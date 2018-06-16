@@ -29,14 +29,15 @@
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
 
-#include "hphp/runtime/vm/jit/irgen-ret.h"
-#include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-call.h"
+#include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-inlining.h"
+#include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
+#include "hphp/runtime/vm/jit/irgen-ret.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
-#include "hphp/runtime/vm/jit/irgen-internal.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
@@ -2123,6 +2124,177 @@ void emitGetMemoKeyL(IRGS& env, int32_t locId) {
   // Use the generic scheme, which is implemented by GetMemoKey. The simplifier
   // will catch any additional special cases.
   push(env, gen(env, GetMemoKey, value));
+}
+
+void emitMemoGet(IRGS& env, Offset relOffset, LocalRange keys) {
+  assertx(curFunc(env)->isMemoizeWrapper());
+  assertx(keys.first + keys.count <= curFunc(env)->numLocals());
+
+  CompactVector<bool> types;
+  for (auto i = keys.count; i > 0; --i) {
+    auto const type = env.irb->local(keys.first + i - 1, DataTypeSpecific).type;
+    if (type <= TStr) {
+      types.emplace_back(true);
+    } else if (type <= TInt) {
+      types.emplace_back(false);
+    } else {
+      // Let it fatal from the interpreter
+      PUNT(MemoGet);
+    }
+  }
+
+  auto const takenOff = bcOff(env) + relOffset;
+  auto const taken = getBlock(env, takenOff);
+  assertx(taken != nullptr);
+
+  auto const func = curFunc(env);
+  // Any value we get from memoization must be the same type we return from this
+  // function.
+  auto const retTy =
+    typeFromRAT(func->repoReturnType(), curClass(env)) & TInitCell;
+
+  auto const val = [&]{
+    if (func->isMethod() && !func->isStatic()) {
+      auto const cls = func->cls();
+      assertx(cls != nullptr);
+      assertx(cls->hasMemoSlots());
+
+      auto const this_ = checkAndLoadThis(env);
+      if (!this_->isA(Type::SubObj(cls))) PUNT(MemoGet);
+
+      auto const memoInfo = cls->memoSlotForFunc(func->getFuncId());
+
+      if (keys.count == 0 && !memoInfo.second) {
+        return gen(
+          env,
+          MemoGetInstanceValue,
+          MemoValueInstanceData { memoInfo.first, func },
+          taken,
+          retTy,
+          this_
+        );
+      }
+
+      return gen(
+        env,
+        MemoGetInstanceCache,
+        MemoCacheInstanceData {
+          memoInfo.first,
+          keys,
+          types.data(),
+          func,
+          memoInfo.second
+        },
+        taken,
+        retTy,
+        fp(env),
+        this_
+      );
+    }
+
+    if (keys.count > 0) {
+      return gen(
+        env,
+        MemoGetStaticCache,
+        MemoCacheStaticData { func, keys, types.data() },
+        taken,
+        retTy,
+        fp(env)
+      );
+    }
+    return gen(
+      env,
+      MemoGetStaticValue,
+      MemoValueStaticData { func },
+      taken,
+      retTy
+    );
+  }();
+  pushIncRef(env, val);
+}
+
+void emitMemoSet(IRGS& env, LocalRange keys) {
+  assertx(curFunc(env)->isMemoizeWrapper());
+  assertx(keys.first + keys.count <= curFunc(env)->numLocals());
+
+  CompactVector<bool> types;
+  for (auto i = keys.count; i > 0; --i) {
+    auto const type = env.irb->local(keys.first + i - 1, DataTypeSpecific).type;
+    if (type <= TStr) {
+      types.emplace_back(true);
+    } else if (type <= TInt) {
+      types.emplace_back(false);
+    } else {
+      // Let it fatal from the interpreter
+      PUNT(MemoSet);
+    }
+  }
+
+  auto const ldVal = [&] (DataTypeCategory tc) {
+    return gen(
+      env,
+      AssertType,
+      TInitCell,
+      topC(env, BCSPRelOffset{ 0 }, tc)
+    );
+  };
+
+  auto const func = curFunc(env);
+  if (func->isMethod() && !func->isStatic()) {
+    auto const cls = func->cls();
+    assertx(cls != nullptr);
+    assertx(cls->hasMemoSlots());
+
+    auto const this_ = checkAndLoadThis(env);
+    if (!this_->isA(Type::SubObj(cls))) PUNT(MemoSet);
+
+    auto const memoInfo = cls->memoSlotForFunc(func->getFuncId());
+
+    if (keys.count == 0 && !memoInfo.second) {
+      gen(
+        env,
+        MemoSetInstanceValue,
+        MemoValueInstanceData { memoInfo.first, func },
+        this_,
+        ldVal(DataTypeCountness)
+      );
+      return;
+    }
+
+    gen(
+      env,
+      MemoSetInstanceCache,
+      MemoCacheInstanceData {
+        memoInfo.first,
+        keys,
+        types.data(),
+        func,
+        memoInfo.second
+      },
+      fp(env),
+      this_,
+      ldVal(DataTypeGeneric)
+    );
+    return;
+  }
+
+  if (keys.count > 0) {
+    gen(
+      env,
+      MemoSetStaticCache,
+      MemoCacheStaticData { func, keys, types.data() },
+      fp(env),
+      ldVal(DataTypeGeneric)
+    );
+    return;
+  }
+
+  gen(
+    env,
+    MemoSetStaticValue,
+    MemoValueStaticData { func },
+    ldVal(DataTypeCountness)
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

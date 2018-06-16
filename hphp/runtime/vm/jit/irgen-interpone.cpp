@@ -285,6 +285,7 @@ interpOutputLocals(IRGS& env,
     // New minstrs are handled extremely conservatively.
     case OpQueryM:
     case OpMemoGet:
+    case OpMemoSet:
       break;
     case OpDim:
       if (inst.imm[0].u_OA & mDefine) smashesAllLocals = true;
@@ -299,7 +300,6 @@ interpOutputLocals(IRGS& env,
     case OpUnsetM:
     case OpSetWithRefLML:
     case OpSetWithRefRML:
-    case OpMemoSet:
       smashesAllLocals = true;
       break;
 

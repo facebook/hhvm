@@ -112,9 +112,6 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
   for (LocalId i = 0; i < state.locals.size(); ++i) {
     if (func.locals[i].killed) continue;
     if (options.FilterAssertions) {
-      // MemoGet and MemoSet read from a range of locals, but don't gain any
-      // benefit from knowing their types.
-      if (bcode.op == Op::MemoGet || bcode.op == Op::MemoSet) continue;
       if (i < mayReadLocalSet.size() && !mayReadLocalSet.test(i)) {
         continue;
       }
@@ -277,7 +274,6 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::EmptyS:
   case Op::IsTypeC:
   case Op::IsTypeL:
-  case Op::IsUninit:
   case Op::OODeclExists:
   case Op::AliasCls:
   case Op::FPassC:
@@ -719,6 +715,15 @@ void first_pass(const Index& index,
             op.LIterNext.target = make_fatal_block(ainfo, blk, state)->id;
           } else {
             op.LIterNextK.target = make_fatal_block(ainfo, blk, state)->id;
+          }
+          break;
+        case Op::MemoGet:
+          if (flags.jmpDest != blk->fallthrough) {
+            if (!flags.wasPEI) {
+              blk->fallthrough = flags.jmpDest;
+              continue;
+            }
+            blk->fallthrough = make_fatal_block(ainfo, blk, state)->id;
           }
           break;
         default:

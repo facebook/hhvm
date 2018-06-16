@@ -1498,15 +1498,22 @@ std::map<std::string,ParserFunc> opcode_parsers;
     UNUSED size_t immIdx = 0;                                          \
     IMM_##imm;                                                         \
                                                                        \
-    int stackDelta = NUM_PUSH_##push - NUM_POP_##pop;                  \
-    as.adjustStack(stackDelta);                                        \
-                                                                       \
-    if (isFPush(Op##name)) {                                           \
-      as.beginFpi(curOpcodeOff);                                       \
+    as.adjustStack(-NUM_POP_##pop);                                    \
+    /* MemoGet pushes after branching */                               \
+    if (thisOpcode != OpMemoGet) {                                     \
+      as.adjustStack(NUM_PUSH_##push);                                 \
     }                                                                  \
                                                                        \
     for (auto& kv : labelJumps) {                                      \
       as.addLabelJump(kv.first, kv.second, curOpcodeOff);              \
+    }                                                                  \
+                                                                       \
+    if (thisOpcode == OpMemoGet) {                                     \
+      as.adjustStack(NUM_PUSH_##push);                                 \
+    }                                                                  \
+                                                                       \
+    if (isFPush(Op##name)) {                                           \
+      as.beginFpi(curOpcodeOff);                                       \
     }                                                                  \
                                                                        \
     /* Stack depth should be 0 after RetC or RetV. */                  \

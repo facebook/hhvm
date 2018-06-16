@@ -93,6 +93,7 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op) {
     case Op::Eval:
     case Op::NativeImpl:
     case Op::BreakTraceHint:
+    case Op::MemoGet:
       return ControlFlowInfo::BreaksBB;
     case Op::FCall:
     case Op::FCallD:

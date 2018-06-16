@@ -8,83 +8,32 @@
 *)
 
 open Instruction_sequence
-open Hhbc_ast.MemberOpMode
 open Hh_core
 open Emit_memoize_helpers
 
 let make_memoize_function_no_params_code
-  ~non_null_return ~deprecation_info env renamed_function_id =
-  let local_cache = Local.Unnamed 0 in
-  let local_guard = Local.Unnamed 1 in
-  let label_0 = Label.Regular 0 in
-  let label_1 = Label.Regular 1 in
-  let label_2 = Label.Regular 2 in
-  let label_3 = Label.Regular 3 in
-  let label_4 = Label.Regular 4 in
-  let label_5 = Label.Regular 5 in
-  let needs_guard = not non_null_return in
+  ~deprecation_info env renamed_function_id =
+  let label = Label.Regular 0 in
   let scope = Emit_env.get_scope env in
   let deprecation_body =
     Emit_body.emit_deprecation_warning scope deprecation_info in
   gather [
     deprecation_body;
-    optional needs_guard [
-      instr_false; instr_staticlocinit local_guard static_memoize_cache_guard;
-    ];
-    instr_null;
-    instr_staticlocinit local_cache static_memoize_cache;
-    optional needs_guard [
-      instr_null;
-      instr_ismemotype;
-      instr_jmpnz label_0];
-    instr_cgetl local_cache;
-    instr_dup;
-    instr_istypec Hhbc_ast.OpNull;
-    instr_jmpnz label_1;
+    instr_memoget label None;
     instr_retc;
-    instr_label label_1;
-    instr_popc;
-    instr_label label_0;
-    optional needs_guard [
-      instr_null;
-      instr_maybememotype;
-      instr_jmpz label_2;
-      instr_cgetl local_guard;
-      instr_jmpz label_2;
-      instr_null;
-      instr_retc;
-      instr_label label_2;
-      instr_null;
-      instr_ismemotype;
-      instr_jmpnz label_3
-      ];
+    instr_label label;
     instr_fpushfuncd 0 renamed_function_id;
     instr_fcall 0;
     instr_unboxr;
-    instr_setl local_cache;
-    optional needs_guard [
-      instr_jmp label_4;
-      instr_label label_3;
-      instr_fpushfuncd 0 renamed_function_id;
-      instr_fcall 0;
-      instr_unboxr;
-      instr_label label_4;
-      instr_null;
-      instr_maybememotype;
-      instr_jmpz label_5;
-      instr_true;
-      instr_setl local_guard;
-      instr_popc;
-      instr_label label_5;
-      ];
-    instr_retc ]
+    instr_memoset None;
+    instr_retc
+  ]
 
 let make_memoize_function_with_params_code
   ~pos ~deprecation_info env params renamed_method_id =
   let param_count = List.length params in
-  let static_local = Local.Unnamed param_count in
   let label = Label.Regular 0 in
-  let first_local = Local.Unnamed (param_count + 1) in
+  let first_local = Local.Unnamed param_count in
   let begin_label, default_value_setters =
     (* Default value setters belong in the wrapper function not in the original function *)
     Emit_param.emit_param_default_value_setter env pos params
@@ -96,34 +45,25 @@ let make_memoize_function_with_params_code
     begin_label;
     Emit_body.emit_method_prolog ~pos ~params:params ~should_emit_init_this:false;
     deprecation_body;
-    instr_typedvalue (Typed_value.Dict []);
-    instr_staticlocinit static_local static_memoize_cache;
-    param_code_sets params (param_count + 1);
-    instr_basel static_local Warn;
-    instr_memoget 0 (Some (first_local, param_count));
-    instr_isuninit;
-    instr_jmpnz label;
-    instr_cgetcunop;
+    param_code_sets params param_count;
+    instr_memoget label (Some (first_local, param_count));
     instr_retc;
     instr_label label;
-    instr_ugetcunop;
-    instr_popu;
     instr_fpushfuncd param_count renamed_method_id;
     param_code_gets params;
     instr_fcall param_count;
     instr_unboxr;
-    instr_basel static_local Define;
-    instr_memoset 0 (Some (first_local, param_count));
+    instr_memoset (Some (first_local, param_count));
     instr_retc;
     default_value_setters
   ]
 
 let make_memoize_function_code
-  ~pos ~non_null_return ~deprecation_info env params renamed_method_id =
+  ~pos ~deprecation_info env params renamed_method_id =
   Emit_pos.emit_pos_then pos @@
   if List.is_empty params
   then make_memoize_function_no_params_code
-        ~non_null_return ~deprecation_info env renamed_method_id
+         ~deprecation_info env renamed_method_id
   else make_memoize_function_with_params_code
         ~pos ~deprecation_info env params renamed_method_id
 
@@ -162,11 +102,9 @@ let emit_wrapper_function
   let return_type_info =
     Emit_body.emit_return_type_info
       ~scope ~skipawaitable:false ~namespace ast_fun.Ast.f_ret in
-  let non_null_return =
-    cannot_return_null ast_fun.Ast.f_fun_kind ast_fun.Ast.f_ret in
   let body_instrs =
     make_memoize_function_code
-      ~pos ~non_null_return ~deprecation_info env params renamed_id
+      ~pos ~deprecation_info env params renamed_id
   in
   let memoized_body =
     make_wrapper_body env return_type_info params body_instrs in

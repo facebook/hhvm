@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -346,6 +347,76 @@ TypedValue HHVM_FUNCTION(serialize_memoize_param, TypedValue param) {
   return tvReturn(sb.detach());
 }
 
+bool HHVM_FUNCTION(clear_static_memoization,
+                   TypedValue clsStr, TypedValue funcStr) {
+  auto clear = [] (const Func* func) {
+    if (!func->isMemoizeWrapper()) return false;
+    auto valLink = rds::attachStaticMemoValue(func);
+    if (valLink.bound() && valLink.isInit()) {
+      auto oldVal = *valLink;
+      valLink.markUninit();
+      tvDecRefGen(oldVal);
+    }
+    auto cacheLink = rds::attachStaticMemoCache(func);
+    if (cacheLink.bound() && cacheLink.isInit()) {
+      auto oldCache = *cacheLink;
+      cacheLink.markUninit();
+      if (oldCache) req::destroy_raw(oldCache);
+    }
+    return true;
+  };
+
+  if (isStringType(clsStr.m_type)) {
+    auto const cls = Unit::loadClass(clsStr.m_data.pstr);
+    if (!cls) return false;
+    if (isStringType(funcStr.m_type)) {
+      auto const func = cls->lookupMethod(funcStr.m_data.pstr);
+      return clear(func);
+    }
+    auto ret = false;
+    for (auto i = cls->numMethods(); i--; ) {
+      auto const func = cls->getMethod(i);
+      if (func->isStatic()) {
+        if (clear(func)) ret = true;
+      }
+    }
+    return ret;
+  }
+
+  if (isStringType(funcStr.m_type)) {
+    auto const func = Unit::loadFunc(funcStr.m_data.pstr);
+    return func && clear(func);
+  }
+
+  return false;
+}
+
+bool HHVM_FUNCTION(clear_instance_memoization, const Object& obj) {
+  auto const cls = obj->getVMClass();
+  if (!cls->hasMemoSlots()) return false;
+
+  if (!obj->getAttribute(ObjectData::UsedMemoCache)) return true;
+
+  auto const nSlots = cls->numMemoSlots();
+  for (Slot i = 0; i < nSlots; ++i) {
+    auto slot = UNLIKELY(obj->hasNativeData())
+      ? obj->memoSlotNativeData(i, cls->getNativeDataInfo()->sz)
+      : obj->memoSlot(i);
+    if (slot->isCache()) {
+      if (auto cache = slot->getCache()) {
+        slot->resetCache();
+        req::destroy_raw(cache);
+      }
+    } else {
+      auto const oldVal = *slot->getValue();
+      tvWriteUninit(*slot->getValue());
+      tvDecRefGen(oldVal);
+    }
+  }
+
+  return true;
+}
+
 void HHVM_FUNCTION(set_frame_metadata, const Variant& metadata) {
   VMRegAnchor _;
   auto fp = vmfp();
@@ -374,6 +445,10 @@ static struct HHExtension final : Extension {
     HHVM_NAMED_FE(HH\\could_include, HHVM_FN(could_include));
     HHVM_NAMED_FE(HH\\serialize_memoize_param,
                   HHVM_FN(serialize_memoize_param));
+    HHVM_NAMED_FE(HH\\clear_static_memoization,
+                  HHVM_FN(clear_static_memoization));
+    HHVM_NAMED_FE(HH\\clear_instance_memoization,
+                  HHVM_FN(clear_instance_memoization));
     HHVM_NAMED_FE(HH\\set_frame_metadata, HHVM_FN(set_frame_metadata));
     loadSystemlib();
   }

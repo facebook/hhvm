@@ -1,0 +1,109 @@
+================================
+Testing static functions....
+
+Cls1::func1()
+string(6) "abcdef"
+Cls1::func2()
+int(1234)
+string(6) "abcdef"
+int(1234)
+Cls1::func1()
+string(6) "abcdef"
+int(1234)
+string(6) "abcdef"
+Cls1::func2()
+int(1234)
+Cls1::func1()
+string(6) "abcdef"
+Cls1::func2()
+int(1234)
+================================
+Testing methods....
+
+Cls2::func1()
+string(6) "ghijkl"
+Cls2::func2()
+int(1234)
+string(6) "ghijkl"
+int(1234)
+Cls2::func1()
+string(6) "ghijkl"
+Cls2::func2()
+int(1234)
+================================
+Testing single methods....
+
+Cls3::func()
+string(3) "xyz"
+Cls4::func()
+int(1234)
+string(3) "xyz"
+int(1234)
+Cls3::func()
+string(3) "xyz"
+int(1234)
+string(3) "xyz"
+Cls4::func()
+int(1234)
+================================
+Testing traits....
+
+Trait1::func1()
+int(123)
+Trait1::func2()
+int(1234)
+int(123)
+int(1234)
+Trait1::func1()
+int(123)
+Trait1::func2()
+int(1234)
+================================
+Testing trait static functions....
+
+Trait2::func1()
+string(6) "qwerty"
+Trait2::func2()
+int(1234)
+string(6) "qwerty"
+int(1234)
+Trait2::func1()
+string(6) "qwerty"
+int(1234)
+string(6) "qwerty"
+Trait2::func2()
+int(1234)
+Trait2::func1()
+string(6) "qwerty"
+Trait2::func2()
+int(1234)
+================================
+Testing trait single methods....
+
+Trait3::func()
+string(3) "xyz"
+Trait4::func()
+int(1234)
+string(3) "xyz"
+int(1234)
+Trait3::func()
+string(3) "xyz"
+int(1234)
+string(3) "xyz"
+Trait4::func()
+int(1234)
+================================
+Testing free functions....
+
+func1()
+string(5) "zyzzy"
+func2()
+int(1234)
+string(5) "zyzzy"
+int(1234)
+func1()
+string(5) "zyzzy"
+int(1234)
+string(5) "zyzzy"
+func2()
+int(1234)

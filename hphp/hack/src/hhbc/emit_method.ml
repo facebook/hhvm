@@ -87,7 +87,9 @@ let from_ast_wrapper : bool -> _ ->
     (not method_is_private && not method_is_protected))) in
   let is_memoize =
     Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes in
-  let deprecation_info = Hhas_attribute.deprecation_info method_attributes in
+  let deprecation_info =
+    if is_memoize then None else Hhas_attribute.deprecation_info method_attributes
+  in
   let is_no_injection = Hhas_attribute.is_no_injection method_attributes in
   let (pos, original_name) = ast_method.Ast.m_name in
   let (_, class_name) = ast_class.Ast.c_name in

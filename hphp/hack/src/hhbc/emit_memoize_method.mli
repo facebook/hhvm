@@ -24,9 +24,3 @@ val emit_wrapper_methods :
   Ast.class_ ->
   Ast.method_ list ->
   Hhas_method.t list
-
-(* Emit static and instance properties used for memoize cache *)
-val emit_properties :
-  memoize_info ->
-  Ast.method_ list ->
-  Hhas_property.t list

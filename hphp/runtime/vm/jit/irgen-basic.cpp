@@ -37,14 +37,6 @@ void implClsRefGet(IRGS& env, SSATmp* classSrc, uint32_t slot) {
   putClsRef(env, slot, cls);
 }
 
-const StaticString s_FATAL_NULL_THIS(Strings::FATAL_NULL_THIS);
-bool checkThis(IRGS& env, SSATmp* /*ctx*/) {
-  if (hasThis(env)) return true;
-  auto const err = cns(env, s_FATAL_NULL_THIS.get());
-  gen(env, RaiseError, err);
-  return false;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -225,19 +217,12 @@ void emitUnbox(IRGS& env) {
 }
 
 void emitThis(IRGS& env) {
-  auto const ctx = ldCtx(env);
-  if (!checkThis(env, ctx)) {
-    // Unreachable
-    push(env, cns(env, TInitNull));
-    return;
-  }
-  auto const this_ = castCtxThis(env, ctx);
+  auto const this_ = checkAndLoadThis(env);
   pushIncRef(env, this_);
 }
 
 void emitCheckThis(IRGS& env) {
-  auto const ctx = ldCtx(env);
-  checkThis(env, ctx);
+  checkAndLoadThis(env);
 }
 
 void emitBareThis(IRGS& env, BareThisOp subop) {

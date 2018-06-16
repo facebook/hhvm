@@ -2944,25 +2944,6 @@ fields of that struct for holding intermediate values.
 
   Get element with key S1 from base S0 as a reference.
 
-| MemoGet<loc-begin, loc-count>, D(Cell), S(FramePtr) S(PtrToGen), PRc
-
-  Perform a memoize cache lookup using S1. S1 must point to a dict serving as a
-  memoize cache, or point to a RefData containing such a dict. The keys used
-  are read from the exclusive local range [loc_begin, loc_begin+loc_count]
-  (where S0 is the pointer to the frame containing the locals). If the lookup
-  is successful, the element is returned (already inc-refd). If the element
-  is not found, Uninit is returned. This op can only be used inside a function
-  marked as a memoize wrapper.
-
-| MemoSet<loc-begin, loc-count>, ND, S(FramePtr) S(PtrToGen) S(Cell), MElem
-
-  Store S2 in the memoize cache given by S1. S1 must point to a dict serving as
-  a memoize cache or point to a RefData containing such a dict. They keys used
-  as read from the exclusive local range [loc_begin, loc_begin+loc_count]
-  (where S0 is the pointer to the frame containing the locals). S2 must not be
-  Uninit and will be inc-refd by the operation internally. This op can only be
-  used inside a function marked as a memoize wrapper.
-
 | MemoGetStaticValue<func,T>, DParam(InitCell), NA, B
 
   Get the memo value associated with the static function "func". If the value

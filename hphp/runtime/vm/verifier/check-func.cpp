@@ -816,14 +816,12 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::FPassM:
   case Op::IncDecM:
   case Op::UnsetM:
-  case Op::MemoGet:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CRV;
     }
     return m_tmp_sig;
   case Op::SetM:
   case Op::SetOpM:
-  case Op::MemoSet:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = i == n - 1 ? CV : CRV;
     }
@@ -913,8 +911,6 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
     case Op::FPassM:  //THREE(IVA, IVA, KA)
     case Op::SetWithRefLML:
     case Op::SetWithRefRML:
-    case Op::MemoGet:
-    case Op::MemoSet:
       return true;
 
     default:
@@ -1377,8 +1373,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
     case Op::GetMemoKeyL:
     case Op::MemoGet:
     case Op::MemoSet:
-    case Op::MaybeMemoType:
-    case Op::IsMemoType:
       if (!m_func->isMemoizeWrapper()) {
         ferror("{} can only appear within memoize wrappers\n",
                opcodeToName(op));
@@ -1862,6 +1856,10 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
       cur->iters[iter.id] = false;
     }
     ok &= checkEdge(b, *cur, b->succs[0]);
+  } else if (peek_op(b->last) == OpMemoGet && numSuccBlocks(b) == 2) {
+    ok &= checkEdge(b, *cur, b->succs[0]);
+    --cur->stklen;
+    ok &= checkEdge(b, *cur, b->succs[1]);
   } else {
     // Other branch instructions send the same state to all successors.
     if (m_errmode == kVerbose) {

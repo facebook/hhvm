@@ -1241,8 +1241,9 @@ folly::Optional<Cell> staticLocHelper(ISS& env, LocalId l, Type init) {
 }
 
 // If the current function is a memoize wrapper, return the inferred return type
-// of the function being wrapped.
-Type memoizeImplRetType(ISS& env) {
+// of the function being wrapped along with if the wrapped function is effect
+// free.
+std::pair<Type, bool> memoizeImplRetType(ISS& env) {
   always_assert(env.ctx.func->isMemoizeWrapper);
 
   // Lookup the wrapped function. This should always resolve to a precise
@@ -1286,10 +1287,11 @@ Type memoizeImplRetType(ISS& env) {
     CallContext { env.ctx, args, ctxType },
     memo_impl_func
   );
+  auto const effectFree = env.index.is_effect_free(memo_impl_func);
   // Regardless of anything we know the return type will be an InitCell (this is
   // a requirement of memoize functions).
-  if (!retTy.subtypeOf(TInitCell)) return TInitCell;
-  return retTy;
+  if (!retTy.subtypeOf(TInitCell)) return { TInitCell, effectFree };
+  return { retTy, effectFree };
 }
 
 /*
@@ -1405,37 +1407,6 @@ void group(ISS& env, const bc::IsTypeC& istype,
   auto const location = topStkEquiv(env);
   if (location == NoLocalId) return impl(env, istype, negate, jmp);
   isTypeHelper(env, istype.subop1, location, istype, invertJmp(jmp));
-}
-
-// If we do an IsUninit check and then Jmp based on the check, one branch will
-// be the original type minus the Uninit, and the other will be
-// Uninit. (IsUninit does not pop the value).
-template<class JmpOp>
-void group(ISS& env, const bc::IsUninit&, const JmpOp& jmp) {
-  auto const valTy = popCU(env);
-  typeTestPropagate(env, valTy, TUninit, remove_uninit(valTy), jmp);
-}
-
-template<class JmpOp>
-void group(ISS& env, const bc::IsUninit&, const bc::Not&, const JmpOp& jmp) {
-  auto const valTy = popCU(env);
-  typeTestPropagate(env, valTy, TUninit, remove_uninit(valTy), invertJmp(jmp));
-}
-
-// A MemoGet, followed by an IsUninit, followed by a Jmp, can have the type of
-// the stack inferred very well. The IsUninit success path will be Uninit and
-// the failure path will be the inferred return type of the wrapped
-// function. This has to be done as a group and not via individual interp()
-// calls is because of limitations in HHBBC's type-system. The type that MemoGet
-// pushes is the inferred return type of the wrapper function with Uninit added
-// in. Unfortunately HHBBC's type-system cannot exactly represent this
-// combination, so it gets forced to Cell. By analyzing this triplet as a group,
-// we can avoid this loss of type precision.
-template <class JmpOp>
-void group(ISS& env, const bc::MemoGet& get, const bc::IsUninit& /*isuninit*/,
-           const JmpOp& jmp) {
-  impl(env, get);
-  typeTestPropagate(env, popCU(env), TUninit, memoizeImplRetType(env), jmp);
 }
 
 namespace {
@@ -2204,30 +2175,6 @@ void isTypeCImpl(ISS& env, const Op& op) {
 
 void in(ISS& env, const bc::IsTypeC& op) { isTypeCImpl(env, op); }
 void in(ISS& env, const bc::IsTypeL& op) { isTypeLImpl(env, op); }
-
-void in(ISS& env, const bc::IsUninit& /*op*/) {
-  nothrow(env);
-  push(env, popCU(env));
-  isTypeImpl(env, topT(env), TUninit);
-}
-
-void in(ISS& env, const bc::MaybeMemoType& /*op*/) {
-  always_assert(env.ctx.func->isMemoizeWrapper);
-  nothrow(env);
-  constprop(env);
-  auto const memoTy = memoizeImplRetType(env);
-  auto const ty = popC(env);
-  push(env, ty.couldBe(memoTy) ? TTrue : TFalse);
-}
-
-void in(ISS& env, const bc::IsMemoType& /*op*/) {
-  always_assert(env.ctx.func->isMemoizeWrapper);
-  nothrow(env);
-  constprop(env);
-  auto const memoTy = memoizeImplRetType(env);
-  auto const ty = popC(env);
-  push(env, memoTy.subtypeOf(ty) ? TTrue : TFalse);
-}
 
 void in(ISS& env, const bc::InstanceOfD& op) {
   auto t1 = topC(env);
@@ -4553,6 +4500,72 @@ void in(ISS& env, const bc::Silence& op) {
       break;
   }
 }
+
+
+void in(ISS& env, const bc::MemoGet& op) {
+  always_assert(env.ctx.func->isMemoizeWrapper);
+  always_assert(op.locrange.first + op.locrange.count
+                <= env.ctx.func->locals.size());
+
+  // If we can use an equivalent, earlier range, then use that instead.
+  auto const equiv = equivLocalRange(env, op.locrange);
+  if (equiv != op.locrange.first) {
+    return reduce(
+      env,
+      bc::MemoGet { op.target, LocalRange { equiv, op.locrange.count } }
+    );
+  }
+
+  auto retTy = memoizeImplRetType(env);
+  if (retTy.second) constprop(env);
+
+  // MemoGet can raise if we give a non arr-key local, or if we're in a method
+  // and $this isn't available.
+  auto allArrKey = true;
+  for (uint32_t i = 0; i < op.locrange.count; ++i) {
+    allArrKey &= locRaw(env, op.locrange.first + i).subtypeOf(TArrKey);
+  }
+  if (allArrKey &&
+      (!env.ctx.func->cls ||
+       (env.ctx.func->attrs & AttrStatic) ||
+       thisAvailable(env))) {
+    nothrow(env);
+  }
+
+  env.propagate(op.target, &env.state);
+  if (retTy.first == TBottom) jmp_setdest(env, op.target);
+  push(env, std::move(retTy.first));
+}
+
+void in(ISS& env, const bc::MemoSet& op) {
+  always_assert(env.ctx.func->isMemoizeWrapper);
+  always_assert(op.locrange.first + op.locrange.count
+                <= env.ctx.func->locals.size());
+
+  // If we can use an equivalent, earlier range, then use that instead.
+  auto const equiv = equivLocalRange(env, op.locrange);
+  if (equiv != op.locrange.first) {
+    return reduce(
+      env,
+      bc::MemoSet { LocalRange { equiv, op.locrange.count } }
+    );
+  }
+
+  // MemoSet can raise if we give a non arr-key local, or if we're in a method
+  // and $this isn't available.
+  auto allArrKey = true;
+  for (uint32_t i = 0; i < op.locrange.count; ++i) {
+    allArrKey &= locRaw(env, op.locrange.first + i).subtypeOf(TArrKey);
+  }
+  if (allArrKey &&
+      (!env.ctx.func->cls ||
+       (env.ctx.func->attrs & AttrStatic) ||
+       thisAvailable(env))) {
+    nothrow(env);
+  }
+  push(env, popC(env));
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -4618,24 +4631,9 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
   X(IsTypeStruct)
   X(IsTypeL)
   X(IsTypeC)
-  X(IsUninit)
   X(StaticLocCheck)
   X(Same)
   X(NSame)
-  case Op::MemoGet:
-    switch (o2) {
-    case Op::IsUninit:
-      switch (o3) {
-      case Op::JmpZ:
-        return group(env, it, it[0].MemoGet, it[1].IsUninit, it[2].JmpZ);
-      case Op::JmpNZ:
-        return group(env, it, it[0].MemoGet, it[1].IsUninit, it[2].JmpNZ);
-      default: break;
-      }
-      break;
-    default: break;
-    }
-    break;
   default: break;
   }
 #undef X

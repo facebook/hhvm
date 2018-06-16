@@ -102,6 +102,7 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/interp-helpers.h"
 #include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/php-debug.h"
@@ -3962,33 +3963,199 @@ OPTBLD_INLINE void iopSetWithRefRML(local_var local) {
   vmStack().popTV();
 }
 
-OPTBLD_INLINE void iopMemoGet(uint32_t nDiscard,
-                              LocalRange locals) {
-  assertx(vmfp()->m_func->isMemoizeWrapper());
-  assertx(locals.first + locals.count <= vmfp()->m_func->numLocals());
-  auto mstate = vmMInstrState();
-  auto const res = MixedArray::MemoGet(
-    mstate.base,
-    frame_local(vmfp(), locals.first),
-    locals.count
-  );
-  mFinal(mstate, nDiscard, res);
+namespace {
+
+inline void checkThis(ActRec* fp) {
+  if (!fp->func()->cls() || !fp->hasThis()) {
+    raise_error(Strings::FATAL_NULL_THIS);
+  }
 }
 
-OPTBLD_INLINE void iopMemoSet(uint32_t nDiscard,
-                              LocalRange locals) {
+}
+
+OPTBLD_INLINE void iopMemoGet(PC& pc, PC taken, LocalRange keys) {
   assertx(vmfp()->m_func->isMemoizeWrapper());
-  assertx(locals.first + locals.count <= vmfp()->m_func->numLocals());
-  auto const value = *vmStack().topC();
-  auto mstate = vmMInstrState();
-  MixedArray::MemoSet(
-    mstate.base,
-    frame_local(vmfp(), locals.first),
-    locals.count,
-    value
+  assertx(keys.first + keys.count <= vmfp()->m_func->numLocals());
+
+  for (auto i = 0; i < keys.count; ++i) {
+    auto const key = frame_local(vmfp(), keys.first + i);
+    if (!isIntType(key->m_type) && !isStringType(key->m_type)) {
+      raise_error("Memoization keys can only be ints or strings");
+    }
+  }
+
+  auto const c = [&] () -> const Cell* {
+    auto const func = vmfp()->m_func;
+    if (!func->isMethod() || func->isStatic()) {
+      if (keys.count > 0) {
+        auto cache = rds::bindStaticMemoCache(func);
+        if (!cache.isInit()) return nullptr;
+        auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
+        if (auto getter = memoCacheGetForKeyCount(keys.count)) {
+          return getter(*cache, keysBegin);
+        }
+        return memoCacheGetGeneric(
+          *cache,
+          GenericMemoId{func->getFuncId(), keys.count}.asParam(),
+          keysBegin
+        );
+      }
+
+      auto cache = rds::bindStaticMemoValue(func);
+      return cache.isInit() ? cache.get() : nullptr;
+    }
+
+    checkThis(vmfp());
+    auto const this_ = vmfp()->getThis();
+    auto const cls = func->cls();
+    assertx(this_->instanceof(cls));
+    assertx(cls->hasMemoSlots());
+
+    auto const memoInfo = cls->memoSlotForFunc(func->getFuncId());
+
+    auto const slot = UNLIKELY(this_->hasNativeData())
+      ? this_->memoSlotNativeData(memoInfo.first, cls->getNativeDataInfo()->sz)
+      : this_->memoSlot(memoInfo.first);
+
+    if (keys.count == 0 && !memoInfo.second) {
+      auto const val = slot->getValue();
+      return val->m_type != KindOfUninit ? val : nullptr;
+    }
+
+    auto const cache = slot->getCache();
+    if (!cache) return nullptr;
+
+    if (memoInfo.second) {
+      if (keys.count == 0) {
+        return memoCacheGetSharedOnly(
+          cache,
+          makeSharedOnlyKey(func->getFuncId())
+        );
+      }
+      auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
+      if (auto const getter = sharedMemoCacheGetForKeyCount(keys.count)) {
+        return getter(cache, func->getFuncId(), keysBegin);
+      }
+      return memoCacheGetGeneric(
+        cache,
+        GenericMemoId{func->getFuncId(), keys.count}.asParam(),
+        keysBegin
+      );
+    }
+
+    assertx(keys.count > 0);
+    auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
+    if (auto const getter = memoCacheGetForKeyCount(keys.count)) {
+      return getter(cache, keysBegin);
+    }
+    return memoCacheGetGeneric(
+      cache,
+      GenericMemoId{func->getFuncId(), keys.count}.asParam(),
+      keysBegin
+    );
+  }();
+
+  if (c) {
+    assertx(cellIsPlausible(*c));
+    assertx(c->m_type != KindOfUninit);
+    cellDup(*c, *vmStack().allocC());
+  } else {
+    pc = taken;
+  }
+}
+
+OPTBLD_INLINE void iopMemoSet(LocalRange keys) {
+  assertx(vmfp()->m_func->isMemoizeWrapper());
+  assertx(keys.first + keys.count <= vmfp()->m_func->numLocals());
+
+  for (auto i = 0; i < keys.count; ++i) {
+    auto const key = frame_local(vmfp(), keys.first + i);
+    if (!isIntType(key->m_type) && !isStringType(key->m_type)) {
+      raise_error("Memoization keys can only be ints or strings");
+    }
+  }
+
+  auto val = *vmStack().topC();
+  assertx(val.m_type != KindOfUninit);
+
+  auto const func = vmfp()->m_func;
+  if (!func->isMethod() || func->isStatic()) {
+    if (keys.count > 0) {
+      auto cache = rds::bindStaticMemoCache(func);
+      if (!cache.isInit()) cache.initWith(nullptr);
+      auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
+      if (auto setter = memoCacheSetForKeyCount(keys.count)) {
+        return setter(*cache, keysBegin, val);
+      }
+      return memoCacheSetGeneric(
+        *cache,
+        GenericMemoId{func->getFuncId(), keys.count}.asParam(),
+        keysBegin,
+        val
+      );
+    }
+
+    auto cache = rds::bindStaticMemoValue(func);
+    if (!cache.isInit()) {
+      tvWriteUninit(*cache);
+      cache.markInit();
+    }
+    cellSet(val, *cache);
+    return;
+  }
+
+  checkThis(vmfp());
+  auto const this_ = vmfp()->getThis();
+  auto const cls = func->cls();
+  assertx(this_->instanceof(cls));
+  assertx(cls->hasMemoSlots());
+
+  this_->setAttribute(ObjectData::UsedMemoCache);
+
+  auto const memoInfo = cls->memoSlotForFunc(func->getFuncId());
+
+  auto slot = UNLIKELY(this_->hasNativeData())
+    ? this_->memoSlotNativeData(memoInfo.first, cls->getNativeDataInfo()->sz)
+    : this_->memoSlot(memoInfo.first);
+
+  if (keys.count == 0 && !memoInfo.second) {
+    cellSet(val, *slot->getValue());
+    return;
+  }
+
+  auto& cache = slot->getCacheForWrite();
+
+  if (memoInfo.second) {
+    if (keys.count == 0) {
+      return memoCacheSetSharedOnly(
+        cache,
+        makeSharedOnlyKey(func->getFuncId()),
+        val
+      );
+    }
+    auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
+    if (auto const setter = sharedMemoCacheSetForKeyCount(keys.count)) {
+      return setter(cache, func->getFuncId(), keysBegin, val);
+    }
+    return memoCacheSetGeneric(
+      cache,
+      GenericMemoId{func->getFuncId(), keys.count}.asParam(),
+      keysBegin,
+      val
+    );
+  }
+
+  assertx(keys.count > 0);
+  auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
+  if (auto const setter = memoCacheSetForKeyCount(keys.count)) {
+    return setter(cache, keysBegin, val);
+  }
+  return memoCacheSetGeneric(
+    cache,
+    GenericMemoId{func->getFuncId(), keys.count}.asParam(),
+    keysBegin,
+    val
   );
-  vmStack().discard();
-  mFinal(mstate, nDiscard, value);
 }
 
 static inline void vgetl_body(TypedValue* fr, TypedValue* to) {
@@ -4163,22 +4330,6 @@ OPTBLD_INLINE void iopIsTypeL(local_var loc, IsTypeOp op) {
 OPTBLD_INLINE void iopIsTypeC(IsTypeOp op) {
   auto val = vmStack().topC();
   vmStack().replaceC(make_tv<KindOfBoolean>(isTypeHelper(val, op)));
-}
-
-OPTBLD_INLINE void iopIsUninit() {
-  auto const* cell = vmStack().topC();
-  assertx(cellIsPlausible(*cell));
-  vmStack().pushBool(cell->m_type == KindOfUninit);
-}
-
-OPTBLD_INLINE void iopMaybeMemoType() {
-  assertx(vmfp()->m_func->isMemoizeWrapper());
-  vmStack().replaceTV(make_tv<KindOfBoolean>(true));
-}
-
-OPTBLD_INLINE void iopIsMemoType() {
-  assertx(vmfp()->m_func->isMemoizeWrapper());
-  vmStack().replaceTV(make_tv<KindOfBoolean>(false));
 }
 
 OPTBLD_FLT_INLINE void iopAssertRATL(local_var loc, RepoAuthType rat) {
@@ -5747,12 +5898,6 @@ OPTBLD_INLINE void iopDefClsNop(uint32_t /*cid*/) {}
 
 OPTBLD_INLINE void iopDefTypeAlias(uint32_t tid) {
   vmfp()->func()->unit()->defTypeAlias(tid);
-}
-
-static inline void checkThis(ActRec* fp) {
-  if (!fp->func()->cls() || !fp->hasThis()) {
-    raise_error(Strings::FATAL_NULL_THIS);
-  }
 }
 
 OPTBLD_INLINE void iopThis() {

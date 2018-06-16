@@ -269,7 +269,6 @@ static const struct {
   { OpIsTypeC,     {Stack1|
                     DontGuardStack1,  Stack1,       OutBoolean      }},
   { OpIsTypeL,     {Local,            Stack1,       OutIsTypeL      }},
-  { OpIsUninit,    {Stack1,           StackTop2,    OutBoolean      }},
 
   /*** 7. Mutator instructions ***/
 
@@ -494,15 +493,9 @@ static const struct {
                    {MBase,            None,         OutNone         }},
   { OpSetWithRefRML,
                    {Stack1|MBase,     None,         OutNone         }},
-  { OpMemoGet,     {BStackN|MBase|DontGuardBase|LocalRange,
-                                      Stack1,       OutUnknown      }},
-  { OpMemoSet,     {Stack1|BStackN|MBase|DontGuardBase|LocalRange,
+  { OpMemoGet,     {LocalRange,       None,         OutUnknown      }},
+  { OpMemoSet,     {Stack1|LocalRange,
                                       Stack1,       OutSameAsInput1 }},
-  { OpMaybeMemoType, {Stack1|DontGuardStack1,
-                                      Stack1,       OutBoolean      }},
-  { OpIsMemoType,  {Stack1|DontGuardStack1,
-                                      Stack1,       OutBoolean      }},
-
 };
 
 namespace {
@@ -576,7 +569,6 @@ int64_t getStackPopped(PC pc) {
     case Op::VGetM:
     case Op::IncDecM:
     case Op::UnsetM:
-    case Op::MemoGet:
     case Op::NewPackedArray:
     case Op::NewVecArray:
     case Op::NewKeysetArray:
@@ -593,7 +585,6 @@ int64_t getStackPopped(PC pc) {
     case Op::SetM:
     case Op::SetOpM:
     case Op::BindM:
-    case Op::MemoSet:
       return getImm(pc, 0).u_IVA + 1;
 
     case Op::NewStructArray:
@@ -840,8 +831,6 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
             range.first, range.count);
     for (int i = 0; i < range.count; ++i) {
       inputs.emplace_back(Location::Local { uint32_t(range.first + i) });
-      inputs.back().dontGuard = true;
-      inputs.back().dontBreak = true;
     }
   }
   if (flags & AllLocals) ni.ignoreInnerType = true;
@@ -937,7 +926,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::BreakTraceHint:
   case Op::IsTypeL:
   case Op::IsTypeC:
-  case Op::IsUninit:
   case Op::IncDecL:
   case Op::DefCls:
   case Op::AliasCls:
@@ -1194,8 +1182,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::ContEnterDelegate:
   case Op::YieldFromDelegate:
   case Op::ContUnsetDelegate:
-  case Op::MaybeMemoType:
-  case Op::IsMemoType:
     return true;
 
   case Op::FHandleRefMismatch:

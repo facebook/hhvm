@@ -213,16 +213,13 @@ let instr_fpushfunc n param_locs = instr (ICall(FPushFunc(n, param_locs)))
 let instr_fpushfuncd count text = instr (ICall(FPushFuncD(count, text)))
 let instr_fcall count = instr (ICall(FCall count))
 let instr_fcallunpack count = instr (ICall(FCallUnpack count))
-let instr_isuninit = instr (IMisc IsUninit)
 let instr_cgetcunop = instr (IMisc CGetCUNop)
 let instr_ugetcunop = instr (IMisc UGetCUNop)
-let instr_memoget count range =
-  instr (IMisc (MemoGet(count, range)))
-let instr_memoset count range =
-  instr (IMisc (MemoSet(count, range)))
+let instr_memoget label range =
+  instr (IMisc (MemoGet(label, range)))
+let instr_memoset range =
+  instr (IMisc (MemoSet range))
 let instr_getmemokeyl local = instr (IMisc (GetMemoKeyL local))
-let instr_ismemotype = instr (IMisc IsMemoType)
-let instr_maybememotype = instr (IMisc MaybeMemoType)
 let instr_checkthis = instr (IMisc CheckThis)
 let instr_verifyRetTypeC = instr (IMisc VerifyRetTypeC)
 let instr_verifyRetTypeV = instr (IMisc VerifyRetTypeV)
@@ -798,11 +795,10 @@ let get_input_output_count i =
     | StaticLocDef _ | StaticLocInit _ -> (1, 0)
     | OODeclExists _ | AKExists -> (2, 1)
     | VerifyOutType _ | VerifyRetTypeC | VerifyRetTypeV | CGetCUNop
-    | UGetCUNop | IsMemoType | MaybeMemoType -> (1, 1)
-    | CreateCl (n, _) | MemoGet (n, _) -> (n, 1)
+    | UGetCUNop -> (1, 1)
+    | CreateCl (n, _) -> (n, 1)
+    | MemoGet _ -> (0, 1) | MemoSet _ -> (0, 0)
     | Idx | ArrayIdx -> (3, 1)
-    | IsUninit -> (1, 2)
-    | MemoSet (n, _) -> (n + 1, 1)
     end
   | IGet i ->
     begin match i with
@@ -1017,7 +1013,8 @@ let collect_locals f instrs =
       )
     | IMisc (InitThisLoc l | StaticLocCheck (l, _) | StaticLocDef (l, _) |
              StaticLocInit (l, _) | AssertRATL (l, _) | Silence (l, _) |
-             GetMemoKeyL l | MemoGet (_, Some (l, _)) | MemoSet (_, Some (l, _)))
+             GetMemoKeyL l |
+             MemoGet (_, Some (l, _)) | MemoSet (Some (l, _)))
     | IAsync (AwaitAll (Some (l, _)))
       -> add acc l
     | IFinal (SetWithRefLML (l1, l2))

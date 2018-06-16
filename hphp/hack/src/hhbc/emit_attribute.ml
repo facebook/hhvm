@@ -31,6 +31,14 @@ let ast_is_memoize : A.user_attribute -> bool =
   fun ast_attr ->
   snd ast_attr.A.ua_name = Naming_special_names.UserAttributes.uaMemoize
 
+let ast_is_deprecated : A.user_attribute -> bool =
+  fun ast_attr ->
+  snd ast_attr.A.ua_name = Naming_special_names.UserAttributes.uaDeprecated
+
 let ast_any_is_memoize : A.user_attribute list -> bool =
   fun ast_attrs ->
   List.exists ast_attrs ast_is_memoize
+
+let ast_any_is_deprecated : A.user_attribute list -> bool =
+  fun ast_attrs ->
+  List.exists ast_attrs ast_is_deprecated

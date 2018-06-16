@@ -180,8 +180,6 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IIsset EmptyN);
     (fun () -> IIsset EmptyG);
     (fun () -> IIsset (IsTypeC (random_op_type ())));
-    (fun () -> IMisc MaybeMemoType);
-    (fun () -> IMisc IsMemoType);
     (fun () -> IMutator (SetL (random_local ())));
     (fun () -> IMutator (SetOpL (random_local (), random_eq_op ())));
     (fun () -> IMutator (SetOpG (random_eq_op ())));
@@ -198,7 +196,6 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IMisc UGetCUNop);
     (fun () -> IMisc CGetCUNop);
     (fun () -> IBasic Dup);
-    (fun () -> IMisc IsUninit);
     (fun () -> ILitConst AddNewElemC);
     (fun () -> ILitConst NewPair);
     (fun () -> IOp Concat);
@@ -278,8 +275,6 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IMisc (Silence (random_local (), random_silence ())));
     (fun () -> IMisc (GetMemoKeyL (random_local ())));
     (*(fun () -> IMisc VarEnvDynCall);*)
-    (fun () -> IMisc (MemoSet (Random.int 10, Some (random_local (), Random.int 10))));
-    (fun () -> IMisc (MemoGet (Random.int 10, Some (random_local (), Random.int 10))));
     (fun () -> IAsync WHResult);
     (fun () -> IAsync Await)] @
     begin

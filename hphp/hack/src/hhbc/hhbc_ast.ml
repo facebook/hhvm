@@ -541,13 +541,10 @@ type instruct_misc =
   | BreakTraceHint
   | Silence of local_id * op_silence
   | GetMemoKeyL of local_id
-  | IsUninit
   | CGetCUNop
   | UGetCUNop
-  | MemoSet of int * (local_id * int) option
-  | MemoGet of int * (local_id * int) option
-  | IsMemoType
-  | MaybeMemoType
+  | MemoGet of Label.t * (local_id * int) option
+  | MemoSet of (local_id * int) option
 
 type gen_creation_execution =
   | CreateCont

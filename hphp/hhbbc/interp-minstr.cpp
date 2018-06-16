@@ -1874,66 +1874,6 @@ void in(ISS& env, const bc::FPassM& op) {
   );
 }
 
-void in(ISS& env, const bc::MemoGet& op) {
-  always_assert(env.ctx.func->isMemoizeWrapper);
-  always_assert(op.locrange.first + op.locrange.count
-                <= env.ctx.func->locals.size());
-  always_assert(env.state.mInstrState.base.loc == BaseLoc::Local ||
-                env.state.mInstrState.base.loc == BaseLoc::StaticProp ||
-                env.state.mInstrState.base.loc == BaseLoc::Prop);
-  always_assert(env.state.mInstrState.arrayChain.empty());
-
-  // If we can use an equivalent, earlier range, then use that instead.
-  auto const equiv = equivLocalRange(env, op.locrange);
-  if (equiv != op.locrange.first) {
-    return reduce(
-      env,
-      bc::MemoGet { op.arg1, LocalRange { equiv, op.locrange.count } }
-    );
-  }
-
-  nothrow(env);
-  for (uint32_t i = 0; i < op.locrange.count; ++i) {
-    mayReadLocal(env, op.locrange.first + i);
-  }
-  endBase(env, false);
-  discard(env, op.arg1);
-  // The pushed value is always the return type of the wrapped function with
-  // TUninit unioned in, but that's always going to result in TCell right now.
-  push(env, TCell);
-}
-
-void in(ISS& env, const bc::MemoSet& op) {
-  always_assert(env.ctx.func->isMemoizeWrapper);
-  always_assert(op.locrange.first + op.locrange.count
-                <= env.ctx.func->locals.size());
-  always_assert(env.state.mInstrState.base.loc == BaseLoc::Local ||
-                env.state.mInstrState.base.loc == BaseLoc::StaticProp ||
-                env.state.mInstrState.base.loc == BaseLoc::Prop);
-  always_assert(env.state.mInstrState.arrayChain.empty());
-
-  // If we can use an equivalent, earlier range, then use that instead.
-  auto const equiv = equivLocalRange(env, op.locrange);
-  if (equiv != op.locrange.first) {
-    return reduce(
-      env,
-      bc::MemoSet { op.arg1, LocalRange { equiv, op.locrange.count } }
-    );
-  }
-
-  nothrow(env);
-  for (uint32_t i = 0; i < op.locrange.count; ++i) {
-    mayReadLocal(env, op.locrange.first + i);
-  }
-
-  auto const t1 = popC(env);
-
-  env.state.mInstrState.base.type = TDictN;
-  endBase(env);
-  discard(env, op.arg1);
-  push(env, t1);
-}
-
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -2486,6 +2486,18 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
 
     processForcedLive(result.forcedLiveLocations);
 
+    auto const isCFPushTaken = [] (php::Block* blk, BlockId succId) {
+      auto const& lastOpc = blk->hhbcs.back();
+      if (!instrIsNonCallControlFlow(lastOpc.op)) return false;
+      if (!lastOpc.numPush()) return false;
+      auto isTaken = false;
+      forEachTakenEdge(
+        lastOpc,
+        [&] (BlockId takenId) { if (takenId == succId) isTaken = true; }
+      );
+      return isTaken;
+    };
+
     // Merge the liveIn into the liveOut of each normal predecessor.
     // If the set changes, reschedule that predecessor.
     for (auto& pred : nonThrowPreds[blk->id]) {
@@ -2502,13 +2514,21 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       for (auto const& loc : forcedLiveLocations) {
         if (loc.isSlot && loc.blk == blk->id) pbs.slotLive.set(loc.id);
       }
+
       if (pbs.locLive != oldPredLocLive ||
           pbs.slotLive != oldPredSlotLive) {
         changed = true;
       }
-      if (mergeUIVecs(pbs.dceStack, result.stack, blk->id, false)) {
-        changed = true;
-      }
+      changed |= [&] {
+        if (isCFPushTaken(pred, blk->id)) {
+          auto stack = result.stack;
+          stack.insert(stack.end(), pred->hhbcs.back().numPush(),
+                       UseInfo{Use::Not});
+          return mergeUIVecs(pbs.dceStack, stack, blk->id, false);
+        } else {
+          return mergeUIVecs(pbs.dceStack, result.stack, blk->id, false);
+        }
+      }();
       if (changed) {
         incompleteQ.push(rpoId(pred->id));
       }

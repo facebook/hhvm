@@ -347,7 +347,6 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
             LIterNextK,
             IterFree,
             GenericRetDecRefs,
-            MemoSet,
             MemoSetStaticCache,
             MemoSetInstanceCache,
             MemoSetStaticValue,
@@ -1181,21 +1180,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return may_load_store_move(stack_in, AEmpty, stack_in);
     }
 
-  case MemoGet: {
-    auto const extra = inst.extra<MemoGet>();
-    auto const frame = AFrame {
-      inst.src(0),
-      AliasIdSet{
-        AliasIdSet::IdRange{
-          extra->locals.first,
-          extra->locals.first + extra->locals.count
-        }
-      }
-    };
-    auto const base = pointee(inst.src(1));
-    return may_load_store(AElemAny | frame | base, AEmpty);
-  }
-
   case MemoGetStaticValue:
   case MemoGetInstanceValue:
     // Only reads the memo value (which isn't modeled here).
@@ -1248,28 +1232,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto effects = may_load_store(frame, AEmpty);
     if (inst.op() == MemoSetInstanceCache) effects = may_reenter(inst, effects);
     return effects;
-  }
-
-  case MemoSet: {
-    auto const extra = inst.extra<MemoSet>();
-    auto const frame = AFrame {
-      inst.src(0),
-      AliasIdSet{
-        AliasIdSet::IdRange{
-          extra->locals.first,
-          extra->locals.first + extra->locals.count
-        }
-      }
-    };
-    auto const base = pointee(inst.src(1));
-    // May re-enter when decrementing previously stored value
-    return may_reenter(
-      inst,
-      may_load_store(
-        AElemAny | frame | base,
-        AElemAny | base
-      )
-    );
   }
 
   case MixedArrayGetK:

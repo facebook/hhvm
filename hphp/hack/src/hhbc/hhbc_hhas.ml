@@ -575,7 +575,6 @@ let string_of_misc instruction =
     | Catch -> "Catch"
     | ChainFaults -> "ChainFaults"
     | CheckThis -> "CheckThis"
-    | IsUninit -> "IsUninit"
     | CGetCUNop -> "CGetCUNop"
     | UGetCUNop -> "UGetCUNop"
     | StaticLocCheck (local, text) ->
@@ -584,22 +583,19 @@ let string_of_misc instruction =
       sep ["StaticLocDef"; string_of_local_id local; "\"" ^ text ^ "\""]
     | StaticLocInit (local, text) ->
       sep ["StaticLocInit"; string_of_local_id local; "\"" ^ text ^ "\""]
-    | MemoGet (count, Some (Local.Unnamed first, local_count)) ->
+    | MemoGet (label, Some (Local.Unnamed first, local_count)) ->
       Printf.sprintf "MemoGet %s L:%d+%d"
-                     (string_of_int count) first local_count
-    | MemoGet (count, None) ->
-      Printf.sprintf "MemoGet %s L:0+0" (string_of_int count)
+                     (string_of_label label) first local_count
+    | MemoGet (label, None) ->
+      Printf.sprintf "MemoGet %s L:0+0" (string_of_label label)
     | MemoGet _ -> failwith "MemoGet needs an unnamed local"
-    | MemoSet (count, Some (Local.Unnamed first, local_count)) ->
-      Printf.sprintf "MemoSet %s L:%d+%d"
-        (string_of_int count) first local_count
-    | MemoSet (count, None) ->
-      Printf.sprintf "MemoSet %s L:0+0" (string_of_int count)
+    | MemoSet (Some (Local.Unnamed first, local_count)) ->
+       Printf.sprintf "MemoSet L:%d+%d" first local_count
+    | MemoSet None ->
+       Printf.sprintf "MemoSet L:0+0"
     | MemoSet _ -> failwith "MemoSet needs an unnamed local"
     | GetMemoKeyL local ->
       sep ["GetMemoKeyL"; string_of_local_id local]
-    | IsMemoType -> "IsMemoType"
-    | MaybeMemoType -> "MaybeMemoType"
     | CreateCl (n, cid) ->
       sep ["CreateCl"; string_of_int n; string_of_int cid]
     | Idx -> "Idx"

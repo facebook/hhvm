@@ -1276,37 +1276,4 @@ void cgMapIsset(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgMemoGet(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<MemoGet>();
-  auto const fp    = srcLoc(env, inst, 0).reg();
-  auto& v          = vmain(env);
-
-  auto const args = argGroup(env, inst)
-    .ssa(1)
-    .addr(fp, localOffset(extra->locals.first))
-    .imm(extra->locals.count);
-  cgCallHelper(
-    v, env, CallSpec::direct(MixedArray::MemoGet),
-    callDestTV(env, inst), SyncOptions::None, args
-  );
-}
-
-void cgMemoSet(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<MemoSet>();
-  auto const fp    = srcLoc(env, inst, 0).reg();
-  auto& v          = vmain(env);
-
-  auto const args = argGroup(env, inst)
-    .ssa(1)
-    .addr(fp, localOffset(extra->locals.first))
-    .imm(extra->locals.count)
-    .typedValue(2);
-  cgCallHelper(
-    v, env, CallSpec::direct(MixedArray::MemoSet),
-    kVoidDest, SyncOptions::Sync, args
-  );
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 }}}

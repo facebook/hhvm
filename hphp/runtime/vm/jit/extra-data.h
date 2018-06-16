@@ -1144,15 +1144,6 @@ struct NewKeysetArrayData : IRExtraData {
   uint32_t size;
 };
 
-struct MemoData : IRExtraData {
-  explicit MemoData(LocalRange locals)
-    : locals(locals) {}
-
-  std::string show() const { return HPHP::show(locals); }
-
-  LocalRange locals;
-};
-
 struct MemoValueStaticData : IRExtraData {
   explicit MemoValueStaticData(const Func* func) : func{func} {}
   std::string show() const { return func->fullName()->toCppString(); }
@@ -1666,7 +1657,6 @@ X(ElemKeysetX,                  MOpModeData);
 X(CGetProp,                     MOpModeData);
 X(CGetElem,                     MOpModeData);
 X(ArrayGet,                     MOpModeData);
-X(MemoGet,                      MemoData);
 X(MemoGetStaticValue,           MemoValueStaticData);
 X(MemoSetStaticValue,           MemoValueStaticData);
 X(MemoGetStaticCache,           MemoCacheStaticData);
@@ -1675,7 +1665,6 @@ X(MemoGetInstanceValue,         MemoValueInstanceData);
 X(MemoSetInstanceValue,         MemoValueInstanceData);
 X(MemoGetInstanceCache,         MemoCacheInstanceData);
 X(MemoSetInstanceCache,         MemoCacheInstanceData);
-X(MemoSet,                      MemoData);
 X(SetOpProp,                    SetOpData);
 X(SetOpCell,                    SetOpData);
 X(IncDecProp,                   IncDecData);

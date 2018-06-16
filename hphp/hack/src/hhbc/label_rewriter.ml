@@ -47,6 +47,7 @@ let get_regular_labels instr =
   | IIterator (IterBreak (l, _))
   | ICall (DecodeCufIter (_, l))
   | IGenDelegation (YieldFromDelegate (_, l))
+  | IMisc (MemoGet (l, _))
   | IContFlow (Jmp l | JmpNS l | JmpZ l | JmpNZ l) -> [l]
   | IContFlow (Switch (_, _, ls)) -> ls
   | IContFlow (SSwitch pairs) -> List.map pairs snd
@@ -159,6 +160,8 @@ let rewrite_params_and_body defs used refs params body =
     | ITry (TryCatchLegacyBegin l) ->
       Some (ITry (TryCatchLegacyBegin (relabel l)))
     | ITry (TryFaultBegin l) -> Some (ITry (TryFaultBegin (relabel l)))
+    | IMisc (MemoGet (l, r)) ->
+      Some (IMisc (MemoGet (relabel l, r)))
     | ILabel l ->
       begin match Label.option_map relabel_define_label_id l with
       | None -> None
@@ -255,7 +258,9 @@ let clone_with_fresh_regular_labels block =
       IContFlow (Switch (k, n, List.map ll relabel))
     | IContFlow (SSwitch pairs) ->
       IContFlow (SSwitch
-        (List.map pairs (fun (id,l) -> (id, relabel l))))
+       (List.map pairs (fun (id,l) -> (id, relabel l))))
+    | IMisc (MemoGet (l, r)) ->
+      IMisc (MemoGet (relabel l, r))
     | ILabel l -> ILabel (relabel l)
     | _ -> instr
   in

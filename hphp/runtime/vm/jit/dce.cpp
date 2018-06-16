@@ -261,7 +261,6 @@ bool canDCE(IRInstruction* inst) {
   case GetTime:
   case GetTimeNs:
   case Select:
-  case MemoGet:
   case LdARCtx:
   case LdCufIterFunc:
   case LdCufIterCtx:
@@ -695,7 +694,6 @@ bool canDCE(IRInstruction* inst) {
   case LdClsMethodFCacheFunc:
   case LdClsMethodCacheFunc:
   case ProfileInstanceCheck:
-  case MemoSet:
   case MemoGetStaticValue:
   case MemoGetStaticCache:
   case MemoGetInstanceValue:

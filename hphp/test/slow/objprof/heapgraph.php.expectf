@@ -37,7 +37,7 @@ Property:somestring
 Traversing roots for first capture:
 
 Getting in edges of root class:
-StaticProperty:RootClass::getinstance$guarded_single$memoize_cache
+
 onsome-stack
 
 Getting out edges of root class:

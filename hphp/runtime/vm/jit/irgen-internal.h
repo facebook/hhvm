@@ -971,6 +971,10 @@ Block* create_catch_block(IRGS& env, Body body) {
 
 //////////////////////////////////////////////////////////////////////
 
+// If the current function doesn't have a $this, emit a fatal. Otherwise, load
+// $this and return it.
+SSATmp* checkAndLoadThis(IRGS& env);
+
 }}}
 
 #endif

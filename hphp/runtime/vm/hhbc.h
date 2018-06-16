@@ -535,7 +535,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(IsTypeC,         ONE(OA(IsTypeOp)),ONE(CV),         ONE(CV),    NF) \
   O(IsTypeL,         TWO(LA,                                            \
                        OA(IsTypeOp)),  NOV,             ONE(CV),    NF) \
-  O(IsUninit,        NA,               ONE(CUV),        TWO(CUV,CV),NF) \
   O(AssertRATL,      TWO(LA,RATA),     NOV,             NOV,        NF) \
   O(AssertRATStk,    TWO(IVA,RATA),    NOV,             NOV,        NF) \
   O(SetL,            ONE(LA),          ONE(CV),         ONE(CV),    NF) \
@@ -737,10 +736,8 @@ constexpr uint32_t kMaxConcatN = 4;
   O(UnsetM,          TWO(IVA, KA),     MFINAL,          NOV,        NF) \
   O(SetWithRefLML,   TWO(LA,LA),       NOV,             NOV,        NF) \
   O(SetWithRefRML,   ONE(LA),          ONE(RV),         NOV,        NF) \
-  O(MemoGet,         TWO(IVA, LAR),    MFINAL,          ONE(CUV),   NF) \
-  O(MemoSet,         TWO(IVA, LAR),    C_MFINAL,        ONE(CV),    NF) \
-  O(MaybeMemoType,   NA,               ONE(CV),         ONE(CV),    NF) \
-  O(IsMemoType,      NA,               ONE(CV),         ONE(CV),    NF)
+  O(MemoGet,         TWO(BA, LAR),     NOV,             ONE(CV),    CF) \
+  O(MemoSet,         ONE(LAR),         ONE(CV),         ONE(CV),    NF)
 
 enum class Op : uint16_t {
 #define O(name, ...) name,
@@ -1134,8 +1131,6 @@ inline bool isMemberFinalOp(Op op) {
     case Op::UnsetM:
     case Op::SetWithRefLML:
     case Op::SetWithRefRML:
-    case Op::MemoGet:
-    case Op::MemoSet:
       return true;
 
     default:
@@ -1150,7 +1145,6 @@ inline bool isMemberOp(Op op) {
 inline MOpMode finalMemberOpMode(Op op) {
   switch(op){
     case Op::FPassM:
-    case Op::MemoGet:
       return MOpMode::Warn;
     case Op::SetM:
     case Op::VGetM:
@@ -1159,7 +1153,6 @@ inline MOpMode finalMemberOpMode(Op op) {
     case Op::BindM:
     case Op::SetWithRefLML:
     case Op::SetWithRefRML:
-    case Op::MemoSet:
       return MOpMode::Define;
     case Op::UnsetM:
       return MOpMode::Unset;

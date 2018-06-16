@@ -61,6 +61,21 @@ function could_include(string $file) : bool;
 function serialize_memoize_param(mixed $param): arraykey;
 
 /**
+ * Clear memoization data
+ *  - if $cls is non-null, clear memoziation cache for $cls::$func,
+ *    or for all static memoized methods if $func is null
+ *  - if $cls is null, clear memoization cache for $func
+ */
+<<__Native, __ParamCoerceModeFalse>>
+function clear_static_memoization(?string $cls, ?string $func = null) : bool;
+
+/**
+ * Clear memoization data on object instance
+ */
+<<__Native, __ParamCoerceModeFalse>>
+function clear_instance_memoization(object $obj) : bool;
+
+/**
  * Attach metadata to the caller's stack frame. The metadata can be retrieved
  * using debug_backtrace(DEBUG_BACKTRACE_PROVIDE_METADATA).
  */

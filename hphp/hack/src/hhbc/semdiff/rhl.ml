@@ -611,11 +611,11 @@ let check_instruct_misc asn i i' =
   | GetMemoKeyL _, _
   | _, GetMemoKeyL _ -> None (* wimp out if not same named local *)
 
-  | MemoSet (count, Some (Local.Unnamed first, local_count)),
-    MemoSet (count', Some (Local.Unnamed first', local_count'))
-  | MemoGet (count, Some (Local.Unnamed first, local_count)),
-    MemoGet (count', Some (Local.Unnamed first', local_count'))
-    when count=count' && local_count = local_count' ->
+  | MemoSet (Some (Local.Unnamed first, local_count)),
+    MemoSet (Some (Local.Unnamed first', local_count'))
+  | MemoGet (_, Some (Local.Unnamed first, local_count)),
+    MemoGet (_, Some (Local.Unnamed first', local_count'))
+    when local_count = local_count' ->
       let rec loop loop_asn local local' count =
         match reads loop_asn (Local.Unnamed local) (Local.Unnamed local') with
         | None -> None
@@ -647,8 +647,8 @@ let check_instruct_misc asn i i' =
   | Parent _, _ | LateBoundCls _, _ | ClsRefName _, _ | NativeImpl, _
   | VerifyOutType _, _
   | IncStat _, _ | AKExists, _ | Idx, _ | ArrayIdx, _
-  | AssertRATStk _, _ | BreakTraceHint, _ | IsUninit, _
-  | CGetCUNop, _ | UGetCUNop, _ | IsMemoType, _ | MaybeMemoType, _ ->
+  | AssertRATStk _, _ | BreakTraceHint, _
+  | CGetCUNop, _ | UGetCUNop, _ ->
     if i=i' then Some asn else None
 
 let check_instruct_basic i i' =

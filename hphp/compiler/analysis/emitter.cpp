@@ -1172,7 +1172,6 @@ public:
   void emitMethodPrologue(Emitter& e, MethodStatementPtr meth);
   void emitDeprecationWarning(Emitter& e, MethodStatementPtr meth);
   void emitMethod(MethodStatementPtr meth);
-  void addMemoizeProp(MethodStatementPtr meth);
   void emitMemoizeMethod(MethodStatementPtr meth, const StringData* methName);
   void emitConstMethodCallNoParams(Emitter& e, const std::string& name);
   bool emitInlineGen(Emitter& e, const ExpressionPtr&);
@@ -1477,10 +1476,17 @@ struct OpEmitContext {
       POP_CAR_##imm;                                                    \
       POP_##pop;                                                        \
       POP_LA_##imm;                                                     \
-      PUSH_##push;                                                      \
-      PUSH_CAW_##imm;                                                   \
+      /* MemoGet pushes after branching */                              \
+      if (opcode != Op::MemoGet) {                                      \
+        PUSH_##push;                                                    \
+        PUSH_CAW_##imm;                                                 \
+      }                                                                 \
       getUnitEmitter().emitOp(Op##name);                                \
       IMPL_##imm;                                                       \
+      if (opcode == Op::MemoGet) {                                      \
+        PUSH_##push;                                                    \
+        PUSH_CAW_##imm;                                                 \
+      }                                                                 \
     }                                                                   \
     ITRACE(3, "after: {}\n", m_ev.getEvalStack().pretty());             \
     auto& loc = m_tempLoc ? *m_tempLoc : m_node->getRange();            \
@@ -9475,7 +9481,6 @@ void EmitterVisitor::emitPostponedMeths() {
       // Emit the new method that handles the memoization
       m_curFunc = memoizeFe;
       m_curFunc->isMemoizeWrapper = true;
-      addMemoizeProp(meth);
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
       emitMemoizeMethod(meth, rewrittenName);
 
@@ -10024,153 +10029,6 @@ void EmitterVisitor::emitMethodDVInitializers(Emitter& e,
   if (hasOptional) e.JmpNS(topOfBody);
 }
 
-void EmitterVisitor::addMemoizeProp(MethodStatementPtr meth) {
-  assert(m_curFunc->isMemoizeWrapper);
-
-  /*
-   * A memoize cache can take a variety of forms, depending on the function's
-   * parameter count, and what type of function it is. If the function does not
-   * take any parameters (and thus can only cache a single value), the cache is
-   * simply storage for a single value. If the function takes parameters, then
-   * the cache is a set of nested dicts, N levels depth for the N parameters. At
-   * level M, the key is the function's Mth parameter, converted into a memo
-   * key. At the end of the dict chain, the actual value is stored.
-   *
-   * If the cache stores a single value, Null is used to represent the lack of a
-   * value. This poses a problem for functions which actually can return
-   * Null. In that case, such a cache is called "guarded", and has an additional
-   * boolean associated with it. If the value is set to Null, and the guard is
-   * true, the cached value is actually Null, otherwise its not set. If we can't
-   * determine whether will return Null or not, we'll assume it can, and let
-   * HHBBC attempt to infer the return type and optimize away the guard.
-   *
-   * If the function is a free function, the cache is stored as a static local
-   * scoped to that function. If the function is a static method, the cache is
-   * stored as a static property on the function's class. One static property
-   * per cache. If the function is a non-static method, the cache is stored as a
-   * per-instance property on the object. However, to avoid adding an excessive
-   * number of individual properties to every instance, all memoize caches for
-   * that instance share the same property. This means that even if the
-   * functions do not take any parameters, they will use the above described
-   * dict storage. A synthetic integer index is used as the first key to address
-   * the cache for a specific function. An exception is if an object only has
-   * one memoized function. In that case, it will use a single property (without
-   * synthetic index) for the cache storage.
-   */
-
-  auto pce = m_curFunc->pce();
-  auto classScope = meth->getClassScope();
-  auto funcScope = meth->getFunctionScope();
-
-  // Statically determine if this function can potentially return Null. Async
-  // functions cannot return null, nor do ones with type-constraints that don't
-  // admit Null (and return type-constraint enforcement is enabled).
-  auto const cantReturnNull =
-    funcScope->isAsync() ||
-    (m_curFunc->retTypeConstraint.hasConstraint() &&
-     !m_curFunc->retTypeConstraint.isSoft() &&
-     !m_curFunc->retTypeConstraint.isNullable() &&
-     RuntimeOption::EvalCheckReturnTypeHints >= 3);
-
-  if (meth->is(Statement::KindOfFunctionStatement)) {
-    // Functions use statics within themselves. So all we need to do here is set
-    // the name and the guard name if necessary.
-    m_curFunc->memoizePropName = makeStaticString("static$memoize_cache");
-    if ((!meth->getParams() || meth->getParams()->getCount() == 0)
-        && !cantReturnNull) {
-      m_curFunc->memoizeGuardPropName =
-        makeStaticString("static$memoize_cache$guard");
-    }
-    return;
-  }
-
-  // Determine if we need to use a shared cache. We do if this function isn't
-  // static and the class it belongs to has more than one non-static memoized
-  // function.
-  bool useSharedProp = false;
-  if (!funcScope->isStatic()) {
-    // If we're already allocated a memoize cache key, we know immediately we
-    // need to use a shared cache. Otherwise we could be the first, so iterate
-    // over all of the class' functions looking for a non-static memoized
-    // function that isn't the current one.
-    if (!pce->areMemoizeCacheKeysAllocated()) {
-      for (auto const& f : classScope->allFunctions()) {
-        if (!f->isStatic() && f->userAttributes().count("__Memoize") &&
-            !f->isAbstract() && f != funcScope) {
-          useSharedProp = true;
-          break;
-        }
-      }
-    } else {
-      useSharedProp = true;
-    }
-  }
-
-  if (useSharedProp) {
-    m_curFunc->hasMemoizeSharedProp = true;
-    m_curFunc->memoizeSharedPropIndex = pce->getNextMemoizeCacheKey();
-  }
-
-  // Even if the cache isn't shared but if the function isn't static, use the
-  // $shared prefix for its name because there's PHP code which assumes that.
-  auto const propNameBase = funcScope->isStatic()
-    ? toLower(funcScope->getScopeName())
-    : "$shared";
-
-  // The prop definition in traits conflicts with the definition in a class
-  // so make a different prop for each trait
-  std::string traitNamePart;
-  if (classScope && classScope->isTrait()) {
-    traitNamePart = toLower(classScope->getScopeName());
-    // the backslash comes from namespaces. @jan thought that would cause
-    // issues, so use $ instead
-    for (char &c: traitNamePart) {
-      c = (c == '\\' ? '$' : c);
-    }
-    traitNamePart += "$";
-  }
-
-  auto const makeProp = [&](const std::string& baseName, TypedValue val) {
-    auto const name = makeStaticString(
-      folly::sformat("{}${}{}", propNameBase, traitNamePart, baseName)
-    );
-    Attr attrs = AttrPrivate | AttrNoSerialize;
-    attrs = attrs | (funcScope->isStatic() ? AttrStatic : AttrNone);
-    pce->addProperty(
-      name, attrs, staticEmptyString(), nullptr, &val, RepoAuthType{},
-      UserAttributeMap{}
-    );
-    return name;
-  };
-
-  // As described above: If the cache is shared, or if the function has
-  // parameters, use the nested dict scheme, otherwise use a single value.
-  m_curFunc->memoizePropName = [&]{
-    // NB: If you change the naming format, make sure the reflection code is
-    // updated to properly recognize memo cache properties.
-    if (useSharedProp ||
-        (meth->getParams() && meth->getParams()->getCount() > 0)) {
-      return makeProp(
-        "multi$memoize_cache",
-        make_tv<KindOfPersistentDict>(staticEmptyDictArray())
-      );
-    }
-
-    // Use a single value for functions which cannot possibly return null, and a
-    // guarded single value otherwise.
-    if (cantReturnNull) {
-      return makeProp("single$memoize_cache", make_tv<KindOfNull>());
-    }
-
-    m_curFunc->memoizeGuardPropName =
-      makeProp(
-        "guarded_single$memoize_cache$guard",
-        make_tv<KindOfBoolean>(false)
-      );
-    return makeProp("guarded_single$memoize_cache", make_tv<KindOfNull>());
-  }();
-}
-
 void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
                                        const StringData* methName) {
   assert(m_curFunc->isMemoizeWrapper);
@@ -10202,7 +10060,6 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
 
   Label topOfBody(e, Label::NoEntryNopFlag{});
   Label cacheMiss;
-  Label cacheMissNoClean;
 
   emitMethodPrologue(e, meth);
   // We want to emit the deprecation warning on every call, even if its a cache
@@ -10210,46 +10067,13 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   auto const& attrs = meth->getFunctionScope()->userAttributes();
   if (attrs.count(attr_Deprecated)) emitDeprecationWarning(e, meth);
 
-  // Function start
-  int staticLocalID = 0;
-  int staticGuardLocalID = 0;
-  if (isFunc) {
-    // Free function, so load the cache from its static local.
-    staticLocalID = m_curFunc->allocUnnamedLocal();
-    emitVirtualLocal(staticLocalID);
-    if (numParams == 0) {
-      if (m_curFunc->memoizeGuardPropName) {
-        staticGuardLocalID = m_curFunc->allocUnnamedLocal();
-        emitVirtualLocal(staticGuardLocalID);
-        e.False();
-        e.StaticLocInit(staticGuardLocalID, m_curFunc->memoizeGuardPropName);
-      }
-      e.Null();
-    } else {
-      e.Dict(staticEmptyDictArray());
-    }
-    e.StaticLocInit(staticLocalID, m_curFunc->memoizePropName);
-  } else if (!meth->getFunctionScope()->isStatic()) {
-    e.CheckThis();
-  }
-
-  // If needed, store all the memo keys into a set of contiguous locals which
-  // the MemoGet/MemoSet opcodes can read from:
-
-  uint32_t keysBegin = 0;
-  uint32_t keyCount = 0;
-  if (m_curFunc->hasMemoizeSharedProp) {
-    // If this is a shared cache, the first key is always the index, which is
-    // always statically known.
-    keysBegin = m_curFunc->allocUnnamedLocal();
-    ++keyCount;
-    emitVirtualLocal(keysBegin);
-    e.Int(m_curFunc->memoizeSharedPropIndex);
-    emitSet(e);
-    emitPop(e);
-  }
+  // Function start: If this is a non-static method, we need a $this pointer, so
+  // check for its existence.
+  if (!isFunc && !meth->getFunctionScope()->isStatic()) e.CheckThis();
 
   // Serialize the params into memo keys and store them in unnamed locals:
+  uint32_t keysBegin = 0;
+  uint32_t keyCount = 0;
   for (int i = 0; i < numParams; i++) {
     if (m_curFunc->params[i].byRef) {
       throw IncludeTimeFatalException(
@@ -10276,207 +10100,39 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
     emitPop(e);
   }
 
-  auto const emitBase = [&] (bool guard) {
-    if (meth->is(Statement::KindOfFunctionStatement)) {
-      emitVirtualLocal(guard ? staticGuardLocalID : staticLocalID);
-    } else if (meth->getFunctionScope()->isStatic()) {
-      m_evalStack.push(StackSym::K);
-      if (!classScope || classScope->isTrait() ||
-          meth->getFunctionScope()->isClosure()) {
-        m_evalStack.setClsBaseType(SymbolicStack::CLS_SELF);
-      } else {
-        m_evalStack.setClsBaseType(SymbolicStack::CLS_STRING_NAME);
-        m_evalStack.setString(m_curFunc->pce()->name());
-      }
-      e.String(
-        guard ? m_curFunc->memoizeGuardPropName : m_curFunc->memoizePropName
-      );
-      markSProp(e);
-    } else {
-      m_evalStack.push(StackSym::H);
-      m_evalStack.setKnownCls(m_curFunc->pce()->name(), false);
-      m_evalStack.push(StackSym::T);
-      m_evalStack.setString(
-        guard ? m_curFunc->memoizeGuardPropName : m_curFunc->memoizePropName
-      );
-      markProp(e, PropAccessType::Normal);
-    }
-  };
-
-  auto const emitMemoAccess = [&](bool read){
-    always_assert(keyCount > 0);
-    always_assert(keysBegin + keyCount <= m_curFunc->numLocals());
-
-    emitClsIfSPropBase(e);
-    int iLast = m_evalStack.size() - (read ? 1 : 2);
-    int i = scanStackForLocation(iLast);
-    if (read) {
-      auto const count = emitMOp(i, iLast, e, MInstrOpts{MOpMode::Warn}, true);
-      always_assert(keysBegin + keyCount <= m_curFunc->numLocals());
-      e.MemoGet(count, LocalRange{ keysBegin, keyCount });
-    } else {
-      auto const count =
-        emitMOp(i, iLast, e, MInstrOpts{MOpMode::Define}.rhs(), true);
-      always_assert(keysBegin + keyCount <= m_curFunc->numLocals());
-      e.MemoSet(count, LocalRange{ keysBegin, keyCount });
-    }
-  };
-
-  // If we're using a nested dict cache, emit a MemoGet and check if the
-  // returned value is Uninit or not. If we're using a single value cache,
-  // access its stored value and check if its null or not. If we get a value,
-  // return it. Note that even if the cache is guarded, we check if the value is
-  // Null first. If the value is non-null, then the guard must be true, so if
-  // Null isn't common, its a win to always check the value first.
-  if (keyCount > 0) {
-    emitBase(false);
-    emitMemoAccess(true);
-    e.IsUninit();
-    e.JmpNZ(cacheMiss);
-    e.CGetCUNop();
-  } else {
-    if (m_curFunc->memoizeGuardPropName) {
-      // Emit a check for the memoize function's return-type being Null. If it
-      // is, then the cached value will always be Null and we can skip the value
-      // check. HHBBC will optimize this check away in either case.
-      e.Null();
-      e.IsMemoType();
-      e.JmpNZ(cacheMissNoClean);
-    }
-    emitBase(false);
-    emitCGet(e);
-    e.Dup();
-    emitIsType(e, IsTypeOp::Null);
-    e.JmpNZ(cacheMiss);
-  }
+  // Attempt to retrieve the value from the cache, returning if found, branching
+  // if not:
+  e.MemoGet(cacheMiss, LocalRange { keysBegin, keyCount });
   e.RetC();
 
-  // The value isn't there. First clean the Null or Uninit value off the stack.
+  // The value isn't there. Call the wrapped function to get it:
   cacheMiss.set(e);
-  if (keyCount > 0) {
-    e.UGetCUNop();
-    e.PopU();
-  } else {
-    e.PopC();
-  }
-
-  cacheMissNoClean.set(e);
-  if (m_curFunc->memoizeGuardPropName) {
-    // Either we optimized away the cached value check all together, or we did
-    // the check and it contained Null. Either way, we need to check the
-    // guard. If its true, the stored value actually is Null, otherwise we need
-    // to call the function.
-    //
-    // However, if the memoized function cannot possibly return Null, there's no
-    // need to check the guard. In that case, we know the value isn't
-    // present. HHBBC will optimize away the MaybeMemoType check.
-    Label guardNotSet;
-    e.Null();
-    e.MaybeMemoType();
-    e.JmpZ(guardNotSet);
-    emitBase(true);
-    emitCGet(e);
-    e.JmpZ(guardNotSet);
-    e.Null();
-    e.RetC();
-    guardNotSet.set(e);
-  }
-
-  auto const emitImplCall = [&]{
-    auto fpiStart = m_ue.bcPos();
-    if (isFunc) {
-      e.FPushFuncD(numParams, methName);
-    } else if (meth->getFunctionScope()->isStatic()) {
-      emitClsIfSPropBase(e);
-
-      if (classScope && classScope->isTrait()) {
-        fpiStart = m_ue.bcPos();
-        e.FPushClsMethodSD(numParams, SpecialClsRef::Self, methName);
-      } else {
-        fpiStart = m_ue.bcPos();
-        e.FPushClsMethodD(numParams, methName, m_curFunc->pce()->name());
-      }
+  auto fpiStart = m_ue.bcPos();
+  if (isFunc) {
+    e.FPushFuncD(numParams, methName);
+  } else if (meth->getFunctionScope()->isStatic()) {
+    if (classScope && classScope->isTrait()) {
+      e.FPushClsMethodSD(numParams, SpecialClsRef::Self, methName);
     } else {
-      e.This();
-      fpiStart = m_ue.bcPos();
-      e.FPushObjMethodD(numParams, methName, ObjMethodOp::NullThrows);
+      e.FPushClsMethodD(numParams, methName, m_curFunc->pce()->name());
     }
-    {
-      FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-      for (uint32_t i = 0; i < numParams; i++) {
-        emitVirtualLocal(i);
-        emitCGet(e);
-        e.FPassC(i, FPassHint::Any);
-      }
-    }
-    e.FCall(numParams);
-    emitConvertToCell(e);
-  };
-
-  /*
-   * Make the call to the memoized function and store the value in the
-   * cache. There's three distinct cases here:
-   *
-   * 1 - Full dict memo cache. Just store the function call result in it. We
-   * have to emit the base before the function call to ensure all the values are
-   * at the right stack locations.
-   *
-   * 2 - Single value memo cache with a guard. Store the function call result in
-   * the cache and store a True into the guard. If HHBBC can determine either
-   * the cache or the guard is redundant, elide the appropriate sets. This case
-   * is more complicated because whether or not we're going to perform either
-   * set determines whether we need to push a base before or after the call.
-   *
-   * 3 - Single value memo cache without a guard. Similar to #1, but store the
-   * value in the single value cache.
-   */
-  if (keyCount > 0) {
-    emitBase(false);
-    emitImplCall();
-    emitMemoAccess(false);
-  } else if (m_curFunc->memoizeGuardPropName) {
-    Label noCacheSet;
-    Label join;
-    Label done;
-
-    // If HHBBC determines the memoize function always returns Null, then
-    // there's no point in storing the value, so jump over the set. This has to
-    // be done before calling the wrapped function because we need to know if
-    // we're going to have to push the cache's base first.
-    e.Null();
-    e.IsMemoType();
-    e.JmpNZ(noCacheSet);
-
-    // Otherwise make the call and store the value in the cache like usual.
-    emitBase(false);
-    emitImplCall();
-    emitSet(e);
-    e.Jmp(join);
-
-    // We skipped storing the value in the cache, so just call the function
-    // (without pushing a base).
-    noCacheSet.set(e);
-    emitImplCall();
-
-    // If HHBBC determines the memoize function cannot return Null, there's no
-    // need to set the guard (its not necessary because Null unambiguously means
-    // not present). In that case, skip over setting the guard to true.
-    join.set(e);
-    e.Null();
-    e.MaybeMemoType();
-    e.JmpZ(done);
-    emitBase(true);
-    emitClsIfSPropBase(e);
-    e.True();
-    emitSet(e);
-    e.PopC();
-
-    done.set(e);
   } else {
-    emitBase(false);
-    emitImplCall();
-    emitSet(e);
+    e.This();
+    fpiStart = m_ue.bcPos();
+    e.FPushObjMethodD(numParams, methName, ObjMethodOp::NullThrows);
   }
+  {
+    FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
+    for (uint32_t i = 0; i < numParams; i++) {
+      emitVirtualLocal(i);
+      e.FPassL(i, i, FPassHint::Cell);
+    }
+  }
+  e.FCall(numParams);
+  emitConvertToCell(e);
+
+  // Set it in the cache and return it
+  e.MemoSet(LocalRange { keysBegin, keyCount });
   e.RetC();
 
   assert(m_evalStack.size() == 0);

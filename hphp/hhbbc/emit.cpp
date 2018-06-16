@@ -735,8 +735,14 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       if (isRet(Op::opcode))              ret_assert(); \
       ue.emitOp(Op::opcode);                            \
       POP_##inputs                                      \
-      PUSH_##outputs                                    \
+      /* MemoGet pushes after branching */              \
+      if (Op::opcode != Op::MemoGet) {                  \
+        PUSH_##outputs                                  \
+      }                                                 \
       IMM_##imms                                        \
+      if (Op::opcode == Op::MemoGet) {                  \
+        PUSH_##outputs                                  \
+      }                                                 \
       if (isFPush(Op::opcode))     fpush();             \
       if (isFCallStar(Op::opcode)) fcall(Op::opcode);   \
       if (flags & TF) currentStackDepth = 0;            \

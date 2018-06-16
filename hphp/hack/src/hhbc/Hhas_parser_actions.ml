@@ -418,11 +418,8 @@ let make_nullary_inst s =
  | "Idx" -> IMisc(Idx)
  | "ArrayIdx" -> IMisc(ArrayIdx)
  | "BreakTraceHint" -> IMisc(BreakTraceHint)
- | "IsUninit" -> IMisc(IsUninit)
  | "CGetCUNop" -> IMisc(CGetCUNop)
  | "UGetCUNop" -> IMisc(UGetCUNop)
- | "IsMemoType" -> IMisc(IsMemoType)
- | "MaybeMemoType" -> IMisc(MaybeMemoType)
 
  (* async_functions *)
  | "Await" -> IAsync Await
@@ -974,6 +971,7 @@ let makeunaryinst s arg = match s with
    | "LateBoundCls" -> IMisc(LateBoundCls (intofiarg arg))
    | "ClsRefName" -> IMisc(ClsRefName (intofiarg arg))
    | "GetMemoKeyL" -> IMisc(GetMemoKeyL (localidofiarg arg))
+   | "MemoSet" -> IMisc (MemoSet (memoargofiarg arg))
 
    | "ContAssignDelegate" -> IGenDelegation (ContAssignDelegate (iterofiarg arg))
    (* Note: The TryCatch/TryFault instructions don't show up here because the
@@ -1076,12 +1074,14 @@ match s with
    IGenDelegation (ContUnsetDelegate (freeiteratorofiarg arg1, iterofiarg arg2))
 
  (* instruct_misc *)
- | "MemoSet" ->
-   let l = memoargofiarg arg2 in
-   IMisc (MemoSet(intofiarg arg1, l))
  | "MemoGet" ->
    let l = memoargofiarg arg2 in
-   IMisc (MemoGet(intofiarg arg1, l))
+   let lab =
+     (match arg1 with
+      | IAId l -> makelabel l
+      | _ -> report_error "bad label")
+   in
+   IMisc (MemoGet(lab, l))
 
  | "AliasCls" ->
    IIncludeEvalDefine (AliasCls(stringofiarg arg1, stringofiarg arg2))

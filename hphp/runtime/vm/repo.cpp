@@ -940,6 +940,11 @@ void Repo::getIntPragma(int repoId, const char* name, int& val) {
 }
 
 void Repo::setIntPragma(int repoId, const char* name, int val) {
+  // Read first to see if a write can be avoided
+  int oldval = -1;
+  getIntPragma(repoId, name, oldval);
+  if (val == oldval) return;
+
   // Pragma writes must be executed outside transactions, since they may change
   // transaction behavior.
   std::stringstream ssPragma;
@@ -969,6 +974,11 @@ void Repo::getTextPragma(int repoId, const char* name, std::string& val) {
 }
 
 void Repo::setTextPragma(int repoId, const char* name, const char* val) {
+  // Read first to see if a write can be avoided
+  std::string oldval = "?";
+  getTextPragma(repoId, name, oldval);
+  if (!strcmp(oldval.c_str(), val)) return;
+
   // Pragma writes must be executed outside transactions, since they may change
   // transaction behavior.
   std::stringstream ssPragma;

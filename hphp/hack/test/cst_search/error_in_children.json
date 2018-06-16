@@ -1,0 +1,11 @@
+{
+  "pattern_type": "node_pattern",
+  "kind": "methodish_declaration",
+  "children": {
+    "methodish_function_decl_header": {
+      "pattern_type": "node_pattern",
+      "kind": "foo",
+      "children": {}
+    }
+  }
+}

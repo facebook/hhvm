@@ -391,6 +391,7 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
     let children = Hh_json.get_object_exn children_json in
 
     let get_child_type
+        (child_keytrace: Hh_json.Access.keytrace)
         (child_name: string)
         : (child_type, string) Core_result.t =
       (* We're given a field name like `binary_right_operand`, but the field
@@ -408,7 +409,7 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
         let valid_types = List.map kind_info.fields ~f:(fun (field_name, _) ->
           get_prefixed_field_name field_name
         ) in
-        error_at_keytrace ~keytrace:children_keytrace
+        error_at_keytrace ~keytrace:child_keytrace
           (Printf.sprintf
             ("Unknown child type '%s'; "^^
             "valid child types for a node of kind '%s' are: %s")
@@ -418,9 +419,10 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
       | Some _ -> Ok (ChildType child_name)
     in
     let children_patterns =
-      List.map children ~f:(fun (child_name, pattern_json) ->
-        get_child_type child_name >>= fun child_name ->
-        compile_pattern ~json:pattern_json ~keytrace:children_keytrace
+      List.mapi children ~f:(fun index (child_name, pattern_json) ->
+        let child_keytrace = (string_of_int index) :: children_keytrace in
+        get_child_type child_keytrace child_name >>= fun child_name ->
+        compile_pattern ~json:pattern_json ~keytrace:child_keytrace
         >>| fun pattern ->
         (child_name, pattern)
       )

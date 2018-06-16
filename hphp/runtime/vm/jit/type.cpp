@@ -162,7 +162,7 @@ static std::string show(Ptr ptr) {
   return folly::sformat("{{{}}}", folly::join('|', parts));
 }
 
-static const jit::hash_map<Type, const char*> s_typeNames{
+static const jit::fast_map<Type, const char*> s_typeNames{
 #define IRT(x, ...) {T##x, #x},
 #define IRTP IRT
   IR_TYPES

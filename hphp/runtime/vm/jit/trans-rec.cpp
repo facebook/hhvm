@@ -94,7 +94,7 @@ void TransRec::optimizeForMemory() {
 
 TransRec::SavedAnnotation
 TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
-  static jit::hash_set<std::string> fileWritten;
+  static jit::fast_set<std::string> fileWritten;
   SavedAnnotation saved = {
     folly::sformat("{}/tc_annotations.txt{}",
                    RuntimeOption::EvalDumpTCPath,

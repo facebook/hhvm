@@ -63,7 +63,7 @@ private:
   char buffer[buffer_size];
   const std::string& fileName;
   // keep track of things that have already been serialized.
-  jit::hash_set<const void*> serializedStatics;
+  jit::fast_set<const void*> serializedStatics;
 };
 
 struct ProfDataDeserializer {
@@ -128,7 +128,7 @@ struct ProfDataDeserializer {
   EntMap<Func*>        funcMap;
   EntMap<Class*>       classMap;
   EntMap<const RepoAuthType::Array*> ratMap;
-  jit::hash_map<uint32_t, uint32_t> fidMap;
+  jit::fast_map<uint32_t, uint32_t> fidMap;
 };
 
 template<class T>

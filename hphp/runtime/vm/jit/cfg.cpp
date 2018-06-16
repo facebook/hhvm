@@ -138,8 +138,8 @@ bool splitCriticalEdges(IRUnit& unit) {
   if (modified) reflowTypes(unit);
   auto const startBlocks = unit.numBlocks();
 
-  jit::hash_set<Block*> newCatches;
-  jit::hash_set<Block*> oldCatches;
+  jit::fast_set<Block*> newCatches;
+  jit::fast_set<Block*> oldCatches;
 
   // Try to split outgoing edges of each reachable block.  This is safe in
   // a postorder walk since we visit blocks after visiting successors.

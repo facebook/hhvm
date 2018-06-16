@@ -64,7 +64,7 @@ struct TranslateRetryContext {
   ProfSrcKeySet toInterp;
 
   // Regions to not inline
-  jit::hash_set<ProfSrcKey, ProfSrcKey::Hasher> inlineBlacklist;
+  jit::fast_set<ProfSrcKey, ProfSrcKey::Hasher> inlineBlacklist;
 };
 
 /*

@@ -99,7 +99,7 @@ private:
   };
 
 private:
-  jit::hash_map<IRInstruction*,SSATmp*,HashOp,EqualsOp> m_map;
+  jit::fast_map<IRInstruction*,SSATmp*,HashOp,EqualsOp> m_map;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

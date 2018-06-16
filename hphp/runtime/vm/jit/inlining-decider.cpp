@@ -330,7 +330,7 @@ struct InlineRegionKey {
   TinyVector<Type, 4> argTypes;
 };
 
-using InlineCostCache = jit::hash_map<
+using InlineCostCache = jit::fast_map<
   InlineRegionKey,
   unsigned,
   InlineRegionKey::Hash,

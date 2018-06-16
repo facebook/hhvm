@@ -183,9 +183,9 @@ namespace {
 TRACE_SET_MOD(pdce_inline);
 
 using InstructionList = jit::vector<IRInstruction*>;
-using InstructionSet = jit::hash_set<IRInstruction*>;
-using FPUseMap = jit::hash_map<SSATmp*, InstructionSet>;
-using FPMap = jit::hash_map<Block*, SSATmp*>;
+using InstructionSet = jit::fast_set<IRInstruction*>;
+using FPUseMap = jit::fast_map<SSATmp*, InstructionSet>;
+using FPMap = jit::fast_map<Block*, SSATmp*>;
 
 struct InlineAnalysis {
   IRUnit* unit;
@@ -204,7 +204,7 @@ struct InlineAnalysis {
    * Map fp -> set, where all blocks in set exit the unit while still within the
    * the inlined region for fp.
    */
-  jit::hash_map<SSATmp*, BlockSet> exitBlocks;
+  jit::fast_map<SSATmp*, BlockSet> exitBlocks;
 };
 
 struct OptimizeContext {
@@ -284,7 +284,7 @@ InlineAnalysis analyze(IRUnit& unit) {
 
   // Exit blocks are all associated with FPs that are defined on the main trace
   // as part of a DefInlineFP/InlineReturn pair (mainFPs)
-  jit::hash_set<SSATmp*> mainFPs;
+  jit::fast_set<SSATmp*> mainFPs;
 
   auto addFPUse = [&] (IRInstruction& inst, SSATmp* use) {
     auto it = ia.fpUses.find(use);

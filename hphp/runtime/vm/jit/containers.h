@@ -108,9 +108,6 @@ using hash_map = folly::F14NodeMap<K,V,H,C>;
 template<class T, class H=std::hash<T>, class C=std::equal_to<T>>
 using hash_set = folly::F14NodeSet<T,H,C>;
 
-template<class T, class C = std::less<T>>
-using set = std::set<T, C>;
-
 template<class T>
 using unique_ptr = std::unique_ptr<T>;
 

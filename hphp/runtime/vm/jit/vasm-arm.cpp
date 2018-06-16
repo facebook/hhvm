@@ -438,7 +438,7 @@ static CodeAddress toReal(Venv& env, CodeAddress a) {
 
 void Vgen::handleLiterals(Venv& env) {
   decltype(env.meta.literalsToPool) notEmitted;
-  jit::hash_map<CodeBlock*, CodeAddress> headers;
+  jit::fast_map<CodeBlock*, CodeAddress> headers;
   for (auto const& pl : env.meta.literalsToPool) {
     auto const cb = getBlock(env, pl.patchAddress);
     if (!cb) {

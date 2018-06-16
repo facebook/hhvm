@@ -122,7 +122,7 @@ private:
     // kMinSwitchPercent % of total profiling hits.
     uint32_t includedCases = 0;
     uint32_t includedHits = 0;
-    jit::hash_set<SrcKey, SrcKey::Hasher> allowedSks;
+    jit::fast_set<SrcKey, SrcKey::Hasher> allowedSks;
     for (auto const& item : data) {
       // We always have bounds checks for the default, so it doesn't count
       // against the case limit.

@@ -84,7 +84,7 @@ struct CGMeta {
    * We want to collapse emitting literals multiple times.  This map allows us
    * to find the addresses of already emitted literals.
    */
-  jit::hash_map<uint64_t, const uint64_t*> literalAddrs;
+  jit::fast_map<uint64_t, const uint64_t*> literalAddrs;
 
   /*
    * All the alignment constraints on each code address.

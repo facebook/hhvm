@@ -399,7 +399,7 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
     it.second->relocate(rel);
   }
 
-  jit::hash_set<Func*> visitedFuncs;
+  jit::fast_set<Func*> visitedFuncs;
   CodeSmasher s;
   for (size_t i = 0; i < num; i++) {
     auto& reloc = relocs[i];

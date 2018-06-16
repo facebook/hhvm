@@ -181,7 +181,7 @@ void region_prune_arcs(RegionDesc& region, std::vector<Type>* input) {
   auto const sortedBlocks = region.blocks();
 
   // Maps region block ids to their RPO ids.
-  auto blockToRPO = jit::hash_map<RegionDesc::BlockId,uint32_t>{};
+  auto blockToRPO = jit::fast_map<RegionDesc::BlockId,uint32_t>{};
 
   auto blockInfos = std::vector<BlockInfo>(sortedBlocks.size());
   auto workQ = dataflow_worklist<uint32_t>(sortedBlocks.size());

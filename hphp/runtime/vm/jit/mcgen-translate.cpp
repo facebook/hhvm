@@ -396,7 +396,7 @@ void retranslateAll() {
 
   // 4) Relocate the machine code into code.hot in the desired order
 
-  jit::hash_set<hfsort::TargetId> seen;
+  jit::fast_set<hfsort::TargetId> seen;
   std::vector<tc::FuncMetaInfo> infos;
   infos.reserve(ntargets);
 

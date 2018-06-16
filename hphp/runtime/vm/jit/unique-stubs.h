@@ -339,7 +339,7 @@ struct UniqueStubs {
    * @reached:  jmp from TC
    * @context:  func body
    */
-  jit::hash_map<Op, TCA> interpOneCFHelpers;
+  jit::fast_map<Op, TCA> interpOneCFHelpers;
 
 
   /////////////////////////////////////////////////////////////////////////////

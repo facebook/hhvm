@@ -676,7 +676,7 @@ private:
    * Lists of profiling translations for each Func, and a lock to protect it.
    */
   mutable folly::SharedMutex m_funcProfTransLock;
-  jit::hash_map<FuncId, TransIDVec> m_funcProfTrans;
+  jit::fast_map<FuncId, TransIDVec> m_funcProfTrans;
 
   /*
    * Map from jump addresses to the ID of the translation containing them.
@@ -687,11 +687,11 @@ private:
    * Cache for Func -> block end offsets. Values in this map cannot be modified
    * after insertion so no locking is necessary for lookups.
    */
-  folly::AtomicHashMap<FuncId, const jit::hash_set<Offset>>
+  folly::AtomicHashMap<FuncId, const jit::fast_set<Offset>>
     m_blockEndOffsets;
 
   mutable folly::SharedMutex m_targetProfilesLock;
-  jit::hash_map<TransID, std::vector<TargetProfileInfo>> m_targetProfiles;
+  jit::fast_map<TransID, std::vector<TargetProfileInfo>> m_targetProfiles;
 
   bool m_wasDeserialized{false};
 };

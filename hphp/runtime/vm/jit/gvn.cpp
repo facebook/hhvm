@@ -672,7 +672,7 @@ void insertIncRefs(PrcEnv& env) {
   }
 }
 
-using ActionMap = jit::hash_map<SSATmp*, std::vector<SSATmp*>>;
+using ActionMap = jit::fast_map<SSATmp*, std::vector<SSATmp*>>;
 
 void tryReplaceInstruction(
   IRUnit& unit,

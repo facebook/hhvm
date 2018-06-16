@@ -35,7 +35,7 @@ namespace {
 
 SharedMutex s_mutex;
 
-jit::hash_map<std::string,StringTag> s_string_to_tag;
+jit::fast_map<std::string,StringTag> s_string_to_tag;
 std::vector<const char*> s_tag_to_string;
 
 }

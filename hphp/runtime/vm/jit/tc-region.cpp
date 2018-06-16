@@ -531,14 +531,14 @@ void smashOptCalls(TransMetaInfo& transInfo,
                    const PrologueTCAMap& prologueTCAs) {
   assertx(!transInfo.loc.empty());
 
-  jit::hash_map<TCA,PrologueID> newSmashableCallData;
-
-  for (auto& pair : transInfo.meta.smashableCallData) {
+  auto const oldSmashableCallData = std::move(transInfo.meta.smashableCallData);
+  for (auto& pair : oldSmashableCallData) {
     TCA call = pair.first;
     const PrologueID& pid = pair.second;
     auto it = prologueTCAs.find(pid);
     if (it == prologueTCAs.end()) {
-      newSmashableCallData.emplace(pair);
+      // insert non-smashed call back into transInfo.meta.smashableCallData
+      transInfo.meta.smashableCallData.emplace(pair);
       continue;
     }
 
@@ -554,9 +554,6 @@ void smashOptCalls(TransMetaInfo& transInfo,
 
     transInfo.meta.smashableLocations.erase(call);
   }
-
-  // Remove the calls that were smashed from transInfo.meta.smashableCallData.
-  transInfo.meta.smashableCallData.swap(newSmashableCallData);
 }
 
 /*

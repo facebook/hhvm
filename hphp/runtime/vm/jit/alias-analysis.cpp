@@ -347,8 +347,8 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
    * object property offsets, and for arrays based only on index.  Everything
    * colliding in that regard is assumed to possibly alias.
    */
-  auto conflict_prop_offset = jit::hash_map<uint32_t,ALocBits>{};
-  auto conflict_array_index = jit::hash_map<int64_t,ALocBits>{};
+  auto conflict_prop_offset = jit::fast_map<uint32_t,ALocBits>{};
+  auto conflict_array_index = jit::fast_map<int64_t,ALocBits>{};
 
   visit_locations(blocks, [&] (AliasClass acls) {
     if (auto const prop = acls.is_prop()) {

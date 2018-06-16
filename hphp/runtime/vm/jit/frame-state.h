@@ -253,7 +253,7 @@ struct FrameState {
    * point. Used to preserve predictions for values that move between different
    * slots.
    */
-  jit::hash_map<SSATmp*, Type> predictedTypes;
+  jit::fast_map<SSATmp*, Type> predictedTypes;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

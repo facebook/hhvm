@@ -139,7 +139,7 @@ bool checkBlock(Block* b) {
 bool DEBUG_ONLY checkInitCtxInvariants(const IRUnit& unit) {
   auto const blocks = rpoSortCfg(unit);
 
-  jit::hash_map<SSATmp*, Block*> init_ctx_blocks;
+  jit::fast_map<SSATmp*, Block*> init_ctx_blocks;
 
   for (auto& blk : blocks) {
     for (auto& inst : blk->instrs()) {

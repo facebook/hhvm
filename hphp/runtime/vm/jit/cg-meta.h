@@ -133,7 +133,7 @@ struct CGMeta {
    * Extra data kept for smashable calls.  Used to pre-smash calls before the
    * code is published.
    */
-  jit::hash_map<TCA,PrologueID> smashableCallData;
+  jit::fast_map<TCA,PrologueID> smashableCallData;
 
   /*
    * Extra data kept for smashable jumps/jccs.  Used to pre-smash jumps/jccs
@@ -144,7 +144,7 @@ struct CGMeta {
     SrcKey   sk;
     JumpKind kind;
   };
-  jit::hash_map<TCA,JumpData> smashableJumpData;
+  jit::fast_map<TCA,JumpData> smashableJumpData;
 
   /*
    * Debug-only map from bytecode to machine code address.

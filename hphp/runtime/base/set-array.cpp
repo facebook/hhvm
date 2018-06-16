@@ -283,6 +283,7 @@ ArrayData* SetArray::AddToSet(ArrayData* ad, StringData* s, bool copy) {
 //////////////////////////////////////////////////////////////////////
 
 void SetArray::Release(ArrayData* in) {
+  in->fixCountForRelease();
   assertx(in->isRefCounted());
   assertx(in->hasExactlyOneRef());
   auto const ad = asSet(in);

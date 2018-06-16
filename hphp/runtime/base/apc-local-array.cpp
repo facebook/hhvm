@@ -95,6 +95,7 @@ tv_rval APCLocalArray::GetValueRef(const ArrayData* adIn,
 }
 
 void APCLocalArray::Release(ArrayData* ad) {
+  ad->fixCountForRelease();
   assertx(ad->hasExactlyOneRef());
   auto const a = asApcArray(ad);
   auto size = a->heapSize();

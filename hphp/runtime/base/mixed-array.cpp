@@ -490,6 +490,7 @@ ArrayData* MixedArray::MakeDArrayFromAPC(const APCArray* apc) {
 
 NEVER_INLINE
 void MixedArray::Release(ArrayData* in) {
+  in->fixCountForRelease();
   assertx(in->isRefCounted());
   assertx(in->hasExactlyOneRef());
   auto const ad = asMixed(in);
@@ -575,18 +576,9 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
  *   m_size <= m_used; m_used <= capacity()
  *   last element cannot be a tombstone
  *   m_pos and all external iterators can't be on a tombstone
- *
- * kMixedKind:
  *   m_nextKI >= highest actual int key
  *   Elm.data.m_type maybe kInvalidDataType (tombstone)
  *   hash[] maybe Tombstone
- *
- * kPackedKind:
- *   m_size == m_used
- *   m_nextKI = uninitialized
- *   Elm.skey uninitialized
- *   Elm.hash uninitialized
- *   no kInvalidDataType tombstones
  */
 bool MixedArray::checkInvariants() const {
   static_assert(ssize_t(Empty) == ssize_t(-1), "");

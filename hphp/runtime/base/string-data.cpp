@@ -384,6 +384,7 @@ void StringData::releaseProxy() {
 }
 
 void StringData::release() noexcept {
+  fixCountForRelease();
   assertx(isRefCounted());
   assertx(checkSane());
   if (UNLIKELY(!isFlat())) {

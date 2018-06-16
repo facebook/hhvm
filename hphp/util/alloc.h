@@ -96,6 +96,16 @@ constexpr bool use_jemalloc =
 #endif
   ;
 
+// When this is true, all static/uncounted strings/arrays have addresses lower
+// than kUncountedMaxAddr, and all counted HeapObjects have higher addresses.
+constexpr bool use_addr_to_check_counted =
+#if USE_JEMALLOC_EXTENT_HOOKS && defined(USE_ADDR_CHECK_COUNTED)
+  true
+#else
+  false
+#endif
+  ;
+
 // ASAN modifies the generated code in ways that cause abnormally high C++
 // stack usage.
 constexpr size_t kStackSizeMinimum =
@@ -112,6 +122,21 @@ struct OutOfMemoryException : Exception {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+// Address ranges for the managed arenas.  Low arena is in [1G, 4G), and high
+// arena in [4G, kUncountedMaxAddr) at most.  LOW_PTR builds won't work if low
+// arena overflows.  High arena overflow would result in a crash, so we size it
+// large enough to make sure we run out of memory before it overflows.  These
+// constants are only meaningful when use_addr_to_check_counted is true (which
+// currently depends on USE_JEMALLOC_EXTENT_HOOKS).  We make them available for
+// all modes to avoid having ifdefs everywhere.
+constexpr unsigned kUncountedMaxShift = 40;
+constexpr uintptr_t kLowArenaMinAddr = 1ull << 30;
+constexpr uintptr_t kLowArenaMaxAddr = 1ull << 32;
+constexpr uintptr_t kUncountedMaxAddr = 1ull << kUncountedMaxShift;
+constexpr uintptr_t kHighArenaMaxAddr = kUncountedMaxAddr;
+constexpr size_t kLowArenaMaxCap = 3ull << 30;
+constexpr size_t kHighArenaMaxCap = kHighArenaMaxAddr - kLowArenaMaxAddr;
 
 #ifdef USE_JEMALLOC
 
@@ -150,16 +175,6 @@ template<typename T> inline T* GetByArenaId(unsigned id) {
   }
   return nullptr;
 }
-
-// Address ranges for the managed arenas.  Low arena is in [1G, 4G), and high
-// arena in [4G, 128G) at most.  Both grows down and can be smaller.  But things
-// won't work well if either overflows.
-constexpr uintptr_t kLowArenaMinAddr = 1ull << 30;
-constexpr uintptr_t kLowArenaMaxAddr = 4ull << 30;
-constexpr uintptr_t kUncountedMaxAddr = 128ull << 30;
-constexpr uintptr_t kHighArenaMaxAddr = kUncountedMaxAddr;
-constexpr size_t kLowArenaMaxCap = kLowArenaMaxAddr - kLowArenaMinAddr;
-constexpr size_t kHighArenaMaxCap = kUncountedMaxAddr - kLowArenaMaxAddr;
 
 // Explicit per-thread tcache for the huge arenas.
 extern __thread int high_arena_tcache;

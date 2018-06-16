@@ -206,6 +206,23 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
   }
 
   auto& vtaken = unlikelyCounted ? vcold(env) : v;
+
+  if (use_addr_to_check_counted &&
+      !one_bit_refcount && unlikelyIncrement &&
+      ty <= (TCounted | TPersistent) && ty.maybe(TPersistent)) {
+    // We know the value is a pointer to a HeapObject
+    auto const addr = loc.reg();
+    // Look at upper bits of the pointer to decide if it is counted.
+    auto const sf = v.makeReg();
+    v << shrqi{(int)kUncountedMaxShift, addr, v.makeReg(), sf};
+    unlikelyIfThen(v, vtaken, CC_NZ, sf,
+                   [&] (Vout& v) {
+                     emitIncRef(v, loc.reg(), TRAP_REASON);
+                   });
+    FTRACE(1, "irlower-inc: checking addr for incref {}\n", *inst);
+    return;
+  }
+
   ifRefCountedType(
     v, vtaken, ty, loc,
     [&] (Vout& v) {
@@ -713,6 +730,25 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
         implProf(v, ty);
       });
   } else {
+    if (use_addr_to_check_counted && profile.optimizing() &&
+        ty <= (TCounted | TPersistent) && ty.maybe(TPersistent)) {
+      // Need to check countedness, and we do it by looking at the pointer.
+      auto const data = profile.data();
+      auto const unlikelyDecrement = data.total > 0 &&
+        data.percent(data.survived() + data.destroyed()) <
+        RuntimeOption::EvalJitPGOUnlikelyDecRefDecrementPercent;
+      // if actually counted, we need to touch the cache line anyway.
+      if (unlikelyDecrement) {
+        auto sf = v.makeReg();
+        auto const addr = srcLoc(env, inst, 0).reg();
+        v << shrqi{(int)kUncountedMaxShift, addr, v.makeReg(), sf};
+        unlikelyIfThen(v, vcold(env), CC_NZ, sf,
+                       [&] (Vout& v) {
+                         impl(v, ty & TCounted);
+                       });
+        return;
+      }
+    }
     ifRefCountedType(v, v, ty, srcLoc(env, inst, 0), [&] (Vout& v) {
         impl(v, ty);
       });
@@ -782,6 +818,18 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
   emitDecRefTypeStat(v, env, inst);
 
   auto& vtaken = unlikelyCounted ? vcold(env) : v;
+
+  if (use_addr_to_check_counted && profile.optimizing() && unlikelyDecrement &&
+      ty <= (TCounted | TPersistent) && ty.maybe(TPersistent)) {
+    auto sf = v.makeReg();
+    v << shrqi{(int)kUncountedMaxShift, loc.reg(), v.makeReg(), sf};
+    unlikelyIfThen(v, vtaken, CC_NZ, sf,
+                   [&] (Vout& v) {
+                     emitDecRef(v, loc.reg(), TRAP_REASON);
+                   });
+    return;
+  }
+
   ifRefCountedType(
     v, vtaken, ty, loc,
     [&] (Vout& v) {

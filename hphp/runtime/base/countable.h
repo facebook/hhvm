@@ -18,6 +18,7 @@
 #define incl_HPHP_COUNTABLE_H_
 
 #include "hphp/runtime/base/header-kind.h"
+#include "hphp/util/alloc.h"
 #include "hphp/util/assertions.h"
 
 #include <cstdint>
@@ -71,7 +72,9 @@ struct MaybeCountable : HeapObject {
   void rawIncRefCount() const;
   void decRefCount() const;
   bool decWillRelease() const;
+  bool countedDecRefAndCheck();
   bool decReleaseCheck();
+  void fixCountForRelease();            // set count to 1 if it was 0
   bool cowCheck() const;
   /*
    * Uncounted types still record how many references there are to
@@ -166,7 +169,6 @@ ALWAYS_INLINE bool Countable::isRefCounted() const {
 }
 
 ALWAYS_INLINE bool MaybeCountable::hasMultipleRefs() const {
-  assertx(checkCount());
   if (one_bit_refcount) return m_count != OneReference;
 
   return uint32_t(m_count) > 1; // treat Static/Uncounted as large counts
@@ -274,13 +276,23 @@ ALWAYS_INLINE bool MaybeCountable::decReleaseCheck() {
   return false;
 }
 
-ALWAYS_INLINE bool Countable::decReleaseCheck() {
+ALWAYS_INLINE void MaybeCountable::fixCountForRelease() {
+  if (debug && !one_bit_refcount) {
+    if (!m_count) ++m_count;
+  }
+}
+
+ALWAYS_INLINE bool MaybeCountable::countedDecRefAndCheck() {
   assertx(!tl_sweeping);
   assertx(checkCount());
   if (noop_decref) return false;
   if (one_bit_refcount) return m_count == OneReference;
-
+  assertx(m_count > 0);
   return !(--m_count);
+}
+
+ALWAYS_INLINE bool Countable::decReleaseCheck() {
+  return countedDecRefAndCheck();
 }
 
 ALWAYS_INLINE bool MaybeCountable::isStatic() const {

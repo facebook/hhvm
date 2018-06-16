@@ -606,6 +606,7 @@ ArrayData* PackedArray::MakeVArrayFromAPC(const APCArray* apc) {
 }
 
 void PackedArray::Release(ArrayData* ad) {
+  ad->fixCountForRelease();
   assertx(checkInvariants(ad));
   assertx(ad->isRefCounted());
   assertx(ad->hasExactlyOneRef());

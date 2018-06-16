@@ -294,6 +294,31 @@ void emitIncRefWork(Vout& v, Vreg data, Vreg type, Reason reason) {
   });
 }
 
+void emitIncRefWork(Vout& v, Vloc loc, Type type, Reason reason) {
+  // If definitely not ref-counted, nothing to do
+  if (!type.maybe(TCounted)) return;
+
+  if (type <= TCounted) {
+    // Definitely ref-counted
+    emitIncRef(v, loc.reg(), reason);
+    return;
+  }
+
+  // It might be ref-counted, we need to check at runtime.
+
+  if (loc.hasReg(1)) {
+    // We don't know the type, so check it at runtime.
+    emitIncRefWork(v, loc.reg(0), loc.reg(1), reason);
+    return;
+  }
+
+  // We do know the type, but it might be persistent or counted. Check the
+  // ref-count.
+  auto const sf = emitCmpRefCount(v, 0, loc.reg());
+  auto const cc = one_bit_refcount ? CC_E : CC_GE;
+  ifThen(v, cc, sf, [&] (Vout& v) { emitIncRef(v, loc.reg(), reason); });
+}
+
 void emitDecRefWorkObj(Vout& v, Vreg obj, Reason reason) {
   auto const shouldRelease = emitCmpRefCount(v, OneReference, obj);
   ifThenElse(

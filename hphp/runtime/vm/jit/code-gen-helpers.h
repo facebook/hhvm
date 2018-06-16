@@ -145,6 +145,7 @@ Vreg emitDecRef(Vout& v, Vreg data, Reason reason);
  * emitIncRefWork performs type check and calls incRef if appropriate.
  */
 void emitIncRefWork(Vout& v, Vreg data, Vreg type, Reason reason);
+void emitIncRefWork(Vout& v, Vloc loc, Type type, Reason reason);
 
 /*
  * Check the refcount of `data'.  If it's negative (and hence, a sentinel

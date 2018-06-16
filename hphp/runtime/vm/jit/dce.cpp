@@ -696,6 +696,14 @@ bool canDCE(IRInstruction* inst) {
   case LdClsMethodCacheFunc:
   case ProfileInstanceCheck:
   case MemoSet:
+  case MemoGetStaticValue:
+  case MemoGetStaticCache:
+  case MemoGetInstanceValue:
+  case MemoGetInstanceCache:
+  case MemoSetStaticValue:
+  case MemoSetStaticCache:
+  case MemoSetInstanceValue:
+  case MemoSetInstanceCache:
   case KillClsRef:
   case KillCufIter:
   case BoxPtr:
@@ -1126,12 +1134,14 @@ void performActRecFixups(const BlockList& blocks,
         break;
 
       /*
-       * DecRef* are special: they're the only instructions that can reenter
+       * These are special: they're the only instructions that can reenter
        * but not throw. This means it's safe to elide their inlined frame, as
        * long as we adjust their markers to a depth that is guaranteed to not
        * stomp on the caller's frame if it reenters.
        */
       case DecRef:
+      case MemoSetStaticValue:
+      case MemoSetInstanceValue:
         if (inst.marker().func() != outerFunc) {
           ITRACE(3, "pushing stack depth of {} to {}\n", safeDepth, inst);
           inst.marker() = inst.marker().adjustSP(FPInvOffset{safeDepth});

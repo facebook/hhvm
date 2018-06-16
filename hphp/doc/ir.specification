@@ -2963,6 +2963,59 @@ fields of that struct for holding intermediate values.
   Uninit and will be inc-refd by the operation internally. This op can only be
   used inside a function marked as a memoize wrapper.
 
+| MemoGetStaticValue<func,T>, DParam(InitCell), NA, B
+
+  Get the memo value associated with the static function "func". If the value
+  is not present, branch. The returned value is not inc-reffed. This op can
+  only be used inside a memoize wrapper.
+
+| MemoGetStaticCache<func,keys,T>, DParam(InitCell), S(FramePtr), B
+
+  Perform a lookup on the memo cache associated with the static function
+  "func". The keys for the lookup are read from the locals on the frame pointed
+  to by S0 (which must be ints or strings). If the lookup fails, branch. The
+  returned value is not inc-reffed. This op can only be used inside a memoize
+  wrapper.
+
+| MemoGetInstanceValue<slot,func,T>, DParam(InitCell), S(Obj), B
+
+  Get the memo value at the specified memo slot on S0. If the value is not
+  present, branch. The returned value is not inc-reffed. This op can only be
+  used inside a memoize wrapper.
+
+| MemoGetInstanceCache<func,keys,T>, DParam(InitCell), S(FramePtr) S(Obj), B
+
+  Perform a lookup on the memo cache at the specified memo slot on S1. The keys
+  for the lookup are read from the locals on the frame pointed to by S0 (which
+  must be ints or strings). If the lookup fails, branch. The returned value is
+  not inc-reffed. This op can only be used inside a memoize wrapper.
+
+| MemoSetStaticValue<func>, ND, S(InitCell), NF
+
+  Set S1 as the memo value associated with the static function "func". Store
+  the value, overwriting any previous value, with appropriate ref-count
+  manipulations. This op can only be used inside a memoize wrapper.
+
+| MemoSetStaticCache<func,keys>, ND, S(FramePtr) S(InitCell), NF
+
+  Store S1 in the memo cache associated with the static function "func". The
+  keys for the lookup are read from the locals on the frame pointed to be S0
+  (which must be ints or strings). Store the value, overwriting any previous
+  value, with appropriate ref-count manipulations. This op can only be used
+  inside a memoize wrapper.
+
+| MemoSetInstanceValue<slot,func>, ND, S(Obj) S(InitCell), NF
+
+  Set S2 as the memo value at the specified memo slot on S1. Store the value,
+  overwriting any previous value, with appropriate ref-count
+  manipulations. This op can only be used inside a memoize wrapper.
+
+| MemoSetInstanceCache<slot,func,keys>, ND, S(FramePtr) S(Obj) S(InitCell), NF
+
+  Store S2 in the memo cache at the specified memo slot on S1. Store the value,
+  overwriting any previous value, with appropriate ref-count
+  manipulations. This op can only be used inside a memoize wrapper.
+
 | BindElem, ND, S(PtrToGen) S(Cell) S(BoxedCell), MElem
 
   Bind element with key S1 in base S0 to the reference S2.

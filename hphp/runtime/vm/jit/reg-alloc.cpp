@@ -72,6 +72,10 @@ bool loadsCell(Opcode op) {
   case KeysetIdx:
   case LdVecElem:
   case LdPackedElem:
+  case MemoGetStaticValue:
+  case MemoGetStaticCache:
+  case MemoGetInstanceValue:
+  case MemoGetInstanceCache:
     switch (arch()) {
     case Arch::X64: return true;
     case Arch::ARM: return true;

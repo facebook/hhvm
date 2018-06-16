@@ -34,6 +34,8 @@
 
 #include <folly/Conv.h>
 #include <folly/Optional.h>
+#include <folly/gen/Base.h>
+#include <folly/gen/String.h>
 
 #include <algorithm>
 #include <string>
@@ -1151,6 +1153,99 @@ struct MemoData : IRExtraData {
   LocalRange locals;
 };
 
+struct MemoValueStaticData : IRExtraData {
+  explicit MemoValueStaticData(const Func* func) : func{func} {}
+  std::string show() const { return func->fullName()->toCppString(); }
+  const Func* func;
+};
+
+struct MemoValueInstanceData : IRExtraData {
+  explicit MemoValueInstanceData(Slot slot, const Func* func)
+    : slot{slot}
+    , func{func} {}
+  std::string show() const {
+    return folly::sformat("{},{}", slot, func->fullName());
+  }
+  Slot slot;
+  const Func* func;
+};
+
+struct MemoCacheStaticData : IRExtraData {
+  MemoCacheStaticData(const Func* func, LocalRange keys, const bool* types)
+    : func{func}
+    , keys{keys}
+    , types{types} {}
+
+  MemoCacheStaticData* clone(Arena& arena) const {
+    auto p = new (arena) MemoCacheStaticData(func, keys, types);
+    auto tmp = new (arena) bool[keys.count];
+    std::copy(types, types + keys.count, tmp);
+    p->types = tmp;
+    return p;
+  }
+
+  std::string show() const {
+    auto ret = folly::sformat("{},{}", func->fullName(), HPHP::show(keys));
+    if (keys.count > 0) {
+      ret += ",<";
+      for (auto i = 0; i < keys.count; ++i) {
+        if (i > 0) ret += ",";
+        ret += folly::sformat("{}", types[i] ? "string" : "int");
+      }
+      ret += ">";
+    }
+    return ret;
+  }
+
+  const Func* func;
+  LocalRange keys;
+  const bool* types;
+};
+
+struct MemoCacheInstanceData : IRExtraData {
+  MemoCacheInstanceData(Slot slot,
+                        LocalRange keys,
+                        const bool* types,
+                        const Func* func,
+                        bool shared)
+    : slot{slot}
+    , keys{keys}
+    , types{types}
+    , func{func}
+    , shared{shared} {}
+
+  MemoCacheInstanceData* clone(Arena& arena) const {
+    auto p =
+      new (arena) MemoCacheInstanceData(slot, keys, types, func, shared);
+    auto tmp = new (arena) bool[keys.count];
+    std::copy(types, types + keys.count, tmp);
+    p->types = tmp;
+    return p;
+  }
+
+  std::string show() const {
+    return folly::sformat(
+      "{},{},{},<{}>,{}",
+      slot,
+      func->fullName(),
+      HPHP::show(keys),
+      [&]{
+        using namespace folly::gen;
+        return range<uint32_t>(0, keys.count)
+          | map([this] (uint32_t i) { return types[i] ? "string" : "int"; })
+          | unsplit<std::string>(",");
+      }(),
+      shared ? "shared" : "non-shared"
+    );
+  }
+
+  Slot slot;
+  LocalRange keys;
+  const bool* types;
+  const Func* func;
+  bool shared;
+};
+
 struct MOpModeData : IRExtraData {
   explicit MOpModeData(MOpMode mode) : mode{mode} {}
 
@@ -1572,6 +1667,14 @@ X(CGetProp,                     MOpModeData);
 X(CGetElem,                     MOpModeData);
 X(ArrayGet,                     MOpModeData);
 X(MemoGet,                      MemoData);
+X(MemoGetStaticValue,           MemoValueStaticData);
+X(MemoSetStaticValue,           MemoValueStaticData);
+X(MemoGetStaticCache,           MemoCacheStaticData);
+X(MemoSetStaticCache,           MemoCacheStaticData);
+X(MemoGetInstanceValue,         MemoValueInstanceData);
+X(MemoSetInstanceValue,         MemoValueInstanceData);
+X(MemoGetInstanceCache,         MemoCacheInstanceData);
+X(MemoSetInstanceCache,         MemoCacheInstanceData);
 X(MemoSet,                      MemoData);
 X(SetOpProp,                    SetOpData);
 X(SetOpCell,                    SetOpData);

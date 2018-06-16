@@ -831,7 +831,15 @@ bool opcodeMayRaise(Opcode opc) {
   case LtStrInt:
   case MapIsset:
   case MemoGet:
+  case MemoGetInstanceCache:
+  case MemoGetInstanceValue:
+  case MemoGetStaticCache:
+  case MemoGetStaticValue:
   case MemoSet:
+  case MemoSetInstanceCache:
+  case MemoSetInstanceValue:
+  case MemoSetStaticCache:
+  case MemoSetStaticValue:
   case MethodExists:
   case MIterFree:
   case MIterNext:

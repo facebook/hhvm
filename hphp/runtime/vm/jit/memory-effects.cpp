@@ -347,7 +347,11 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
             LIterNextK,
             IterFree,
             GenericRetDecRefs,
-            MemoSet);
+            MemoSet,
+            MemoSetStaticCache,
+            MemoSetInstanceCache,
+            MemoSetStaticValue,
+            MemoSetInstanceValue);
   always_assert_flog(
     may_reenter_is_ok,
     "instruction {} claimed may_reenter, but it isn't allowed to say that",
@@ -1191,6 +1195,61 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto const base = pointee(inst.src(1));
     return may_load_store(AElemAny | frame | base, AEmpty);
   }
+
+  case MemoGetStaticValue:
+  case MemoGetInstanceValue:
+    // Only reads the memo value (which isn't modeled here).
+    return may_load_store(AEmpty, AEmpty);
+
+  case MemoSetStaticValue:
+  case MemoSetInstanceValue:
+    // Writes to the memo value (which isn't modeled), but can re-enter to run
+    // a destructor.
+    return may_reenter(inst, may_load_store(AEmpty, AEmpty));
+
+  case MemoGetStaticCache:
+  case MemoSetStaticCache: {
+    // Reads some (non-zero) set of locals for keys, and reads/writes from the
+    // memo cache (which isn't modeled). The set can re-enter to run a
+    // destructor.
+    auto const extra = inst.extra<MemoCacheStaticData>();
+    auto const frame = AFrame {
+      inst.src(0),
+      AliasIdSet{
+        AliasIdSet::IdRange{
+          extra->keys.first,
+          extra->keys.first + extra->keys.count
+        }
+      }
+    };
+    auto effects = may_load_store(frame, AEmpty);
+    if (inst.op() == MemoSetStaticCache) effects = may_reenter(inst, effects);
+    return effects;
+  }
+
+  case MemoGetInstanceCache:
+  case MemoSetInstanceCache: {
+    // Reads some set of locals for keys, and reads/writes from the memo cache
+    // (which isn't modeled). The set can re-enter to run a destructor.
+    auto const extra = inst.extra<MemoCacheInstanceData>();
+    auto const frame = [&]() -> AliasClass {
+      // Unlike MemoGet/SetStaticCache, we can have an empty key range here.
+      if (extra->keys.count == 0) return AEmpty;
+      return AFrame {
+        inst.src(0),
+        AliasIdSet{
+          AliasIdSet::IdRange{
+            extra->keys.first,
+            extra->keys.first + extra->keys.count
+          }
+        }
+      };
+    }();
+    auto effects = may_load_store(frame, AEmpty);
+    if (inst.op() == MemoSetInstanceCache) effects = may_reenter(inst, effects);
+    return effects;
+  }
+
   case MemoSet: {
     auto const extra = inst.extra<MemoSet>();
     auto const frame = AFrame {

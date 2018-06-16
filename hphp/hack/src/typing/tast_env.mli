@@ -72,11 +72,21 @@ val get_class_ids : env -> Tast.ty -> string list
     identifiers of all classes the type may represent. *)
 
 val fold_unresolved : env -> Tast.ty -> env * Tast.ty
-(** Try to unify all the types in an intersection. *)
+(** Try to unify all the types in an unresolved union. *)
+
+val flatten_unresolved : env -> Tast.ty -> Tast.ty list -> env * Tast.ty list
+(** Flatten nested unresolved unions, turning ((A | B) | C) to (A | B | C). *)
 
 val push_option_out : env -> Tast.ty -> env * Tast.ty
 (** Strip away all Toptions that we possibly can in a type, expanding type
     variables along the way, turning ?T -> T. *)
+
+val get_concrete_supertypes : env -> Tast.ty -> env * Tast.ty list
+(** Get the "as" constraints from an abstract type or generic parameter, or
+    return the type itself if there is no "as" constraint. In the case of a
+    generic parameter whose "as" constraint is another generic parameter, repeat
+    the process until a type is reached that is not a generic parameter. Don't
+    loop on cycles. (For example, function foo<Tu as Tv, Tv as Tu>(...)) *)
 
 val is_visible :
   env ->
@@ -128,6 +138,9 @@ val is_fresh_generic_parameter: string -> bool
 (** Return whether the type parameter with the given name was implicity created
     as part of an `instamceof`, `is`, or `as` expression (instead of being
     explicitly declared in code by the user). *)
+
+val subtype: env -> Tast.ty -> Tast.ty -> env * bool
+(** Return {true} when the first type is a subtype of the second type. *)
 
 val referenced_typeconsts :
   env -> Aast.hint -> Aast.sid list -> (string * string * Pos.t) list

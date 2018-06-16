@@ -63,7 +63,9 @@ let fully_expand = Typing_expand.fully_expand
 
 let get_class_ids = Typing_utils.get_class_ids
 let fold_unresolved = Typing_utils.fold_unresolved
+let flatten_unresolved = Typing_utils.flatten_unresolved
 let push_option_out = Typing_utils.push_option_out
+let get_concrete_supertypes = Typing_utils.get_concrete_supertypes
 
 let is_visible = Typing_visibility.is_visible
 
@@ -78,6 +80,11 @@ let localize_with_dty_validator = Typing_phase.localize_with_dty_validator
 let get_upper_bounds = Typing_env.get_upper_bounds
 
 let is_fresh_generic_parameter = Typing_env.is_fresh_generic_parameter
+
+let subtype env ty_sub ty_super =
+  Errors.try_
+    (fun () -> Typing_subtype.sub_type env ty_sub ty_super, true)
+    (fun _ -> env, false)
 
 let referenced_typeconsts env root ids =
   let root = hint_to_ty env root in

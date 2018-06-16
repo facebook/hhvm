@@ -68,6 +68,9 @@ type pattern =
       children: (child_type * pattern) list;
     }
 
+  (* Match any missing node. *)
+  | MissingNodePattern
+
   (**
    * Return the given node in the result list, assuming that the pattern overall
    * matches. (This pattern by itself always matches; it's often used with
@@ -201,6 +204,11 @@ let rec search_node
       (child_node, pattern)
     ) in
     search_and ~env ~patterns
+
+  | MissingNodePattern ->
+    if Syntax.kind node = SyntaxKind.Missing
+    then (env, empty_result)
+    else (env, None)
 
   | MatchPattern { match_name } ->
     let result = {
@@ -351,6 +359,8 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
     match pattern_type with
     | "node_pattern" ->
       compile_node_pattern ~json ~keytrace
+    | "missing_node_pattern" ->
+      compile_missing_node_pattern ~json ~keytrace
     | "match_pattern" ->
       compile_match_pattern ~json ~keytrace
     | "descendant_pattern" ->
@@ -432,6 +442,9 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
       kind = NodeKind kind;
       children;
     }
+
+  and compile_missing_node_pattern ~json:_json ~keytrace:_keytrace =
+    Ok MissingNodePattern
 
   and compile_match_pattern ~json ~keytrace =
     get_string "match_name" (json, keytrace)

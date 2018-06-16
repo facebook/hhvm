@@ -3174,14 +3174,21 @@ let legacy_compliant_parse_defensively fn quick_mode parser_options content =
     let env = make_env ~fail_open:false ~quick_mode ~parser_options fn in
     legacy @@ from_text env source
   end with e ->
+    (* If we fail to lower, try to just make a source text and get the file mode *)
+    (* If even THAT fails, we just have to give up and return an empty php file*)
+    let mode =
+    try
+      let source = Full_fidelity_source_text.make fn content in
+      snd @@ Full_fidelity_parser.get_language_and_mode source
+    with _ -> None in
     let err = Printexc.to_string e in
     let fn = Relative_path.suffix fn in
     let () =
-      !Utils.log (Printf.sprintf "!! FAILED FOR %s\n  - error: %s\n" fn err)
+      Hh_logger.log "!! FAILED FOR %s\n  - error: %s\n" fn err
     in
-    { Parser_hack.file_mode = None
+    { Parser_hack.file_mode = mode
     ; Parser_hack.comments = []
     ; Parser_hack.ast = []
     ; Parser_hack.content = content
-    ; Parser_hack.is_hh_file = false
+    ; Parser_hack.is_hh_file = mode <> None
     }

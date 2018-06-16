@@ -29,6 +29,12 @@ bool HHVM_FUNCTION(could_include, const String& file);
 TypedValue HHVM_FUNCTION(serialize_memoize_param, TypedValue param);
 void HHVM_FUNCTION(set_frame_metadata, const Variant& metadata);
 
+TypedValue serialize_memoize_param_arr(ArrayData*);
+TypedValue serialize_memoize_param_obj(ObjectData*);
+TypedValue serialize_memoize_param_col(ObjectData*);
+TypedValue serialize_memoize_param_str(StringData*);
+TypedValue serialize_memoize_param_dbl(double);
+
 extern const StaticString
   s_nullMemoKey,
   s_trueMemoKey,

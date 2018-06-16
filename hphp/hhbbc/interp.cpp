@@ -1067,6 +1067,23 @@ void in(ISS& env, const bc::CastDArray&)  {
   castImpl(env, TDArr, tvCastToDArrayInPlace);
 }
 
+void in(ISS& env, const bc::DblAsBits&) {
+  nothrow(env);
+  constprop(env);
+
+  auto const ty = popC(env);
+  if (!ty.couldBe(TDbl)) return push(env, ival(0));
+
+  if (auto val = tv(ty)) {
+    assertx(isDoubleType(val->m_type));
+    val->m_type = KindOfInt64;
+    push(env, from_cell(*val));
+    return;
+  }
+
+  push(env, TInt);
+}
+
 void in(ISS& env, const bc::Print& /*op*/) {
   popC(env);
   push(env, ival(1));
@@ -1126,6 +1143,29 @@ void jmpImpl(ISS& env, const JmpOp& op) {
 
 void in(ISS& env, const bc::JmpNZ& op) { jmpImpl<true>(env, op); }
 void in(ISS& env, const bc::JmpZ& op)  { jmpImpl<false>(env, op); }
+
+void in(ISS& env, const bc::Select& op) {
+  auto const cond = topC(env);
+  auto const t = topC(env, 1);
+  auto const f = topC(env, 2);
+
+  nothrow(env);
+  constprop(env);
+
+  switch (emptiness(cond)) {
+    case Emptiness::Maybe:
+      discard(env, 3);
+      push(env, union_of(t, f));
+      return;
+    case Emptiness::NonEmpty:
+      discard(env, 3);
+      push(env, t);
+      return;
+    case Emptiness::Empty:
+      return reduce(env, bc::PopC {}, bc::PopC {});
+  }
+  not_reached();
+}
 
 namespace {
 
@@ -1828,23 +1868,24 @@ void in(ISS& env, const bc::AKExists& /*op*/) {
 void in(ISS& env, const bc::GetMemoKeyL& op) {
   always_assert(env.ctx.func->isMemoizeWrapper);
 
-  auto const tyIMemoizeParam =
-    subObj(env.index.builtin_class(s_IMemoizeParam.get()));
+  auto const rclsIMemoizeParam = env.index.builtin_class(s_IMemoizeParam.get());
+  auto const tyIMemoizeParam = subObj(rclsIMemoizeParam);
 
   auto const inTy = locAsCell(env, op.loc1);
 
   // If the local could be uninit, we might raise a warning (as
   // usual). Converting an object to a memo key might invoke PHP code if it has
   // the IMemoizeParam interface, and if it doesn't, we'll throw.
-  if (!locCouldBeUninit(env, op.loc1) && !inTy.couldBe(TObj)) {
+  if (!locCouldBeUninit(env, op.loc1) &&
+      !inTy.couldBeAny(TObj, TArr, TVec, TDict)) {
     nothrow(env); constprop(env);
   }
 
   // If type constraints are being enforced and the local being turned into a
   // memo key is a parameter, then we can possibly using the type constraint to
-  // perform a more efficient memoization scheme. Note that this all needs to
-  // stay in sync with the interpreter and JIT.
+  // infer a more efficient memo key mode.
   using MK = MemoKeyConstraint;
+  folly::Optional<res::Class> resolvedCls;
   auto const mkc = [&] {
     if (!RuntimeOption::EvalHardTypeHints) return MK::None;
     if (op.loc1 >= env.ctx.func->params.size()) return MK::None;
@@ -1853,41 +1894,146 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       auto res = env.index.resolve_type_name(tc.typeName());
       if (res.type != AnnotType::Object) {
         tc.resolveType(res.type, res.nullable || tc.isNullable());
+      } else {
+        resolvedCls = env.index.resolve_class(env.ctx, tc.typeName());
       }
     }
     return memoKeyConstraintFromTC(tc);
   }();
 
+  // Use the type-constraint to reduce this operation to a more efficient memo
+  // mode. Some of the modes can be reduced to simple bytecode operations
+  // inline. Even with the type-constraints, we still need to check the inferred
+  // type of the local. Something may have possibly clobbered the local between
+  // the type-check and this op.
   switch (mkc) {
-    case MK::Null:
-      // Always null, so the key can always just be 0
-      always_assert(inTy.subtypeOf(TNull));
-      return push(env, ival(0));
     case MK::Int:
       // Always an int, so the key is always an identity mapping
-      always_assert(inTy.subtypeOf(TInt));
-      return reduce(env, bc::CGetL { op.loc1 });
+      if (inTy.subtypeOf(TInt)) return reduce(env, bc::CGetL { op.loc1 });
+      break;
     case MK::Bool:
       // Always a bool, so the key is the bool cast to an int
-      always_assert(inTy.subtypeOf(TBool));
-      return reduce(env, bc::CGetL { op.loc1 }, bc::CastInt {});
+      if (inTy.subtypeOf(TBool)) {
+        return reduce(env, bc::CGetL { op.loc1 }, bc::CastInt {});
+      }
+      break;
     case MK::Str:
       // Always a string, so the key is always an identity mapping
-      always_assert(inTy.subtypeOf(TStr));
-      return reduce(env, bc::CGetL { op.loc1 });
+      if (inTy.subtypeOf(TStr)) return reduce(env, bc::CGetL { op.loc1 });
+      break;
     case MK::IntOrStr:
       // Either an int or string, so the key can be an identity mapping
-      return reduce(env, bc::CGetL { op.loc1 });
+      if (inTy.subtypeOf(TArrKey)) return reduce(env, bc::CGetL { op.loc1 });
+      break;
     case MK::StrOrNull:
+      // A nullable string. The key will either be the string or the integer
+      // zero.
+      if (inTy.subtypeOf(TOptStr)) {
+        return reduce(
+          env,
+          bc::CGetL { op.loc1 },
+          bc::Int { 0 },
+          bc::IsTypeL { op.loc1, IsTypeOp::Null },
+          bc::Select {}
+        );
+      }
+      break;
     case MK::IntOrNull:
-      // A nullable string or int. For strings the key will always be 0 or the
-      // string. For ints the key will be the int or a static string. We can't
-      // reduce either without introducing control flow.
-      return push(env, union_of(TInt, TStr));
+      // A nullable int. The key will either be the integer, or the static empty
+      // string.
+      if (inTy.subtypeOf(TOptInt)) {
+        return reduce(
+          env,
+          bc::CGetL { op.loc1 },
+          bc::String { staticEmptyString() },
+          bc::IsTypeL { op.loc1, IsTypeOp::Null },
+          bc::Select {}
+        );
+      }
+      break;
     case MK::BoolOrNull:
-      // A nullable bool. The key will always be an int (null will be 2), but we
-      // can't reduce that without introducing control flow.
-      return push(env, TInt);
+      // A nullable bool. The key will either be 0, 1, or 2.
+      if (inTy.subtypeOf(TOptBool)) {
+        return reduce(
+          env,
+          bc::CGetL { op.loc1 },
+          bc::CastInt {},
+          bc::Int { 2 },
+          bc::IsTypeL { op.loc1, IsTypeOp::Null },
+          bc::Select {}
+        );
+      }
+      break;
+    case MK::Dbl:
+      // The double will be converted (losslessly) to an integer.
+      if (inTy.subtypeOf(TDbl)) {
+        return reduce(env, bc::CGetL { op.loc1 }, bc::DblAsBits {});
+      }
+      break;
+    case MK::DblOrNull:
+      // A nullable double. The key will be an integer, or the static empty
+      // string.
+      if (inTy.subtypeOf(TOptDbl)) {
+        return reduce(
+          env,
+          bc::CGetL { op.loc1 },
+          bc::DblAsBits {},
+          bc::String { staticEmptyString() },
+          bc::IsTypeL { op.loc1, IsTypeOp::Null },
+          bc::Select {}
+        );
+      }
+      break;
+    case MK::Object:
+      // An object. If the object is definitely known to implement IMemoizeParam
+      // we can simply call that method, casting the output to ensure its always
+      // a string (which is what the generic mode does). If not, it will use the
+      // generic mode, which can handle collections or classes which don't
+      // implement getInstanceKey.
+      if (resolvedCls &&
+          resolvedCls->subtypeOf(rclsIMemoizeParam) &&
+          inTy.subtypeOf(tyIMemoizeParam)) {
+        return reduce(
+          env,
+          bc::CGetL { op.loc1 },
+          bc::FPushObjMethodD {
+            0,
+            s_getInstanceKey.get(),
+            ObjMethodOp::NullThrows,
+            false
+          },
+          bc::FCall { 0 },
+          bc::UnboxR {},
+          bc::CastString {}
+        );
+      }
+      break;
+    case MK::ObjectOrNull:
+      // An object or null. We can use the null safe version of a function call
+      // when invoking getInstanceKey and then select from the result of that,
+      // or the integer 0. This might seem wasteful, but the JIT does a good job
+      // inlining away the call in the null case.
+      if (resolvedCls &&
+          resolvedCls->subtypeOf(rclsIMemoizeParam) &&
+          inTy.subtypeOf(opt(tyIMemoizeParam))) {
+        return reduce(
+          env,
+          bc::CGetL { op.loc1 },
+          bc::FPushObjMethodD {
+            0,
+            s_getInstanceKey.get(),
+            ObjMethodOp::NullSafe,
+            false
+          },
+          bc::FCall { 0 },
+          bc::UnboxR {},
+          bc::CastString {},
+          bc::Int { 0 },
+          bc::IsTypeL { op.loc1, IsTypeOp::Null },
+          bc::Select {}
+        );
+      }
+      break;
     case MK::None:
       break;
   }
@@ -1895,35 +2041,39 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   // No type constraint, or one that isn't usuable. Use the generic memoization
   // scheme which can handle any type:
 
+  if (auto const val = tv(inTy)) {
+    auto const key = eval_cell(
+      [&]{ return HHVM_FN(serialize_memoize_param)(*val); }
+    );
+    if (key) return push(env, *key);
+  }
+
   // Integer keys are always mapped to themselves
   if (inTy.subtypeOf(TInt)) return reduce(env, bc::CGetL { op.loc1 });
-
-  if (inTy.subtypeOf(tyIMemoizeParam)) {
+  if (inTy.subtypeOf(TOptInt)) {
     return reduce(
       env,
       bc::CGetL { op.loc1 },
-      bc::FPushObjMethodD {
-        0,
-        s_getInstanceKey.get(),
-        ObjMethodOp::NullThrows,
-        false
-      },
-      bc::FCall { 0 },
-      bc::UnboxR {}
+      bc::String { s_nullMemoKey.get() },
+      bc::IsTypeL { op.loc1, IsTypeOp::Null },
+      bc::Select {}
+    );
+  }
+  if (inTy.subtypeOf(TBool)) {
+    return reduce(
+      env,
+      bc::String { s_falseMemoKey.get() },
+      bc::String { s_trueMemoKey.get() },
+      bc::CGetL { op.loc1 },
+      bc::Select {}
     );
   }
 
   // A memo key can be an integer if the input might be an integer, and is a
-  // string otherwise. Booleans are always static strings.
+  // string otherwise. Booleans and nulls are always static strings.
   auto keyTy = [&]{
-    if (auto const val = tv(inTy)) {
-      auto const key = eval_cell(
-        [&]{ return HHVM_FN(serialize_memoize_param)(*val); }
-      );
-      if (key) return *key;
-    }
-    if (inTy.subtypeOf(TBool)) return TSStr;
-    if (inTy.couldBe(TInt)) return union_of(TInt, TStr);
+    if (inTy.subtypeOf(TOptBool)) return TSStr;
+    if (inTy.couldBe(TInt))       return union_of(TInt, TStr);
     return TStr;
   }();
   push(env, std::move(keyTy));

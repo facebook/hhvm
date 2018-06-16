@@ -38,7 +38,6 @@
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/collections/ext_collections.h"
-#include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 
 #include "hphp/util/abi-cxx.h"
@@ -59,7 +58,6 @@ constexpr irlower::SyncOptions SSync = irlower::SyncOptions::Sync;
 
 constexpr DestType DSSA  = DestType::SSA;
 constexpr DestType DDbl  = DestType::Dbl;
-constexpr DestType DTV   = DestType::TV;
 constexpr DestType DNone = DestType::None;
 
 template<class EDType, class MemberType>
@@ -115,7 +113,6 @@ static auto c_AsyncFunctionWaitHandle_Create_false =
  *
  * Dest
  *   DSSA  - The helper returns a single-register value
- *   DTV   - The helper returns a TypedValue in two registers
  *   DNone - The helper does not return a value
  *
  * SyncPoint
@@ -563,9 +560,6 @@ static CallMap s_callMap {
 
     /* method_exists($obj, $meth) */
     {MethodExists, methodExistsHelper, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
-
-    {GetMemoKey, HHVM_FN(serialize_memoize_param), DTV, SSync, {{TV, 0}}},
-    {GetMemoKeyScalar, HHVM_FN(serialize_memoize_param), DTV, SNone, {{TV, 0}}},
 
     /* microtime(true) */
     {GetTime, TimeStamp::CurrentSecond, DDbl, SNone, {}},

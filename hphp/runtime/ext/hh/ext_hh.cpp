@@ -182,22 +182,27 @@ void serialize_memoize_array(StringBuffer& sb, int depth, const ArrayData* ad) {
   serialize_memoize_code(sb, SER_MC_STOP);
 }
 
+ALWAYS_INLINE
+void serialize_memoize_col(StringBuffer& sb, int depth, ObjectData* obj) {
+  assertx(obj->isCollection());
+  auto const ad = collections::asArray(obj);
+  if (LIKELY(ad != nullptr)) {
+    serialize_memoize_array(sb, depth, ad);
+  } else {
+    assertx(obj->collectionType() == CollectionType::Pair);
+    auto const pair = reinterpret_cast<const c_Pair*>(obj);
+    serialize_memoize_code(sb, SER_MC_CONTAINER);
+    serialize_memoize_int64(sb, 0);
+    serialize_memoize_tv(sb, depth, pair->get(0));
+    serialize_memoize_int64(sb, 1);
+    serialize_memoize_tv(sb, depth, pair->get(1));
+    serialize_memoize_code(sb, SER_MC_STOP);
+  }
+}
+
 void serialize_memoize_obj(StringBuffer& sb, int depth, ObjectData* obj) {
   if (obj->isCollection()) {
-    const ArrayData* ad = collections::asArray(obj);
-    if (ad) {
-      serialize_memoize_array(sb, depth, ad);
-    } else {
-      assertx(obj->collectionType() == CollectionType::Pair);
-
-      auto const pair = reinterpret_cast<c_Pair*>(obj);
-      serialize_memoize_code(sb, SER_MC_CONTAINER);
-      serialize_memoize_int64(sb, 0);
-      serialize_memoize_tv(sb, depth, pair->get(0));
-      serialize_memoize_int64(sb, 1);
-      serialize_memoize_tv(sb, depth, pair->get(1));
-      serialize_memoize_code(sb, SER_MC_STOP);
-    }
+    serialize_memoize_col(sb, depth, obj);
   } else if (obj->instanceof(s_IMemoizeParam)) {
     Variant ser = obj->o_invoke_few_args(s_getInstanceKey, 0);
     serialize_memoize_code(sb, SER_MC_OBJECT);
@@ -270,28 +275,64 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
   }
 }
 
+ALWAYS_INLINE TypedValue serialize_memoize_string_top(StringData* str) {
+  if (str->empty()) {
+    return make_tv<KindOfPersistentString>(staticEmptyString());
+  } else if ((unsigned char)str->data()[0] < 0xf0) {
+    // serialize_memoize_string_data always returns a string with the first
+    // character >= 0xf0, so anything less than that can't collide. There's no
+    // worry about int-like strings because we won't perform key coercion.
+    str->incRefCount();
+    return make_tv<KindOfString>(str);
+  }
+
+  StringBuffer sb;
+  serialize_memoize_code(sb, SER_MC_STRING);
+  serialize_memoize_string_data(sb, str);
+  return make_tv<KindOfString>(sb.detach().detach());
+}
+
 } // end anonymous namespace
+
+TypedValue serialize_memoize_param_arr(ArrayData* arr) {
+  StringBuffer sb;
+  serialize_memoize_array(sb, 0, arr);
+  return tvReturn(sb.detach());
+}
+
+TypedValue serialize_memoize_param_obj(ObjectData* obj) {
+  StringBuffer sb;
+  serialize_memoize_obj(sb, 0, obj);
+  return tvReturn(sb.detach());
+}
+
+TypedValue serialize_memoize_param_col(ObjectData* obj) {
+  StringBuffer sb;
+  serialize_memoize_col(sb, 0, obj);
+  return tvReturn(sb.detach());
+}
+
+TypedValue serialize_memoize_param_str(StringData* str) {
+  return serialize_memoize_string_top(str);
+}
+
+TypedValue serialize_memoize_param_dbl(double val) {
+  StringBuffer sb;
+  serialize_memoize_code(sb, SER_MC_DOUBLE);
+  sb.append(reinterpret_cast<const char*>(&val), 8);
+  return tvReturn(sb.detach());
+}
 
 TypedValue HHVM_FUNCTION(serialize_memoize_param, TypedValue param) {
   // Memoize throws in the emitter if any function parameters are references, so
   // we can just assert that the param is cell here
-  assertx(!isRefType(param.m_type));
+  assertx(cellIsPlausible(param));
   auto const type = param.m_type;
 
   if (type == KindOfInt64) {
     return param;
   } else if (isStringType(type)) {
-    auto const str = param.m_data.pstr;
-    if (str->empty()) {
-      return make_tv<KindOfPersistentString>(staticEmptyString());
-    } else if ((unsigned char)str->data()[0] < 0xf0) {
-      // serialize_memoize_tv always returns a string with the first character
-      // >= 0xf0, so anything less than that can't collide. There's no worry
-      // about int-like strings because the key returned from this function is
-      // used in dicts (which don't perform key coercion).
-      str->incRefCount();
-      return param;
-    }
+    return serialize_memoize_string_top(param.m_data.pstr);
   } else if (type == KindOfUninit || type == KindOfNull) {
     return make_tv<KindOfPersistentString>(s_nullMemoKey.get());
   } else if (type == KindOfBoolean) {

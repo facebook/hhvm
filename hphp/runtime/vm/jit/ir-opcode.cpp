@@ -631,6 +631,7 @@ bool opcodeMayRaise(Opcode opc) {
   case DbgTrashMem:
   case DbgTrashRetVal:
   case DbgTrashStk:
+  case DblAsBits:
   case DebugBacktrace:
   case DebugBacktraceFast:
   case DecRef:

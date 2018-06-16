@@ -355,7 +355,6 @@ operator|(TypeConstraint::Flags a, TypeConstraint::Flags b) {
  * enforced. If they are not, then none of this information can be used.
  */
 enum class MemoKeyConstraint {
-  Null,
   Int,
   IntOrNull,
   Bool,
@@ -363,6 +362,10 @@ enum class MemoKeyConstraint {
   Str,
   StrOrNull,
   IntOrStr,
+  Dbl,
+  DblOrNull,
+  Object,
+  ObjectOrNull,
   None
 };
 MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint&);

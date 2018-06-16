@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -151,8 +152,55 @@ IMPL_OPCODE_CALL(PrintBool)
 IMPL_OPCODE_CALL(PrintInt)
 IMPL_OPCODE_CALL(PrintStr)
 
-IMPL_OPCODE_CALL(GetMemoKey)
-IMPL_OPCODE_CALL(GetMemoKeyScalar)
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+void getMemoKeyImpl(IRLS& env, const IRInstruction* inst, bool sync) {
+  auto const s = inst->src(0);
+
+  auto args = argGroup(env, inst);
+  if (s->isA(TArrLike) || s->isA(TObj) || s->isA(TStr) || s->isA(TDbl)) {
+    args.ssa(0, s->isA(TDbl));
+  } else {
+    args.typedValue(0);
+  }
+
+  auto const target = [&]{
+    if (s->isA(TArrLike)) return CallSpec::direct(serialize_memoize_param_arr);
+    if (s->isA(TStr))     return CallSpec::direct(serialize_memoize_param_str);
+    if (s->isA(TDbl))     return CallSpec::direct(serialize_memoize_param_dbl);
+    if (s->isA(TObj)) {
+      auto const ty = s->type();
+      if (ty.clsSpec().cls() && ty.clsSpec().cls()->isCollectionClass()) {
+        return CallSpec::direct(serialize_memoize_param_col);
+      }
+      return CallSpec::direct(serialize_memoize_param_obj);
+    }
+    return CallSpec::direct(HHVM_FN(serialize_memoize_param));
+  }();
+
+  cgCallHelper(
+    vmain(env),
+    env,
+    target,
+    callDestTV(env, inst),
+    sync ? SyncOptions::Sync :  SyncOptions::None,
+    args
+  );
+}
+
+}
+
+void cgGetMemoKey(IRLS& env, const IRInstruction* inst) {
+  getMemoKeyImpl(env, inst, true);
+}
+
+void cgGetMemoKeyScalar(IRLS& env, const IRInstruction* inst) {
+  getMemoKeyImpl(env, inst, false);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 void cgRBTraceEntry(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<RBTraceEntry>();

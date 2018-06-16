@@ -896,7 +896,6 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
       auto const dt = tc.underlyingDataType();
       assertx(dt.hasValue());
       switch (*dt) {
-        case KindOfNull:         return MK::Null;
         case KindOfBoolean:
           return tc.isNullable() ? MK::BoolOrNull : MK::Bool;
         case KindOfInt64:
@@ -904,7 +903,10 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
         case KindOfPersistentString:
         case KindOfString:
           return tc.isNullable() ? MK::StrOrNull : MK::Str;
+        case KindOfObject:
+          return tc.isNullable() ? MK::ObjectOrNull : MK::Object;
         case KindOfDouble:
+          return tc.isNullable() ? MK::DblOrNull : MK::Dbl;
         case KindOfPersistentVec:
         case KindOfVec:
         case KindOfPersistentDict:
@@ -914,7 +916,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
         case KindOfPersistentArray:
         case KindOfArray:
         case KindOfResource:
-        case KindOfObject:       return MK::None;
+        case KindOfNull:         return MK::None;
         case KindOfUninit:
         case KindOfRef:
           always_assert_flog(false, "Unexpected DataType");

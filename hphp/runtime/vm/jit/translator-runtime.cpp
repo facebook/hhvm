@@ -207,7 +207,7 @@ RefData* boxValue(TypedValue tv) {
   return RefData::Make(tv);
 }
 
-inline int64_t reinterpretDblAsInt(double d) {
+int64_t reinterpretDblAsInt(double d) {
   union {
     int64_t intval;
     double dblval;

@@ -563,15 +563,19 @@ To string conversions:
 
 | ConvIntToStr,                 D(Str), S(Int),                          PRc
 
-| ConvObjToStr,                 D(Str), S(Obj),                       PRc
+| ConvObjToStr,                 D(Str), S(Obj),                          PRc
 
-| ConvResToStr,                 D(Str), S(Res),                       PRc
+| ConvResToStr,                 D(Str), S(Res),                          PRc
 
-| ConvCellToStr,                D(Str), S(Cell),                      PRc
+| ConvCellToStr,                D(Str), S(Cell),                         PRc
 
 
   All the above opcodes convert S0 from its current type to the destination
   type, according to the PHP semantics of such a conversion.
+
+| DblAsBits,                    D(Int), S(Dbl),                           NF
+
+  Reinterpret a double as an integer with the same bit pattern.
 
 | ConvClsToCctx, D(Cctx), S(Cls), NF
 
@@ -2167,7 +2171,7 @@ To string conversions:
 
   Given a cell, produces a string or an int that can be used as a memoize cache
   key. Valid values for the input include all basic types, arrays and
-  collections, and objects that implement IMemozieParam. Any other type will
+  collections, and objects that implement IMemoizeParam. Any other type will
   cause GetMemoKey to throw. This op can only be used within functions marked
   as memoize wrappers.
 

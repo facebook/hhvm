@@ -259,6 +259,7 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::CastKeyset:
   case Op::CastVArray:
   case Op::CastDArray:
+  case Op::DblAsBits:
   case Op::InstanceOfD:
   case Op::IsTypeStruct:
   case Op::AsTypeStruct:

@@ -530,6 +530,19 @@ void emitCastString(IRGS& env) {
   decRef(env, src);
 }
 
+//////////////////////////////////////////////////////////////////////
+
+void emitDblAsBits(IRGS& env) {
+  auto const src = popC(env);
+  if (!src->isA(TDbl)) {
+    push(env, cns(env, 0));
+    return;
+  }
+  push(env, gen(env, DblAsBits, src));
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void emitIncStat(IRGS& env, uint32_t counter, uint32_t value) {
   if (!Stats::enabled()) return;
   gen(env, IncStat, cns(env, counter), cns(env, value), cns(env, false));

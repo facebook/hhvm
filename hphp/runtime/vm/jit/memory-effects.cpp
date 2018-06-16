@@ -1578,6 +1578,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvClsToCctx:
   case ConvDblToBool:
   case ConvDblToInt:
+  case DblAsBits:
   case LdMIStateAddr:
   case LdPairBase:
   case CheckStaticLoc:

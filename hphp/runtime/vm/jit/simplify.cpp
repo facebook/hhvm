@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/simple-propagation.h"
+#include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/type-array-elem.h"
 #include "hphp/runtime/vm/jit/type.h"
 
@@ -2350,6 +2351,12 @@ SSATmp* simplifyConvCellToObj(State& /*env*/, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyDblAsBits(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (src->hasConstVal()) return cns(env, reinterpretDblAsInt(src->dblVal()));
+  return nullptr;
+}
+
 namespace {
 
 ALWAYS_INLINE bool isSimplifyOkay(const IRInstruction* inst) {
@@ -3707,6 +3714,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ConvVecToDArr)
   X(ConvDictToDArr)
   X(ConvKeysetToDArr)
+  X(DblAsBits)
   X(Count)
   X(CountArray)
   X(CountArrayFast)

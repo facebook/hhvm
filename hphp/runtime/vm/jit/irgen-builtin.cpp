@@ -2108,20 +2108,9 @@ void emitAKExists(IRGS& env) {
 //////////////////////////////////////////////////////////////////////
 
 void emitGetMemoKeyL(IRGS& env, int32_t locId) {
-  auto const func = curFunc(env);
+  DEBUG_ONLY auto const func = curFunc(env);
   assertx(func->isMemoizeWrapper());
   assertx(!func->anyByRef());
-
-  // If this local corresponds to a function's parameter, and that parameter has
-  // an enforced type-constraint, we may be able to use a more specific
-  // memoization key scheme. These schemes need to agree with HHBBC and the
-  // interpreter.
-  using MK = MemoKeyConstraint;
-  auto const mkc = [&]{
-    if (!RuntimeOption::EvalHardTypeHints) return MK::None;
-    if (locId >= func->numParams()) return MK::None;
-    return memoKeyConstraintFromTC(func->params()[locId].typeConstraint);
-  }();
 
   auto const value = ldLocInnerWarn(
     env,
@@ -2131,73 +2120,9 @@ void emitGetMemoKeyL(IRGS& env, int32_t locId) {
     DataTypeSpecific
   );
 
-  switch (mkc) {
-    case MK::Null:
-      // Null values are always mapped to 0
-      assertx(value->isA(TNull));
-      push(env, cns(env, 0));
-      break;
-    case MK::Int:
-    case MK::IntOrNull:
-      // Integers are always identity mappings, while null gets mapped to a
-      // static string.
-      assertx(value->isA(TInt | TNull));
-      push(
-        env,
-        gen(
-          env,
-          Select,
-          gen(env, IsType, TNull, value),
-          cns(env, s_nullMemoKey.get()),
-          value
-        )
-      );
-      break;
-    case MK::Bool:
-    case MK::BoolOrNull:
-      // Booleans are just converted to integers, while null gets mapped to 2
-      // (since bool will only ever be 0 or 1).
-      assertx(value->isA(TBool | TNull));
-      push(
-        env,
-        cond(
-          env,
-          [&](Block* taken) { gen(env, CheckType, TNull, taken, value); },
-          [&] { return cns(env, 2); },
-          [&] {
-            auto const refined = gen(env, AssertType, TBool, value);
-            return gen(env, ConvBoolToInt, refined);
-          }
-        )
-      );
-      return;
-    case MK::Str:
-    case MK::StrOrNull:
-      // Strings are identity mapped, while null is mapped to 0.
-      assertx(value->isA(TStr | TNull));
-      pushIncRef(
-        env,
-        gen(
-          env,
-          Select,
-          gen(env, IsType, TNull, value),
-          cns(env, 0),
-          value
-        )
-      );
-      return;
-    case MK::IntOrStr:
-      // Integers and strings can never collide, so they're just identity
-      // mappings.
-      assertx(value->isA(TInt | TStr));
-      pushIncRef(env, value);
-      break;
-    case MK::None:
-      // Otherwise just use the generic scheme, which is implemented by
-      // GetMemoKey. The simplifier will catch any additional special cases.
-      push(env, gen(env, GetMemoKey, value));
-      break;
-  }
+  // Use the generic scheme, which is implemented by GetMemoKey. The simplifier
+  // will catch any additional special cases.
+  push(env, gen(env, GetMemoKey, value));
 }
 
 //////////////////////////////////////////////////////////////////////

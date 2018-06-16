@@ -2607,6 +2607,15 @@ OPTBLD_INLINE void iopCastDArray() {
   tvCastToDArrayInPlace(c1);
 }
 
+OPTBLD_INLINE void iopDblAsBits() {
+  auto c = vmStack().topC();
+  if (UNLIKELY(!isDoubleType(c->m_type))) {
+    vmStack().replaceC<KindOfInt64>(0);
+    return;
+  }
+  c->m_type = KindOfInt64;
+}
+
 ALWAYS_INLINE
 bool implInstanceOfHelper(const StringData* str1, Cell* c2) {
   const NamedEntity* rhs = NamedEntity::get(str1, false);
@@ -2782,6 +2791,33 @@ OPTBLD_INLINE void iopJmpZ(PC& pc, PC targetpc) {
 OPTBLD_INLINE void iopJmpNZ(PC& pc, PC targetpc) {
   jmpOpImpl<OpJmpNZ>(pc, targetpc);
 }
+
+OPTBLD_INLINE void iopSelect() {
+  auto const cond = [&]{
+    auto c = vmStack().topC();
+    if (c->m_type == KindOfInt64 || c->m_type == KindOfBoolean) {
+      auto const val = (bool)c->m_data.num;
+      vmStack().popX();
+      return val;
+    } else {
+      auto const val = cellAsCVarRef(*c).toBoolean();
+      vmStack().popC();
+      return val;
+    }
+  }();
+
+  if (cond) {
+    auto const t = *vmStack().topC();
+    vmStack().discard();
+    vmStack().replaceC(t);
+  } else {
+    vmStack().popC();
+  }
+}
+
+struct IterBreakElem {
+  Id type, iter;
+};
 
 OPTBLD_INLINE
 void iopIterBreak(PC& pc, PC targetpc, const IterTable& iterTab) {
@@ -4239,70 +4275,21 @@ OPTBLD_INLINE void iopAKExists() {
 }
 
 OPTBLD_INLINE void iopGetMemoKeyL(local_var loc) {
-  auto const func = vmfp()->m_func;
+  DEBUG_ONLY auto const func = vmfp()->m_func;
   assertx(func->isMemoizeWrapper());
   assertx(!func->anyByRef());
 
-  // If this local corresponds to one of the function's parameters, and there's
-  // a useful type-hint (which is being enforced), we can use a more efficient
-  // memoization scheme based on the range of types we know this local can
-  // have. This scheme needs to agree with HHBBC and the JIT.
-  using MK = MemoKeyConstraint;
-  auto const mkc = [&]{
-    if (!RuntimeOption::EvalHardTypeHints) {
-      return MK::None;
-    }
-    if (loc.index >= func->numParams()) return MK::None;
-    return memoKeyConstraintFromTC(func->params()[loc.index].typeConstraint);
-  }();
+  assertx(tvIsPlausible(*loc.ptr));
 
   if (UNLIKELY(loc.ptr->m_type == KindOfUninit)) {
     tvWriteNull(*loc.ptr);
     raise_undefined_local(vmfp(), loc.index);
   }
+  auto const cell = tvToCell(loc.ptr);
 
-  auto const key = [&](){
-    switch (mkc) {
-      case MK::Null:
-        assertx(loc.ptr->m_type == KindOfNull);
-        return make_tv<KindOfInt64>(0);
-      case MK::Int:
-      case MK::IntOrNull:
-        if (loc.ptr->m_type == KindOfInt64) {
-          return *loc.ptr;
-        } else {
-          assertx(loc.ptr->m_type == KindOfNull);
-          return make_tv<KindOfPersistentString>(s_nullMemoKey.get());
-        }
-      case MK::Bool:
-      case MK::BoolOrNull:
-        if (loc.ptr->m_type == KindOfBoolean) {
-          return make_tv<KindOfInt64>(loc.ptr->m_data.num);
-        } else {
-          assertx(loc.ptr->m_type == KindOfNull);
-          return make_tv<KindOfInt64>(2);
-        }
-      case MK::Str:
-      case MK::StrOrNull:
-        if (tvIsString(loc.ptr)) {
-          tvIncRefGen(*loc.ptr);
-          return *loc.ptr;
-        } else {
-          assertx(loc.ptr->m_type == KindOfNull);
-          return make_tv<KindOfInt64>(0);
-        }
-      case MK::IntOrStr:
-        assertx(tvIsString(loc.ptr) || loc.ptr->m_type == KindOfInt64);
-        tvIncRefGen(*loc.ptr);
-        return *loc.ptr;
-      case MK::None:
-        // Use the generic scheme, which is performed by
-        // serialize_memoize_param.
-        return HHVM_FN(serialize_memoize_param)(*loc.ptr);
-    }
-    not_reached();
-  }();
-
+  // Use the generic scheme, which is performed by
+  // serialize_memoize_param.
+  auto const key = HHVM_FN(serialize_memoize_param)(*cell);
   cellCopy(key, *vmStack().allocC());
 }
 

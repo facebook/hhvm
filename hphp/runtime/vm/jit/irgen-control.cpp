@@ -283,4 +283,23 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
 
 //////////////////////////////////////////////////////////////////////
 
+void emitSelect(IRGS& env) {
+  auto const condSrc = popC(env);
+  auto const boolSrc = gen(env, ConvCellToBool, condSrc);
+  decRef(env, condSrc);
+
+  ifThenElse(
+    env,
+    [&] (Block* taken) { gen(env, JmpZero, taken, boolSrc); },
+    [&] { // True case
+      auto const val = popC(env, DataTypeCountness);
+      popDecRef(env, DataTypeCountness);
+      push(env, val);
+    },
+    [&] { popDecRef(env, DataTypeCountness); } // False case
+  );
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }}}

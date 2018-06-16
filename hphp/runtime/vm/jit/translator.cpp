@@ -195,10 +195,12 @@ static const struct {
   { OpCastVec,     {Stack1,           Stack1,       OutVec          }},
   { OpCastVArray,  {Stack1,           Stack1,       OutArray        }},
   { OpCastDArray,  {Stack1,           Stack1,       OutArray        }},
+  { OpDblAsBits,   {Stack1,           Stack1,       OutInt64        }},
   { OpInstanceOf,  {StackTop2,        Stack1,       OutBoolean      }},
   { OpInstanceOfD, {Stack1,           Stack1,       OutPredBool     }},
   { OpIsTypeStruct,{Stack1,           Stack1,       OutBoolean      }},
   { OpAsTypeStruct,{Stack1,           Stack1,       OutSameAsInput1 }},
+  { OpSelect,      {StackTop3,        Stack1,       OutUnknown      }},
   { OpPrint,       {Stack1,           Stack1,       OutInt64        }},
   { OpClone,       {Stack1,           Stack1,       OutObject       }},
   { OpExit,        {Stack1,           Stack1,       OutNull         }},
@@ -998,6 +1000,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::CastVec:
   case Op::CastVArray:
   case Op::CastDArray:
+  case Op::DblAsBits:
   case Op::CheckProp:
   case Op::CheckThis:
   case Op::Clone:
@@ -1141,6 +1144,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FCallM:
   case Op::FCallDM:
   case Op::FCallUnpackM:
+  case Op::Select:
     return false;
 
   // These are instructions that are always interp-one'd, or are always no-ops.

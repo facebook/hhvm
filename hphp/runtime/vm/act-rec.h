@@ -107,10 +107,6 @@ struct ActRec {
     // Set if this corresponds to a dynamic call
     DynamicCall = (1u << 27),
 
-    // In non-HH files the caller can specify whether param type-checking
-    // should be strict or weak.
-    UseWeakTypes = (1u << 28),
-
     // This bit can be independently set on ActRecs with any other flag state.
     // It's used by the unwinder to know that an ActRec has been partially torn
     // down (locals freed).
@@ -127,7 +123,7 @@ struct ActRec {
   static constexpr int kNumArgsMask = (1 << kNumArgsBits) - 1;
   static constexpr int kFlagsMask = ~kNumArgsMask;
   static constexpr int kExecutionModeMask =
-    ~(LocalsDecRefd | UseWeakTypes | DynamicCall | MultiReturn);
+    ~(LocalsDecRefd | DynamicCall | MultiReturn);
 
   /*
    * To conserve space, we use unions for pairs of mutually exclusive fields
@@ -188,7 +184,6 @@ struct ActRec {
    * Raw flags accessors.
    */
   Flags flags() const;
-  bool useWeakTypes() const;
   bool localsDecRefd() const;
   bool resumed() const;
   bool isFCallAwait() const;
@@ -214,7 +209,6 @@ struct ActRec {
   /*
    * Flags setters.
    */
-  void setUseWeakTypes();
   void setLocalsDecRefd();
   void setResumed();
   void setFCallAwait();

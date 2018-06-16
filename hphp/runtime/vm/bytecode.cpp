@@ -4613,7 +4613,6 @@ OPTBLD_INLINE ActRec* fPushFuncImpl(const Func* func, int numArgs) {
   ar->m_func = func;
   ar->initNumArgs(numArgs);
   ar->trashVarEnv();
-  setTypesFlag(vmfp(), ar);
   return ar;
 }
 
@@ -4804,7 +4803,6 @@ void fPushObjMethodImpl(StringData* name,
     ar->trashVarEnv();
     decRefStr(name);
   }
-  setTypesFlag(vmfp(), ar);
 }
 
 void fPushNullObjMethod(int numArgs) {
@@ -4937,7 +4935,6 @@ void pushClsMethodImpl(Class* cls,
     ar->trashVarEnv();
     decRefStr(const_cast<StringData*>(name));
   }
-  setTypesFlag(vmfp(), ar);
 }
 
 Class* specialClsRefToCls(SpecialClsRef ref) {
@@ -5047,7 +5044,6 @@ void fpushCtorImpl(uint32_t numArgs, Class* cls, bool dynamic) {
   ar->initNumArgs(numArgs);
   if (dynamic) ar->setDynamicCall();
   ar->trashVarEnv();
-  setTypesFlag(vmfp(), ar);
 }
 
 }
@@ -5137,7 +5133,6 @@ OPTBLD_INLINE void iopFPushCufIter(uint32_t numArgs, Iter* it) {
   } else {
     ar->trashVarEnv();
   }
-  setTypesFlag(vmfp(), ar);
 }
 
 OPTBLD_INLINE void iopFThrowOnRefMismatch(ActRec* ar, imm_array<bool> byRefs) {
@@ -5245,15 +5240,6 @@ bool doFCall(ActRec* ar, PC& pc) {
 }
 
 OPTBLD_INLINE void iopFCall(PC& pc, ActRec* ar, uint32_t numArgs) {
-  if (vmfp()->func()->isBuiltin()) {
-    ar->setUseWeakTypes();
-  } else if (ar->m_func->isBuiltin()) {
-    if (!builtinCallUsesStrictTypes(vmfp()->unit())) {
-      ar->setUseWeakTypes();
-    }
-  } else if (!callUsesStrictTypes(vmfp())) {
-    ar->setUseWeakTypes();
-  }
   assertx(numArgs == ar->numArgs());
   if (ar->isDynamicCall()) callerDynamicCallChecks(ar->func());
   checkStack(vmStack(), ar->m_func, 0);
@@ -5295,8 +5281,6 @@ void iopFCallAwait(PC& pc, ActRec* ar, uint32_t numArgs,
 OPTBLD_FLT_INLINE
 void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
   const NamedEntity* ne = vmfp()->m_func->unit()->lookupNamedEntityId(id);
-  auto unit = vmfp()->func()->unit();
-  auto strict = builtinCallUsesStrictTypes(unit);
   Func* func = Unit::lookupFunc(ne);
   if (func == nullptr) {
     raise_error("Call to undefined function %s()",
@@ -5305,7 +5289,7 @@ void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
 
   TypedValue* args = vmStack().indTV(numArgs-1);
   TypedValue ret;
-  if (Native::coerceFCallArgs(args, numArgs, numNonDefault, func, strict)) {
+  if (Native::coerceFCallArgs(args, numArgs, numNonDefault, func)) {
     if (func->hasVariadicCaptureParam()) {
       assertx(numArgs > 0);
       assertx(
@@ -5958,11 +5942,8 @@ OPTBLD_INLINE void iopVerifyParamType(local_var param) {
   assertx(func->numParams() == int(func->params().size()));
   const TypeConstraint& tc = func->params()[param.index].typeConstraint;
   assertx(tc.hasConstraint());
-  bool useStrictTypes =
-    func->unit()->isHHFile() || RuntimeOption::EnableHipHopSyntax ||
-    !vmfp()->useWeakTypes();
   if (!tc.isTypeVar() && !tc.isTypeConstant()) {
-    tc.verifyParam(param.ptr, func, param.index, useStrictTypes);
+    tc.verifyParam(param.ptr, func, param.index);
   }
 }
 
@@ -5984,9 +5965,8 @@ OPTBLD_INLINE void implVerifyRetType() {
 
   const auto func = vmfp()->m_func;
   const auto tc = func->returnTypeConstraint();
-  bool useStrictTypes = func->unit()->useStrictTypes();
   if (!tc.isTypeVar() && !tc.isTypeConstant()) {
-    tc.verifyReturn(vmStack().topTV(), func, useStrictTypes);
+    tc.verifyReturn(vmStack().topTV(), func);
   }
 }
 
@@ -6004,8 +5984,7 @@ OPTBLD_INLINE void iopVerifyRetNonNullC() {
   }
   const auto func = vmfp()->m_func;
   const auto tc = func->returnTypeConstraint();
-  bool useStrictTypes = func->unit()->useStrictTypes();
-  tc.verifyReturnNonNull(vmStack().topTV(), func, useStrictTypes);
+  tc.verifyReturnNonNull(vmStack().topTV(), func);
 }
 
 OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {

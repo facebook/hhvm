@@ -40,7 +40,7 @@ extern "C++" {
  * Invoking an arbitrary user-defined function.
  */
 Variant invoke(const char *function, const Variant& params, strhash_t hash = -1,
-    bool tryInterp = true, bool fatal = true, bool useWeakTypes = false);
+    bool tryInterp = true, bool fatal = true);
 
 } // extern C++
 

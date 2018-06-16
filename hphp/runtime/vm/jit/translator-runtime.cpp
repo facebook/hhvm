@@ -601,18 +601,15 @@ void VerifyParamTypeCallable(TypedValue value, int param) {
   }
 }
 
+
 void VerifyParamTypeFail(int paramNum) {
   VMRegAnchor _;
   const ActRec* ar = liveFrame();
   const Func* func = ar->m_func;
   auto const& tc = func->params()[paramNum].typeConstraint;
   TypedValue* tv = frame_local(ar, paramNum);
-  auto unit = func->unit();
-  bool useStrictTypes =
-    unit->isHHFile() || RuntimeOption::EnableHipHopSyntax ||
-    !ar->useWeakTypes();
   assertx(!tc.check(tv, func));
-  tc.verifyParamFail(func, tv, paramNum, useStrictTypes);
+  tc.verifyParamFail(func, tv, paramNum);
 }
 
 void VerifyRetTypeSlow(int32_t id,
@@ -637,12 +634,8 @@ void VerifyRetTypeFail(int32_t id, TypedValue* tv) {
   const Func* func = ar->m_func;
   if (id == HPHP::TypeConstraint::ReturnId) {
     auto const& tc = func->returnTypeConstraint();
-    auto unit = func->unit();
-    bool useStrictTypes =
-      RuntimeOption::EnableHipHopSyntax || func->isBuiltin() ||
-      unit->useStrictTypes();
     assertx(!tc.check(tv, func));
-    tc.verifyReturnFail(func, tv, useStrictTypes);
+    tc.verifyReturnFail(func, tv);
   } else {
     auto const& tc = func->params()[id].typeConstraint;
     assertx(!tc.check(tv, func));
@@ -1094,22 +1087,6 @@ uintptr_t tlsBaseNoInline() {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Sometimes calls to builtin functions are inlined so that the call itself can
- * occur via CallBuiltin rather than NativeImpl.  In these instances it's
- * possible that no ActRec was pushed for the builtin call, in which case the
- * liveFunc() will be the caller rather than the callee.
- *
- * If no ActRec was pushed for the builtin function, inspect the caller to
- * determine if the call used strict types.
- */
-bool useStrictTypesHelper(const Func* callee) {
-  if (liveFunc() == callee) {
-    return !liveFrame()->useWeakTypes();
-  }
-  return liveUnit()->useStrictTypes() && !liveUnit()->isHHFile();
-}
-
 void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func) {
   if (LIKELY(!RuntimeOption::PHP7_ScalarTypes ||
              RuntimeOption::EnableHipHopSyntax)) {
@@ -1117,10 +1094,12 @@ void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func) {
   }
 
   VMRegAnchor _;
-  if (!useStrictTypesHelper(func)) return;
+  if (!call_uses_strict_types(func)) {
+    return;
+  }
 
   auto const& tc = func->params()[argNum - 1].typeConstraint;
-  tc.verifyParam(&tv, func, argNum - 1, true);
+  tc.verifyParam(&tv, func, argNum - 1);
 }
 
 TVCoercionException::TVCoercionException(const Func* func,

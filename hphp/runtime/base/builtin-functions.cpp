@@ -458,7 +458,7 @@ Variant vm_call_user_func(const Variant& function, const Variant& params,
   auto ret = Variant::attach(
     g_context->invokeFunc(f, params, obj, cls,
                           nullptr, invName, ExecutionContext::InvokeNormal,
-                          false, dynamic, checkRef)
+                          dynamic, checkRef)
   );
   if (UNLIKELY(isRefType(ret.getRawType()))) {
     tvUnbox(*ret.asTypedValue());
@@ -481,13 +481,12 @@ static Variant invoke_failed(const char *func,
 
 static Variant
 invoke(const String& function, const Variant& params, strhash_t /*hash*/,
-       bool /*tryInterp*/, bool fatal, bool useWeakTypes = false) {
+       bool /*tryInterp*/, bool fatal) {
   Func* func = Unit::loadFunc(function.get());
   if (func && (isContainer(params) || params.isNull())) {
     auto ret = Variant::attach(
       g_context->invokeFunc(func, params, nullptr, nullptr,
-                            nullptr, nullptr, ExecutionContext::InvokeNormal,
-                            useWeakTypes)
+                            nullptr, nullptr, ExecutionContext::InvokeNormal)
     );
     if (UNLIKELY(isRefType(ret.getRawType()))) {
       tvUnbox(*ret.asTypedValue());
@@ -500,10 +499,9 @@ invoke(const String& function, const Variant& params, strhash_t /*hash*/,
 // Declared in externals.h.  If you're considering calling this
 // function for some new code, please reconsider.
 Variant invoke(const char *function, const Variant& params, strhash_t hash /* = -1 */,
-               bool tryInterp /* = true */, bool fatal /* = true */,
-               bool useWeakTypes /* = false */) {
+               bool tryInterp /* = true */, bool fatal /* = true */) {
   String funcName(function, CopyString);
-  return invoke(funcName, params, hash, tryInterp, fatal, useWeakTypes);
+  return invoke(funcName, params, hash, tryInterp, fatal);
 }
 
 Variant invoke_static_method(const String& s, const String& method,

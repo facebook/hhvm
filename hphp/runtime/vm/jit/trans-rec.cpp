@@ -19,8 +19,6 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 
-#include <unordered_map>
-
 namespace HPHP { namespace jit {
 
 TransRec::TransRec(SrcKey                      _src,
@@ -96,7 +94,7 @@ void TransRec::optimizeForMemory() {
 
 TransRec::SavedAnnotation
 TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
-  static std::unordered_map<std::string, bool> fileWritten;
+  static jit::hash_set<std::string> fileWritten;
   SavedAnnotation saved = {
     folly::sformat("{}/tc_annotations.txt{}",
                    RuntimeOption::EvalDumpTCPath,
@@ -106,10 +104,8 @@ TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
   };
   auto const fileName = saved.fileName.c_str();
 
-  auto result = fileWritten.find(saved.fileName);
-  if (result == fileWritten.end()) {
+  if (fileWritten.insert(saved.fileName).second) {
     unlink(fileName);
-    fileWritten[saved.fileName] = true;
   }
 
   FILE* file = fopen(fileName, "a");

@@ -18,7 +18,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <unordered_map>
 
 #include <folly/Format.h>
 
@@ -182,7 +181,7 @@ void region_prune_arcs(RegionDesc& region, std::vector<Type>* input) {
   auto const sortedBlocks = region.blocks();
 
   // Maps region block ids to their RPO ids.
-  auto blockToRPO = std::unordered_map<RegionDesc::BlockId,uint32_t>{};
+  auto blockToRPO = jit::hash_map<RegionDesc::BlockId,uint32_t>{};
 
   auto blockInfos = std::vector<BlockInfo>(sortedBlocks.size());
   auto workQ = dataflow_worklist<uint32_t>(sortedBlocks.size());

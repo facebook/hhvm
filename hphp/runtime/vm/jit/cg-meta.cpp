@@ -100,11 +100,14 @@ void CGMeta::process(
 
 void CGMeta::process_literals() {
   assertx(literalsToPool.empty());
-  for (auto& pair : literals) {
-    if (s_literals.find(pair.first)) continue;
+  for (auto& pair : literalAddrs) {
+    if (s_literals.find(pair.first)) {
+      // TreadHashMap doesn't allow re-inserting existing keys
+      continue;
+    }
     s_literals.insert(pair.first, pair.second);
   }
-  literals.clear();
+  literalAddrs.clear();
 }
 
 void CGMeta::process_only(
@@ -165,7 +168,7 @@ void CGMeta::clear() {
   catches.clear();
   jmpTransIDs.clear();
   literalsToPool.clear();
-  literals.clear();
+  literalAddrs.clear();
   alignments.clear();
   reusedStubs.clear();
   addressImmediates.clear();
@@ -183,7 +186,7 @@ bool CGMeta::empty() const {
     catches.empty() &&
     jmpTransIDs.empty() &&
     literalsToPool.empty() &&
-    literals.empty() &&
+    literalAddrs.empty() &&
     alignments.empty() &&
     reusedStubs.empty() &&
     addressImmediates.empty() &&

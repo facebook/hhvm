@@ -337,7 +337,7 @@ const uint64_t* alloc_literal(Venv& env, uint64_t val) {
 
   if (auto addr = addrForLiteral(val)) return addr;
 
-  auto& pending = env.meta.literals;
+  auto& pending = env.meta.literalAddrs;
   auto it = pending.find(val);
   if (it != pending.end()) {
     DEBUG_ONLY auto realAddr =

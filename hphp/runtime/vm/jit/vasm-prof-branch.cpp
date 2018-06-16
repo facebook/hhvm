@@ -292,7 +292,7 @@ struct Env {
    * we def'd a VregSF, branched, re-joined, and then used the VregSF after the
    * phi), so instead we just rename everything to RegSF{0}.
    */
-  std::unordered_set<unsigned> sf_renames;
+  jit::hash_set<unsigned> sf_renames;
 };
 
 /*

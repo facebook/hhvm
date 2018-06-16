@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/hhbc.h"
 
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
@@ -338,7 +339,7 @@ struct UniqueStubs {
    * @reached:  jmp from TC
    * @context:  func body
    */
-  std::unordered_map<Op, TCA> interpOneCFHelpers;
+  jit::hash_map<Op, TCA> interpOneCFHelpers;
 
 
   /////////////////////////////////////////////////////////////////////////////

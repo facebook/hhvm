@@ -776,7 +776,7 @@ using BlockState = StateVector<Block, PreBlockInfo>;
 
 struct PreEnv {
   using IncDecKey = std::tuple<Block*,uint32_t,bool>; /* blk, id, at front */
-  using InsertMap = std::unordered_map<IncDecKey, SSATmp*>;
+  using InsertMap = jit::hash_map<IncDecKey, SSATmp*>;
 
   explicit PreEnv(Env& env, RCAnalysis& rca) :
       env(env),
@@ -1357,9 +1357,9 @@ void find_alias_sets(Env& env) {
 
   auto frame_to_ctx = sparse_idptr_map<SSATmp,ASetID>(env.unit.numTmps());
 
-  std::unordered_set<IRInstruction*,
-                     LdStaticLocHashEqual,
-                     LdStaticLocHashEqual> ldStaticLocs;
+  jit::hash_set<IRInstruction*,
+                LdStaticLocHashEqual,
+                LdStaticLocHashEqual> ldStaticLocs;
 
   auto add = [&] (SSATmp* tmp) {
     if (!tmp->type().maybe(TCounted)) return;

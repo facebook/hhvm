@@ -73,7 +73,7 @@ struct Patch {
   Instruction* src;
 };
 using PatchList = std::vector<Patch>;
-using InstrSet = std::unordered_set<Instruction*>;
+using InstrSet = jit::hash_set<Instruction*>;
 struct JmpOutOfRange : std::exception {};
 
 /*
@@ -1324,7 +1324,7 @@ void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& meta) {
 
 void adjustMetaDataForRelocation(RelocationInfo& rel, AsmInfo* /*asmInfo*/,
                                  CGMeta& meta) {
-  for (auto& li : meta.literals) {
+  for (auto& li : meta.literalAddrs) {
     if (auto adjusted = rel.adjustedAddressAfter((TCA)li.second)) {
       li.second = (uint64_t*)adjusted;
     }

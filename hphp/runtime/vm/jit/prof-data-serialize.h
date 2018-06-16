@@ -18,9 +18,7 @@
 #define incl_HPHP_PROF_DATA_SERIALIZE_H_
 
 #include <string>
-#include <unordered_map>
-#include <unordered_set>
-
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 
 namespace HPHP {
@@ -65,12 +63,12 @@ private:
   char buffer[buffer_size];
   const std::string& fileName;
   // keep track of things that have already been serialized.
-  std::unordered_set<const void*> serializedStatics;
+  jit::hash_set<const void*> serializedStatics;
 };
 
 struct ProfDataDeserializer {
   template<typename T>
-  using EntMap = std::unordered_map<uintptr_t, T>;
+  using EntMap = jit::hash_map<uintptr_t, T>;
 
   explicit ProfDataDeserializer(const std::string& name);
   ~ProfDataDeserializer();
@@ -130,7 +128,7 @@ struct ProfDataDeserializer {
   EntMap<Func*>        funcMap;
   EntMap<Class*>       classMap;
   EntMap<const RepoAuthType::Array*> ratMap;
-  std::unordered_map<uint32_t, uint32_t> fidMap;
+  jit::hash_map<uint32_t, uint32_t> fidMap;
 };
 
 template<class T>

@@ -35,7 +35,6 @@
 #include <bitset>
 #include <iostream>
 #include <string>
-#include <unordered_set>
 
 #include <boost/dynamic_bitset.hpp>
 

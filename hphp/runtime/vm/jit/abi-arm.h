@@ -24,8 +24,6 @@
 #include "hphp/vixl/a64/assembler-a64.h"
 #include "hphp/vixl/a64/constants-a64.h"
 
-#include <unordered_map>
-
 namespace HPHP { namespace jit {
 
 struct Abi;

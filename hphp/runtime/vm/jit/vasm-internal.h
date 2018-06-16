@@ -70,7 +70,7 @@ struct Venv {
    * translation.  This is important on ARM because Vgen::patch needs to know
    * if it should insert a jump over the literal pool it inserts.
    */
-  std::unordered_set<CodeAddress> fallThrus;
+  jit::hash_set<CodeAddress> fallThrus;
 
   /*
    * Stubs that need to be emitted and patched into service request callsites.

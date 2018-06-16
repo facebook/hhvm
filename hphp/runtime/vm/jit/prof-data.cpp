@@ -186,7 +186,7 @@ bool ProfData::anyBlockEndsAt(const Func* func, Offset offset) {
     Arena arena;
     Verifier::GraphBuilder builder{arena, func};
     auto cfg = builder.build();
-    std::unordered_set<Offset> offsets;
+    jit::hash_set<Offset> offsets;
 
     for (auto blocks = linearBlocks(cfg); !blocks.empty(); ) {
       auto last = blocks.popFront()->last - func->unit()->entry();

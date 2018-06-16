@@ -18,7 +18,6 @@
 #define incl_HPHP_RUNTIME_VM_JIT_TIMER_H_
 
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #define JIT_TIMERS                              \

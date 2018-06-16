@@ -28,7 +28,7 @@
 #include "hphp/util/dataflow-worklist.h"
 
 #include <sstream>
-#include <unordered_map>
+#include <folly/small_vector.h>
 
 namespace HPHP { namespace jit {
 
@@ -50,7 +50,7 @@ struct CongruenceHasher {
   using KeyType = std::pair<IRInstruction*, DstIndex>;
 
   explicit CongruenceHasher(const ValueNumberTable& globalTable)
-    : m_globalTable(globalTable)
+    : m_globalTable(&globalTable)
   {
   }
 
@@ -70,13 +70,14 @@ struct CongruenceHasher {
   }
 
   size_t hashSrcs(KeyType key, size_t result) const {
+    auto& table = *m_globalTable;
     auto inst = key.first;
     for (uint32_t i = 0; i < inst->numSrcs(); ++i) {
       auto src = canonical(inst->src(i));
-      assertx(m_globalTable[src].value);
+      assertx(table[src].value);
       result = folly::hash::hash_128_to_64(
         result,
-        reinterpret_cast<size_t>(m_globalTable[src].value)
+        reinterpret_cast<size_t>(table[src].value)
       );
     }
     return result;
@@ -93,27 +94,28 @@ struct CongruenceHasher {
   }
 
 private:
-  const ValueNumberTable& m_globalTable;
+  const ValueNumberTable* m_globalTable;
 };
 
 struct CongruenceComparator {
   using KeyType = std::pair<IRInstruction*, DstIndex>;
 
   explicit CongruenceComparator(const ValueNumberTable& globalTable)
-    : m_globalTable(globalTable)
+    : m_globalTable(&globalTable)
   {
   }
 
   bool compareSrcs(KeyType keyA, KeyType keyB) const {
+    auto& table = *m_globalTable;
     auto instA = keyA.first;
     auto instB = keyB.first;
 
     for (uint32_t i = 0; i < instA->numSrcs(); ++i) {
       auto srcA = canonical(instA->src(i));
       auto srcB = canonical(instB->src(i));
-      assertx(m_globalTable[srcA].value);
-      assertx(m_globalTable[srcB].value);
-      if (m_globalTable[srcA].value != m_globalTable[srcB].value) return false;
+      assertx(table[srcA].value);
+      assertx(table[srcB].value);
+      if (table[srcA].value != table[srcB].value) return false;
     }
 
     return true;
@@ -147,10 +149,10 @@ struct CongruenceComparator {
   }
 
 private:
-  const ValueNumberTable& m_globalTable;
+  const ValueNumberTable* m_globalTable;
 };
 
-using NameTable = std::unordered_map<
+using NameTable = jit::hash_map<
   std::pair<IRInstruction*, DstIndex>, SSATmp*,
   CongruenceHasher,
   CongruenceComparator
@@ -670,7 +672,7 @@ void insertIncRefs(PrcEnv& env) {
   }
 }
 
-using ActionMap = std::unordered_map<SSATmp*, std::vector<SSATmp*>>;
+using ActionMap = jit::hash_map<SSATmp*, std::vector<SSATmp*>>;
 
 void tryReplaceInstruction(
   IRUnit& unit,
@@ -735,7 +737,7 @@ void replaceRedundantComputations(
       tryReplaceInstruction(unit, idoms, &inst, table, actionMap);
     }
   }
-  if (!actionMap.size()) return;
+  if (actionMap.empty()) return;
   PrcEnv env(unit, blocks);
   for (auto& elm : actionMap) {
     if (env.insertMap.size() == kMaxTrackedPrcs) {

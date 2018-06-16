@@ -330,15 +330,9 @@ struct InlineRegionKey {
   TinyVector<Type, 4> argTypes;
 };
 
-using InlineCostCache = std::unordered_map<
+using InlineCostCache = jit::hash_map<
   InlineRegionKey,
   unsigned,
-  InlineRegionKey::Hash,
-  InlineRegionKey::Eq
->;
-
-using RegionKeySet = std::unordered_set<
-  InlineRegionKey,
   InlineRegionKey::Hash,
   InlineRegionKey::Eq
 >;

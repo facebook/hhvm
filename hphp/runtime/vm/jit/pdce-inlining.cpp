@@ -167,10 +167,7 @@ An additional EagerSyncVMRegs is inserted following EndCatch in catch traces to
 ensure that the callee frame is visited by the unwinder.
 */
 
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
-
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -185,10 +182,10 @@ namespace {
 
 TRACE_SET_MOD(pdce_inline);
 
-using InstructionList = std::vector<IRInstruction*>;
-using InstructionSet = std::unordered_set<IRInstruction*>;
-using FPUseMap = std::unordered_map<SSATmp*, InstructionSet>;
-using FPMap = std::unordered_map<Block*, SSATmp*>;
+using InstructionList = jit::vector<IRInstruction*>;
+using InstructionSet = jit::hash_set<IRInstruction*>;
+using FPUseMap = jit::hash_map<SSATmp*, InstructionSet>;
+using FPMap = jit::hash_map<Block*, SSATmp*>;
 
 struct InlineAnalysis {
   IRUnit* unit;
@@ -207,7 +204,7 @@ struct InlineAnalysis {
    * Map fp -> set, where all blocks in set exit the unit while still within the
    * the inlined region for fp.
    */
-  std::unordered_map<SSATmp*, BlockSet> exitBlocks;
+  jit::hash_map<SSATmp*, BlockSet> exitBlocks;
 };
 
 struct OptimizeContext {
@@ -287,7 +284,7 @@ InlineAnalysis analyze(IRUnit& unit) {
 
   // Exit blocks are all associated with FPs that are defined on the main trace
   // as part of a DefInlineFP/InlineReturn pair (mainFPs)
-  std::unordered_set<SSATmp*> mainFPs;
+  jit::hash_set<SSATmp*> mainFPs;
 
   auto addFPUse = [&] (IRInstruction& inst, SSATmp* use) {
     auto it = ia.fpUses.find(use);

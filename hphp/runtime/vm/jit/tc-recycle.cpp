@@ -95,7 +95,7 @@ struct FuncInfo {
 
   std::vector<TransLoc> prologues;
   std::vector<SrcRec*>  srcRecs;
-  std::unordered_set<TCA> callers;
+  jit::hash_set<TCA> callers;
 };
 
 struct SmashedCall {
@@ -106,18 +106,18 @@ struct SmashedCall {
 
 std::mutex s_dataLock;
 
-std::unordered_map<
+jit::hash_map<
   TCA /* toSmash */,
   SmashedCall /* target */
 > s_smashedCalls;
 
-std::unordered_map<
+jit::hash_map<
   TCA /* toSmash */,
   SrcRec* /* dest */
 > s_smashedBranches;
 
 // Keyed on FuncId as these are never reused
-std::unordered_map<FuncId, FuncInfo> s_funcTCData;
+jit::hash_map<FuncId, FuncInfo> s_funcTCData;
 
 struct FuncJob {
   const StringData* fname;

@@ -35,7 +35,6 @@
 
 #include <vector>
 #include <memory>
-#include <unordered_map>
 
 namespace HPHP { namespace jit {
 
@@ -677,7 +676,7 @@ private:
    * Lists of profiling translations for each Func, and a lock to protect it.
    */
   mutable folly::SharedMutex m_funcProfTransLock;
-  std::unordered_map<FuncId, TransIDVec> m_funcProfTrans;
+  jit::hash_map<FuncId, TransIDVec> m_funcProfTrans;
 
   /*
    * Map from jump addresses to the ID of the translation containing them.
@@ -688,11 +687,11 @@ private:
    * Cache for Func -> block end offsets. Values in this map cannot be modified
    * after insertion so no locking is necessary for lookups.
    */
-  folly::AtomicHashMap<FuncId, const std::unordered_set<Offset>>
+  folly::AtomicHashMap<FuncId, const jit::hash_set<Offset>>
     m_blockEndOffsets;
 
   mutable folly::SharedMutex m_targetProfilesLock;
-  std::unordered_map<TransID, std::vector<TargetProfileInfo>> m_targetProfiles;
+  jit::hash_map<TransID, std::vector<TargetProfileInfo>> m_targetProfiles;
 
   bool m_wasDeserialized{false};
 };

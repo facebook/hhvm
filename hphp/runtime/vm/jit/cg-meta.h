@@ -18,6 +18,7 @@
 #define incl_HPHP_JIT_CODE_GEN_FIXUPS_H_
 
 #include "hphp/runtime/vm/jit/alignment.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
@@ -83,7 +84,7 @@ struct CGMeta {
    * We want to collapse emitting literals multiple times.  This map allows us
    * to find the addresses of already emitted literals.
    */
-  std::unordered_map<uint64_t, const uint64_t*> literals;
+  jit::hash_map<uint64_t, const uint64_t*> literalAddrs;
 
   /*
    * All the alignment constraints on each code address.

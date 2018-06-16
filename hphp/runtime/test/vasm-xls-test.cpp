@@ -84,8 +84,8 @@ template<class T> uint64_t test_const(T val) {
     optimizeX64(vasm.unit(), test_abi_x64, true /* regalloc */);
     emitX64(unit, text, meta, nullptr);
   }
-  // The above code might use meta.literals but shouldn't use anything else.
-  meta.literals.clear();
+  // The above code might use meta.literalAddrs but shouldn't use anything else.
+  meta.literalAddrs.clear();
   EXPECT_TRUE(meta.empty());
 
   union { double d; uint64_t c; } u;

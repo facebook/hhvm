@@ -1229,7 +1229,6 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
     nullptr,
     1,
     args,
-    false,
     false
   );
 

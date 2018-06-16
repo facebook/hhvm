@@ -1334,8 +1334,7 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit) {
 
   auto const func = unit->getMain(nullptr);
   return invokeFunc(func, init_null_variant, nullptr, nullptr,
-                    m_globalVarEnv, nullptr, InvokePseudoMain,
-                    !unit->useStrictTypes());
+                    m_globalVarEnv, nullptr, InvokePseudoMain);
 }
 
 void ExecutionContext::syncGdbState() {
@@ -1536,7 +1535,6 @@ ALWAYS_INLINE
 TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
                                             ObjectData* thiz, Class* cls,
                                             uint32_t argc, StringData* invName,
-                                            bool useWeakTypes,
                                             bool dynamic,
                                             FStackCheck doStackCheck,
                                             FInitArgs doInitArgs,
@@ -1612,12 +1610,6 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
     throw;
   }
 
-  if (useWeakTypes) {
-    ar->setUseWeakTypes();
-  } else {
-    setTypesFlag(vmfp(), ar);
-  }
-
   {
     pushVMState(reentrySP);
     SCOPE_EXIT {
@@ -1687,7 +1679,6 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
                                         VarEnv* varEnv /* = NULL */,
                                         StringData* invName /* = NULL */,
                                         InvokeFlags flags /* = InvokeNormal */,
-                                        bool useWeakTypes /* = false */,
                                         bool dynamic /* = true */,
                                         bool checkRefAnnot /* = false */) {
   const auto& args = *args_.asCell();
@@ -1755,7 +1746,7 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
     });
   };
 
-  return invokeFuncImpl(f, thiz, cls, argc, invName, useWeakTypes,
+  return invokeFuncImpl(f, thiz, cls, argc, invName,
                         dynamic && !(flags & InvokePseudoMain),
                         doCheckStack, doInitArgs, doEnterVM);
 }
@@ -1765,7 +1756,6 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
                                            StringData* invName,
                                            int argc,
                                            const TypedValue* argv,
-                                           bool useWeakTypes /* = false */,
                                            bool dynamic /* = true */) {
   auto const doCheckStack = [&](TypedValue&) {
     // See comments in invokeFunc().
@@ -1798,7 +1788,7 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
   return invokeFuncImpl(f,
                         ActRec::decodeThis(thisOrCls),
                         ActRec::decodeClass(thisOrCls),
-                        argc, invName, useWeakTypes, dynamic,
+                        argc, invName, dynamic,
                         doCheckStack, doInitArgs, doEnterVM);
 }
 

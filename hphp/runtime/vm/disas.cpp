@@ -818,7 +818,7 @@ void print_alias(Output& out, const TypeAlias& alias) {
 
 void print_unit_strict_types(Output& out, const Unit* unit) {
   if (!RuntimeOption::PHP7_ScalarTypes) return;
-  if (unit->useStrictTypes()) out.fmtln(".strict 1;");
+  if (unit->useStrictTypesForBuiltins()) out.fmtln(".strict 1;");
   else out.fmtln(".strict 0;");
 }
 

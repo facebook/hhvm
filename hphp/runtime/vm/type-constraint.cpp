@@ -402,12 +402,11 @@ bool TypeConstraint::checkTypeAliasObj(const Class* cls) const {
 }
 
 
-void TypeConstraint::verifyReturnNonNull(TypedValue* tv, const Func* func,
-                                         bool useStrictTypes) const {
+void TypeConstraint::verifyReturnNonNull(TypedValue* tv, const Func* func) const {
   const auto DEBUG_ONLY tc = func->returnTypeConstraint();
   assertx(!tc.isNullable());
   if (UNLIKELY(cellIsNull(tv))) {
-    verifyReturnFail(func, tv, useStrictTypes);
+    verifyReturnFail(func, tv);
   } else if (debug) {
     auto vm = &*g_context;
     always_assert_flog(
@@ -546,9 +545,43 @@ const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
   not_reached();
 }
 
+bool call_uses_strict_types(const Func* callee) {
+  auto outer = [&] {
+    if (vmfp()->sfp()) return vmfp()->sfp()->func();
+    auto const next = g_context->getPrevVMState(vmfp());
+    return next ? next->func() : nullptr;
+  };
+  auto const caller =
+
+  (vmfp()->func() == callee) ? outer() : vmfp()->func();
+  if (!caller) {
+    // For example, HHBBC calling Foldable functions
+    return true;
+  }
+
+  if (callee->isBuiltin()) {
+    return caller->unit()->useStrictTypesForBuiltins();
+  }
+
+  if (LIKELY(RuntimeOption::EnableHipHopSyntax)) {
+    return true;
+  }
+
+  /* In PHP, if you have a function 'foo', and call array_map('foo', ...),
+   * array_map makes a call to 'foo', and that should *never* be strict in PHP
+   * mode, even if both foo and the call to array_map are in a strict file.
+   */
+  if (caller->isBuiltin() && !callee->isBuiltin()) {
+    return callee->unit()->isHHFile();
+  }
+
+  // Neither is builtin
+  return caller->unit()->useStrictTypes();
+}
+
 void TypeConstraint::verifyParamFail(const Func* func, TypedValue* tv,
-                                     int paramNum, bool useStrictTypes) const {
-  verifyFail(func, tv, paramNum, useStrictTypes);
+                                     int paramNums) const {
+  verifyFail(func, tv, paramNums);
   assertx(
     isSoft() || !RuntimeOption::EvalHardTypeHints || (isThis() && couldSeeMockObject()) ||
     (RuntimeOption::EvalHackArrCompatTypeHintNotices &&
@@ -609,7 +642,7 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
 }
 
 void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
-                                int id, bool useStrictTypes) const {
+                                int id) const {
   VMRegAnchor _;
   std::string name = displayName(func);
   auto const givenType = describe_actual_type(tv, isHHType());
@@ -670,6 +703,12 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
       return;
     }
   }
+
+  const bool useStrictTypes = (id == ReturnId) ?
+    LIKELY(RuntimeOption::EnableHipHopSyntax) ||
+    func->isBuiltin() ||
+    func->unit()->useStrictTypes() :
+    call_uses_strict_types(func);
 
   if (UNLIKELY(!useStrictTypes)) {
     if (auto dt = underlyingDataType()) {

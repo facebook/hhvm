@@ -35,7 +35,7 @@ namespace HH\Lib\_Private\Native {
  *
  */
 <<__Native>>
-function pseudorandom_int(int $min = PHP_INT_MIN, int $max = PHP_INT_MAX): int;
+function pseudorandom_int(int $min = \PHP_INT_MIN, int $max = \PHP_INT_MAX): int;
 
 /**
  * Seeds the pseudorandom number generator used by `pseudorandom_int`. This
@@ -48,6 +48,22 @@ function pseudorandom_int(int $min = PHP_INT_MIN, int $max = PHP_INT_MAX): int;
  */
 <<__Native>>
 function pseudorandom_seed(int $seed): void;
+
+/**
+ * Generates cryptographic random integers that are suitable for use where
+ * unbiased results are critical (e.g. shuffling a Poker deck).
+ *
+ * @param int $min - The lowest value to be returned down to PHP_INT_MIN.
+ * @param int $max - The highest value to be returned up to PHP_INT_MAX.
+ *
+ * @return int - The crypto-secure random integer.
+ *
+ * @throws Exception - If generating sufficiently random data fails.
+ * @throws Error - If $min > $max.
+ *
+ */
+<<__Native>>
+function random_int(int $min = \PHP_INT_MIN, int $max = \PHP_INT_MAX): int;
 
 }
 

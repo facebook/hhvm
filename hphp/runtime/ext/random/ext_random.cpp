@@ -15,6 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/ext/random/ext_random.h"
+
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -44,7 +46,7 @@ String HHVM_FUNCTION(random_bytes, int64_t length) {
   return ret.setSize(length);
 }
 
-int64_t HHVM_FUNCTION(random_int, int64_t min, int64_t max) {
+int64_t getRandomInt(int64_t min, int64_t max) {
   if (min > max) {
     SystemLib::throwErrorObject(
       "Minimum value must be less than or equal to the maximum value");
@@ -84,6 +86,10 @@ int64_t HHVM_FUNCTION(random_int, int64_t min, int64_t max) {
   }
 
   return (int64_t)((result % umax) + min);
+}
+
+int64_t HHVM_FUNCTION(random_int, int64_t min, int64_t max) {
+  return getRandomInt(min, max);
 }
 
 static struct RandomExtension final : public Extension {

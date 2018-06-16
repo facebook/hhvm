@@ -15,11 +15,13 @@
 */
 
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/random/ext_random.h"
 #include "hphp/system/systemlib.h"
 #include <folly/Random.h>
 
 namespace HPHP {
 namespace {
+
   THREAD_LOCAL(folly::Random::DefaultGenerator, tl_rng);
   int64_t HHVM_FUNCTION(HH_pseudorandom_int, int64_t min, int64_t max) {
     return std::uniform_int_distribution<int64_t>(min, max)(*tl_rng);
@@ -27,6 +29,10 @@ namespace {
 
   void HHVM_FUNCTION(HH_pseudorandom_seed, int64_t seed) {
     tl_rng->seed(seed);
+  }
+
+  int64_t HHVM_FUNCTION(HH_random_int, int64_t min, int64_t max) {
+    return getRandomInt(min, max);
   }
 
   struct RandomExtension final : Extension {
@@ -40,6 +46,10 @@ namespace {
         HH\\Lib\\_Private\\Native\\pseudorandom_seed,
         HH_pseudorandom_seed
       );
+      HHVM_FALIAS(
+        HH\\Lib\\_Private\\Native\\random_int,
+        HH_random_int
+      );
       loadSystemlib();
     }
 
@@ -47,5 +57,6 @@ namespace {
       tl_rng->seed(folly::Random::secureRandom<int64_t>());
     }
   } s_random_extension;
+
 } // anonymous namespace
 } // namespace HPHP

@@ -24,6 +24,7 @@ namespace HPHP {
   struct NamedEntity;
   struct Func;
   struct StringData;
+  struct MemoCacheBase;
 }
 
 namespace HPHP { namespace rds {
@@ -54,6 +55,18 @@ bindStaticLocal(const Func*, const StringData*);
  */
 Link<TypedValue, rds::Mode::Normal>
 bindClassConstant(const StringData* clsName, const StringData* cnsName);
+
+Link<Cell, rds::Mode::Normal>
+bindStaticMemoValue(const Func*);
+
+Link<MemoCacheBase*, rds::Mode::Normal>
+bindStaticMemoCache(const Func*);
+
+Link<Cell, rds::Mode::Normal>
+attachStaticMemoValue(const Func*);
+
+Link<MemoCacheBase*, rds::Mode::Normal>
+attachStaticMemoCache(const Func*);
 
 //////////////////////////////////////////////////////////////////////
 

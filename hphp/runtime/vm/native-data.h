@@ -274,12 +274,6 @@ void nativeDataWakeup(ObjectData* obj, const Variant& data);
 
 size_t ndsize(const ObjectData* obj, const NativeDataInfo* ndi);
 
-// return the full native header size, which is also the distance from
-// the allocated pointer to the ObjectData*.
-inline size_t ndsize(size_t dataSize) {
-  return alignTypedValue(dataSize + sizeof(NativeNode));
- }
-
 inline NativeNode* getNativeNode(ObjectData* obj, const NativeDataInfo* ndi) {
   return reinterpret_cast<NativeNode*>(
     reinterpret_cast<char*>(obj) - ndsize(obj, ndi)

@@ -457,6 +457,28 @@ inline const Class::ScopedClonesMap& Class::scopedClones() const {
   return m_extra->m_scopedClones;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// Memoization
+
+inline size_t Class::numMemoSlots() const {
+  return m_extra->m_nextMemoSlot;
+}
+
+inline bool Class::hasMemoSlots() const {
+  return numMemoSlots() > 0;
+}
+
+inline std::pair<Slot, bool> Class::memoSlotForFunc(FuncId func) const {
+  assertx(hasMemoSlots());
+  auto const it = m_extra->m_memoMappings.find(func);
+  if (it != m_extra->m_memoMappings.end()) return it->second;
+  // Each mapping is only stored in the class which defines it, so recurse up to
+  // the parent. We should only be calling this with functions which have a memo
+  // slot, so assert if we reach the end without finding a slot.
+  if (m_parent) return m_parent->memoSlotForFunc(func);
+  always_assert(false);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Other methods.
 

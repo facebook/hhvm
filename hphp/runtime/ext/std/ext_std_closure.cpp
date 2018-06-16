@@ -361,6 +361,7 @@ void StandardExtension::loadClosure() {
 void StandardExtension::initClosure() {
   c_Closure::cls_Closure = Unit::lookupClass(s_Closure.get());
   assertx(c_Closure::cls_Closure);
+  assertx(!c_Closure::cls_Closure->hasMemoSlots());
   c_Closure::cls_Closure->allocExtraData();
   c_Closure::cls_Closure->m_extra.raw()->m_instanceCtor =
     RuntimeOption::RepoAuthoritative

@@ -201,6 +201,9 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
     } else if (from_hdr->kind() == HeaderKind::ClosureHdr) {
       from_obj = closureObj(from_hdr);
       prop_offset = edge.offset - (uintptr_t(from_obj) - uintptr_t(from_hdr));
+    } else if (from_hdr->kind() == HeaderKind::MemoData) {
+      from_obj = memoObj(from_hdr);
+      prop_offset = edge.offset - (uintptr_t(from_obj) - uintptr_t(from_hdr));
     } else if (isObjectKind(from_hdr->kind())) {
       from_obj = static_cast<const ObjectData*>(from_hdr);
       prop_offset = edge.offset;
@@ -273,6 +276,7 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
       case HeaderKind::Closure:
         // the class of a c_Closure describes the captured variables
       case HeaderKind::NativeData:
+      case HeaderKind::MemoData:
       case HeaderKind::Object: {
         auto cls = from_obj->getVMClass();
         FTRACE(5, "HG: Getting connection name for class {} at {}\n",

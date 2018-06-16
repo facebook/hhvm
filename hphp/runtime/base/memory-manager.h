@@ -454,6 +454,19 @@ struct NativeNode : HeapObject,
   uint32_t arOff() const { return m_aux32; } // from this to ActRec, or 0
 };
 
+// Header for objects with memoization data.
+struct MemoNode : HeapObject,
+                  type_scan::MarkCollectable<MemoNode> {
+  explicit MemoNode(uint32_t objoff) {
+    initHeader_32(HeaderKind::MemoData, objoff);
+  }
+  uint32_t objOff() const { return m_aux32; }
+  // Make sure this header is the same size as a TypedValue to simplify
+  // alignment.
+  uint64_t padding;
+};
+static_assert(sizeof(MemoNode) == alignTypedValue(sizeof(MemoNode)), "");
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

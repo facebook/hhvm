@@ -37,6 +37,7 @@ struct ObjectData;
 struct RefData;
 struct ResourceHdr;
 struct StringData;
+struct MemoCacheBase;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -55,6 +56,7 @@ union Value {
   ResourceHdr*  pres;   // KindOfResource
   RefData*      pref;   // KindOfRef
   MaybeCountable* pcnt; // for alias-safe generic refcounting operations
+  MemoCacheBase* pcache; // Not valid except when in a MemoSlot
 };
 
 enum VarNrFlag { NR_FLAG = 1 << 29 };

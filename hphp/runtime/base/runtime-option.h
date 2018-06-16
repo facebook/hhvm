@@ -851,6 +851,7 @@ struct RuntimeOption {
   F(bool, UseMSRVForInOut, true)                                        \
   F(bool, HHIRGenerateCallM, true)                                      \
   F(bool, HHIRGenerateRetM, true)                                       \
+  F(uint32_t, NonSharedInstanceMemoCaches, 10)                          \
   F(std::vector<std::string>, IniGetHide, std::vector<std::string>())   \
   F(std::string, UseRemoteUnixServer, "no")                             \
   F(std::string, UnixServerPath, "")                                    \

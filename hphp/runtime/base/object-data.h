@@ -17,12 +17,12 @@
 #ifndef incl_HPHP_OBJECT_DATA_H_
 #define incl_HPHP_OBJECT_DATA_H_
 
+#include "hphp/runtime/base/classname-is.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/classname-is.h"
 #include "hphp/runtime/base/req-ptr.h"
-#include "hphp/runtime/base/weakref-data.h"
 #include "hphp/runtime/base/tv-val.h"
+#include "hphp/runtime/base/weakref-data.h"
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -65,6 +65,70 @@ namespace Native {
                                          size_t nProps);
 }
 
+// A slot to store memoization data in. This can be either a Cell storing a
+// single value, or a pointer to a memoization cache.
+struct MemoSlot {
+public:
+  /*
+   * We use the type field of the Cell to determine whether this is a single
+   * value or a memo cache. If the type is kInvalidDataType (which cannot occur
+   * for a valid Cell), its a memo cache. As a special case, if type is Uninit,
+   * and the pointer is null, it can also be a cache (its also a value). This
+   * lets us initialize the slots with zero regardless of how it will be
+   * used. When its actually used, the correct type will be filed in. The
+   * ambiguity isn't an issue because these predicates are just for assertions
+   * (the type of the slot is implied by the function).
+   */
+
+  bool isCache() const {
+    return value.m_type == kInvalidDataType ||
+      (value.m_type == KindOfUninit && value.m_data.pcache == nullptr);
+  }
+  bool isValue() const { return value.m_type != kInvalidDataType; }
+
+  // Get a reference to the pointer to the cache, for the purpose of a set on
+  // the cache. Since we're going to be creating a cache in this slot, change
+  // its type to indicate this.
+  MemoCacheBase*& getCacheForWrite() {
+    assertx(isCache());
+    value.m_type = kInvalidDataType;
+    return value.m_data.pcache;
+  }
+
+  MemoCacheBase* getCache() {
+    assertx(isCache());
+    return value.m_data.pcache;
+  }
+  const MemoCacheBase* getCache() const {
+    assertx(isCache());
+    return value.m_data.pcache;
+  }
+
+  Cell* getValue() {
+    assertx(isValue());
+    assertx(cellIsPlausible(value));
+    return &value;
+  }
+  const Cell* getValue() const {
+    assertx(isValue());
+    assertx(cellIsPlausible(value));
+    return &value;
+  }
+
+  // Used when we've freed the cache manually
+  void resetCache() {
+    assertx(isCache());
+    value.m_data.pcache = nullptr;
+  }
+private:
+  TYPE_SCAN_CUSTOM() {
+    isCache() ? scanner.scan(value.m_data.pcache) : scanner.scan(value);
+  }
+
+  Cell value;
+};
+static_assert(sizeof(MemoSlot) == sizeof(Cell), "");
+
 struct InvokeResult {
   TypedValue val;
   InvokeResult() {}
@@ -88,7 +152,16 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
                                // finished. Only set during construction when
                                // the class has immutable properties (to
                                // temporarily allow writing to them).
+    UsedMemoCache      = 0x10  // Object has had data set in its memo slots
   };
+
+  static constexpr size_t offsetofAttrs() {
+    return offsetof(ObjectData, m_aux16);
+  }
+
+  static constexpr size_t sizeofAttrs() {
+    return sizeof(m_aux16);
+  }
 
  private:
   static __thread uint32_t os_max_id;
@@ -127,14 +200,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   size_t heapSize() const;
 
-  // WeakRef control methods.
-  inline void invalidateWeakRef() {
-    if (UNLIKELY(getAttribute(IsWeakRefed))) {
-      WeakRefData::invalidateWeakRef((uintptr_t)this);
-    }
-  }
-
-  inline void setWeakRefed(bool /*flag*/) { setAttribute(IsWeakRefed); }
+  void setWeakRefed() { setAttribute(IsWeakRefed); }
 
   public:
 
@@ -163,6 +229,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
    * DefaultAttrs; otherwise, use newInstanceRawAttrs. The big=true versions
    * should be called when size > kMaxSmallSize.
    *
+   * The memo versions should be used if the object has memo slots.
+   *
    * The initial ref-count will be set to one.
    */
   static const uint8_t DefaultAttrs = NoDestructor;
@@ -170,9 +238,18 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   static ObjectData* newInstanceRawSmall(Class*, size_t size, size_t index);
   static ObjectData* newInstanceRawBig(Class*, size_t size);
   static ObjectData* newInstanceRawAttrsSmall(Class*, size_t size, size_t index,
-      uint8_t attrs);
+                                              uint8_t attrs);
   static ObjectData* newInstanceRawAttrsBig(Class*, size_t size,
-      uint8_t attrs);
+                                            uint8_t attrs);
+
+  static ObjectData* newInstanceRawMemoSmall(Class*, size_t size,
+                                             size_t index, size_t objoff);
+  static ObjectData* newInstanceRawMemoBig(Class*, size_t size, size_t objoff);
+  static ObjectData* newInstanceRawMemoAttrsSmall(Class*, size_t size,
+                                                  size_t index, size_t objoff,
+                                                  uint8_t attrs);
+  static ObjectData* newInstanceRawMemoAttrsBig(Class*, size_t size,
+                                                size_t objoff, uint8_t attrs);
 
   void release() noexcept;
   void releaseNoObjDestructCheck() noexcept;
@@ -345,9 +422,20 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   tv_lval propLvalAtOffset(Slot);
   tv_rval propRvalAtOffset(Slot) const;
 
+  // Get a pointer to the i-th memo slot. The object must not have native data.
+  MemoSlot* memoSlot(Slot);
+  const MemoSlot* memoSlot(Slot) const;
+
+  // Get a pointer to the i-th memo slot. Use these if the object has native
+  // data. The second parameter is the size of the object's native data.
+  MemoSlot* memoSlotNativeData(Slot, size_t);
+  const MemoSlot* memoSlotNativeData(Slot, size_t) const;
+
  public:
   const Func* methodNamed(const StringData*) const;
   static size_t sizeForNProps(Slot);
+
+  static size_t objOffFromMemoNode(const Class*);
 
   //============================================================================
   // Properties.
@@ -447,6 +535,8 @@ private:
   bool toBooleanImpl() const noexcept;
   int64_t toInt64Impl() const noexcept;
   double toDoubleImpl() const noexcept;
+
+  bool slowDestroyCheck() const;
 
 // offset:  0        8       12   16   20          32
 // 64bit:   header   cls          id   [subclass]  [props...]

@@ -55,6 +55,7 @@ inline ObjectData::ObjectData(Class* cls, NoInit, uint8_t flags,
   : ObjectData(cls, InitRaw{}, flags, kind)
 {
   assertx(cls->numDeclProperties() == 0);
+  assertx(!cls->hasMemoSlots());
 }
 
 inline size_t ObjectData::heapSize() const {
@@ -76,11 +77,24 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
     obj = ctor(cls);
     assertx(obj->checkCount());
     assertx(obj->hasInstanceDtor());
+  } else if (cls->hasMemoSlots()) {
+    auto const size = sizeForNProps(cls->numDeclProperties());
+    auto const objOff = objOffFromMemoNode(cls);
+    auto mem = tl_heap->objMalloc(size + objOff);
+    new (NotNull{}, mem) MemoNode(objOff);
+    std::memset(
+      reinterpret_cast<char*>(mem) + sizeof(MemoNode),
+      0,
+      objOff - sizeof(MemoNode)
+    );
+    obj = new (NotNull{}, reinterpret_cast<char*>(mem) + objOff)
+      ObjectData(cls);
+    assertx(obj->hasExactlyOneRef());
+    assertx(!obj->hasInstanceDtor());
   } else {
-    size_t nProps = cls->numDeclProperties();
-    size_t size = sizeForNProps(nProps);
+    auto const size = sizeForNProps(cls->numDeclProperties());
     auto& mm = *tl_heap;
-    obj = new (mm.objMalloc(size)) ObjectData(cls);
+    obj = new (NotNull{}, mm.objMalloc(size)) ObjectData(cls);
     assertx(obj->hasExactlyOneRef());
     assertx(!obj->hasInstanceDtor());
   }
@@ -101,10 +115,23 @@ inline ObjectData* ObjectData::newInstanceNoPropInit(Class* cls) {
          !(cls->attrs() &
            (AttrAbstract | AttrInterface | AttrTrait | AttrEnum)));
 
-  size_t nProps = cls->numDeclProperties();
-  size_t size = sizeForNProps(nProps);
-  auto const obj = new (tl_heap->objMalloc(size))
-                   ObjectData(cls, InitRaw{}, cls->getODAttrs());
+  ObjectData* obj;
+  auto const size = sizeForNProps(cls->numDeclProperties());
+  if (cls->hasMemoSlots()) {
+    auto const objOff = objOffFromMemoNode(cls);
+    auto mem = tl_heap->objMalloc(size + objOff);
+    new (NotNull{}, mem) MemoNode(objOff);
+    std::memset(
+      reinterpret_cast<char*>(mem) + sizeof(MemoNode),
+      0,
+      objOff - sizeof(MemoNode)
+    );
+    obj = new (NotNull{}, reinterpret_cast<char*>(mem) + objOff)
+      ObjectData(cls, InitRaw{}, cls->getODAttrs());
+  } else {
+    obj = new (NotNull{}, tl_heap->objMalloc(size))
+      ObjectData(cls, InitRaw{}, cls->getODAttrs());
+  }
   assertx(obj->hasExactlyOneRef());
   return obj;
 }
@@ -271,8 +298,43 @@ inline bool ObjectData::hasDynProps() const {
   return getAttribute(HasDynPropArr) && dynPropArray().size() != 0;
 }
 
+inline MemoSlot* ObjectData::memoSlot(Slot slot) {
+  assertx(!hasNativeData());
+  assertx(slot < m_cls->numMemoSlots());
+  return reinterpret_cast<MemoSlot*>(this) - slot - 1;
+}
+
+inline const MemoSlot* ObjectData::memoSlot(Slot slot) const {
+  assertx(!hasNativeData());
+  assertx(slot < m_cls->numMemoSlots());
+  return reinterpret_cast<const MemoSlot*>(this) - slot - 1;
+}
+
+inline MemoSlot* ObjectData::memoSlotNativeData(Slot slot,
+                                                size_t ndiSize) {
+  assertx(slot < m_cls->numMemoSlots());
+  return reinterpret_cast<MemoSlot*>(
+    reinterpret_cast<char*>(this) - alignTypedValue(ndiSize)
+  ) - slot - 1;
+}
+
+inline const MemoSlot* ObjectData::memoSlotNativeData(
+  Slot slot, size_t ndiSize
+) const {
+  assertx(slot < m_cls->numMemoSlots());
+  return reinterpret_cast<const MemoSlot*>(
+    reinterpret_cast<const char*>(this) - alignTypedValue(ndiSize)
+  ) - slot - 1;
+}
+
 inline size_t ObjectData::sizeForNProps(Slot nProps) {
   return sizeof(ObjectData) + sizeof(TypedValue) * nProps;
+}
+
+inline size_t ObjectData::objOffFromMemoNode(const Class* cls) {
+  assertx(cls->hasMemoSlots());
+  assertx(!cls->getNativeDataInfo());
+  return cls->numMemoSlots() * sizeof(MemoSlot) + sizeof(MemoNode);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

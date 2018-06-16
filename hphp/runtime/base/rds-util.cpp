@@ -38,6 +38,34 @@ bindClassConstant(const StringData* clsName, const StringData* cnsName) {
   return ret;
 }
 
+Link<Cell, rds::Mode::Normal>
+bindStaticMemoValue(const Func* func) {
+  return bind<Cell,Mode::Normal>(
+    StaticMemoValue { func->getFuncId() }
+  );
+}
+
+Link<Cell, rds::Mode::Normal>
+attachStaticMemoValue(const Func* func) {
+  return attach<Cell,Mode::Normal>(
+    StaticMemoValue { func->getFuncId() }
+  );
+}
+
+Link<MemoCacheBase*, rds::Mode::Normal>
+bindStaticMemoCache(const Func* func) {
+  return bind<MemoCacheBase*,Mode::Normal>(
+    StaticMemoCache { func->getFuncId() }
+  );
+}
+
+Link<MemoCacheBase*, rds::Mode::Normal>
+attachStaticMemoCache(const Func* func) {
+  return attach<MemoCacheBase*,Mode::Normal>(
+    StaticMemoCache { func->getFuncId() }
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

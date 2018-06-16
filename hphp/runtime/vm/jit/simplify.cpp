@@ -2482,7 +2482,9 @@ SSATmp* simplifyCheckInitSProps(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyInitObjProps(State& env, const IRInstruction* inst) {
   auto const cls = inst->extra<InitObjProps>()->cls;
-  if (cls->getODAttrs() == 0 && cls->numDeclProperties() == 0) {
+  if (cls->getODAttrs() == 0 &&
+      cls->numDeclProperties() == 0 &&
+      !cls->hasMemoSlots()) {
     return gen(env, Nop);
   }
   return nullptr;

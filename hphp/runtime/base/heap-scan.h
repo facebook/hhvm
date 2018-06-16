@@ -88,6 +88,25 @@ inline void scanAFWH(const c_Awaitable* wh, type_scan::Scanner& scanner) {
   return wh->scan(scanner);
 }
 
+inline void scanMemoSlots(const ObjectData* obj,
+                          type_scan::Scanner& scanner,
+                          bool isNative) {
+  auto const cls = obj->getVMClass();
+  assertx(cls->hasMemoSlots());
+
+  if (!obj->getAttribute(ObjectData::UsedMemoCache)) return;
+
+  auto const numSlots = cls->numMemoSlots();
+  if (!isNative) {
+    for (Slot i = 0; i < numSlots; ++i) scanner.scan(*obj->memoSlot(i));
+  } else {
+    auto const ndi = cls->getNativeDataInfo();
+    for (Slot i = 0; i < numSlots; ++i) {
+      scanner.scan(*obj->memoSlotNativeData(i, ndi->sz));
+    }
+  }
+}
+
 inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
   switch (h->kind()) {
     case HeaderKind::Empty:
@@ -123,13 +142,22 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
     case HeaderKind::NativeData: {
       auto native = static_cast<const NativeNode*>(h);
       scanNative(native, scanner);
-      return Native::obj(native)->scan(scanner);
+      auto const obj = Native::obj(native);
+      if (UNLIKELY(obj->getVMClass()->hasMemoSlots())) {
+        scanMemoSlots(obj, scanner, true);
+      }
+      return obj->scan(scanner);
     }
     case HeaderKind::AsyncFuncFrame:
       return scanAFWH(asyncFuncWH(h), scanner);
     case HeaderKind::ClosureHdr:
       scanner.scan(*static_cast<const ClosureHdr*>(h));
       return closureObj(h)->scan(scanner);
+    case HeaderKind::MemoData: {
+      auto const obj = memoObj(h);
+      scanMemoSlots(obj, scanner, false);
+      return obj->scan(scanner);
+    }
     case HeaderKind::Pair:
       return static_cast<const c_Pair*>(h)->scan(scanner);
     case HeaderKind::Vector:

@@ -224,6 +224,9 @@ struct Profile { TransID transId;
 struct SPropCache { LowPtr<const Class> cls;
                     Slot slot; };
 
+struct StaticMemoValue { FuncId funcId; };
+struct StaticMemoCache { FuncId funcId; };
+
 using Symbol = boost::variant< StaticLocal
                              , ClsConstant
                              , StaticMethod
@@ -239,6 +242,8 @@ using Symbol = boost::variant< StaticLocal
                              , Profile<jit::SwitchProfile>
                              , Profile<jit::TypeProfile>
                              , SPropCache
+                             , StaticMemoValue
+                             , StaticMemoCache
                              >;
 
 //////////////////////////////////////////////////////////////////////

@@ -142,6 +142,7 @@ finish_class() {
   assertx((cls == wh) || (cls->classof(wh)));
   assertx(cls->numDeclProperties() == 0);
   assertx(cls->numStaticProperties() == 0);
+  assertx(!cls->hasMemoSlots());
   DEBUG_ONLY auto const ctor = cls->getCtor();
   assertx(ctor == wh->getCtor());
   assertx(ctor->attrs() & AttrPrivate);

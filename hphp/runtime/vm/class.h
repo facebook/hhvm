@@ -38,6 +38,8 @@
 #include <folly/Hash.h>
 #include <folly/Range.h>
 
+#include <boost/container/flat_map.hpp>
+
 #include <list>
 #include <memory>
 #include <type_traits>
@@ -1015,6 +1017,26 @@ public:
    */
   const ScopedClonesMap& scopedClones() const;
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Memoization
+  //
+
+  /*
+   * Whether an object of this class will have memo slots.
+   */
+  bool hasMemoSlots() const;
+
+  /*
+   * Return the number of memo slots an object of this class will require.
+   */
+  size_t numMemoSlots() const;
+
+  /*
+   * Given a function (belonging to this class or a parent), return the slot it
+   * should use for memoization, and whether that slot is shared. The function
+   * must be a memoize wrapper.
+   */
+  std::pair<Slot, bool> memoSlotForFunc(FuncId func) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Other methods.
@@ -1091,7 +1113,6 @@ public:
 
 private:
   struct ExtraData {
-    ExtraData() {}
     ~ExtraData();
 
     /*
@@ -1147,6 +1168,21 @@ private:
      * Cache of persistent enum values, managed by EnumCache.
      */
     std::atomic<EnumValues*> m_enumValues{nullptr};
+
+    /*
+     * Mapping of functions (in this class only) to their assigned slots and
+     * whether the slot is shared. This is not inherited from the parent.
+     */
+    boost::container::flat_map<FuncId, std::pair<Slot, bool>> m_memoMappings;
+    /*
+     * Maps a parameter count to an assigned slot for that count. This is
+     * inherited from the parent.
+     */
+    boost::container::flat_map<size_t, Slot> m_sharedMemoSlots;
+    /*
+     * The next memo slot to assign. This is inherited from the parent.
+     */
+    Slot m_nextMemoSlot{0};
   };
 
   /*
@@ -1305,6 +1341,7 @@ private:
   void checkRequirementConstraints() const;
   void raiseUnsatisfiedRequirement(const PreClass::ClassRequirement*) const;
   void setNativeDataInfo();
+  void setMemoCacheInfo();
 
   template<bool setParents> void setInstanceBitsImpl();
   void addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const;

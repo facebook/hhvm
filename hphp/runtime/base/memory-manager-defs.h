@@ -206,6 +206,20 @@ inline ObjectData* closureObj(HeapObject* h) {
   return obj;
 }
 
+inline ObjectData* memoObj(HeapObject* h) {
+  assertx(h->kind() == HeaderKind::MemoData);
+  auto hdr = static_cast<MemoNode*>(h);
+  auto obj = reinterpret_cast<ObjectData*>((char*)hdr + hdr->objOff());
+  assertx(obj->headerKind() == HeaderKind::Object);
+  assertx(obj->getVMClass()->hasMemoSlots());
+  assertx(hdr->objOff() == ObjectData::objOffFromMemoNode(obj->getVMClass()));
+  return obj;
+}
+
+inline const ObjectData* memoObj(const HeapObject* h) {
+  return memoObj(const_cast<HeapObject*>(h));
+}
+
 // if this header is one of the types that contains an ObjectData,
 // return the (possibly inner ptr) ObjectData*
 inline const ObjectData* innerObj(const HeapObject* h) {
@@ -214,6 +228,7 @@ inline const ObjectData* innerObj(const HeapObject* h) {
          h->kind() == HeaderKind::NativeData ?
            Native::obj(static_cast<const NativeNode*>(h)) :
          h->kind() == HeaderKind::ClosureHdr ? closureObj(h) :
+         h->kind() == HeaderKind::MemoData ? memoObj(h) :
          nullptr;
 }
 
@@ -270,6 +285,7 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* AsyncFuncFrame */
     0, /* NativeData */
     0, /* ClosureHdr */
+    0, /* MemoData */
     0, /* Cpp */
     0, /* SmallMalloc */
     0, /* BigMalloc */
@@ -310,6 +326,7 @@ inline size_t allocSize(const HeapObject* h) {
   CHECKSIZE(AsyncFuncFrame)
   CHECKSIZE(NativeData)
   CHECKSIZE(ClosureHdr)
+  CHECKSIZE(MemoData)
   CHECKSIZE(Cpp)
   CHECKSIZE(SmallMalloc)
   CHECKSIZE(BigMalloc)
@@ -360,6 +377,9 @@ inline size_t allocSize(const HeapObject* h) {
       // [ClosureHdr][ObjectData][use vars]
       size = static_cast<const ClosureHdr*>(h)->size();
       break;
+    case HeaderKind::MemoData:
+      size = static_cast<const MemoNode*>(h)->objOff() + memoObj(h)->heapSize();
+      break;
     case HeaderKind::WaitHandle: {
       // size = table[h->whkind & mask]
       // [ObjectData][subclass]
@@ -393,7 +413,7 @@ inline size_t allocSize(const HeapObject* h) {
       break;
     case HeaderKind::NativeData: {
       // h->obj_offset + (h+h->obj_offset)->m_cls->m_extra * sz(TV) + sz(OD)
-      // [NativeNode][NativeData][ObjectData][props] is one allocation.
+      // [NativeNode][Memo Slots][NativeData][ObjectData][props] is one alloc.
       // Generators -
       // [NativeNode][NativeData<locals><Resumable><GeneratorData>][ObjectData]
       auto native = static_cast<const NativeNode*>(h);

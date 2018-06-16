@@ -325,6 +325,7 @@ bool record_request_heap_mem_event(const void* addr,
     case HeaderKind::AsyncFuncFrame:
     case HeaderKind::NativeData:
     case HeaderKind::ClosureHdr:
+    case HeaderKind::MemoData:
       break;
 
     case HeaderKind::Cpp:

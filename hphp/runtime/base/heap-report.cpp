@@ -90,6 +90,7 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::AsyncFuncFrame:
     case HeaderKind::NativeData:
     case HeaderKind::ClosureHdr:
+    case HeaderKind::MemoData:
       break;
     case HeaderKind::Free:
       out << "[" << static_cast<const FreeNode*>(h)->size() << "]";

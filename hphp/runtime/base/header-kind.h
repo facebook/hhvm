@@ -61,6 +61,7 @@ enum class HeaderKind : uint8_t {
   AsyncFuncFrame, // NativeNode followed by Frame, Resumable, AFWH
   NativeData, // a NativeData header preceding an HNI ObjectData
   ClosureHdr, // a ClosureHdr preceding a Closure ObjectData
+  MemoData, // Memoization data preceding an ObjectData
   Cpp, // a managed object with associated C++ type
   SmallMalloc, // small req::malloc'd block
   BigMalloc, // big req::malloc'd block
@@ -146,8 +147,9 @@ enum class GCBits : uint8_t {};
  * Note: X in bit 50 is the kHasApcTv flag; see array-data.h
  *
  * Note: when an ObjectData is preceded by a special header (AsyncFuncFrame,
- * NativeData, or ClosureHeader), only the special header is marked using
- * the m_marks field; the m_marks field on the interior ObjectData is unused.
+ * NativeData, ClosureHeader, or MemoData), only the special header is marked
+ * using the m_marks field; the m_marks field on the interior ObjectData is
+ * unused.
  *
  * Special headers have non-refcount uses for m_aux32:
  *
@@ -155,6 +157,7 @@ enum class GCBits : uint8_t {};
  * [ ar_off | kind | marks |              ] AsyncFuncFrame (NativeNode)
  * [ ar_off | kind | marks | tyindex:16   ] NativeData (NativeNode)
  * [ size   | kind | marks |              ] ClosureHeader (ClosureHdr)
+ * [ objoff | kind | marks |              ] MemoData
  * [        | kind | marks | tyindex:16   ] Cpp, SmallMalloc (MallocNode)
  * [ index  | kind | marks | tyindex:16   ] BigMalloc (MallocNode)
  * [ index  | kind | marks | kIndexUnkown ] BigObj (MallocNode)

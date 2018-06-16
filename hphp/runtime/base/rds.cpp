@@ -69,6 +69,8 @@ struct SymbolKind : boost::static_visitor<std::string> {
   template<typename T>
   std::string operator()(Profile<T> /*k*/) const { return "Profile"; }
   std::string operator()(SPropCache /*k*/) const { return "SPropCache"; }
+  std::string operator()(StaticMemoValue) const { return "StaticMemoValue"; }
+  std::string operator()(StaticMemoCache) const { return "StaticMemoCache"; }
 };
 
 struct SymbolRep : boost::static_visitor<std::string> {
@@ -104,6 +106,15 @@ struct SymbolRep : boost::static_visitor<std::string> {
   std::string operator()(SPropCache k) const {
     return k.cls->name()->toCppString() + "::" +
            k.cls->staticProperties()[k.slot].name->toCppString();
+  }
+
+  std::string operator()(StaticMemoValue k) const {
+    auto const func = Func::fromFuncId(k.funcId);
+    return func->fullName()->toCppString();
+  }
+  std::string operator()(StaticMemoCache k) const {
+    auto const func = Func::fromFuncId(k.funcId);
+    return func->fullName()->toCppString();
   }
 };
 
@@ -147,6 +158,14 @@ struct SymbolEq : boost::static_visitor<bool> {
   bool operator()(SPropCache k1, SPropCache k2) const {
     return k1.cls == k2.cls && k1.slot == k2.slot;
   }
+
+  bool operator()(StaticMemoValue k1, StaticMemoValue k2) const {
+    return k1.funcId == k2.funcId;
+  }
+
+  bool operator()(StaticMemoCache k1, StaticMemoCache k2) const {
+    return k1.funcId == k2.funcId;
+  }
 };
 
 struct SymbolHash : boost::static_visitor<size_t> {
@@ -182,6 +201,12 @@ struct SymbolHash : boost::static_visitor<size_t> {
     );
   }
 
+  size_t operator()(StaticMemoValue k) const {
+    return std::hash<FuncId>()(k.funcId);
+  }
+  size_t operator()(StaticMemoCache k) const {
+    return std::hash<FuncId>()(k.funcId);
+  }
 };
 
 struct HashCompare {

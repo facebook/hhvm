@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/instance-bits.h"
+#include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
 #include "hphp/runtime/vm/unit-util.h"
@@ -1734,6 +1735,7 @@ Class::Class(PreClass* preClass, Class* parent,
   setRequirements();
   setNativeDataInfo();
   setEnumType();
+  setMemoCacheInfo();
 
   // A class is allowed to implement two interfaces that share the same slot if
   // we'll fatal trying to define that class, so this has to happen after all
@@ -2955,6 +2957,122 @@ void Class::setEnumType() {
       raise_error("Invalid base type for enum %s",
                   m_preClass->name()->data());
     }
+  }
+}
+
+void Class::setMemoCacheInfo() {
+  // Inherit the data from the parent, if any.
+  if (m_parent && m_parent->hasMemoSlots()) {
+    allocExtraData();
+    m_extra.raw()->m_nextMemoSlot = m_parent->m_extra->m_nextMemoSlot;
+    m_extra.raw()->m_sharedMemoSlots = m_parent->m_extra->m_sharedMemoSlots;
+  }
+
+  // If we have memo slots defined already, and this class is adding (or
+  // changing) native data, forbid it. The parent class won't realize the native
+  // data has changed size, so code we generate in it to access the slot will be
+  // incorrect (it won't find the slot in the right place). If we ever have a
+  // need to actually do this, we'll have to revisit this.
+  if (m_preClass->nativeDataInfo() && m_extra->m_nextMemoSlot > 0) {
+    raise_error(
+      "Class '%s' with existing memoized methods cannot have native-data added",
+      m_preClass->name()->data()
+    );
+  }
+
+  auto const forEachMeth = [&](auto f) {
+    auto const methodCount = numMethods();
+    for (Slot i = 0; i < methodCount; ++i) {
+      auto const m = getMethod(i);
+      if (m->isMemoizeWrapper() && !m->isStatic() && m->cls() == this) f(m);
+    }
+  };
+
+  auto const addNonShared = [&](const Func* f) {
+    allocExtraData();
+    auto extra = m_extra.raw();
+    extra->m_memoMappings.emplace(
+      f->getFuncId(),
+      std::make_pair(extra->m_nextMemoSlot++, false)
+    );
+  };
+
+  auto const addShared = [&](const Func* f) {
+    allocExtraData();
+    auto extra = m_extra.raw();
+
+    // There's no point in allocating slots for parameter counts greater than
+    // kMemoCacheMaxSpecializedKeys, since they'll all be generic caches
+    // anyways. Cap the count at that.
+    auto const keyCount =
+      std::min<size_t>(f->numParams(), kMemoCacheMaxSpecializedKeys + 1);
+    auto const it = extra->m_sharedMemoSlots.find(keyCount);
+    if (it != extra->m_sharedMemoSlots.end()) {
+      extra->m_memoMappings.emplace(
+        f->getFuncId(),
+        std::make_pair(it->second, true)
+      );
+      return;
+    }
+
+    extra->m_sharedMemoSlots.emplace(keyCount, extra->m_nextMemoSlot);
+    extra->m_memoMappings.emplace(
+      f->getFuncId(),
+      std::make_pair(extra->m_nextMemoSlot++, true)
+    );
+  };
+
+  // First count how many methods we have without parameters or with parameters.
+  size_t methNoKeys = 0;
+  size_t methWithKeys = 0;
+  forEachMeth(
+    [&](const Func* f) {
+      if (f->numParams() == 0) {
+        ++methNoKeys;
+      } else {
+        ++methWithKeys;
+      }
+    }
+  );
+
+  // We only want to assign up to EvalNonSharedInstanceMemoCaches non-shared
+  // caches. With the remaining non-assigned slots, we give preference to the
+  // parameter-less methods first. This is because there's a greater benefit to
+  // giving parameter-less methods non-shared slots (they can just be a
+  // Cell). However, we only give the methods non-shared slots if we can give
+  // them to all the methods. If there's more methods than we have available
+  // non-shared slots, its not clear which ones should get the non-shared slots
+  // and which ones shouldn't, so we treat them all equally and give them all
+  // shared slots. After processing the parameter-less methods, we apply the
+  // same logic to the methods with parameters.
+
+  // How many non-shared slots do we have left to allocate?
+  auto slotsLeft =
+    RuntimeOption::EvalNonSharedInstanceMemoCaches -
+    std::min(
+      m_extra->m_nextMemoSlot,
+      RuntimeOption::EvalNonSharedInstanceMemoCaches
+    );
+
+  if (methNoKeys > 0) {
+    forEachMeth(
+      [&](const Func* f) {
+        if (f->numParams() == 0) {
+          (methNoKeys <= slotsLeft) ? addNonShared(f) : addShared(f);
+        }
+      }
+    );
+    if (methNoKeys <= slotsLeft) slotsLeft -= methNoKeys;
+  }
+
+  if (methWithKeys > 0) {
+    forEachMeth(
+      [&](const Func* f) {
+        if (f->numParams() > 0) {
+          (methWithKeys <= slotsLeft) ? addNonShared(f) : addShared(f);
+        }
+      }
+    );
   }
 }
 

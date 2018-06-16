@@ -49,7 +49,7 @@ req::shared_ptr<WeakRefData> WeakRefData::forObject(Object obj) {
   } else {
     wr_data = req::make_shared<WeakRefData>(make_tv<KindOfObject>(obj.get()));
 
-    obj->setWeakRefed(true);
+    obj->setWeakRefed();
     req::weak_ptr<WeakRefData> weak_data = req::weak_ptr<WeakRefData>(wr_data);
     if (!(weakmap->insert(
             {(uintptr_t)obj.get(), weak_data}).second)) {
@@ -63,7 +63,6 @@ req::shared_ptr<WeakRefData> WeakRefData::forObject(Object obj) {
 WeakRefData::~WeakRefData() {
   if (pointee.m_type != KindOfUninit) {
     ObjectData* obj = unpack_tv<KindOfObject>(&pointee);
-    obj->setWeakRefed(false);
     s_weakref_data.get()->erase((uintptr_t)obj);
   }
 }

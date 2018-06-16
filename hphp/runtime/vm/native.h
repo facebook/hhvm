@@ -227,7 +227,7 @@ enum Attr {
  */
 bool coerceFCallArgs(TypedValue* args,
                      int32_t numArgs, int32_t numNonDefault,
-                     const Func* func, bool useStrictTypes);
+                     const Func* func);
 
 /**
  * Dispatches a call to the native function bound to <func>

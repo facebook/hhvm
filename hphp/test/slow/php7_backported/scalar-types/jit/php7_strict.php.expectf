@@ -1,0 +1,5 @@
+
+Fatal error: Uncaught TypeError: Argument 1 passed to crc32() must be an instance of string, int given in %s/test/slow/php7_backported/scalar-types/jit/php7_strict.php:4
+Stack trace:
+#0 %s/test/slow/php7_backported/scalar-types/jit/php7_strict.php(4): crc32()
+#1 {main}

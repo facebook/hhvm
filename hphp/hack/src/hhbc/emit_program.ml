@@ -66,9 +66,6 @@ let from_ast ~is_hh_file ~is_evaled ast =
         (* is scalar_types is set - always assume strict_types to have value *)
         if Hhbc_options.php7_scalar_types !(Hhbc_options.compiler_options)
         then begin match strict_types with
-          (* If scalar types AND hack is on, then strict mode is on *)
-          | _ when Hhbc_options.enable_hiphop_syntax !(Hhbc_options.compiler_options) ->
-            Some true
           | None -> Some false
           | _ -> strict_types
           end

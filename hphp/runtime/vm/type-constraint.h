@@ -285,20 +285,17 @@ struct TypeConstraint {
   bool checkTypeAliasNonObj(const TypedValue* tv) const;
 
   // NB: will throw if the check fails.
-  void verifyParam(TypedValue* tv, const Func* func, int paramNum,
-                   bool useStrictTypes = true) const {
+  void verifyParam(TypedValue* tv, const Func* func, int paramNum) const {
     if (UNLIKELY(!check(tv, func))) {
-      verifyParamFail(func, tv, paramNum, useStrictTypes);
+      verifyParamFail(func, tv, paramNum);
     }
   }
-  void verifyReturn(TypedValue* tv, const Func* func,
-                    bool useStrictTypes = true) const {
+  void verifyReturn(TypedValue* tv, const Func* func) const {
     if (UNLIKELY(!check(tv, func))) {
-      verifyReturnFail(func, tv, useStrictTypes);
+      verifyReturnFail(func, tv);
     }
   }
-  void verifyReturnNonNull(TypedValue* tv, const Func* func,
-                           bool useStrictTypes = true) const;
+  void verifyReturnNonNull(TypedValue* tv, const Func* func) const;
   void verifyOutParam(TypedValue* tv, const Func* func, int paramNum) const {
     if (UNLIKELY(!check(tv, func))) {
       verifyOutParamFail(func, tv, paramNum);
@@ -309,14 +306,12 @@ struct TypeConstraint {
   void selfToClass(const Func* func, const Class **cls) const;
   void thisToClass(const Class **cls) const;
   void parentToClass(const Func* func, const Class **cls) const;
-  void verifyFail(const Func* func, TypedValue* tv, int id,
-                  bool useStrictTypes) const;
+  void verifyFail(const Func* func, TypedValue* tv, int id) const;
   void verifyParamFail(const Func* func, TypedValue* tv,
-                       int paramNum, bool useStrictTypes = true) const;
+                       int paramNum) const;
   void verifyOutParamFail(const Func* func, TypedValue* tv, int paramNum) const;
-  void verifyReturnFail(const Func* func, TypedValue* tv,
-                        bool useStrictTypes = true) const {
-    verifyFail(func, tv, ReturnId, useStrictTypes);
+  void verifyReturnFail(const Func* func, TypedValue* tv) const {
+    verifyFail(func, tv, ReturnId);
   }
 
 private:
@@ -373,6 +368,8 @@ enum class MemoKeyConstraint {
 MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint&);
 
 const char* describe_actual_type(const TypedValue* tv, bool isHHType);
+
+bool call_uses_strict_types(const Func* func);
 
 }
 

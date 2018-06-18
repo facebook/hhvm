@@ -257,6 +257,28 @@ let test_merge_into_current () =
     (Errors.get_error_list errors |> error_list_to_string) error_message;
   true
 
+(* Errors.merge is called on very critical paths in Parsing_service,
+ * Decl_redecl_service, and Typing_check_service to merge partial results from
+ * workers. If it's too slow, it delays scheduling of more jobs, and hurts
+ * parallelism rate. All those callsites pass the second argument as the
+ * accumulator, so the runtime needs to be proportional to the size of first
+ * argument. *)
+let test_performance () =
+  let n = 1000000 in
+  let rec aux acc = function
+    | 0 -> acc
+    | n ->
+      let path = (string_of_int n) ^ ".php" in
+      let errors, () =
+        Errors.(do_with_context (create_path path) Typing) begin fun () ->
+          error_in path
+        end
+      in
+      (* note argument order: small first, big second *)
+      aux (Errors.merge errors acc) (n-1)
+  in
+  let errors = aux Errors.empty n in
+  List.length (Errors.get_error_list errors) == n
 
 let tests = [
   "test", test_do;
@@ -267,6 +289,7 @@ let tests = [
   "test_phases", test_phases;
   "test_incremental_update", test_incremental_update;
   "test_merge_into_current", test_merge_into_current;
+  "test_performance", test_performance;
 ]
 
 let () =

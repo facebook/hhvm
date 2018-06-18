@@ -59,10 +59,13 @@ let files_t_map v ~f =
   end
 
 let files_t_merge ~f x y =
-  Relative_path.Map.merge x y ~f:begin fun k x y ->
-    let x = Option.value x ~default:PhaseMap.empty in
-    let y = Option.value y ~default:PhaseMap.empty in
-    Some (PhaseMap.merge x y ~f:(fun phase x y -> f phase k x y))
+  (* Using fold instead of merge to make the runtime proportional to the size
+   * of first argument (like List.rev_append ) *)
+  Relative_path.Map.fold x ~init:y ~f:begin fun k x acc ->
+    let y = Option.value (Relative_path.Map.get y k) ~default:PhaseMap.empty in
+    Relative_path.Map.add acc k (
+      PhaseMap.merge x y ~f:(fun phase x y -> f phase k x y)
+    )
   end
 
 let files_t_to_list x =
@@ -566,7 +569,7 @@ and incremental_update :
     | Some x -> Relative_path.Map.add acc path x
   in
   (* Replace old errors with new *)
-  let res = files_t_merge old new_ ~f:begin fun phase path old new_ ->
+  let res = files_t_merge new_ old ~f:begin fun phase path new_ old ->
     if path = Relative_path.default then begin
       let phase = match phase with
         | Init -> "Init"

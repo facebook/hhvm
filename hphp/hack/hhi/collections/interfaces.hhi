@@ -1402,7 +1402,7 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
 <<__Sealed(ImmSet::class, MutableSet::class)>>
 interface ConstSet<+Tv> extends ConstCollection<Tv>,
                                 ConstSetAccess<Tv>,
-                                HH\Rx\KeyedIterable<mixed, Tv>,
+                                HH\Rx\KeyedIterable<arraykey, Tv>,
                                 Container<Tv> {
   /**
    * Returns a `ConstVector` containing the values of the current `ConstSet`.
@@ -1425,7 +1425,7 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
    *           current `ConstSet`.
    */
   <<__Rx, __MutableReturn>>
-  public function keys(): ConstVector<mixed>;
+  public function keys(): ConstVector<arraykey>;
   /**
    * Returns a `ConstSet` containing the values after an operation has been
    * applied to each value in the current `ConstSet`.
@@ -1462,7 +1462,7 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
    *           operation on the current `ConstSet`'s values is applied.
    */
   <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
-  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(mixed, Tv): Tu) $fn): ConstSet<Tu>;
+  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(arraykey, Tv): Tu) $fn): ConstSet<Tu>;
   /**
    * Returns a `ConstSet` containing the values of the current `ConstSet` that
    * meet a supplied condition applied to each value.
@@ -1498,7 +1498,7 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
    *           condition is applied to the values of the current `ConstSet`.
    */
   <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(mixed, Tv): bool) $fn): ConstSet<Tv>;
+  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(arraykey, Tv): bool) $fn): ConstSet<Tv>;
   /**
    * Returns a `ConstSet` where each value is a `Pair` that combines the value
    * of the current `ConstSet` and the provided `Traversable`.
@@ -1641,7 +1641,7 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
    *           `ConstSet` is empty.
    */
   <<__Rx>>
-  public function firstKey(): mixed;
+  public function firstKey(): ?arraykey;
   /**
    * Returns the last value in the current `ConstSet`.
    *
@@ -1661,7 +1661,7 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
    *           current `ConstSet` is empty.
    */
   <<__Rx>>
-  public function lastKey(): mixed;
+  public function lastKey(): ?arraykey;
 
   <<__Rx>> /* HH_FIXME[0002] */
   public function toVArray(): varray<Tv>;
@@ -1703,7 +1703,7 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
    *           current `MutableSet`.
    */
   <<__Rx, __MutableReturn>>
-  public function keys(): MutableVector<mixed>;
+  public function keys(): MutableVector<arraykey>;
   /**
    * Returns a `MutableSet` containing the values after an operation has been
    * applied to each value in the current `MutableSet`.
@@ -1740,7 +1740,7 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
    *           operation on the current `MutableSet`'s values is applied.
    */
   <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
-  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(mixed, Tv): Tu) $fn): MutableSet<Tu>;
+  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(arraykey, Tv): Tu) $fn): MutableSet<Tu>;
   /**
    * Returns a `MutableSet` containing the values of the current `MutableSet`
    * that meet a supplied condition applied to each value.
@@ -1776,7 +1776,7 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
    *           condition is applied to the values of the current `MutableSet`.
    */
   <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(mixed, Tv): bool) $fn):
+  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(arraykey, Tv): bool) $fn):
     MutableSet<Tv>;
   /**
    * Returns a `MutableSet` where each value is a `Pair` that combines the
@@ -1922,7 +1922,7 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
    *           `MutableSet` is empty.
    */
   <<__Rx>>
-  public function firstKey(): mixed;
+  public function firstKey(): ?arraykey;
   /**
    * Returns the last value in the current `MutableSet`.
    *
@@ -1942,7 +1942,7 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
    *           current `MutableSet` is empty.
    */
   <<__Rx>>
-  public function lastKey(): mixed;
+  public function lastKey(): ?arraykey;
 
   <<__Rx>> /* HH_FIXME[0002] */
   public function toVArray(): varray<Tv>;

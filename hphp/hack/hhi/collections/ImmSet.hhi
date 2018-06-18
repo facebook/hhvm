@@ -123,7 +123,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *           `ImmSet`.
    */
   <<__Rx, __MutableReturn>>
-  public function getIterator(): HH\Rx\KeyedIterator<mixed, Tv>;
+  public function getIterator(): HH\Rx\KeyedIterator<arraykey, Tv>;
 
   /**
    * Creates an `ImmSet` from the given `Traversable`, or an empty `ImmSet` if
@@ -209,7 +209,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
   <<__Rx, __MutableReturn>>  /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
-  public function toMap(): Map<mixed, Tv>;
+  public function toMap(): Map<arraykey, Tv>;
 
   /**
    * Returns an immutable map (`ImmMap`) based on the values of the current
@@ -222,7 +222,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *           value.
    */
   <<__Rx>>
-  public function toImmMap(): ImmMap<mixed, Tv>;
+  public function toImmMap(): ImmMap<arraykey, Tv>;
 
   /**
    * Returns a mutable copy (`Set`) of the current `ImmSet`.
@@ -286,7 +286,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - an `ImmVector` containing the values of the current `ImmSet`.
    */
   <<__Rx, __MutableReturn>>
-  public function keys(): ImmVector<mixed>;
+  public function keys(): ImmVector<arraykey>;
 
   /**
    * Returns a lazy, access elements only when needed view of the current
@@ -302,7 +302,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Rx, __MutableReturn>>
-  public function lazy(): HH\Rx\KeyedIterable<mixed, Tv>;
+  public function lazy(): HH\Rx\KeyedIterable<arraykey, Tv>;
 
   /**
    * Returns an `ImmSet` containing the values after an operation has been
@@ -341,7 +341,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *           operation on the current `ImmSet`'s values is applied.
    */
   <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
-  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(mixed, Tv): Tu) $callback):
+  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(arraykey, Tv): Tu) $callback):
     ImmSet<Tu>;
 
   /**
@@ -381,7 +381,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *
    */
   <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(mixed, Tv): bool) $callback):
+  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(arraykey, Tv): bool) $callback):
     ImmSet<Tv>;
 
   /**
@@ -534,7 +534,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *           current `ImmSet` is empty.
    */
   <<__Rx>>
-  public function firstKey(): mixed;
+  public function firstKey(): ?arraykey;
 
   /**
    * Returns the last value in the current `ImmSet`.
@@ -558,7 +558,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *           `ImmSet` is empty.
    */
   <<__Rx>>
-  public function lastKey(): mixed;
+  public function lastKey(): ?arraykey;
 
   <<__Rx>> /* HH_FIXME[0002] */
   public function toVArray(): varray<Tv>;

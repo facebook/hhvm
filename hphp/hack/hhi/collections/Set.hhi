@@ -120,7 +120,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *           each key of the `Map` being the same as its value.
    */
   <<__Rx, __MutableReturn>>
-  public function toMap(): Map<mixed, Tv>;
+  public function toMap(): Map<arraykey, Tv>;
 
   /**
    * Returns an immutable map (`ImmMap`) based on the values of the current
@@ -132,7 +132,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *           with each key of the Map being the same as its value.
    */
   <<__Rx>>
-  public function toImmMap(): ImmMap<mixed, Tv>;
+  public function toImmMap(): ImmMap<arraykey, Tv>;
 
   /**
    * Returns a deep copy of the current `Set`.
@@ -176,7 +176,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Rx, __MutableReturn>>
-  public function lazy(): HH\Rx\KeyedIterable<mixed, Tv>;
+  public function lazy(): HH\Rx\KeyedIterable<arraykey, Tv>;
 
   /**
    * Returns a `Vector` containing the values of the current `Set`.
@@ -200,7 +200,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *           current `Set`.
    */
   <<__Rx, __MutableReturn>>
-  public function keys(): Vector<mixed>;
+  public function keys(): Vector<arraykey>;
 
   /**
    * Returns a `Set` containing the values after an operation has been applied
@@ -238,7 +238,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *           on the current `Set`'s values is applied.
    */
   <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
-  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(mixed, Tv): Tu) $callback): Set<Tu>;
+  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(arraykey, Tv): Tu) $callback): Set<Tu>;
 
   /**
    * Returns a `Set` containing the values of the current `Set` that meet
@@ -277,7 +277,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    */
   <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(mixed, Tv): bool) $callback): Set<Tv>;
+  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(arraykey, Tv): bool) $callback): Set<Tv>;
 
   /**
    * Alters the current `Set` so that it only contains the values that meet a
@@ -316,7 +316,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - Returns itself.
    */
   <<__Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
-  public function retainWithKey(<<__OnlyRxIfRxFunc>>(function(mixed, Tv): bool) $callback): Set<Tv>;
+  public function retainWithKey(<<__OnlyRxIfRxFunc>>(function(arraykey, Tv): bool) $callback): Set<Tv>;
 
   /**
    * Throws an exception unless the current `Set` or the `Traversable` is
@@ -456,7 +456,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *           empty.
    */
   <<__Rx>>
-  public function firstKey(): mixed;
+  public function firstKey(): ?arraykey;
 
   /**
    * Returns the last value in the current `Set`.
@@ -478,7 +478,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *           `Set` is empty.
    */
   <<__Rx>>
-  public function lastKey(): mixed;
+  public function lastKey(): ?arraykey;
 
   /**
    * Checks if the current `Set` is empty.
@@ -611,7 +611,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - A `KeyedIterator` that allows you to traverse the current `Set`.
    */
   <<__Rx, __MutableReturn>>
-  public function getIterator(): HH\Rx\KeyedIterator<mixed, Tv>;
+  public function getIterator(): HH\Rx\KeyedIterator<arraykey, Tv>;
 
   /**
    * Returns a `Set` containing the values from the specified `array`.
@@ -694,13 +694,13 @@ final class Set<Tv> implements MutableSet<Tv> {
  *
  * Methods and functions should take and return the KeyedIterator interface.
  */
-class SetIterator<+Tv> implements HH\Rx\KeyedIterator<mixed, Tv> {
+class SetIterator<+Tv> implements HH\Rx\KeyedIterator<arraykey, Tv> {
   <<__Rx>>
   public function __construct();
   <<__Rx>>
   public function current(): Tv;
   <<__Rx>>
-  public function key(): mixed;
+  public function key(): arraykey;
   <<__Rx>>
   public function valid(): bool;
   <<__Rx, __Mutable>>

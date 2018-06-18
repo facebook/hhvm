@@ -407,6 +407,7 @@ bool canDCE(IRInstruction* inst) {
   case LdCls:
   case LdClsCached:
   case LdClsCachedSafe:
+  case LdClsTypeCns:
   case LdCns:
   case LookupCns:
   case LookupCnsE:
@@ -414,6 +415,7 @@ bool canDCE(IRInstruction* inst) {
   case LdClsCns:
   case InitClsCns:
   case LdSubClsCns:
+  case LdTypeCns:
   case CheckSubClsCns:
   case LdClsCnsVecLen:
   case LookupClsMethodFCache:

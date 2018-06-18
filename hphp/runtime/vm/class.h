@@ -892,6 +892,13 @@ public:
    */
   DataType clsCnsType(const StringData* clsCnsName) const;
 
+  /*
+   * Get the slot for a constant with name, which can optionally be abstract and
+   * either must be or must not be a type constant.
+   */
+  Slot clsCnsSlot(
+    const StringData* name, bool wantTypeCns, bool allowAbstract) const;
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Interfaces and traits.

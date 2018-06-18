@@ -1260,6 +1260,15 @@ const Cell* Class::cnsNameToTV(const StringData* clsCnsName,
   return ret;
 }
 
+Slot Class::clsCnsSlot(
+  const StringData* name, bool wantTypeCns, bool allowAbstract
+) const {
+  auto slot = m_constants.findIndex(name);
+  if (slot == kInvalidSlot) return slot;
+  if (!allowAbstract && m_constants[slot].isAbstract()) return kInvalidSlot;
+  return m_constants[slot].isType() == wantTypeCns ? slot : kInvalidSlot;
+}
+
 DataType Class::clsCnsType(const StringData* cnsName) const {
   Slot slot;
   auto const cns = cnsNameToTV(cnsName, slot);

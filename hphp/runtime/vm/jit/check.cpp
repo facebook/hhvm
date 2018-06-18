@@ -561,6 +561,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 #define DArrMixed
 #define DVArr
 #define DDArr
+#define DStaticDArr
 #define DCol
 #define DCtx
 #define DCtxCls
@@ -611,6 +612,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 #undef DArrMixed
 #undef DVArr
 #undef DDArr
+#undef DStaticDArr
 #undef DCol
 #undef DCtx
 #undef DCtxCls

@@ -552,7 +552,7 @@ Array HHVM_FUNCTION(type_structure,
   auto const cls = get_cls(cls_or_obj);
 
   if (!cls) {
-    raise_error("Non-existent class %s", cls_or_obj.toString().get()->data());
+    raise_error("Class undefined: %s", cls_or_obj.toString().get()->data());
   }
 
   auto const cls_sd = cls->name();

@@ -477,6 +477,9 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
                                 ? TVec : Type::Array(ArrayData::kPackedKind));
 #define DDArr           return (RuntimeOption::EvalHackArrDVArrs \
                                 ? TDict : Type::Array(ArrayData::kMixedKind));
+#define DStaticDArr     return (RuntimeOption::EvalHackArrDVArrs \
+                                ? TStaticDict \
+                                : Type::StaticArray(ArrayData::kMixedKind));
 #define DCol            return newColReturn(inst);
 #define DCtx            return ctxReturn(inst);
 #define DCtxCls         return ctxClsReturn(inst);
@@ -520,6 +523,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DArrMixed
 #undef DVArr
 #undef DDArr
+#undef DStaticDArr
 #undef DCol
 #undef DCtx
 #undef DCtxCls

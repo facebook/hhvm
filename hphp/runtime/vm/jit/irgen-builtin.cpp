@@ -105,6 +105,7 @@ const StaticString
   s_chr("chr"),
   s_func_num_args("func_num_args"),
   s_array_key_cast("hh\\array_key_cast"),
+  s_type_structure("hh\\type_structure"),
   s_one("1"),
   s_empty("");
 
@@ -588,6 +589,45 @@ SSATmp* opt_array_key_cast(IRGS& env, const ParamPrep& params) {
   return nullptr;
 }
 
+SSATmp* opt_type_structure(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 2) return nullptr;
+  auto const clsNameTmp = params[0].value;
+  auto const cnsNameTmp = params[1].value;
+
+  if (!clsNameTmp->isA(TStr)) return nullptr;
+  if (!cnsNameTmp->hasConstVal(TStaticStr)) return nullptr;
+  auto const cnsName = cnsNameTmp->strVal();
+
+  auto const clsTmp = [&] () -> SSATmp* {
+    if (clsNameTmp->inst()->is(LdClsName)) {
+      return clsNameTmp->inst()->src(0);
+    }
+    return ldCls(env, clsNameTmp, make_opt_catch(env, params));
+  }();
+
+  if (!clsTmp->type().clsSpec()) return nullptr;
+  auto const cls = clsTmp->type().clsSpec().cls();
+
+  auto const cnsSlot = cls->clsCnsSlot(cnsName, true, true);
+  if (cnsSlot == kInvalidSlot) return nullptr;
+
+  auto const data = LdSubClsCnsData { cnsName, cnsSlot };
+  auto const ptr = gen(env, LdSubClsCns, data, clsTmp);
+  return cond(
+    env,
+    [&] (Block* taken) {
+      gen(env, CheckTypeMem, TUncountedInit, taken, ptr);
+      return gen(env, LdTypeCns, taken, gen(env, LdMem, TUncountedInit, ptr));
+    },
+    [&] (SSATmp* cns) { return cns; },
+    [&] /* taken */ {
+      return gen(
+        env, LdClsTypeCns, make_opt_catch(env, params), clsTmp, cnsNameTmp
+      );
+    }
+  );
+}
+
 SSATmp* opt_foldable(IRGS& env,
                      const Func* func,
                      const ParamPrep& params,
@@ -750,6 +790,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
     X(min2)
     X(set_frame_metadata)
     X(array_key_cast)
+    X(type_structure)
 
 #undef X
 

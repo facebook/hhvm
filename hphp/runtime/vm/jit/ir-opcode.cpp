@@ -61,6 +61,7 @@ TRACE_SET_MOD(hhir);
 #define DArrMixed      HasDest
 #define DVArr          HasDest
 #define DDArr          HasDest
+#define DStaticDArr    HasDest
 #define DCol           HasDest
 #define DCtx           HasDest
 #define DCtxCls        HasDest
@@ -128,6 +129,7 @@ OpInfo g_opInfo[] = {
 #undef DArrMixed
 #undef DVArr
 #undef DDArr
+#undef DStaticDArr
 #undef DCol
 #undef DAllocObj
 #undef DCtx
@@ -410,6 +412,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClsCtor:
   case LdClsPropAddrOrNull:
   case LdClsPropAddrOrRaise:
+  case LdClsTypeCns:
   case LdFunc:
   case LdFuncCached:
   case LdFuncCachedU:
@@ -805,6 +808,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdSwitchDblIndex:
   case LdSwitchStrIndex:
   case LdTVAux:
+  case LdTypeCns:
   case LdUnwinderValue:
   case LdVecElem:
   case LdVectorBase:

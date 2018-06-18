@@ -404,6 +404,43 @@ void cgInitClsCns(IRLS& env, const IRInstruction* inst) {
   markRDSHandleInitialized(v, link.handle());
 }
 
+void cgLdTypeCns(IRLS& env, const IRInstruction* inst) {
+  auto const cns = srcLoc(env, inst, 0).reg();
+  auto const ret = dstLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+  v << testqi{0x1, cns, sf};
+  fwdJcc(v, env, CC_Z, sf, inst->taken());
+  v << xorqi{0x1, cns, ret, v.makeReg()};
+}
+
+static ArrayData* loadClsTypeCnsHelper(
+  const Class* cls, const StringData* name
+) {
+  auto typeCns = cls->clsCnsGet(name, true);
+  if (typeCns.m_type == KindOfUninit) {
+    if (cls->hasTypeConstant(name, true)) {
+      raise_error("Type constant %s::%s is abstract",
+                  cls->name()->data(), name->data());
+    } else {
+      raise_error("Non-existent type constant %s::%s",
+                  cls->name()->data(), name->data());
+    }
+  }
+
+  assertx(isArrayLikeType(typeCns.m_type));
+  assertx(typeCns.m_data.parr->isDictOrDArray());
+  assertx(typeCns.m_data.parr->isStatic());
+  return typeCns.m_data.parr;
+}
+
+void cgLdClsTypeCns(IRLS& env, const IRInstruction* inst) {
+  auto const args = argGroup(env, inst).ssa(0).ssa(1);
+  cgCallHelper(vmain(env), env, CallSpec::direct(loadClsTypeCnsHelper),
+               callDestTV(env, inst), SyncOptions::Sync, args);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

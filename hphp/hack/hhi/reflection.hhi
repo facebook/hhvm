@@ -31,12 +31,12 @@ class ReflectionClass implements Reflector {
   public function __construct(mixed $argument);
   public static function export(mixed $argument, bool $return = false): ?string;
   public function getConstant(string $name): mixed;
-  public function getConstants(): array<string, mixed>;
-  public function getAbstractConstantNames(): array<string, string>;
+  public function getConstants(): darray<string, mixed>;
+  public function getAbstractConstantNames(): darray<string, string>;
   public function getTypeConstant(string $name): ReflectionTypeConstant;
-  public function getTypeConstants(): array<ReflectionTypeConstant>;
+  public function getTypeConstants(): varray<ReflectionTypeConstant>;
   public function getConstructor(): ?ReflectionMethod;
-  public function getDefaultProperties(): array<string, mixed>;
+  public function getDefaultProperties(): darray<string, mixed>;
   /**
    * Returns string or false
    */
@@ -48,15 +48,15 @@ class ReflectionClass implements Reflector {
    * Returns string or false
    */
   public function getFileName(): mixed;
-  public function getInterfaceNames(): array<string>;
-  public function getInterfaces(): array<string, ReflectionClass>;
-  final public function getAttributes(): array<string, array<mixed>>;
-  final public function getAttribute(string $name): ?array<mixed>;
+  public function getInterfaceNames(): varray<string>;
+  public function getInterfaces(): darray<string, ReflectionClass>;
+  final public function getAttributes(): darray<string, varray<mixed>>;
+  final public function getAttribute(string $name): ?varray<mixed>;
   final public function getAttributeClass<T as HH\ClassLikeAttribute>(classname<T> $c): ?T;
-  final public function getAttributesRecursive(): array<string, array<mixed>>;
-  final public function getAttributeRecursive(string $name): ?array<mixed>;
+  final public function getAttributesRecursive(): darray<string, varray<mixed>>;
+  final public function getAttributeRecursive(string $name): ?varray<mixed>;
   public function getMethod(string $name): ReflectionMethod;
-  public function getMethods(?int $filter = null): array<ReflectionMethod>;
+  public function getMethods(?int $filter = null): varray<ReflectionMethod>;
   public function getModifiers(): int;
   public function getName(): string;
   public function getNamespaceName(): string;
@@ -64,17 +64,17 @@ class ReflectionClass implements Reflector {
    * Returns ReflectionClass or false
    */
   public function getParentClass(): mixed;
-  public function getProperties(int $filter = 0xFFFF): array<ReflectionProperty>;
+  public function getProperties(int $filter = 0xFFFF): varray<ReflectionProperty>;
   public function getProperty(string $name): ReflectionProperty;
-  public function getRequirementNames(): array<string>;
-  public function getRequirements(): array<string, ReflectionClass>;
+  public function getRequirementNames(): varray<string>;
+  public function getRequirements(): darray<string, ReflectionClass>;
   public function getShortName(): string;
   public function getStartLine(): int;
-  public function getStaticProperties(): array<string, mixed>;
+  public function getStaticProperties(): darray<string, mixed>;
   public function getStaticPropertyValue(string $name, mixed $def_value = null): mixed;
-  public function getTraitAliases(): array<string, string>;
-  public function getTraitNames(): array<string>;
-  public function getTraits(): array<string, ReflectionClass>;
+  public function getTraitAliases(): darray<string, string>;
+  public function getTraitNames(): varray<string>;
+  public function getTraits(): darray<string, ReflectionClass>;
   public function hasConstant(string $name): bool;
   public function hasMethod(string $name): bool;
   public function hasProperty(string $name): bool;
@@ -127,13 +127,13 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function getStartLine(): mixed; // int | false
   public function getEndLine(): mixed; // int | false
   public function getDocComment(): mixed; // string | false
-  public function getStaticVariables(): array<string, mixed>;
+  public function getStaticVariables(): darray<string, mixed>;
   public function returnsReference(): bool;
   public function getReturnTypeText();
-  final public function getAttributes(): array<string, array<mixed>>;
-  final public function getAttribute(string $name): ?array<mixed>;
+  final public function getAttributes(): darray<string, varray<mixed>>;
+  final public function getAttribute(string $name): ?varray<mixed>;
   public function getNumberOfParameters(): int;
-  public function getParameters(): array<ReflectionParameter>;
+  public function getParameters(): varray<ReflectionParameter>;
   public function getNumberOfRequiredParameters();
   public function isDeprecated(): bool;
   public function getExtension();
@@ -153,7 +153,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector
   public static function export($name, $return = null);
   public function isDisabled();
   public function invoke(...);
-  public function invokeArgs(array $args);
+  public function invokeArgs(varray $args);
   public function getClosure();
   final public function getAttributeClass<T as HH\FunctionAttribute>(classname<T> $c): ?T;
 }
@@ -184,12 +184,12 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   public function getClosure($object);
   public function getModifiers();
   public function invoke($object, ...);
-  public function invokeArgs($object, array $args);
+  public function invokeArgs($object, varray $args);
   public function getDeclaringClass();
   public function getPrototype();
   public function setAccessible($accessible);
-  final public function getAttributesRecursive(): array<string, array<mixed>>;
-  final public function getAttributeRecursive(string $name): ?array<mixed>;
+  final public function getAttributesRecursive(): darray<string, varray<mixed>>;
+  final public function getAttributeRecursive(string $name): ?varray<mixed>;
   final public function getAttributeClass<T as HH\MethodAttribute>(classname<T> $c): ?T;
 }
 
@@ -309,12 +309,12 @@ class ReflectionTypeAlias implements Reflector {
   final private function __clone();
   final public function __construct(string $name);
   public function __toString(): string;
-  public function getTypeStructure(): array;
-  public function getResolvedTypeStructure(): array;
+  public function getTypeStructure(): darray;
+  public function getResolvedTypeStructure(): darray;
   public function getAssignedTypeText(): string;
   public function getName(): string;
   public function getFileName(): string;
-  final public function getAttributes(): array;
+  final public function getAttributes(): darray;
   final public function getAttribute(string $name);
   final public function getAttributeClass<T as HH\TypeAliasAttribute>(classname<T> $c): ?T;
 }

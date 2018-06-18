@@ -742,20 +742,25 @@ let ai_check genv files_info env t =
       | Errors.Decl -> "Decl"
       | Errors.Typing -> "Typing"
     in
-    let () = List.iter failures
+    let all_passed = List.exists failures
         ~f:(fun (k, m) ->
-          if not (Relative_path.Set.is_empty m) then
-            Hh_logger.log "%d Hack errors in phase %s"
-              (Relative_path.Set.cardinal m)
-              (phase_to_string k)) in
-    let check_mode = ServerArgs.check_mode genv.options in
-    let errorl = Ai.go
-        Typing_check_utils.type_file genv.workers files_info
-        env.tcopt ai_opt check_mode in
-    let env = { env with
-                errorl  (* Ignore hack errors. *)
-              } in
-    env, (Hh_logger.log_duration "Ai" t)
+          if Relative_path.Set.is_empty m then true
+          else begin
+            Hh_logger.log "Cannot run AI because of errors in source in phase %s"
+              (phase_to_string k);
+            false
+          end)
+    in
+    if not all_passed then env, t
+    else
+      let check_mode = ServerArgs.check_mode genv.options in
+      let errorl = Ai.go
+          Typing_check_utils.type_file genv.workers files_info
+          env.tcopt ai_opt check_mode in
+      let env = { env with
+                  errorl  (* Just Zonk errors. *)
+                } in
+      env, (Hh_logger.log_duration "Ai" t)
   | None -> env, t
 
 let run_search genv t =

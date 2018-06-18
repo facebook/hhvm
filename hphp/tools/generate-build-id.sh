@@ -16,7 +16,7 @@ function digest() {
 
 # if we're under source control,
 # find the last commit that changed this tree
-if hg root >&/dev/null; then
+if hg root >&/dev/null && [ -e "$(hg root)/.hg" ]; then
   if commithash=$(hg log --pager never --limit 1 "$treeroot" -T'{node}'); then
     buildid="$(digest <(hg diff "$treeroot" && echo "$commithash"))"
   else

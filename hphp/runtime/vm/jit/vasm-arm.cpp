@@ -536,7 +536,7 @@ void Vgen::emit(const copy& i) {
     a->Fmov(D(i.d), X(i.s));
   } else {
     assertx(i.s.isSIMD() && i.d.isSIMD());
-    a->Fmov(D(i.d), D(i.s));
+    a->mov(V(i.d), V(i.s));
   }
 }
 

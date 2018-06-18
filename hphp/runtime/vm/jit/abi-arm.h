@@ -86,7 +86,8 @@ inline vixl::FPRegister x2f(PhysReg x64reg) {
 
 inline vixl::VRegister x2v(PhysReg x64reg) {
   always_assert(x64reg.isSIMD());
-  return vixl::VRegister(vixl::CPURegister(x64reg));
+  auto const r = vixl::CPURegister(x64reg);
+  return vixl::VRegister(r.code(), 128);
 }
 
 /*

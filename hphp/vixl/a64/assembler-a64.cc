@@ -1177,6 +1177,19 @@ void Assembler::st1(const VRegister& vt,
 }
 
 
+void Assembler::mov(const VRegister& vd, const VRegister& vs) {
+  assert(vd.IsSameSizeAndType(vs));
+  Instr format;
+  if (vd.Is64Bits()) {
+    format = NEON_8B;
+  } else {
+    assert(vd.Is128Bits());
+    format = NEON_16B;
+  }
+  Emit(format | NEON_ORR | Rm(vs) | Rn(vs) | Rd(vd));
+}
+
+
 void Assembler::mov(const Register& rd, const Register& rm) {
   // Moves involving the stack pointer are encoded as add immediate with
   // second operand of zero. Otherwise, orr with first operand zr is

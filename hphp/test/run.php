@@ -1813,19 +1813,19 @@ function generate_array_diff($ar1, $ar2, $is_reg, $w) {
 
     if ($k1 == $l1 + 1 || $k2 === null) {
       $l1 = $k1;
-      $diff[] = current($old1);
+      $diff[] = current(&$old1);
       $k1 = next(&$old1) ? key(&$old1) : null;
     } else if ($k2 == $l2 + 1 || $k1 === null) {
       $l2 = $k2;
-      $diff[] = current($old2);
+      $diff[] = current(&$old2);
       $k2 = next(&$old2) ? key(&$old2) : null;
     } else if ($k1 < $k2) {
       $l1 = $k1;
-      $diff[] = current($old1);
+      $diff[] = current(&$old1);
       $k1 = next(&$old1) ? key(&$old1) : null;
     } else {
       $l2 = $k2;
-      $diff[] = current($old2);
+      $diff[] = current(&$old2);
       $k2 = next(&$old2) ? key(&$old2) : null;
     }
   }
@@ -1883,7 +1883,7 @@ function dump_repo_to_hhas_file($test, $program, $hhas_target) {
     '--file',
     escapeshellarg($test),
   ));
-  system("$dump_cmd &> /dev/null", $ret);
+  system("$dump_cmd &> /dev/null", &$ret);
   return $ret === 0 ? $hhas_target : false;
 }
 
@@ -1903,7 +1903,7 @@ function dump_hhas_cmd($hhvm_cmd, $test, $hhas_file) {
 function dump_hhas_to_temp($hhvm_cmd, $test) {
   $temp_file = $test . '.round_trip.hhas';
   $cmd = dump_hhas_cmd($hhvm_cmd, $test, $temp_file);
-  system("$cmd &> /dev/null", $ret);
+  system("$cmd &> /dev/null", &$ret);
   return $ret === 0 ? $temp_file : false;
 }
 
@@ -1930,7 +1930,7 @@ function dump_hh_codegen($options, $test, $test_config) {
       "2>",
       escapeshellarg($msgs_file),
     )),
-    $ret
+    &$ret
   );
   return $ret === 0 ? $temp_file : false;
 }
@@ -1954,7 +1954,7 @@ function semdiff_output($options, $test) {
       "2>",
       escapeshellarg($msgs_file),
     )),
-    $ret
+    &$ret
   );
   return array($ret, $temp_file);
 }
@@ -2589,7 +2589,7 @@ function run_test($options, $test) {
         ">",
         escapeshellarg($diff),
       )),
-      $ret
+      &$ret
     );
 
     // If identical, don't bother dropping through to roundtrip stage
@@ -2621,7 +2621,7 @@ function run_test($options, $test) {
         ">",
         escapeshellarg($diff),
       )),
-      $ret
+      &$ret
     );
 
     if ($ret === 0) {
@@ -2992,21 +2992,21 @@ function aggregate_srcloc_info($tests) {
       $all_mismatched_srcloc[] = $instr;
     }
     $all_mismatched_srcloc = array_unique($all_mismatched_srcloc);
-    sort($all_mismatched_srcloc);
+    sort(&$all_mismatched_srcloc);
 
     $missing_on_lhs_srcloc = $srcloc_info['missing_on_lhs_srcloc'];
     foreach ($missing_on_lhs_srcloc as $instr) {
       $all_missing_on_lhs[] = $instr;
     }
     $all_missing_on_lhs = array_unique($all_missing_on_lhs);
-    sort($all_missing_on_lhs);
+    sort(&$all_missing_on_lhs);
 
     $missing_on_rhs_srcloc = $srcloc_info['missing_on_rhs_srcloc'];
     foreach ($missing_on_rhs_srcloc as $instr) {
       $all_missing_on_rhs[] = $instr;
     }
     $all_missing_on_rhs = array_unique($all_missing_on_rhs);
-    sort($all_missing_on_rhs);
+    sort(&$all_missing_on_rhs);
   }
 
   print "\nInstructions with mismatched srcloc:\n";
@@ -3228,7 +3228,7 @@ function start_servers($options, $configs) {
 }
 
 function drain_queue($queue) {
-  while (@msg_receive($queue, 0, $type, 1024, $message, true,
+  while (@msg_receive($queue, 0, &$type, 1024, &$message, true,
                       MSG_IPC_NOWAIT | MSG_NOERROR));
 }
 
@@ -3559,7 +3559,7 @@ function main($argv) {
       "There are %d new failing tests, and %d new passing tests.\n",
       count($failed_tests), $new_fails, $new_passes
     );
-    sort($failed_tests);
+    sort(&$failed_tests);
     file_put_contents($fail_file, implode("\n", $failed_tests));
   } else if (isset($options['testpilot'])) {
     Status::say(array('op' => 'all_done', 'results' => $results));

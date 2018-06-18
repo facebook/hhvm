@@ -316,7 +316,12 @@ module ServerInitCommon = struct
    * parsing hooks. During lazy init, need to do it manually from the fast
    * instead since we aren't parsing the codebase.
    *)
-  let update_search saved t =
+  let update_search genv saved t =
+    (* Don't update search index when in check mode *)
+    (* We can't use is_check_mode here because we want to
+      skip this step even while saving saved states.
+    *)
+    if ServerArgs.check_mode genv.options then t else
     (* Only look at Hack files *)
     let fast = FileInfo.saved_to_hack_files saved in
     (* Filter out non php files *)
@@ -482,7 +487,8 @@ module ServerInitCommon = struct
         with a full parse rather than parsing decl asts and then parsing full ones *)
       let lazy_parse = not genv.local_config.SLC.use_full_fidelity_parser in
       let env, t = parsing ~lazy_parse genv env ~get_next t in
-      SearchServiceRunner.update_fileinfo_map env.files_info;
+      if not (ServerArgs.check_mode genv.options) then
+        SearchServiceRunner.update_fileinfo_map env.files_info;
       let t = update_files genv env.files_info t in
       let env, t = naming env t in
       let fast = FileInfo.simplify_fast env.files_info in
@@ -543,8 +549,8 @@ module ServerEagerInit : InitKind = struct
     let get_next, t = indexing genv in
     let lazy_parse = lazy_level = Parse in
     let env, t = parsing ~lazy_parse genv env ~get_next t in
-    SearchServiceRunner.update_fileinfo_map env.files_info;
-
+    if not (ServerArgs.check_mode genv.options) then
+      SearchServiceRunner.update_fileinfo_map env.files_info;
     let timeout = genv.local_config.SLC.load_mini_script_timeout in
     let state_future = state_future >>=
       with_loader_timeout timeout "wait_for_state"
@@ -713,7 +719,7 @@ module ServerLazyInit : InitKind = struct
       (* Update the fileinfo object's dependencies now that we have full fast *)
       let t = update_files genv env.files_info t in
 
-      let t = update_search old_saved t in
+      let t = update_search genv old_saved t in
 
       type_check_dirty genv env old_fast fast dirty_files similar_files t, state
     | Error err ->

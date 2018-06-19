@@ -361,6 +361,8 @@ end
 module Rx = struct
   let freeze = "\\HH\\Rx\\freeze"
   let mutable_ = "\\HH\\Rx\\mutable"
+  let cTraversable = "\\HH\\Rx\\Traversable"
+  let cKeyedTraversable = "\\HH\\Rx\\KeyedTraversable"
 end
 
 module Shapes = struct

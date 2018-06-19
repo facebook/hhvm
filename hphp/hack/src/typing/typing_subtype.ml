@@ -183,6 +183,7 @@ let rec simplify_subtype
 
   | (r, Tarraykind akind), (_, Tclass ((_, coll), [tv_super]))
     when (coll = SN.Collections.cTraversable ||
+          coll = SN.Rx.cTraversable ||
           coll = SN.Collections.cContainer) ->
       (match akind with
         (* array <: Traversable<t> and emptyarray <: Traversable<t> for any t *)
@@ -207,6 +208,7 @@ let rec simplify_subtype
 
   | (r, Tarraykind akind), (_, Tclass ((_, coll), [tk_super; tv_super]))
     when (coll = SN.Collections.cKeyedTraversable
+         || coll = SN.Rx.cKeyedTraversable
          || coll = SN.Collections.cKeyedContainer
          || coll = SN.Collections.cIndexish) ->
       (match akind with

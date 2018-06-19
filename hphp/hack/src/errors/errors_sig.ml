@@ -520,6 +520,7 @@ module type S = sig
   val untyped_lambda_strict_mode : Pos.t -> unit
   val binding_ref_in_array : Pos.t -> unit
   val return_ref_in_array : Pos.t -> unit
+  val passing_array_cell_by_ref : Pos.t -> unit
   val invalid_conditionally_reactive_call : Pos.t -> Pos.t -> string -> string -> unit
   val conditionally_reactive_function : Pos.t -> unit
   val multiple_conditionally_reactive_annotations : Pos.t -> string -> unit

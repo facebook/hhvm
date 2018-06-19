@@ -3037,6 +3037,11 @@ let return_ref_in_array pos =
     "supported in Hack." in
   add (Typing.err_code Typing.BindingRefInArray) pos msg
 
+let passing_array_cell_by_ref pos =
+  let msg = "Passing array cells by reference is no longer supported; " ^
+    "use 'inout' instead" in
+  add (Typing.err_code Typing.PassingArrayCellByRef) pos msg
+
 let superglobal_in_reactive_context pos name =
   add (Typing.err_code Typing.SuperglobalInReactiveContext) pos (
     "Superglobal "^  name ^ " cannot be used in a reactive context."

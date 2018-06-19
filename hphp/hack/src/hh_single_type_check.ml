@@ -159,6 +159,7 @@ let parse_options () =
   let allow_non_arraykey_keys = ref false in
   let allow_array_as_tuple = ref false in
   let allow_return_by_ref = ref false in
+  let allow_array_cell_pass_by_ref = ref false in
   let hacksperimental = ref false in
   let void_is_type_of_null = ref false in
   let enable_shape_field_check = ref false in
@@ -319,6 +320,9 @@ let parse_options () =
     "--allow-return-by-ref",
         Arg.Set allow_return_by_ref,
         " Allow returning references from functions";
+    "--allow-array-cell-pass-by-ref",
+        Arg.Set allow_array_cell_pass_by_ref,
+        " Allow binding of array cells by reference as arguments to function calls";
     "--hacksperimental",
         Arg.Set hacksperimental,
         " Enable experimental Hack features";
@@ -352,6 +356,7 @@ let parse_options () =
       GlobalOptions.tco_disallow_non_arraykey_keys = not !allow_non_arraykey_keys;
       GlobalOptions.tco_disallow_array_as_tuple = not !allow_array_as_tuple;
       GlobalOptions.tco_disallow_return_by_ref = not !allow_return_by_ref;
+      GlobalOptions.tco_disallow_array_cell_pass_by_ref = not !allow_array_cell_pass_by_ref;
   } in
   let tcopt = {
     tcopt with

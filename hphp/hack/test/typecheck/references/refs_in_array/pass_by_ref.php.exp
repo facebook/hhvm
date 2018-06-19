@@ -1,1 +1,2 @@
-No errors
+File "pass_by_ref.php", line 7, characters 13-18:
+Passing array cells by reference is no longer supported; use 'inout' instead (Typing[4253])

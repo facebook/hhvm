@@ -5418,10 +5418,17 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
       let env, ty = check_arithmetic env ty in
       make_result env te ty
   | Ast.Uref ->
-      (* We basically just ignore references in non-strict files *)
       if forbid_uref
       then Errors.binding_ref_in_array p
-      else if Env.is_strict env && not is_func_arg
+      else if is_func_arg then
+        begin
+          if TypecheckerOptions.disallow_array_cell_pass_by_ref
+            (Env.get_options env)
+          then match snd te with
+          | T.Array_get _ -> Errors.passing_array_cell_by_ref p
+          | _ -> ()
+        end
+      else if Env.is_strict env
       then Errors.reference_expr p;
       make_result env te ty
   | Ast.Usilence ->

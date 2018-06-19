@@ -113,6 +113,11 @@ type t = {
  tco_disallow_return_by_ref: bool;
 
  (*
+  * Flag to disallow binding array cells by reference as function arguments
+  *)
+ tco_disallow_array_cell_pass_by_ref: bool;
+
+ (*
   * Flag to enable logging of statistics regarding use of language features.
   * Currently used for lambdas.
   *)
@@ -158,6 +163,7 @@ val make :
   tco_disallow_array_typehint: bool ->
   tco_disallow_array_literal: bool ->
   tco_disallow_return_by_ref: bool ->
+  tco_disallow_array_cell_pass_by_ref: bool ->
   tco_language_feature_logging: bool ->
   tco_unsafe_rx: bool ->
   po_disallow_elvis_space: bool ->
@@ -183,6 +189,7 @@ val tco_disallow_ambiguous_lambda : t -> bool
 val tco_disallow_array_typehint : t -> bool
 val tco_disallow_array_literal : t -> bool
 val tco_disallow_return_by_ref : t -> bool
+val tco_disallow_array_cell_pass_by_ref : t -> bool
 val tco_language_feature_logging : t -> bool
 val tco_unsafe_rx : t -> bool
 val po_disallow_elvis_space : t -> bool

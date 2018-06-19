@@ -15,28 +15,34 @@
 */
 
 #include "hphp/runtime/base/variable-serializer.h"
+
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/util/exception.h"
-#include "hphp/runtime/base/zend-printf.h"
-#include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/base/zend-string.h"
-#include <cmath>
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/utf8-decode.h"
+#include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/base/zend-printf.h"
+#include "hphp/runtime/base/zend-string.h"
+
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/json/JSON_parser.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
+
 #include "hphp/runtime/vm/native-data.h"
+
+#include "hphp/util/exception.h"
+
+#include <cmath>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -670,12 +676,12 @@ void VariableSerializer::write(const Object& v) {
 void VariableSerializer::preventOverflow(const Object& v,
                                          const std::function<void()>& func) {
   TypedValue tv = make_tv<KindOfObject>(const_cast<ObjectData*>(v.get()));
-  if (incNestedLevel(tv)) {
-    writeOverflow(tv);
+  if (incNestedLevel(&tv)) {
+    writeOverflow(&tv);
   } else {
     func();
   }
-  decNestedLevel(tv);
+  decNestedLevel(&tv);
 }
 
 void VariableSerializer::write(const Variant& v, bool isArrayKey /*= false */) {
@@ -687,7 +693,7 @@ void VariableSerializer::write(const Variant& v, bool isArrayKey /*= false */) {
     write(v.toObject());
     return;
   }
-  serializeVariant(v, isArrayKey);
+  serializeVariant(v.asTypedValue(), isArrayKey);
 }
 
 void VariableSerializer::writeNull() {
@@ -722,7 +728,7 @@ void VariableSerializer::writeNull() {
   }
 }
 
-void VariableSerializer::writeOverflow(const TypedValue& tv) {
+void VariableSerializer::writeOverflow(tv_rval tv) {
   bool wasRef = m_referenced;
   setReferenced(false);
   switch (m_type) {
@@ -757,7 +763,7 @@ void VariableSerializer::writeOverflow(const TypedValue& tv) {
     {
       int optId = m_refs[tv].m_id;
       assertx(optId != NO_ID);
-      bool isObject = tv.m_type == KindOfResource || tv.m_type == KindOfObject;
+      bool isObject = tvIsResource(tv) || tvIsObject(tv);
       if (wasRef) {
         m_buf->append("R:");
         m_buf->append(optId);
@@ -1182,7 +1188,7 @@ void VariableSerializer::writeArrayValue(
   case Type::DebuggerSerialize:
     // Do not count referenced values after the first
     if (!(value.isReferenced() &&
-          m_refs[*value.asTypedValue()].m_id != NO_ID)) {
+          m_refs[value.asTypedValue()].m_id != NO_ID)) {
       m_valueCount++;
     }
     write(value);
@@ -1338,7 +1344,7 @@ void VariableSerializer::indent() {
   }
 }
 
-bool VariableSerializer::incNestedLevel(const TypedValue& tv) {
+bool VariableSerializer::incNestedLevel(tv_rval tv) {
   ++m_currentDepth;
 
   switch (m_type) {
@@ -1365,7 +1371,7 @@ bool VariableSerializer::incNestedLevel(const TypedValue& tv) {
     {
       auto& ref = m_refs[tv];
       int ct = ++ref.m_count;
-      bool isObject = tv.m_type == KindOfResource || tv.m_type == KindOfObject;
+      bool isObject = tvIsResource(tv) || tvIsObject(tv);
       if (ref.m_id != NO_ID && (m_referenced || isObject)) {
         return true;
       }
@@ -1380,7 +1386,7 @@ bool VariableSerializer::incNestedLevel(const TypedValue& tv) {
   return false;
 }
 
-void VariableSerializer::decNestedLevel(const TypedValue& tv) {
+void VariableSerializer::decNestedLevel(tv_rval tv) {
   --m_currentDepth;
   --m_refs[tv].m_count;
   if (m_type == Type::DebuggerSerialize && m_maxLevelDebugger > 0) {
@@ -1388,33 +1394,31 @@ void VariableSerializer::decNestedLevel(const TypedValue& tv) {
   }
 }
 
-void VariableSerializer::serializeRef(const TypedValue* tv, bool isArrayKey) {
-  assertx(isRefType(tv->m_type));
+void VariableSerializer::serializeRef(tv_rval tv, bool isArrayKey) {
+  assertx(tvIsRef(tv));
   // Ugly, but behavior is different for serialize
   if (getType() == VariableSerializer::Type::Serialize ||
       getType() == VariableSerializer::Type::Internal ||
       getType() == VariableSerializer::Type::APCSerialize ||
       getType() == VariableSerializer::Type::DebuggerSerialize) {
-    if (incNestedLevel(*tv)) {
-      writeOverflow(*tv);
+    if (incNestedLevel(tv)) {
+      writeOverflow(tv);
     } else {
       // Tell the inner variant to skip the nesting check for data inside
-      serializeVariant(*tv->m_data.pref->var(), isArrayKey, true);
+      serializeVariant(val(tv).pref->tv(), isArrayKey, true);
     }
-    decNestedLevel(*tv);
+    decNestedLevel(tv);
   } else {
-    serializeVariant(*tv->m_data.pref->var(), isArrayKey);
+    serializeVariant(val(tv).pref->tv(), isArrayKey);
   }
 }
 
 NEVER_INLINE
-void VariableSerializer::serializeVariant(const Variant& self,
+void VariableSerializer::serializeVariant(tv_rval tv,
                                           bool isArrayKey /* = false */,
                                           bool skipNestCheck /* = false */,
                                           bool noQuotes /* = false */) {
-  auto tv = self.asTypedValue();
-
-  switch (tv->m_type) {
+  switch (type(tv)) {
     case KindOfUninit:
     case KindOfNull:
       assertx(!isArrayKey);
@@ -1423,59 +1427,59 @@ void VariableSerializer::serializeVariant(const Variant& self,
 
     case KindOfBoolean:
       assertx(!isArrayKey);
-      write(tv->m_data.num != 0);
+      write(val(tv).num != 0);
       return;
 
     case KindOfInt64:
-      write(tv->m_data.num);
+      write(val(tv).num);
       return;
 
     case KindOfDouble:
-      write(tv->m_data.dbl);
+      write(val(tv).dbl);
       return;
 
     case KindOfPersistentString:
     case KindOfString:
-      write(tv->m_data.pstr->data(),
-            tv->m_data.pstr->size(), isArrayKey, noQuotes);
+      write(val(tv).pstr->data(),
+            val(tv).pstr->size(), isArrayKey, noQuotes);
       return;
 
     case KindOfPersistentVec:
     case KindOfVec:
       assertx(!isArrayKey);
-      assertx(tv->m_data.parr->isVecArray());
-      serializeArray(tv->m_data.parr, skipNestCheck);
+      assertx(val(tv).parr->isVecArray());
+      serializeArray(val(tv).parr, skipNestCheck);
       return;
 
     case KindOfPersistentDict:
     case KindOfDict:
       assertx(!isArrayKey);
-      assertx(tv->m_data.parr->isDict());
-      serializeArray(tv->m_data.parr, skipNestCheck);
+      assertx(val(tv).parr->isDict());
+      serializeArray(val(tv).parr, skipNestCheck);
       return;
 
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       assertx(!isArrayKey);
-      assertx(tv->m_data.parr->isKeyset());
-      serializeArray(tv->m_data.parr, skipNestCheck);
+      assertx(val(tv).parr->isKeyset());
+      serializeArray(val(tv).parr, skipNestCheck);
       return;
 
     case KindOfPersistentArray:
     case KindOfArray:
       assertx(!isArrayKey);
-      assertx(tv->m_data.parr->isPHPArray());
-      serializeArray(tv->m_data.parr, skipNestCheck);
+      assertx(val(tv).parr->isPHPArray());
+      serializeArray(val(tv).parr, skipNestCheck);
       return;
 
     case KindOfObject:
       assertx(!isArrayKey);
-      serializeObject(tv->m_data.pobj);
+      serializeObject(val(tv).pobj);
       return;
 
     case KindOfResource:
       assertx(!isArrayKey);
-      serializeResource(tv->m_data.pres->data());
+      serializeResource(val(tv).pres->data());
       return;
 
     case KindOfRef:
@@ -1493,14 +1497,14 @@ void VariableSerializer::serializeResourceImpl(const ResourceData* res) {
 
 void VariableSerializer::serializeResource(const ResourceData* res) {
   TypedValue tv = make_tv<KindOfResource>(const_cast<ResourceHdr*>(res->hdr()));
-  if (UNLIKELY(incNestedLevel(tv))) {
-    writeOverflow(tv);
+  if (UNLIKELY(incNestedLevel(&tv))) {
+    writeOverflow(&tv);
   } else if (auto trace = dynamic_cast<const CompactTrace*>(res)) {
     serializeArray(trace->extract());
   } else {
     serializeResourceImpl(res);
   }
-  decNestedLevel(tv);
+  decNestedLevel(&tv);
 }
 
 void VariableSerializer::serializeString(const String& str) {
@@ -1556,12 +1560,12 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
   }
   if (!skipNestCheck) {
     TypedValue tv = make_array_like_tv(const_cast<ArrayData*>(arr));
-    if (incNestedLevel(tv)) {
-      writeOverflow(tv);
+    if (incNestedLevel(&tv)) {
+      writeOverflow(&tv);
     } else {
       serializeArrayImpl(arr);
     }
-    decNestedLevel(tv);
+    decNestedLevel(&tv);
   } else {
     // If isObject, the array is temporary and we should not check or save
     // its pointer.
@@ -1741,8 +1745,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
         obj->isWaitHandle()) {
       raise_warning("Attempted to serialize unserializable builtin class %s",
                     obj->getVMClass()->preClass()->name()->data());
-      Variant placeholder = init_null();
-      serializeVariant(placeholder);
+      serializeVariant(init_null().asTypedValue());
       return;
     }
     if (obj->getVMClass()->rtAttribute(Class::HasSleep)) {
@@ -1835,7 +1838,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
       raise_notice("serialize(): __sleep should return an array only "
                    "containing the names of instance-variables to "
                    "serialize");
-      serializeVariant(uninit_null());
+      serializeVariant(uninit_null().asTypedValue());
     }
   } else {
     if (type == VariableSerializer::Type::VarExport &&
@@ -1866,13 +1869,13 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
         // If we have a DebugDisplay prop saved, use it.
         auto const debugDisp = obj->getProp(nullptr, s_PHP_DebugDisplay.get());
         if (debugDisp) {
-          serializeVariant(tvAsCVarRef(debugDisp.tv_ptr()), false, false, true);
+          serializeVariant(debugDisp, false, false, true);
           return;
         }
         // Otherwise compute it if we have a __toDebugDisplay method.
         auto val = const_cast<ObjectData*>(obj)->invokeToDebugDisplay();
         if (val.isInitialized()) {
-          serializeVariant(val, false, false, true);
+          serializeVariant(val.asTypedValue(), false, false, true);
           return;
         }
       }
@@ -1906,12 +1909,12 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
 
 void VariableSerializer::serializeObject(const ObjectData* obj) {
   TypedValue tv = make_tv<KindOfObject>(const_cast<ObjectData*>(obj));
-  if (UNLIKELY(incNestedLevel(tv))) {
-    writeOverflow(tv);
+  if (UNLIKELY(incNestedLevel(&tv))) {
+    writeOverflow(&tv);
   } else {
     serializeObjectImpl(obj);
   }
-  decNestedLevel(tv);
+  decNestedLevel(&tv);
 }
 
 void VariableSerializer::serializeObject(const Object& obj) {

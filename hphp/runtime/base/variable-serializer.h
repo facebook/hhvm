@@ -17,10 +17,10 @@
 #ifndef incl_HPHP_VARIABLE_SERIALIZER_H_
 #define incl_HPHP_VARIABLE_SERIALIZER_H_
 
+#include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/vm/class.h"
@@ -124,7 +124,7 @@ private:
 
   void writeNull();
   // what to write if recursive level is over limit?
-  void writeOverflow(const TypedValue& tv);
+  void writeOverflow(tv_rval tv);
   void writeRefCount(); // for DebugDump only
 
   void writeArrayHeader(int size, bool isVectorData, ArrayKind kind);
@@ -146,8 +146,8 @@ private:
   void indent();
   void setReferenced(bool referenced) { m_referenced = referenced;}
   void setRefCount(int count) { m_refCount = count;}
-  bool incNestedLevel(const TypedValue& tv);
-  void decNestedLevel(const TypedValue& tv);
+  bool incNestedLevel(tv_rval tv);
+  void decNestedLevel(tv_rval tv);
   void pushObjectInfo(const String& objClass, int objId, char objCode);
   void popObjectInfo();
   void pushResourceInfo(const String& rsrcName, int rsrcId);
@@ -155,7 +155,8 @@ private:
 
   ArrayKind getKind(const ArrayData* arr) const;
 
-  // Sentinel used to indicate that a member of SavedRefMap has a count but no ID.
+  // Sentinel used to indicate that a member of SavedRefMap has a count but no
+  // ID.
   static constexpr int NO_ID = -1;
 
   struct SavedRefMap {
@@ -167,14 +168,14 @@ private:
       int m_id;
     };
 
-    MapData& operator[](const TypedValue& tv) {
-      auto& elm = m_mapping[tv];
-      if (!elm.m_count) tvIncRefGen(tv);
+    MapData& operator[](tv_rval tv) {
+      auto& elm = m_mapping[*tv];
+      if (!elm.m_count) tvIncRefGen(*tv);
       return elm;
     }
 
-    const MapData& operator[](const TypedValue& tv) const {
-      return m_mapping.at(tv);
+    const MapData& operator[](tv_rval tv) const {
+      return m_mapping.at(*tv);
     }
 
   private:
@@ -247,12 +248,12 @@ private:
   void preventOverflow(const Object& v, const std::function<void()>& func);
   void writePropertyKey(const String& prop);
 
-  void serializeRef(const TypedValue* tv, bool isArrayKey);
+  void serializeRef(tv_rval tv, bool isArrayKey);
   // Serialize a Variant recursively.
   // The last param noQuotes indicates to serializer to not put the output in
   // double quotes (used when printing the output of a __toDebugDisplay() of
   // an object when it is a string.
-  void serializeVariant(const Variant&,
+  void serializeVariant(tv_rval value,
                         bool isArrayKey = false,
                         bool skipNestCheck = false,
                         bool noQuotes = false);

@@ -448,6 +448,16 @@ enable_if_lval_t<T&&, void> tvBindRef(RefData* fr, T&& to) {
 }
 
 /*
+ * Bind `from' to `to', boxing `from' if necessary first.
+ */
+template<typename From, typename To> ALWAYS_INLINE
+enable_if_lval_t<From&&, enable_if_lval_t<To&&, void>>
+tvSetRef(From&& from, To&& to) {
+  tvBoxIfNeeded(from);
+  tvBindRef(val(from).pref, to);
+}
+
+/*
  * Assign KindOfUninit to `to' directly, ignoring refs.
  *
  * Equivalent to tvSetIgnoreRef(make_tv<KindOfUninit>(), to).

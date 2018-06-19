@@ -1015,13 +1015,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       ; vector_intrinsic_members = members
       ; _ }
       ->
-      let members_opt =
-        try Some (couldMap ~f:pExpr members env) with
-        | API_Missing_syntax (_,_,n)
-          when kind n = SyntaxKind.ElementInitializer -> None
-      in
-      if env.is_hh_file || env.enable_hh_syntax || members_opt = None
-      then Collection (pos_name kw env, couldMap ~f:pAField members env)
+      if env.is_hh_file || env.enable_hh_syntax then
+        Collection (pos_name kw env, couldMap ~f:pAField members env)
       else
         (* If php, this is a subscript expression, not a collection. *)
         let subscript_receiver = pExpr kw env in

@@ -502,6 +502,22 @@ Other properties are consequences of these rules. For example, commutativity
 follows by applying all three.
 }}
 
+{{ com
+Nullable types are unions:
+}}
+
+-------------------- :: nullable_union
+G |- ?t1 <: t1 | ?t2
+
+{{ com
+
+Note that this rule, together with \ottdrulename{sub\_refl} and
+\ottdrulename{sub\_union\_least}, implies
+\ottdrulename{sub\_nullable\_cancel} if we take $[[t1]]$ to be
+$[[?t2]]$.
+
+}}
+
 {{ com \subsection{Primitives} }}
 
 {{ com

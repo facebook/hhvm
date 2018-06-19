@@ -1057,8 +1057,9 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
 
     | ListExpression { list_members = members; _ } ->
       (* TODO: Or tie in with other intrinsics and post-process to List *)
-      let pBinderOrIgnore node env =
-        Option.value ~default:(Pos.none, Omitted) @@ mpOptional pExpr node env
+      let pBinderOrIgnore node env = match syntax node with
+        | Missing -> (Pos.none, Omitted)
+        | _ -> pExpr node env
       in
       List (couldMap ~f:pBinderOrIgnore members env)
 

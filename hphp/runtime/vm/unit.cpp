@@ -1036,7 +1036,7 @@ bool Unit::classExists(const StringData* name, bool autoload, ClassKind kind) {
 ///////////////////////////////////////////////////////////////////////////////
 // Constant lookup.
 
-const Cell* Unit::lookupCns(const StringData* cnsName) {
+tv_rval Unit::lookupCns(const StringData* cnsName) {
   auto const handle = lookupCnsHandle(cnsName);
 
   if (LIKELY(rds::isHandleBound(handle) &&
@@ -1059,7 +1059,7 @@ const Cell* Unit::lookupCns(const StringData* cnsName) {
     return nullptr;
   }
   if (UNLIKELY(rds::s_constants().get() != nullptr)) {
-    return rds::s_constants()->rval(cnsName).tv_ptr();
+    return rds::s_constants()->rval(cnsName);
   }
   return nullptr;
 }
@@ -1074,7 +1074,7 @@ const Cell* Unit::lookupPersistentCns(const StringData* cnsName) {
   return ret;
 }
 
-const TypedValue* Unit::loadCns(const StringData* cnsName) {
+tv_rval Unit::loadCns(const StringData* cnsName) {
   auto const tv = lookupCns(cnsName);
   if (LIKELY(tv != nullptr)) return tv;
 

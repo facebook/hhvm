@@ -135,11 +135,11 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE
-const Cell* lookupCnsImpl(StringData* nm) {
-  const Cell* cns = nullptr;
+tv_rval lookupCnsImpl(StringData* nm) {
+  tv_rval cns;
 
   if (UNLIKELY(rds::s_constants().get() != nullptr)) {
-    cns = rds::s_constants()->rval(nm).tv_ptr();
+    cns = rds::s_constants()->rval(nm);
   }
   if (!cns) {
     cns = Unit::loadCns(const_cast<StringData*>(nm));
@@ -217,7 +217,7 @@ Cell lookupCnsUHelperNormal(rds::Handle tv_handle,
   // Try cache handle for unqualified name.
   if (UNLIKELY(!cns && rds::isHandleInit(tv_handle, rds::NormalTag{}))) {
     cns = rds::handleToPtr<TypedValue, rds::Mode::Normal>(tv_handle);
-    assertx(cns->m_type != KindOfUninit);
+    assertx(type(cns) != KindOfUninit);
   }
 
   if (LIKELY(cns != nullptr)) {

@@ -485,11 +485,8 @@ TypedValue HHVM_FUNCTION(array_map,
       keyConverted = !collectionAllowsIntStringKeys(col_type);
     }
     for (ArrayIter iter(arr1); iter; ++iter) {
-      auto result = Variant::attach(
-        g_context->invokeFuncFew(
-          ctx, 1, iter.secondRvalPlus().unboxed().tv_ptr()
-        )
-      );
+      auto const arg = tvToCell(iter.secondValPlus());
+      auto result = Variant::attach(g_context->invokeFuncFew(ctx, 1, &arg));
       // if keyConverted is false, it's possible that ret will have fewer
       // elements than cell_arr1; keys int(1) and string('1') may both be
       // present
@@ -2799,7 +2796,8 @@ TypedValue HHVM_FUNCTION(hphp_array_idx,
       auto const index = key.toKey(arr).tv();
       if (!isNullType(index.m_type)) {
         auto const ret = arr->get(index, false);
-        return tvReturn(!ret.is_dummy() ? tvAsCVarRef(ret.tv_ptr()) : def);
+        return tvReturn(!ret.is_dummy() ? const_variant_ref{ret}
+                                        : const_variant_ref{def});
       }
     } else {
       raise_error("hphp_array_idx: search must be an array");

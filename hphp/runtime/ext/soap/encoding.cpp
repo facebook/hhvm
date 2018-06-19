@@ -2503,15 +2503,16 @@ static Variant to_zval_array(encodeType* type, xmlNodePtr data) {
 
       /* Get/Create intermediate arrays for multidimensional arrays */
       i = 0;
-      Variant *ar = &ret;
+      tv_lval ar = ret.asTypedValue();
       while (i < dimension-1) {
-        if (!ar->toArrRef().exists(pos[i])) {
-          ar->toArrRef().set(pos[i], Array::Create());
+        auto& arr = toArrRef(ar);
+        if (!arr.exists(pos[i])) {
+          arr.set(pos[i], Array::Create());
         }
-        ar = &tvAsVariant(ar->toArrRef().lvalAt(pos[i]).tv_ptr());
+        ar = arr.lvalAt(pos[i]);
         i++;
       }
-      ar->toArrRef().set(pos[i], tmpVal);
+      toArrRef(ar).set(pos[i], tmpVal);
 
       /* Increment position */
       i = dimension;

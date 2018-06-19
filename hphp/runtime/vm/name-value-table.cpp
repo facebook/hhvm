@@ -149,18 +149,15 @@ void NameValueTable::leak() {
   assertx(leaked());
 }
 
-TypedValue* NameValueTable::set(const StringData* name, const TypedValue* val) {
+TypedValue* NameValueTable::set(const StringData* name, tv_rval val) {
   TypedValue* target = findTypedValue(name);
   tvSet(*tvToCell(val), *target);
   return target;
 }
 
-TypedValue* NameValueTable::bind(const StringData* name, TypedValue* val) {
+TypedValue* NameValueTable::bind(const StringData* name, tv_lval val) {
   TypedValue* target = findTypedValue(name);
-  if (!isRefType(val->m_type)) {
-    tvBox(*val);
-  }
-  tvBind(*val, *target);
+  tvSetRef(val, target);
   return target;
 }
 

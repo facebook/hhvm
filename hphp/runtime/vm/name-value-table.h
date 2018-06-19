@@ -19,6 +19,7 @@
 
 #include <folly/Bits.h>
 
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
@@ -131,13 +132,13 @@ struct NameValueTable {
    * Set the slot for the supplied name to `val', allocating it if
    * necessary.
    */
-  TypedValue* set(const StringData* name, const TypedValue* val);
+  TypedValue* set(const StringData* name, tv_rval val);
 
   /*
    * Bind the slot for the supplied name to `val', allocating it and
    * boxing it first if necessary.
    */
-  TypedValue* bind(const StringData* name, TypedValue* val);
+  TypedValue* bind(const StringData* name, tv_lval val);
 
   /*
    * Remove an element from this table.  All elements added always

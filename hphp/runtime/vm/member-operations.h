@@ -824,8 +824,8 @@ inline tv_lval ElemDObject(TypedValue& tvRef, tv_lval base,
     // ArrayObject should always have the 'storage' property...
     assertx(storage);
     return UNLIKELY(checkHACIntishCast())
-      ? ElemDArray<mode, reffy, true, keyType>(storage.tv_ptr(), key)
-      : ElemDArray<mode, reffy, false, keyType>(storage.tv_ptr(), key);
+      ? ElemDArray<mode, reffy, true, keyType>(storage, key)
+      : ElemDArray<mode, reffy, false, keyType>(storage, key);
   }
 
 
@@ -1028,7 +1028,7 @@ inline tv_lval ElemUVecPre(tv_lval base, int64_t key) {
     PackedArray::LvalSilentIntVec(oldArr, key, oldArr->cowCheck());
 
   if (UNLIKELY(!lval)) {
-    return ElemUEmptyish().tv_ptr();
+    return ElemUEmptyish();
   }
   if (lval.arr != oldArr) {
     type(base) = KindOfVec;
@@ -2167,7 +2167,7 @@ inline Cell IncDecElemEmptyish(
                  tvAsCVarRef(&key).toString().data());
   }
   assertx(type(lval) == KindOfNull);
-  return IncDecBody(op, lval.tv_ptr());
+  return IncDecBody(op, lval);
 }
 
 inline Cell IncDecElemScalar() {

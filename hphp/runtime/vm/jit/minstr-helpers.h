@@ -548,8 +548,8 @@ template<KeyType keyType, bool checkForInt, MOpMode mode, bool intishWarn>
 inline tv_rval elemArrayImpl(ArrayData* ad, key_type<keyType> key) {
   auto constexpr warn = mode == MOpMode::Warn;
   auto const ret = checkForInt ?
-    checkedGet<warn, intishWarn>(ad, key).tv_ptr() :
-    (warn ? ad->rvalStrict(key).tv_ptr() : ad->rval(key).tv_ptr());
+    checkedGet<warn, intishWarn>(ad, key) :
+    (warn ? ad->rvalStrict(key) : ad->rval(key));
   if (!ret) return elemArrayNotFound<mode>(key);
   return ret;
 }
@@ -736,7 +736,7 @@ ELEM_KEYSET_U_HELPER_TABLE(X)
 
 #define X(nm, keyType, mode) \
 inline tv_rval nm(ArrayData* ad, key_type<keyType> key) { \
-  return HPHP::ElemKeyset<mode, keyType>(ad, key).tv_ptr(); \
+  return HPHP::ElemKeyset<mode, keyType>(ad, key); \
 }
 ELEM_KEYSET_HELPER_TABLE(X)
 #undef X

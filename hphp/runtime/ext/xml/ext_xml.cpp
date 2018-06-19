@@ -632,7 +632,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         auto lval = parser->data.toArrRef().lvalAt();
         type(lval) = KindOfArray;
         val(lval).parr = tag.detach();
-        parser->ctag.assignRef(tvAsVariant(lval.tv_ptr()));
+        parser->ctag.assignRef(lval);
       } else if (parser->level == (XML_MAXLEVEL + 1)) {
         raise_warning("Maximum depth exceeded - Results truncated");
       }

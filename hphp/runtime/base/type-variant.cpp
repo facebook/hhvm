@@ -90,6 +90,10 @@ NEVER_INLINE
 Variant::Variant(const Variant& v) noexcept {
   cellDup(tvToInitCell(*v.asTypedValue()), *asTypedValue());
 }
+NEVER_INLINE
+Variant::Variant(const_variant_ref v) noexcept {
+  cellDup(tvToInitCell(*v.rval()), *asTypedValue());
+}
 
 /*
  * The destruct functions below all arbitrarily take RefData* as an

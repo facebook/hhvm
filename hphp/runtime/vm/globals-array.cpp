@@ -173,7 +173,7 @@ ArrayData* GlobalsArray::SetRefInt(ArrayData* ad, int64_t k,
 ArrayData* GlobalsArray::SetRefStr(ArrayData* ad, StringData* k,
                                    tv_lval v, bool) {
   auto a = asGlobals(ad);
-  tvAsVariant(a->m_tab->lookupAdd(k)).assignRef(tvAsVariant(v.tv_ptr()));
+  tvAsVariant(a->m_tab->lookupAdd(k)).assignRef(v);
   return a;
 }
 

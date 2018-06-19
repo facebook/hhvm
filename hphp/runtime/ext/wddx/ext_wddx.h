@@ -68,12 +68,6 @@ struct WddxPacket : ResourceData {
   bool m_manualPacketCreation;
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// helper
-
-void find_var_recursive(const TypedValue* tv,
-                        const req::ptr<WddxPacket>& wddxPacket);
-
 }
 
 #endif

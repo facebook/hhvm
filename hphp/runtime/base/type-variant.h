@@ -63,8 +63,6 @@ private:
 public:
   explicit base(tv_val_t val) : m_val{val} {}
 
-  /* implicit */ operator Variant() const;
-
   DataType getType() const {
     auto const t = type(m_val);
     return isRefType(t) ? val(m_val).pref->tv()->m_type : t;
@@ -333,6 +331,7 @@ struct Variant : private TypedValue {
    */
 
   Variant(const Variant& v) noexcept;
+ /* implicit */  Variant(const_variant_ref v) noexcept;
 
   Variant(const Variant& v, CellCopy) noexcept {
     m_type = v.m_type;
@@ -1381,14 +1380,6 @@ Variant operator+(const Variant & lhs, const Variant & rhs) = delete;
 /*
  * Definitions for some members of variant_ref et al. that use Variant.
  */
-namespace variant_ref_detail{
-template<bool is_const>
-inline base<is_const>::operator Variant() const {
-  TypedValue tv{val(m_val), type(m_val)};
-  return tvAsCVarRef(&tv);
-}
-}
-
 inline variant_ref::variant_ref(Variant& v)
   : variant_ref_detail::base<false>{v.asTypedValue()}
 {}

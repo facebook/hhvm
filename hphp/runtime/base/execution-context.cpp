@@ -1294,7 +1294,7 @@ VarEnv* ExecutionContext::getOrCreateVarEnv(int frame) {
   return fp->getVarEnv();
 }
 
-void ExecutionContext::setVar(StringData* name, const TypedValue* v) {
+void ExecutionContext::setVar(StringData* name, tv_rval v) {
   VMRegAnchor _;
   ActRec *fp = vmfp();
   if (!fp) return;
@@ -1302,7 +1302,7 @@ void ExecutionContext::setVar(StringData* name, const TypedValue* v) {
   if (fp) fp->getVarEnv()->set(name, v);
 }
 
-void ExecutionContext::bindVar(StringData* name, TypedValue* v) {
+void ExecutionContext::bindVar(StringData* name, tv_lval v) {
   VMRegAnchor _;
   ActRec *fp = vmfp();
   if (!fp) return;

@@ -214,15 +214,15 @@ String WddxPacket::wrapValue(const String& start,
 //////////////////////////////////////////////////////////////////////////////
 // helpers
 
-void find_var_recursive(const TypedValue* tv,
-                        const req::ptr<WddxPacket>& wddxPacket) {
+static void find_var_recursive(tv_rval tv,
+                               const req::ptr<WddxPacket>& wddxPacket) {
   if (tvIsString(tv)) {
     auto var_name = tvCastToString(*tv);
     wddxPacket->add_var(var_name, true);
   }
-  if (isArrayLikeType(tv->m_type)) {
-    for (ArrayIter iter(tv->m_data.parr); iter; ++iter) {
-      find_var_recursive(iter.secondRval().tv_ptr(), wddxPacket);
+  if (tvIsArrayLike(tv)) {
+    for (ArrayIter iter(val(tv).parr); iter; ++iter) {
+      find_var_recursive(iter.secondRval(), wddxPacket);
     }
   }
 }

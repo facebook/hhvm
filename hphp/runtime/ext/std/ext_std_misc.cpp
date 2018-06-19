@@ -411,7 +411,7 @@ Variant HHVM_FUNCTION(constant, const String& name) {
     }
   } else {
     auto const cns = Unit::loadCns(name.get());
-    if (cns) return tvAsCVarRef(cns);
+    if (cns) return const_variant_ref{cns};
   }
 
   raise_warning("constant(): Couldn't find constant %s", data);
@@ -444,7 +444,7 @@ bool HHVM_FUNCTION(defined, const String& name, bool autoload /* = true */) {
     return false;
   } else {
     auto* cb = autoload ? Unit::loadCns : Unit::lookupCns;
-    return cb(name.get());
+    return cb(name.get()).is_set();
   }
 }
 

@@ -530,11 +530,11 @@ void VarEnv::exitFP(ActRec* fp) {
   }
 }
 
-void VarEnv::set(const StringData* name, const TypedValue* tv) {
+void VarEnv::set(const StringData* name, tv_rval tv) {
   m_nvTable.set(name, tv);
 }
 
-void VarEnv::bind(const StringData* name, TypedValue* tv) {
+void VarEnv::bind(const StringData* name, tv_lval tv) {
   m_nvTable.bind(name, tv);
 }
 
@@ -1880,7 +1880,7 @@ static inline tv_lval ratchetRefs(tv_lval result,
                                   TypedValue& tvRef,
                                   TypedValue& tvRef2) {
   TRACE(5, "Ratchet: result %p(k%d c%d), ref %p(k%d c%d) ref2 %p(k%d c%d)\n",
-        result.tv_ptr(), static_cast<data_type_t>(result.type()),
+        &val(result), static_cast<data_type_t>(result.type()),
         innerCount(*result),
         &tvRef, static_cast<data_type_t>(tvRef.m_type), innerCount(tvRef),
         &tvRef2, static_cast<data_type_t>(tvRef2.m_type), innerCount(tvRef2));
@@ -1904,11 +1904,11 @@ static inline tv_lval ratchetRefs(tv_lval result,
     // unconditionally here because we maintain the invariant throughout that
     // either tvRef is KindOfUninit, or tvRef contains a valid object that
     // result points to.
-    assertx(result.tv_ptr() == &tvRef);
+    assertx(&val(result) == &tvRef.m_data);
     return tv_lval(&tvRef2);
   }
 
-  assertx(result.tv_ptr() != &tvRef);
+  assertx(&val(result) != &tvRef.m_data);
   return result;
 }
 

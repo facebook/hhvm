@@ -63,9 +63,7 @@ static inline long in6addrWord(struct in6_addr addr, char wordNo) {
 static void arrayRefHelper(Variant& arr) {
   String sms("hhvm.stats.max_slot");
   String hfc("hhvm.hot_func_count");
-  Variant r(Variant::StrongBind{},
-            tvAsVariant(arr.toArrRef().lvalAt(sms).tv_ptr()));
-  arr.toArrRef().setRef(hfc, r);
+  arr.toArrRef().setRef(hfc, arr.toArrRef().lvalAt(sms));
 }
 
 bool TestCppBase::TestVariantArrayRef() {

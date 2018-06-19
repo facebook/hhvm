@@ -125,16 +125,6 @@ public:
   type_t& type() const;
 
   /*
-   * Get a pointer to the referenced TypedValue.
-   *
-   * Behavior is undefined if this object was not constructed from a single
-   * TypedValue*. Currently, this never happens.
-   *
-   * TODO(#9077255): Make it happen for monomorphic arrays.
-   */
-  tv_t* tv_ptr() const;
-
-  /*
    * Get a copy of the referenced value and type as a TypedValue.
    *
    * @requires: is_set()

@@ -85,11 +85,6 @@ inline auto tv_val<is_const, tag_t>::type() const -> type_t& {
 }
 
 template<bool is_const, typename tag_t>
-inline auto tv_val<is_const, tag_t>::tv_ptr() const -> tv_t* {
-  return m_tv;
-}
-
-template<bool is_const, typename tag_t>
 inline TypedValue tv_val<is_const, tag_t>::tv() const {
   // Explicitly drop m_aux, since users of tv_val shouldn't care about it.
   assertx(is_set());

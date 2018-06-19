@@ -643,7 +643,7 @@ public:
    *
    * Return nullptr if no such constant is defined.
    */
-  static const Cell* lookupCns(const StringData* cnsName);
+  static tv_rval lookupCns(const StringData* cnsName);
 
   /*
    * Look up the value of the persistent constant with name `cnsName'.
@@ -657,7 +657,7 @@ public:
    * Look up, or autoload and define, the value of the constant with name
    * `cnsName' for this request.
    */
-  static const Cell* loadCns(const StringData* cnsName);
+  static tv_rval loadCns(const StringData* cnsName);
 
   /*
    * Define a constant (either request-local or persistent) with name `cnsName'

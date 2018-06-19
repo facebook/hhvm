@@ -432,6 +432,9 @@ let interface_implements =
 let memoize_on_lambda = "<<__Memoize>> attribute is not allowed on lambdas or \
   anonymous functions."
 
+let instanceof_paren x =
+  Printf.sprintf "`instanceof (%s)` is not allowed because it is ambiguous. Is `%s` a class or a constant?"
+    x x
 let invalid_await_use = "Await cannot be used as an expression"
 
 let invalid_default_argument s = s ^ " expression is not permitted \

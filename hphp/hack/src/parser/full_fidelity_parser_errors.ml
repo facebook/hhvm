@@ -84,6 +84,7 @@ type env =
   ; disallow_elvis_space : bool
   ; is_hh_file           : bool
   ; is_strict            : bool
+  ; codegen              : bool
   }
 
 let make_env
@@ -92,6 +93,7 @@ let make_env
   ?(enable_hh_syntax     = false           )
   ?(disallow_elvis_space = false           )
   (syntax_tree : SyntaxTree.t)
+  ~(codegen : bool)
   : env
   = { syntax_tree
     ; level
@@ -100,6 +102,7 @@ let make_env
     ; disallow_elvis_space
     ; is_hh_file = SyntaxTree.is_hack syntax_tree
     ; is_strict = SyntaxTree.is_strict syntax_tree
+    ; codegen
     }
 
 and is_hhvm_compat env = env.hhvm_compat_mode <> NoCompat
@@ -1488,6 +1491,19 @@ let expression_errors env node parents errors =
     | _ -> false
   in
   match syntax node with
+  (* It is ambiguous what `instanceof (A)` means: either instanceof a type A
+   * or instanceof a type whose name is what the constant A evaluates to.
+   * We therefore simply disallow this. *)
+  | InstanceofExpression
+    { instanceof_right_operand =
+      { syntax = ParenthesizedExpression
+        { parenthesized_expression_expression =
+          { syntax = Token _; _ } as in_paren
+        ; _ }
+      ; _ }
+    ; _ } when not env.codegen ->
+    let in_paren = text in_paren in
+    make_error_from_node node (SyntaxError.instanceof_paren in_paren) :: errors
   | LiteralExpression { literal_expression = {syntax = Token token; _} as e ; _}
     when env.is_hh_file && is_decimal_or_hexadecimal_literal token ->
     let text = text e in
@@ -2588,6 +2604,7 @@ let find_syntax_errors env =
         let errors =
           methodish_errors env node parents errors in
         trait_require_clauses, names, errors
+      | InstanceofExpression _
       | LiteralExpression _
       | SafeMemberSelectionExpression _
       | HaltCompilerExpression _

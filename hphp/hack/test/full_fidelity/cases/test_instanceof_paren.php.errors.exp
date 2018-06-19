@@ -1,0 +1,1 @@
+(3,5)-(3,21) `instanceof (A)` is not allowed because it is ambiguous. Is `A` a class or a constant?

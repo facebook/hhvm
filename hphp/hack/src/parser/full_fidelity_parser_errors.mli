@@ -25,6 +25,7 @@ module WithSmartConstructors : functor (SmartConstructors : SmartConstructors.Sm
     -> ?disallow_elvis_space:bool
     (* Required parts *)
     -> Full_fidelity_syntax_tree.WithSyntax(Syntax).WithSmartConstructors(SmartConstructors).t
+    -> codegen:bool
     -> env
 
   val parse_errors : env -> Full_fidelity_syntax_error.t list

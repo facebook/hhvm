@@ -3083,6 +3083,7 @@ let lower_tree
         ~hhvm_compat_mode
         ~enable_hh_syntax:env.enable_hh_syntax
         ~disallow_elvis_space:env.disallow_elvis_space
+        ~codegen:env.codegen
       in
       let errors = ParserErrors.parse_errors error_env in
       (* Prioritize runtime errors *)
@@ -3122,6 +3123,7 @@ let lower_tree
               be caught in later phases.
             *)
             ~hhvm_compat_mode:ParserErrors.HHVMCompat
+            ~codegen:env.codegen
             tree
         in
         let f e = Errors.parsing_error (pos_and_message_of e) in

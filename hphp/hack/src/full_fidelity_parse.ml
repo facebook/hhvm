@@ -383,6 +383,7 @@ let handle_existing_file args filename =
       ~level
       ~hhvm_compat_mode
       ~disallow_elvis_space:args.disallow_elvis_space
+      ~codegen:args.codegen
     in
     print_full_fidelity_errors ~source_text ~error_env
   end;

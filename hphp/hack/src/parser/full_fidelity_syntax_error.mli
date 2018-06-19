@@ -252,6 +252,7 @@ val sealed_val_not_classname: string
 val sealed_final: string
 val interface_implements: string
 val memoize_on_lambda: string
+val instanceof_paren: string -> string
 val invalid_await_use: string
 val invalid_constructor_method_call: string
 val invalid_default_argument: string -> string

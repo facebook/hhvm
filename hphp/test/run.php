@@ -1201,6 +1201,7 @@ function hhbbc_cmd($options, $test, $program) {
     '--no-logging',
     '--no-cores',
     '--parallel-num-threads=1',
+    '--hack-compiler-extract-path='.bin_root().'/hackc_%{schema}',
     read_opts_file("$test.hhbbc_opts"),
     "-o \"$test.repo/$program.hhbbc\" \"$test.repo/$program.hhbc\"",
   ));

@@ -53,6 +53,7 @@ namespace fs = boost::filesystem;
 
 std::string output_repo;
 std::string input_repo;
+std::string hack_compiler_extract_path;
 bool logging = true;
 bool print_bytecode_stats_and_exit = false;
 
@@ -137,6 +138,9 @@ void parse_options(int argc, char** argv) {
     ("trace-bytecode",
       po::value(&trace_bcs)->composing(),
       "Add a bytecode to trace (for debugging)")
+    ("hack-compiler-extract-path",
+      po::value(&hack_compiler_extract_path)->default_value(""),
+      "hack compiler extract path")
     ;
 
   // Some extra esoteric options that aren't exposed in --help for
@@ -474,9 +478,9 @@ int main(int argc, char** argv) try {
   RuntimeOption::RepoCommit          = false;
   RuntimeOption::EvalJit             = false;
 
-  // We shouldn't be running the compiler anyway, and this keeps us from
-  // uselessly extracting the embedded one.
-  RuntimeOption::EvalHackCompilerDefault = false;
+  if (!hack_compiler_extract_path.empty()) {
+    RuntimeOption::EvalHackCompilerExtractPath = hack_compiler_extract_path;
+  }
 
   RuntimeOption::EvalThisTypeHintLevel = gd.ThisTypeHintLevel;
 

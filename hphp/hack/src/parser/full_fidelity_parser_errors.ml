@@ -70,6 +70,7 @@ type first_use_or_def = {
   f_location: location;
   f_kind: name_kind;
   f_name: string;
+  f_global: bool;
 }
 
 type error_level = Minimum | Typical | Maximum
@@ -123,8 +124,13 @@ let combine_names n1 n2 =
   | false, false -> n1 ^ "\\" ^ n2
   | _ -> n1 ^ n2
 
-let make_first_use_or_def ~kind location namespace_name name =
-  { f_location = location; f_kind = kind; f_name = combine_names namespace_name name }
+let make_first_use_or_def ~kind ?(is_method=false) location namespace_name name =
+  {
+    f_location = location;
+    f_kind = kind;
+    f_name = combine_names namespace_name name;
+    f_global = not is_method && namespace_name = global_namespace_name;
+  }
 
 type used_names = {
   t_classes: first_use_or_def SMap.t;
@@ -1272,11 +1278,16 @@ let redeclaration_errors env node parents namespace_name names errors =
       | { syntax = MethodishDeclaration _; _ } :: _ ->
         let function_name = text f.function_name in
         let location = make_location_of_node f.function_name in
-        let def = make_first_use_or_def
+        let is_method = match parents with
+          | { syntax = MethodishDeclaration _; _ } :: _ -> true
+          | _ -> false
+        in
+        let def = make_first_use_or_def ~is_method
           ~kind:Name_def location namespace_name function_name in
         let errors =
           match SMap.get function_name names.t_functions with
-          | Some { f_location = { start_offset; _}; f_kind = Name_def; _} ->
+          | Some { f_location = { start_offset; _}; f_kind = Name_def; f_global; _ }
+              when f_global = def.f_global ->
             let text = SyntaxTree.text env.syntax_tree in
             let line, _ =
               Full_fidelity_source_text.offset_to_position text start_offset in
@@ -1767,7 +1778,7 @@ let require_errors env node parents trait_use_clauses errors =
 
 let check_type_name syntax_tree name namespace_name name_text location names errors =
   begin match SMap.get name_text names.t_classes with
-  | Some { f_location = location; f_kind; f_name }
+  | Some { f_location = location; f_kind; f_name; _ }
     when combine_names namespace_name name_text <> f_name && f_kind <> Name_def ->
     let text = SyntaxTree.text syntax_tree in
     let line_num, _ =
@@ -1996,9 +2007,9 @@ let use_class_or_namespace_clause_errors
         else (String.lowercase_ascii short_name) = String.lowercase_ascii name in
       let map = get_map names in
       match SMap.find_first_opt find_name map with
-      | Some (_, { f_location = location; f_kind; _ }) ->
+      | Some (_, { f_location = location; f_kind; f_global; _ }) ->
         if (f_kind <> Name_def
-           || (error_on_global_redefinition && is_global_namespace))
+           || (error_on_global_redefinition && (is_global_namespace || f_global)))
         then
           let error =
             make_name_already_used_error name name_text
@@ -2701,18 +2712,27 @@ let find_syntax_errors env =
         if namespace_type = Unspecified
         then Bracketed (make_location namespace_left_brace namespace_right_brace)
         else namespace_type in
-      (* reset names/namespace_type before diving into namespace body *)
+      (* reset names/namespace_type before diving into namespace body,
+         keeping global function names *)
       let namespace_name = get_namespace_name parents namespace_name in
+      let is_global _ f = f.f_global in
+      let global_funs names = SMap.filter is_global names.t_functions in
+      let new_names = {empty_names with t_functions = global_funs names} in
       let acc1 =
         make_acc
-          acc errors namespace_type empty_names
+          acc errors namespace_type new_names
           namespace_name empty_trait_require_clauses
       in
       let acc1 = fold_child_nodes folder node parents acc1 in
+      (* add newly declared global functions to the old set of names *)
+      let old_names =
+        {acc.names with t_functions =
+          SMap.union (global_funs acc1.names) acc.names.t_functions}
+      in
       (* resume with old set of names and pull back
         accumulated errors/last seen namespace type *)
         make_acc
-          acc acc1.errors namespace_type acc.names
+          acc acc1.errors namespace_type old_names
           acc.namespace_name acc.trait_require_clauses
     | NamespaceEmptyBody { namespace_semicolon; _ } ->
       let namespace_type =

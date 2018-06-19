@@ -115,6 +115,7 @@ bool RuntimeOption::EnableIsExprPrimitiveMigration = true;
 bool RuntimeOption::Hacksperimental = false;
 bool RuntimeOption::CheckParamTypeInvariance = true;
 bool RuntimeOption::DumpPreciseProfileData = true;
+bool RuntimeOption::EnableCoroutines = true;
 uint32_t RuntimeOption::EvalInitialStaticStringTableSize =
   kDefaultInitialStaticStringTableSize;
 uint32_t RuntimeOption::EvalInitialNamedEntityTableSize = 30000;
@@ -1498,6 +1499,9 @@ void RuntimeOption::Load(
     Config::Bind(Hacksperimental, ini, config,
                 "Hack.Lang.Hacksperimental",
                 false);
+    Config::Bind(EnableCoroutines, ini, config,
+                "Hack.Lang.EnableCoroutines",
+                true);
   }
   {
     // Options for PHP7 features which break BC. (Features which do not break

@@ -281,6 +281,8 @@ let parse_text compiler_options popt fn text =
       not (Hhbc_options.enable_uniform_variable_syntax !Hhbc_options.compiler_options) in
     let hacksperimental =
       Hhbc_options.hacksperimental !Hhbc_options.compiler_options in
+    let lower_coroutines =
+      Hhbc_options.enable_coroutines !Hhbc_options.compiler_options in
     let systemlib_compat_mode = Emit_env.is_systemlib () in
     let env = Full_fidelity_ast.make_env
       ~parser_options:popt
@@ -292,6 +294,7 @@ let parse_text compiler_options popt fn text =
       ~enable_hh_syntax
       ~hacksperimental
       ~keep_errors:false
+      ~lower_coroutines
       fn
     in
     let source_text = SourceText.make fn text in

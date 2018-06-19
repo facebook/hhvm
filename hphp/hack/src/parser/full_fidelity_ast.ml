@@ -58,7 +58,7 @@ let make_env
   ?(keep_errors              = true                    )
   ?(ignore_pos               = false                   )
   ?(quick_mode               = false                   )
-  ?(lower_coroutines         = false                   )
+  ?(lower_coroutines         = true                    )
   ?(enable_hh_syntax         = false                   )
   ?(disallow_elvis_space     = false                   )
   ?(fail_open                = true                    )
@@ -3073,9 +3073,9 @@ let lower_tree
   (mode : FileInfo.mode)
   (tree : PositionedSyntaxTree.t)
 : result =
-  let lower_coroutines = env.lower_coroutines && PositionedSyntaxTree.sc_state tree in
+  let env = { env with lower_coroutines = env.lower_coroutines && PositionedSyntaxTree.sc_state tree } in
   let () =
-    if env.codegen && not lower_coroutines then
+    if env.codegen && not env.lower_coroutines then
       let hhvm_compat_mode = if env.systemlib_compat_mode
         then ParserErrors.SystemLibCompat
         else ParserErrors.HHVMCompat in
@@ -3143,7 +3143,7 @@ let lower_tree
     env.disallow_elvis_space in
   let env = { env with parser_options = popt } in
   let script = PositionedSyntaxTree.root tree in
-  if lower_coroutines
+  if env.lower_coroutines
   then
     let script =
       Full_fidelity_editable_positioned_syntax.from_positioned_syntax script

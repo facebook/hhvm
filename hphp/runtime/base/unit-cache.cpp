@@ -658,6 +658,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
   std::string t = fileMd5 + '\0'
     + (RuntimeOption::AssertEmitted ? '1' : '0')
     + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
+    + (RuntimeOption::EnableCoroutines ? '1' : '0')
     + (RuntimeOption::EnableHackcOnlyFeature ? '1' : '0')
     + (RuntimeOption::EnableIsExprPrimitiveMigration ? '1' : '0')
     + (RuntimeOption::EnableHipHopExperimentalSyntax ? '1' : '0')

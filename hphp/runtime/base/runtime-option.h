@@ -448,6 +448,7 @@ struct RuntimeOption {
   static bool AutoprimeGenerators;
   static bool EnableHackcOnlyFeature;
   static bool EnableIsExprPrimitiveMigration;
+  static bool EnableCoroutines;
   static bool Hacksperimental;
   static uint32_t EvalInitialStaticStringTableSize;
   static uint32_t EvalInitialNamedEntityTableSize;

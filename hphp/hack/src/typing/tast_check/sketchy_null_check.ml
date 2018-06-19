@@ -25,6 +25,7 @@ let rec find_sketchy_type env ty =
   | Tnonnull -> Some false
 
   | Tabstract (AKenum _, _)
+  | Tarraykind _
     when Env.forward_compat_ge env 2018_06_14 -> Some false
 
   | Tprim Tbool when Env.forward_compat_ge env 2018_06_14 -> Some true

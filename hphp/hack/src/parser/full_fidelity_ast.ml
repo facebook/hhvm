@@ -1868,9 +1868,11 @@ and pStmt : stmt parser = fun node env ->
     in
     let akv =
       let value = pExpr foreach_value env in
-      Option.value_map (mpOptional pExpr foreach_key env)
-        ~default:(As_v value)
-        ~f:(fun key -> As_kv (key, value))
+      match syntax foreach_key with
+        | Missing -> As_v value
+        | _ ->
+          let key = pExpr foreach_key env in
+          As_kv (key, value)
     in
     let blk = unwrap_extra_block @@ pStmtUnsafe foreach_body env in
     pos, Foreach (col, akw, akv, blk)

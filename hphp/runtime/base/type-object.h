@@ -207,6 +207,16 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+ALWAYS_INLINE const Object& asCObjRef(tv_rval tv) {
+  assertx(tvIsObject(tv));
+  return reinterpret_cast<const Object&>(val(tv).pobj);
+}
+
+ALWAYS_INLINE const Object& toCObjRef(tv_rval tv) {
+  return asCObjRef(tvIsRef(tv) ? val(tv).pref->tv() : tv);
+}
+
 }
 
 #endif // incl_HPHP_OBJECT_H_

@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
+
 #include "hphp/util/assertions.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/functional.h"
@@ -30,6 +31,9 @@
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
+
+// Forward declare to avoid including tv-conversions.h and creating a cycle.
+StringData* tvCastToStringData(TypedValue tv);
 
 struct VarNR;
 struct VariableSerializer;
@@ -52,7 +56,8 @@ constexpr int kMinShrinkThreshold = 1024;
 
 //////////////////////////////////////////////////////////////////////
 
-// Built strings will have their reference counts pre-initialized to 1.
+// Built strings will be uncounted, or will have their reference counts
+// pre-initialized to 1.
 StringData* buildStringData(int     n);
 StringData* buildStringData(int64_t n);
 StringData* buildStringData(double  n);
@@ -415,9 +420,6 @@ public:
   void dump() const;
 
  private:
-  static req::ptr<StringData> buildString(int n);
-  static req::ptr<StringData> buildString(int64_t n);
-
   String rvalAtImpl(int key) const {
     if (m_str) {
       return String{m_str->getChar(key)};
@@ -595,6 +597,21 @@ ALWAYS_INLINE String& asStrRef(tv_lval tv) {
   assertx(isStringType(type(tv)));
   type(tv) = KindOfString;
   return reinterpret_cast<String&>(val(tv).pstr);
+}
+
+ALWAYS_INLINE const String& asCStrRef(tv_rval tv) {
+  assert(cellIsPlausible(*tv));
+  assertx(isStringType(type(tv)));
+  return reinterpret_cast<const String&>(val(tv).pstr);
+}
+
+ALWAYS_INLINE const String& toCStrRef(tv_rval tv) {
+  return asCStrRef(tvIsRef(tv) ? val(tv).pref->tv() : tv);
+}
+
+ALWAYS_INLINE String toString(tv_rval tv) {
+  if (isStringType(type(tv))) return String{val(tv).pstr};
+  return String::attach(tvCastToStringData(*tv));
 }
 
 }

@@ -31,6 +31,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+// Forward declare to avoid including tv-conversions.h and creating a cycle.
+ArrayData* tvCastToArrayLikeData(TypedValue tv);
+
 struct ArrayIter;
 struct VariableUnserializer;
 
@@ -665,9 +668,22 @@ ALWAYS_INLINE Array& asArrRef(tv_lval tv) {
   return *reinterpret_cast<Array*>(&val(tv).parr);
 }
 
+ALWAYS_INLINE Array& toArrRef(tv_lval tv) {
+  return asArrRef(isRefType(type(tv)) ? val(tv).pref->tv() : tv);
+}
+
 ALWAYS_INLINE const Array& asCArrRef(tv_rval tv) {
   assertx(tvIsArrayLike(tv));
   return *reinterpret_cast<const Array*>(&val(tv).parr);
+}
+
+ALWAYS_INLINE const Array& toCArrRef(tv_rval tv) {
+  return asCArrRef(tvIsRef(tv) ? val(tv).pref->tv() : tv);
+}
+
+ALWAYS_INLINE Array toArray(tv_rval rval) {
+  if (isArrayLikeType(type(rval))) return Array{val(rval).parr};
+  return Array::attach(tvCastToArrayLikeData(*rval));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

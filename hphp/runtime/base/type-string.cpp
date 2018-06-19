@@ -80,42 +80,23 @@ static InitFiniNode prepopulate_integers([] {
 String::~String() {}
 
 StringData* buildStringData(int n) {
-  char tmpbuf[12];
-
-  tmpbuf[11] = '\0';
-  auto sl = conv_10(n, &tmpbuf[11]);
-  return StringData::Make(sl, CopyString);
+  return buildStringData(static_cast<int64_t>(n));
 }
-
-req::ptr<StringData> String::buildString(int n) {
-  const StringData* sd = GetIntegerStringData(n);
-  if (sd) {
-    assertx(sd->isStatic());
-    return req::ptr<StringData>::attach(const_cast<StringData*>(sd));
-  }
-  return req::ptr<StringData>::attach(buildStringData(n));
-}
-
-String::String(int n) : m_str(buildString(n)) { }
 
 StringData* buildStringData(int64_t n) {
-  char tmpbuf[21];
+  if (auto const sd = String::GetIntegerStringData(n)) {
+    assertx(sd->isStatic());
+    return const_cast<StringData*>(sd);
+  }
 
+  char tmpbuf[21];
   tmpbuf[20] = '\0';
   auto const sl = conv_10(n, &tmpbuf[20]);
   return StringData::Make(sl, CopyString);
 }
 
-req::ptr<StringData> String::buildString(int64_t n) {
-  const StringData* sd = GetIntegerStringData(n);
-  if (sd) {
-    assertx(sd->isStatic());
-    return req::ptr<StringData>::attach(const_cast<StringData*>(sd));
-  }
-  return req::ptr<StringData>::attach(buildStringData(n));
-}
-
-String::String(int64_t n) : m_str(buildString(n)) { }
+String::String(int n) : String(static_cast<int64_t>(n)) {}
+String::String(int64_t n) : m_str(buildStringData(n), NoIncRef{}) {}
 
 void formatPhpDblStr(char **pbuf, double n) {
   if (RuntimeOption::EnableHipHopSyntax && n == 0.0) {

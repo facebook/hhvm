@@ -22,12 +22,13 @@
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/tv-variant.h"
-#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-resource.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/typed-value.h"
 
 #include <algorithm>
 #include <type_traits>
@@ -44,6 +45,103 @@ void tvCastToVArrayInPlace(TypedValue*);
 void tvCastToDArrayInPlace(TypedValue*);
 
 struct OptionalVariant;
+
+/*
+ * These structs are substitutes for Variant& or const Variant&, when there's
+ * no actual Variant in memory to take a reference to (when working with a
+ * tv_lval from an Array, for example). They should be treated with the same
+ * care as normal references: when copying or storing a variant_ref or
+ * const_variant_ref, think carefully about the lifetime of the underlying
+ * data.
+ */
+namespace variant_ref_detail {
+template<bool is_const>
+struct base {
+private:
+  using tv_val_t = typename std::conditional<is_const, tv_rval, tv_lval>::type;
+
+public:
+  explicit base(tv_val_t val) : m_val{val} {}
+
+  /* implicit */ operator Variant() const;
+
+  DataType getType() const {
+    auto const t = type(m_val);
+    return isRefType(t) ? val(m_val).pref->tv()->m_type : t;
+  }
+  bool isNull()      const { return isNullType(getType()); }
+  bool isBoolean()   const { return isBooleanType(getType()); }
+  bool isInteger()   const { return isIntType(getType()); }
+  bool isDouble()    const { return isDoubleType(getType()); }
+  bool isString()    const { return isStringType(getType()); }
+  bool isArray()     const { return isArrayLikeType(getType()); }
+  bool isPHPArray()  const { return isArrayType(getType()); }
+  bool isVecArray()  const { return isVectype(getType()); }
+  bool isDict()      const { return isDictType(getType()); }
+  bool isKeyset()    const { return isKeysetType(getType()); }
+  bool isHackArray() const { return isHackArrayType(getType()); }
+  bool isObject()    const { return isObjectType(getType()); }
+  bool isResource()  const { return isResourceType(getType()); }
+
+  auto toBoolean() const { return tvCastToBoolean(*m_val); }
+  auto toInt64()   const { return tvCastToInt64(*m_val); }
+  auto toDouble()  const { return tvCastToDouble(*m_val); }
+  auto toString()  const { return HPHP::toString(m_val); }
+  auto toArray()   const { return HPHP::toArray(m_val); }
+
+  auto& asCStrRef() const { return HPHP::asCStrRef(m_val); }
+  auto& asCArrRef() const { return HPHP::asCArrRef(m_val); }
+  auto& asCObjRef() const { return HPHP::asCObjRef(m_val); }
+
+  auto& toCStrRef() const { return HPHP::toCStrRef(m_val); }
+  auto& toCArrRef() const { return HPHP::toCArrRef(m_val); }
+  auto& toCObjRef() const { return HPHP::toCObjRef(m_val); }
+
+  auto getArrayData() const {
+    assertx(isArray());
+    return isRefType(type(m_val)) ? val(m_val).pref->tv()->m_data.parr
+                                  : val(m_val).parr;
+  }
+
+protected:
+  const tv_val_t m_val;
+};
+}
+
+struct const_variant_ref;
+
+struct variant_ref : variant_ref_detail::base<false> {
+  using variant_ref_detail::base<false>::base;
+
+  /* implicit */ variant_ref(Variant& v);
+
+  /* implicit */ operator const_variant_ref() const;
+
+  tv_lval lval() const { return m_val; }
+
+  void unset() const {
+    tvMove(make_tv<KindOfUninit>(), m_val);
+  }
+};
+
+struct const_variant_ref : variant_ref_detail::base<true> {
+  using variant_ref_detail::base<true>::base;
+
+  /* implicit */ const_variant_ref(const Variant& v);
+
+  /*
+   * Equivalent to const_cast<Variant&>(const Variant&), so use with care.
+   */
+  variant_ref as_variant_ref() const {
+    return variant_ref{m_val.as_lval()};
+  }
+
+  tv_rval rval() const { return m_val; }
+};
+
+inline variant_ref::operator const_variant_ref() const {
+  return const_variant_ref{m_val};
+}
 
 /*
  * This class predates HHVM.
@@ -804,7 +902,7 @@ struct Variant : private TypedValue {
   /* implicit */ operator char   () const = delete;
   /* implicit */ operator short  () const = delete;
   /* implicit */ operator int    () const = delete;
-  /* implicit */ operator int64_t  () const = delete;
+  /* implicit */ operator int64_t() const = delete;
   /* implicit */ operator double () const = delete;
   /* implicit */ operator String () const = delete;
   /* implicit */ operator Array  () const = delete;
@@ -837,8 +935,7 @@ struct Variant : private TypedValue {
   }
 
   String toString() const& {
-    if (isStringType(m_type)) return String{m_data.pstr};
-    return toStringHelper();
+    return HPHP::toString(asTypedValue());
   }
 
   String toString() && {
@@ -846,15 +943,14 @@ struct Variant : private TypedValue {
       m_type = KindOfNull;
       return String::attach(m_data.pstr);
     }
-    return toStringHelper();
+    return toString();
   }
 
   // Convert a non-array-like type to a PHP array, leaving PHP arrays and Hack
   // arrays unchanged. Use toPHPArray() if you want the result to always be a
   // PHP array.
   Array toArray() const {
-    if (isArrayLikeType(m_type)) return Array(m_data.parr);
-    return toArrayHelper();
+    return HPHP::toArray(asTypedValue());
   }
   Array toPHPArray() const {
     if (isArrayType(m_type)) return Array(m_data.parr);
@@ -1267,8 +1363,6 @@ private:
   bool   toBooleanHelper() const;
   int64_t  toInt64Helper(int base = 10) const;
   double toDoubleHelper() const;
-  String toStringHelper() const;
-  Array  toArrayHelper() const;
   Array  toPHPArrayHelper() const;
   Object toObjectHelper() const;
   Resource toResourceHelper() const;
@@ -1277,6 +1371,29 @@ private:
 };
 
 Variant operator+(const Variant & lhs, const Variant & rhs) = delete;
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Definitions for some members of variant_ref et al. that use Variant.
+ */
+namespace variant_ref_detail{
+template<bool is_const>
+inline base<is_const>::operator Variant() const {
+  TypedValue tv{val(m_val), type(m_val)};
+  return tvAsCVarRef(&tv);
+}
+}
+
+inline variant_ref::variant_ref(Variant& v)
+  : variant_ref_detail::base<false>{v.asTypedValue()}
+{}
+
+inline const_variant_ref::const_variant_ref(const Variant& v)
+  : variant_ref_detail::base<true>{v.asTypedValue()}
+{}
+
+///////////////////////////////////////////////////////////////////////////////
 
 struct RefResultValue {
   const Variant& get() const { return m_var; }
@@ -1535,7 +1652,7 @@ inline Array& forceToArray(Variant& var) {
 inline Array& forceToArray(tv_lval lval) {
   auto const inner = lval.unboxed();
   if (!isArrayLikeType(inner.type())) {
-    tvSet(make_tv<KindOfArray>(ArrayData::Create()), inner);
+    tvMove(make_tv<KindOfArray>(ArrayData::Create()), inner);
   }
   return asArrRef(inner);
 }

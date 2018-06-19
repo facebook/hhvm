@@ -14,6 +14,7 @@ open Tast
 open Typing_defs
 
 module Env = Tast_env
+module SN = Naming_special_names
 
 (* Return {Some} when {ty} contains falsey values. *)
 let rec find_sketchy_type env ty =
@@ -27,6 +28,14 @@ let rec find_sketchy_type env ty =
   | Tabstract (AKenum _, _)
   | Tarraykind _
     when Env.forward_compat_ge env 2018_06_14 -> Some false
+
+  | Tclass ((_, cid), _)
+    when Env.forward_compat_ge env 2018_06_14 && (
+      cid = SN.Collections.cVec ||
+      cid = SN.Collections.cDict ||
+      cid = SN.Collections.cKeyset
+    )
+    -> Some false
 
   | Tprim Tbool when Env.forward_compat_ge env 2018_06_14 -> Some true
   | Tprim (Tbool | Tresource) -> None

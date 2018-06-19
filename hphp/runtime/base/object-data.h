@@ -440,11 +440,11 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   //============================================================================
   // Properties.
  private:
-  Slot declPropInd(const TypedValue* prop) const;
+  Slot declPropInd(tv_rval prop) const;
   [[noreturn]] NEVER_INLINE
-  void throwMutateImmutable(const TypedValue* prop) const;
+  void throwMutateImmutable(tv_rval prop) const;
   [[noreturn]] NEVER_INLINE
-  void throwBindImmutable(const TypedValue* prop) const;
+  void throwBindImmutable(tv_rval prop) const;
 
  public:
   // never box the lval returned from getPropLval; use propB or vGetProp instead
@@ -455,16 +455,15 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   tv_lval vGetPropIgnoreAccessibility(const StringData*);
 
  private:
-  template <class T>
   struct PropLookup {
-    T prop;
+    tv_lval prop;
     bool accessible;
     bool immutable;
   };
 
   template <bool forWrite>
   ALWAYS_INLINE
-  PropLookup<TypedValue*> getPropImpl(const Class*, const StringData*);
+  PropLookup getPropImpl(const Class*, const StringData*);
 
   enum class PropMode : int {
     ReadNoWarn,
@@ -474,8 +473,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   };
 
   template<PropMode mode>
-  TypedValue* propImpl(TypedValue* tvRef, const Class* ctx,
-                       const StringData* key);
+  tv_lval propImpl(TypedValue* tvRef, const Class* ctx, const StringData* key);
 
   bool propEmptyImpl(const Class* ctx, const StringData* key);
 
@@ -498,23 +496,23 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
                      Array& props, std::vector<bool>& inserted) const;
 
  public:
-  TypedValue* prop(TypedValue* tvRef, const Class* ctx, const StringData* key);
-  TypedValue* propW(TypedValue* tvRef, const Class* ctx, const StringData* key);
-  TypedValue* propD(TypedValue* tvRef, const Class* ctx, const StringData* key);
-  TypedValue* propB(TypedValue* tvRef, const Class* ctx, const StringData* key);
+  tv_lval prop(TypedValue* tvRef, const Class* ctx, const StringData* key);
+  tv_lval propW(TypedValue* tvRef, const Class* ctx, const StringData* key);
+  tv_lval propD(TypedValue* tvRef, const Class* ctx, const StringData* key);
+  tv_lval propB(TypedValue* tvRef, const Class* ctx, const StringData* key);
 
   bool propIsset(const Class* ctx, const StringData* key);
   bool propEmpty(const Class* ctx, const StringData* key);
 
   void setProp(Class* ctx, const StringData* key, Cell val);
-  TypedValue* setOpProp(TypedValue& tvRef, Class* ctx, SetOpOp op,
-                        const StringData* key, Cell* val);
+  tv_lval setOpProp(TypedValue& tvRef, Class* ctx, SetOpOp op,
+                    const StringData* key, Cell* val);
 
   Cell incDecProp(Class* ctx, IncDecOp op, const StringData* key);
 
   void unsetProp(Class* ctx, const StringData* key);
 
-  TypedValue* makeDynProp(const StringData* key);
+  tv_lval makeDynProp(const StringData* key);
 
   static void raiseObjToIntNotice(const char*);
   static void raiseObjToDoubleNotice(const char*);

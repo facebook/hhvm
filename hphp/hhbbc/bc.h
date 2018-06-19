@@ -51,7 +51,7 @@ struct Func;
  *
  * E.g.
  *
- *   auto fpass = bc::FPassC { 2 };  // FPassC for arg 2
+ *   auto pushInt = bc::Int { 2 };  // Push literal int
  */
 
 //////////////////////////////////////////////////////////////////////
@@ -487,9 +487,6 @@ namespace imm {
 #define POP_MFINAL  uint32_t numPop() const { return arg1; } \
                     Flavor popFlavor(uint32_t) const { not_reached(); }
 
-#define POP_F_MFINAL uint32_t numPop() const { return arg2; } \
-                     Flavor popFlavor(uint32_t) const { not_reached(); }
-
 #define POP_C_MFINAL uint32_t numPop() const { return arg1 + 1; } \
                      Flavor popFlavor(uint32_t) const { not_reached(); }
 
@@ -654,7 +651,6 @@ OPCODES
 #undef POP_TWO
 #undef POP_THREE
 #undef POP_MFINAL
-#undef POP_F_MFINAL
 #undef POP_C_MFINAL
 #undef POP_V_MFINAL
 #undef POP_CMANY

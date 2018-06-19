@@ -89,8 +89,7 @@ State entry_state(const Index& index, Context const ctx,
   auto locId = uint32_t{0};
   for (; locId < ctx.func->params.size(); ++locId) {
     // Parameters may be Uninit (i.e. no InitCell).  Also note that if
-    // a function takes a param by ref, it might come in as a Cell
-    // still if FPassC was used.
+    // a function takes a param by ref, it might come in as a Cell.
     if (knownArgs) {
       if (locId < knownArgs->size()) {
         if (ctx.func->params[locId].isVariadic) {

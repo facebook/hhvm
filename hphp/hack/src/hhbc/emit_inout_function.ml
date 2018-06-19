@@ -20,7 +20,7 @@ let is_last_param_variadic param_count params =
 let emit_body_instrs_inout params call_instrs =
   let param_count = List.length params in
   let param_instrs = gather @@
-    List.mapi params ~f:(fun i p ->
+    List.map params ~f:(fun p ->
         gather [
           if Hhas_param.is_inout p
           then gather [
@@ -30,7 +30,7 @@ let emit_body_instrs_inout params call_instrs =
           ]
           else instr_pushl (Local.Named (Hhas_param.name p));
           if not (Hhas_param.is_variadic p)
-          then instr_fpassc i H.Any
+          then instr_fpasscnop
           else empty
         ]) in
   let inout_params = List.filter_map params ~f:(fun p ->
@@ -60,19 +60,19 @@ let emit_body_instrs_ref params call_instrs =
   let param_count = List.length params in
   let msrv = Hhbc_options.use_msrv_for_inout !Hhbc_options.compiler_options in
   let param_instrs = gather @@
-    List.mapi params ~f:(fun i p ->
+    List.map params ~f:(fun p ->
       let local = Local.Named (Hhas_param.name p) in
       if Hhas_param.is_variadic p then
         instr_pushl local
       else if Hhas_param.is_reference p then
         gather [
           instr_vgetl local;
-          instr_fpassvnop i H.Any
+          instr_fpassvnop
         ]
       else
         gather [
           instr_pushl local;
-          instr_fpassc i H.Any
+          instr_fpasscnop
         ]) in
   let param_get_instrs =
     List.filter_map params ~f:(fun p ->

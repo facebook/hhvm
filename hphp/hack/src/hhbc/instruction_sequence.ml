@@ -148,17 +148,14 @@ let instr_self =
   instr (IMisc (Self class_ref_rewrite_sentinel))
 let instr_parent =
   instr (IMisc (Parent class_ref_rewrite_sentinel))
-let instr_fpassl param local hint = instr (ICall (FPassL (param, local, hint)))
-let instr_fpassr i hint = instr (ICall (FPassR (i, hint)))
-let instr_fpassv i hint = instr (ICall (FPassV (i, hint)))
-let instr_fpassn i hint = instr (ICall (FPassN (i, hint)))
-let instr_fpassg i hint = instr (ICall (FPassG (i, hint)))
-let instr_fpassc i hint = instr (ICall (FPassC (i, hint)))
-let instr_fpassvnop i hint = instr (ICall (FPassVNop (i, hint)))
+let instr_fis_param_by_ref i hint =
+  instr (ICall (FIsParamByRef (i, hint)))
 let instr_fthrow_on_ref_mismatch by_refs =
   instr (ICall (FThrowOnRefMismatch by_refs))
 let instr_fhandle_ref_mismatch i hint name =
   instr (ICall (FHandleRefMismatch (i, hint, name)))
+let instr_fpasscnop = instr (ICall (FPassCNop))
+let instr_fpassvnop = instr (ICall (FPassVNop))
 
 let instr_popu = instr (IBasic PopU)
 let instr_popr = instr (IBasic PopR)
@@ -539,7 +536,6 @@ let rewrite_class_refs_instr num = function
 | IMutator (BindS _) -> (num - 1, IMutator (BindS num))
 | IBase (BaseSC (si, _)) -> (num - 1, IBase (BaseSC (si, num)))
 | IBase (BaseSL (l, _)) -> (num - 1, IBase (BaseSL (l, num)))
-| ICall (FPassS (np, _, h)) -> (num - 1, ICall (FPassS (np, num, h)))
 | ICall (FPushCtor (np, _)) -> (num - 1, ICall (FPushCtor (np, num)))
 | ICall (FPushClsMethod (np, _, pl)) ->
   (num - 1, ICall (FPushClsMethod (np, num, pl)))
@@ -777,10 +773,9 @@ let get_input_output_count i =
     | FPushFuncU _ | FPushClsMethodD _ | FPushClsMethodSD _ | FPushCufIter _
     | FPushFuncD _ | FThrowOnRefMismatch _ | FHandleRefMismatch _ -> (0, 0)
     | FPushObjMethod _ -> (2, 0)
-    | FPushCtor _ | FPushCtorD _ | FPushCtorI _ | FPassL _
-    | FPushCtorS _ -> (0, 1)
-    | FPassC _ | FPassV _ | FPassVNop _ | FPassR _
-    | FPassN _ | FPassG _ | FPassS _ -> (1, 1)
+    | FPushCtor _ | FPushCtorD _ | FPushCtorI _ | FPushCtorS _
+    | FIsParamByRef _ -> (0, 1)
+    | FPassCNop | FPassVNop -> (1, 1)
     | FCall n | FCallD (n, _, _) | FCallAwait (n, _, _)| FCallUnpack n
     | FCallBuiltin (n, _, _) -> (n, 1) | FCallM (n1, n2) -> (n1, n2)
     | FCallDM (n1, n2, _, _) -> (n1, n2) | FCallUnpackM (n1, n2) -> (n1, n2)
@@ -829,13 +824,12 @@ let get_input_output_count i =
     begin match i with
     | BaseNC _ | BaseSC _ | BaseSL _ -> (1, 1)
     | BaseNL _ -> (0, 1)
-    | FPassBaseNC _ | FPassBaseNL _ | BaseGC _ | BaseGL _ | FPassBaseGC _
-    | FPassBaseGL _ | BaseL _ | FPassBaseL _ | BaseC _ | BaseR _ | BaseH
-    | Dim _ | FPassDim _ -> (0, 0)
+    | BaseGC _ | BaseGL _ | BaseL _ | BaseC _ | BaseR _ | BaseH
+    | Dim _ -> (0, 0)
     end
   | IFinal i ->
     begin match i with
-    | QueryM (n, _, _) | VGetM (n, _) | FPassM (_, n, _, _) | IncDecM (n, _, _)
+    | QueryM (n, _, _) | VGetM (n, _) | IncDecM (n, _, _)
     | UnsetM (n, _) -> (n, 1)
     | SetM (n, _) | SetOpM (n, _, _) | BindM (n, _) -> (n + 1, 1)
     | SetWithRefLML _ -> (0, 0)
@@ -1001,10 +995,7 @@ let collect_locals f instrs =
     | IIsset (IssetL l | EmptyL l | IsTypeL (l, _))
     | IMutator (SetL l | PopL l | SetOpL (l, _) | IncDecL (l, _) | BindL l |
                 UnsetL l)
-    | ICall (FPassL (_, l, _))
-    | IBase (BaseNL (l, _) | FPassBaseNL (_, l) | BaseGL (l, _) |
-             FPassBaseGL (_, l) | FPassBaseL (_, l)
-      )
+    | IBase (BaseNL (l, _) | BaseGL (l, _))
     | IFinal (SetWithRefRML l)
     | IIterator (
       IterInit (_, _, l) | WIterInit (_, _, l) | MIterInit (_, _, l) |
@@ -1029,8 +1020,8 @@ let collect_locals f instrs =
       )
       -> add (add (add acc l1) l2) l3
     | IBase (Dim (_, mk))
-    | IFinal (QueryM (_, _, mk) | VGetM (_, mk) | FPassM (_, _, mk, _) |
-              SetM (_, mk) | IncDecM (_, _, mk) | BindM (_, mk) | UnsetM (_, mk))
+    | IFinal (QueryM (_, _, mk) | VGetM (_, mk) | SetM (_, mk) |
+              IncDecM (_, _, mk) | BindM (_, mk) | UnsetM (_, mk))
       -> add_member_key acc mk
     | _ -> acc
   in

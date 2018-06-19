@@ -207,16 +207,6 @@ void finish_builtin(ISS& env,
                     uint32_t numParams,
                     bool unpack);
 
-/*
- * Reduce an FPass* for param to bc followed by either FPassVNop or FPassC if
- * byRef is true or false, respectively, or nothing if the FPI kind is Builtin.
- *
- * The FPassHint will either be used in the FPassC/FPassVNop, or used to decide
- * whether to emit an FPassWarning for builtin calls.
- */
-void reduce_fpass_arg(ISS& env, const Bytecode& bc, uint32_t param, bool byRef,
-                      FPassHint hint);
-
 bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp);
 
 folly::Optional<Type>

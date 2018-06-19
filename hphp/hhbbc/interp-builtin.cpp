@@ -487,15 +487,6 @@ void finish_builtin(ISS& env,
   fpiPop(env);
 }
 
-void reduce_fpass_arg(ISS& env, const Bytecode& bc, uint32_t param, bool byRef,
-                      FPassHint hint) {
-  if (byRef) {
-    return reduce(env, bc, bc::FPassVNop { param, hint });
-  }
-
-  return reduce(env, bc, bc::FPassC { param, hint });
-}
-
 bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp) {
   if (numArgs < 1 || numArgs > 2) return false;
   auto const& name = topT(env, numArgs - 1);

@@ -41,17 +41,21 @@
   CGetL $f
   FPushObjMethodD 1 "m" NullThrows
   FPushFuncD 1 "h"
-  FPassL 0 $b Cell
+  VGetL $b
+  FPassVNop
   FCall 1
-  FPassR 0 Cell
-  FCall 1
-  PopR
-  FPushFuncD 1 "var_dump"
-  FPassL 0 $a Cell
+  BoxR
+  FPassVNop
   FCall 1
   PopR
   FPushFuncD 1 "var_dump"
-  FPassL 0 $b Cell
+  CGetL $a
+  FPassCNop
+  FCall 1
+  PopR
+  FPushFuncD 1 "var_dump"
+  CGetL $b
+  FPassCNop
   FCall 1
   PopR
   Null
@@ -61,7 +65,8 @@
 .class F {
   .method [public] <"" N  > m(&$y) {
     FPushFuncD 1 "f"
-    FPassL 0 $y Cell
+    VGetL $y
+    FPassVNop
     FCall 1
     PopR
     Null

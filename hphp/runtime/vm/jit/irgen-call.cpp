@@ -1293,27 +1293,49 @@ SSATmp* ldPreLiveFunc(IRGS& env) {
   return gen(env, LdARFuncPtr, TFunc, IRSPRelOffsetData { actRecOff }, sp(env));
 }
 
-}
-
-void checkFPassHint(IRGS& env, uint32_t paramId, FPassHint hint,
-                    bool byRef) {
+void handleRefMismatch(IRGS& env, SSATmp* func, uint32_t paramId) {
   if (!RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch &&
       !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) {
     return;
   }
 
-  switch (hint) {
-  case FPassHint::Any: return;
-  case FPassHint::Cell:
-    if (!byRef) return;
-    break;
-  case FPassHint::Ref:
-    if (byRef) return;
-    break;
+  gen(env, RaiseParamRefMismatchForFunc, ParamData { (int32_t)paramId }, func);
+}
+
+}
+
+void emitFIsParamByRef(IRGS& env, uint32_t paramId, FPassHint hint) {
+  auto const func = ldPreLiveFunc(env);
+  if (func->hasConstVal(TFunc)) {
+    auto const byRef = func->funcVal()->byRef(paramId);
+    if (hint == (byRef ? FPassHint::Cell : FPassHint::Ref)) {
+      handleRefMismatch(env, func, paramId);
+    }
+    push(env, cns(env, byRef));
+    return;
   }
 
-  auto const func = ldPreLiveFunc(env);
-  gen(env, RaiseParamRefMismatchForFunc, ParamData { (int32_t)paramId }, func);
+  push(env, cond(
+    env,
+    [&] (Block* taken) {
+      // CheckRefs only needs to know the number of parameters when there are
+      // more than 64 args.
+      auto const numParams = paramId < 64
+        ? cns(env, 64) : gen(env, LdFuncNumParams, func);
+      auto const bucket = paramId / 64 * 64;
+      auto const mask = 1UL << (paramId % 64);
+      gen(env, CheckRefs, taken, CheckRefsData { bucket, mask, 0 }, func,
+          numParams);
+    },
+    [&] {
+      if (hint == FPassHint::Ref) handleRefMismatch(env, func, paramId);
+      return cns(env, false);
+    },
+    [&] {
+      if (hint == FPassHint::Cell) handleRefMismatch(env, func, paramId);
+      return cns(env, true);
+    }
+  ));
 }
 
 void emitFThrowOnRefMismatch(IRGS& env, const ImmVector& immVec) {
@@ -1356,12 +1378,12 @@ void emitFThrowOnRefMismatch(IRGS& env, const ImmVector& immVec) {
 
 void emitFHandleRefMismatch(IRGS& env, uint32_t paramId, FPassHint hint,
                             const StringData* funcName) {
+  assertx(hint != FPassHint::Any);
   if (!RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch &&
       !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) {
     return;
   }
 
-  assertx(hint != FPassHint::Any);
   gen(
     env,
     RaiseParamRefMismatchForFuncName,
@@ -1371,83 +1393,11 @@ void emitFHandleRefMismatch(IRGS& env, uint32_t paramId, FPassHint hint,
   );
 }
 
-/*
- * All fpass instructions spill the stack after they execute, because we are
- * sure to need that value in memory, regardless of whether we side-exit or
- * throw.  At the level of HHBC semantics, it's illegal to pop them from the
- * stack until we've left the FPI region, and we will be spilling the whole
- * stack when we get to the FCall{D,} at the end of the region.  This should
- * also potentially reduce the number of live registers during call sequences.
- *
- * Note: there is a general problem with the spillStack mechanism, in that it
- * may sink stores that are not profitable to sink, but in this case we can
- * work around it easily.
- */
-
-void emitFPassC(IRGS& env, uint32_t argNum, FPassHint hint) {
-  checkFPassHint(env, argNum, hint,
-                 env.currentNormalizedInstruction->preppedByRef);
-}
-
-void emitFPassVNop(IRGS& env, uint32_t argNum, FPassHint hint) {
-  checkFPassHint(env, argNum, hint, true);
-}
-
-void emitFPassL(IRGS& env, uint32_t argNum, int32_t id, FPassHint hint) {
-  if (env.currentNormalizedInstruction->preppedByRef) {
-    checkFPassHint(env, argNum, hint, true);
-    emitVGetL(env, id);
-  } else {
-    checkFPassHint(env, argNum, hint, false);
-    emitCGetL(env, id);
-  }
-}
-
-void emitFPassS(IRGS& env, uint32_t argNum, uint32_t slot, FPassHint hint) {
-  if (env.currentNormalizedInstruction->preppedByRef) {
-    checkFPassHint(env, argNum, hint, true);
-    emitVGetS(env, slot);
-  } else {
-    checkFPassHint(env, argNum, hint, false);
-    emitCGetS(env, slot);
-  }
-}
-
-void emitFPassG(IRGS& env, uint32_t argNum, FPassHint hint) {
-  if (env.currentNormalizedInstruction->preppedByRef) {
-    checkFPassHint(env, argNum, hint, true);
-    emitVGetG(env);
-  } else {
-    checkFPassHint(env, argNum, hint, false);
-    emitCGetG(env);
-  }
-}
-
-void emitFPassR(IRGS& env, uint32_t argNum, FPassHint hint) {
-  if (env.currentNormalizedInstruction->preppedByRef) {
-    checkFPassHint(env, argNum, hint, true);
-    implBoxR(env);
-  } else {
-    checkFPassHint(env, argNum, hint, false);
-    implUnboxR(env);
-  }
-}
+void emitFPassCNop(IRGS&) {}
+void emitFPassVNop(IRGS&) {}
 
 void emitUnboxR(IRGS& env) { implUnboxR(env); }
 void emitBoxR(IRGS& env) { implBoxR(env); }
-
-void emitFPassV(IRGS& env, uint32_t argNum, FPassHint hint) {
-  if (env.currentNormalizedInstruction->preppedByRef) {
-    // FPassV is a no-op when the callee expects by ref.
-    checkFPassHint(env, argNum, hint, true);
-    return;
-  }
-
-  checkFPassHint(env, argNum, hint, false);
-  auto const tmp = popV(env);
-  pushIncRef(env, gen(env, LdRef, TInitCell, tmp));
-  decRef(env, tmp);
-}
 
 //////////////////////////////////////////////////////////////////////
 

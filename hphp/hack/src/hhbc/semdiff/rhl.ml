@@ -328,12 +328,11 @@ let check_instruct_get asn i i' =
   | CGetQuietL l, CGetQuietL l'
   | CGetL2 l, CGetL2 l'
   | CUGetL l, CUGetL l'
+  | VGetL l, VGetL l'
   | PushL l, PushL l' (* TODO: this also unsets but don't track that yet *)
     -> reads asn l l' (* these instructions read locals *)
   | ClsRefGetL (l,cr), ClsRefGetL (l',cr') ->
     if cr = cr' then reads asn l l' else None
-  | VGetL (Local.Named s), VGetL (Local.Named s')
-    when s=s' -> Some asn
   | VGetL _, _
   | _, VGetL _ ->
     (* can't handle the possible  aliasing here, so bail *)
@@ -408,35 +407,6 @@ let check_instruct_mutator asn i i' =
 
 let check_instruct_call asn i i' =
   match i, i' with
-  (* TODO: I don't think the hints actually have semantic imnport. If so, could
-     drop requirement that they match *)
-  | FPassL (param_id,Local.Named s, h), FPassL (param_id', Local.Named s', h')
-    when param_id=param_id' && s=s' && h=h' -> Some asn
-  (* Experiment: when we see FPassL on unnamed locals, we register a read
-     effect, and then brutally forget any equalities involving them. So if
-     we have created an alias, we won't do anything unsound because of it.
-     If, as I suspect, these FPassL's are just used as short-lived temporaries
-     then this will probably work...
-     Note that we *add* the locals to vs, vs' because we don't know their values.
-     TODO: check that adding back equality between the two original variables is
-     actually sound. There might be a counterexample involving funky aliases
-     being created in the called function, but I can't construct one that would
-     lead to a semdiff bug at the moment. *)
-  | FPassL (param_id, (Local.Unnamed _n as l), h),
-    FPassL (param_id', (Local.Unnamed _n' as l'), h')
-    when param_id=param_id' && h=h' ->
-     begin match reads asn l l' with
-      | None -> None
-      | Some (props,vs,vs') ->
-         let stripped = PropSet.filter (fun (x,x') -> x <> l && x' <> l') props in
-         let addedback = PropSet.add (l,l') stripped in
-           Some (addedback, VarSet.add l vs, VarSet.add l' vs')
-     end
-  | FPassL (_,_,_), _
-  | _, FPassL (_,_,_) ->
-    (* COMPLETENESS: If this is pass by reference, might get aliasing so just
-      wimp out for now. *)
-    None
   | DecodeCufIter _ , DecodeCufIter _ ->
     (* should be handled in check *)
     None
@@ -446,10 +416,9 @@ let check_instruct_call asn i i' =
   | FPushObjMethodD _, _ | FPushClsMethod _, _
   | FPushClsMethodS _, _ | FPushClsMethodSD _, _
   | FPushClsMethodD _, _ | FPushCtor _, _ | FPushCtorD _, _ | FPushCtorI _, _
-  | FPushCtorS _, _ | FPushCufIter _, _ | FPassC _, _
-  | FPassV _, _ | FPassVNop _, _ | FPassR _, _ | FPassN _, _
-  | FPassG _, _ | FPassS _, _ | FCall _, _ | FCallD _, _
-  | FCallAwait _, _ | FCallUnpack _, _ | FCallBuiltin _, _
+  | FPushCtorS _, _ | FPushCufIter _, _ | FIsParamByRef _, _
+  | FThrowOnRefMismatch _, _ | FPassCNop, _ | FPassVNop, _ | FCall _, _
+  | FCallD _, _ | FCallAwait _, _ | FCallUnpack _, _ | FCallBuiltin _, _
   | FCallM _, _ | FCallUnpackM _, _ | FCallDM _, _ ->
     if i=i' then Some asn else None
   | _, _ -> None
@@ -475,35 +444,23 @@ let check_instruct_base asn i i' =
     else None
     (* All these depend on the string names of locals never being the ones
     we're tracking with the analysis *)
-  | FPassBaseNL (n,l), FPassBaseNL (n',l') ->
-    if n=n' then reads asn l l'
-    else None
   | BaseGL (l,mode), BaseGL(l',mode') ->
     if mode = mode' then reads asn l l'
     else None (* don't really know if this is right *)
-  | FPassBaseGL (n,l), FPassBaseGL (n',l') ->
-    if n=n' then reads asn l l'
-    else None
   | BaseSL (l,n), BaseSL (l',n') ->
     if n=n' then reads asn l l'
     else None
   | BaseL (l,mode), BaseL (l',mode') ->
     if mode=mode' then reads asn l l'
     else None
-  | FPassBaseL (n,l), FPassBaseL (n',l') ->
-    if n = n' then reads asn l l'
-    else None
   | Dim (mode, mk), Dim (mode', mk') ->
     if mode=mode' then reads_member_key asn mk mk' else None
-  | FPassDim(n, mk), FPassDim(n', mk') ->
-    if n=n' then reads_member_key asn mk mk' else None
-  | BaseNL _, _ | FPassBaseNL _, _ | BaseGL _, _ | FPassBaseGL _, _
-  | BaseSL _, _ | BaseL _, _ | FPassBaseL _, _ | Dim _, _ | FPassDim _, _ ->
+  | BaseNL _, _ | BaseGL _, _ | BaseSL _, _ | BaseL _, _ | Dim _, _ ->
     None
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
-  | BaseNC _, _ | FPassBaseNC _, _ | BaseGC _, _ | FPassBaseGC _, _
-  | BaseSC _, _ | BaseC _, _ | BaseR _, _ | BaseH, _ ->
+  | BaseNC _, _ | BaseGC _, _ | BaseSC _, _ | BaseC _, _ | BaseR _, _
+  | BaseH, _ ->
     if i=i' then Some asn else None
 
 let check_instruct_final asn i i' =
@@ -518,8 +475,6 @@ let check_instruct_final asn i i' =
     when n=n' && op=op' -> reads_member_key asn mk mk'
   | VGetM (n, mk), VGetM (n', mk')
     when n=n' -> reads_member_key asn mk mk'
-  | FPassM (m,n,mk,h), FPassM (m',n',mk',h')
-    when m=m' && n=n' && h=h' -> reads_member_key asn mk mk'
   | SetM (n, mk), SetM (n', mk')
     when n=n' -> reads_member_key asn mk mk'
   | IncDecM (m,op,mk), IncDecM (m',op',mk')
@@ -534,9 +489,9 @@ let check_instruct_final asn i i' =
     (* COMPLETENESS: HackC/HHVM do not generate this instruction, so reject it
       for now. *)
     None
-  | SetWithRefLML _, _ | QueryM _, _ | VGetM _, _ | FPassM _, _ | SetM _, _
-  | IncDecM _, _ | SetOpM _, _ | BindM _, _ | UnsetM _, _ | SetWithRefRML _, _
-    -> None
+  | SetWithRefLML _, _ | QueryM _, _ | VGetM _, _ | SetM _, _ | IncDecM _, _
+  | SetOpM _, _ | BindM _, _ | UnsetM _, _ | SetWithRefRML _, _ ->
+    None
 
 (* Iterators. My understanding is that the initializers either jump to the
 specified label with no access to locals, or write the first value of the
@@ -1394,57 +1349,6 @@ let equiv prog prog' startlabelpairs =
       $$ uCreateCl
       $? (fun (cugets,(np,_cn)) -> np >= List.length cugets) in
 
-    (* Special case where FPassL _n is safe.
-      A special case of that is where a closure is constructed inline during the
-      sequence of pass instructions. There must be other such cases lurking...
-      Note that we discard the local var pushes and the createcl instruction in
-      the return value so this counts as one parameter in the list. Those
-      instructions will get checked again when we move forward (we only consume
-      the FPassL even though the pattern is complex). *)
-    let createcl_and_pass_pattern =
-      (cugetl_list_createcl_pattern $$ uFPassC)
-      $> (fun (_l,pi) -> pi) in
-    let fpassl_fpassl_pattern =
-      uFPassL $*$ uFPassL
-      $? (fun ((pn,_l,h),(pn',_l',h')) -> pn=pn' && h=h')
-      $> (fun ((_pn,l,_h),(_pn',l',_h')) -> (l,l')) in
-
-    let any_pass_pattern =
-      createcl_and_pass_pattern
-      $| uFPassC $| uFPassV $| uFPassVNop $| uFPassR
-      $| uFPassN $| uFPassG
-      $| (uFPassL $> (fun (param,_,h) -> (param,h)))
-      $| (uFPassS $> (fun (param,_,h) -> (param,h))) in
-    let any_pass_list_pattern = greedy_kleene any_pass_pattern in
-    let any_call_pattern =
-      uFCall
-      $| (uFCallM $> (fun (np,_) -> np))
-      $| (uFCallUnpackM $> (fun (np,_) -> np))
-      $| (uFCallDM $> (fun (np,_,_,_) -> np))
-      $| (uFCallD $> (fun (np,_,_) -> np))
-      $| (uFCallAwait $> (fun (np,_,_) -> np))
-      $| uFCallUnpack
-      $| (uFCallBuiltin $> (fun (_,np2,_) -> np2)) in
-    let passes_call_pattern = any_pass_list_pattern $$ any_call_pattern in
-    let two_passes_call_pattern =
-      (passes_call_pattern $*$ passes_call_pattern)
-      $? (fun ((pass_list,np),(pass_list',np')) ->
-        pass_list = pass_list' && np = np' && np > List.length pass_list) in
-    let fpassl_action =
-      (fpassl_fpassl_pattern $$ two_passes_call_pattern)
-      $>> (fun ((l,l'),_) _ ->
-        match reads asn l l' with
-        | None ->
-          (* ???: really bail, no subsequent patterns *)
-          Some (pc, pc', asn, assumed, todo)
-        | Some newasn ->
-          begin match writes newasn l l' with
-          | None -> Some (pc, pc', asn, assumed, todo)
-          | Some newnewasn ->
-            check (succ pc) (succ pc') newnewasn
-              (add_assumption (pc,pc') asn assumed) todo
-          end) in
-
     (* Dealing with equivalence of closure creation *)
     let two_cugetl_list_createcl_pattern =
       cugetl_list_createcl_pattern $*$ cugetl_list_createcl_pattern
@@ -1663,7 +1567,6 @@ let equiv prog prog' startlabelpairs =
       concat_string_either_action;
       concat_caststring_action;
       two_print_constant_strings_action;
-      fpassl_action;
       two_string_fatal_action;
       two_cugetl_list_createcl_action;
       two_vget_base_action;

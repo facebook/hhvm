@@ -410,16 +410,11 @@ type instruct_call =
   | FPushCtorS of num_params * SpecialClsRef.t
   | DecodeCufIter of Iterator.t * Label.t
   | FPushCufIter of num_params * Iterator.t
+  | FIsParamByRef of param_num * fpass_hint
   | FThrowOnRefMismatch of bool list
   | FHandleRefMismatch of param_num * fpass_hint * string
-  | FPassC of param_num * fpass_hint
-  | FPassV of param_num * fpass_hint
-  | FPassVNop of param_num * fpass_hint
-  | FPassR of param_num * fpass_hint
-  | FPassL of param_num * local_id * fpass_hint
-  | FPassN of param_num * fpass_hint
-  | FPassG of param_num * fpass_hint
-  | FPassS of param_num * classref_id * fpass_hint
+  | FPassCNop
+  | FPassVNop
   | FCall of num_params
   | FCallM of num_params * num_params
   | FCallDM of num_params * num_params * class_id * function_id
@@ -432,26 +427,19 @@ type instruct_call =
 type instruct_base =
   | BaseNC of stack_index * MemberOpMode.t
   | BaseNL of local_id * MemberOpMode.t
-  | FPassBaseNC of param_num * stack_index
-  | FPassBaseNL of param_num * local_id
   | BaseGC of stack_index * MemberOpMode.t
   | BaseGL of local_id * MemberOpMode.t
-  | FPassBaseGC of param_num * stack_index
-  | FPassBaseGL of param_num * local_id
   | BaseSC of stack_index * classref_id
   | BaseSL of local_id * stack_index
   | BaseL of local_id * MemberOpMode.t
-  | FPassBaseL of param_num * local_id
   | BaseC of stack_index
   | BaseR of stack_index
   | BaseH
   | Dim of MemberOpMode.t * MemberKey.t
-  | FPassDim of param_num * MemberKey.t
 
 type instruct_final =
   | QueryM of num_params * QueryOp.t * MemberKey.t
   | VGetM of num_params * MemberKey.t
-  | FPassM of param_num * num_params * MemberKey.t * fpass_hint
   | SetM of num_params * MemberKey.t
   | IncDecM of num_params * incdec_op * MemberKey.t
   | SetOpM of num_params  * eq_op * MemberKey.t

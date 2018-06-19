@@ -32,8 +32,11 @@
       PopC
       CGetL $f
       FPushFunc 2
-      FPassL 0 $a Cell
-      FPassL 1 $b Cell
+      CGetL $a
+      FPassCNop
+      CGetL $b
+      FPassCNop
+      FThrowOnRefMismatch "00"
       FCall 2
       UnboxR
       SetL _8
@@ -76,10 +79,13 @@ F1:
   PopC
   FPushFuncD 1 "var_dump"
   FPushFuncD 2 "silly"
-  FPassL 0 $p Cell
-  FPassL 1 $f Cell
+  CGetL $p
+  FPassCNop
+  CGetL $f
+  FPassCNop
   FCall 2
-  FPassR 0 Cell
+  UnboxR
+  FPassCNop
   FCall 1
   PopR
   Null

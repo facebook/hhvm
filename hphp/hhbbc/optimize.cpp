@@ -74,8 +74,8 @@ bool ignoresStackInput(Op op) {
   case Op::BoxRNop:
   case Op::UGetCUNop:
   case Op::CGetCUNop:
+  case Op::FPassCNop:
   case Op::FPassVNop:
-  case Op::FPassC:
   case Op::PopU:
     return true;
   default:
@@ -162,8 +162,6 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
     case Op::BaseGC:      assert_stack(bcode.BaseGC.arg1);      break;
     case Op::BaseSC:      assert_stack(bcode.BaseSC.arg1);      break;
     case Op::BaseR:       assert_stack(bcode.BaseR.arg1);       break;
-    case Op::FPassBaseNC: assert_stack(bcode.FPassBaseNC.arg2); break;
-    case Op::FPassBaseGC: assert_stack(bcode.FPassBaseGC.arg2); break;
     case Op::Dim: {
       switch (bcode.Dim.mkey.mcode) {
         case MEC: case MPC:
@@ -276,7 +274,8 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::IsTypeL:
   case Op::OODeclExists:
   case Op::AliasCls:
-  case Op::FPassC:
+  case Op::FPassCNop:
+  case Op::FPassVNop:
     return true;
 
   case Op::This:
@@ -467,17 +466,6 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
     auto const v = i < numCells ?
       constVals[i] : *tv(state.stack[stkSize - i - 1].type);
     gen(gen_constant(v));
-
-    // Special case for FPass* instructions.  We just put a C on the
-    // stack, so we need to get it to be an F.
-    if (isFPassStar(op.op)) {
-      if (state.fpiStack.back().kind != FPIKind::Builtin) {
-        // We should only ever const prop for FPassL right now.
-        always_assert(numPush == 1 && op.op == Op::FPassL);
-        gen(bc::FPassC { op.FPassL.arg1, op.FPassL.subop3 });
-      }
-      continue;
-    }
 
     // Similar special case for FCallBuiltin.  We need to turn things into R
     // flavors since opcode that followed the call are going to expect that

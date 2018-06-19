@@ -48,8 +48,14 @@ start:          IsTypeL $arr ArrLike
                 JmpNZ loop_key
 
     loop_val:   FPushCufIter 1 0
-                FPassL 0 $v Any
-                FCall 1
+                FIsParamByRef 0 Any
+                JmpNZ by_ref_val
+                CGetL $v
+                FPassCNop
+                Jmp call_val
+    by_ref_val: VGetL $v
+                FPassVNop
+    call_val:   FCall 1
                 UnboxR
                 JmpZ next_val
                 BaseL $res Define
@@ -58,9 +64,23 @@ start:          IsTypeL $arr ArrLike
                 Jmp endloop_a
 
     loop_both:  FPushCufIter 2 0
-                FPassL 0 $v Any
-                FPassL 1 $k Any
-                FCall 2
+                FIsParamByRef 0 Any
+                JmpNZ by_ref_v_both
+                CGetL $v
+                FPassCNop
+                Jmp pass_k_both
+    by_ref_v_both:
+                VGetL $v
+                FPassVNop
+    pass_k_both:FIsParamByRef 1 Any
+                JmpNZ by_ref_k_both
+                CGetL $k
+                FPassCNop
+                Jmp call_both
+    by_ref_k_both:
+                VGetL $k
+                FPassVNop
+    call_both:  FCall 2
                 UnboxR
                 JmpZ next_both
                 BaseL $res Define
@@ -69,8 +89,14 @@ start:          IsTypeL $arr ArrLike
                 Jmp endloop_a
 
     loop_key:   FPushCufIter 1 0
-                FPassL 0 $k Any
-                FCall 1
+                FIsParamByRef 0 Any
+                JmpNZ by_ref_key
+                CGetL $k
+                FPassCNop
+                Jmp call_key
+    by_ref_key: VGetL $k
+                FPassVNop
+    call_key:   FCall 1
                 UnboxR
                 JmpZ next_key
                 BaseL $res Define
@@ -133,8 +159,14 @@ start_kt:         IssetL $func
                   JmpNZ loop_key_kt
 
     loop_val_kt:  FPushCufIter 1 0
-                  FPassL 0 $v Any
-                  FCall 1
+                  FIsParamByRef 0 Any
+                  JmpNZ by_ref_val_kt
+                  CGetL $v
+                  FPassCNop
+                  Jmp call_val_kt
+    by_ref_val_kt:VGetL $v
+                  FPassVNop
+    call_val_kt:  FCall 1
                   UnboxR
                   JmpZ next_val_kt
                   CGetL $v
@@ -145,9 +177,24 @@ start_kt:         IssetL $func
                   Jmp endloop_a_kt
 
     loop_both_kt: FPushCufIter 2 0
-                  FPassL 0 $v Any
-                  FPassL 1 $k Any
-                  FCall 2
+                  FIsParamByRef 0 Any
+                  JmpNZ by_ref_v_both_kt
+                  CGetL $v
+                  FPassCNop
+                  Jmp pass_k_both_kt
+    by_ref_v_both_kt:
+                  VGetL $v
+                  FPassVNop
+    pass_k_both_kt:
+                  FIsParamByRef 1 Any
+                  JmpNZ by_ref_k_both_kt
+                  CGetL $k
+                  FPassCNop
+                  Jmp call_both_kt
+    by_ref_k_both_kt:
+                  VGetL $k
+                  FPassVNop
+    call_both_kt: FCall 2
                   UnboxR
                   JmpZ next_both_kt
                   CGetL $v
@@ -158,8 +205,14 @@ start_kt:         IssetL $func
                   Jmp endloop_a_kt
 
     loop_key_kt:  FPushCufIter 1 0
-                  FPassL 0 $k Any
-                  FCall 1
+                  FIsParamByRef 0 Any
+                  JmpNZ by_ref_key_kt
+                  CGetL $k
+                  FPassCNop
+                  Jmp call_key_kt
+    by_ref_key_kt:VGetL $k
+                  FPassVNop
+    call_key_kt:  FCall 1
                   UnboxR
                   JmpZ next_key_kt
                   CGetL $v

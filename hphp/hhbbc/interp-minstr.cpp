@@ -1455,94 +1455,6 @@ void miFinalSetWithRef(ISS& env) {
   }
 }
 
-//////////////////////////////////////////////////////////////////////
-
-template<typename A, typename B>
-void handleDualMInstrState(ISS& env, A nondefine, B define) {
-  // The current active state should be the non-define case. We'll do the
-  // non-define processing first, then swap in the define case into the active
-  // state and do the define processing. Then we'll swap the non-define case
-  // back into the active state.
-  auto start = env.state;
-
-  assert(!env.flags.canConstProp);
-  assert(env.flags.wasPEI);
-  nondefine();
-
-  auto nonDefineState = std::move(env.state);
-  auto const nonDefineFlags = env.flags;
-
-  env.flags.canConstProp = false;
-  env.flags.effectFree = false;
-  env.flags.wasPEI = true;
-  env.state = std::move(start);
-
-  // If we're tracking a separate define state, replace the active state with it
-  // so it can be processed. If not, the non-define state (which is active) and
-  // the define state are identical, so we don't have to modify anything.
-  if (env.state.mInstrStateDefine) {
-    env.state.mInstrState = *env.state.mInstrStateDefine;
-  }
-  define();
-
-  merge_into(env.state, nonDefineState);
-
-  if (nonDefineState.mInstrState.base.loc != BaseLoc::None) {
-    // The non-define case continued the sequence (it has a base), so the define
-    // case (which is the current active state) can't have ended the sequence.
-    assert(env.state.mInstrState.base.loc != BaseLoc::None);
-    // Move the active state back into the define state.
-    if (env.state.mInstrStateDefine) {
-      *env.state.mInstrStateDefine.mutate() = std::move(env.state.mInstrState);
-    } else {
-      env.state.mInstrStateDefine.emplace(std::move(env.state.mInstrState));
-    }
-  } else {
-    // The non-define case no longer has a base, so it ended the member
-    // instruction sequence. The define case (which is the current active state)
-    // should likewise have ended the sequence.
-    assert(env.state.mInstrState.base.loc == BaseLoc::None);
-    assert(env.state.mInstrState.arrayChain.empty());
-    assert(nonDefineState.mInstrState.arrayChain.empty());
-    env.state.mInstrStateDefine.reset();
-  }
-  // Set the active state back to be the non-define case.
-  env.state.mInstrState = std::move(nonDefineState.mInstrState);
-
-  env.flags.wasPEI |= nonDefineFlags.wasPEI;
-  env.flags.canConstProp &= nonDefineFlags.canConstProp;
-  env.flags.effectFree &= nonDefineFlags.effectFree;
-
-  // Elements of a minstr sequence should never be constprop - it
-  // would leave invalid bytecode.
-  assert(!env.flags.canConstProp);
-}
-
-/*
- * Helpers to set the MOpMode immediate of a bytecode struct, whether it's
- * subop2 for Base* opcodes or subop1 for a Dim. All users of these functions
- * start with the flags set to Warn.
- */
-template<typename BC>
-void setMOpMode(BC& op, MOpMode mode) {
-  assert(op.subop2 == MOpMode::Warn);
-  op.subop2 = mode;
-}
-
-void setMOpMode(bc::Dim& op, MOpMode mode) {
-  assert(op.subop1 == MOpMode::Warn);
-  op.subop1 = mode;
-}
-
-folly::Optional<MOpMode> fpassMode(ISS& env, int32_t arg) {
-  switch (prepKind(env, arg)) {
-    case PrepKind::Unknown: return folly::none;
-    case PrepKind::Val:     return MOpMode::Warn;
-    case PrepKind::Ref:     return MOpMode::Define;
-  }
-  always_assert(false);
-}
-
 }
 
 namespace interp_step {
@@ -1647,43 +1559,6 @@ void in(ISS& env, const bc::BaseH&) {
   nothrow(env);
 }
 
-template<typename BC>
-static void fpassImpl(ISS& env, int32_t arg, BC op) {
-  if (auto const mode = fpassMode(env, arg)) {
-    setMOpMode(op, *mode);
-    return reduce(env, op);
-  }
-
-  handleDualMInstrState(
-    env,
-    [&] { in(env, op); },
-    [&] {
-      setMOpMode(op, MOpMode::Define);
-      in(env, op);
-    }
-  );
-}
-
-void in(ISS& env, const bc::FPassBaseNC& op) {
-  fpassImpl(env, op.arg1, bc::BaseNC{op.arg2, MOpMode::Warn});
-}
-
-void in(ISS& env, const bc::FPassBaseNL& op) {
-  fpassImpl(env, op.arg1, bc::BaseNL{op.loc2, MOpMode::Warn});
-}
-
-void in(ISS& env, const bc::FPassBaseGC& op) {
-  fpassImpl(env, op.arg1, bc::BaseGC{op.arg2, MOpMode::Warn});
-}
-
-void in(ISS& env, const bc::FPassBaseGL& op) {
-  fpassImpl(env, op.arg1, bc::BaseGL{op.loc2, MOpMode::Warn});
-}
-
-void in(ISS& env, const bc::FPassBaseL& op) {
-  fpassImpl(env, op.arg1, bc::BaseL{op.loc2, MOpMode::Warn});
-}
-
 //////////////////////////////////////////////////////////////////////
 // Intermediate operations
 
@@ -1698,11 +1573,6 @@ void in(ISS& env, const bc::Dim& op) {
   } else {
     miNewElem(env);
   }
-}
-
-void in(ISS& env, const bc::FPassDim& op) {
-  if (!key_type_or_fixup(env, op)) return;
-  fpassImpl(env, op.arg1, bc::Dim{MOpMode::Warn, op.mkey});
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1851,27 +1721,6 @@ void in(ISS& env, const bc::SetWithRefRML& op) {
   locAsCell(env, op.loc1);
   popR(env);
   miFinalSetWithRef(env);
-}
-
-void in(ISS& env, const bc::FPassM& op) {
-  if (!key_type_or_fixup(env, op)) return;
-  auto const cget = bc::QueryM{op.arg2, QueryMOp::CGet, op.mkey};
-  auto const vget = bc::VGetM{op.arg2, op.mkey};
-
-  if (auto const mode = fpassMode(env, op.arg1)) {
-    auto const kind = prepKind(env, op.arg1);
-    auto const hint =
-      !fpassCanThrow(env, kind, op.subop4) ? FPassHint::Any : op.subop4;
-    return mode == MOpMode::Warn
-      ? reduce_fpass_arg(env, cget, op.arg1, false, hint)
-      : reduce_fpass_arg(env, vget, op.arg1, true, hint);
-  }
-
-  handleDualMInstrState(
-    env,
-    [&] { in(env, cget); },
-    [&] { in(env, vget); }
-  );
 }
 
 }

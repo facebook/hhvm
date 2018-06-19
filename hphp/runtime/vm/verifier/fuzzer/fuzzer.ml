@@ -357,23 +357,7 @@ let mut_imms (is : IS.t) : IS.t =
     | FPushCtor     (i, id) -> FPushCtor  (i, mutate_int        id !mag)
     | FPushCtorI    (i, id) -> FPushCtorI (i, mutate_int        id !mag)
     | DecodeCufIter (i, id) -> DecodeCufIter (i, mutate_label data id)
-    | FPassS        (i, id, h) -> FPassS     (mutate_int        i  !mag,
-                                              mutate_int        id !mag,
-                                              mutate_fpasshint  h)
-    | FPassL        (i, id, h) -> FPassL     (mutate_int        i  !mag,
-                                              mutate_local_id   id !mag,
-                                              mutate_fpasshint  h)
-    | FPassC        (i, h)     -> FPassC     (mutate_int        i  !mag,
-                                              mutate_fpasshint  h)
-    | FPassV        (i, h)     -> FPassV     (mutate_int        i  !mag,
-                                              mutate_fpasshint  h)
-    | FPassVNop     (i, h)     -> FPassVNop  (mutate_int        i  !mag,
-                                              mutate_fpasshint  h)
-    | FPassR        (i, h)     -> FPassR     (mutate_int        i  !mag,
-                                              mutate_fpasshint  h)
-    | FPassN        (i, h)     -> FPassN     (mutate_int        i  !mag,
-                                              mutate_fpasshint  h)
-    | FPassG        (i, h)     -> FPassG     (mutate_int        i  !mag,
+    | FIsParamByRef (i, h)  -> FIsParamByRef (mutate_int        i  !mag,
                                               mutate_fpasshint  h)
     | _ -> s in
   let mutate_base s =
@@ -388,19 +372,13 @@ let mut_imms (is : IS.t) : IS.t =
                                        mutate_mode         mode)
     | BaseL     (id,  mode) -> BaseL  (mutate_local_id id  !mag,
                                        mutate_mode         mode)
-    | FPassBaseNC (i,  idx) -> FPassBaseNC (i, mutate_int      idx !mag)
-    | FPassBaseNL (i,   id) -> FPassBaseNL (i, mutate_local_id id  !mag)
-    | FPassBaseGC (i,  idx) -> FPassBaseGC (i, mutate_int      idx !mag)
-    | FPassBaseGL (i,   id) -> FPassBaseGL (i, mutate_local_id id  !mag)
     | BaseSC      (idx,  i) -> BaseSC         (mutate_int      idx !mag,
                                                mutate_int      i   !mag)
     | BaseSL      (id, idx) -> BaseSL         (mutate_local_id id  !mag,
                                                mutate_int      idx !mag)
-    | FPassBaseL  (i,   id) -> FPassBaseL  (i, mutate_local_id id  !mag)
     | BaseC        idx      -> BaseC    (mutate_int idx !mag)
     | BaseR        idx      -> BaseR    (mutate_int idx !mag)
     | Dim       (mode, key) -> Dim      (mutate_mode  mode, mutate_key key !mag)
-    | FPassDim    (i,  key) -> FPassDim (mutate_int i !mag, mutate_key key !mag)
     | _ -> s in
   let mutate_ctrl_flow data s =
     match s with
@@ -422,9 +400,6 @@ let mut_imms (is : IS.t) : IS.t =
     match s with
     | QueryM  (i, op, k) ->
         QueryM (mutate_int i !mag,   mutate_op      op,      mutate_key k !mag)
-    | FPassM  (i, i', k, h) ->
-        FPassM (mutate_int i !mag,   mutate_int i' !mag,     mutate_key k !mag,
-                mutate_fpasshint h)
     | VGetM   (i,     k) -> VGetM   (mutate_int i  !mag,     mutate_key k !mag)
     | SetM    (i,     k) -> SetM    (mutate_int i  !mag,     mutate_key k !mag)
     | IncDecM (i, op, k) -> IncDecM (mutate_int i  !mag, op, mutate_key k !mag)

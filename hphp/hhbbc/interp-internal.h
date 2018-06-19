@@ -147,15 +147,6 @@ void reduce(ISS& env, Bytecodes&&... hhbc) {
   reduce(env, { std::forward<Bytecodes>(hhbc)... });
 }
 
-bool fpassCanThrow(ISS& /*env*/, PrepKind kind, FPassHint hint) {
-  switch (kind) {
-  case PrepKind::Unknown: return hint != FPassHint::Any;
-  case PrepKind::Val:     return hint == FPassHint::Ref;
-  case PrepKind::Ref:     return hint == FPassHint::Cell;
-  }
-  not_reached();
-}
-
 void nothrow(ISS& env) {
   FTRACE(2, "    nothrow\n");
   env.flags.wasPEI = false;
@@ -445,73 +436,6 @@ void fpiNotFoldable(ISS& env) {
   // marking the next bytecode unreachable
   unreachable(env);
   FTRACE(2, "     fpi: not foldable\n");
-}
-
-PrepKind prepKind(ISS& env, uint32_t paramId) {
-  auto& ar = fpiTop(env);
-  if (ar.func && !ar.fallbackFunc) {
-    auto const ret = env.index.lookup_param_prep(env.ctx, *ar.func, paramId);
-    if (ar.foldable && ret != PrepKind::Val) {
-      fpiNotFoldable(env);
-    }
-    if (ret != PrepKind::Unknown) {
-      return ret;
-    }
-  }
-  assertx(ar.kind != FPIKind::Builtin && !ar.foldable);
-  return PrepKind::Unknown;
-}
-
-template<class... Bytecodes>
-void killFPass(ISS& env, PrepKind kind, FPassHint hint, uint32_t arg,
-               Bytecodes&&... bcs) {
-  assert(kind != PrepKind::Unknown);
-
-  // Since PrepKind is never Unknown for builtins or foldables we
-  // should know statically if we will throw or not at runtime
-  // (PrepKind and FPassHint don't match).
-  if (fpassCanThrow(env, kind, hint)) {
-    auto const& ar = fpiTop(env);
-    assertx(ar.foldable || ar.kind == FPIKind::Builtin);
-    assertx(ar.func && !ar.fallbackFunc);
-    return reduce(
-      env,
-      std::forward<Bytecodes>(bcs)...,
-      bc::FHandleRefMismatch { arg, hint, ar.func->name() }
-    );
-  }
-  return reduce(env, std::forward<Bytecodes>(bcs)...);
-}
-
-bool shouldKillFPass(ISS& env, FPassHint hint, uint32_t param) {
-  auto& ar = fpiTop(env);
-  if (ar.kind == FPIKind::Builtin) return true;
-  if (!ar.foldable) return false;
-  prepKind(env, param);
-  if (!ar.foldable) return false;
-  auto const ok = [&] {
-    if (hint == FPassHint::Ref) return false;
-    auto const& t = topT(env);
-    if (!is_scalar(t)) return false;
-    auto const callee = ar.func->exactFunc();
-    if (param >= callee->params.size() ||
-        (param + 1 == callee->params.size() &&
-         callee->params.back().isVariadic)) {
-      return true;
-    }
-    auto const constraint = callee->params[param].typeConstraint;
-    if (!constraint.hasConstraint() ||
-        constraint.isTypeVar() ||
-        constraint.isTypeConstant()) {
-      return true;
-    }
-    return env.index.satisfies_constraint(
-      Context { callee->unit, const_cast<php::Func*>(callee), callee->cls },
-      t, constraint);
-  }();
-  if (ok) return true;
-  fpiNotFoldable(env);
-  return false;
 }
 
 //////////////////////////////////////////////////////////////////////

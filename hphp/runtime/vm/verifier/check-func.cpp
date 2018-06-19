@@ -121,7 +121,8 @@ struct FuncChecker {
   bool checkSig(PC pc, int len, const FlavorDesc* args, const FlavorDesc* sig);
   bool checkEHStack(const EHEnt&, Block* b);
   bool checkTerminal(State* cur, PC pc);
-  bool checkFpi(State* cur, PC pc, Block* b);
+  bool checkFpi(State* cur, PC pc);
+  bool checkFPass(State* cur, PC pc);
   bool checkIter(State* cur, PC pc);
   bool checkClsRefSlots(State* cur, PC pc);
   bool checkIterBreak(State* cur, PC pc);
@@ -813,7 +814,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   switch (peek_op(pc)) {
   case Op::QueryM:
   case Op::VGetM:
-  case Op::FPassM:
   case Op::IncDecM:
   case Op::UnsetM:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
@@ -908,7 +908,6 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
       decode_iva(pc);
       key = decode_member_key(pc, unit());
       break;
-    case Op::FPassM:  //THREE(IVA, IVA, KA)
     case Op::SetWithRefLML:
     case Op::SetWithRefRML:
       return true;
@@ -1020,7 +1019,7 @@ bool FuncChecker::checkTerminal(State* cur, PC pc) {
   return true;
 }
 
-bool FuncChecker::checkFpi(State* cur, PC pc, Block* /*b*/) {
+bool FuncChecker::checkFpi(State* cur, PC pc) {
   if (cur->fpilen <= 0) {
     error("%s", "cannot access empty FPI stack\n");
     return false;
@@ -1062,7 +1061,7 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* /*b*/) {
       return false;
     }
   } else {
-    // FPass*
+    assertx(op == Op::FIsParamByRef);
     int param_id = getImmIva(pc);
     int push_params = getImmIva(at(fpi.fpush));
     if (param_id >= push_params) {
@@ -1071,27 +1070,38 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* /*b*/) {
       return false;
     }
     if (param_id != fpi.next) {
-      error("FPass* out of order; got id %d expected %d\n",
+      error("FIsParamByRef out of order; got id %d expected %d\n",
              param_id, fpi.next);
       ok = false;
     }
-    if (isMemberBaseOp(op) || isMemberDimOp(op)) {
-      // The argument isn't pushed until the final member operation. Skip the
-      // last two checks.
-      return ok;
-    }
-    // we have already popped FPass's input, but not pushed the output, so this
-    // check doesn't count the F result of this FPass, but does count the
-    // previous FPass*s.
-    if (cur->stklen != fpi.stkmin + param_id) {
-      error("Stack depth incorrect after FPass; got %d expected %d\n",
-             cur->stklen, fpi.stkmin + param_id);
-      ok = false;
-    }
-    fpi.next++;
   }
 
   return ok;
+}
+
+bool FuncChecker::checkFPass(State* cur, PC pc) {
+  assertx(isFPassStar(peek_op(pc)));
+  if (cur->fpilen <= 0) {
+    error("%s", "cannot access empty FPI stack\n");
+    return false;
+  }
+  FpiState& fpi = cur->fpi[cur->fpilen - 1];
+  int push_params = getImmIva(at(fpi.fpush));
+  if (fpi.next >= push_params) {
+    error("param_id %d out of range [0:%d)\n", fpi.next,
+           push_params);
+    return false;
+  }
+  // we have already popped FPass's input, but not pushed the output, so this
+  // check doesn't count the F result of this FPass, but does count the
+  // previous FPass*s.
+  if (cur->stklen != fpi.stkmin + fpi.next) {
+    error("Stack depth incorrect after FPass; got %d expected %d\n",
+           cur->stklen, fpi.stkmin + fpi.next);
+    return false;
+  }
+  fpi.next++;
+  return true;
 }
 
 // Check that the initialization state of the iterator referenced by
@@ -1412,9 +1422,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
     case Op::BaseGC:
     case Op::BaseSC:
     case Op::BaseC:
-    case Op::BaseR:
-    case Op::FPassBaseNC:
-    case Op::FPassBaseGC: {
+    case Op::BaseR: {
       auto const stackIdx = getImm(pc, 0).u_IVA;
       if (stackIdx >= cur->stklen) {
         ferror("{} indexes ({}) past end of stack ({})\n", opcodeToName(op),
@@ -1779,7 +1787,8 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     ok &= checkInputs(&cur, pc, b);
     auto const flags = instrFlags(op);
     if (flags & TF) ok &= checkTerminal(&cur, pc);
-    if (flags & FF) ok &= checkFpi(&cur, pc, b);
+    if (flags & FF) ok &= checkFpi(&cur, pc);
+    if (isFPassStar(op)) ok &= checkFPass(&cur, pc);
     if (isIter(pc)) ok &= checkIter(&cur, pc);
     if (Op(*pc) == Op::IterBreak) ok &= checkIterBreak(&cur, pc);
     ok &= checkClsRefSlots(&cur, pc);

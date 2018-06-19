@@ -21,7 +21,7 @@
     .try {
       FPushCtorD 1 "Exception"
       String "ex"
-      FPassC 0 Any
+      FPassCNop
       FCall 1
       PopR
       Throw

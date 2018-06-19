@@ -266,11 +266,6 @@ static inline ActRec* arFromSp(int32_t n) {
   return ar;
 }
 
-ALWAYS_INLINE MOpMode fpass_mode(ActRec* ar, int paramId) {
-  assertx(paramId < ar->numArgs());
-  return ar->m_func->byRef(paramId) ? MOpMode::Define : MOpMode::Warn;
-}
-
 namespace {
 
 // wrapper for local variable LA operand
@@ -3468,16 +3463,6 @@ OPTBLD_INLINE void iopBaseNL(local_var loc, MOpMode mode) {
   baseNImpl(tvToCell(loc.ptr), mode);
 }
 
-OPTBLD_INLINE void iopFPassBaseNC(ActRec* ar, uint32_t paramId, uint32_t idx) {
-  auto const mode = fpass_mode(ar, paramId);
-  baseNImpl(vmStack().indTV(idx), mode);
-}
-
-OPTBLD_INLINE void iopFPassBaseNL(ActRec* ar, uint32_t paramId, local_var loc) {
-  auto const mode = fpass_mode(ar, paramId);
-  baseNImpl(tvToCell(loc.ptr), mode);
-}
-
 static inline void baseGImpl(TypedValue* key, MOpMode mode) {
   baseNGImpl(key, mode, lookupd_gbl, lookup_gbl);
 }
@@ -3487,16 +3472,6 @@ OPTBLD_INLINE void iopBaseGC(uint32_t idx, MOpMode mode) {
 }
 
 OPTBLD_INLINE void iopBaseGL(local_var loc, MOpMode mode) {
-  baseGImpl(tvToCell(loc.ptr), mode);
-}
-
-OPTBLD_INLINE void iopFPassBaseGC(ActRec* ar, uint32_t paramId, uint32_t idx) {
-  auto const mode = fpass_mode(ar, paramId);
-  baseGImpl(vmStack().indTV(idx), mode);
-}
-
-OPTBLD_INLINE void iopFPassBaseGL(ActRec* ar, uint32_t paramId, local_var loc) {
-  auto const mode = fpass_mode(ar, paramId);
   baseGImpl(tvToCell(loc.ptr), mode);
 }
 
@@ -3537,11 +3512,6 @@ OPTBLD_INLINE void baseLImpl(local_var loc, MOpMode mode) {
 }
 
 OPTBLD_INLINE void iopBaseL(local_var loc, MOpMode mode) {
-  baseLImpl(loc, mode);
-}
-
-OPTBLD_INLINE void iopFPassBaseL(ActRec* ar, uint32_t paramId, local_var loc) {
-  auto mode = fpass_mode(ar, paramId);
   baseLImpl(loc, mode);
 }
 
@@ -3715,11 +3685,6 @@ OPTBLD_INLINE void iopDim(MOpMode mode, MemberKey mk) {
   dimDispatch(mode, mk, false);
 }
 
-OPTBLD_INLINE void iopFPassDim(ActRec* ar, uint32_t paramId, MemberKey mk) {
-  auto const mode = fpass_mode(ar, paramId);
-  dimDispatch(mode, mk, false);
-}
-
 static OPTBLD_INLINE void mFinal(MInstrState& mstate,
                                  int32_t nDiscard,
                                  folly::Optional<TypedValue> result) {
@@ -3787,37 +3752,6 @@ static OPTBLD_INLINE void vGetMImpl(MemberKey mk, int32_t nDiscard) {
 }
 
 OPTBLD_INLINE void iopVGetM(uint32_t nDiscard, MemberKey mk) {
-  vGetMImpl(mk, nDiscard);
-}
-
-static void checkFPassHint(ActRec* ar, uint32_t paramId, FPassHint hint) {
-  assertx(paramId < ar->numArgs());
-
-  if (!RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch &&
-      !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) {
-    return;
-  }
-
-  switch (hint) {
-  case FPassHint::Any: return;
-  case FPassHint::Cell:
-    if (!ar->m_func->byRef(paramId)) return;
-    break;
-  case FPassHint::Ref:
-    if (ar->m_func->byRef(paramId)) return;
-    break;
-  }
-  raiseParamRefMismatchForFunc(ar->m_func, paramId);
-}
-
-OPTBLD_INLINE
-void iopFPassM(ActRec* ar, uint32_t paramId, uint32_t nDiscard, MemberKey mk,
-               FPassHint hint) {
-  checkFPassHint(ar, paramId, hint);
-  auto const mode = fpass_mode(ar, paramId);
-  if (mode == MOpMode::Warn) {
-    return queryMImpl(mk, nDiscard, QueryMOp::CGet);
-  }
   vGetMImpl(mk, nDiscard);
 }
 
@@ -5273,6 +5207,21 @@ OPTBLD_INLINE void iopFPushCufIter(uint32_t numArgs, Iter* it) {
   }
 }
 
+OPTBLD_INLINE void iopFIsParamByRef(ActRec* ar, uint32_t paramId,
+                                    FPassHint hint) {
+  assertx(paramId < ar->numArgs());
+  auto const byRef = ar->func()->byRef(paramId);
+
+  if (RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch ||
+      RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) {
+    if (hint == (byRef ? FPassHint::Cell : FPassHint::Ref)) {
+      raiseParamRefMismatchForFunc(ar->func(), paramId);
+    }
+  }
+
+  vmStack().pushBool(byRef);
+}
+
 OPTBLD_INLINE void iopFThrowOnRefMismatch(ActRec* ar, imm_array<bool> byRefs) {
   assertx(byRefs.size <= ar->numArgs());
   auto const func = ar->func();
@@ -5291,76 +5240,8 @@ OPTBLD_INLINE void iopFHandleRefMismatch(uint32_t paramId, FPassHint hint,
   raiseParamRefMismatchForFuncName(funcName, paramId, hint == FPassHint::Cell);
 }
 
-OPTBLD_INLINE void iopFPassC(ActRec* ar, uint32_t paramId, FPassHint hint) {
-  checkFPassHint(ar, paramId, hint);
-}
-
-OPTBLD_INLINE void iopFPassV(ActRec* ar, uint32_t paramId, FPassHint hint) {
-  checkFPassHint(ar, paramId, hint);
-  const Func* func = ar->m_func;
-  if (!func->byRef(paramId)) {
-    vmStack().unbox();
-  }
-}
-
-OPTBLD_INLINE void iopFPassVNop(ActRec* ar, uint32_t paramId, FPassHint hint) {
-  checkFPassHint(ar, paramId, hint);
-}
-
-OPTBLD_INLINE void iopFPassR(ActRec* ar, uint32_t paramId, FPassHint hint) {
-  checkFPassHint(ar, paramId, hint);
-  const Func* func = ar->m_func;
-  if (func->byRef(paramId)) {
-    TypedValue* tv = vmStack().topTV();
-    if (!isRefType(tv->m_type)) {
-      tvBox(*tv);
-    }
-  } else {
-    if (isRefType(vmStack().topTV()->m_type)) {
-      vmStack().unbox();
-    }
-  }
-}
-
-OPTBLD_INLINE void iopFPassL(ActRec* ar, uint32_t paramId, local_var loc,
-                             FPassHint hint) {
-  checkFPassHint(ar, paramId, hint);
-  TypedValue* fr = loc.ptr;
-  TypedValue* to = vmStack().allocTV();
-  if (!ar->m_func->byRef(paramId)) {
-    cgetl_body(vmfp(), fr, to, loc.index, true);
-  } else {
-    vgetl_body(fr, to);
-  }
-}
-
-OPTBLD_INLINE void iopFPassN(ActRec* ar, uint32_t paramId, FPassHint hint) {
-  checkFPassHint(ar, paramId, hint);
-  if (!ar->m_func->byRef(paramId)) {
-    iopCGetN();
-  } else {
-    iopVGetN();
-  }
-}
-
-OPTBLD_INLINE void iopFPassG(ActRec* ar, uint32_t paramId, FPassHint hint) {
-  checkFPassHint(ar, paramId, hint);
-  if (!ar->m_func->byRef(paramId)) {
-    iopCGetG();
-  } else {
-    iopVGetG();
-  }
-}
-
-OPTBLD_INLINE void iopFPassS(ActRec* ar, uint32_t paramId, clsref_slot slot,
-                             FPassHint hint) {
-  checkFPassHint(ar, paramId, hint);
-  if (!ar->m_func->byRef(paramId)) {
-    iopCGetS(slot);
-  } else {
-    iopVGetS(slot);
-  }
-}
+OPTBLD_INLINE void iopFPassCNop() {}
+OPTBLD_INLINE void iopFPassVNop() {}
 
 bool doFCall(ActRec* ar, PC& pc) {
   TRACE(3, "FCall: pc %p func %p base %d\n", vmpc(),
@@ -6982,16 +6863,6 @@ OPTBLD_INLINE TCA iopWrapReturn(void(fn)(PC, Params...), PC origpc,
 ALWAYS_INLINE ActRec* ar_for_inst(Op op, PC origpc,
                                   int iva_count, uint32_t* ivas) {
   switch (op) {
-    case Op::FPassC:
-    case Op::FPassV:
-    case Op::FPassVNop:
-    case Op::FPassR:
-    case Op::FPassN:
-    case Op::FPassG:
-    case Op::FPassS:
-      assertx(iva_count >= 1);
-      return arFromSp(ivas[0] + 1);
-    case Op::FPassL:
     case Op::FCall:
     case Op::FCallD:
     case Op::FCallAwait:
@@ -7001,9 +6872,6 @@ ALWAYS_INLINE ActRec* ar_for_inst(Op op, PC origpc,
     case Op::FCallUnpackM:
       assertx(iva_count >= 1);
       return arFromSp(ivas[0]);
-    case Op::FPassM:
-      assertx(iva_count >= 2);
-      return arFromSp(ivas[0] + ivas[1]);
     default:
       return arFromInstr(origpc);
   }

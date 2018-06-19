@@ -107,14 +107,7 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     return TBoxedInitCell;
   };
 
-  auto outFlag = getInstrInfo(inst.op()).type;
-  if (outFlag == OutFInputL) {
-    outFlag = inst.preppedByRef ? OutVInputL : OutCInputL;
-  } else if (outFlag == OutFInputR) {
-    outFlag = inst.preppedByRef ? OutVInput : OutCInput;
-  }
-
-  switch (outFlag) {
+  switch (getInstrInfo(inst.op()).type) {
     case OutNull:        return TInitNull;
     case OutNullUninit:  return TUninit;
     case OutString:      return TStr;
@@ -146,8 +139,6 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutModifiedInput3: return topType(env, BCSPRelOffset{2}).modified();
     case OutVInput:      return boxed(topType(env, BCSPRelOffset{0}));
     case OutVInputL:     return boxed(localType());
-    case OutFInputL:
-    case OutFInputR:     not_reached();
 
     case OutArith:
       return arithOpResult(topType(env, BCSPRelOffset{0}),
@@ -155,12 +146,8 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutArithO:
       return arithOpOverResult(topType(env, BCSPRelOffset{0}),
                                topType(env, BCSPRelOffset{1}));
-    case OutUnknown: {
-      if (isFPassStar(inst.op())) {
-        return inst.preppedByRef ? TBoxedInitCell : TCell;
-      }
-      return TGen;
-    }
+    case OutUnknown:     return TGen;
+
     case OutBitOp:
       return bitOpResult(topType(env, BCSPRelOffset{0}),
                          inst.op() == HPHP::OpBitNot ?
@@ -290,8 +277,6 @@ interpOutputLocals(IRGS& env,
     case OpDim:
       if (inst.imm[0].u_OA & mDefine) smashesAllLocals = true;
       break;
-    case OpFPassDim:
-    case OpFPassM:
     case OpVGetM:
     case OpSetM:
     case OpIncDecM:
@@ -475,7 +460,6 @@ void emitIncDecG(IRGS& env, IncDecOp)         { INTERP }
 void emitBindN(IRGS& env)                     { INTERP }
 void emitUnsetN(IRGS& env)                    { INTERP }
 void emitUnsetG(IRGS& env)                    { INTERP }
-void emitFPassN(IRGS& env,uint32_t,FPassHint) { INTERP }
 void emitIncl(IRGS& env)                      { INTERP }
 void emitInclOnce(IRGS& env)                  { INTERP }
 void emitReq(IRGS& env)                       { INTERP }

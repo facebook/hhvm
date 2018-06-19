@@ -169,7 +169,7 @@
   ClsRefGetC 0
   FPushClsMethod 1 0
   String "printing this string"
-  FPassC 0 Any
+  FPassCNop
   FCall 1
   PopR
 

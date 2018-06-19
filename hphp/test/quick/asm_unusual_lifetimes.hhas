@@ -16,10 +16,10 @@
   PopC
 
   FPushFuncD 2 "main"
-    FPassL 0 $a Any
-    UnsetL $a
-    FPassL 1 $b Any
-    UnsetL $b
+    PushL $a
+    FPassCNop
+    PushL $b
+    FPassCNop
   FCall 2
   UnboxR
   RetC

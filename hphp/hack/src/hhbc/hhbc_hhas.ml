@@ -389,26 +389,16 @@ let string_of_base x =
     sep ["BaseNC"; string_of_stack_index si; MemberOpMode.to_string m]
   | BaseNL (id, m) ->
     sep ["BaseNL"; string_of_local_id id; MemberOpMode.to_string m]
-  | FPassBaseNC (i, si) ->
-    sep ["FPassBaseNC"; string_of_param_num i; string_of_stack_index si]
-  | FPassBaseNL (i, lid) ->
-    sep ["FPassBaseNL"; string_of_param_num i; string_of_local_id lid]
   | BaseGC (si, m) ->
     sep ["BaseGC"; string_of_stack_index si; MemberOpMode.to_string m]
   | BaseGL (id, m) ->
     sep ["BaseGL"; string_of_local_id id; MemberOpMode.to_string m]
-  | FPassBaseGC (i, si) ->
-    sep ["FPassBaseGC"; string_of_param_num i; string_of_stack_index si]
-  | FPassBaseGL (i, lid) ->
-    sep ["FPassBaseGL"; string_of_param_num i; string_of_local_id lid]
   | BaseSC (si, id) ->
     sep ["BaseSC"; string_of_stack_index si; string_of_classref id]
   | BaseSL (lid, si) ->
     sep ["BaseSL"; string_of_local_id lid; string_of_stack_index si]
   | BaseL (lid, m) ->
     sep ["BaseL"; string_of_local_id lid; MemberOpMode.to_string m]
-  | FPassBaseL (i, lid) ->
-    sep ["FPassBaseL"; string_of_param_num i; string_of_local_id lid]
   | BaseC si ->
     sep ["BaseC"; string_of_stack_index si]
   | BaseR si ->
@@ -417,8 +407,6 @@ let string_of_base x =
     "BaseH"
   | Dim (m, mk) ->
     sep ["Dim"; MemberOpMode.to_string m; string_of_member_key mk]
-  | FPassDim (i, mk) ->
-    sep ["FPassDim"; string_of_param_num i; string_of_member_key mk]
 
 let string_of_final instruction =
   match instruction with
@@ -434,10 +422,6 @@ let string_of_final instruction =
   | BindM (n, mk) ->
     sep ["BindM";
       string_of_int n; string_of_member_key mk]
-  | FPassM (i, n, mk, h) ->
-    sep ["FPassM";
-      string_of_param_num i; string_of_int n; string_of_member_key mk;
-      string_of_fpasshint h]
   | SetM (i, mk) ->
     sep ["SetM";
       string_of_param_num i; string_of_member_key mk]
@@ -505,29 +489,17 @@ let string_of_call instruction =
     sep ["DecodeCufIter"; string_of_iterator_id id; string_of_label l]
   | FPushCufIter (n, id) ->
     sep ["FPushCufIter"; string_of_int n; string_of_iterator_id id]
+  | FIsParamByRef (i, h) ->
+    sep ["FIsParamByRef"; string_of_param_num i; string_of_fpasshint h]
   | FThrowOnRefMismatch l ->
     sep ["FThrowOnRefMismatch"; string_of_list_of_bools l]
   | FHandleRefMismatch (i, h, f) ->
     sep ["FHandleRefMismatch"; string_of_param_num i; string_of_fpasshint h;
          "\"" ^ f ^ "\""]
-  | FPassC (i, h) ->
-    sep ["FPassC"; string_of_param_num i; string_of_fpasshint h]
-  | FPassV (i, h) ->
-    sep ["FPassV"; string_of_param_num i; string_of_fpasshint h]
-  | FPassVNop (i, h) ->
-    sep ["FPassVNop"; string_of_param_num i; string_of_fpasshint h]
-  | FPassR (i, h) ->
-    sep ["FPassR"; string_of_param_num i; string_of_fpasshint h]
-  | FPassL (i, lid, h) ->
-    sep ["FPassL"; string_of_param_num i; string_of_local_id lid;
-         string_of_fpasshint h]
-  | FPassN (i, h) ->
-    sep ["FPassN"; string_of_param_num i; string_of_fpasshint h]
-  | FPassG (i, h) ->
-    sep ["FPassG"; string_of_param_num i; string_of_fpasshint h]
-  | FPassS (i, id, h) ->
-    sep ["FPassS"; string_of_param_num i; string_of_classref id;
-         string_of_fpasshint h]
+  | FPassCNop ->
+    sep ["FPassCNop"]
+  | FPassVNop ->
+    sep ["FPassVNop"]
   | FCall n ->
     sep ["FCall"; string_of_int n]
   | FCallD (n, c, f) ->

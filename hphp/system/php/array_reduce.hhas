@@ -44,9 +44,22 @@ check_func:
 
   .try 1 {
     loop_x:   FPushCufIter 2 0
-              FPassL 0 $res Any
-              FPassL 1 $v Any
-              FCall 2
+              FIsParamByRef 0 Any
+              JmpNZ by_ref_res
+              CGetL $res
+              FPassCNop
+              Jmp pass_v
+    by_ref_res:
+              VGetL $res
+              FPassVNop
+    pass_v:   FIsParamByRef 1 Any
+              JmpNZ by_ref_v
+              CGetL $v
+              FPassCNop
+              Jmp call
+    by_ref_v: VGetL $v
+              FPassVNop
+    call:     FCall 2
               UnboxR
               SetL $res
               PopC

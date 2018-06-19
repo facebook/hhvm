@@ -38,7 +38,7 @@ let rec rebalance_stk n (req : stack) : instruct list * stack =
   | "V", (buf, extra) ->
     ILitConst (Int (Int64.of_int 1)) :: IBasic (Box) :: buf, "V" :: extra
   | "F", (buf, extra) ->
-    ILitConst (Int (Int64.of_int 1)) :: ICall (FPassC (n, Any)) :: buf, "F" :: extra
+    ILitConst (Int (Int64.of_int 1)) :: ICall (FPassCNop) :: buf, "F" :: extra
   | "R", (buf, extra) ->
     ILitConst (Int (Int64.of_int 1)) :: IBasic (BoxR) :: buf,"R" :: extra
   | "U", (buf, extra) -> ILitConst NullUninit :: buf, "U" :: extra
@@ -130,7 +130,6 @@ let stk_data : instruct -> stack_sig = function
   | IMisc UGetCUNop                        -> ["C"], ["U"]
   | IGet VGetL _                           -> [], ["V"]
   | ILitConst NullUninit                   -> [], ["U"]
-  | ICall FPassL _                         -> [], ["F"]
   | ILitConst NewVecArray n
   | ILitConst NewKeysetArray n
   (*| IOp ConcatN n *)
@@ -140,7 +139,6 @@ let stk_data : instruct -> stack_sig = function
   | ILitConst NewPackedArray n             -> produce "C" n, ["C"]
   | IFinal SetOpM (n, _, _)
   | IFinal SetM (n, _)                     -> produce "C" (n + 1), ["C"]
-  | IFinal FPassM (_, n, _, _)
   | IFinal VGetM (n, _)                    -> produce "C" n, ["V"]
   | IFinal UnsetM (n, _)                   -> produce "C" n, []
   | IFinal BindM (n, _)                    -> produce "V" (n + 1), ["V"]
@@ -215,13 +213,8 @@ let stk_data : instruct -> stack_sig = function
   | IAsync _
   | ILitConst ColFromArray _               -> ["C"], ["C"]
   | IMisc VerifyRetTypeV                   -> ["V"], ["V"]
-  | ICall FPassN _
-  | ICall FPassG _
-  | ICall FPassS _
-  | ICall FPassC _                         -> ["C"], ["F"]
-  | ICall FPassVNop _
-  | ICall FPassV _                         -> ["V"], ["F"]
-  | ICall FPassR _                         -> ["R"], ["F"]
+  | ICall FPassCNop                        -> ["C"], ["F"]
+  | ICall FPassVNop                        -> ["V"], ["F"]
   | ILitConst NewPair
   | IOp _
   | ILitConst AddNewElemC                  -> ["C"; "C"], ["C"]

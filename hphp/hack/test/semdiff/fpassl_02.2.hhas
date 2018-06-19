@@ -30,7 +30,8 @@
   PopC
   .try_fault F2 {
     FPushClsMethodD 1 "fromDArray" "HH\\AwaitAllWaitHandle"
-    FPassL 0 _1 Cell
+    CGetL _1
+    FPassCNop
     FCall 1
     UnboxR
     Await

@@ -76,7 +76,7 @@
   Int 64
   NewPackedArray 64
 
-  FPassC 0 Any
+  FPassCNop
   FCall 1
   PopR
 

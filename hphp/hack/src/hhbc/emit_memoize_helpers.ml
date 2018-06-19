@@ -19,8 +19,9 @@ let param_code_sets params local =
         instr_popc ])
 
 let param_code_gets params =
-  gather @@ List.concat_mapi params (fun index param ->
-      [ instr_fpassl index (Local.Named (Hhas_param.name param)) Hhbc_ast.Cell ])
+  gather @@ List.concat_map params (fun param ->
+      [ instr_cgetl (Local.Named (Hhas_param.name param));
+        instr_fpasscnop ])
 
 let check_memoize_possible pos ~ret_by_ref ~params ~is_method =
   if ret_by_ref

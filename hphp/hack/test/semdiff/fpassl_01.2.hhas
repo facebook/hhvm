@@ -14,14 +14,15 @@
   PopC
   .try_fault F4 {
     FPushFuncU 2 "HH\\Lib\\Dict\\map_with_key" "map_with_key"
-    FPassL 0 _6 Cell
+    CGetL _6
 # the line above is the tricky one
+    FPassCNop
     CUGetL $predicate
     CreateCl 1 0
 # and the two above construct the parameter inline
 # so needed the extension to the fpassl special-case
 # semdiff pattern
-    FPassC 1 Cell
+    FPassCNop
     FCall 2
     UnboxR
   }
@@ -30,7 +31,8 @@
   PopC
   .try_fault F5 {
     FPushFuncU 1 "HH\\Lib\\Dict\\gen" "gen"
-    FPassL 0 _6 Cell
+    CGetL _6
+    FPassCNop
     FCall 1
     UnboxR
   }
@@ -86,8 +88,11 @@ F6:
     .declvars $0Closure $predicate;
     CGetL $predicate
     FPushFunc 2
-    FPassL 0 $k Cell
-    FPassL 1 $v Cell
+    CGetL $k
+    FPassCNop
+    CGetL $v
+    FPassCNop
+    FThrowOnRefMismatch "00"
     FCall 2
     UnboxR
     RetC

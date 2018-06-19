@@ -13,7 +13,8 @@
 .function caller($who, $arg) {
   CGetL $who
   FPushFunc 1
-  FPassL 0 $arg Any
+  CGetL $arg
+  FPassCNop
   FCall 1
   UnboxR
 
@@ -58,9 +59,9 @@
 .function main() {
   FPushFuncD 2 "caller"
   String "a"
-  FPassC 0 Any
+  FPassCNop
   String "b"
-  FPassC 1 Any
+  FPassCNop
   FCall 2
   PopR
 
@@ -68,7 +69,8 @@
   SetL $funk
   PopC
   FPushFuncD 1 "byref"
-  FPassL 0 $funk Any
+  VGetL $funk
+  FPassVNop
   FCall 1
   PopR
   CGetL $funk

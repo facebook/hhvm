@@ -12,7 +12,8 @@
   SetL $myinf
   PopC
   FPushFuncD 1 "var_dump"
-  FPassL 0 $myinf Cell
+  CGetL $myinf
+  FPassCNop
   FCall 1
   PopR
   Null

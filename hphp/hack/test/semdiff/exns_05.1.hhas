@@ -6,27 +6,27 @@
 .main {
   FPushFuncD 1 "foo"
   String "lop"
-  FPassC 0 Cell
+  FPassCNop
   FCall 1
   PopR
   FPushFuncD 1 "foo"
   String "goo"
-  FPassC 0 Cell
+  FPassCNop
   FCall 1
   PopR
   FPushFuncD 1 "foo"
   String "blah"
-  FPassC 0 Cell
+  FPassCNop
   FCall 1
   PopR
   FPushFuncD 1 "foo"
   String "baz"
-  FPassC 0 Cell
+  FPassCNop
   FCall 1
   PopR
   FPushFuncD 1 "foo"
   String "bar"
-  FPassC 0 Cell
+  FPassCNop
   FCall 1
   PopR
   Int 1
@@ -38,14 +38,14 @@
     .try_fault F1 {
       FPushCtorD 1 "Exception"
       String "one"
-      FPassC 0 Cell
+      FPassCNop
       FCall 1
       PopR
       Throw
     }
     FPushCtorD 1 "Exception"
     String "two"
-    FPassC 0 Cell
+    FPassCNop
     FCall 1
     PopR
     Throw
@@ -60,7 +60,7 @@ F1:
   UnsetL _1
   FPushCtorD 1 "Exception"
   String "two"
-  FPassC 0 Cell
+  FPassCNop
   FCall 1
   PopR
   Throw
@@ -81,7 +81,7 @@ F0:
       .try_fault F3 {
         FPushCtorD 1 "Exception"
         String "one"
-        FPassC 0 Cell
+        FPassCNop
         FCall 1
         PopR
         Throw
@@ -134,7 +134,7 @@ F2:
     PopC
     FPushCtorD 1 "Exception"
     String "one"
-    FPassC 0 Cell
+    FPassCNop
     FCall 1
     PopR
     Throw
@@ -145,7 +145,7 @@ F2:
     PopC
     FPushCtorD 1 "Exception"
     String "two"
-    FPassC 0 Cell
+    FPassCNop
     FCall 1
     PopR
     Throw
@@ -181,7 +181,7 @@ F4:
     PopC
     FPushCtorD 1 "Exception"
     String "two"
-    FPassC 0 Cell
+    FPassCNop
     FCall 1
     PopR
     Throw
@@ -214,14 +214,14 @@ L2:
     .try_fault F1 {
       FPushCtorD 1 "Exception"
       String "one"
-      FPassC 0 Cell
+      FPassCNop
       FCall 1
       PopR
       Throw
     }
     FPushCtorD 1 "Exception"
     String "two"
-    FPassC 0 Cell
+    FPassCNop
     FCall 1
     PopR
     Throw
@@ -236,7 +236,7 @@ F1:
   UnsetL _1
   FPushCtorD 1 "Exception"
   String "two"
-  FPassC 0 Cell
+  FPassCNop
   FCall 1
   PopR
   Throw
@@ -256,7 +256,7 @@ F0:
     .try_fault F2 {
       FPushCtorD 1 "Exception"
       String "bar"
-      FPassC 0 Cell
+      FPassCNop
       FCall 1
       PopR
       Throw
@@ -301,7 +301,8 @@ F2:
   PopC
   .try {
     FPushFuncD 1 "call_user_func"
-    FPassL 0 $fname Cell
+    CGetL $fname
+    FPassCNop
     FCall 1
     PopR
     Jmp L0

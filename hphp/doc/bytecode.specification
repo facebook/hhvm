@@ -2237,58 +2237,12 @@ FPushCufIter <num params> <iterator id>   []  ->  []
 
   FPI push the result of a previous DecodeCufIter. No warning is raised.
 
+FIsParamByRef <param id> <reffiness hint>   []  ->  [C:Bool]
 
-Reffiness hints
---------------------
-  All of the FPass* instructions take a parameter id, %1, and a reffiness hint,
-  %2, which may be 'Any', 'Cell', or 'Ref'. If the reffiness hint %2 is not
-  'Any' and does not match the reffiness of parameter %1 the runtime may raise
-  a warning or throw an exception. The value of %2 has no other effect on these
-  instructions.
-
-FPassC <param id> <reffiness hint>     [C]  ->  [F]
-
-  FPI pass parameter. This instruction pushes $1 onto the stack as a cell
-  regardless of whether parameter %1 is pass by value or pass by reference.
-
-FPassV <param id> <reffiness hint>    [V]  ->  [F]
-
-  FPI pass parameter. If parameter %1 is pass by value, this instruction will
-  unbox $1 and push it onto the stack as a cell. If parameter %1 is pass by
-  reference, this instruction will push $1 onto the stack as a ref.
-
-FPassVNop <param id> <reffiness hint> [V]  ->  [F]
-
-  FPI pass parameter, no op. Parameter %1 must be statically known to be pass
-  by reference. This instruction pushes $1 onto the stack as a ref.
-
-FPassR <param id> <reffiness hint>    [R]  ->  [F]
-
-  FPI pass parameter. If $1 is a cell at run time, this instruction will behave
-  like FPassC. Otherwise, this instruction will behave like FPassV.
-
-FPassL <param id> <local variable id> <reffiness hint>    []  ->  [F]
-
-  FPI pass local as parameter. This instruction behaves as CGetL if parameter
-  %1 is pass by value, or it behaves like VGetL if parameter %1 is pass by
-  reference.
-
-FPassN <param id> <reffiness hint>    [C]  ->  [F]
-
-  FPI pass local as parameter. This instruction behaves as CGetN if parameter
-  %1 is pass by value, or it behaves like VGetN if parameter %1 is pass by
-  reference.
-
-FPassG <param id> <reffiness hint>    [C]  ->  [F]
-
-  FPI pass global as parameter. This instruction behaves as CGetG if parameter
-  %1 is pass by value, or it behaves like VGetG if parameter %1 is pass by
-  reference.
-
-FPassS <param id> <class-ref slot> <reffiness hint>    [C]  ->  [F]
-
-  FPI pass parameter. This instruction behaves as CGetS if parameter %1 is pass
-  by value, or it behaves like VGetS if parameter %1 is pass by reference.
+  Push a bool indicating whether parameter %1 is pass by ref. If the reffiness
+  hint %2, which may be 'Any', 'Cell', or 'Ref', is not 'Any' and does not
+  match the reffiness of parameter %1 the runtime may raise a warning or throw
+  an exception.
 
 FThrowOnRefMismatch <reffiness bool vector>   []  ->  []
 
@@ -2302,6 +2256,16 @@ FHandleRefMismatch <param id> <reffiness hint> <func name>   []  ->  []
   Handle known mismatch between reffiness of the parameter %1 of the function
   named %3 and the reffiness hint %2, which may be 'Cell', or 'Ref'. Depending
   on the runtime configuration, may raise a warning or throw an exception.
+
+FPassCNop   [C]  ->  [F]
+
+  FPI pass parameter, no op. This instruction pushes $1 onto the stack as
+  a cell.
+
+FPassVNop   [V]  ->  [F]
+
+  FPI pass parameter, no op. This instruction pushes $1 onto the stack as
+  a ref.
 
 FCall <num params>    [F..F]  ->  [R]
 
@@ -3444,8 +3408,7 @@ UnsetPropL <local variable id>    [B]  ->  []
 
 Each instruction in this section corresponds to one member operation from the
 previous section. The same bytecode may represent multiple different member
-operations, differentiating between the options using MOpMode immediates and/or
-the reffiness of parameters (in the case of FPass* bytecodes).
+operations, differentiating between the options using MOpMode immediates.
 
 Since they represent member operations, these instructions produced and/or
 consume a base in the member base register. The MBR is live starting after a
@@ -3467,29 +3430,20 @@ described in the "Instruction set" introduction section.
 BaseNC <stack index> <member op mode>    []  ->  []
 BaseNL <local id>    <member op mode>    []  ->  []
 
-FPassBaseNC <param id> <stack index>    []  ->  []
-FPassBaseNL <param id> <local id>       []  ->  []
-
   BaseN{C,L}{,W,D} member operation.
 
 BaseGC <stack index> <member op mode>    []  ->  []
 BaseGL <local id>    <member op mode>    []  ->  []
 
-FPassBaseGC <param id> <stack index>    []  ->  []
-FPassBaseGL <param id> <local id>       []  ->  []
-
   BaseG{C,L}{,W,D} member operation.
 
-BaseSC <stack index> <class-ref slot>    [CV?]  ->  [CV?]
-BaseSL <local id>    <class-ref slot>    [CV?]  ->  [CV?]
+BaseSC <stack index> <class-ref slot>    []  ->  []
+BaseSL <local id>    <class-ref slot>    []  ->  []
 
   BaseS{C,L} member operation. %1 gives the location of the static property
-  name, and %2 gives the class input. The class is consumed, leaving an
-  optional cell or var on the top of the stack undisturbed.
+  name, and %2 gives the class input. The class is consumed.
 
 BaseL <local id> <member op mode>    []  ->  []
-
-FPassBaseL <param id> <local id>    []  ->  []
 
   BaseL{,W,D} member operation.
 
@@ -3506,8 +3460,6 @@ BaseH    []  ->  []
 -----------------------------
 
 Dim  <member op mode> <member key>     []  ->  []
-
-FPassDim   <param id> <member key>    []  ->  []
 
   {Prop,Elem}{L,C,I,T}{W,D,U} member operation.
 
@@ -3527,11 +3479,6 @@ QueryM <stack count> <query op> <member key>    [...]  ->  [C]
 VGetM <stack count> <member key>    [...]  ->  [V]
 
   {VGet}{Prop,Elem} or VGetNewElem member operation.
-
-FPassM <param id> <stack count> <member key>    [...]  ->  [V]
-
-  {CGet,VGet}{Prop,Elem} or VGetNewElem, member operation, depending
-  on the reffiness of the specified parameter.
 
 SetM <stack count> <member key>    [... C]  ->  [C]
 

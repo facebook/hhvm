@@ -1067,14 +1067,12 @@ public:
    */
   struct MInstrOpts {
     explicit MInstrOpts(MOpMode mode)
-      : allowW{mode == MOpMode::Define}
-      , mode{mode}
+      : MInstrOpts(mode, mode == MOpMode::Define)
     {}
 
-    explicit MInstrOpts(int32_t paramId)
-      : allowW{true}
-      , fpass{true}
-      , paramId{paramId}
+    explicit MInstrOpts(MOpMode mode, bool allowW)
+      : allowW{allowW}
+      , mode{mode}
     {}
 
     MInstrOpts& rhs() {
@@ -1084,17 +1082,14 @@ public:
 
     bool allowW{false};
     bool rhsVal{false};
-    bool fpass{false};
-    union {
-      MOpMode mode;
-      int32_t paramId;
-    };
+    MOpMode mode;
   };
 
   MemberKey symToMemberKey(Emitter& e, int i, bool allowW);
   size_t emitMOp(int iFirst, int& iLast, Emitter& e,
                  MInstrOpts opts, bool includeLast = false);
-  void emitQueryMOp(int iFirst, int iLast, Emitter& e, QueryMOp op);
+  void emitQueryMOp(int iFirst, int iLast, Emitter& e, QueryMOp op,
+                    bool allowW = false);
 
   void emitPrePush(Emitter& e, ExpressionListPtr params);
   void emitCall(Emitter& e, FunctionCallPtr func,
@@ -1102,7 +1097,7 @@ public:
   void emitAGet(Emitter& e);
   void emitCGetL2(Emitter& e);
   void emitPushL(Emitter& e);
-  void emitCGet(Emitter& e);
+  void emitCGet(Emitter& e, bool allowW = false);
   void emitCGetQuiet(Emitter& e);
   bool emitVGet(Emitter& e, bool skipCells = false);
   void emitIsset(Emitter& e);
@@ -1202,7 +1197,7 @@ public:
                     const char* nameOverride = nullptr,
                     ExpressionListPtr paramsOverride = nullptr);
   void emitFPass(Emitter& e, ExpressionPtr exp, int paramId);
-  void emitFPassStrict(Emitter& e, ExpressionPtr exp, int paramId);
+  void emitFPassStrict(Emitter& e, ExpressionPtr exp);
   void emitClosureUseVar(Emitter& e, ExpressionPtr exp, int paramId,
                          bool byRef);
   bool emitScalarValue(Emitter& e, Variant&& value);
@@ -1510,7 +1505,6 @@ struct OpEmitContext {
 #define COUNT_FOUR(t1,t2,t3,t4) 4
 #define COUNT_FIVE(t1,t2,t3,t4,t5) 5
 #define COUNT_MFINAL 0
-#define COUNT_F_MFINAL 0
 #define COUNT_C_MFINAL 0
 #define COUNT_V_MFINAL 0
 #define COUNT_FMANY 0
@@ -1576,7 +1570,6 @@ struct OpEmitContext {
   POP_##t5(4)
 #define POP_MFINAL \
   getEmitterVisitor().popEvalStackMMany()
-#define POP_F_MFINAL POP_MFINAL
 #define POP_C_MFINAL \
   getEmitterVisitor().popEvalStack(StackSym::C); \
   getEmitterVisitor().popEvalStackMMany()
@@ -2040,7 +2033,6 @@ struct OpEmitContext {
 #undef POP_FOUR
 #undef POP_FIVE
 #undef POP_MFINAL
-#undef POP_F_MFINAL
 #undef POP_C_MFINAL
 #undef POP_V_MFINAL
 #undef POP_CV
@@ -4857,7 +4849,7 @@ void EmitterVisitor::emitCall(Emitter& e,
         emitConvertToCell(e);
       } else if (!param->hasContext(Expression::InOutParameter)) {
         if (fpassStrict) {
-          emitFPassStrict(e, param, i);
+          emitFPassStrict(e, param);
         } else {
           emitFPass(e, param, i);
         }
@@ -6045,7 +6037,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
     if (el->getType() == '`') {
       emitConvertToCell(e);
-      e.FPassC(0, FPassHint::Any);
+      e.FPassCNop();
       delete fpi;
       e.FCall(1);
     }
@@ -7313,7 +7305,7 @@ bool EmitterVisitor::emitInlineGena(
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fromDArrayStart);
     emitVirtualLocal(array);
     emitCGet(e);
-    e.FPassC(0, FPassHint::Any);
+    e.FPassCNop();
   }
   e.FCall(1);
   e.UnboxR();
@@ -7474,7 +7466,7 @@ bool EmitterVisitor::emitHHInvariant(Emitter& e, SimpleFunctionCallPtr call) {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
     for (auto i = uint32_t{1}; i < params->getCount(); ++i) {
       if (fpassStrict) {
-        emitFPassStrict(e, (*params)[i], i - 1);
+        emitFPassStrict(e, (*params)[i]);
       } else {
         emitFPass(e, (*params)[i], i - 1);
       }
@@ -7529,9 +7521,7 @@ size_t EmitterVisitor::emitMOp(
     return m_evalStack.actualSize() - 1 - m_evalStack.getActualPos(i);
   };
 
-  auto const baseMode =
-    opts.fpass ? MOpMode::None :
-    opts.mode == MOpMode::InOut ? MOpMode::Warn : opts.mode;
+  auto const baseMode = opts.mode == MOpMode::InOut ? MOpMode::Warn : opts.mode;
 
   // Emit the base location operation.
   auto sym = m_evalStack.get(iFirst);
@@ -7540,18 +7530,10 @@ size_t EmitterVisitor::emitMOp(
     case StackSym::N:
       switch (flavor) {
         case StackSym::C:
-          if (opts.fpass) {
-            e.FPassBaseNC(opts.paramId, stackIdx(iFirst));
-          } else {
-            e.BaseNC(stackIdx(iFirst), baseMode);
-          }
+          e.BaseNC(stackIdx(iFirst), baseMode);
           break;
         case StackSym::L:
-          if (opts.fpass) {
-            e.FPassBaseNL(opts.paramId, m_evalStack.getLoc(iFirst));
-          } else {
-            e.BaseNL(m_evalStack.getLoc(iFirst), baseMode);
-          }
+          e.BaseNL(m_evalStack.getLoc(iFirst), baseMode);
           break;
         default:
           always_assert(false);
@@ -7561,18 +7543,10 @@ size_t EmitterVisitor::emitMOp(
     case StackSym::G:
       switch (flavor) {
         case StackSym::C:
-          if (opts.fpass) {
-            e.FPassBaseGC(opts.paramId, stackIdx(iFirst));
-          } else {
-            e.BaseGC(stackIdx(iFirst), baseMode);
-          }
+          e.BaseGC(stackIdx(iFirst), baseMode);
           break;
         case StackSym::L:
-          if (opts.fpass) {
-            e.FPassBaseGL(opts.paramId, m_evalStack.getLoc(iFirst));
-          } else {
-            e.BaseGL(m_evalStack.getLoc(iFirst), baseMode);
-          }
+          e.BaseGL(m_evalStack.getLoc(iFirst), baseMode);
           break;
         default:
           always_assert(false);
@@ -7604,11 +7578,7 @@ size_t EmitterVisitor::emitMOp(
     case StackSym::None:
       switch (flavor) {
         case StackSym::L:
-          if (opts.fpass) {
-            e.FPassBaseL(opts.paramId, m_evalStack.getLoc(iFirst));
-          } else {
-            e.BaseL(m_evalStack.getLoc(iFirst), baseMode);
-          }
+          e.BaseL(m_evalStack.getLoc(iFirst), baseMode);
           break;
         case StackSym::C:
           e.BaseC(stackIdx(iFirst));
@@ -7633,11 +7603,7 @@ size_t EmitterVisitor::emitMOp(
   // Emit all intermediate operations, optionally leaving the final operation up
   // to our caller.
   for (auto i = iFirst + 1; i < (includeLast ? iLast+1 : iLast); ++i) {
-    if (opts.fpass) {
-      e.FPassDim(opts.paramId, symToMemberKey(e, i, opts.allowW));
-    } else {
-      e.Dim(opts.mode, symToMemberKey(e, i, opts.allowW));
-    }
+    e.Dim(opts.mode, symToMemberKey(e, i, opts.allowW));
   }
 
   size_t stackCount = 0;
@@ -7777,13 +7743,13 @@ void EmitterVisitor::emitAGet(Emitter& e) {
 }
 
 void EmitterVisitor::emitQueryMOp(int iFirst, int iLast, Emitter& e,
-                                  QueryMOp op) {
+                                  QueryMOp op, bool allowW) {
   auto const flags = getQueryMOpMode(op);
-  auto const stackCount = emitMOp(iFirst, iLast, e, MInstrOpts{flags});
-  e.QueryM(stackCount, op, symToMemberKey(e, iLast, false /* allowW */));
+  auto const stackCount = emitMOp(iFirst, iLast, e, MInstrOpts{flags, allowW});
+  e.QueryM(stackCount, op, symToMemberKey(e, iLast, allowW));
 }
 
-void EmitterVisitor::emitCGet(Emitter& e) {
+void EmitterVisitor::emitCGet(Emitter& e, bool allowW) {
   if (checkIfStackEmpty("CGet*")) return;
   LocationGuard loc(e, m_tempLoc);
   m_tempLoc.clear();
@@ -7812,7 +7778,7 @@ void EmitterVisitor::emitCGet(Emitter& e) {
       }
     }
   } else {
-    emitQueryMOp(i, iLast, e, QueryMOp::CGet);
+    emitQueryMOp(i, iLast, e, QueryMOp::CGet, allowW);
   }
 }
 
@@ -8112,76 +8078,110 @@ EmitterVisitor::MInstrChain EmitterVisitor::emitInOutArg(
       e.Null();
       e.PopL(loc);
     }
-    e.FPassC(paramId, FPassHint::Any);
+    e.FPassCNop();
   } else {
     auto const stackCount = emitMOp(i, iLast, e, MInstrOpts{MOpMode::InOut});
     e.QueryM(
       stackCount, QueryMOp::InOut, symToMemberKey(e, iLast, false /* allowW */)
     );
-    e.FPassC(paramId, FPassHint::Any);
+    e.FPassCNop();
   }
   return chain;
 }
 
-void EmitterVisitor::emitFPassStrict(Emitter& e, ExpressionPtr exp,
-                                     int paramId) {
+void EmitterVisitor::emitFPassStrict(Emitter& e, ExpressionPtr exp) {
   assertx(RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch);
   assertx(usePassByRefHint(exp->getFunctionScope()));
+  LocationGuard locGuard(e, exp->getRange());
   visit(exp);
   if (checkIfStackEmpty("FPass*")) return;
 
   if (!exp->hasContext(Expression::RefParameter)) {
     emitCGet(e);
-    e.FPassC(paramId, FPassHint::Any);
+    e.FPassCNop();
   } else if (emitVGet(e, true)) {
-    e.FPassC(paramId, FPassHint::Any);
+    e.FPassCNop();
   } else {
-    e.FPassVNop(paramId, FPassHint::Any);
+    e.FPassVNop();
   }
 }
 
 void EmitterVisitor::emitFPass(Emitter& e, ExpressionPtr exp, int paramId) {
-  visit(exp);
-  if (checkIfStackEmpty("FPass*")) return;
-
+  LocationGuard locGuard(e, exp->getRange());
   auto const hint = usePassByRefHint(exp->getFunctionScope())
     ? getPassByRefHint(exp) : FPassHint::Any;
 
-  LocationGuard locGuard(e, m_tempLoc);
+  auto const emitTernary = [&] (bool shouldVisit) {
+    Label byRef, done;
+    e.FIsParamByRef(paramId, hint);
+    e.JmpNZ(byRef);
+    if (shouldVisit) visit(exp);
+    emitCGet(e, true);
+    e.FPassCNop();
+    e.Jmp(done);
+    byRef.set(e);
+    if (shouldVisit) visit(exp);
+    emitVGet(e);
+    e.FPassVNop();
+    done.set(e);
+  };
+
+  auto const visitTwice = [&] {
+    switch (exp->getKindOf()) {
+      case Expression::KindOfArrayElementExpression: {
+        auto ae = static_pointer_cast<ArrayElementExpression>(exp);
+        return !ae->isSuperGlobal() || !ae->getOffset();
+      }
+      case Expression::KindOfObjectMethodExpression: {
+        auto om = static_pointer_cast<ObjectMethodExpression>(exp);
+        return om->isXhpGetAttr();
+      }
+      case Expression::KindOfObjectPropertyExpression:
+      case Expression::KindOfStaticMemberExpression:
+        return true;
+      default:
+        return false;
+    }
+  }();
+
+  if (visitTwice) {
+    emitTernary(true);
+    return;
+  }
+
+  visit(exp);
+  if (checkIfStackEmpty("FPass*")) return;
+  LocationGuard loc(e, m_tempLoc);
   m_tempLoc.clear();
 
   emitClsIfSPropBase(e);
   int iLast = m_evalStack.size()-1;
   int i = scanStackForLocation(iLast);
   int sz = iLast - i;
-
   assert(sz >= 0);
   char sym = m_evalStack.get(i);
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
     switch (sym) {
-      case StackSym::L: e.FPassL(paramId, m_evalStack.getLoc(i), hint); break;
-      case StackSym::C: e.FPassC(paramId, hint); break;
-      case StackSym::LN: e.CGetL(m_evalStack.getLoc(i));  // fall through
-      case StackSym::CN: e.FPassN(paramId, hint); break;
-      case StackSym::LG: e.CGetL(m_evalStack.getLoc(i));  // fall through
-      case StackSym::CG: e.FPassG(paramId, hint); break;
-      case StackSym::LS: e.CGetL(m_evalStack.getLoc(i));  // fall through
-      case StackSym::CS:
-        e.FPassS(paramId, kClsRefSlotPlaceholder, hint);
-        break;
-      case StackSym::V:  e.FPassV(paramId, hint); break;
-      case StackSym::R:  e.FPassR(paramId, hint); break;
-      default: {
-        unexpectedStackSym(sym, "emitFPass");
-        break;
+      case StackSym::C: {
+        e.FIsParamByRef(paramId, hint);
+        e.PopC();
+        e.FPassCNop();
+        return;
       }
+      case StackSym::LN:
+      case StackSym::LG:
+      case StackSym::LS:
+        e.CGetL(m_evalStack.getLoc(i));
+        assertx(m_evalStack.top() == StackSym::C);
+        m_evalStack.pop();
+        m_evalStack.push(StackSym::C | StackSym::GetMarker(sym));
+        break;
+      default:
+        break;
     }
-  } else {
-    auto const stackCount = emitMOp(i, iLast, e, MInstrOpts{paramId});
-    e.FPassM(
-      paramId, stackCount, symToMemberKey(e, iLast, true /* allowW */), hint
-    );
   }
+
+  emitTernary(false);
 }
 
 void EmitterVisitor::emitIsset(Emitter& e) {
@@ -9323,11 +9323,11 @@ void EmitterVisitor::emitInOutToRefWrapper(PostponedMeth& p,
         inoutParams.push_back(i);
         emitVirtualLocal(i);
         emitVGet(e);
-        e.FPassVNop(i, FPassHint::Any);
+        e.FPassVNop();
       } else {
         emitVirtualLocal(i);
         e.PushL(i);
-        e.FPassC(i, FPassHint::Any);
+        e.FPassCNop();
       }
     },
     [&] (Emitter& e) {
@@ -9367,7 +9367,7 @@ void EmitterVisitor::emitRefToInOutWrapper(PostponedMeth& p,
         e.PushL(i);
       }
       if (!fe->params[i].variadic) {
-        e.FPassC(i, FPassHint::Any);
+        e.FPassCNop();
       }
     },
     [&] (Emitter& e) {
@@ -10125,7 +10125,8 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
     for (uint32_t i = 0; i < numParams; i++) {
       emitVirtualLocal(i);
-      e.FPassL(i, i, FPassHint::Cell);
+      emitCGet(e);
+      e.FPassCNop();
     }
   }
   e.FCall(numParams);

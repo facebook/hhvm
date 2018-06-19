@@ -6,7 +6,7 @@ comparing key h
 Semdiff succeeded
 comparing key mymain
 Semdiff failed
-pc=;16, pc'=;16, i=FPassR 0 Cell i'=UnboxR asn={}{}
+pc=;16, pc'=;16, i=BoxR 0 Cell i'=UnboxR asn={}{}
 
 comparing .class F
 comparing key m
@@ -16,6 +16,7 @@ Semdiff succeeded
 Edits = 
 
 for mymain:
-- FPassR 0 Cell
+- BoxR
+- FPassVNop
 + UnboxR
-+ FPassC 0 Cell
++ FPassCNop

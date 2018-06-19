@@ -303,19 +303,13 @@ let base_instrs (fn : IS.t) : lazy_instruct list =
   let cls_ref_slts = IS.get_num_cls_ref_slots fn in
   [(fun () -> IBase (BaseNC (Random.int 10, random_mode ())));
    (fun () -> IBase (BaseNL (random_local (), random_mode ())));
-   (fun () -> IBase (FPassBaseNC (Random.int 10, Random.int 10)));
-   (fun () -> IBase (FPassBaseNL (Random.int 10, random_local ())));
    (fun () -> IBase (BaseGC (Random.int 10, random_mode ())));
    (fun () -> IBase (BaseGL (random_local (), random_mode ())));
-   (fun () -> IBase (FPassBaseGC (Random.int 10, Random.int 10)));
-   (fun () -> IBase (FPassBaseGL (Random.int 10, random_local ())));
    (fun () -> IBase (BaseL (random_local (), random_mode ())));
-   (fun () -> IBase (FPassBaseL (Random.int 10, random_local ())));
    (fun () -> IBase (BaseC (Random.int 10)));
    (fun () -> IBase (BaseR (Random.int 10)));
    (fun () -> IBase BaseH);
-   (fun () -> IBase (Dim (random_mode(), random_key ())));
-   (fun () -> IBase (FPassDim (Random.int 10, random_key())))] @
+   (fun () -> IBase (Dim (random_mode(), random_key ())))] @
    begin
      if cls_ref_slts <= 0 then [] else
      [(fun () -> IBase (BaseSC (Random.int 10, Random.int 10)));
@@ -327,8 +321,6 @@ let final_instrs (_ : IS.t) : lazy_instruct list =
   [(fun () -> IFinal (QueryM (Random.int 10,
     random_query_op (), random_key ())));
    (fun () -> IFinal (VGetM (Random.int 10, random_key ())));
-   (fun () -> IFinal (FPassM (Random.int 10, Random.int 10, random_key (),
-                              random_fpasshint ())));
    (fun () -> IFinal (SetM (Random.int 10, random_key ())));
    (fun () -> IFinal (IncDecM (Random.int 10,
      random_incdec_op (), random_key ())));
@@ -340,21 +332,9 @@ let final_instrs (_ : IS.t) : lazy_instruct list =
    (fun () -> IFinal (SetWithRefRML (random_local ())))]
 
 (* Generators for FPass* instructions *)
-let fpass_instrs (fn : IS.t) : lazy_instruct list =
-  let cls_ref_slts = IS.get_num_cls_ref_slots fn in
-  [(fun () -> ICall (FPassV (Random.int 10, random_fpasshint ())));
-   (fun () -> ICall (FPassVNop (Random.int 10, random_fpasshint ())));
-   (fun () -> ICall (FPassR (Random.int 10, random_fpasshint ())));
-   (fun () -> ICall (FPassL (Random.int 10, random_local (),
-                             random_fpasshint ())));
-   (fun () -> ICall (FPassN (Random.int 10, random_fpasshint ())));
-   (fun () -> ICall (FPassG (Random.int 10, random_fpasshint ())));
-   (fun () -> ICall (FPassS (Random.int 10, Random.int 10,
-                             random_fpasshint ())))] @
-   begin
-     if cls_ref_slts <= 0 then [] else
-     [(fun () -> ICall (FPassC (Random.int 10, random_fpasshint ())))]
-   end
+let fpass_instrs (_ : IS.t) : lazy_instruct list =
+  [(fun () -> ICall (FPassCNop));
+   (fun () -> ICall (FPassVNop))]
 
 (* An association list of stack signatures to random generators for
     instructions with that stack signature, produced from input list of

@@ -45,13 +45,33 @@ PART2
 ;
   if ($withKey) {
     echo "    loop:   FPushCufIter 2 0\n";
-    echo "            FPassL 0 \$k Any\n";
-    echo "            FPassL 1 \$v Any\n";
-    echo "            FCall 2\n";
+    echo "            FIsParamByRef 0 Any\n";
+    echo "            JmpNZ by_ref_k\n";
+    echo "            CGetL \$k\n";
+    echo "            FPassCNop\n";
+    echo "            Jmp pass_v\n";
+    echo "    by_ref_k:\n";
+    echo "            VGetL \$k\n";
+    echo "            FPassVNop\n";
+    echo "    pass_v: FIsParamByRef 1 Any\n";
+    echo "            JmpNZ by_ref_v\n";
+    echo "            CGetL \$v\n";
+    echo "            FPassCNop\n";
+    echo "            Jmp call\n";
+    echo "    by_ref_v:\n";
+    echo "            VGetL \$v\n";
+    echo "            FPassVNop\n";
+    echo "    call:   FCall 2\n";
   } else {
     echo "    loop:   FPushCufIter 1 0\n";
-    echo "            FPassL 0 \$v Any\n";
-    echo "            FCall 1\n";
+    echo "            FIsParamByRef 0 Any\n";
+    echo "            JmpNZ by_ref\n";
+    echo "            CGetL \$v\n";
+    echo "            FPassCNop\n";
+    echo "            Jmp call\n";
+    echo "    by_ref: VGetL \$v\n";
+    echo "            FPassVNop\n";
+    echo "    call:   FCall 1\n";
   }
 
   if ($filter) {
@@ -100,7 +120,7 @@ PART3;
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0 Any
+          FPassCNop
           FCall 1
           PopR
           Throw

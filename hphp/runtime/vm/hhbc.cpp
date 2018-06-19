@@ -439,7 +439,6 @@ int instrNumPops(PC pc) {
 #define FOUR(...) 4
 #define FIVE(...) 5
 #define MFINAL -3
-#define F_MFINAL -6
 #define C_MFINAL -5
 #define V_MFINAL C_MFINAL
 #define FMANY -3
@@ -458,7 +457,6 @@ int instrNumPops(PC pc) {
 #undef FOUR
 #undef FIVE
 #undef MFINAL
-#undef F_MFINAL
 #undef C_MFINAL
 #undef V_MFINAL
 #undef FMANY
@@ -481,8 +479,6 @@ int instrNumPops(PC pc) {
   // FCallM, FCallDM, and FCallUnpackM pop uninit values from the stack and
   // push multiple returned values.
   if (n == -4) return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA - 1;
-  // FPassM final operations have paramId as imm 0 and stackCount as imm1
-  if (n == -6) return getImm(pc, 1).u_IVA;
   // Other final member operations pop their first immediate + 1
   if (n == -5) return getImm(pc, 0).u_IVA + 1;
 
@@ -562,7 +558,6 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define FOUR(f1, f2, f3, f4) return doFlavor(idx, f1, f2, f3, f4);
 #define FIVE(f1, f2, f3, f4, f5) return doFlavor(idx, f1, f2, f3, f4, f5);
 #define MFINAL return manyFlavor(op, idx, CRV);
-#define F_MFINAL MFINAL
 #define C_MFINAL return idx == 0 ? CV : CRV;
 #define V_MFINAL return idx == 0 ? VV : CRV;
 #define FMANY return manyFlavor(op, idx, FV);
@@ -584,7 +579,6 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef FOUR
 #undef FIVE
 #undef MFINAL
-#undef F_MFINAL
 #undef C_MFINAL
 #undef V_MFINAL
 #undef FMANY

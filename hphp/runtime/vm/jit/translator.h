@@ -280,9 +280,6 @@ enum OutTypeConstraints {
   OutVInput,            // type is V(input)
   OutCInputL,           // type is C(type) of local input
   OutVInputL,           // type is V(type) of local input
-  OutFInputL,           // type is V(type) of local input if current param is
-                        //   by ref, else type is C(type) of local input
-  OutFInputR,           // Like FInputL, but for R's on the stack.
 
   OutArith,             // For Add, Sub, Mul
   OutArithO,            // For AddO, SubO, MulO
@@ -309,7 +306,7 @@ enum Operands {
   Stack2          = 1 << 1,
   Stack1          = 1 << 2,
   StackIns1       = 1 << 3,  // Insert an element under top of stack
-  FuncdRef        = 1 << 4,  // Input to FPass*
+  FuncdRef        = 1 << 4,  // Unused, to be removed
   FStack          = 1 << 5,  // output of FPushFuncD and friends
   Local           = 1 << 6,  // Writes to a local
   Iter            = 1 << 7,  // Iterator in imm[0]

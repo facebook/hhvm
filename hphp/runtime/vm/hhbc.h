@@ -582,25 +582,13 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FPushCtorS,      TWO(IVA,OA(SpecialClsRef)),                        \
                                        NOV,             ONE(CV),    PF) \
   O(FPushCufIter,    TWO(IVA,IA),      NOV,             NOV,        PF) \
-  O(FPassC,          TWO(IVA,OA(FPassHint)),                            \
-                                       ONE(CV),         ONE(FV),    FF) \
-  O(FPassV,          TWO(IVA,OA(FPassHint)),                            \
-                                       ONE(VV),         ONE(FV),    FF) \
-  O(FPassVNop,       TWO(IVA,OA(FPassHint)),                            \
-                                       ONE(VV),         ONE(FV),    FF) \
-  O(FPassR,          TWO(IVA,OA(FPassHint)),                            \
-                                       ONE(RV),         ONE(FV),    FF) \
-  O(FPassL,          THREE(IVA,LA,OA(FPassHint)),                       \
-                                       NOV,             ONE(FV),    FF) \
-  O(FPassN,          TWO(IVA,OA(FPassHint)),                            \
-                                       ONE(CV),         ONE(FV),    FF) \
-  O(FPassG,          TWO(IVA,OA(FPassHint)),                            \
-                                       ONE(CV),         ONE(FV),    FF) \
-  O(FPassS,          THREE(IVA,CAR,OA(FPassHint)),                      \
-                                       ONE(CV),         ONE(FV),    FF) \
+  O(FIsParamByRef,   TWO(IVA,OA(FPassHint)),                            \
+                                       NOV,             ONE(CV),    FF) \
   O(FThrowOnRefMismatch, ONE(BLLA),    NOV,             NOV,        FF) \
   O(FHandleRefMismatch, THREE(IVA,OA(FPassHint),SA),                    \
                                        NOV,             NOV,        NF) \
+  O(FPassCNop,       NA,               ONE(CV),         ONE(FV),    NF) \
+  O(FPassVNop,       NA,               ONE(VV),         ONE(FV),    NF) \
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
   O(FCallM,          TWO(IVA,IVA),     UFMANY,          CMANY,      CF_FF) \
   O(FCallDM,         FOUR(IVA,IVA,SA,SA),UFMANY,        CMANY,      CF_FF) \
@@ -709,24 +697,11 @@ constexpr uint32_t kMaxConcatN = 4;
   O(BaseC,           ONE(IVA),         NOV,             NOV,        NF) \
   O(BaseR,           ONE(IVA),         NOV,             NOV,        NF) \
   O(BaseH,           NA,               NOV,             NOV,        NF) \
-  O(FPassBaseNC,     TWO(IVA, IVA),                                     \
-                                       NOV,             NOV,        FF) \
-  O(FPassBaseNL,     TWO(IVA, LA),                                      \
-                                       NOV,             NOV,        FF) \
-  O(FPassBaseGC,     TWO(IVA, IVA),                                     \
-                                       NOV,             NOV,        FF) \
-  O(FPassBaseGL,     TWO(IVA, LA),                                      \
-                                       NOV,             NOV,        FF) \
-  O(FPassBaseL,      TWO(IVA, LA),                                      \
-                                       NOV,             NOV,        FF) \
   O(Dim,             TWO(OA(MOpMode), KA),                              \
                                        NOV,             NOV,        NF) \
-  O(FPassDim,        TWO(IVA, KA),     NOV,             NOV,        FF) \
   O(QueryM,          THREE(IVA, OA(QueryMOp), KA),                      \
                                        MFINAL,          ONE(CV),    NF) \
   O(VGetM,           TWO(IVA, KA),     MFINAL,          ONE(VV),    NF) \
-  O(FPassM,          FOUR(IVA,IVA,KA,OA(FPassHint)),                    \
-                                       F_MFINAL,        ONE(FV),    FF) \
   O(SetM,            TWO(IVA, KA),     C_MFINAL,        ONE(CV),    NF) \
   O(IncDecM,         THREE(IVA, OA(IncDecOp), KA),                      \
                                        MFINAL,          ONE(CV),    NF) \
@@ -1053,14 +1028,8 @@ inline bool isFCallStar(Op opcode) {
 
 inline bool isFPassStar(Op opcode) {
   switch (opcode) {
-    case OpFPassC:
-    case OpFPassV:
-    case OpFPassR:
-    case OpFPassL:
-    case OpFPassN:
-    case OpFPassG:
-    case OpFPassS:
-    case OpFPassM:
+    case OpFPassCNop:
+    case OpFPassVNop:
       return true;
 
     default:
@@ -1090,14 +1059,9 @@ inline bool isMemberBaseOp(Op op) {
     case Op::BaseNL:
     case Op::BaseGC:
     case Op::BaseGL:
-    case Op::FPassBaseNC:
-    case Op::FPassBaseNL:
-    case Op::FPassBaseGC:
-    case Op::FPassBaseGL:
     case Op::BaseSC:
     case Op::BaseSL:
     case Op::BaseL:
-    case Op::FPassBaseL:
     case Op::BaseC:
     case Op::BaseR:
     case Op::BaseH:
@@ -1109,21 +1073,13 @@ inline bool isMemberBaseOp(Op op) {
 }
 
 inline bool isMemberDimOp(Op op) {
-  switch (op) {
-    case Op::Dim:
-    case Op::FPassDim:
-      return true;
-
-    default:
-      return false;
-  }
+  return op == Op::Dim;
 }
 
 inline bool isMemberFinalOp(Op op) {
   switch (op) {
     case Op::QueryM:
     case Op::VGetM:
-    case Op::FPassM:
     case Op::SetM:
     case Op::IncDecM:
     case Op::SetOpM:
@@ -1144,8 +1100,6 @@ inline bool isMemberOp(Op op) {
 
 inline MOpMode finalMemberOpMode(Op op) {
   switch(op){
-    case Op::FPassM:
-      return MOpMode::Warn;
     case Op::SetM:
     case Op::VGetM:
     case Op::IncDecM:

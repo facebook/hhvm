@@ -315,18 +315,14 @@ static const struct {
   { OpFPushCtorI,  {None,             Stack1|FStack,OutObject       }},
   { OpFPushCtorS,  {None,             Stack1|FStack,OutObject       }},
   { OpFPushCufIter,{None,             FStack,       OutFDesc        }},
+  { OpFIsParamByRef,
+                   {None,             Stack1,       OutBoolean      }},
   { OpFThrowOnRefMismatch,
                    {None,             None,         OutNone         }},
   { OpFHandleRefMismatch,
                    {None,             None,         OutNone         }},
-  { OpFPassC,      {FuncdRef,         None,         OutSameAsInput1 }},
-  { OpFPassVNop,   {FuncdRef,         None,         OutSameAsInput1 }},
-  { OpFPassV,      {Stack1|FuncdRef,  Stack1,       OutUnknown      }},
-  { OpFPassR,      {Stack1|FuncdRef,  Stack1,       OutFInputR      }},
-  { OpFPassL,      {Local|FuncdRef,   Stack1,       OutFInputL      }},
-  { OpFPassN,      {Stack1|FuncdRef,  Stack1,       OutUnknown      }},
-  { OpFPassG,      {Stack1|FuncdRef,  Stack1,       OutUnknown      }},
-  { OpFPassS,      {Stack1|FuncdRef,  Stack1,       OutUnknown      }},
+  { OpFPassCNop,   {None,             None,         OutSameAsInput1 }},
+  { OpFPassVNop,   {None,             None,         OutSameAsInput1 }},
   /*
    * FCall is special. Like the Ret* instructions, its manipulation of the
    * runtime stack are outside the boundaries of the tracelet abstraction.
@@ -459,26 +455,17 @@ static const struct {
   { OpBaseNL,      {Local,            MBase,        OutNone         }},
   { OpBaseGC,      {StackI,           MBase,        OutNone         }},
   { OpBaseGL,      {Local,            MBase,        OutNone         }},
-  { OpFPassBaseNC, {StackI|FuncdRef,  MBase,        OutNone         }},
-  { OpFPassBaseNL, {Local|FuncdRef,   MBase,        OutNone         }},
-  { OpFPassBaseGC, {StackI|FuncdRef,  MBase,        OutNone         }},
-  { OpFPassBaseGL, {Local|FuncdRef,   MBase,        OutNone         }},
   { OpBaseSC,      {StackI,           MBase,        OutNone         }},
   { OpBaseSL,      {Local,            MBase,        OutNone         }},
   { OpBaseL,       {Local,            MBase,        OutNone         }},
-  { OpFPassBaseL,  {Local|FuncdRef,   MBase,        OutNone         }},
   { OpBaseC,       {StackI,           MBase,        OutNone         }},
   { OpBaseR,       {StackI,           MBase,        OutNone         }},
   { OpBaseH,       {None,             MBase,        OutNone         }},
   { OpDim,         {MBase|MKey,       MBase,        OutNone         }},
-  { OpFPassDim,    {MBase|MKey|FuncdRef,
-                                      MBase,        OutNone         }},
   { OpQueryM,      {BStackN|MBase|MKey,
                                       Stack1,       OutUnknown      }},
   { OpVGetM,       {BStackN|MBase|MKey,
                                       Stack1,       OutVUnknown     }},
-  { OpFPassM,      {BStackN|MBase|MKey|FuncdRef,
-                                      Stack1,       OutUnknown      }},
   { OpSetM,        {Stack1|BStackN|MBase|MKey,
                                       Stack1,       OutUnknown      }},
   { OpIncDecM,     {BStackN|MBase|MKey,
@@ -578,10 +565,6 @@ int64_t getStackPopped(PC pc) {
     case Op::CreateCl:
       return getImm(pc, 0).u_IVA;
 
-    case Op::FPassM:
-      // imm[0] is argument index
-      return getImm(pc, 1).u_IVA;
-
     case Op::SetM:
     case Op::SetOpM:
     case Op::BindM:
@@ -631,13 +614,9 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
   case Op::CGetCUNop:
   case Op::UGetCUNop:
   case Op::EntryNop:
-    return true;
-  case Op::FPassC:
+  case Op::FPassCNop:
   case Op::FPassVNop:
-    return static_cast<FPassHint>(ni.imm[1].u_OA) == FPassHint::Any || (
-      !RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch &&
-      !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch
-    );
+    return true;
   case Op::VerifyRetTypeC:
   case Op::VerifyRetTypeV:
     return !RuntimeOption::EvalCheckReturnTypeHints;
@@ -904,12 +883,8 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FCallUnpack:
   case Op::FCallAwait:
   case Op::ClsCnsD:
+  case Op::FIsParamByRef:
   case Op::FThrowOnRefMismatch:
-  case Op::FPassR:
-  case Op::FPassV:
-  case Op::FPassG:
-  case Op::FPassL:
-  case Op::FPassS:
   case Op::FCallBuiltin:
   case Op::NewStructArray:
   case Op::NewStructDArray:
@@ -1103,22 +1078,15 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::BaseNL:
   case Op::BaseGC:
   case Op::BaseGL:
-  case Op::FPassBaseNC:
-  case Op::FPassBaseNL:
-  case Op::FPassBaseGC:
-  case Op::FPassBaseGL:
   case Op::BaseSC:
   case Op::BaseSL:
   case Op::BaseL:
-  case Op::FPassBaseL:
   case Op::BaseC:
   case Op::BaseR:
   case Op::BaseH:
   case Op::Dim:
-  case Op::FPassDim:
   case Op::QueryM:
   case Op::VGetM:
-  case Op::FPassM:
   case Op::SetM:
   case Op::IncDecM:
   case Op::SetOpM:
@@ -1152,6 +1120,8 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Fatal:
   case Op::Unwind:
   case Op::Throw:
+  case Op::FPassCNop:
+  case Op::FPassVNop:
   case Op::CGetN:
   case Op::CGetQuietN:
   case Op::VGetN:
@@ -1185,9 +1155,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
     return true;
 
   case Op::FHandleRefMismatch:
-  case Op::FPassVNop:
-  case Op::FPassN:
-  case Op::FPassC:
     return static_cast<FPassHint>(ni.imm[1].u_OA) == FPassHint::Any || (
       !RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch &&
       !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch

@@ -1709,11 +1709,8 @@ void dce(Env& env, const bc::BaseNC& op)      { minstr_base(env, op, op.arg1); }
 void dce(Env& env, const bc::BaseGC& op)      { minstr_base(env, op, op.arg1); }
 void dce(Env& env, const bc::BaseSC& op)      { minstr_base(env, op, op.arg1); }
 void dce(Env& env, const bc::BaseR& op)       { minstr_base(env, op, op.arg1); }
-void dce(Env& env, const bc::FPassBaseNC& op) { minstr_base(env, op, op.arg2); }
-void dce(Env& env, const bc::FPassBaseGC& op) { minstr_base(env, op, op.arg2); }
 
 void dce(Env& env, const bc::Dim& op)         { minstr_dim(env, op); }
-void dce(Env& env, const bc::FPassDim& op)    { minstr_dim(env, op); }
 
 void dce(Env& env, const bc::QueryM& op) {
   if (!env.flags.wasPEI) {
@@ -1744,7 +1741,6 @@ void dce(Env& env, const bc::IncDecM& op)    { minstr_final(env, op, op.arg1); }
 void dce(Env& env, const bc::SetOpM& op)     { minstr_final(env, op, op.arg1); }
 void dce(Env& env, const bc::BindM& op)      { minstr_final(env, op, op.arg1); }
 void dce(Env& env, const bc::UnsetM& op)     { minstr_final(env, op, op.arg1); }
-void dce(Env& env, const bc::FPassM& op)     { minstr_final(env, op, op.arg2); }
 
 void dispatch_dce(Env& env, const Bytecode& op) {
 #define O(opcode, ...) case Op::opcode: dce(env, op.opcode); return;
@@ -1790,11 +1786,8 @@ void adjustMinstr(bc::BaseNC& op, MaskType m)      { m_adj(op.arg1, m); }
 void adjustMinstr(bc::BaseGC& op, MaskType m)      { m_adj(op.arg1, m); }
 void adjustMinstr(bc::BaseSC& op, MaskType m)      { m_adj(op.arg1, m); }
 void adjustMinstr(bc::BaseR& op, MaskType m)       { m_adj(op.arg1, m); }
-void adjustMinstr(bc::FPassBaseNC& op, MaskType m) { m_adj(op.arg2, m); }
-void adjustMinstr(bc::FPassBaseGC& op, MaskType m) { m_adj(op.arg2, m); }
 
 void adjustMinstr(bc::Dim& op, MaskType m)         { m_adj(op.mkey, m); }
-void adjustMinstr(bc::FPassDim& op, MaskType m)    { m_adj(op.mkey, m); }
 
 void adjustMinstr(bc::QueryM& op, MaskType m)  { m_adj(op.arg1, op, m); }
 void adjustMinstr(bc::VGetM& op, MaskType m)   { m_adj(op.arg1, op, m); }
@@ -1803,7 +1796,6 @@ void adjustMinstr(bc::IncDecM& op, MaskType m) { m_adj(op.arg1, op, m); }
 void adjustMinstr(bc::SetOpM& op, MaskType m)  { m_adj(op.arg1, op, m); }
 void adjustMinstr(bc::BindM& op, MaskType m)   { m_adj(op.arg1, op, m); }
 void adjustMinstr(bc::UnsetM& op, MaskType m)  { m_adj(op.arg1, op, m); }
-void adjustMinstr(bc::FPassM& op, MaskType m)  { m_adj(op.arg2, op, m); }
 
 void adjustMinstr(Bytecode& op, MaskType m) {
 #define O(opcode, ...) case Op::opcode: adjustMinstr(op.opcode, m); return;

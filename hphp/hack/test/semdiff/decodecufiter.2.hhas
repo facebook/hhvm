@@ -21,7 +21,9 @@ L3:
     .try {
     L2:
       FPushCufIter 1 0
-      FPassL 0 $v Any
+      CGetL $v
+      FPassCNop
+      FThrowOnRefMismatch "0"
       FCall 1
       UnboxR
       AssertRATL $res Obj=HH\Map
@@ -46,7 +48,7 @@ L1:
 L0:
   FPushCtorD 1 "InvalidArgumentException"
   String "Parameter must be a valid callback"
-  FPassC 0 Any
+  FPassCNop
   FCall 1
   PopR
   Throw

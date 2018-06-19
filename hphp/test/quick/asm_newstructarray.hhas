@@ -19,7 +19,8 @@
   PopC
 
   FPushFuncD 1 "var_dump"
-  FPassL 0 $arr Any
+  CGetL $arr
+  FPassCNop
   FCall 1
   UnboxR
   PopC

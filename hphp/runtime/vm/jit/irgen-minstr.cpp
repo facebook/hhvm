@@ -1824,13 +1824,6 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
   not_reached();
 }
 
-MOpMode fpassFlags(IRGS& env, int32_t /*idx*/) {
-  if (env.currentNormalizedInstruction->preppedByRef) {
-    return MOpMode::Define;
-  }
-  return MOpMode::Warn;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -1841,14 +1834,6 @@ void emitBaseNC(IRGS& env, uint32_t /*idx*/, MOpMode /*mode*/) {
 
 void emitBaseNL(IRGS& env, int32_t /*locId*/, MOpMode /*mode*/) {
   interpOne(env, *env.currentNormalizedInstruction);
-}
-
-void emitFPassBaseNC(IRGS& env, uint32_t arg, uint32_t idx) {
-  emitBaseNC(env, idx, fpassFlags(env, arg));
-}
-
-void emitFPassBaseNL(IRGS& env, uint32_t arg, int32_t locId) {
-  emitBaseNL(env, locId, fpassFlags(env, arg));
 }
 
 void emitBaseGC(IRGS& env, uint32_t idx, MOpMode mode) {
@@ -1862,14 +1847,6 @@ void emitBaseGL(IRGS& env, int32_t locId, MOpMode mode) {
   auto name = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
                          DataTypeSpecific);
   baseGImpl(env, name, mode);
-}
-
-void emitFPassBaseGC(IRGS& env, uint32_t arg, uint32_t idx) {
-  emitBaseGC(env, idx, fpassFlags(env, arg));
-}
-
-void emitFPassBaseGL(IRGS& env, uint32_t arg, int32_t locId) {
-  emitBaseGL(env, locId, fpassFlags(env, arg));
 }
 
 void emitBaseSC(IRGS& env, uint32_t propIdx, uint32_t slot) {
@@ -1898,10 +1875,6 @@ void emitBaseL(IRGS& env, int32_t locId, MOpMode mode) {
   }
 
   simpleBaseImpl(env, base, Location::Local { safe_cast<uint32_t>(locId) });
-}
-
-void emitFPassBaseL(IRGS& env, uint32_t arg, int32_t locId) {
-  emitBaseL(env, locId, fpassFlags(env, arg));
 }
 
 void emitBaseC(IRGS& env, uint32_t idx) {
@@ -1948,10 +1921,6 @@ void emitDim(IRGS& env, MOpMode mode, MemberKey mk) {
 
   newBase = ratchetRefs(env, newBase);
   gen(env, StMBase, newBase);
-}
-
-void emitFPassDim(IRGS& env, uint32_t arg, MemberKey mk) {
-  emitDim(env, fpassFlags(env, arg), mk);
 }
 
 void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
@@ -2039,16 +2008,6 @@ void emitVGetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   }();
 
   mFinalImpl(env, nDiscard, result);
-}
-
-void emitFPassM(IRGS& env, uint32_t arg, uint32_t nDiscard, MemberKey mk,
-                FPassHint hint) {
-  if (fpassFlags(env, arg) == MOpMode::Warn) {
-    checkFPassHint(env, arg, hint, false);
-    return emitQueryM(env, nDiscard, QueryMOp::CGet, mk);
-  }
-  checkFPassHint(env, arg, hint, true);
-  emitVGetM(env, nDiscard, mk);
 }
 
 void emitSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {

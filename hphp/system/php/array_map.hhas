@@ -6,9 +6,12 @@
 
 call_cpp_impl_with_extra:
           FPushFuncD   4   "__SystemLib\\array_map"
-          FPassL 0 $func Any
-          FPassL 1 $arr Any
-          FPassL 2 $res Any
+          CGetL $func
+          FPassCNop
+          CGetL $arr
+          FPassCNop
+          CGetL $res
+          FPassCNop
           CGetL $extra
           FCallUnpack 4
           UnboxR
@@ -16,8 +19,10 @@ call_cpp_impl_with_extra:
 
 call_cpp_impl:
           FPushFuncD   2   "__SystemLib\\array_map"
-          FPassL 0 $func Any
-          FPassL 1 $arr Any
+          CGetL $func
+          FPassCNop
+          CGetL $arr
+          FPassCNop
           FCall 2
           UnboxR
           RetC
@@ -66,8 +71,14 @@ not_array:
             WIterInitK 1 endloop_kt $v $k
   .try 1 {
     loop_x_kt:FPushCufIter 1 0
-              FPassL 0 $v Any
-              FCall 1
+              FIsParamByRef 0 Any
+              JmpNZ by_ref_kt
+              CGetL $v
+              FPassCNop
+              Jmp call_kt
+    by_ref_kt:VGetL $v
+              FPassVNop
+    call_kt:  FCall 1
               BaseL $res Define
               SetWithRefRML $k
               WIterNextK 1 loop_x_kt $v $k
@@ -105,8 +116,14 @@ one_array:
 
   .try 1 {
     loop_x:   FPushCufIter 1 0
-              FPassL 0 $v Any
-              FCall 1
+              FIsParamByRef 0 Any
+              JmpNZ by_ref
+              CGetL $v
+              FPassCNop
+              Jmp call
+    by_ref:   VGetL $v
+              FPassVNop
+    call:     FCall 1
               BaseL $res Define
               SetWithRefRML $k
               WIterNextK 1 loop_x $v $k

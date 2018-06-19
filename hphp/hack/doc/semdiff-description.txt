@@ -286,37 +286,6 @@ string concatenation is associative.
 
 (Planned: a slightly richer set of patterns for string operations.)
 
-FPassL
-------
-
-FPassL n l pushes local l to the stack as argument n of an upcoming function
-call. This might look like a simple read of l, but the semantics are actually a
-bit more complicated: it behaves like CGetL if parameter n is by value, and like
-VGetL if it's by reference. But we don't track what function is about to be
-called, so don't know which case applies. And we don't allow VGetL on unnamed
-locals. So the easy, safe thing to do would be to disallow FPassL on unnamed
-locals. Unfortunately, that does occur in practice, when compiling pipes. So we
-implement the following nasty-but-safe hack:
-
-  prog.pc = FPassL n _l   prog'.pc' = FPassL n _l'
-  safe_sequence(prog,pc+1)
-  safe_sequence(prog',pc'+1)
-  phi => _l=_l'
-  Gamma; pc,pc':[phi] |- pc+1,pc'+1 : [phi + _l=_l']
- ----------------------------------------------------
-                 Gamma |- pc,pc' : [phi]
-
-where safe_sequence(prog,pc) says "there's a sequence of (only)
-parameter-pushing instructions starting at pc, terminated by a call instruction
-that will consume all of them and the current top of the stack". Note that we're
-treating the FPassL instructions as if they might both read and write the
-locals. The read is clear, and the write accounts for the possibility that the
-call might modify the local if it ends up being passed by reference. I don't
-actually know if that can happen, but it's conservative to assume it might. If
-it can, then it won't *really* happen until the call returns, but it's safe to
-pretend it could happen at the point we do the push, since all we're doing is
-removing any other equalities involving _l or _l' earlier than we need to.
-
 Fatal exit messages
 -------------------
 

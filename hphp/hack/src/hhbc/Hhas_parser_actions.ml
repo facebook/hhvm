@@ -367,6 +367,10 @@ let make_nullary_inst s =
  | "Clone" -> IOp (Clone)
  | "Exit" -> IOp (Hhbc_ast.Exit) (* Need to qualify because of shadowing *)
 
+ (* instruct_call *)
+ | "FPassCNop" -> ICall (FPassCNop)
+ | "FPassVNop" -> ICall (FPassVNop)
+
  (* instruct_control_flow *)
  | "RetC" -> IContFlow (RetC)
  | "RetV" -> IContFlow (RetV)
@@ -1018,27 +1022,17 @@ match s with
  | "FPushCtorS" -> ICall (FPushCtorS (intofiarg arg1, specialclsrefofiarg arg2))
  | "DecodeCufIter" -> ICall (DecodeCufIter (iterofiarg arg1, labelofiarg arg2))
  | "FPushCufIter" -> ICall (FPushCufIter (intofiarg arg1, iterofiarg arg2))
- | "FPassC" -> ICall(FPassC (intofiarg arg1, fpasshintof arg2))
- | "FPassV" -> ICall(FPassV (intofiarg arg1, fpasshintof arg2))
- | "FPassVNop" -> ICall(FPassVNop (intofiarg arg1, fpasshintof arg2))
- | "FPassR" -> ICall(FPassR (intofiarg arg1, fpasshintof arg2))
- | "FPassN" -> ICall(FPassN (intofiarg arg1, fpasshintof arg2))
- | "FPassG" -> ICall(FPassG (intofiarg arg1, fpasshintof arg2))
+ | "FIsParamByRef" -> ICall (FIsParamByRef (intofiarg arg1, fpasshintof arg2))
+
  (* instruct_base *)
  | "BaseNC" -> IBase (BaseNC (intofiarg arg1, memberopmodeofiarg arg2))
  | "BaseNL" -> IBase (BaseNL (localidofiarg arg1, memberopmodeofiarg arg2))
- | "FPassBaseNC" -> IBase (FPassBaseNC (intofiarg arg1, intofiarg arg2))
- | "FPassBaseNL" -> IBase (FPassBaseNL (intofiarg arg1, localidofiarg arg2))
  | "BaseGC" -> IBase (BaseGC (intofiarg arg1, memberopmodeofiarg arg2))
  | "BaseGL" -> IBase (BaseGL (localidofiarg arg1, memberopmodeofiarg arg2))
- | "FPassBaseGC" -> IBase (FPassBaseGC (intofiarg arg1, intofiarg arg2))
- | "FPassBaseGL" -> IBase (FPassBaseGL (intofiarg arg1, localidofiarg arg2))
  | "BaseSC" -> IBase(BaseSC (intofiarg arg1, intofiarg arg2))
  | "BaseSL" -> IBase (BaseSL (localidofiarg arg1, intofiarg arg2))
  | "BaseL" -> IBase (BaseL (localidofiarg arg1, memberopmodeofiarg arg2))
- | "FPassBaseL" -> IBase (FPassBaseL (intofiarg arg1, localidofiarg arg2))
  | "Dim" -> IBase (Dim (memberopmodeofiarg arg1, memberkeyofiarg arg2))
- | "FPassDim" -> IBase (FPassDim (intofiarg arg1, memberkeyofiarg arg2))
 
  (* instruct_final *)
  | "VGetM" -> IFinal (VGetM (intofiarg arg1, memberkeyofiarg arg2))
@@ -1115,8 +1109,6 @@ let maketernaryinst s arg1 arg2 arg3 =
       class_id_of_iarg arg2, function_id_of_iarg arg3))
  | "FCallBuiltin" ->
     ICall(FCallBuiltin (intofiarg arg1, intofiarg arg2, stringofiarg arg3))
- | "FPassL" -> ICall (FPassL (intofiarg arg1, localidofiarg arg2, fpasshintof arg3))
- | "FPassS" -> ICall(FPassS (intofiarg arg1, intofiarg arg2, fpasshintof arg3))
  | "FHandleRefMismatch" ->
     ICall (FHandleRefMismatch (intofiarg arg1, fpasshintof arg2, stringofiarg arg3))
 
@@ -1162,8 +1154,6 @@ match s with
                                        labelofiarg arg3, localidofiarg arg4))
  | "LIterNext" -> IIterator(LIterNext (iterofiarg arg1, localidofiarg arg2,
                                        labelofiarg arg3, localidofiarg arg4))
- | "FPassM" ->
-    IFinal(FPassM (intofiarg arg1, intofiarg arg2, memberkeyofiarg arg3, fpasshintof arg4))
  | "FCallDM" ->
     ICall(FCallDM (intofiarg arg1, intofiarg arg2,
       class_id_of_iarg arg3, function_id_of_iarg arg4))

@@ -9,10 +9,6 @@ function test(C $c): void {
   echo('foo');
   print('foo');
 
-  assert(true);
-  invariant(true, 'foo');
-  invariant_violation('foo');
-
   fun('test');
   class_meth(C::class, 'staticFoo');
   inst_meth($c, 'instanceFoo');
@@ -21,6 +17,10 @@ function test(C $c): void {
   empty($c);
   isset($c);
   unset($c);
+
+  assert(true);
+  invariant(true, 'foo');
+  invariant_violation('foo');
 }
 
 <<__Rx>>

@@ -7,7 +7,7 @@
  *
  *)
 (* Tracks the different types of mutability of a given local variable.
-  See typing_mutability.mli for a description of the fields.
+  See typing_mutability.ml for a description of the fields.
 *)
 module LMap = Local_id.Map
 type mut_type = Mutable | Borrowed | Const

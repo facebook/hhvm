@@ -159,14 +159,15 @@ class deep_type_mapper = object(this)
     let env, tv = this#on_type env tv in
     env, (r, Tarraykind (AKdarray (tk, tv)))
   method! on_tarraykind_akshape env r fdm =
-    let env, fdm = Nast.ShapeMap.map_env begin fun env (tk, tv) ->
+    let env, fdm = Nast.ShapeMap.map_env begin fun env _key (tk, tv) ->
       let env, tk = this#on_type env tk in
       let env, tv = this#on_type env tv in
       env, (tk, tv)
     end env fdm in
     env, (r, Tarraykind (AKshape fdm))
   method! on_tarraykind_aktuple env r fields =
-    let env, fields = IMap.map_env (this#on_type) env fields in
+    let on_type env _key = this#on_type env in
+    let env, fields = IMap.map_env on_type env fields in
     env, (r, Tarraykind (AKtuple fields))
   method! on_ttuple env r tyl =
     let env, tyl = List.map_env env tyl this#on_type in

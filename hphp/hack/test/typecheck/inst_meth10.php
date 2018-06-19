@@ -20,10 +20,10 @@ class A {
     return 1;
   }
   public function f2(A $x) {
-    if(true) {
+    $y = true;
+    if($y) {
       $x = new B();
     }
     return inst_meth($x, 'f1');
   }
 }
-

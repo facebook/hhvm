@@ -594,7 +594,7 @@ module ShapeFieldMap = struct
       f_over_shape_field_type
 
   let map_env f env shape_map =
-    let f_over_shape_field_type env ({ sft_ty; _ } as shape_field_type) =
+    let f_over_shape_field_type env _key ({ sft_ty; _ } as shape_field_type) =
       let env, sft_ty = f env sft_ty in
       env, { shape_field_type with sft_ty } in
     Nast.ShapeMap.map_env f_over_shape_field_type env shape_map

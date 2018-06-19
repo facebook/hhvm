@@ -25,9 +25,9 @@
   *)
  type expression_id = Ident.t
  type local = locl ty * expression_id
- type local_history = locl ty list
  type old_local = locl ty list * locl ty * expression_id
- type local_types = (local Local_id.Map.t) Typing_continuations.Map.t
+ type local_id_map = local Local_id.Map.t
+ type local_types = local_id_map Typing_continuations.Map.t
 
  (* Local environment includes types of locals and bounds on type parameters. *)
  type local_env = {
@@ -35,7 +35,6 @@
    local_types        : local_types;
    local_mutability   : Typing_mutability_env.mutability_env;
    local_reactive : reactivity;
-   local_type_history : local_history Local_id.Map.t;
    (* Local variables that were assigned in a `using` clause *)
    local_using_vars   : Local_id.Set.t;
    (* Type parameter environment
@@ -61,7 +60,10 @@
    genv    : genv       ;
    decl_env: Decl_env.env;
    todo    : tfun list  ;
+   checking_todos : bool;
    in_loop : bool       ;
+   in_try  : bool       ;
+   in_case : bool       ;
    inside_constructor: bool;
    (* A set of constraints that are global to a given method *)
    global_tpenv : tpenv ;

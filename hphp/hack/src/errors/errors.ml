@@ -528,7 +528,7 @@ and add_list code pos_msg_l =
   if not (is_ignored_fixme code) && !is_hh_fixme pos code
   then add_applied_fixme code pos
   else add_error (make_error code pos_msg_l);
-  add_ignored_fixme_code_error pos code
+  add_ignored_fixme_code_error pos code;
 
 and merge (err',fixmes') (err,fixmes) =
   let append = fun _ _ x y ->

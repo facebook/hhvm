@@ -10,9 +10,11 @@
  */
 
 function f(): int {
-  if (true) {
+  $b = true;
+  $c = false;
+  if ($b) {
     $x = 1;
-  } else if (false) {
+  } else if ($c) {
     $x = false;
   } else {
     $x = 4;

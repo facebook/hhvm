@@ -18,7 +18,7 @@ open Type_parameter_env
 module Dep = Typing_deps.Dep
 module TLazyHeap = Typing_lazy_heap
 module LEnvC = Typing_lenv_cont
-module Cont = Typing_continuations
+module C = Typing_continuations
 
 let show_env _ = "<env>"
 let pp_env _ _ = Printf.printf "%s\n" "<env>"
@@ -275,11 +275,13 @@ let get_tpenv_tparams env =
   env.lenv.tpenv SSet.empty
 
 (* Replace types for locals with empty environment *)
-let env_with_locals env locals history =
-  { env with lenv = {
-      env.lenv with local_types = locals; local_type_history = history;
-    }
+let env_with_locals env locals =
+  { env with lenv =
+    { env.lenv with local_types = locals; }
   }
+
+let reinitialize_locals env =
+  env_with_locals env LEnvC.initial_locals
 
 let empty_fake_members = {
   last_call = None;
@@ -290,9 +292,17 @@ let empty_fake_members = {
 let empty_local tpenv local_reactive = {
   tpenv = tpenv;
   fake_members = empty_fake_members;
-  local_types = Typing_continuations.Map.empty;
+  local_types = LEnvC.empty_locals;
   local_using_vars = Local_id.Set.empty;
-  local_type_history = Local_id.Map.empty;
+  local_mutability = Local_id.Map.empty;
+  local_reactive = local_reactive;
+}
+
+let initial_local tpenv local_reactive = {
+  tpenv = tpenv;
+  fake_members = empty_fake_members;
+  local_types = LEnvC.initial_locals;
+  local_using_vars = Local_id.Set.empty;
   local_mutability = Local_id.Map.empty;
   local_reactive = local_reactive;
 }
@@ -304,9 +314,12 @@ let empty tcopt file ~droot = {
   outer_reason = Reason.URnone;
   tenv    = IMap.empty;
   subst   = IMap.empty;
-  lenv    = empty_local SMap.empty Nonreactive;
+  lenv    = initial_local SMap.empty Nonreactive;
   todo    = [];
+  checking_todos = false;
   in_loop = false;
+  in_try  = false;
+  in_case  = false;
   inside_constructor = false;
   decl_env = {
     mode = FileInfo.Mstrict;
@@ -415,9 +428,11 @@ let get_env_mutability env =
 let fresh_tenv env f =
   f { env with
       todo = [];
-      lenv = empty_local env.lenv.tpenv env.lenv.local_reactive;
+      lenv = initial_local env.lenv.tpenv env.lenv.local_reactive;
       tenv = IMap.empty;
-      in_loop = false
+      in_loop = false;
+      in_try = false;
+      in_case = false;
     }
 
 let get_enum env x =
@@ -512,12 +527,13 @@ let get_construct env class_ =
   class_.tc_construct
 
 let check_todo env =
+  let env = { env with checking_todos = true } in
   let env, remaining =
     List.fold_left env.todo ~f:(fun (env, remaining) f ->
       let env, remove = f env in
       if remove then env, remaining else env, f::remaining)
       ~init:(env, []) in
-  { env with todo = List.rev remaining }
+  { env with todo = List.rev remaining; checking_todos = false }
 
 let get_return env =
   env.genv.return
@@ -658,19 +674,6 @@ let debug_env env =
     Printf.printf "}\n"
   end env.genv.classes
 *)
-(*****************************************************************************)
-(* This is used when we want member variables to be treated like locals
- * We want to handle the following:
- * if($this->x) {
- *   ... $this->x ...
- * }
- * The trick consists in replacing $this->x with a "fake" local. So that
- * all the logic that normally applies to locals is applied in cases like
- * this. Hence the name: FakeMembers.
- * All the fake members are thrown away at the first call.
- * We keep the invalidated fake members for better error messages.
- *)
-(*****************************************************************************)
 
 let get_last_call env =
   match (env.lenv.fake_members).last_call with
@@ -792,38 +795,25 @@ let rec unbind seen env ty =
 
 let unbind = unbind []
 
-(* We maintain 3 states for a local, all the types that the
- * local ever had (cf integrate in typing.ml), the type
+(* We maintain 2 states for a local: the type
  * that the local currently has, and an expression_id generated from
  * the last assignment to this local.
  *)
 let set_local env x new_type =
-  let {fake_members; local_types; local_type_history; local_using_vars;
+  let {fake_members; local_types; local_using_vars;
        tpenv; local_mutability; local_reactive} = env.lenv in
   let env, new_type = unbind env new_type in
   let new_type = match new_type with
     | _, Tunresolved [ty] -> ty
     | _ -> new_type in
-  let next_cont = LEnvC.get_cont Cont.Next local_types in
-  let all_types, expr_id =
-    match
-      (Local_id.Map.get x next_cont, Local_id.Map.get x local_type_history)
-      with
-    | None, None -> [], Ident.tmp()
-    | Some (_, y), Some x -> x, y
-    | _ -> Exit_status.(exit Local_type_env_stale)
-  in
-  let all_types =
-    if List.exists all_types (fun ty' ->
-      let _, ty' = expand_type env ty' in Typing_defs.ty_equal new_type ty')
-    then all_types
-    else new_type :: all_types
-  in
+  let next_cont = LEnvC.get_cont C.Next local_types in
+  let expr_id = match Local_id.Map.get x next_cont with
+    | None -> Ident.tmp()
+    | Some (_, y) -> y in
   let local = new_type, expr_id in
-  let local_types = LEnvC.add_to_cont Cont.Next x local local_types in
-  let local_type_history = Local_id.Map.add x all_types local_type_history in
+  let local_types = LEnvC.add_to_cont C.Next x local local_types in
   let env = { env with
-    lenv = {fake_members; local_types; local_type_history; local_using_vars;
+    lenv = {fake_members; local_types; local_using_vars;
             tpenv; local_mutability; local_reactive; } }
   in
   env
@@ -836,15 +826,13 @@ let set_using_var env x =
     env.lenv with local_using_vars = Local_id.Set.add x env.lenv.local_using_vars } }
 
 let unset_local env local =
-  let {fake_members; local_types ; local_type_history;
-       local_using_vars; tpenv;
-       local_mutability; local_reactive; } = env.lenv in
-  let local_types = LEnvC.remove_from_cont Cont.Next local local_types in
+  let {fake_members; local_types; local_using_vars; tpenv; local_mutability;
+    local_reactive; } = env.lenv in
+  let local_types = LEnvC.remove_from_cont C.Next local local_types in
   let local_using_vars = Local_id.Set.remove local local_using_vars in
-  let local_type_history = Local_id.Map.remove local local_type_history in
   let local_mutability = Local_id.Map.remove local local_mutability in
   let env = { env with
-    lenv = {fake_members; local_types; local_type_history; local_using_vars;
+    lenv = {fake_members; local_types; local_using_vars;
             tpenv; local_mutability; local_reactive} }
   in
   env
@@ -859,70 +847,46 @@ env_with_mut
   (Local_id.Map.add local mutability_type env.lenv.local_mutability)
 
 let get_locals env =
-  LEnvC.get_cont Cont.Next env.lenv.local_types
+  LEnvC.get_cont C.Next env.lenv.local_types
 
-let get_local env x =
-  let next_cont = get_locals env in
-  let lcl = Local_id.Map.get x next_cont in
+let get_local_in_ctx x ctx =
+  let lcl = Local_id.Map.get x ctx in
   match lcl with
   | None -> (Reason.Rnone, Tany)
   | Some (x, _) -> x
 
+let get_local_ env x =
+  let next_cont = get_locals env in
+  get_local_in_ctx x next_cont
+
+(* While checking todos at the end of a function body, the Next continuation
+ * might have been moved to the 'Exit' (if there is a `return` statement)
+ * or the 'Catch' continuation (if the function always throws). So we find
+ * which continuation is still present and get the local from there. *)
+let get_local_for_todo env x =
+  let local_types = env.lenv.local_types in
+  let ctx = LEnvC.try_get_conts [C.Next; C.Exit; C.Catch] local_types in
+  get_local_in_ctx x ctx
+
+let get_local env x =
+  if env.checking_todos then get_local_for_todo env x else get_local_ env x
+
 let set_local_expr_id env x new_eid =
   let local_types = env.lenv.local_types in
-  let next_cont = LEnvC.get_cont Cont.Next local_types in
+  let next_cont = LEnvC.get_cont C.Next local_types in
   match Local_id.Map.get x next_cont with
   | Some (type_, eid) when eid <> new_eid ->
       let local = type_, new_eid in
-      let local_types = LEnvC.add_to_cont Cont.Next x local local_types in
+      let local_types = LEnvC.add_to_cont C.Next x local local_types in
       let env ={ env with lenv = { env.lenv with local_types } }
       in
       env
   | _ -> env
 
 let get_local_expr_id env x =
-  let next_cont = LEnvC.get_cont Cont.Next env.lenv.local_types in
+  let next_cont = LEnvC.get_cont C.Next env.lenv.local_types in
   let lcl = Local_id.Map.get x next_cont in
   Option.map lcl ~f:(fun (_, x) -> x)
-
-(*****************************************************************************)
-(* This function is called when we are about to type-check a block that will
- * later be fully_integrated (cf Typing.fully_integrate).
- * Integration is about keeping track of all the types that a local had in
- * its lifetime. It's necessary to correctly type-check catch blocks.
- * After we type-check a block, we want to take all the types that the local
- * had in this block, and add it to the list of possible types.
- *
- * However, we are not interested in the types that the local had *before*
- * we started typing the block.
- *
- * A concrete example:
- *
- * $x = null;
- *
- * $x = 'hello'; // the type of $x is string
- *
- * while (...) {
- *   $x = 0;
- * }
- *
- * The type of $x is string or int, NOT string or int or ?_.
- * We don't really care about the fact that $x could be null before the
- * block.
- *
- * This is what freeze_local does, just before we start type-checking the
- * while loop, we "freeze" the type of locals to the current environment.
- *)
-(*****************************************************************************)
-
-let freeze_local_env env =
-  let local_types = env.lenv.local_types in
-  let next_cont = LEnvC.get_cont Cont.Next local_types in
-  let local_type_history = Local_id.Map.map
-    (fun (type_, _) -> [type_])
-    next_cont
-  in
-  env_with_locals env local_types local_type_history
 
 (*****************************************************************************)
 (* Sets up/cleans up the environment when typing an anonymous function. *)
@@ -950,39 +914,17 @@ let in_loop env f =
   let env, result = f env in
   { env with in_loop = old_in_loop }, result
 
-(*****************************************************************************)
-(* Merge and un-merge locals *)
-(*****************************************************************************)
+let in_try env f =
+  let old_in_try = env.in_try in
+  let env = { env with in_try = true } in
+  let env, result = f env in
+  { env with in_try = old_in_try }, result
 
-let merge_locals_and_history lenv =
-  let merge_fn _key locals history =
-    match locals, history with
-      | None, None -> None
-      | Some (type_, exp_id), Some hist -> Some (hist, type_, exp_id)
-      | _ -> Exit_status.(exit Local_type_env_stale)
-  in
-  let next_cont = LEnvC.get_cont Cont.Next lenv.local_types in
-  Local_id.Map.merge
-    merge_fn next_cont lenv.local_type_history
-
-(* TODO: Right now the only continuation we have is next
- * so I'm putting everything in next *)
-let separate_locals_and_history locals_and_history =
-  let conts = Typing_continuations.Map.empty in
-  let next_cont = Local_id.Map.map
-    (fun (_, type_, exp_id) -> type_, exp_id) locals_and_history
-  in
-  let locals =
-    Typing_continuations.Map.add
-      Cont.Next
-      next_cont
-      conts
-  in
-  let history = Local_id.Map.map
-    (fun (hist, _, _) -> hist) locals_and_history
-  in
-  locals, history
-
+let in_case env f =
+  let old_in_case = env.in_case in
+  let env = { env with in_case = true } in
+  let env, result = f env in
+  { env with in_case = old_in_case }, result
 
 (* Return the subset of env which is saved in the Typed AST's EnvAnnotation. *)
 let save local_tpenv env =

@@ -19,6 +19,7 @@ open Nast
 open Typing_defs
 open Utils
 
+module TFTerm       = Typing_func_terminality
 module TUtils       = Typing_utils
 module Reason       = Typing_reason
 module Inst         = Decl_instantiate
@@ -42,6 +43,9 @@ module ExprDepTy    = Typing_dependent_type.ExprDepTy
 module TCO          = TypecheckerOptions
 module EnvFromDef   = Typing_env_from_def.EnvFromDef(Nast.Annotations)
 module TySet        = Typing_set
+module C            = Typing_continuations
+module CMap         = C.Map
+module Try          = Typing_try
 
 (*****************************************************************************)
 (* Debugging *)
@@ -516,8 +520,17 @@ and fun_implicit_return env pos ret = function
     Typing_suggest.save_return env ret rty;
     Type.sub_type pos Reason.URreturn env rty ret
 
-and block env stl =
-  List.map_env env stl stmt
+(* Perform provided typing function only if the Next continuation is present.
+ * If the Next continuation is absent, it means that we are typechecking
+ * unreachable code. *)
+and if_next tyf env node =
+  match LEnv.get_cont_option env C.Next with
+  | None -> env, None
+  | Some _ ->
+    let env, tn = tyf env node in
+    env, Some tn
+
+and block env stl = List.filter_map_env env stl ~f:(if_next stmt)
 
 (* Set a local; must not be already assigned if it is a using variable *)
 and set_local ?(is_using_clause = false) env (pos,x) ty =
@@ -588,15 +601,39 @@ and enforce_return_disposable _env e =
   | p, _ ->
     Errors.invalid_return_disposable p
 
+(* Wrappers around the function with the same name in Typing_lenv, which only
+ * performs the move/save and merge operation if we are in a try block or in a
+ * function with return type 'noreturn'.
+ * This enables significant perf improvement, because this is called at every
+ * function of method call, when most calls are outside of a try block. *)
+and move_and_merge_next_in_catch env =
+  if env.Env.in_try || (TFTerm.is_noreturn env)
+    then LEnv.move_and_merge_next_in_cont env C.Catch
+    else LEnv.drop_cont env C.Next
+
+and save_and_merge_next_in_catch env =
+  if env.Env.in_try || (TFTerm.is_noreturn env)
+    then LEnv.save_and_merge_next_in_cont env C.Catch
+    else env
+
 and stmt env = function
   | Fallthrough ->
+      let env = if env.Env.in_case
+        then LEnv.move_and_merge_next_in_cont env C.Fallthrough
+        else env in
       env, T.Fallthrough
   | GotoLabel _
-  | Goto _
+  | Goto _ ->
+    let env = move_and_merge_next_in_catch env in
+    env, T.Noop
   | Noop ->
       env, T.Noop
   | Expr e ->
+
       let env, te, ty = expr ~is_expr_statement:true env e in
+      let env = if TFTerm.expression_exits te ty
+        then LEnv.move_and_merge_next_in_cont env C.Exit
+        else env in
       (* NB: this check does belong here and not in expr, even though it only
        * applies to expressions -- we actually want to perform the check on
        * statements that are expressions, e.g., "foo();" we want to check, but
@@ -608,37 +645,23 @@ and stmt env = function
       env, T.Expr te
   | If (e, b1, b2)  ->
       let env, te, _ = expr env e in
+
       (* We stash away the locals environment because condition updates it
        * locally for checking b1. For example, we might have condition
        * $x === null, or $x instanceof C, which changes the type of $x in
        * lenv *)
       let parent_lenv = env.Env.lenv in
+
       let env   = condition env true e in
       let env, tb1 = block env b1 in
       let lenv1 = env.Env.lenv in
+
       let env   = { env with Env.lenv = parent_lenv } in
       let env   = condition env false e in
       let env, tb2 = block env b2 in
       let lenv2 = env.Env.lenv in
-      let terminal1 = Nast_terminality.Terminal.block env b1 in
-      let terminal2 = Nast_terminality.Terminal.block env b2 in
-      let env =
-        if terminal1 && terminal2
-        then
-          let env = LEnv.integrate env parent_lenv lenv1 in
-          let env = LEnv.integrate env env.Env.lenv lenv2 in
-          LEnv.integrate env env.Env.lenv parent_lenv
-        else if terminal1
-        then begin
-          let env = LEnv.integrate env parent_lenv lenv1 in
-          LEnv.integrate env env.Env.lenv lenv2
-        end
-        else if terminal2
-        then begin
-          let env = LEnv.integrate env parent_lenv lenv2 in
-          LEnv.integrate env env.Env.lenv lenv1
-        end
-        else LEnv.intersect env parent_lenv lenv1 lenv2 in
+
+      let env = LEnv.union_lenvs env parent_lenv lenv1 lenv2 in
       (* TODO TAST: annotate with joined types *)
       env, T.If(te, tb1, tb2)
   | Return (p, None) ->
@@ -647,6 +670,7 @@ and stmt env = function
       let { Typing_env_return_info.return_type = expected_return; _ } = Env.get_return env in
       Typing_suggest.save_return env expected_return rty;
       let env = Type.sub_type p Reason.URreturn env rty expected_return in
+      let env = LEnv.move_and_merge_next_in_cont env C.Exit in
       env, T.Return (p, None)
   | Return (p, Some e) ->
       let env = check_inout_return env in
@@ -676,68 +700,77 @@ and stmt env = function
         | _ -> ()
       end;
       let rty = Typing_return.wrap_awaitable env p rty in
-      (match snd (Env.expand_type env return_type) with
-      | r, Tprim Tvoid when not (TUtils.is_void_type_of_null env) ->
-          (* Yell about returning a value from a void function. This catches
-           * more issues than just unifying with void would do -- in particular
-           * just unifying allows you to return a Typing_utils.tany env from a void function,
-           * which is clearly wrong. Note this check is best-effort; if the
-           * function returns a generic type which later ends up being Tvoid
-           * then there's not much we can do here. *)
-          Errors.return_in_void p (Reason.to_pos r);
-          env, T.Return(p, Some te)
-      | _, Tunresolved _ ->
-          (* we allow return types to grow for anonymous functions *)
-          let env, rty = TUtils.unresolved env rty in
-          let env = Type.sub_type pos Reason.URreturn env rty return_type in
-          env, T.Return(p, Some te)
-      | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _
-        | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
-        | Tanon (_, _) | Tobject | Tshape _ | Tdynamic) ->
-          Typing_suggest.save_return env return_type rty;
-          let env = Type.sub_type pos Reason.URreturn env rty return_type in
-          env, T.Return(p, Some te)
-      )
+      let env, rty = (match snd (Env.expand_type env return_type) with
+        | r, Tprim Tvoid when not (TUtils.is_void_type_of_null env) ->
+            (* Yell about returning a value from a void function. This catches
+             * more issues than just unifying with void would do -- in particular
+             * just unifying allows you to return a Typing_utils.tany env from a void function,
+             * which is clearly wrong. Note this check is best-effort; if the
+             * function returns a generic type which later ends up being Tvoid
+             * then there's not much we can do here. *)
+            Errors.return_in_void p (Reason.to_pos r);
+            env, T.Return(p, Some te)
+        | _, Tunresolved _ ->
+            (* we allow return types to grow for anonymous functions *)
+            let env, rty = TUtils.unresolved env rty in
+            let env = Type.sub_type pos Reason.URreturn env rty return_type in
+            env, T.Return(p, Some te)
+        | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _
+          | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
+          | Tanon (_, _) | Tobject | Tshape _ | Tdynamic) ->
+            Typing_suggest.save_return env return_type rty;
+            let env = Type.sub_type pos Reason.URreturn env rty return_type in
+            env, T.Return(p, Some te)
+        ) in
+      let env = LEnv.move_and_merge_next_in_cont env C.Exit in
+      env, rty
   | Do (b, e) as st ->
-      (* NOTE: leaks scope as currently implemented; this matches
-         the behavior in naming (cf. `do_stmt` in naming/naming.ml).
-       *)
-      let parent_lenv = env.Env.lenv in
-      let env = Env.freeze_local_env env in
+    (* NOTE: leaks scope as currently implemented; this matches
+       the behavior in naming (cf. `do_stmt` in naming/naming.ml).
+     *)
+    let env, (tb, te) = LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
       let env, _ = block env b in
-      let env, te, _ = expr env e in
-      let after_block = env.Env.lenv in
-      let alias_depth =
-        if env.Env.in_loop then 1 else Typing_alias.get_depth st in
-      let env, tb = Env.in_loop env begin
-          iter_n_acc alias_depth begin fun env ->
-            let env = condition env true e in
-            let env, tb = block env b in
-            env, tb
-          end end in
-      let env =
-        if Nast.Visitor.HasContinue.block b
-        then LEnv.fully_integrate env parent_lenv
-        else { env with Env.lenv = after_block } in
-      let env = condition env false e in
-      env, T.Do(tb, te)
-  | While (e, b) as st ->
-      let env, te, _ = expr env e in
-      let parent_lenv = env.Env.lenv in
-      let env = Env.freeze_local_env env in
+      let env, te, _ = if_next_expr env e in
+      (* saving the locals in continue here even if there is no continue
+       * statement because they must be merged at the end of the loop, in
+       * case there is no iteration *)
+      let env = LEnv.save_and_merge_next_in_cont env C.Continue in
       let alias_depth =
         if env.Env.in_loop then 1 else Typing_alias.get_depth st in
       let env, tb = Env.in_loop env begin
         iter_n_acc alias_depth begin fun env ->
-          let env = condition env true e in
+          let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
+          (* Reset let variables *)
+          let env = if_next_condition env true e in
+          let env, tb = block env b in
+          env, tb
+        end end in
+      let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
+      let env = if_next_condition env false e in
+      let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
+      env, (tb, te)) in
+    env, T.Do(tb, te)
+  | While (e, b) as st ->
+    let env, te, _ = expr env e in
+    let env, (te, tb) = LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
+      let env = LEnv.save_and_merge_next_in_cont env C.Continue in
+      let alias_depth =
+        if env.Env.in_loop then 1 else Typing_alias.get_depth st in
+      let env, tb = Env.in_loop env begin
+        iter_n_acc alias_depth begin fun env ->
+          let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
+          (* Reset let variables *)
+          let env = if_next_condition env true e in
           (* TODO TAST: avoid repeated generation of block *)
           let env, tb = block env b in
           env, tb
         end
       end in
-      let env = LEnv.fully_integrate env parent_lenv in
-      let env = condition env false e in
-      env, T.While (te, tb)
+      let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
+      let env = if_next_condition env false e in
+      let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
+      env, (te, tb)) in
+    env, T.While (te, tb)
   | Using (has_await, using_clause, using_block) ->
       let env, typed_using_clause, using_vars = check_using_clause env has_await using_clause in
       let env, typed_using_block = block env using_block in
@@ -746,61 +779,76 @@ and stmt env = function
       let env = List.fold_left using_vars ~init:env ~f:Env.unset_local in
       env, T.Using (has_await, typed_using_clause, typed_using_block)
   | For (e1, e2, e3, b) as st ->
-      (* For loops leak their initalizer, but nothing that's defined in the
-         body
-       *)
-      let (env, te1, _) = expr env e1 in      (* initializer *)
-      let (env, te2, _) = expr env e2 in
-      let parent_lenv = env.Env.lenv in
-      let env = Env.freeze_local_env env in
-      let alias_depth =
-        if env.Env.in_loop then 1 else Typing_alias.get_depth st in
-      let env, (tb, te3) = Env.in_loop env begin
-        iter_n_acc alias_depth begin fun env ->
-          let env = condition env true e2 in (* iteration 0 *)
-          let env, tb = block env b in
-          let (env, te3, _) = expr env e3 in
-          env, (tb, te3)
-        end
-      end in
-      let env = LEnv.fully_integrate env parent_lenv in
-      let env = condition env false e2 in
-      env, T.For(te1, te2, te3, tb)
-  | Switch (e, cl) ->
-      let cl = List.map ~f:drop_dead_code_after_break cl in
-      Nast_terminality.SafeCase.check (fst e) env cl;
+    (* For loops leak their initalizer, but nothing that's defined in the
+       body
+     *)
+    let (env, te1, _) = expr env e1 in      (* initializer *)
+    let (env, te2, _) = expr env e2 in
+    let env, (te1, te2, te3, tb) = LEnv.stash_and_do env [C.Continue; C.Break]
+      (fun env ->
+        let env = LEnv.save_and_merge_next_in_cont env C.Continue in
+        let alias_depth =
+          if env.Env.in_loop then 1 else Typing_alias.get_depth st in
+        let env, (tb, te3) = Env.in_loop env begin
+          iter_n_acc alias_depth begin fun env ->
+            (* Reset let variables *)
+            let env = if_next_condition env true e2 in
+            let env, tb = block env b in
+            let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
+            let (env, te3, _) = if_next_expr env e3 in
+            env, (tb, te3)
+          end
+        end in
+        let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
+        let env = if_next_condition env false e2 in
+        let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
+        env, (te1, te2, te3, tb)) in
+    env, T.For(te1, te2, te3, tb)
+  | Switch ((pos, _) as e, cl) ->
       let env, te, ty = expr env e in
       Async.enforce_not_awaitable env (fst e) ty;
       let env = check_exhaustiveness env (fst e) ty cl in
-      let parent_lenv = env.Env.lenv in
-      let env, cl, tcl = case_list parent_lenv ty env cl in
-      let env = LEnv.intersect_nonterminal_branches env parent_lenv cl in
+      (* NB: A 'continue' inside a 'switch' block is equivalent to a 'break'.
+       * See the note in
+       * http://php.net/manual/en/control-structures.continue.php *)
+      let env, (te, tcl) = LEnv.stash_and_do env [C.Continue; C.Break]
+        (fun env ->
+          let parent_locals = LEnv.get_all_locals env in
+          let case_list env = case_list parent_locals ty env pos cl in
+          let env, tcl = Env.in_case env case_list in
+          let env = LEnv.update_next_from_conts env
+            [C.Continue; C.Break; C.Next] in
+          env, (te, tcl)) in
       env, T.Switch(te, tcl)
   | Foreach (e1, e2, b) as st ->
-      let check_dynamic env ty ~f =
-        if TUtils.is_dynamic env ty then
-          env
-        else f() in
-      (* It's safe to do foreach over a disposable, as no leaking is possible *)
-      let env, te1, ty1 = expr ~accept_using_var:true env e1 in
-      let parent_lenv = env.Env.lenv in
-      let env = Env.freeze_local_env env in
-      let env, ty2 = as_expr env (fst e1) e2 in
-      let env =
-        check_dynamic env ty1 ~f:begin fun () ->
-          Type.sub_type (fst e1) Reason.URforeach env ty1 ty2
+    let check_dynamic env ty ~f =
+      if TUtils.is_dynamic env ty then
+        env
+      else f() in
+    (* It's safe to do foreach over a disposable, as no leaking is possible *)
+    let env, te1, ty1 = expr ~accept_using_var:true env e1 in
+    let env, (te1, te2, tb) = LEnv.stash_and_do env [C.Continue; C.Break]
+      (fun env ->
+        let env = LEnv.save_and_merge_next_in_cont env C.Continue in
+        let env, ty2 = as_expr env (fst e1) e2 in
+        let env =
+          check_dynamic env ty1 ~f:begin fun () ->
+            Type.sub_type (fst e1) Reason.URforeach env ty1 ty2
+          end in
+        let alias_depth =
+          if env.Env.in_loop then 1 else Typing_alias.get_depth st in
+        let env, (te2, tb) = Env.in_loop env begin
+          iter_n_acc alias_depth begin fun env ->
+            let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
+            let env, te2 = bind_as_expr env ty1 ty2 e2 in
+            let env, tb = block env b in
+            env, (te2, tb)
+          end
         end in
-      let alias_depth =
-        if env.Env.in_loop then 1 else Typing_alias.get_depth st in
-      let env, (te2, tb) = Env.in_loop env begin
-        iter_n_acc alias_depth begin fun env ->
-          let env, te2 = bind_as_expr env ty1 ty2 e2 in
-          let env, tb = block env b in
-          env, (te2, tb)
-        end
-      end in
-      let env = LEnv.fully_integrate env parent_lenv in
-      env, T.Foreach (te1, te2, tb)
+        let env = LEnv.update_next_from_conts env
+          [C.Continue; C.Break; C.Next] in
+        env, (te1, te2, tb)) in
+    env, T.Foreach (te1, te2, tb)
   | Try (tb, cl, fb) ->
     let env, ttb, tcl, tfb = try_catch env tb cl fb in
     env, T.Try (ttb, tcl, tfb)
@@ -830,10 +878,13 @@ and stmt env = function
     let p = fst e in
     let env, te, ty = expr env e in
     let env = exception_ty p env ty in
+    let env = move_and_merge_next_in_catch env in
     env, T.Throw(is_terminal, te)
   | Continue p ->
+    let env = LEnv.move_and_merge_next_in_cont env C.Continue in
     env, T.Continue p
   | Break p ->
+    let env = LEnv.move_and_merge_next_in_cont env C.Break in
     env, T.Break p
   | Let ((p, x) as id, h, rhs) ->
     let env, hint_ty, expected = match h with
@@ -896,82 +947,99 @@ and check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
       | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _ | Tanon (_, _)
       | Tobject | Tshape _ | Tdynamic -> env
 
-and case_list parent_lenv ty env cl =
-  let env = { env with Env.lenv = parent_lenv } in
-  case_list_ parent_lenv ty env cl
+and finally_cont fb env ctx =
+  let env = LEnv.replace_cont env C.Next (Some ctx) in
+  let env, _tfb = block env fb in
+  env, LEnv.get_all_locals env
+
+and finally env fb =
+  match fb with
+  | [] ->
+    let env = LEnv.update_next_from_conts env [C.Next; C.Finally] in
+    env, []
+  | _ ->
+    let parent_locals = LEnv.get_all_locals env in
+    (* First typecheck the finally block against all continuations merged
+    * together.
+    * During this phase, record errors found in the finally block, but discard
+    * the resulting environment. *)
+    let env' = LEnv.update_next_from_conts env C.all in
+    let _, tfb = block env' fb in
+    (* Second, typecheck the finally block once against each continuation. This
+    * helps be more clever about what each continuation will be after the
+    * finally block.
+    * We don't want to record errors during this phase, because certain types
+    * of errors will fire wrongly. For example, if $x is nullable in some
+    * continuations but not in others, then we must use `?->` on $x, but an
+    * error will fire when typechecking the finally block againts continuations
+    * where $x is non-null.  *)
+    let finally_cont env _key = finally_cont fb env in
+    let env, locals_map = Errors.ignore_ (fun () ->
+      CMap.map_env finally_cont env parent_locals) in
+    let env, locals = Try.finally_merge env locals_map in
+    (Env.env_with_locals env locals), tfb
 
 and try_catch env tb cl fb =
-  let unfrozen_parent_lenv = env.Env.lenv in
-  let env = Env.freeze_local_env env in
-  let parent_lenv = env.Env.lenv in
-  let env, ttb = block env tb in
-  let after_try = env.Env.lenv in
-  let env, term_lenv_tcb_l = List.map_env env cl
-    begin fun env (_, _, b as catch_block) ->
-      let env, lenv, tcb = catch parent_lenv after_try env catch_block in
-      let term = Nast_terminality.Terminal.block env b in
-      env, (term, lenv, tcb)
-    end in
-  let term_lenv_l = List.map term_lenv_tcb_l (fun (a, b, _) -> (a, b)) in
-  let tcb_l = List.map term_lenv_tcb_l (fun (_, _, a) -> a) in
-  let term_lenv_l =
-    (Nast_terminality.Terminal.block env tb, after_try) :: term_lenv_l in
-  let env, tfb = if List.is_empty fb then env, [] else begin
-    let after_catchl = env.Env.lenv in
-    let lenv_l = List.map term_lenv_l (fun (_, a) -> a) in
-    let env = LEnv.integrate_list env parent_lenv lenv_l in
-    let env = LEnv.fully_integrate env parent_lenv in
-    let env, tfb = block env fb in
-    { env with Env.lenv = after_catchl }, tfb
-  end in
-  let env = LEnv.intersect_nonterminal_branches env parent_lenv term_lenv_l in
-  let env, _ = block env fb in
-  let after_finally = env.Env.lenv in
-  let env = LEnv.integrate env after_finally unfrozen_parent_lenv in
-  let env = LEnv.integrate env unfrozen_parent_lenv after_finally in
-  env, ttb, tcb_l, tfb
+  let parent_locals = LEnv.get_all_locals env in
+  let env = LEnv.drop_conts env
+    [C.Break; C.Continue; C.Exit; C.Catch; C.Finally] in
+  let env, (ttb, tcb) = Env.in_try env (fun env ->
+    let env, ttb = block env tb in
+    let env = LEnv.move_and_merge_next_in_cont env C.Finally in
+    (* If there is no catch continuation, this means the try block has not
+     * thrown, so the catch blocks are not reached, so we don't typecheck them. *)
+    let env, tcb = match LEnv.get_cont_option env C.Catch with
+    | None -> env, []
+    | Some catchctx ->
+      let env, lenvtcblist = List.map_env env ~f:(catch catchctx) cl in
+      let lenvl, tcb = List.unzip lenvtcblist in
+      let env = LEnv.union_lenv_list env env.Env.lenv lenvl in
+      let env = LEnv.move_and_merge_next_in_cont env C.Finally in
+      env, tcb in
+    env, (ttb, tcb)) in
+  let env, tfb = finally env fb in
+  let env = LEnv.drop_cont env C.Finally in
+  let env = LEnv.restore_and_merge_conts_from
+    env parent_locals [C.Break; C.Continue; C.Exit; C.Catch; C.Finally] in
+  env, ttb, tcb, tfb
 
-and drop_dead_code_after_break_block = function
-  | [] -> [], false
-  | Break x :: _ -> [Break x], true
-  | x :: rest ->
-    let x', drop =
-      match x with
-      | If (_, [], []) as if_stmt -> if_stmt, false
-      | If (cond, b1, b2) ->
-        let b1, drop1 = if b1 = [] then [], true
-                        else drop_dead_code_after_break_block b1 in
-        let b2, drop2 = if b2 = [] then [], true
-                        else drop_dead_code_after_break_block b2 in
-        If (cond, b1, b2), drop1 && drop2
-      | x -> x, false
-    in
-    if drop then ([x'], true) else begin
-      let rest', drop = drop_dead_code_after_break_block rest in
-      x'::rest', drop
-    end
+and case_list parent_locals ty env switch_pos cl =
+  let initialize_next_cont env =
+    let env = LEnv.restore_conts_from env parent_locals [C.Next] in
+    let env = LEnv.update_next_from_conts env [C.Next; C.Fallthrough] in
+    LEnv.drop_cont env C.Fallthrough in
 
-and drop_dead_code_after_break = function
-  | Default b -> Default (fst (drop_dead_code_after_break_block b))
-  | Case (e, b) -> Case (e, fst (drop_dead_code_after_break_block b))
+  let check_fallthrough env switch_pos case_pos block rest_of_list ~is_default =
+    if not @@ List.is_empty block then
+      begin match rest_of_list with
+      | [] -> ()
+      | _ ->
+        begin match LEnv.get_cont_option env C.Next with
+        | Some _ ->
+          if is_default then Errors.default_fallthrough switch_pos
+          else Errors.case_fallthrough switch_pos case_pos
+        | None -> ()
+        end (* match *)
+      end (* match *)
+    else () in
 
-and case_list_ parent_lenv ty env = function
-  | [] -> env, [], []
-  | Default b :: _ ->
+  match cl with
+  | [] -> env, []
+  | Default b :: rl ->
+    let env = initialize_next_cont env in
       (* TODO this is wrong, should continue on to the other cases, but it
        * doesn't matter in practice since our parser won't parse default
        * anywhere but in the last position :) Should fix all of this as well
        * as totality detection for switch. *)
     let env, tb = block env b in
-    env, [Nast_terminality.Terminal.case env (Default b), env.Env.lenv],
-      [T.Default tb]
-  | (Case (e, b)) as ce :: rl ->
+    check_fallthrough env switch_pos Pos.none b rl ~is_default:true;
+    env, [T.Default tb]
+  | (Case ((pos, _) as e, b)) :: rl ->
     (* TODO - we should consider handling the comparisons the same
      * way as Binop Ast.EqEq, since case statements work using ==
      * comparison rules *)
 
-    (* The way we handle terminal/nonterminal here is not quite right, you
-     * can still break the type system with things like P3131824. *)
+    let env = initialize_next_cont env in
     let ty_num = (Reason.Rnone, Tprim Nast.Tnum) in
     let ty_arraykey = (Reason.Rnone, Tprim Nast.Tarraykey) in
     let both_are_sub_types env tprim ty1 ty2 =
@@ -982,47 +1050,13 @@ and case_list_ parent_lenv ty env = function
                     (both_are_sub_types env ty_arraykey ty ty2)
                  then env, ty
                  else Type.unify (fst e) Reason.URnone env ty ty2 in
+    let env, tb = block env b in
+    check_fallthrough env switch_pos pos b rl ~is_default:false;
+    let env, tcl = case_list parent_locals ty env switch_pos rl in
+    env, T.Case (te, tb)::tcl
 
-    if Nast_terminality.Terminal.block env b then
-      let env, tb = block env b in
-      let lenv = env.Env.lenv in
-      let env, rl, tcl = case_list parent_lenv ty env rl in
-      env, (Nast_terminality.Terminal.case env ce, lenv) :: rl, T.Case (te, tb)::tcl
-    else
-      (* Since this block is not terminal we will end up falling through to the
-       * next block. This means the lenv will include what our current
-       * environment is, intersected (or integrated?) with the environment
-       * after executing the block. Example:
-       *
-       *  $x = 0; // $x = int
-       *  switch (0) {
-       *    case 1:
-       *      $x = ''; // $x = string
-       *      // FALLTHROUGH
-       *    case 2:
-       *      $x; // $x = int & string
-       *    ...
-       *)
-      let lenv1 = env.Env.lenv in
-      let env, tb = block env b in
-      (* PERF: If the case is empty or a Noop then we do not need to intersect
-       * the lenv since they will be the same.
-       *
-       * This saves the cost of intersecting the lenv for the common pattern of
-       *   case 1:
-       *   case 2:
-       *   case 3:
-       *   ...
-       *)
-      let env = match b with
-        | [] | [Noop] -> env
-        | _ -> LEnv.intersect env parent_lenv lenv1 env.Env.lenv in
-      let env, rl, tcl = case_list_ parent_lenv ty env rl in
-      env, rl, T.Case (te, tb)::tcl
-
-and catch parent_lenv after_try env (sid, exn, b) =
-  let env = { env with Env.lenv = after_try } in
-  let env = LEnv.fully_integrate env parent_lenv in
+and catch catchctx env (sid, exn, b) =
+  let env = LEnv.replace_cont env C.Next (Some catchctx) in
   let cid = CI (sid, []) in
   let ety_p = (fst sid) in
   let env, _, _ = instantiable_cid ety_p env cid in
@@ -1030,8 +1064,7 @@ and catch parent_lenv after_try env (sid, exn, b) =
   let env = exception_ty ety_p env ety in
   let env = set_local env exn ety in
   let env, tb = block env b in
-  (* Only keep the local bindings if this catch is non-terminal *)
-  env, env.Env.lenv, (sid, exn, tb)
+  env, (env.Env.lenv, (sid, exn, tb))
 
 and as_expr env pe = function
   | As_v _ ->
@@ -1084,6 +1117,11 @@ and bind_as_expr env loop_ty ty aexpr =
       env, T.Await_as_kv(p, T.make_typed_expr p1 ty1' (T.Lvar id), te)
     | _ -> (* TODO Probably impossible, should check that *)
       assert false
+
+and if_next_expr env (p, _ as e) =
+  match LEnv.get_cont_option env C.Next with
+  | None -> expr_error env p (Reason.Rwitness p)
+  | Some _ -> expr env e
 
 and expr
     ?expected
@@ -1178,13 +1216,12 @@ and eif env ~expected ~coalesce ~in_cond p c e1 e2 =
   let env = condition env false c in
   let env, te2, ty2 = expr ?expected env e2 in
   let lenv2 = env.Env.lenv in
-  let fake_members =
-    LEnv.intersect_fake lenv1.Env.fake_members lenv2.Env.fake_members in
+  let fake_members = LEnv.intersect_fake lenv1 lenv2 in
   (* we restore the locals to their parent state so as not to leak the
    * effects of the `condition` calls above *)
   let env = { env with Env.lenv =
               { parent_lenv with Env.fake_members = fake_members } } in
-  (* This is a shortened form of what we do in Typing_lenv.intersect. The
+  (* This is a shortened form of what we do in Typing_lenv.union_lenvs. The
    * latter takes local environments as arguments, but our types here
    * aren't assigned to local variables in an environment *)
   (* TODO: Omit if expected type is present and checked in calls to expr *)
@@ -1536,8 +1573,10 @@ and expr_
       make_result env T.This (new_ty)
   | Assert (AE_assert e) ->
       let env, te, _ = expr env e in
+      let env = LEnv.save_and_merge_next_in_cont env C.Exit in
       let env = condition env true e in
-      make_result env (T.Assert (T.AE_assert te)) (Reason.Rwitness p, Tprim Tvoid)
+      make_result env (T.Assert (T.AE_assert te))
+        (Reason.Rwitness p, Tprim Tvoid)
   | True ->
       make_result env T.True (Reason.Rwitness p, Tprim Tbool)
   | False ->
@@ -1754,6 +1793,7 @@ and expr_
       expr_error env p (Reason.Rwitness p)
   | Dollardollar ((_, x) as id) ->
       let ty = Env.get_local env x in
+      let env = save_and_merge_next_in_catch env in
       make_result env (T.Dollardollar id) ty
   | Lvar ((_, x) as id) ->
       let local_id = Local_id.to_string x in
@@ -1809,6 +1849,7 @@ and expr_
       make_result env (T.Expr_list tel) ty
   | Array_get (e, None) ->
       let env, te1, ty1 = update_array_type p env e None valkind in
+      let env = save_and_merge_next_in_catch env in
       let env, ty = array_append p env ty1 in
       make_result env (T.Array_get(te1, None)) ty
   | Array_get (e1, Some e2) ->
@@ -1816,6 +1857,7 @@ and expr_
         update_array_type ?lhs_of_null_coalesce p env e1 (Some e2) valkind in
       let env, ty1 = TUtils.fold_unresolved env ty1 in
       let env, te2, ty2 = expr env e2 in
+      let env = save_and_merge_next_in_catch env in
       let is_lvalue = (valkind == `lvalue) in
       let env, ty =
         array_get ?lhs_of_null_coalesce is_lvalue p env ty1 e2 ty2 in
@@ -1845,6 +1887,7 @@ and expr_
           tel,
           [])) (Env.fresh_type())
   | Call (call_type, e, hl, el, uel) ->
+      let env = save_and_merge_next_in_catch env in
       let env, te, ty = check_call ~is_using_clause ~expected ~is_expr_statement
         env p call_type e hl el uel ~in_suspend:false in
       Typing_mutability.enforce_mutable_call env te;
@@ -1920,6 +1963,7 @@ and expr_
   | Binop (bop, e1, e2) ->
       let env, te1, ty1 = raw_expr in_cond env e1 in
       let env, te2, ty2 = raw_expr in_cond env e2 in
+      let env = save_and_merge_next_in_catch env in
       let env, te3, ty =
         binop in_cond p env bop (fst e1) te1 ty1 (fst e2) te2 ty2 in
       env, te3, ty
@@ -1946,6 +1990,7 @@ and expr_
       make_result env (T.Pipe(e0, te1, te2)) ty2
   | Unop (uop, e) ->
       let env, te, ty = raw_expr in_cond env e in
+      let env = save_and_merge_next_in_catch env in
       unop ~is_func_arg ~forbid_uref p env uop te ty
   | Eif (c, e1, e2) -> eif env ~expected ~coalesce:false ~in_cond p c e1 e2
   | Typename sid ->
@@ -1988,6 +2033,7 @@ and expr_
         Errors.static_property_in_reactive_context p
       end;
       let env, te, cty = static_class_id p env cid in
+      let env = save_and_merge_next_in_catch env in
       let env, ty, _ =
         class_get ~is_method:false ~is_const:false env cty mid cid in
       if Env.FakeMembers.is_static_invalid env cid (snd mid)
@@ -2001,13 +2047,14 @@ and expr_
      *   if ($x->f !== null) { ...$x->f... }
      *)
   | Obj_get (e, (pid, Id (py, y)), nf)
-      when Env.FakeMembers.get env e y <> None ->
-        let env, local = Env.FakeMembers.make p env e y in
-        let local = p, Lvar (p, local) in
-        let env, _, ty = expr env local in
-        let env, t_lhs, _ = expr ~accept_using_var:true env e in
-        let t_rhs = T.make_typed_expr pid ty (T.Id (py, y)) in
-        make_result env (T.Obj_get (t_lhs, t_rhs, nf)) ty
+    when Env.FakeMembers.get env e y <> None ->
+      let env = save_and_merge_next_in_catch env in
+      let env, local = Env.FakeMembers.make p env e y in
+      let local = p, Lvar (p, local) in
+      let env, _, ty = expr env local in
+      let env, t_lhs, _ = expr ~accept_using_var:true env e in
+      let t_rhs = T.make_typed_expr pid ty (T.Id (py, y)) in
+      make_result env (T.Obj_get (t_lhs, t_rhs, nf)) ty
     (* Statically-known instance property access e.g. $x->f *)
   | Obj_get (e1, (pm, Id m), nullflavor) ->
       let nullsafe =
@@ -2016,6 +2063,7 @@ and expr_
           | OG_nullsafe -> Some p
         ) in
       let env, te1, ty1 = expr ~accept_using_var:true env e1 in
+      let env = save_and_merge_next_in_catch env in
       let env, result =
         obj_get ~is_method:false ~nullsafe ~valkind env ty1 (CIexpr e1) m (fun x -> x) in
       let has_lost_info = Env.FakeMembers.is_invalid env e1 (snd m) in
@@ -2045,6 +2093,7 @@ and expr_
       (Reason.Rwitness p, Typing_utils.tany env)
       end in
     let (pos, _), te2 = te2 in
+    let env = save_and_merge_next_in_catch env in
     let te2 = T.make_typed_expr pos ty te2 in
     make_result env (T.Obj_get(te1, te2, nullflavor)) ty
   | Yield_break ->
@@ -2088,6 +2137,7 @@ and expr_
       let env =
         Type.sub_type p (Reason.URyield) env rty expected_return in
       let env = Env.forget_members env p in
+      let env = LEnv.save_and_merge_next_in_cont env C.Exit in
       make_result env (T.Yield taf) (Reason.Ryield_send p, Toption send)
   | Yield_from e ->
     let key = Env.fresh_type () in
@@ -2140,6 +2190,7 @@ and expr_
   | Special_func func -> special_func env p func
   | New (((), c), el, uel) ->
       Typing_hooks.dispatch_new_id_hook c env p;
+      let env = save_and_merge_next_in_catch env in
       let env, tc, tel, tuel, ty, _ =
         new_object ~expected ~is_using_clause ~check_parent:false ~check_not_abstract:true
           p env c el uel in
@@ -2152,6 +2203,7 @@ and expr_
       expr_error env p (Reason.Rwitness p)
   | Cast (hint, e) ->
       let env, te, ty2 = expr env e in
+      let env = save_and_merge_next_in_catch env in
       Async.enforce_not_awaitable env (fst e) ty2;
       if (TypecheckerOptions.experimental_feature_enabled
         (Env.get_options env)
@@ -2430,11 +2482,11 @@ and expr_
       (* allow_inter adds a type-variable *)
       let env, tfdm =
         ShapeMap.map_env
-          (fun env (e, expected) ->
+          (fun env _key (e, expected) ->
             let env, te, ty = expr ?expected env e in env, (te,ty))
           env fdm_with_expected in
       let env, fdm =
-        let convert_expr_and_type_to_shape_field_type env (_, ty) =
+        let convert_expr_and_type_to_shape_field_type env _key (_, ty) =
           let env, sft_ty = TUtils.unresolved env ty in
           (* An expression evaluation always corresponds to a shape_field_type
              with sft_optional = false. *)
@@ -2616,6 +2668,12 @@ and anon_check_param env param =
       let env = Type.sub_type hint_pos Reason.URhint env paramty hty in
       env
 
+and anon_block env b =
+  let is_not_next = function C.Next -> false | _ -> true in
+  let all_but_next = List.filter C.all ~f:is_not_next in
+  let env, tb = LEnv.stash_and_do env all_but_next (fun env -> block env b) in
+  env, tb
+
 (* Make a type-checking function for an anonymous function. *)
 and anon_make tenv p f ft idl =
   let anon_lenv = tenv.Env.lenv in
@@ -2725,7 +2783,7 @@ and anon_make tenv p f ft idl =
             ~is_by_ref:f.f_ret_by_ref
             hret) in
         let local_tpenv = env.Env.lenv.Env.tpenv in
-        let env, tb = block env nb.fnb_nast in
+        let env, tb = anon_block env nb.fnb_nast in
         let env =
           if Nast_terminality.Terminal.block tenv nb.fnb_nast
             || nb.fnb_unsafe || !auto_complete
@@ -3194,10 +3252,10 @@ and assign_ p ur env e1 ty2 =
       )
   | _, Array_get ((_, Lvar (_, lvar)) as shape, ((Some _) as e2)) ->
     let access_type = Typing_arrays.static_array_access env e2 in
-      (* In the case of an assignment of the form $x['new_field'] = ...;
-      * $x could be a shape where the field 'new_field' is not yet defined.
-      * When that is the case we want to add the field to its type.
-      *)
+    (* In the case of an assignment of the form $x['new_field'] = ...;
+     * $x could be a shape where the field 'new_field' is not yet defined.
+     * When that is the case we want to add the field to its type.
+     *)
     let env, _te, shape_ty = expr env shape in
     let env, shape_ty = Typing_arrays.update_array_type_on_lvar_assignment
       p access_type env shape_ty in
@@ -3986,7 +4044,7 @@ and is_abstract_ft fty = match fty with
           | OG_nullsafe -> Some p
         ) in
       let tel = ref [] and tuel = ref [] and tftyl = ref [] in
-      let fn = (fun (env, fty, _) ->
+      let k = (fun (env, fty, _) ->
         check_coroutine_call env fty;
         let env, tel_, tuel_, method_ =
           call ~expected ~receiver_type:ty1 ~is_expr_statement p env fty el uel in
@@ -3994,7 +4052,7 @@ and is_abstract_ft fty = match fty with
         tftyl := fty :: !tftyl;
         env, method_, None) in
       let env, ty = obj_get ~is_method ~nullsafe ~pos_params:el
-                      ~explicit_tparams:hl env ty1 (CIexpr e1) m fn in
+                      ~explicit_tparams:hl env ty1 (CIexpr e1) m k in
       let tfty =
         match !tftyl with
         | [fty] -> fty
@@ -5701,20 +5759,21 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
  * and returns a refined type (making necessary changes to the
  * environment, which is threaded through).
  *)
-and refine_lvalue_type env e ~refine = match e with
+and refine_lvalue_type env e ~refine =
+  match e with
   | _, Lvar x
   | _, ImmutableVar x
   | _, Dollardollar x ->
       let ty = Env.get_local env (snd x) in
       let env, refined_ty = refine env ty in
       set_local env x refined_ty
-  | p, Class_get (((), cname), (_, member_name)) ->
+  | p, Class_get (((), cname), (_, member_name)) as e ->
       let env, _te, ty = expr env e in
       let env, refined_ty = refine env ty in
       let env, local = Env.FakeMembers.make_static p env cname member_name in
       let lvar = (p, local) in
       set_local env lvar refined_ty
-    (* TODO TAST: generate as assignment to the fake local in the TAST *)
+    (* TODO TAST: generate an assignment to the fake local in the TAST *)
   | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
       let env, _te, ty = expr env e in
       let env, refined_ty = refine env ty in
@@ -5723,12 +5782,20 @@ and refine_lvalue_type env e ~refine = match e with
       set_local env lvar refined_ty
   | _ -> env
 
-and condition_var_non_null env e =
-  refine_lvalue_type env e ~refine:TUtils.non_null
+and condition_nullity ~nonnull env e =
+  let refine = if nonnull
+    then TUtils.non_null
+    else (fun env ty -> env, ty) in
+  refine_lvalue_type env e ~refine
 
 and condition_isset env = function
   | _, Array_get (x, _) -> condition_isset env x
-  | v -> condition_var_non_null env v
+  | v -> condition_nullity ~nonnull:true env v
+
+and if_next_condition env tparamt e =
+  match LEnv.get_cont_option env C.Next with
+  | None -> env
+  | Some _ -> condition env tparamt e
 
 (**
  * Build an environment for the true or false branch of
@@ -5754,11 +5821,11 @@ and condition ?lhs_of_null_coalesce env tparamet =
       condition_isset env param
   | _, Call (Cnormal, (_, Id (_, func)), _, [e], [])
     when not tparamet && SN.StdlibFunctions.is_null = func ->
-      condition_var_non_null env e
+      condition_nullity ~nonnull:true env e
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), (_, Null), e)
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), e, (_, Null)) when not tparamet ->
       let env, _ = expr env e in
-      condition_var_non_null env e
+      condition_nullity ~nonnull:true env e
   | (p, (Lvar _ | Obj_get _ | Class_get _) as e) ->
       let env, ty = expr env e in
       let env, ety = Env.expand_type env ty in
@@ -5772,7 +5839,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
           condition env (not tparamet) (p, Binop (Ast.Eqeq, e, (p, Null))))
   | _, Binop (Ast.Eq None, var, e) when tparamet ->
       let env, _ = expr env e in
-      condition_var_non_null env var
+      condition_nullity ~nonnull:true env var
   | p1, Binop (Ast.Eq None, (_, (Lvar _ | Obj_get _) as lv), (p2, _)) ->
       let env, _ = expr env (p1, Binop (Ast.Eq None, lv, (p2, Null))) in
       condition env tparamet lv
@@ -5934,7 +6001,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), e, (_, Null))
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), (_, Null), e) ->
       let env, _ = expr env e in
-      env
+      condition_nullity ~nonnull:false env e
   | e ->
       let env, _ = expr env e in
       env
@@ -6571,9 +6638,7 @@ and method_def env m =
   Reason.expr_display_id_map := IMap.empty;
   Typing_hooks.dispatch_enter_method_def_hook m;
   let pos = fst m.m_name in
-  let env =
-    Env.env_with_locals env Typing_continuations.Map.empty Local_id.Map.empty
-  in
+  let env = Env.reinitialize_locals env in
   let env = Env.set_env_function_pos env pos in
   let env = Typing_attributes.check_def env new_object
     SN.AttributeKinds.mthd m.m_user_attributes in

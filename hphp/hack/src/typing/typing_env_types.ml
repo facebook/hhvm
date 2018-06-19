@@ -50,12 +50,27 @@ let pp_local_env _ _ = Printf.printf "%s\n" "<local_env>"
 
 (* Local environment includes types of locals and bounds on type parameters. *)
 type local_env = {
+  (* Fake members are used when we want member variables to be treated like
+   * locals. We want to handle the following:
+   * if($this->x) {
+   *   ... $this->x ...
+   * }
+   * The trick consists in replacing $this->x with a "fake" local. So that
+   * all the logic that normally applies to locals is applied in cases like
+   * this. Hence the name: FakeMembers.
+   * All the fake members are thrown away at the first call.
+   * We keep the invalidated fake members for better error messages.
+   *)
   fake_members       : fake_members;
+  (* Local types per continuation. For example, the local types of the
+   * break continuation correspond to the local types that there were at the
+   * last encountered break in the current scope. These are kept to be merged
+   * at the appropriate merge points. *)
   local_types        : local_types;
   local_mutability   : Typing_mutability_env.mutability_env;
+
   (* Whether current environment is reactive *)
   local_reactive : reactivity;
-  local_type_history : local_history Local_id.Map.t;
   (* Local variables that were assigned in a `using` clause *)
   local_using_vars   : local_id_set_t;
   (* Type parameter environment
@@ -93,7 +108,10 @@ type env = {
   genv    : genv       ;
   decl_env: Decl_env.env;
   todo    : tfun list  ;
+  checking_todos : bool;
   in_loop : bool       ;
+  in_try  : bool       ;
+  in_case : bool       ;
   inside_constructor: bool;
   (* A set of constraints that are global to a given method *)
   global_tpenv : tpenv ;

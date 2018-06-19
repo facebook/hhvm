@@ -139,21 +139,11 @@ let log_continuation env name cont =
       lprintf (Normal Green) " [eid: %s]" (Ident.debug expr_id) end
     cont)
 
-let log_history env =
-  indentEnv "history" (fun () ->
-    Local_id.Map.iter begin fun id all_types ->
-      lnewline();
-      lprintf (Bold Green) "%s[#%d]: "
-        (Local_id.get_name id) (Local_id.to_int id);
-      log_type_list env all_types end
-    env.Env.lenv.Env.local_type_history)
-
 let log_local_types env =
   indentEnv "local_types" (fun () ->
     Typing_continuations.Map.iter
       (log_continuation env)
-      env.Env.lenv.Env.local_types;
-    log_history env)
+      env.Env.lenv.Env.local_types)
 
 let log_using_vars env =
   let using_vars = env.Env.lenv.Env.local_using_vars in

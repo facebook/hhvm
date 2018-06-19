@@ -8,11 +8,13 @@
  *
  *
  */
+function f(): void {}
 
 function foo(): int {
   $a = 23;
   try {
     $a = 'hello';
+    f();
   } catch (Exception $e) {
     return $a;
   }

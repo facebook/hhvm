@@ -11,10 +11,14 @@ abstract class Foo {
     if ($y instanceof Foo) {
     }
     try {
-    } catch (Foo $foo) {}
+      might_throw();
+    } catch (Foo $foo) {
+    }
   }
   public static function staticMethod() {}
 }
+
+function might_throw(): void {}
 
 type Alias = Foo;
 

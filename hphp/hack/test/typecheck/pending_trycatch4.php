@@ -8,17 +8,18 @@
  *
  *
  */
+function g(): void {}
 
 function f(): int {
   try {
     try {
       $x = 1;
+      g();
     } catch (Exception $e) {
       $x = false;
     }
   } catch (Exception $e) {
     $x = 4;
   }
-
   return $x;
 }

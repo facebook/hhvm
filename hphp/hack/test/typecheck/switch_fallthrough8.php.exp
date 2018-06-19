@@ -1,1 +1,4 @@
-No errors
+File "switch_fallthrough8.php", line 13, characters 11-11:
+This switch has a case that implicitly falls through and is not annotated with // FALLTHROUGH (NastCheck[3005])
+File "switch_fallthrough8.php", line 14, characters 10-10:
+This case implicitly falls through

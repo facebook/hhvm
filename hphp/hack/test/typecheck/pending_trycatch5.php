@@ -8,11 +8,13 @@
  *
  *
  */
+function might_throw(): void {}
 
 function f(): int {
   try {
     try {
       $x = 1;
+      might_throw();
     } catch (Exception $e) {
       $x = 2;
     }

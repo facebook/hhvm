@@ -100,13 +100,13 @@ let overload_extract_from_awaitable_list env p tyl =
   end tyl ~init:(env, [])
 
 let overload_extract_from_awaitable_shape env p fdm =
-  Nast.ShapeMap.map_env begin fun env (tk, tv) ->
+  Nast.ShapeMap.map_env begin fun env _key (tk, tv) ->
     let env, rtv = overload_extract_from_awaitable env p tv in
     env, (tk, rtv)
   end env fdm
 
 let overload_extract_from_awaitable_aktuple env p fields =
-  IMap.map_env begin fun env ty ->
+  IMap.map_env begin fun env _key ty ->
     let env, rty = overload_extract_from_awaitable env p ty in
     env, rty
   end env fields
@@ -205,13 +205,13 @@ let rec gen_array_rec env p ty =
     let env, vty = is_array env vty in
     env, (r, Tarraykind (AKdarray(kty, vty)))
   | r, Tarraykind (AKshape fdm) ->
-    let env, fdm = Nast.ShapeMap.map_env begin fun env (tk, tv) ->
+    let env, fdm = Nast.ShapeMap.map_env begin fun env _key (tk, tv) ->
       let env, tv = is_array env tv in
       env, (tk, tv)
     end env fdm in
     env, (r, Tarraykind (AKshape fdm))
   | r, Tarraykind (AKtuple fields) ->
-    let env, fields = IMap.map_env begin fun env ty ->
+    let env, fields = IMap.map_env begin fun env _key ty ->
       let env, ty = is_array env ty in
       env, ty
     end env fields in

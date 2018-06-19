@@ -8,6 +8,8 @@ final class D {}
 final class E {}
 final class F {}
 
+function f(): void {}
+
 function test(): void {
   $x = new A();
   $x = new B();
@@ -17,6 +19,7 @@ function test(): void {
     try {
       $x = new E();
       $x = new F();
+      f();
     } catch (Exception $e) {
       hh_show($x); // (D | E | F)
     }

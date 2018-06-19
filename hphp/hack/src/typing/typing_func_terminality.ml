@@ -7,6 +7,11 @@
  *
  *)
 
+open Nast
+open Typing_defs
+
+module Env = Typing_env
+module T = Tast
 module TLazyHeap = Typing_lazy_heap
 
 (* Not adding a Typing_dep here because it will be added when the
@@ -29,3 +34,15 @@ let raise_exit_if_terminal = function
   | Some ({ Typing_defs.ft_ret = (_r, Typing_defs.Tprim Nast.Tnoreturn); _})
     -> raise Exit
   | Some _ -> ()
+
+let expression_exits (_, te) (_, ty) =
+  match te, ty with
+  | T.Assert(T.AE_assert (_, T.False)), _ -> true
+  | _, Tprim Tnoreturn -> true
+  | T.Yield_break, _ -> true
+  | _ -> false
+
+let is_noreturn env =
+  match (Env.get_return env).Typing_env_return_info.return_type with
+  | _, Tprim Tnoreturn -> true
+  | _ -> false

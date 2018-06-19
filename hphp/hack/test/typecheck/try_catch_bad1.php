@@ -8,11 +8,13 @@
  *
  *
  */
+function f(): void {}
 
 function foo(): int {
   $a = 23;
   try {
     $a = 456;
+    f();
   } catch (MyException $e) {
     // Now that this is a non-terminal, this is bad
     $a = 'duck';

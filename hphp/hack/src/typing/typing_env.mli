@@ -28,6 +28,7 @@ val make_ft : Pos.t -> reactivity -> bool -> decl fun_params -> decl ty -> decl 
 val get_shape_field_name : Nast.shape_field_name -> string
 val empty_fake_members : fake_members
 val empty_local : tpenv -> reactivity -> local_env
+val initial_local : tpenv -> reactivity -> local_env
 val empty : TypecheckerOptions.t -> Relative_path.t ->
   droot: Typing_deps.Dep.variant option -> env
 val is_typedef : Typedefs.key -> bool
@@ -130,15 +131,12 @@ val env_reactivity: env -> reactivity
 val env_local_reactive : env -> bool
 val is_mutable : env -> Local_id.t -> bool
 val add_mutable_var : env -> Local_id.t -> Typing_mutability_env.mutability -> env
-val freeze_local_env : env -> env
 val function_is_mutable : env -> bool
 val set_fun_mutable : env -> bool -> env
-val env_with_locals :
-  env -> local_types -> local_history Local_id.Map.t -> env
+val env_with_locals : env -> local_types -> env
+val reinitialize_locals : env -> env
 val anon : local_env -> env -> (env -> env * Tast.expr * locl ty) -> env * Tast.expr * locl ty
 val in_loop : env -> (env -> env * 'a) -> env * 'a
-val merge_locals_and_history : local_env -> old_local Local_id.Map.t
-val separate_locals_and_history :
-  old_local Local_id.Map.t ->
-  (local_types * local_history Local_id.Map.t)
+val in_try : env -> (env -> env * 'a) -> env * 'a
+val in_case : env -> (env -> env * 'a) -> env * 'a
 val save : tpenv -> env -> Tast.saved_env

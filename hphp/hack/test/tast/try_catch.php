@@ -8,11 +8,13 @@
  *
  *
  */
+function might_throw(): void {}
 
 function terminal_catch_can_do_whatever(): int {
   $a = 23;
   try {
     $a = 456;
+    might_throw();
   } catch (YourException $e) {
     return $a;
   } catch (MyException $e) {

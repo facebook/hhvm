@@ -8,14 +8,17 @@
  *
  *
  */
+function might_throw(): void {}
 
 function x(int $x): void {}
 
 function y(): void {
   $x = 3;
   try {
-    if (true) {
+    $b = true;
+    if ($b) {
       $x = false;
+      might_throw();
     } else {
       $x = 3;
       throw new Exception('x');

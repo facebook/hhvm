@@ -14,6 +14,12 @@ module Env = Typing_env
 module TUtils = Typing_utils
 module TURecursive = Typing_unify_recursive
 
+(* This reference is definitely ugly, but introducing a new parameter for each
+ * of those many mutually recursive functions, including those in Typing_utils -
+ * because there is a hidden circular dependency with those - seemed like too
+ * much of a bummer. *)
+let make_union_instead_of_unificaton = ref false
+
 (* If result is (env', ty) then env' extends env,
  * and ty1 <: ty and ty2 <: ty under env'
  *)
@@ -34,8 +40,9 @@ let rec unify ?(opts=TUtils.default_unify_opt) env ty1 ty2 =
     let env, ty1 = Env.get_type_unsafe env n1 in
     let env, ty2 = Env.get_type_unsafe env n2 in
     let n' = Env.fresh() in
-    let env = Env.rename env n1 n' in
-    let env = Env.rename env n2 n' in
+    let env = if !make_union_instead_of_unificaton then env else
+      let env = Env.rename env n1 n' in
+      Env.rename env n2 n' in
     let env, ty = unify ~opts env ty1 ty2 in
     let env = TURecursive.add env n' ty in
     env, (r, Tvar n')
@@ -43,9 +50,10 @@ let rec unify ?(opts=TUtils.default_unify_opt) env ty1 ty2 =
   | ty2, (r, Tvar n) ->
     let env, ty1 = Env.get_type env r n in
     let n' = Env.fresh() in
-    let env = Env.rename env n n' in
+    let env = if !make_union_instead_of_unificaton then env else
+      Env.rename env n n' in
     let env, ty = unify ~opts env ty1 ty2 in
-    let env = TURecursive.add env n ty in
+    let env = TURecursive.add env n' ty in
     env, (r, Tvar n')
   | (r1, Tunresolved tyl1), (r2, Tunresolved tyl2) ->
       let r = unify_reason r1 r2 in
@@ -595,6 +603,12 @@ and unify_params env l1 l2 var1_opt =
     let env, _ = unify env ty2 ty1 in
     let env, rl = unify_params env rl1 rl2 var1_opt in
     env, { x2 with fp_name = name } :: rl
+
+let union ?(opts=TUtils.default_unify_opt) env ty1 ty2 =
+  make_union_instead_of_unificaton := true;
+  let res = unify ~opts env ty1 ty2 in
+  make_union_instead_of_unificaton := false;
+  res
 
 (*****************************************************************************)
 (* Exporting *)

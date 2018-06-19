@@ -1,18 +1,24 @@
 <?hh
 
   function f () {
-    return 1;
+    if (true) {
+      return 1;
+    }
     return 1.0;
   }
 
   function g () {
-    return 'str';
+    if (true) {
+      return 'str';
+    }
     return 1;
     }
 
   class C  {
     public function meth1 () {
-      return 'one';
+      if (true) {
+        return 'one';
+      }
       return 'two';
     }
 

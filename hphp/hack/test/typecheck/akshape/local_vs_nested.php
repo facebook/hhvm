@@ -8,7 +8,7 @@ function test(int $i, int $j, int $k): void {
   $a = array();
   $a['aaa'] = 4;
   $a['aaa'] = 'aaa'; // $a is a local variable, so at this point we can forget
-  // about 'aaa' prevoiusly storing an int
+  // about 'aaa' previously storing an int
   hh_show($a);
   take_string($a['aaa']); // no error
 

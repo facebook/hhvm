@@ -23,7 +23,7 @@ type ObjprofObjectStats = shape(
   'instances'        => int,
   'bytes'            => int,
   'bytes_normalized' => float,
-  'paths'            => ?array<string, ObjprofPathsStats>,
+  'paths'            => ?darray<string, ObjprofPathsStats>,
 );
 
 type ObjprofStringStats = shape(
@@ -33,7 +33,7 @@ type ObjprofStringStats = shape(
   'path'  => string,
 );
 
-function thread_memory_stats(): array<string, int>; // auto-imported from HH namespace
+function thread_memory_stats(): darray<string, int>; // auto-imported from HH namespace
 
 function thread_mark_stack(): void; // auto-imported from HH namespace
 
@@ -44,30 +44,30 @@ namespace HH {
 function objprof_get_data(
   int $flags = OBJPROF_FLAGS_DEFAULT,
   varray<string> $exclude_list = varray[],
-): array<string, ObjprofObjectStats>; // auto-imported from HH namespace
+): darray<string, ObjprofObjectStats>; // auto-imported from HH namespace
 
 function objprof_get_paths(
   int $flags = OBJPROF_FLAGS_DEFAULT,
   varray<string> $exclude_list = varray[],
-): array<string, ObjprofObjectStats>; // auto-imported from HH namespace
+): darray<string, ObjprofObjectStats>; // auto-imported from HH namespace
 
 function objprof_get_strings(
   int $min_dup,
-): array<string, ObjprofStringStats>; // auto-imported from HH namespace
+): darray<string, ObjprofStringStats>; // auto-imported from HH namespace
 
 //////////////////////////////////////////////////////////////////
 // Heap graph
 
 function heapgraph_create(): resource; // auto-imported from HH namespace
 
-function heapgraph_stats(resource $heapgraph): array<string, int>; // auto-imported from HH namespace
+function heapgraph_stats(resource $heapgraph): darray<string, int>; // auto-imported from HH namespace
 
 function heapgraph_foreach_node(resource $heapgraph, mixed $callback): void; // auto-imported from HH namespace
 function heapgraph_foreach_edge(resource $heapgraph, mixed $callback): void; // auto-imported from HH namespace
 function heapgraph_foreach_root(resource $heapgraph, mixed $callback): void; // auto-imported from HH namespace
-function heapgraph_dfs_nodes(resource $heapgraph, array<int> $roots, array<int> $skips, mixed $callback): void; // auto-imported from HH namespace
-function heapgraph_dfs_edges(resource $heapgraph, array<int> $roots, array<int> $skips, mixed $callback): void; // auto-imported from HH namespace
-function heapgraph_node(resource $heapgraph, int $index): array<string, mixed>; // auto-imported from HH namespace
-function heapgraph_edge(resource $heapgraph, int $index): array<string, mixed>; // auto-imported from HH namespace
-function heapgraph_node_in_edges(resource $heapgraph, int $index): array<array<string, mixed>>; // auto-imported from HH namespace
-function heapgraph_node_out_edges(resource $heapgraph, int $index): array<array<string, mixed>>; // auto-imported from HH namespace
+function heapgraph_dfs_nodes(resource $heapgraph, varray<int> $roots, varray<int> $skips, mixed $callback): void; // auto-imported from HH namespace
+function heapgraph_dfs_edges(resource $heapgraph, varray<int> $roots, varray<int> $skips, mixed $callback): void; // auto-imported from HH namespace
+function heapgraph_node(resource $heapgraph, int $index): darray<string, mixed>; // auto-imported from HH namespace
+function heapgraph_edge(resource $heapgraph, int $index): darray<string, mixed>; // auto-imported from HH namespace
+function heapgraph_node_in_edges(resource $heapgraph, int $index): varray<darray<string, mixed>>; // auto-imported from HH namespace
+function heapgraph_node_out_edges(resource $heapgraph, int $index): varray<darray<string, mixed>>; // auto-imported from HH namespace

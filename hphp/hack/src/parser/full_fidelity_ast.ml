@@ -13,6 +13,9 @@ open Hh_core
 (* What we are lowering to *)
 open Ast
 
+(* Don't allow expressions to nest deeper than this to avoid stack overflow *)
+let recursion_limit = 30000
+
 (* Context of the file being parsed, as (hopefully some day read-only) state. *)
 type env =
   { is_hh_file               : bool
@@ -47,6 +50,7 @@ type env =
               HALT_COMPILER is at x bytes offset in the file.
   *)
   ; saw_compiler_halt_offset : (int option) ref
+  ; recursion_depth : int ref
   }[@@deriving show]
 
 let make_env
@@ -103,6 +107,7 @@ let make_env
     ; unsafes = ISet.empty
     ; saw_std_constant_redefinition = false
     ; saw_compiler_halt_offset = ref None
+    ; recursion_depth = ref 0
     }
 
 type result =
@@ -969,8 +974,11 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       let args = couldMap ~f:pExpr arg_list env in
       args, [] in
   let rec pExpr_ : expr_ parser = fun node env ->
+    env.recursion_depth := !(env.recursion_depth) + 1;
+    if !(env.recursion_depth) > recursion_limit then
+      failwith "Expression recursion limit reached";
     let pos = pPos node env in
-    match syntax node with
+    let result = match syntax node with
     | LambdaExpression {
         lambda_async; lambda_coroutine; lambda_signature; lambda_body;
         lambda_attribute_spec; _ } ->
@@ -1615,6 +1623,10 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       Xml (name, attrs, exprs)
     (* FIXME; should this include Missing? ; "| Missing -> Null" *)
     | _ -> missing_syntax ?fallback:(Some Null) "expression" node env
+    in
+    env.recursion_depth := !(env.recursion_depth) - 1;
+    assert (!(env.recursion_depth) >= 0);
+    result
   in
   let outer_unsafes = env.unsafes in
   let is_safe =

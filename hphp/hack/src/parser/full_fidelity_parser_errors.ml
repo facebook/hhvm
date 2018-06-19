@@ -2554,6 +2554,11 @@ let declare_errors env node parents errors =
   | DeclareBlockStatement { declare_block_expression = expr; _} ->
     let errors =
       match syntax expr with
+      | BinaryExpression { binary_right_operand = r; _ } ->
+        check_constant_expression errors r
+      | _ -> errors in
+    let errors =
+      match syntax expr with
       | BinaryExpression
         { binary_left_operand = loper
         ; binary_operator = op
@@ -2679,13 +2684,6 @@ let find_syntax_errors env =
         let errors =
           class_property_multiple_visibility_error env node parents errors in
         trait_require_clauses, names, errors
-      | PropertyDeclarator { property_initializer; _ } ->
-        let is_static_prop = match parents with
-          | _ :: _ :: x :: _ -> property_modifier_contains_helper is_static x
-          | _ -> false in
-        let errors = if is_static_prop then
-          check_constant_expression errors property_initializer else errors in
-        trait_require_clauses, names, errors
       | Enumerator _ ->
         let errors = enum_errors node errors in
         trait_require_clauses, names, errors
@@ -2701,8 +2699,10 @@ let find_syntax_errors env =
       | XHPExpression _ ->
         let errors = xhp_errors env node errors in
         trait_require_clauses, names, errors
-      | StaticDeclarator { static_initializer; _ } ->
-        let errors = check_constant_expression errors static_initializer in
+      | PropertyDeclarator { property_initializer = init; _ }
+      | StaticDeclarator { static_initializer = init; _ }
+      | XHPClassAttribute { xhp_attribute_decl_initializer = init; _ } ->
+        let errors = check_constant_expression errors init in
         trait_require_clauses, names, errors
       | _ -> trait_require_clauses, names, errors in
 

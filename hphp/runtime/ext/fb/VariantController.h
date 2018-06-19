@@ -41,7 +41,7 @@ struct VariantControllerImpl {
   typedef String StringType;
 
   // variant accessors
-  static HPHP::serialize::Type type(const VariantType& obj) {
+  static HPHP::serialize::Type type(const_variant_ref obj) {
     switch (obj.getType()) {
       case KindOfUninit:
       case KindOfNull:       return HPHP::serialize::Type::NULLT;
@@ -77,14 +77,14 @@ struct VariantControllerImpl {
     }
     not_reached();
   }
-  static int64_t asInt64(const VariantType& obj) { return obj.toInt64(); }
-  static bool asBool(const VariantType& obj) { return obj.toInt64() != 0; }
-  static double asDouble(const VariantType& obj) { return obj.toDouble(); }
-  static const String& asString(const VariantType& obj) {
+  static int64_t asInt64(const_variant_ref obj) { return obj.toInt64(); }
+  static bool asBool(const_variant_ref obj) { return obj.toInt64() != 0; }
+  static double asDouble(const_variant_ref obj) { return obj.toDouble(); }
+  static const String& asString(const_variant_ref obj) {
     return obj.toCStrRef();
   }
-  static const Array& asMap(const VariantType& obj) { return obj.toCArrRef(); }
-  static const Array& asVector(const VariantType& obj) { return obj.toCArrRef(); }
+  static const Array& asMap(const_variant_ref obj) { return obj.toCArrRef(); }
+  static const Array& asVector(const_variant_ref obj) { return obj.toCArrRef(); }
 
   // variant creators
   static VariantType createNull() { return init_null(); }
@@ -134,7 +134,7 @@ struct VariantControllerImpl {
   }
   static void mapNext(ArrayIter& it) { ++it; }
   static Variant mapKey(ArrayIter& it) { return it.first(); }
-  static const VariantType& mapValue(ArrayIter& it) { return it.secondRef(); }
+  static const_variant_ref mapValue(ArrayIter& it) { return it.secondRef(); }
 
   // vector methods
   static VectorType createVector() {
@@ -154,7 +154,7 @@ struct VariantControllerImpl {
     return !it.end();
   }
   static void vectorNext(ArrayIter& it) { ++it; }
-  static const VariantType& vectorValue(ArrayIter& it) {
+  static const_variant_ref vectorValue(ArrayIter& it) {
     return it.secondRef();
   }
 

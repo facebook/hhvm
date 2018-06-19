@@ -598,19 +598,18 @@ void IniSetting::ParserCallback::onPopEntry(
     auto const hash = arr->toArrRef().lvalAt(skey);
     forceToArray(hash);
     if (!oEmpty) {                         // a[b]
-      makeArray(tvAsVariant(hash.tv_ptr()), offset, value);
+      makeArray(hash, offset, value);
     } else {                               // a[]
       asArrRef(hash).append(value);
     }
   }
 }
 
-void IniSetting::ParserCallback::makeArray(Variant& hash,
+void IniSetting::ParserCallback::makeArray(tv_lval val,
                                            const std::string& offset,
                                            const std::string& value) {
   assertx(!offset.empty());
-  Variant *val = &hash;
-  assertx(val->isArray());
+  assertx(variant_ref{val}.isArray());
   auto start = offset.c_str();
   auto p = start;
   bool last = false;
@@ -621,10 +620,9 @@ void IniSetting::ParserCallback::makeArray(Variant& hash,
     //   hhvm.a[b][c][d]
     // b will be hash and an array already, but c and d might
     // not exist and will need to be made an array
-    forceToArray(*val);
-    val = &tvAsVariant(val->toArrRef().lvalAt(index).tv_ptr());
+    val = forceToArray(val).lvalAt(index);
     if (last) {
-      *val = Variant(value);
+      tvMove(make_tv<KindOfString>(StringData::Make(value)), val);
     } else {
       p += index.size() + 1;
     }
@@ -641,17 +639,14 @@ void IniSetting::ParserCallback::makeSettingSub(const String& key,
   assertx(type == ":" || type == "@");
   std::vector<std::string> copy_name_parts = split_brackets(value);
   assertx(!copy_name_parts.empty());
-  Variant* base = &cur_settings;
+  auto base = tv_lval{cur_settings.asTypedValue()};
   bool skip = false;
   for (auto& part : copy_name_parts) {
-    if (!base->isArray()) {
-      *base = Array::Create();
-    }
-    auto lval = base->toArrRef().lvalAt(String(part));
+    auto lval = forceToArray(base).lvalAt(String(part));
     if (isNullType(lval.unboxed().type())) {
       skip = true;
     } else {
-      base = &tvAsVariant(lval.tv_ptr());
+      base = lval;
     }
   }
   // if skip is true we have something like:
@@ -663,17 +658,17 @@ void IniSetting::ParserCallback::makeSettingSub(const String& key,
                     "does not exist. Skipping!", key.toCppString().c_str(),
                     offset.c_str(), value.c_str());
   } else if (offset == ":") {
-   cur_settings.toArrRef().setRef(key, *base);
+   cur_settings.toArrRef().setRef(key, base);
   } else if (offset == "@") {
     cur_settings.toArrRef().set(key, *base);
   } else {
-    traverseToSet(key, offset, *base, cur_settings, type);
+    traverseToSet(key, offset, base, cur_settings, type);
   }
 }
 
 void IniSetting::ParserCallback::traverseToSet(const String &key,
                                                const std::string& offset,
-                                               Variant& value,
+                                               tv_lval value,
                                                Variant& cur_settings,
                                                const std::string& stopChar) {
   assertx(stopChar == "@" || stopChar == ":");
@@ -682,25 +677,23 @@ void IniSetting::ParserCallback::traverseToSet(const String &key,
   auto isSymlink = stopChar == ":";
   auto start = offset.c_str();
   auto p = start;
-  auto const first(cur_settings.toArrRef().lvalAt(key));
+  tv_lval first = cur_settings.toArrRef().lvalAt(key);
   forceToArray(first);
-  Variant *setting = &tvAsVariant(first.tv_ptr());
   String index;
   bool done = false;
   while (!done) {
     index = String(p);
     p += index.size() + 1;
     if (strcmp(p, stopChar.c_str()) != 0) {
-      forceToArray(*setting);
-      setting = &tvAsVariant(setting->toArrRef().lvalAt(index).tv_ptr());
+      first = forceToArray(first).lvalAt(index);
     } else {
       done = true;
     }
   }
   if (isSymlink) {
-    setting->toArrRef().setRef(index, value);
+    toArrRef(first).setRef(index, value);
   } else {
-    setting->toArrRef().set(index, value);
+    toArrRef(first).set(index, *value);
   }
 }
 
@@ -867,7 +860,7 @@ IniSettingMap IniSetting::FromStringAsMap(const std::string& ini,
   return ret;
 }
 
-Variant IniSetting::Unbox(const Variant& boxed, std::set<ArrayData*>& seen,
+Variant IniSetting::Unbox(const_variant_ref boxed, std::set<ArrayData*>& seen,
                           bool& use_defaults, const String& array_key) {
   assertx(boxed.isArray());
   Variant unboxed(Array::Create());
@@ -878,20 +871,22 @@ Variant IniSetting::Unbox(const Variant& boxed, std::set<ArrayData*>& seen,
       // asserting here to ensure that key is  a scalar type that can be
       // converted to a string.
       assertx(key.isScalar());
-      auto& elem = tvAsCVarRef(it.secondRval().tv_ptr());
+      auto elem = it.secondRef();
       unboxed.asArrRef().set(
         key,
-        elem.isArray() ? Unbox(elem, seen, use_defaults, key.toString()) : elem
+        elem.isArray()
+          ? *Unbox(elem, seen, use_defaults, key.toString()).asTypedValue()
+          : *elem.rval()
       );
     }
     seen.erase(ad);
   } else {
-    // The insert into seen wasn't successful. We have recursion.
-    // break the recursive cycle, so the elements can be freed by the MM.
-    // The const_cast is ok because we fully own the array, with no sharing.
+    // The insert into seen wasn't successful. We have recursion.  break the
+    // recursive cycle, so the elements can be freed by the MM. The
+    // as_variant_ref() is ok because we fully own the array, with no sharing.
 
     // Use the current array key to give a little help in the log message
-    const_cast<Variant&>(boxed).unset();
+    boxed.as_variant_ref().unset();
     use_defaults = true;
     Logger::Warning("INI Recursion Detected at offset named %s. "
                     "Using default runtime settings.",

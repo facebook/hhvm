@@ -817,11 +817,15 @@ struct Variant : private TypedValue {
     tvSet(tvToInitCell(*v.asTypedValue()), *asTypedValue());
     return *this;
   }
-  Variant& assignRef(Variant& v) noexcept {
-    assertx(&v != &uninit_variant);
-    tvBoxIfNeeded(*v.asTypedValue());
-    tvBind(*v.asTypedValue(), *asTypedValue());
+  Variant& assignRef(tv_lval tv) noexcept {
+    tvSetRef(tv, asTypedValue());
     return *this;
+  }
+  Variant& assignRef(variant_ref v) noexcept {
+    return assignRef(v.lval());
+  }
+  Variant& assignRef(Variant& v) noexcept {
+    return assignRef(v.asTypedValue());
   }
   Variant& assignRef(VRefParam v) = delete;
 

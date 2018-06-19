@@ -863,7 +863,7 @@ ArrayData* ArrayData::CreateRef(Variant& value) {
   return pai.create();
 }
 
-ArrayData* ArrayData::CreateRef(TypedValue name, Variant& value) {
+ArrayData* ArrayData::CreateRef(TypedValue name, tv_lval value) {
   if (debug) assertForCreate(name);
 
   ArrayInit init(1, ArrayInit::Map{});

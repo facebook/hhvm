@@ -293,7 +293,7 @@ void loadFuncContextImpl(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
   bool dynamic = false;
 
   auto func = vm_decode_function(
-    VarNR(arr),
+    VarNR(arr).operator const Variant&(),
     fp,
     false, // forward
     inst,

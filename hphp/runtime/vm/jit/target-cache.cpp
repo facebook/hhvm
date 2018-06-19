@@ -107,7 +107,7 @@ void FuncCache::lookup(rds::Handle handle,
       bool dynamic = false;
       try {
         func = vm_decode_function(
-          String(sd),
+          Variant{sd},
           fp,
           false /* forward */,
           this_,

@@ -161,8 +161,8 @@ public:
    * insertion.
    */
   static ArrayData* CreateRef(Variant& value);
-  static ArrayData* CreateRef(TypedValue name, Variant& value);
-  static ArrayData* CreateRef(const Variant& name, Variant& value);
+  static ArrayData* CreateRef(TypedValue name, tv_lval value);
+  static ArrayData* CreateRef(const Variant& name, tv_lval value);
 
   /*
    * Make a copy of the array.

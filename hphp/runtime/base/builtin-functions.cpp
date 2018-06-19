@@ -187,7 +187,7 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
 }
 
 const HPHP::Func*
-vm_decode_function(const Variant& function,
+vm_decode_function(const_variant_ref function,
                    ActRec* ar,
                    bool forwarding,
                    ObjectData*& this_,
@@ -420,7 +420,7 @@ vm_decode_function(const Variant& function,
     return f;
   }
   if (function.isObject()) {
-    this_ = function.asCObjRef().get();
+    this_ = function.toCObjRef().get();
     cls = nullptr;
     dynamic = false;
     const HPHP::Func *f = this_->getVMClass()->lookupMethod(s___invoke.get());
@@ -442,7 +442,7 @@ vm_decode_function(const Variant& function,
   return nullptr;
 }
 
-Variant vm_call_user_func(const Variant& function, const Variant& params,
+Variant vm_call_user_func(const_variant_ref function, const Variant& params,
                           bool forwarding /* = false */,
                           bool checkRef /* = false */) {
   ObjectData* obj = nullptr;

@@ -110,7 +110,7 @@ bool array_is_valid_callback(const Array& arr);
 
 enum class DecodeFlags { Warn, NoWarn, LookupOnly };
 const HPHP::Func*
-vm_decode_function(const Variant& function,
+vm_decode_function(const_variant_ref function,
                    ActRec* ar,
                    bool forwarding,
                    ObjectData*& this_,
@@ -120,7 +120,7 @@ vm_decode_function(const Variant& function,
                    DecodeFlags flags = DecodeFlags::Warn);
 
 inline void
-vm_decode_function(const Variant& function,
+vm_decode_function(const_variant_ref function,
                    ActRec* ar,
                    bool forwarding,
                    CallCtx& ctx,
@@ -129,8 +129,16 @@ vm_decode_function(const Variant& function,
                                 ctx.invName, ctx.dynamic, flags);
 }
 
-Variant vm_call_user_func(const Variant& function, const Variant& params,
+Variant vm_call_user_func(const_variant_ref function, const Variant& params,
                           bool forwarding = false, bool checkRef = false);
+template<typename T>
+Variant vm_call_user_func(T&& t, const Variant& params,
+                          bool forwarding = false, bool checkRef = false) {
+  const Variant function{std::forward<T>(t)};
+  return vm_call_user_func(
+    const_variant_ref{function}, params, forwarding, checkRef
+  );
+}
 
 Variant invoke_static_method(const String& s, const String& method,
                              const Variant& params, bool fatal = true);

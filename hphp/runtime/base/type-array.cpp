@@ -707,6 +707,11 @@ void Array::setWithRefImpl(const T& key, TypedValue v) {
 
 template<typename T> ALWAYS_INLINE
 void Array::setRefImpl(const T& key, Variant& v) {
+  setRefImpl(key, tv_lval{v.asTypedValue()});
+}
+
+template<typename T> ALWAYS_INLINE
+void Array::setRefImpl(const T& key, tv_lval v) {
   if (!m_arr) {
     m_arr = Ptr::attach(ArrayData::CreateRef(key, v));
   } else {
@@ -868,6 +873,7 @@ FOR_EACH_KEY_TYPE(set, TypedValue)
 FOR_EACH_KEY_TYPE(add, TypedValue)
 FOR_EACH_KEY_TYPE(setWithRef, TypedValue)
 FOR_EACH_KEY_TYPE(setRef, Variant&)
+FOR_EACH_KEY_TYPE(setRef, tv_lval)
 
 #undef I
 #undef V

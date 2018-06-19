@@ -206,8 +206,8 @@ struct ArrayIter {
   TypedValue secondVal() const { return secondRval().tv(); }
   TypedValue secondValPlus() { return secondRvalPlus().tv(); }
 
-  const Variant& secondRef() const {
-    return tvAsCVarRef(secondRval().tv_ptr());
+  const_variant_ref secondRef() const {
+    return const_variant_ref(secondRval());
   }
 
   // Inline version of secondRef.  Only for use in iterator helpers.
@@ -387,19 +387,17 @@ struct MArrayIter {
     return data->getKey(m_pos);
   }
 
-  Variant& val() {
+  variant_ref val() {
     ArrayData* data = getArray();
     assertx(data && data == getContainer());
     assertx(!data->cowCheck() || data->noCopyOnWrite());
     assertx(!getResetFlag());
     assertx(data->validMArrayIter(*this));
-    // Normally it's not ok to modify the return value of rvalPos,
-    // but the whole point of mutable array iteration is that this is
-    // allowed, so this const_cast is not actually evil.
-    // TODO(#9077255): Use tv_lval for this somehow.
-    return tvAsVariant(const_cast<TypedValue*>(
-      data->rvalPos(m_pos).tv_ptr()
-    ));
+    // Normally it's not ok to modify the return value of rvalPos, but the
+    // whole point of mutable array iteration is that this is allowed, so this
+    // as_lval() is not actually evil. This may change if we ever decide to
+    // make tv_rval hold the TypedValue by value, rather than a pointer.
+    return variant_ref{data->rvalPos(m_pos).as_lval()};
   }
 
   void release() { delete this; }

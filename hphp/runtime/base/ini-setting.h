@@ -185,14 +185,14 @@ public:
     virtual void onOp(std::string &result, char type, const std::string& op1,
                       const std::string& op2);
   protected:
-    void makeArray(Variant &hash, const std::string &offset,
+    void makeArray(tv_lval hash, const std::string &offset,
                    const std::string &value);
   private:
     // Substitution copy or symlink via @ or : markers in the config line
     void makeSettingSub(const String &key, const std::string &offset,
                         const std::string &value, Variant& cur_settings);
     void traverseToSet(const String &key, const std::string& offset,
-                       Variant& value, Variant& cur_settings,
+                       tv_lval value, Variant& cur_settings,
                        const std::string& stopChar);
   };
   struct SectionParserCallback : ParserCallback {
@@ -417,7 +417,7 @@ private:
   /**
    * Take a Variant full of KindOfRefs and unbox it.
    */
-  static Variant Unbox(const Variant& boxed, std::set<ArrayData*>& seen,
+  static Variant Unbox(const_variant_ref boxed, std::set<ArrayData*>& seen,
                        bool& use_defaults, const String& array_key);
 };
 

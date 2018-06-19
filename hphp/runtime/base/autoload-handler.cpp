@@ -303,7 +303,7 @@ AutoloadHandler::loadFromMap(const String& clsName,
     if (res == Success) return Success;
     auto const func = m_map.get()->get(s_failure);
     if (isNullType(func.unboxed().type())) return Failure;
-    res = invokeFailureCallback(tvAsCVarRef(func.tv_ptr()), kind, clsName, err);
+    res = invokeFailureCallback(const_variant_ref{func}, kind, clsName, err);
     if (checkExists()) return Success;
     if (res == RetryAutoloading) {
       continue;
@@ -313,8 +313,10 @@ AutoloadHandler::loadFromMap(const String& clsName,
 }
 
 AutoloadHandler::Result
-AutoloadHandler::invokeFailureCallback(const Variant& func, const String& kind,
-                                       const String& name, const Variant& err) {
+AutoloadHandler::invokeFailureCallback(
+    const_variant_ref func, const String& kind,
+    const String& name, const Variant& err
+) {
   // can throw, otherwise
   //  - true means the map was updated. try again
   //  - false means we should stop applying autoloaders (only affects classes)
@@ -465,8 +467,9 @@ AutoloadHandler::loadFromMapPartial(const String& className,
   if (!err.isNull()) {
     auto const func = m_map.get()->get(s_failure);
     if (!isNullType(func.unboxed().type())) {
-      res = invokeFailureCallback(tvAsCVarRef(func.tv_ptr()),
-                                  kind, className, err);
+      res = invokeFailureCallback(
+        const_variant_ref{func}, kind, className, err
+      );
       assertx(res != Failure);
       if (checkExists()) {
         return Success;

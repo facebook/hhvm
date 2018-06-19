@@ -500,6 +500,7 @@ public:
    * Set an element to a reference to `v', boxing it if it's unboxed.
    */
   FOR_EACH_KEY_TYPE(setRef, Variant&)
+  FOR_EACH_KEY_TYPE(setRef, tv_lval);
 
   /*
    * Add an element.
@@ -576,6 +577,7 @@ private:
   template<typename T> void setImpl(const T& key, TypedValue v);
   template<typename T> void setWithRefImpl(const T& key, TypedValue v);
   template<typename T> void setRefImpl(const T& key, Variant& v);
+  template<typename T> void setRefImpl(const T& key, tv_lval v);
   template<typename T> void addImpl(const T& key, TypedValue v);
 
   static void compileTimeAssertions();

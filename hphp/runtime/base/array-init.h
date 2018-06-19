@@ -420,19 +420,19 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
   /*
    * Call setRef() on the underlying array.
    */
-  MixedPHPArrayInitBase& setRef(int64_t name, Variant& v,
+  MixedPHPArrayInitBase& setRef(int64_t name, tv_lval v,
                                 bool /*keyConverted*/ = false) {
     this->performOp([&]{
-      return MixedArray::SetRefInt(this->m_arr, name, LV(v), false);
+      return MixedArray::SetRefInt(this->m_arr, name, v, false);
     });
     return *this;
   }
 
-  MixedPHPArrayInitBase& setRef(const String& name, Variant& v,
+  MixedPHPArrayInitBase& setRef(const String& name, tv_lval v,
                              bool keyConverted = false) {
     if (keyConverted) {
       this->performOp([&]{
-        return MixedArray::SetRefStr(this->m_arr, name.get(), LV(v), false);
+        return MixedArray::SetRefStr(this->m_arr, name.get(), v, false);
       });
     } else {
       this->performOp([&]{
@@ -442,7 +442,7 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
     return *this;
   }
 
-  MixedPHPArrayInitBase& setRef(TypedValue name, Variant& v,
+  MixedPHPArrayInitBase& setRef(TypedValue name, tv_lval v,
                                 bool keyConverted = false) {
     if (keyConverted) {
       this->performOp([&]{
@@ -456,13 +456,13 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
     }
     return *this;
   }
-  MixedPHPArrayInitBase& setRef(const Variant& name, Variant& v,
+  MixedPHPArrayInitBase& setRef(const Variant& name, tv_lval v,
                                 bool keyConverted = false) {
     return setRef(*name.asTypedValue(), v, keyConverted);
   }
 
   template<typename T>
-  MixedPHPArrayInitBase& setRef(const T& name, Variant& v,
+  MixedPHPArrayInitBase& setRef(const T& name, tv_lval v,
                                 bool keyConverted = false) {
     if (keyConverted) {
       this->performOp([&]{ return this->m_arr->setRef(name, v, false); });

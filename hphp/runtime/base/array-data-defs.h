@@ -51,7 +51,7 @@ inline ArrayData* ArrayData::CreateWithRef(const Variant& name,
   return CreateWithRef(*name.asTypedValue(), value);
 }
 
-inline ArrayData* ArrayData::CreateRef(const Variant& name, Variant& value) {
+inline ArrayData* ArrayData::CreateRef(const Variant& name, tv_lval value) {
   return CreateRef(*name.asTypedValue(), value);
 }
 
@@ -567,7 +567,7 @@ inline ArrayData* ArrayData::appendRef(Variant& v, bool copy) {
 }
 
 inline Variant ArrayData::getValue(ssize_t pos) const {
-  return tvAsCVarRef(rvalPos(pos).tv_ptr());
+  return const_variant_ref{rvalPos(pos)};
 }
 
 inline Variant ArrayData::getKey(ssize_t pos) const {

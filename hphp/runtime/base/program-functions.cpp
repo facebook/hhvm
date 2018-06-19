@@ -346,7 +346,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
         type(lval) = KindOfPersistentArray;
         val(lval).parr = staticEmptyArray();
         gpc_elements.push_back(uninit_null());
-        gpc_elements.back().assignRef(tvAsVariant(lval.tv_ptr()));
+        gpc_elements.back().assignRef(lval);
       } else {
         String key(index, index_len, CopyString);
         auto const v = symtable->rvalAt(key).unboxed();
@@ -354,9 +354,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
           symtable->set(key, Array::Create());
         }
         gpc_elements.push_back(uninit_null());
-        gpc_elements.back().assignRef(
-          tvAsVariant(symtable->lvalAt(key).tv_ptr())
-        );
+        gpc_elements.back().assignRef(symtable->lvalAt(key));
       }
       symtable = &gpc_elements.back().toArrRef();
       /* ip pointed to the '[' character, now obtain the key */

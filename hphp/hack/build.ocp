@@ -174,22 +174,6 @@ begin library "hh-emitter"
   ]
 end
 
-begin library "hh-format"
-  requires = [ "hh-typing-base" ]
-  files = [
-    "src/diff/parse_diff.ml"
-    "src/stubs/formatEventLogger.ml"
-    "src/format/format_hack.ml"
-    "src/format/format_diff.ml"
-    "src/format/format_mode.ml"
-  ]
-end
-
-begin program "hh_format"
-  requires = [ "hh-format" "hh-client" ]
-  files = [ "src/hh_format.ml" ]
-end
-
 begin program "hh_single_type_check"
   requires = [ "hh-client"  "hh-emitter" ]
   files = [

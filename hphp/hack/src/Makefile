@@ -126,7 +126,6 @@ TARGETS_BASE=\
 	_build/hh_server \
 	_build/hh_client \
 	_build/hh_single_type_check \
-	_build/hh_format \
 	_build/hackfmt \
 	_build/full_fidelity_parse \
 	_build/hh_single_compile
@@ -254,7 +253,6 @@ copy-hack-files: build-hack
 	cp _build/hh_client.$(TARGET_EXT) ../bin/hh_client
 	cp _build/hh_single_type_check.$(TARGET_EXT) ../bin/hh_single_type_check
 	cp _build/hackfmt.$(TARGET_EXT) ../bin/hackfmt
-	cp _build/hh_format.$(TARGET_EXT) ../bin/hh_format
 	cp _build/full_fidelity_parse.$(TARGET_EXT) ../bin/hh_parse
 	cp _build/hh_single_compile.$(TARGET_EXT) ../bin/hh_single_compile
 
@@ -270,7 +268,6 @@ copy-hack-files-ocp: build-hack-with-ocp
 	cp ../_obuild/hh_client/hh_client.asm ../bin/hh_client
 	cp ../_obuild/hh_single_type_check/hh_single_type_check.asm ../bin/hh_single_type_check
 	cp ../_obuild/hh_format/hackfmt.asm ../bin/hackfmt
-	cp ../_obuild/hh_format/hh_format.asm ../bin/hh_format
 	cp ../_obuild/full_fidelity_parse.asm ../bin/hh_parse
 	cp ../_obuild/hh_single_compile.asm ../bin/hh_single_compile
 
@@ -288,12 +285,6 @@ do-test:
 	python3 ../test/verify.py --program ../bin/hh_single_type_check ../test/coverage
 	python3 ../test/verify.py --program ../bin/hh_single_type_check ../test/dumpsymbolinfo
 	python3 ../test/verify.py --program ../bin/hh_single_type_check ../test/dump_inheritance
-	python3 ../test/verify.py --program ../bin/hh_format ../test/format
 	python3 ../test/verify.py --program ../bin/hh_single_type_check ../test/suggest
 	python3 ../test/verify.py --program ../bin/hh_single_type_check ../test/typecheck
-	python3 ../test/verify.py --program ../bin/hh_format ../test/typecheck \
-		--disabled-extension .no_format \
-		--out-extension .format_out \
-		--expect-extension '' \
-		--flags --root .
 	python3 ../test/integration/runner.py ../bin/hh_server ../bin/hh_client

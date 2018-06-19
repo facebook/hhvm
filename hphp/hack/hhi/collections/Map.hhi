@@ -72,6 +72,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    *           `Map`.
    */
   <<__Rx>>
+  /* HH_IGNORE_ERROR[2082] T30260145 */
   public function toArray(): array<Tk, Tv>;
 
   /**
@@ -81,7 +82,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    *           current `Map`.
    */
   <<__Rx>>
-  public function toValuesArray(): array<Tv>;
+  public function toValuesArray(): varray<Tv>;
 
   /**
    * Returns an `array` whose values are the keys of the current `Map`.
@@ -90,7 +91,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    *           `Map`.
    */
   <<__Rx>>
-  public function toKeysArray(): array<Tk>;
+  public function toKeysArray(): varray<Tk>;
 
   /**
    * Returns a `Vector` with the values of the current `Map`.
@@ -667,7 +668,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * @return - A `Map` with the key/value pairs from the provided `array`.
    */
   <<__Deprecated('Use `new Map($arr)` instead.')>>
-  public static function fromArray(array<Tk, Tv> $arr): Map<Tk, Tv>;
+  public static function fromArray(darray<Tk, Tv> $arr): Map<Tk, Tv>;
 
   /**
    * Creates a `Map` from the given `Traversable`, or an empty `Map` if

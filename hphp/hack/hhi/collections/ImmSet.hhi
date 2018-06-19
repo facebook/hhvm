@@ -87,6 +87,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *           where each key of the `array` are the same as each value.
    */
   <<__Rx>>
+  /* HH_IGNORE_ERROR[2082] T30260145 */
   public function toArray(): array<Tv, Tv>;
 
   /**
@@ -100,7 +101,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *           current `ImmSet`.
    */
   <<__Rx>>
-  public function toKeysArray(): array<Tv>;
+  public function toKeysArray(): varray<Tv>;
 
   /**
    * Returns an `array` containing the values from the current `ImmSet`.
@@ -111,7 +112,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *           current `ImmSet`.
    */
   <<__Rx>>
-  public function toValuesArray(): array<Tv>;
+  public function toValuesArray(): varray<Tv>;
 
   /**
    * Returns an iterator that points to beginning of the current `ImmSet`.

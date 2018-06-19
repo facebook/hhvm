@@ -63,6 +63,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @return - an `array` containing the values from the current `Pair`.
    */
   <<__Rx>>
+  /* HH_IGNORE_ERROR[2082] T30260145 */
   public function toArray(): array;
 
   /**
@@ -73,7 +74,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @return - an `array` containing the values from the current `Pair`.
    */
   <<__Rx>>
-  public function toValuesArray(): array;
+  public function toValuesArray(): varray;
 
   /**
    * Returns an `array` whose values are the keys from the current `Pair`.
@@ -81,7 +82,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @return - an `array` with the integer keys from the current `Pair`.
    */
   <<__Rx>>
-  public function toKeysArray(): array;
+  public function toKeysArray(): varray;
 
  /**
    * Returns a `Vector` containing the elements of the current `Pair`.

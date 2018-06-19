@@ -273,6 +273,7 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @return - an array converted from the current `Iterable`.
    */
+   /* HH_IGNORE_ERROR[2082] T30260145 */
   public function toArray(): array;
   /**
    * Returns an `array` with the values from the current `Iterable`.
@@ -282,7 +283,7 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @return - an `array` containing the values from the current `Iterable`.
    */
-  public function toValuesArray(): array;
+  public function toValuesArray(): varray;
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
@@ -534,7 +535,7 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    * @return - an `array` containing the values from the current
    *           `KeyedIterable`.
    */
-  public function toKeysArray(): array;
+  public function toKeysArray(): varray;
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */

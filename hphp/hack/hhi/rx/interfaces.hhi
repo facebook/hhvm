@@ -133,6 +133,7 @@ interface Iterable<+Tv>
    * @return - an array converted from the current `Iterable`.
    */
   <<__Rx>>
+  /* HH_IGNORE_ERROR[2082] T30260145 */
   public function toArray(): array;
   /**
    * Returns an `array` with the values from the current `Iterable`.
@@ -143,7 +144,7 @@ interface Iterable<+Tv>
    * @return - an `array` containing the values from the current `Iterable`.
    */
   <<__Rx>>
-  public function toValuesArray(): array;
+  public function toValuesArray(): varray;
   /**
    * Returns a `Vector` converted from the current `Iterable`.
    *
@@ -419,7 +420,7 @@ interface KeyedIterable<Tk, +Tv>
    *           `KeyedIterable`.
    */
   <<__Rx>>
-  public function toKeysArray(): array;
+  public function toKeysArray(): varray;
   /**
    * Returns a `Map` based on the keys and values of the current
    * `KeyedIterable`.

@@ -66,6 +66,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *           each key of the `array` are the same as each value.
    */
   <<__Rx>>
+  /* HH_IGNORE_ERROR[2082] T30260145 */
   public function toArray(): array<Tv, Tv>;
 
   /**
@@ -79,7 +80,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *           current `Set`.
    */
   <<__Rx>>
-  public function toKeysArray(): array<Tv>;
+  public function toKeysArray(): varray<Tv>;
 
   /**
    * Returns an `array` containing the values from the current `Set`.
@@ -90,7 +91,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *           current `Set`.
    */
   <<__Rx>>
-  public function toValuesArray(): array<Tv>;
+  public function toValuesArray(): varray<Tv>;
 
   /**
    * Returns a `Vector` of the current `Set` values.
@@ -623,7 +624,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - A `Set` with the values from the provided `array`.
    */
   <<__Deprecated('Use `new Set($arr)` instead.')>>
-  public static function fromArray<T>(array<T, Tv> $arr): Set<Tv>;
+  public static function fromArray<T>(darray<T, Tv> $arr): Set<Tv>;
 
   /**
    * Returns a `Set` containing all the values from the specified `array`(s).

@@ -127,7 +127,7 @@ interface MutableSet extends ConstSet,
 
 trait StrictIterable {
   public function toArray() {
-    $arr = array();
+    $arr = varray[];
     foreach ($this as $v) {
       $arr[] = $v;
     }
@@ -256,21 +256,21 @@ trait StrictIterable {
 
 trait StrictKeyedIterable {
   public function toArray() {
-    $arr = array();
+    $arr = darray[];
     foreach ($this as $k => $v) {
       $arr[$k] = $v;
     }
     return $arr;
   }
   public function toValuesArray() {
-    $arr = array();
+    $arr = varray[];
     foreach ($this as $v) {
       $arr[] = $v;
     }
     return $arr;
   }
   public function toKeysArray() {
-    $arr = array();
+    $arr = varray[];
     foreach ($this as $k => $_) {
       $arr[] = $k;
     }
@@ -434,7 +434,7 @@ trait StrictKeyedIterable {
 
 trait LazyIterable {
   public function toArray() {
-    $arr = array();
+    $arr = varray[];
     foreach ($this as $v) {
       $arr[] = $v;
     }
@@ -509,21 +509,21 @@ trait LazyIterable {
 
 trait LazyKeyedIterable {
   public function toArray() {
-    $arr = array();
+    $arr = darray[];
     foreach ($this as $k => $v) {
       $arr[$k] = $v;
     }
     return $arr;
   }
   public function toValuesArray() {
-    $arr = array();
+    $arr = varray[];
     foreach ($this as $v) {
       $arr[] = $v;
     }
     return $arr;
   }
   public function toKeysArray() {
-    $arr = array();
+    $arr = varray[];
     foreach ($this as $k => $_) {
       $arr[] = $k;
     }
@@ -1725,7 +1725,7 @@ class LazyIterableView implements \HH\Iterable {
   public function __construct($iterable) { $this->iterable = $iterable; }
   public function getIterator() { return $this->iterable->getIterator(); }
   public function toArray() {
-    $arr = array();
+    $arr = varray[];
     foreach ($this->iterable as $v) {
       $arr[] = $v;
     }
@@ -1804,21 +1804,21 @@ class LazyKeyedIterableView implements \HH\KeyedIterable {
   public function __construct($iterable) { $this->iterable = $iterable; }
   public function getIterator() { return $this->iterable->getIterator(); }
   public function toArray() {
-    $arr = array();
+    $arr = darray[];
     foreach ($this->iterable as $k => $v) {
       $arr[$k] = $v;
     }
     return $arr;
   }
   public function toValuesArray() {
-    $arr = array();
+    $arr = varray[];
     foreach ($this->iterable as $v) {
       $arr[] = $v;
     }
     return $arr;
   }
   public function toKeysArray() {
-    $arr = array();
+    $arr = varray[];
     foreach ($this->iterable as $k => $_) {
       $arr[] = $k;
     }

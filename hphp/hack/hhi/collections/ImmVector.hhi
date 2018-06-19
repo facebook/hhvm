@@ -122,6 +122,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * @return - An `array` containing the values from the current `ImmVector`.
    */
   <<__Rx>>
+  /* HH_IGNORE_ERROR[2082] T30260145 */
   public function toArray(): array<Tv>;
 
   /**
@@ -132,7 +133,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * @return - An `array` containing the values from the current `ImmVector`.
    */
   <<__Rx>>
-  public function toValuesArray(): array<Tv>;
+  public function toValuesArray(): varray<Tv>;
 
   /**
    * Returns an `array` whose values are the keys from the current `ImmVector`.
@@ -140,7 +141,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * @return - An `array` with the integer keys from the current `ImmVector`.
    */
   <<__Rx>>
-  public function toKeysArray(): array<Tv>;
+  public function toKeysArray(): varray<Tv>;
 
   /**
    * Returns an iterator that points to beginning of the current `ImmVector`.

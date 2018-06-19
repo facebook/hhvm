@@ -65,6 +65,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - An `array` containing the values from the current `Vector`.
    */
   <<__Rx>>
+  /* HH_IGNORE_ERROR[2082] T30260145 */
   public function toArray(): array<Tv>;
 
   /**
@@ -75,7 +76,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - An `array` containing the values from the current `Vector`.
    */
   <<__Rx>>
-  public function toValuesArray(): array<Tv>;
+  public function toValuesArray(): varray<Tv>;
 
   /**
    * Returns an `array` whose values are the keys from the current `Vector`.
@@ -83,7 +84,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - An `array` with the integer keys from the current `Vector`.
    */
   <<__Rx>>
-  public function toKeysArray(): array<int>;
+  public function toKeysArray(): varray<int>;
 
   /**
    * Returns a copy of the current `Vector`.
@@ -746,7 +747,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - A `Vector` with the values from the provided `array`.
    */
   <<__Deprecated('Use `new Vector($arr)` instead.')>>
-  public static function fromArray<T>(array<T, Tv> $arr): Vector<Tv>;
+  public static function fromArray<T>(darray<T, Tv> $arr): Vector<Tv>;
 
   /**
    * Creates a `Vector` from the given `Traversable`, or an empty `Vector` if

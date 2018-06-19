@@ -59,6 +59,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *           `ImmMap`.
    */
   <<__Rx>>
+  /* HH_IGNORE_ERROR[2082] T30260145 */
   public function toArray(): array<Tk, Tv>;
 
   /**
@@ -68,7 +69,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *           current `ImmMap`.
    */
   <<__Rx>>
-  public function toValuesArray(): array<Tv>;
+  public function toValuesArray(): varray<Tv>;
 
   /**
    * Returns an `array` whose values are the keys of the current `ImmMap`.
@@ -77,7 +78,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *           the current `ImmMap`.
    */
   <<__Rx>>
-  public function toKeysArray(): array<Tk>;
+  public function toKeysArray(): varray<Tk>;
 
   /**
    * Returns a `Vector` with the values of the current `ImmMap`.

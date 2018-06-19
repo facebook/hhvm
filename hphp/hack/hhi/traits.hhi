@@ -16,9 +16,10 @@
 
 trait StrictIterable<+Tv> implements Iterable<Tv> {
 
+  /* HH_IGNORE_ERROR[2082] T30260145 */
   public function toArray(): array;
 
-  public function toValuesArray(): array;
+  public function toValuesArray(): varray;
 
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
@@ -64,11 +65,12 @@ trait StrictIterable<+Tv> implements Iterable<Tv> {
 
 
 trait StrictKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
+  /* HH_IGNORE_ERROR[2082] T30260145 */
   public function toArray(): array;
 
-  public function toValuesArray(): array;
+  public function toValuesArray(): varray;
 
-  public function toKeysArray(): array;
+  public function toKeysArray(): varray;
 
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
@@ -137,9 +139,10 @@ trait StrictKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
 
 
 trait LazyIterable<+Tv> implements Iterable<Tv> {
+  /* HH_IGNORE_ERROR[2082] T30260145 */
   public function toArray(): array;
 
-  public function toValuesArray(): array;
+  public function toValuesArray(): varray;
 
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
@@ -185,11 +188,12 @@ trait LazyIterable<+Tv> implements Iterable<Tv> {
 
 
 trait LazyKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
+  /* HH_IGNORE_ERROR[2082] T30260145 */
   public function toArray(): array;
 
-  public function toValuesArray(): array;
+  public function toValuesArray(): varray;
 
-  public function toKeysArray(): array;
+  public function toKeysArray(): varray;
 
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe

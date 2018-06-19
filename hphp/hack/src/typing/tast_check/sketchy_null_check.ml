@@ -32,6 +32,10 @@ let rec find_sketchy_type env ty =
   | Tprim _ -> Some true
 
   | Tunresolved tyl -> List.find_map tyl (find_sketchy_type env)
+  | Tabstract _
+    when Env.forward_compat_ge env 2018_06_14 ->
+    let env, tyl = Env.get_concrete_supertypes env ety in
+    List.find_map tyl (find_sketchy_type env)
   | _ -> None
 
 let get_lvar_name = function

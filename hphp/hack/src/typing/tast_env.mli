@@ -57,7 +57,11 @@ val in_loop : env -> bool
 val get_tcopt : env -> TypecheckerOptions.t
 (** Return the {!TypecheckerOptions.t} with which this TAST was checked. *)
 
-val error_if_forward_compat_ge : int -> env -> (unit -> unit) -> unit
+val forward_compat_ge : env -> int -> bool
+(** Return {true} if the forward compatibility level is newer than the given ISO
+    date (represented with an int; e.g. 2018_06_14) *)
+
+val error_if_forward_compat_ge : env -> int -> (unit -> unit) -> unit
 (** Call the func if the forward compatibility level is new enough *)
 
 val expand_type : env -> Tast.ty -> env * Tast.ty

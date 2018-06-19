@@ -137,7 +137,9 @@ class virtual handler_base : handler = object
 end
 
 let if_enabled env f handler =
-  Env.error_if_forward_compat_ge handler#minimum_forward_compat_level env (fun () -> f handler)
+  Env.error_if_forward_compat_ge env
+    handler#minimum_forward_compat_level
+    (fun () -> f handler)
 
 (** Return an {!iter} visitor which invokes all of the given handlers upon
     visiting each node. *)

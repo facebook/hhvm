@@ -15,8 +15,7 @@ open Typing_defs
 
 module Env = Tast_env
 
-(* Return {Some} when {ty} may contain falsey values (other than the boolean
-   value {false}). *)
+(* Return {Some} when {ty} contains falsey values. *)
 let rec find_sketchy_type env ty =
   (* Find sketchy nulls hidden under Tunresolved *)
   let env, ty = Env.fold_unresolved env ty in
@@ -25,6 +24,7 @@ let rec find_sketchy_type env ty =
   | Tmixed
   | Tnonnull -> Some false
 
+  | Tprim Tbool when Env.forward_compat_ge env 2018_06_14 -> Some true
   | Tprim (Tbool | Tresource) -> None
   | Tprim _ -> Some true
 

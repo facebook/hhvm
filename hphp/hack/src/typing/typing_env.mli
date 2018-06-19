@@ -118,7 +118,8 @@ val add_generic_parameters : env -> Nast.tparam list -> env
 val get_generic_parameters : env -> string list
 val error_if_reactive_context : env -> (unit -> unit) -> unit
 val error_if_shallow_reactive_context : env -> (unit -> unit) -> unit
-val error_if_forward_compat_ge : int -> env -> (unit -> unit) -> unit
+val forward_compat_ge : env -> int -> bool
+val error_if_forward_compat_ge : env -> int -> (unit -> unit) -> unit
 val add_fresh_generic_parameter : env -> string -> env * string
 val is_fresh_generic_parameter : string -> bool
 val get_tpenv_size : env -> int

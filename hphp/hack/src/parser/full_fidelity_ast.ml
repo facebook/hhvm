@@ -2432,17 +2432,20 @@ and pClassElt : class_elt list parser = fun node env ->
         } ->
           let (p, name) = pos_name name env in
           let pos = if is_missing init then p else Pos.btw p (pPos init env) in
-          XhpAttr
-          ( mpOptional pHint ty env
-          , (pos, (p, ":" ^ name), mpOptional pSimpleInitializer init env)
-          , not (is_missing req)
-          , match syntax ty with
+          (* we can either have a typehint or an xhp enum *)
+          let hint, enum = match syntax ty with
             | XHPEnumType { xhp_enum_optional; xhp_enum_values; _ } ->
               let p = pPos ty env in
               let opt = not (is_missing xhp_enum_optional) in
               let vals = couldMap ~f:pExpr xhp_enum_values env in
-              Some (p, opt, vals)
-            | _ -> None
+              None, Some (p, opt, vals)
+            | _ -> Some (pHint ty env), None
+          in
+          XhpAttr
+          ( hint
+          , (pos, (p, ":" ^ name), mpOptional pSimpleInitializer init env)
+          , not (is_missing req)
+          , enum
           )
       | XHPSimpleClassAttribute { xhp_simple_class_attribute_type = attr } ->
         XhpAttrUse (pPos attr env, Happly (pos_name attr env, []))

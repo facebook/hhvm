@@ -994,11 +994,8 @@ and string_of_fun ~env f use_list =
       ^ (String.concat ", " @@ List.map use_list_helper use_list)
       ^ ") "
   in
-  let async = match f.A.f_fun_kind with
-  | A.FAsync | A.FAsyncGenerator -> "async "
-  | _ -> "" in
-  async
-  ^ (if f.A.f_static then "static " else "")
+  (if f.A.f_static then "static " else "")
+  ^ (if f.A.f_fun_kind = A.FAsync || f.A.f_fun_kind = A.FAsyncGenerator then "async " else "")
   ^ "function ("
   ^ args
   ^ ") "

@@ -169,6 +169,7 @@ void ModifierExpression::outputPHP(CodeGenerator& cg,
     }
   }
 
+  bool saw_async = false;
   for (unsigned int i = 0; i < m_modifiers.size(); i++) {
     switch (m_modifiers[i]) {
     case T_PUBLIC:    break;
@@ -177,9 +178,10 @@ void ModifierExpression::outputPHP(CodeGenerator& cg,
     case T_STATIC:    cg_printf("static ");    break;
     case T_ABSTRACT:  cg_printf("abstract ");  break;
     case T_FINAL:     cg_printf("final ");     break;
-    case T_ASYNC:     cg_printf("async ");     break;
+    case T_ASYNC:     saw_async = true;        break;
     default:
       assert(false);
     }
   }
+  if (saw_async) cg_printf("async ");
 }

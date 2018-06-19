@@ -169,7 +169,7 @@ using PostOrderId = uint32_t;
   for the hash() and same() methods for the spillFrameMap.
 */
 struct TrackedStore {
-  enum Kind {
+  enum Kind : int16_t {
     Unseen,
     Instruction,
     Phi,

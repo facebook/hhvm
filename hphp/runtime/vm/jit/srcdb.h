@@ -49,7 +49,7 @@ struct RelocationInfo;
  * intact.
  */
 struct IncomingBranch {
-  enum class Tag {
+  enum class Tag : int16_t {
     JMP,
     JCC,
     ADDR,

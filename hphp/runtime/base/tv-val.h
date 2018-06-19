@@ -14,11 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_MEMB_VAL_H_
-#define incl_HPHP_MEMB_VAL_H_
+#pragma once
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/typed-value.h"
+
+#include "hphp/util/compact-tagged-ptrs.h"
 
 #include <cstddef>
 #include <type_traits>
@@ -34,6 +35,17 @@ struct empty {};
 
 template<typename T>
 struct with_dummy {
+  /*
+   * The canonical non-null "missing" rval. Only valid for tv_rval (is_const ==
+   * true). These are actually defined in tv_val_detail::with_dummy; see above.
+   *
+   * Some users of tv_rval prefer to use a dummy rval-to-Uninit to represent a
+   * missing element, instead of a nullptr rval, so that tv() is always valid.
+   * These functions provide and test for such a value.
+   *
+   * static tv_val dummy();
+   * bool is_dummy() const;
+   */
   static T dummy() { return T { &immutable_uninit_base }; }
   bool is_dummy() const { return static_cast<const T&>(*this) == dummy(); }
 };
@@ -53,14 +65,19 @@ struct with_dummy {
  * Like all pointers, tv_val is nullable/optional. The presence of a value can
  * be detected via is_set(), explicit cast to a bool, or comparison with
  * nullptr.
+ *
+ * If tag_t is non-void, CompactTaggedPtr will be used internally to store a
+ * tag. This has no space overhead, but has a slight penalty at runtime.
  */
-template<bool is_const>
+template<bool is_const, typename tag_t = void>
 struct tv_val : std::conditional<is_const,
                                  tv_val_detail::with_dummy<tv_val<true>>,
                                  tv_val_detail::empty>::type {
 private:
   template<typename T> using maybe_const_t =
     typename std::conditional<is_const, const T, T>::type;
+  template<typename T, typename R = T> using with_tag_t =
+    typename std::enable_if<!std::is_same<T, void>::value, R>::type;
 
 public:
   using value_t = maybe_const_t<Value>;
@@ -69,6 +86,12 @@ public:
 
   tv_val();
   /* implicit */ tv_val(tv_t* lval);
+
+  /*
+   * Construct from a tv_val without a tag and a tag.
+   */
+  template<typename Tag = tag_t>
+  tv_val(tv_val<is_const> lval, with_tag_t<Tag> t);
 
   bool operator==(tv_val other) const;
 
@@ -126,20 +149,20 @@ public:
    */
   tv_val unboxed() const;
 
-  /*
-   * The canonical non-null "missing" rval. Only valid for tv_rval (is_const ==
-   * true). These are actually defined in tv_val_detail::with_dummy; see above.
-   *
-   * Some users of tv_rval prefer to use a dummy rval-to-Uninit to represent a
-   * missing element, instead of a nullptr rval, so that tv() is always valid.
-   * These functions provide and test for such a value.
-   *
-   * static tv_val dummy();
-   * bool is_dummy() const;
-   */
+  template<typename Tag = tag_t>
+  with_tag_t<Tag> tag() const;
+
+  template<typename Tag = tag_t>
+  with_tag_t<Tag, tv_val<is_const>> drop_tag() const;
 
 private:
-  tv_t* m_tv;
+  template<bool, typename> friend struct tv_val;
+
+  using storage_t = typename std::conditional<
+    std::is_same<tag_t, void>::value, tv_t*, CompactTaggedPtr<tv_t, tag_t>
+  >::type;
+
+  storage_t m_tv;
 };
 
 /*
@@ -162,5 +185,3 @@ using tv_rval = tv_val<true>;
 }
 
 #include "hphp/runtime/base/tv-val-inl.h"
-
-#endif

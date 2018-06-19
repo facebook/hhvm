@@ -178,7 +178,7 @@ private:
     bool isVecValue() const;
     bool isDictValue() const;
   private:
-    enum class Type {
+    enum class Type : int16_t {
       Value,
       ColValue,
       VecValue,

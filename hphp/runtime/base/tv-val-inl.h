@@ -20,78 +20,98 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<bool is_const>
-inline tv_val<is_const>::tv_val()
+template<bool is_const, typename tag_t>
+inline tv_val<is_const, tag_t>::tv_val()
   : tv_val{nullptr}
 {}
 
-template<bool is_const>
-inline tv_val<is_const>::tv_val(tv_t* lval)
+template<bool is_const, typename tag_t>
+inline tv_val<is_const, tag_t>::tv_val(tv_t* lval)
   : m_tv{lval}
 {}
 
-template<bool is_const>
-inline bool tv_val<is_const>::operator==(tv_val other) const {
+template<bool is_const, typename tag_t>
+template<typename Tag>
+inline tv_val<is_const, tag_t>::tv_val(
+    tv_val<is_const> lval, with_tag_t<Tag> t
+) : m_tv{t, lval.m_tv}
+{}
+
+template<bool is_const, typename tag_t>
+inline bool tv_val<is_const, tag_t>::operator==(tv_val other) const {
   return m_tv == other.m_tv;
 }
 
-template<bool is_const>
-inline bool tv_val<is_const>::is_set() const {
+template<bool is_const, typename tag_t>
+inline bool tv_val<is_const, tag_t>::is_set() const {
   return m_tv;
 }
 
-template<bool is_const>
-inline tv_val<is_const>::operator bool() const {
+template<bool is_const, typename tag_t>
+inline tv_val<is_const, tag_t>::operator bool() const {
   return is_set();
 }
 
-template<bool is_const>
-inline bool tv_val<is_const>::operator==(std::nullptr_t) const {
+template<bool is_const, typename tag_t>
+inline bool tv_val<is_const, tag_t>::operator==(std::nullptr_t) const {
   return !is_set();
 }
 
-template<bool is_const>
-inline bool tv_val<is_const>::operator!=(std::nullptr_t) const {
+template<bool is_const, typename tag_t>
+inline bool tv_val<is_const, tag_t>::operator!=(std::nullptr_t) const {
   return is_set();
 }
 
-template<bool is_const>
-inline tv_val<is_const>::operator tv_val<true>() const {
+template<bool is_const, typename tag_t>
+inline tv_val<is_const, tag_t>::operator tv_val<true>() const {
   return tv_val<true>{m_tv};
 }
 
-template<bool is_const>
-inline tv_val<false> tv_val<is_const>::as_lval() const {
+template<bool is_const, typename tag_t>
+inline tv_val<false> tv_val<is_const, tag_t>::as_lval() const {
   return tv_val<false>{const_cast<TypedValue*>(m_tv)};
 }
 
-template<bool is_const>
-inline typename tv_val<is_const>::value_t& tv_val<is_const>::val() const {
+template<bool is_const, typename tag_t>
+inline auto tv_val<is_const, tag_t>::val() const -> value_t& {
   assertx(is_set());
   return m_tv->m_data;
 }
 
-template<bool is_const>
-inline typename tv_val<is_const>::type_t& tv_val<is_const>::type() const {
+template<bool is_const, typename tag_t>
+inline auto tv_val<is_const, tag_t>::type() const -> type_t& {
   assertx(is_set());
   return m_tv->m_type;
 }
 
-template<bool is_const>
-inline typename tv_val<is_const>::tv_t* tv_val<is_const>::tv_ptr() const {
+template<bool is_const, typename tag_t>
+inline auto tv_val<is_const, tag_t>::tv_ptr() const -> tv_t* {
   return m_tv;
 }
 
-template<bool is_const>
-inline TypedValue tv_val<is_const>::tv() const {
+template<bool is_const, typename tag_t>
+inline TypedValue tv_val<is_const, tag_t>::tv() const {
   // Explicitly drop m_aux, since users of tv_val shouldn't care about it.
   assertx(is_set());
   return TypedValue{val(), type()};
 }
 
-template<bool is_const>
-inline TypedValue tv_val<is_const>::operator*() const {
+template<bool is_const, typename tag_t>
+inline TypedValue tv_val<is_const, tag_t>::operator*() const {
   return tv();
+}
+
+template<bool is_const, typename tag_t>
+template<typename Tag>
+inline auto tv_val<is_const, tag_t>::tag() const -> with_tag_t<Tag> {
+  return m_tv.tag();
+}
+
+template<bool is_const, typename tag_t>
+template<typename Tag>
+inline auto tv_val<is_const, tag_t>::drop_tag() const ->
+  with_tag_t<Tag, tv_val<is_const>> {
+  return tv_val<is_const>{m_tv.ptr()};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

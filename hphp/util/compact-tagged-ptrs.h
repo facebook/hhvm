@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_UTIL_COMPACT_TAGGED_PTRS_H_
 #define incl_HPHP_UTIL_COMPACT_TAGGED_PTRS_H_
 
+#include "hphp/util/assertions.h"
+
 #include <cstdint>
 
 /*
@@ -39,20 +41,21 @@ namespace HPHP {
 #error CompactTaggedPtr is not supported on your architecture.
 #endif
 
-template<class T, class TagType = uint32_t>
+template<class T, class TagType = uint16_t>
 struct CompactTaggedPtr {
   using Opaque = uintptr_t;
-  CompactTaggedPtr() { set(TagType{}, 0); }
+  static_assert(sizeof(TagType) <= sizeof(int16_t),
+                "TagType must fit in 16 bits");
+
+  CompactTaggedPtr() : m_data{makeOpaque(TagType{}, nullptr)} {}
+  CompactTaggedPtr(TagType tag, T* ptr) : m_data{makeOpaque(tag, ptr)} {}
 
   // for save and restore
   explicit CompactTaggedPtr(Opaque v) : m_data(v) {}
   Opaque getOpaque() const { return m_data; }
 
-  void set(TagType ttag, T* ptr) {
-    auto const tag = static_cast<uint64_t>(ttag);
-    assert(tag <= 0xffffu);
-    assert(!(uintptr_t(ptr) >> 48));
-    m_data = uintptr_t(ptr) | (size_t(tag) << 48);
+  void set(TagType tag, T* ptr) {
+    m_data = makeOpaque(tag, ptr);
   }
 
   TagType tag() const { return static_cast<TagType>(m_data >> 48); }
@@ -63,6 +66,14 @@ struct CompactTaggedPtr {
 
 private:
   uintptr_t m_data;
+
+  static uintptr_t makeOpaque(TagType ttag, T* ptr) {
+    auto const tag = static_cast<uint64_t>(ttag);
+    auto const ptr_int = reinterpret_cast<uintptr_t>(ptr);
+    assertx(tag <= 0xffffu);
+    assertx((ptr_int >> 48) == 0);
+    return ptr_int | (tag << 48);
+  }
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -584,6 +584,7 @@ and enforce_return_disposable _env e =
   match e with
   | _, New _ -> ()
   | _, Call _ -> ()
+  | _, Await (_, Call _) -> ()
   | p, _ ->
     Errors.invalid_return_disposable p
 

@@ -288,11 +288,28 @@ struct InlineRegionKey {
     for (auto ty : irk.argTypes) argTypes.push_back(ty);
   }
 
+  InlineRegionKey(InlineRegionKey&& irk) noexcept
+    : entryKey(std::move(irk.entryKey))
+    , ctxType(std::move(irk.ctxType))
+  {
+    for (auto ty : irk.argTypes) argTypes.push_back(ty);
+    irk.argTypes.clear();
+  }
+
   InlineRegionKey& operator=(const InlineRegionKey& irk) {
     entryKey = irk.entryKey;
     ctxType = irk.ctxType;
     argTypes.clear();
     for (auto ty : irk.argTypes) argTypes.push_back(ty);
+    return *this;
+  }
+
+  InlineRegionKey& operator=(InlineRegionKey&& irk) noexcept {
+    entryKey = irk.entryKey;
+    ctxType = irk.ctxType;
+    argTypes.clear();
+    for (auto ty : irk.argTypes) argTypes.push_back(ty);
+    irk.argTypes.clear();
     return *this;
   }
 

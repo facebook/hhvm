@@ -1910,8 +1910,11 @@ and pStmt : stmt parser = fun node env ->
       | _ -> missing_syntax "static declarator" node env
     in
     pos, Static_var (couldMap ~f:pStaticDeclarator static_declarations env)
-  | ReturnStatement { return_expression; return_keyword; _} ->
-    let expr = mpOptional pExpr return_expression env in
+  | ReturnStatement { return_expression; return_keyword; _ } ->
+    let expr = match syntax return_expression with
+      | Missing -> None
+      | _ -> Some (pExpr return_expression env)
+    in
     pos, Return (expr)
   | Syntax.GotoLabel { goto_label_name; _ } ->
     let pos_label = pPos goto_label_name env in

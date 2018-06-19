@@ -31,9 +31,21 @@ let rec find_sketchy_type env ty =
 
   | Tclass ((_, cid), _)
     when Env.forward_compat_ge env 2018_06_14 && (
+      (* Hack arrays *)
       cid = SN.Collections.cVec ||
       cid = SN.Collections.cDict ||
-      cid = SN.Collections.cKeyset
+      cid = SN.Collections.cKeyset ||
+      (* Concrete collection classes *)
+      cid = SN.Collections.cVector ||
+      cid = SN.Collections.cImmVector ||
+      cid = SN.Collections.cSet ||
+      cid = SN.Collections.cImmSet ||
+      cid = SN.Collections.cMap ||
+      cid = SN.Collections.cStableMap ||
+      cid = SN.Collections.cImmMap ||
+      (* Interfaces *)
+      cid = SN.Collections.cConstVector ||
+      cid = SN.Collections.cConstMap
     )
     -> Some false
 

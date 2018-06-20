@@ -742,7 +742,7 @@ let ai_check genv files_info env t =
       | Errors.Decl -> "Decl"
       | Errors.Typing -> "Typing"
     in
-    let all_passed = List.exists failures
+    let all_passed = List.for_all failures
         ~f:(fun (k, m) ->
           if Relative_path.Set.is_empty m then true
           else begin

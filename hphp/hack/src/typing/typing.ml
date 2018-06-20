@@ -1060,7 +1060,7 @@ and catch catchctx env (sid, exn, b) =
   let cid = CI (sid, []) in
   let ety_p = (fst sid) in
   let env, _, _ = instantiable_cid ety_p env cid in
-  let env, _te, ety = static_class_id ety_p env cid in
+  let env, _te, ety = static_class_id ~check_constraints:false ety_p env cid in
   let env = exception_ty ety_p env ety in
   let env = set_local env exn ety in
   let env, tb = block env b in
@@ -1734,6 +1734,7 @@ and expr_
               (Reason.Rwitness pos, Typing_utils.tany env)
         )
     )
+    (* TODO T30597126 instantiate generic parameters from class, and check constraints *)
   | Smethod_id (c, meth) ->
     (* Smethod_id is used when creating a "method pointer" using the magic
      * class_meth function.
@@ -1755,7 +1756,7 @@ and expr_
         expr_error env p Reason.Rnone
       | Some { ce_type = lazy ty; ce_visibility; _ } ->
         let cid = CI (c, []) in
-        let env, _te, cid_ty = static_class_id (fst c) env cid in
+        let env, _te, cid_ty = static_class_id ~check_constraints:false (fst c) env cid in
         let ety_env = {
           type_expansions = [];
           substs = SMap.empty;
@@ -2026,13 +2027,13 @@ and expr_
         let env, local = Env.FakeMembers.make_static p env x y in
         let local = p, Lvar (p, local) in
         let env, _, ty = expr env local in
-        let env, te, _ = static_class_id p env x in
+        let env, te, _ = static_class_id ~check_constraints:false p env x in
         make_result env (T.Class_get (te, (py, y))) ty
   | Class_get (((), cid), mid) ->
       Env.error_if_reactive_context env @@ begin fun () ->
         Errors.static_property_in_reactive_context p
       end;
-      let env, te, cty = static_class_id p env cid in
+      let env, te, cty = static_class_id ~check_constraints:false p env cid in
       let env = save_and_merge_next_in_catch env in
       let env, ty, _ =
         class_get ~is_method:false ~is_const:false env cty mid cid in
@@ -2499,7 +2500,7 @@ and expr_
         (Reason.Rwitness p, Tshape (FieldsFullyKnown, fdm))
 
 and class_const ?(incl_tc=false) env p (((), cid), mid) =
-  let env, ce, cty = static_class_id p env cid in
+  let env, ce, cty = static_class_id ~check_constraints:false p env cid in
   let env, const_ty, cc_abstract_info =
     class_get ~is_method:false ~is_const:true ~incl_tc env cty mid cid in
   match cc_abstract_info with
@@ -3944,7 +3945,7 @@ and is_abstract_ft fty = match fty with
 
   (* Calling parent method *)
   | Class_const (((), CIparent), m) ->
-      let env, tcid, ty1 = static_class_id p env CIparent in
+      let env, tcid, ty1 = static_class_id ~check_constraints:false p env CIparent in
       if Env.is_static env
       then begin
         (* in static context, you can only call parent::foo() on static
@@ -3995,38 +3996,41 @@ and is_abstract_ft fty = match fty with
       end
   (* Call class method *)
   | Class_const(((), e1), m) ->
-      let env, te1, ty1 = static_class_id p env e1 in
+      let env, te1, ty1 = static_class_id ~check_constraints:true p env e1 in
       let env, fty, _ =
         class_get ~is_method:true ~is_const:false ~explicit_tparams:hl
         ~pos_params:el env ty1 m e1 in
       let () = match e1 with
         | CIself when is_abstract_ft fty ->
-          (match Env.get_self env with
+          begin match Env.get_self env with
             | _, Tclass ((_, self), _) ->
               (* at runtime, self:: in a trait is a call to whatever
                * self:: is in the context of the non-trait "use"-ing
                * the trait's code *)
-              (match Env.get_class env self with
+              begin match Env.get_class env self with
                 | Some { tc_kind = Ast.Ctrait; _ } -> ()
                 | _ -> Errors.self_abstract_call (snd m) p (Reason.to_pos (fst fty))
-              )
-            | _ -> ())
+              end
+            | _ -> ()
+          end
         | CI (c, _) when is_abstract_ft fty ->
           Errors.classname_abstract_call (snd c) (snd m) p (Reason.to_pos (fst fty))
         | CI ((_, classname), _) ->
-          (match Typing_heap.Classes.get classname with
+          begin match Typing_heap.Classes.get classname with
           | Some class_def ->
             let (_, method_name) = m in
-            (match SMap.get method_name class_def.tc_smethods with
+            begin match SMap.get method_name class_def.tc_smethods with
             | None -> ()
             | Some elt ->
               if elt.ce_synthesized then
-                Errors.static_synthetic_method classname (snd m) p (Reason.to_pos (fst fty)))
+                Errors.static_synthetic_method classname (snd m) p (Reason.to_pos (fst fty))
+            end
           | None ->
             (* This technically should be an error, but if we throw here we'll break a ton of our
             tests since they reference classes that only exist in www, and any missing classes will
             get caught elsewhere in the pipeline. *)
-            ())
+            ()
+          end
         | _ -> () in
       check_coroutine_call env fty;
       let env, tel, tuel, ty =
@@ -4853,7 +4857,7 @@ and type_could_be_null env ty1 =
       | Tshape _ | Tnonnull -> false)
 
 and class_id_for_new p env cid =
-  let env, te, ty = static_class_id p env cid in
+  let env, te, ty = static_class_id ~check_constraints:false p env cid in
   (* Need to deal with union case *)
   let rec get_info res tyl =
     match tyl with
@@ -4906,30 +4910,47 @@ and trait_most_concrete_req_class trait env =
       )
   end ~init:None
 
-(* For explicit type arguments we support a wildcard syntax `_` for which
- * Hack will generate a fresh type variable
- *)
-and type_argument env hint =
-  match hint with
-  | (_, Happly((_, id), [])) when id = SN.Typehints.wildcard  ->
-    Env.fresh_unresolved_type env
-  | _ ->
-    Phase.hint_locl env hint
-
 (* If there are no explicit type arguments then generate fresh type variables
- * for all of them. Otherwise, check the arity, and use the explicit types *)
-and type_arguments env p class_name tparams hintl =
-  let default () = List.map_env env tparams begin fun env _ ->
-    Env.fresh_unresolved_type env end in
-  if hintl = []
-  then default ()
-  else if List.length hintl != List.length tparams
+ * for all of them. Otherwise, check the arity, and use the explicit types. *)
+and resolve_type_arguments env p class_id tparaml hintl =
+  (* For explicit type arguments we support a wildcard syntax `_` for which
+   * Hack will generate a fresh type variable *)
+  let resolve_type_argument env hint =
+    match hint with
+    | (_, Happly((_, id), [])) when id = SN.Typehints.wildcard  ->
+      Env.fresh_unresolved_type env
+    | _ ->
+      Phase.hint_locl env hint in
+  let length_hintl = List.length hintl in
+  let length_tparaml = List.length tparaml in
+  if length_hintl <> length_tparaml
   then begin
-    Errors.type_arity p class_name (string_of_int (List.length tparams));
-    default ()
+    if length_hintl <> 0
+    then Errors.type_arity p (snd class_id) (string_of_int length_tparaml);
+    List.map_env env tparaml begin fun env _ ->
+    Env.fresh_unresolved_type env end
   end
   else
-    List.map_env env hintl type_argument
+    List.map_env env hintl resolve_type_argument
+
+(* Do all of the above, and also check any constraints associated with the type parameters.
+ *)
+and resolve_type_arguments_and_check_constraints ~check_constraints
+  env p class_id from_class tparaml hintl =
+  let env, type_argl = resolve_type_arguments env p class_id tparaml hintl in
+  let this_ty = (Reason.Rwitness (fst class_id), Tclass (class_id, type_argl)) in
+  let env =
+    if check_constraints
+    then let ety_env = {
+      type_expansions = [];
+      this_ty = this_ty;
+      substs = Subst.make tparaml type_argl;
+      from_class = Some from_class;
+      validate_dty = None;
+    } in
+      Phase.check_tparams_constraints ~use_pos:p ~ety_env env tparaml
+    else env in
+  env, this_ty
 
 (* When invoking a method the class_id is used to determine what class we
  * lookup the method in, but the type of 'this' will be the late bound type.
@@ -4957,12 +4978,12 @@ and type_arguments env p class_name tparams hintl =
 and this_for_method env cid default_ty = match cid with
   | CIparent | CIself | CIstatic ->
       let p = Reason.to_pos (fst default_ty) in
-      let env, _te, ty = static_class_id p env CIstatic in
+      let env, _te, ty = static_class_id ~check_constraints:false p env CIstatic in
       ExprDepTy.make env CIstatic ty
   | _ ->
       env, default_ty
 
-and static_class_id p env =
+and static_class_id ~check_constraints p env =
   let make_result env te ty =
     env, (ty, te), ty in
   function
@@ -5014,15 +5035,16 @@ and static_class_id p env =
   | CIself ->
     make_result env T.CIself
       (Reason.Rwitness p, snd (Env.get_self env))
-  | CI (c, hl) ->
+  | CI (c, hl) as e1 ->
     let class_ = Env.get_class env (snd c) in
     (match class_ with
       | None ->
         make_result env (T.CI (c, hl)) (Reason.Rwitness p, Typing_utils.tany env)
       | Some class_ ->
-        let env, tyl = type_arguments env p (snd c) class_.tc_tparams hl in
-        make_result env (T.CI (c, hl))
-          (Reason.Rwitness (fst c), Tclass (c, tyl))
+        let env, ty =
+          resolve_type_arguments_and_check_constraints ~check_constraints
+            env p c e1 class_.tc_tparams hl in
+        make_result env (T.CI (c, hl)) ty
     )
   | CIexpr (p, _ as e) ->
       let env, te, ty = expr env e in
@@ -5052,7 +5074,7 @@ and static_class_id p env =
 
 and call_construct p env class_ params el uel cid =
   let cid = if cid = CIparent then CIstatic else cid in
-  let env, tcid, cid_ty = static_class_id p env cid in
+  let env, tcid, cid_ty = static_class_id ~check_constraints:false p env cid in
   let ety_env = {
     type_expansions = [];
     this_ty = cid_ty;
@@ -5901,7 +5923,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
       (* The position p here is not really correct... it's the position
        * of the instanceof expression, not the class id. But we don't store
        * position data for the latter. *)
-      let env, _te, obj_ty = static_class_id p env cid in
+      let env, _te, obj_ty = static_class_id ~check_constraints:false p env cid in
 
       if SubType.is_sub_type env obj_ty (
         Reason.none, Tclass ((Pos.none, SN.Classes.cAwaitable), [Reason.none, Typing_utils.tany env])
@@ -6823,7 +6845,7 @@ and gconst_def tcopt cst =
 (* Calls the method of a class, but allows the f callback to override the
  * return value type *)
 and overload_function make_call fpos p env ((), class_id) method_id el uel f =
-  let env, tcid, ty = static_class_id p env class_id in
+  let env, tcid, ty = static_class_id ~check_constraints:false p env class_id in
   let env, _tel, _ = exprs ~is_func_arg:true env el in
   let env, fty, _ =
     class_get ~is_method:true ~is_const:false env ty method_id class_id in

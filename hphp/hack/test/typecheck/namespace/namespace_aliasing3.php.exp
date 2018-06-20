@@ -1,0 +1,8 @@
+File "namespace_aliasing3.php", line 11, characters 16-23:
+Unbound name: Main\Dict\foo (a global function) (Naming[2049])
+File "namespace_aliasing3.php", line 11, characters 16-23:
+Unbound name: Main\Dict\foo (a global constant) (Naming[2049])
+File "namespace_aliasing3.php", line 13, characters 16-30:
+Unbound name: Main\HH\Lib\Dict\foo (a global function) (Naming[2049])
+File "namespace_aliasing3.php", line 13, characters 16-30:
+Unbound name: Main\HH\Lib\Dict\foo (a global constant) (Naming[2049])

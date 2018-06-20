@@ -164,6 +164,8 @@ let parse_options () =
   let void_is_type_of_null = ref false in
   let enable_shape_field_check = ref false in
   let parser = ref Legacy in
+  let auto_namespace_map = ref [] in
+  let dont_assume_php = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -177,6 +179,10 @@ let parse_options () =
     "--auto-complete",
       Arg.Unit (set_mode Autocomplete),
       " Produce autocomplete suggestions";
+    "--auto-namespace-map",
+      Arg.String (fun m ->
+        auto_namespace_map := ServerConfig.convert_auto_namespace_to_map m),
+      " Alias namespaces";
     "--ffp-auto-complete",
       Arg.Unit (set_mode Ffp_autocomplete),
       " Produce autocomplete suggestions using the full-fidelity parse tree";
@@ -215,6 +221,9 @@ let parse_options () =
     "--no-builtins",
       Arg.Set no_builtins,
       " Don't use builtins (e.g. ConstSet)";
+    "--dont-assume-php",
+      Arg.Set dont_assume_php,
+      " Don't assume that undefined names are in PHP files";
     "--dump-deps",
       Arg.Unit (set_mode (Dump_deps)),
       " Print dependencies";
@@ -342,7 +351,7 @@ let parse_options () =
     | None -> die usage in
   let tcopt = {
     GlobalOptions.default with
-      GlobalOptions.tco_assume_php = true;
+      GlobalOptions.tco_assume_php = not !dont_assume_php;
       GlobalOptions.tco_unsafe_rx = false;
       GlobalOptions.tco_safe_array = !safe_array;
       GlobalOptions.tco_safe_vector_array = !safe_vector_array;
@@ -357,6 +366,7 @@ let parse_options () =
       GlobalOptions.tco_disallow_array_as_tuple = not !allow_array_as_tuple;
       GlobalOptions.tco_disallow_return_by_ref = not !allow_return_by_ref;
       GlobalOptions.tco_disallow_array_cell_pass_by_ref = not !allow_array_cell_pass_by_ref;
+      GlobalOptions.po_auto_namespace_map = !auto_namespace_map;
   } in
   let tcopt = {
     tcopt with

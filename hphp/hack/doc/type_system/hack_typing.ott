@@ -231,7 +231,7 @@ decl :: 'decl_' ::= {{ com top level declarations }}
   | interface I typarams iextends :: :: interfacedef {{ com interface declaration }}
   | enum N : t asdecl :: :: enumdef
   | type N < T1 , .. , Tn > = t :: :: alias {{ com type alias }}
-  | newtype N < T1 , .. , Tn > = t asdecl :: :: opaque {{ com opaque type definition }}
+  | newtype N < T1 , .. , Tn > asdecl = t :: :: opaque {{ com opaque type definition }}
   | function id F { s1 .. sm } :: :: function {{ com top-level function definition }}
 
 lvar :: '' ::= {{ com local variable }}
@@ -819,16 +819,16 @@ G |- { t1 / T1, .. , tn / Tn } t <: N < t1 , .. , tn >
 
 {{ com Opaque types }}
 
-newtype N < T1 , .. , Tn > = t as u
+newtype N < T1 , .. , Tn > as u = t
 -------------------------------------------------- :: opaque_as
 G |- N < t1 , .. , tn > <: { t1 / T1, .. , tn / Tn } u
 
-newtype N < T1 , .. , Tn > = t as u
+newtype N < T1 , .. , Tn > as u = t
 local N
 ------------------------------------------------------------------------ :: opaque_local_as
 G |- N < t1 , .. , tn > <: { t1 / T1, .. , tn / Tn } t
 
-newtype N < T1 , .. , Tn > = t as u
+newtype N < T1 , .. , Tn > as u = t
 local N
 ------------------------------------------------------------------------ :: opaque_local_super
 G |- { t1 / T1, .. , tn / Tn } t <: N < t1 , .. , tn >

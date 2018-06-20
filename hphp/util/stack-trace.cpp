@@ -430,6 +430,7 @@ void StackTraceNoHeap::log(const char* errorType, int fd, const char* buildId,
   printPair(fd, "ThreadID", (int64_t)Process::GetThreadId());
   printPair(fd, "ThreadPID", Process::GetThreadPid());
   printPair(fd, "Name", Process::GetAppName().c_str());
+  printPair(fd, "CmdLine", Process::GetCommandLine(getpid()).c_str());
   printPair(fd, "Type", errorType ? errorType : "(unknown error)");
   printPair(fd, "Runtime", "hhvm");
   printPair(fd, "Version", buildId);

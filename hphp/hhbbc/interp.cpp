@@ -2376,6 +2376,9 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
       return result(TBool);
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_array:
+    case TypeStructure::Kind::T_darray:
+    case TypeStructure::Kind::T_varray:
+    case TypeStructure::Kind::T_varray_or_darray:
     case TypeStructure::Kind::T_xhp:
       return result(TBool);
     case TypeStructure::Kind::T_fun:

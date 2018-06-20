@@ -846,6 +846,9 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_trait:
     case TypeStructure::Kind::T_array:
+    case TypeStructure::Kind::T_darray:
+    case TypeStructure::Kind::T_varray:
+    case TypeStructure::Kind::T_varray_or_darray:
       // Not supported, will throw an error on these at the resolution phase
       return false;
     case TypeStructure::Kind::T_enum:

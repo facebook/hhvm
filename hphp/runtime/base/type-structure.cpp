@@ -92,6 +92,9 @@ const std::string
   s_mixed("mixed"),
   s_nonnull("nonnull"),
   s_array("array"),
+  s_darray("HH\\darray"),
+  s_varray("HH\\varray"),
+  s_varray_or_darray("HH\\varray_or_darray"),
   s_shape("shape"),
   s_hh_vec("HH\\vec"),
   s_hh_dict("HH\\dict"),
@@ -278,6 +281,24 @@ std::string fullName(const Array& arr, bool forDisplay) {
       break;
     case TypeStructure::Kind::T_array:
       name += s_array;
+      if (arr.exists(s_generic_types)) {
+        genericTypeName(arr, name, forDisplay);
+      }
+      break;
+    case TypeStructure::Kind::T_darray:
+      name += s_darray;
+      if (arr.exists(s_generic_types)) {
+        genericTypeName(arr, name, forDisplay);
+      }
+      break;
+    case TypeStructure::Kind::T_varray:
+      name += s_varray;
+      if (arr.exists(s_generic_types)) {
+        genericTypeName(arr, name, forDisplay);
+      }
+      break;
+    case TypeStructure::Kind::T_varray_or_darray:
+      name += s_varray_or_darray;
       if (arr.exists(s_generic_types)) {
         genericTypeName(arr, name, forDisplay);
       }
@@ -590,11 +611,20 @@ Array resolveTS(TSEnv& env,
       break;
     }
     case TypeStructure::Kind::T_array:
+    case TypeStructure::Kind::T_darray:
+    case TypeStructure::Kind::T_varray:
+    case TypeStructure::Kind::T_varray_or_darray:
     case TypeStructure::Kind::T_dict:
     case TypeStructure::Kind::T_vec:
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict: {
-      if (kind == TypeStructure::Kind::T_array) env.invalidType = true;
+      if (kind == TypeStructure::Kind::T_array ||
+        kind == TypeStructure::Kind::T_darray ||
+        kind == TypeStructure::Kind::T_varray ||
+        kind == TypeStructure::Kind::T_varray_or_darray
+      ) {
+        env.invalidType = true;
+      }
       if (arr.exists(s_generic_types)) {
         newarr.add(s_generic_types,
                    Variant(resolveGenerics(env, arr, typeCns, typeCnsCls,

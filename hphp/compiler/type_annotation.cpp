@@ -279,19 +279,13 @@ TypeStructure::Kind TypeAnnotation::getKind() const {
     return TypeStructure::Kind::T_array;
   }
   if (!strcasecmp(m_name.c_str(), "HH\\varray")) {
-    return RuntimeOption::EvalHackArrDVArrs
-      ? TypeStructure::Kind::T_vec
-      : TypeStructure::Kind::T_array;
+    return TypeStructure::Kind::T_varray;
   }
   if (!strcasecmp(m_name.c_str(), "HH\\darray")) {
-    return RuntimeOption::EvalHackArrDVArrs
-      ? TypeStructure::Kind::T_dict
-      : TypeStructure::Kind::T_array;
+    return TypeStructure::Kind::T_darray;
   }
   if (!strcasecmp(m_name.c_str(), "HH\\varray_or_darray")) {
-    return RuntimeOption::EvalHackArrDVArrs
-      ? TypeStructure::Kind::T_vec_or_dict
-      : TypeStructure::Kind::T_array;
+    return TypeStructure::Kind::T_varray_or_darray;
   }
   if (!strcasecmp(m_name.c_str(), "HH\\vec_or_dict")) {
     return TypeStructure::Kind::T_vec_or_dict;
@@ -401,8 +395,12 @@ Array TypeAnnotation::getScalarArrayRep() const {
             Variant(argsListToScalarArray(m_typeArgs->m_typeList)));
     break;
   case TypeStructure::Kind::T_array:
+  case TypeStructure::Kind::T_darray:
+  case TypeStructure::Kind::T_varray:
+  case TypeStructure::Kind::T_varray_or_darray:
   case TypeStructure::Kind::T_dict:
   case TypeStructure::Kind::T_vec:
+  case TypeStructure::Kind::T_vec_or_dict:
   case TypeStructure::Kind::T_keyset:
     if (m_typeArgs) {
       rep.add(s_generic_types, Variant(argsListToScalarArray(m_typeArgs)));

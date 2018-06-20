@@ -348,6 +348,9 @@ bool checkTypeStructureMatchesCellImpl(
       return didSucceed;
     }
     case TypeStructure::Kind::T_array:
+    case TypeStructure::Kind::T_darray:
+    case TypeStructure::Kind::T_varray:
+    case TypeStructure::Kind::T_varray_or_darray:
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_xhp:
@@ -426,6 +429,9 @@ void errorOnIsAsExpressionInvalidTypes(const Array& ts) {
     case TypeStructure::Kind::T_xhp:
       return;
     case TypeStructure::Kind::T_array:
+    case TypeStructure::Kind::T_darray:
+    case TypeStructure::Kind::T_varray:
+    case TypeStructure::Kind::T_varray_or_darray:
       raise_error("\"is\" and \"as\" operators cannot be used with an array");
     case TypeStructure::Kind::T_fun:
       raise_error("\"is\" and \"as\" operators cannot be used with a function");
@@ -460,6 +466,9 @@ bool typeStructureCouldBeNonStatic(const Array& ts) {
     case TypeStructure::Kind::T_tuple:
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_array:
+    case TypeStructure::Kind::T_darray:
+    case TypeStructure::Kind::T_varray:
+    case TypeStructure::Kind::T_varray_or_darray:
     case TypeStructure::Kind::T_shape:
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:

@@ -1255,7 +1255,11 @@ namespace HH {
     OF_DICT = 19;
     OF_VEC = 20;
     OF_KEYSET = 21;
+    OF_VEC_OR_DICT = 22;
     OF_NONNULL = 23;
+    OF_DARRAY = 24;
+    OF_VARRAY = 25;
+    OF_VARRAY_OR_DARRAY = 26;
     OF_UNRESOLVED = 101; // for type aliases only
   }
 

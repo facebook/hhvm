@@ -459,6 +459,9 @@ bool write_type_alias(ProfDataSerializer& ser, const TypeAliasReq* td) {
         case TypeStructure::Kind::T_noreturn:
         case TypeStructure::Kind::T_tuple:
         case TypeStructure::Kind::T_array:
+        case TypeStructure::Kind::T_darray:
+        case TypeStructure::Kind::T_varray:
+        case TypeStructure::Kind::T_varray_or_darray:
         case TypeStructure::Kind::T_dict:
         case TypeStructure::Kind::T_vec:
         case TypeStructure::Kind::T_keyset:

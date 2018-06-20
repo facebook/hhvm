@@ -2890,6 +2890,9 @@ folly::Optional<Type> type_of_type_structure(SArray ts) {
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_array:
+    case TypeStructure::Kind::T_darray:
+    case TypeStructure::Kind::T_varray:
+    case TypeStructure::Kind::T_varray_or_darray:
     case TypeStructure::Kind::T_xhp:
     case TypeStructure::Kind::T_enum:
     case TypeStructure::Kind::T_fun:

@@ -66,7 +66,6 @@ let get_from_local_cache ~full popt file_name =
       let contents =
         if (FindUtils.is_php fn
         && not (FilesToIgnore.should_ignore fn))
-        && Parser_hack.get_file_mode popt file_name contents <> None
         then contents
         else ""
       in
@@ -74,10 +73,10 @@ let get_from_local_cache ~full popt file_name =
       match get_file_mode source with
       | None -> []
       | Some _ ->
-        (Full_fidelity_ast.legacy_compliant_parse_defensively
-          file_name
-          false
+        (Full_fidelity_ast.defensive_program
+          ~quick:(not full)
           popt
+          file_name
           contents
         ).Parser_return.ast
     in

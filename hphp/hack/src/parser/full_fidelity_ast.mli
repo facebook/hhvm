@@ -85,5 +85,19 @@ val from_file : env -> result
  *)
 val from_text_with_legacy : env -> string -> Parser_return.t
 val from_file_with_legacy : env -> Parser_return.t
-val legacy_compliant_parse_defensively :
-  Relative_path.t -> bool -> GlobalOptions.t -> string -> Parser_return.t
+val defensive_program :
+  ?quick:bool ->
+  ?elaborate_namespaces:bool ->
+  ParserOptions.t ->
+  Relative_path.t ->
+  string -> Parser_return.t
+
+val defensive_from_file_with_default_popt :
+  ?quick:bool -> Relative_path.t -> Parser_return.t
+val defensive_from_file :
+  ?quick:bool -> ParserOptions.t -> Relative_path.t -> Parser_return.t
+val defensive_program_with_default_popt :
+  ?quick:bool ->
+  ?elaborate_namespaces:bool ->
+  Relative_path.t ->
+  string -> Parser_return.t

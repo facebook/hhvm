@@ -85,9 +85,7 @@ let process_parse_result
 let really_parse ~quick popt acc fn =
   let res = Errors.do_with_context fn Errors.Parsing @@
     if ParserOptions.use_full_fidelity popt
-    then fun () ->
-      let cnt = try Sys_utils.cat (Relative_path.to_absolute fn) with _ -> "" in
-      Full_fidelity_ast.legacy_compliant_parse_defensively fn quick popt cnt
+    then fun () -> Full_fidelity_ast.defensive_from_file ~quick popt fn
     else fun () -> Parser_hack.from_file ~quick popt fn
   in
   process_parse_result ~quick acc fn res popt
@@ -152,7 +150,7 @@ let parse_sequential ~quick fn content acc popt =
       if not (ParserOptions.use_full_fidelity popt)
       then Parser_hack.program popt fn content
       else
-        Full_fidelity_ast.legacy_compliant_parse_defensively fn quick popt content
+        Full_fidelity_ast.defensive_program ~quick popt fn content
     end
   in
   process_parse_result ~ide:true ~quick acc fn res popt

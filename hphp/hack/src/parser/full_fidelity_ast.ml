@@ -3212,10 +3212,15 @@ let from_file_with_legacy env = legacy (from_file env)
  * is removed.
 )******************************************************************************)
 
-let legacy_compliant_parse_defensively fn quick_mode parser_options content =
+let defensive_program
+  ?(quick=false)
+  ?(elaborate_namespaces=true)
+  parser_options fn content =
   try begin
     let source = Full_fidelity_source_text.make fn content in
-    let env = make_env ~fail_open:false ~quick_mode ~parser_options fn in
+    let env = make_env
+        ~elaborate_namespaces
+        ~fail_open:false ~quick_mode:quick ~parser_options fn in
     legacy @@ from_text env source
   end with e ->
     (* If we fail to lower, try to just make a source text and get the file mode *)
@@ -3236,3 +3241,14 @@ let legacy_compliant_parse_defensively fn quick_mode parser_options content =
     ; Parser_return.content = content
     ; Parser_return.is_hh_file = mode <> None
     }
+
+let defensive_from_file ?(quick=false) popt fn =
+  let content = try Sys_utils.cat (Relative_path.to_absolute fn) with _ -> "" in
+  defensive_program ~quick popt fn content
+
+let defensive_from_file_with_default_popt ?(quick=false) fn =
+  defensive_from_file ~quick ParserOptions.default fn
+
+let defensive_program_with_default_popt
+  ?(quick=false) ?(elaborate_namespaces=true) fn content =
+  defensive_program ~quick ~elaborate_namespaces (ParserOptions.default) fn content

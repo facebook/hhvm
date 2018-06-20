@@ -27,6 +27,7 @@ tex-wrap-pre
 \usepackage{ifthen}
 \usepackage{alltt}
 \usepackage{color}
+\usepackage[bookmarks,bookmarksopen,bookmarksdepth=2]{hyperref}
 }}
 
 embed
@@ -419,6 +420,7 @@ string_literal : string
 C :: f : int
 
 {{ com \section*{Subtyping} }}
+{{ com \addcontentsline{toc}{section}{Subtyping} }}
 
 defn
   G |- t1 <: t2 :: :: tysub ::'sub_'
@@ -832,6 +834,7 @@ local N
 G |- { t1 / T1, .. , tn / Tn } t <: N < t1 , .. , tn >
 
 {{ com \section*{Subtyping on shape field types} }}
+{{ com \addcontentsline{toc}{section}{Subtyping on shape field types} }}
 
 defn
   G |- sft1 <: sft2 :: ::fssub::'shape_field_'
@@ -851,6 +854,8 @@ G |- t1 <: t2
 G |- sfn => t1 <: ?sfn => t2
 
 {{ com \section*{Type equivalence} }}
+{{ com \addcontentsline{toc}{section}{Type equivalence} }}
+
 defn
   G |- t1 == t2 :: ::tyeq::''
   {{ com [[t1]] is equivalent to [[t2]] under assumptions [[G]] }}
@@ -865,6 +870,7 @@ G |- t1 == t2
 
 
 {{ com \section*{Subtyping wrt variance} }}
+{{ com \addcontentsline{toc}{section}{Subtyping wrt variance} }}
 
 defn
   G |- t1 <: var :> t2 :: ::argsub::''
@@ -938,6 +944,7 @@ G ; K |- < e : t , e1 : t1 , .. , en : tn >
 
 
 {{ com \section*{Expression typing} }}
+{{ com \addcontentsline{toc}{section}{Expression typing} }}
 
 defn
   G ; K |- e : t :: :: exprty :: 'expr_'
@@ -1166,6 +1173,7 @@ t awaits t'
 G ; K |- await e : t'
 
 {{ com \section*{Awaitable types} }}
+{{ com \addcontentsline{toc}{section}{Awaitable types} }}
 
 defn
   t awaits t' :: :: awaits  :: 'awaits_'
@@ -1185,6 +1193,7 @@ t2 awaits t2'
 t1 | t2 awaits t1' | t2'
 
 {{ com \section*{Expression refinement} }}
+{{ com \addcontentsline{toc}{section}{Expression refinement} }}
 
 defn
   G ; K |- e truthy :: :: truthy  :: 'cond_'
@@ -1254,6 +1263,7 @@ G ; K |- e : t
 G ; K |- e truthy
 
 {{ com \section*{Assignment typing} }}
+{{ com \addcontentsline{toc}{section}{Assignment typing} }}
 
 defn
   G ; K |- e := t , U :: :: assign :: 'assign_'
@@ -1270,6 +1280,7 @@ G' ; K , skip : G'' |- e2 := t2 , U2
 G ; K , skip : G'' |- list ( e1 , e2 ) := `Pair` < t1 , t2> , U1[U2]
 
 {{ com \section*{Statements} }}
+{{ com \addcontentsline{toc}{section}{Statements} }}
 
 defn
   F ; G ; K |- s :: :: st :: 'st_'
@@ -1366,6 +1377,7 @@ F ; G ; K |- { s s1 .. sn }
 
 
 {{ com \section*{Top level declarations} }}
+{{ com \addcontentsline{toc}{section}{Top level declarations} }}
 
 defn
   |- decl :: :: decl_ok :: 'decl_ok_' {{ com a declaration [[decl]] is valid }}

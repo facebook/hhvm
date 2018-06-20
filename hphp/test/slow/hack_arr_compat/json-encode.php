@@ -64,6 +64,9 @@ function test($name, $options) {
   var_dump(json_encode(dict[], $options));
   var_dump(json_encode(dict['a' => 1, 'b' => 2, 'c' => 3], $options));
   var_dump(json_encode(dict[0 => 'a', 1 => 'b', 2 => 'c'], $options));
+  var_dump(json_encode(darray[], $options));
+  var_dump(json_encode(darray['a' => 1, 'b' => 2, 'c' => 3], $options));
+  var_dump(json_encode(darray[0 => 'a', 1 => 'b', 2 => 'c'], $options));
   var_dump(json_encode(keyset[], $options));
   var_dump(json_encode(keyset['a', 'b', 'c'], $options));
 

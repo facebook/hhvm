@@ -132,15 +132,14 @@ final class AsyncGeneratorWaitHandle<Tk, +Tv>
 }
 
 final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
+  <<__PHPStdLib>>
   public static function fromArray<T>(
     array<Awaitable<T>> $deps
   ): Awaitable<void>;
   public static function fromVArray<T>(
-    /* HH_IGNORE_ERROR[0002] Hidden behind experimental option */
     varray<Awaitable<T>> $deps
   ): Awaitable<void>;
   public static function fromDArray<Tk, Tv>(
-    /* HH_IGNORE_ERROR[0001] Hidden behind experimental option */
     darray<Tk, Awaitable<Tv>> $deps
   ): Awaitable<void>;
   public static function fromDict<Tk, Tv>(

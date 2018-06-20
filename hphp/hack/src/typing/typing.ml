@@ -1734,7 +1734,6 @@ and expr_
               (Reason.Rwitness pos, Typing_utils.tany env)
         )
     )
-    (* TODO T30597126 instantiate generic parameters from class, and check constraints *)
   | Smethod_id (c, meth) ->
     (* Smethod_id is used when creating a "method pointer" using the magic
      * class_meth function.
@@ -1756,10 +1755,14 @@ and expr_
         expr_error env p Reason.Rnone
       | Some { ce_type = lazy ty; ce_visibility; _ } ->
         let cid = CI (c, []) in
-        let env, _te, cid_ty = static_class_id ~check_constraints:false (fst c) env cid in
+        let env, _te, cid_ty = static_class_id ~check_constraints:true (fst c) env cid in
+        let tyargs =
+          match cid_ty with
+          | (_, Tclass(_, tyargs)) -> tyargs
+          | _ -> [] in
         let ety_env = {
           type_expansions = [];
-          substs = SMap.empty;
+          substs = Subst.make class_.tc_tparams tyargs;
           this_ty = cid_ty;
           from_class = Some cid;
           validate_dty = None;

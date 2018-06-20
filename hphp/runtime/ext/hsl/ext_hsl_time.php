@@ -32,13 +32,3 @@ namespace HH\Lib\_Private\Native {
 function request_time_ns(): int;
 
 }
-
-namespace HH {
-
-/* Temporary BC wrapper */
-<<NoDoc>>
-function request_time_ns(): int {
-  return \HH\Lib\_Private\Native\request_time_ns();
-}
-
-}

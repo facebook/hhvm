@@ -12,9 +12,3 @@ namespace HH\Lib\_Private\Native {
 function pseudorandom_int(int $min = \PHP_INT_MIN, int $max = \PHP_INT_MAX): int;
 function pseudorandom_seed(int $seed): void;
 }
-
-// temporary BC aliases
-namespace HH {
-function pseudorandom_int(int $min = \PHP_INT_MIN, int $max = \PHP_INT_MAX): int;
-function pseudorandom_seed(int $seed): void;
-}

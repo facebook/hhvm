@@ -66,19 +66,3 @@ function pseudorandom_seed(int $seed): void;
 function random_int(int $min = \PHP_INT_MIN, int $max = \PHP_INT_MAX): int;
 
 }
-
-namespace HH {
-
-/* Temporary BC wrapper */
-<<NoDoc>>
-function pseudorandom_int(int $min = PHP_INT_MIN, int $max = PHP_INT_MAX): int {
-  return \HH\Lib\_Private\Native\pseudorandom_int($min, $max);
-}
-
-/* Temporary BC wrapper */
-<<NoDoc>>
-function pseudorandom_seed(int $seed): void {
-  \HH\Lib\_Private\Native\pseudorandom_seed($seed);
-}
-
-}

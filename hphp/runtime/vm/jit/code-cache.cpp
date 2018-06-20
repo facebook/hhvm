@@ -114,8 +114,8 @@ CodeCache::CodeCache()
 
     if (RuntimeOption::ServerExecutionMode()) {
       Logger::FWarning("Adjusted TC sizes to fit in {} bytes: AHotSize = {}, "
-                       "ASize = {}, AProfSize = {}, AColdSize = {}, ",
-                       "AFrozenSize = {}, GlobalDataSize = {}\n",
+                       "ASize = {}, AProfSize = {}, AColdSize = {}, "
+                       "AFrozenSize = {}, GlobalDataSize = {}",
                        targetSize, AHotSize, ASize, AProfSize, AColdSize,
                        AFrozenSize, GlobalDataSize);
     }

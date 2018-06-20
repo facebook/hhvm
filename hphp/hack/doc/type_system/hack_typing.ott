@@ -60,7 +60,7 @@ metavar userid ::=
   {{ ocaml string }}
 metavar T {{ ocaml typaram_id }} ::= {{ coq string }} {{ com type parameter, different from other identifiers for simplicity }}
   {{ ocaml string }}
-indexvar i, j, m, n ::= {{ coq nat }} {{ com natural number indices }} {{ ocaml int}}
+indexvar i, j, m, n, p ::= {{ coq nat }} {{ com natural number indices }} {{ ocaml int}}
 
 grammar
 
@@ -114,7 +114,8 @@ t, u {{ ocaml ty }} :: 'ty_' ::=                           {{ com syntax of type
   | bool   ::   :: bool                     {{ com boolean type }}
   | void   ::   :: void                     {{ com void return type }}
   | T      ::   :: typeparam                {{ com generic type parameter }}
-  | N inst ::   :: class                    {{ com possibly-instantiated named type }}
+  | N inst ::   :: classish                 {{ com possibly-instantiated named type }}
+  | # N inst :: :: exact                    {{ com exact named type }}
   | ? t    ::   :: option                   {{ com nullable }}
   | t1 '|' t2         :: :: union           {{ com union type }}
   | ( t )  :: S :: paren {{ coq [[t]] }}    {{ com parentheses }} {{ ocaml [[t]] }}
@@ -225,14 +226,28 @@ contkind :: 'Cont_' ::=
   | return :: :: Return {{ com return }}
   | skip :: :: Skip {{ com next statement }}
 
+%%% Elements of class definitions
+member :: 'member_' ::= {{ com property or method definition }}
+  | function id F block :: :: instance {{ com instance method }}
+  | static function id F block :: :: static {{ com static method }}
+
+members :: 'members_' ::= {{ com non-constructor members of a class }}
+  | member1 .. membern :: :: list
+
+classbody :: 'class_' ::= {{ com class body }}
+  | { constructor members } :: :: body
+
+constructor :: '' ::= {{ com constructor definition }}
+  | function __construct funparams block :: :: constructor {{ com constructor }}
+
 %%% Top level declaration
 decl :: 'decl_' ::= {{ com top level declarations }}
-  | class C typarams cextends cimpls :: :: classdef {{ com class declaration }}
+  | class C typarams cextends cimpls classbody :: :: classdef {{ com class declaration }}
   | interface I typarams iextends :: :: interfacedef {{ com interface declaration }}
   | enum N : t asdecl :: :: enumdef
   | type N < T1 , .. , Tn > = t :: :: alias {{ com type alias }}
   | newtype N < T1 , .. , Tn > asdecl = t :: :: opaque {{ com opaque type definition }}
-  | function id F { s1 .. sm } :: :: function {{ com top-level function definition }}
+  | function id F block :: :: function {{ com top-level function definition }}
 
 lvar :: '' ::= {{ com local variable }}
   | $ x                        ::   :: lvar_id        {{ com local variable }}
@@ -259,13 +274,13 @@ e {{ ocaml expr }} :: 'e_' ::= {{ com expressions }}
   | e1 ? e2 : e3               ::   :: eif            {{ com conditional expression }}
   | e1 ?? e2                   ::   :: nullCoalesce       {{ com null coalesce }}
   | e instanceof N             ::   :: instanceOf     {{ com instanceof test }}
-  | new e ( args )             ::   :: new            {{ com object creation }}
+  | new C ( args )             ::   :: new            {{ com object creation }}
   | lamparams lamreturn ==> lambody  ::   :: lambda   {{ com lambda }}
   | await e                    ::   :: await          {{ com await expression }}
 
 args {{ ocaml args }} :: '' ::= {{ com argument list }}
-  | e1 , ... , en              ::   :: args           {{ com arguments }}
-  | e1 , ... , en , vardots e  ::   :: args_splat     {{ com arguments with splat }}
+  | e1 , .. , en              ::   :: args           {{ com arguments }}
+  | e1 , .. , en , vardots e  ::   :: args_splat     {{ com arguments with splat }}
 
 isvariadic :: 'is_variadic_' ::= {{ com optional variadic }}
   |                              :: :: no            {{ com not variadic  parameter }}
@@ -290,7 +305,7 @@ lamreturn :: 'lambda_return_' ::= {{ com lambda return }}
 
 lambody :: 'lambda_body_' ::= {{ com lambda body }}
   | e                            :: :: expr           {{ com expression }}
-  | { s1 .. sn }                 :: :: block          {{ com block }}
+  | block                        :: :: block          {{ com block }}
 
 lamparams :: 'lambda_' ::= {{ com lambda parameters }}
   | ( lamparam1 , .. , lamparamn ) :: :: params       {{ com list }}
@@ -315,7 +330,10 @@ s {{ ocaml st }} :: 's_' ::= {{ com statements }}
   | try s1 cc1 .. ccn finally s2 ::   :: try          {{ com try catch }}
   | switch (e) cases           ::   :: switch         {{ com switch }}
   | e ;                        ::   :: expr           {{ com expression as statement }}
-  | { s1 .. sn }               ::   :: block          {{ com block as statement }}
+  | block                      ::   :: block          {{ com block as statement }}
+
+block {{ ocaml block }} :: 'block_' ::= {{ com block }}
+  | { s1 .. sn }               ::   :: statements     {{ com sequence of statements }}
 
 cc {{ ocaml catch }}:: 'cc_' ::= {{ com catch clause }}
   | catch ( C lvar ) s           ::   :: catch          {{ com catch clause }}
@@ -372,6 +390,7 @@ terminals :: terminals_ ::=
   | ~>                         ::   :: leadsto        {{ tex \leadsto }}
   | truthy                     ::   :: truthy         {{ tex \Downarrow }}
   | vardots                      ::   :: variadicrest   {{ tex \underline{\mathtt{...} } }}
+  | __construct                ::   :: construct      {{ tex \mathtt{\_\_construct}  }}
 
 formula :: 'formula_' ::=
   | judgement                       ::   :: judgement
@@ -597,13 +616,14 @@ User-defined types are subtypes of $[[nonnull]]$:
 
 }}
 
-class C<var1 T1 constraint1, .., varn Tn constraintn> cextends cimpls
---------------------------------------------------------------------- :: class_as_nonnull
+class C<var1 T1 constraint1, .., varn Tn constraintn> cextends cimpls classbody
+------------------------------------------------------------------------------- :: class_as_nonnull
 G |- C<t1, .., tn> <: nonnull
 
 interface I<var1 T1 constraint1, .., varn Tn constraintn> iextends
------------------------------------------------------------------ :: interface_as_nonnull
+------------------------------------------------------------------ :: interface_as_nonnull
 G |- I<t1, .., tn> <: nonnull
+
 
 {{ com
 
@@ -788,16 +808,24 @@ G |- shape ( sft1, ..., sftm, vardots ) <: shape (sft1, ..., sftm, ?sfn1' => mix
 
 {{ com \subsection{Class and interface inheritance} }}
 
-class C < var1 T1 constraint1, ... , varn Tn constraintn > cextends cimpls
+----------------------- :: exact_as_class
+G |- # C inst <: C inst
+
+class C < var1 T1 constraint1, ... , varn Tn constraintn > cextends cimpls classbody
+G |- t1 <: var1 :> u1 ... G |- tn <: varn :> un
+----------------------------------------------------- :: exact_variance
+G |- # C < t1 , ... , tn > <: # C < u1 , ... , un >
+
+class C < var1 T1 constraint1, ... , varn Tn constraintn > cextends cimpls classbody
 G |- t1 <: var1 :> u1 ... G |- tn <: varn :> un
 ----------------------------------------------------- :: class_variance
 G |- C < t1 , ... , tn > <: C < u1 , ... , un >
 
-class C < var1 T1 constraint1, ... , varn Tn constraintn > extends t cimpls
+class C < var1 T1 constraint1, ... , varn Tn constraintn > extends t cimpls classbody
 ------------------------------------------------------ :: class_extends
 G |- C < t1 , ... , tn > <: { t1 / T1 , ... , tn / Tn } t
 
-class C < var1 T1 constraint1, ... , varn Tn constraintn > cextends implements u1 , .. , um
+class C < var1 T1 constraint1, ... , varn Tn constraintn > cextends implements u1 , .. , um classbody
 -------------------------------------------------------------------- :: class_implements
 G |- C < t1 , ... , tn > <: { t1 / T1 , ... , tn / Tn } ui
 
@@ -1118,19 +1146,28 @@ For void functions with statement bodies, we support implicit return by includin
 {{ com TBC variadics }}
 
 lamparams lamreturn ~> ( t1 $x1 , .. , tn $xn) : t
-( t1 $x1 , .. , tn $xn) : t ; G [x1 := t1 , .. , xn := tn ] ; { return : G' } |- { s1 .. sm }
+( t1 $x1 , .. , tn $xn) : t ; G [x1 := t1 , .. , xn := tn ] ; { return : G' } |- block
 ------------------------------------------------------------------------ :: lambda_stmt
-G ; K |- lamparams lamreturn ==> { s1 .. sm } : function(t1,..,tn):t
+G ; K |- lamparams lamreturn ==> block : function(t1,..,tn):t
 
 lamparams lamreturn ~> ( t1 $x1 , .. , tn $xn) : void
-( t1 $x1 , .. , tn $xn) : void ; G [ x1 := t1 , .. , xn := tn ] ; { return : G', skip : G' } |- { s1 .. sm }
+( t1 $x1 , .. , tn $xn) : void ; G [ x1 := t1 , .. , xn := tn ] ; { return : G', skip : G' } |- block
 ------------------------------------------------------------------------ :: lambda_void
-G ; K |- lamparams lamreturn ==> { s1 .. sm } : function(t1,..,tn):void
+G ; K |- lamparams lamreturn ==> block : function(t1,..,tn):void
 
 lamparams lamreturn ~> ( t1 $x1 , .. , tn $xn ) : t
 G [ x1 := t1 , .. , xn := tn ]; { } |- e : t
 ---------------------------------------------------------- :: lambda_expr
 G ; K |- lamparams lamreturn ==> e : function(t1,..,tn):t
+
+{{ com \subsection{Object creation} }}
+
+{{ com To do: constraint satisfaction }}
+
+G ; K |- < e1 : { t1 / T1 , .. , tm / Tm } u1 , .. , en : { t1 / T1 , .. , tm / Tm } un >
+class C < var1 T1 constraint1, .. , varm Tm constraintm > cextends cimpls { function __construct (u1 lvar1 , .. , un lvarn) block members }
+--------------------------------------------------------------- :: new
+G ; K |- new C ( e1 , .. , en ) : # C < t1 , .. , tm >
 
 {{ com \subsection{Function application} }}
 
@@ -1388,18 +1425,18 @@ Top-level functions are typed under an initial typing for locals that provides t
 The continuation environment is initially empty, except for the return continuation, which accepts anything.
 For void functions, we support implicit return by including a skip continuation. }}
 
-( t1 $x1 , .. , tn $xn ) : t ; { x1 : t1 , .. , xn : tn } ; { return : G } |- { s1 .. sm }
+( t1 $x1 , .. , tn $xn ) : t ; { x1 : t1 , .. , xn : tn } ; { return : G } |- block
 ------------------------------------------------------------------------------------------ :: function
-|- function id ( t1 $x1 , .. , tn $xn ) : t { s1 .. sm }
+|- function id ( t1 $x1 , .. , tn $xn ) : t block
 
-( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : t ; { x1 : t1 , .. , xn : tn , x0 : vec<t0> } ; { return : G } |- { s1 .. sm }
+( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : t ; { x1 : t1 , .. , xn : tn , x0 : vec<t0> } ; { return : G } |- block
 ----------------------------------------------------------- :: function_variadic
-|- function id ( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : t { s1 .. sm }
+|- function id ( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : t block
 
-( t1 $x1 , .. , tn $xn ) : void ; { x1 : t1 , .. , xn : tn } ; { return : G, skip : G } |- { s1 .. sm }
+( t1 $x1 , .. , tn $xn ) : void ; { x1 : t1 , .. , xn : tn } ; { return : G, skip : G } |- block
 --------------------------------------------------------------- :: function_void
-|- function id ( t1 $x1 , .. , tn $xn ) : void { s1 .. sm }
+|- function id ( t1 $x1 , .. , tn $xn ) : void block
 
-( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : void ; { x1 : t1 , .. , xn : tn , x0 : vec<t0> } ; { return : G, skip : G } |- { s1 .. sm }
+( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : void ; { x1 : t1 , .. , xn : tn , x0 : vec<t0> } ; { return : G, skip : G } |- block
 --------------------------------------------------------------- :: function_void_variadic
-|- function id ( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : void { s1 .. sm }
+|- function id ( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : void block

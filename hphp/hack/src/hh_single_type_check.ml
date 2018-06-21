@@ -763,10 +763,8 @@ let handle_mode
   | Color ->
       Relative_path.Map.iter files_info begin fun fn fileinfo ->
         if Relative_path.Map.mem builtins fn then () else begin
-          let result = ServerColorFile.get_level_list begin fun () ->
-            ignore @@ Typing_check_utils.check_defs tcopt fn fileinfo;
-            fn
-          end in
+          let tast, _ = Typing_check_utils.type_file tcopt fn fileinfo in
+          let result = Coverage_level.get_levels tast filename in
           print_colored fn result;
         end
       end

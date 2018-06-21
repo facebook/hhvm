@@ -46,6 +46,7 @@ val coverage_levels :
   ServerEnv.env ->
   ServerCommandTypes.file_input ->
   ServerEnv.env * ('a, Coverage_level.result) loop_outputs
+
 val coverage_counts :
   ServerEnv.env ->
   string ->

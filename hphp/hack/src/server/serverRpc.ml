@@ -27,7 +27,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let has_unsaved_changes = ServerFileSync.has_unsaved_changes env in
         env, { Server_status.liveness; has_unsaved_changes; error_list; }
     | STATUS_SINGLE fn -> env, ServerStatusSingle.go fn env.tcopt
-    | COVERAGE_LEVELS fn -> env, ServerColorFile.go env fn
+    | COVERAGE_LEVELS fn ->
+        env, ServerColorFile.go env.ServerEnv.tcopt env.ServerEnv.files_info fn
     | INFER_TYPE (fn, line, char, dynamic_view) ->
         env, ServerInferType.go env (fn, line, char, dynamic_view)
     | INFER_TYPE_BATCH (positions, dynamic_view) ->

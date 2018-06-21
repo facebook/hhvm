@@ -7,18 +7,7 @@
  *
  *)
 
-let get_level_list check =
-  let type_acc : (Pos.t, Typing_reason.t * Typing_defs.locl Typing_defs.ty_)
-    Hashtbl.t = Hashtbl.create 0 in
-  let fn = Typing.with_expr_hook
-    (fun (p, _) ty -> Hashtbl.replace type_acc p ty) check in
-  let level_of_type x = snd (Coverage_level.level_of_type_mapper fn x) in
-  let result = Hashtbl.fold (fun p ty xs ->
-    (Pos.to_absolute p, level_of_type (p, ty)) :: xs) type_acc [] in
-  result
-
-let go env f_in =
-  get_level_list begin fun () ->
-    fst (ServerIdeUtils.check_file_input
-      env.ServerEnv.tcopt env.ServerEnv.files_info f_in)
-  end
+let go tcopt files_info f_in =
+  let check, tast = ServerIdeUtils.check_file_input
+  tcopt files_info f_in in
+  Coverage_level.get_levels tast check

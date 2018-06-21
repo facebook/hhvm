@@ -1181,34 +1181,15 @@ let do_typeCoverage
 
   let filename = Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.textDocument in
   let command = ServerCommandTypes.COVERAGE_LEVELS (ServerCommandTypes.FileName filename) in
-  let results: Coverage_level.result = rpc conn ref_unblocked_time command in
-  let results = Coverage_level.merge_adjacent_results results in
-
-  (* We want to get a percentage-covered number. We could do that with an *)
-  (* additional server round trip to ServerCommandTypes.COVERAGE_COUNTS. *)
-  (* But to avoid that, we'll instead use this rough approximation: *)
-  (* Count how many checked/unchecked/partial "regions" there are, where *)
-  (* a "region" is like results_merged, but counting each line separately. *)
-  let count_region (nchecked, nunchecked, npartial) (pos, level) =
-    let nlines = (Pos.end_line pos) - (Pos.line pos) + 1 in
-    match level with
-    | Ide_api_types.Checked -> (nchecked + nlines, nunchecked, npartial)
-    | Ide_api_types.Unchecked -> (nchecked, nunchecked + nlines, npartial)
-    | Ide_api_types.Partial -> (nchecked, nunchecked, npartial + nlines)
-  in
-  let (nchecked, nunchecked, npartial) =
-    List.fold results ~init:(0,0,0) ~f:count_region in
-
-  let ntotal = nchecked + nunchecked + npartial in
-  let coveredPercent = if ntotal = 0 then 100
-    else ((nchecked * 100) + (npartial * 100)) / ntotal in
-
+  let (results, counts): Coverage_level.result =
+    rpc conn ref_unblocked_time command in
+  let coveredPercent = Coverage_level.get_percent counts in
   let hack_coverage_to_lsp (pos, level) =
     let range = hack_pos_to_lsp_range pos in
     match level with
     (* We only show diagnostics for completely untypechecked code. *)
-    | Ide_api_types.Partial
-    | Ide_api_types.Checked -> None
+    | Ide_api_types.Checked
+    | Ide_api_types.Partial -> None
     | Ide_api_types.Unchecked -> Some
         { range;
           message = None;

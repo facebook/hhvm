@@ -14,8 +14,8 @@ module Test = Integration_test_base
 
 let foo_contents =
 "<?hh
-function g(): string {
-  return 'a';
+function g(string $x): string {
+  return $x;
 }
 "
 let foo_name = "foo.php"
@@ -39,4 +39,9 @@ let () =
     Test.coverage_levels env (ServerCommandTypes.FileName "/foo.php") in
 
   Test.assert_coverage_levels loop_output
-    ["File \"/foo.php\", line 3, characters 10-12: checked"];
+    [
+    "checked: 1";
+    "partial: 0";
+    "unchecked: 0";
+    "File \"/foo.php\", line 3, characters 10-11: checked";
+    ];

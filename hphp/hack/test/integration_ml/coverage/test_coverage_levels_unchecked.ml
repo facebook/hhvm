@@ -39,4 +39,9 @@ let () =
     Test.coverage_levels env (ServerCommandTypes.FileName "/foo.php") in
 
   Test.assert_coverage_levels loop_output
-    ["File \"/foo.php\", line 3, characters 10-11: unchecked"];
+    [
+    "checked: 0";
+    "partial: 0";
+    "unchecked: 1";
+    "File \"/foo.php\", line 3, characters 10-11: unchecked";
+    ];

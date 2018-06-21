@@ -378,13 +378,20 @@ let coverage_levels_to_str_helper (pos, cl) =
   interval^" "^cl_str
 
 let assert_coverage_levels loop_output expected =
-  let results = match loop_output.persistent_client_response with
+  let results, counts = match loop_output.persistent_client_response with
     | Some res -> res
     | _ -> fail "Expected coverage levels response"
   in
+  let strings_of_stats = [
+    "checked: "^(string_of_int counts.checked);
+    "partial: "^(string_of_int counts.partial);
+    "unchecked: "^(string_of_int counts.unchecked);
+    ]
+  in
   let results_as_string =
-    List.map results coverage_levels_to_str_helper |>
-      List.sort ~cmp:compare |> list_to_string in
+    List.map results coverage_levels_to_str_helper
+      |> List.sort ~cmp:compare |> List.append strings_of_stats
+      |> list_to_string in
   let expected_as_string = list_to_string expected in
   assertEqual expected_as_string results_as_string
 

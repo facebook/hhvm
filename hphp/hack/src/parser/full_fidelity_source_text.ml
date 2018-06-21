@@ -91,4 +91,5 @@ let relative_pos pos_file source_text start_offset end_offset =
   in
   let pos_start = offset_to_lnum_bol_cnum start_offset in
   let pos_end   = offset_to_lnum_bol_cnum end_offset in
+
   Pos.make_from_lnum_bol_cnum ~pos_file ~pos_start ~pos_end

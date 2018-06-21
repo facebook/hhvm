@@ -121,8 +121,9 @@ let rec parse_type_specifier ?(allow_var=false) parser =
   | At -> parse_soft_type_specifier parser
   | Classname -> parse_classname_type_specifier parser
   | _ ->
-    let parser = with_error parser1 SyntaxError.error1007 in
-    let (parser, token) = Make.token parser token in
+    let parser = with_error parser ~on_whole_token:true SyntaxError.error1007 in
+    let (parser1, token) = next_xhp_class_name_or_other_token parser in
+    let (parser, token) = Make.token parser1 token in
     Make.error parser token
 
 (* SPEC

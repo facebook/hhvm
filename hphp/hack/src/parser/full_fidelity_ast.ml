@@ -3128,25 +3128,20 @@ let lower_tree
       let is_hhi =
         String_utils.string_ends_with Relative_path.(suffix env.file) "hhi"
       in
-
-      match List.last (PositionedSyntaxTree.all_errors tree) with
-      | None when env.quick_mode || is_hhi -> ()
-      | None ->
-        let errors : SyntaxError.t list =
-          ParserErrors.parse_errors @@ ParserErrors.make_env
-            ~enable_hh_syntax:env.enable_hh_syntax
-            ~disallow_elvis_space:env.disallow_elvis_space
-            (* In non-codegen scenarios(hh_server), we still want to only raise
-              parse errors that cause runtime errors. Other errors will
-              be caught in later phases.
-            *)
-            ~hhvm_compat_mode:ParserErrors.HHVMCompat
-            ~codegen:env.codegen
-            tree
+      match PositionedSyntaxTree.errors tree with
+      | [] when env.quick_mode || is_hhi -> ()
+      | [] ->
+        let error_env = ParserErrors.make_env tree
+          ~hhvm_compat_mode:ParserErrors.HHVMCompat
+          ~enable_hh_syntax:env.enable_hh_syntax
+          ~disallow_elvis_space:env.disallow_elvis_space
+          ~codegen:env.codegen
         in
+        let errors = ParserErrors.parse_errors error_env in
         let f e = Errors.parsing_error (pos_and_message_of e) in
         List.iter ~f errors
-      | Some e -> Errors.parsing_error (pos_and_message_of e)
+      | e::_ ->
+        Errors.parsing_error (pos_and_message_of e);
   in
   let mode = if lang = FileInfo.PhpFile then FileInfo.Mphp else mode in
   let mode = if mode = FileInfo.Mdecl && env.codegen then FileInfo.Mphp else mode in

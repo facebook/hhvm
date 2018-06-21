@@ -1,0 +1,2 @@
+File "inherited_const_redeclared_abstract_in_used_trait.php", line 4, characters 7-10:
+You may not use a reserved keyword for a class name (Parsing[1002])

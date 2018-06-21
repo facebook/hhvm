@@ -1,0 +1,2 @@
+File "trait_abs_const.php", line 4, characters 3-18:
+Traits cannot have constants (Parsing[1002])

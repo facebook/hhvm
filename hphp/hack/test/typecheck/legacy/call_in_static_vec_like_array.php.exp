@@ -1,2 +1,0 @@
-File "call_in_static_vec_like_array.php", line 7, characters 21-26:
-Initialization of class property must be a static literal expression. (Typing[4152])

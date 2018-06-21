@@ -1,0 +1,2 @@
+File "class_clone_function_with_one_param.php", line 5, characters 3-13:
+Method A1::__clone cannot accept any arguments (Parsing[1002])

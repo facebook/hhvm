@@ -1,7 +1,7 @@
 <?hh // strict
 
 interface ILoader<T> {
-  public static async function gen(): Awaitable<T>;
+  public static function gen(): Awaitable<T>;
 
   public function set(T $x);
 }

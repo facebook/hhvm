@@ -1,0 +1,2 @@
+File "string_expressions3.php", line 17, characters 21-31:
+Variable variables are not legal; all variable identifiers must be static strings. (Naming[2081])

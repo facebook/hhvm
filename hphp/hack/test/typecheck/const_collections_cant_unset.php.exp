@@ -1,0 +1,2 @@
+File "const_collections_cant_unset.php", line 8, characters 5-28:
+You cannot mutate this (Typing[4011])

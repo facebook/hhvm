@@ -1,0 +1,6 @@
+File "tuple_as_constant.php", line 16, characters 12-28:
+Invalid return type (Typing[4110])
+File "tuple_as_constant.php", line 15, characters 35-51:
+This is an object of type dict
+File "tuple_as_constant.php", line 5, characters 23-33:
+It is incompatible with an object of type vec

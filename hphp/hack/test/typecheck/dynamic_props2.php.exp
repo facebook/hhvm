@@ -1,0 +1,2 @@
+File "dynamic_props2.php", line 12, characters 11-21:
+Cannot use dynamic class property name in strict mode (Naming[2076])

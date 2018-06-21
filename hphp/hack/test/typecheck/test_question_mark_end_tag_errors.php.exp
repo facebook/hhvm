@@ -1,0 +1,2 @@
+File "test_question_mark_end_tag_errors.php", line 5, characters 1-2:
+A hack source file cannot contain '?>'. (Parsing[1002])

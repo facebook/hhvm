@@ -1,0 +1,2 @@
+File "call_in_static_shape.php", line 7, characters 28-32:
+Invalid expression in constant initializer (Parsing[1002])

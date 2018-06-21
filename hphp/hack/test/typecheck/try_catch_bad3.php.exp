@@ -1,0 +1,2 @@
+File "try_catch_bad3.php", line 13, characters 3-28:
+A try statement requires a catch or a finally clause. (Parsing[1002])

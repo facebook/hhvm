@@ -1,0 +1,2 @@
+File "continue_bad.php", line 16, characters 9-19:
+Break/continue N operators are not supported. (NastCheck[3040])

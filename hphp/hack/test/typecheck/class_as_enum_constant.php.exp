@@ -1,0 +1,2 @@
+File "class_as_enum_constant.php", line 14, characters 3-16:
+Enum element cannot be named 'class' (Parsing[1002])

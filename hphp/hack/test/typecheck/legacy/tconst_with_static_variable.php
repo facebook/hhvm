@@ -6,7 +6,7 @@ abstract class Foo {
     // UNSAFE
   }
   public function instance(): this::T {
-    static $instance = $this->get();
+    $instance = $this->get();
     return $instance;
   }
 

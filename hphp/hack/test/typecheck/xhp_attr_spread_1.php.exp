@@ -1,0 +1,6 @@
+File "xhp_attr_spread_1.php", line 8, characters 22-36:
+An XHP instance was expected (Typing[4191])
+File "xhp_attr_spread_1.php", line 8, characters 22-36:
+The attribute spread operator cannot be called on non-XHP
+File "xhp_attr_spread_1.php", line 8, characters 22-36:
+This is a shape

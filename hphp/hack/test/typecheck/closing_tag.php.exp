@@ -1,0 +1,2 @@
+File "closing_tag.php", line 14, characters 1-2:
+A hack source file cannot contain '?>'. (Parsing[1002])

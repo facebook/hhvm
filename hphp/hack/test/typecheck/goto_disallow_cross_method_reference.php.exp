@@ -1,0 +1,2 @@
+File "goto_disallow_cross_method_reference.php", line 10, characters 10-11:
+Undefined goto label: L0 (Naming[2073])

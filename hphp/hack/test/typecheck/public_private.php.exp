@@ -1,0 +1,2 @@
+File "public_private.php", line 13, characters 3-28:
+A method declaration cannot have multiple visibility modifiers. (Parsing[1002])

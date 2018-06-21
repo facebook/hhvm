@@ -1,0 +1,2 @@
+File "class_const_already_bound.php", line 5, characters 9-14:
+Cannot redeclare Foo::bar (Parsing[1002])

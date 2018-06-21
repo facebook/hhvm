@@ -1,0 +1,2 @@
+File "destructor_return_type1.php", line 13, characters 19-28:
+Destructors are not supported in Hack; use other patterns like IDisposable/using or try/catch instead. (NastCheck[3056])

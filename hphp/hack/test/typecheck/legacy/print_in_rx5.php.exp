@@ -1,2 +1,0 @@
-File "print_in_rx5.php", line 9, characters 5-9:
-'echo' or 'print' are not allowed in reactive or shallow-reactive functions. (Typing[4226])

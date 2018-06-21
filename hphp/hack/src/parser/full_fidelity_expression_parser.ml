@@ -609,6 +609,7 @@ module WithStatementAndDeclAndTypeParser
       let (_, token) = next_token_in_string parser1 literal_kind in
       (* TODO: What about "{$$}" ? *)
       match Token.kind token with
+      | Dollar
       | Variable ->
         (* Parse any expression followed by a close brace.
            TODO: We do not actually support all possible expressions;

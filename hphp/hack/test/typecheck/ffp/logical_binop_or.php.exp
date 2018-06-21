@@ -1,0 +1,2 @@
+File "logical_binop_or.php", line 13, characters 12-13:
+Do not use "or", it has surprising precedence. Use "||" instead (Parsing[1002])

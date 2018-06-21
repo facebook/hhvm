@@ -860,7 +860,6 @@ module WithStatementAndDeclAndTypeParser
        assignment_prefix_kind = Prefix_none then (parser, term)
     else match token with
     (* Binary operators *)
-    (* TODO Add an error if PHP and / or / xor are used in Hack.  *)
     (* TODO Add an error if PHP style <> is used in Hack. *)
     | LessThan when can_term_take_type_args term ->
       parse_remaining_expression_or_specified_function_call parser term

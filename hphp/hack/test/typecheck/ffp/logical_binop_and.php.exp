@@ -1,0 +1,2 @@
+File "logical_binop_and.php", line 13, characters 12-14:
+Do not use "and", it has surprising precedence. Use "&&" instead (Parsing[1002])

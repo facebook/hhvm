@@ -256,3 +256,6 @@ val instanceof_paren: string -> string
 val invalid_await_use: string
 val invalid_constructor_method_call: string
 val invalid_default_argument: string -> string
+val do_not_use_xor : string
+val do_not_use_or : string
+val do_not_use_and : string

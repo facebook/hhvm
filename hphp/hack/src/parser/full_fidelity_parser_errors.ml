@@ -112,6 +112,8 @@ and is_systemlib_compat env = env.hhvm_compat_mode = SystemLibCompat
 
 and is_hack env = env.is_hh_file || env.enable_hh_syntax
 
+let is_typechecker env =
+  is_hack env && (not env.codegen)
 let global_namespace_name = "\\"
 
 let combine_names n1 n2 =
@@ -1367,7 +1369,7 @@ let check_collection_members members errors =
   syntax_to_list_no_separators members
   |> Core_list.fold_left ~init:errors ~f:check_collection_member
 
-let invalid_shape_initializer_name node errors =
+let invalid_shape_initializer_name env node errors =
   match syntax node with
   | LiteralExpression { literal_expression = expr } ->
     let is_str =
@@ -1386,15 +1388,22 @@ let invalid_shape_initializer_name node errors =
       then make_error_from_node node SyntaxError.error2060 :: errors
       else errors
     end
-  | QualifiedName _
   | ScopeResolutionExpression _ -> errors
-  | Token _ when is_name node -> errors
+  | QualifiedName _ ->
+      if is_typechecker env then
+      make_error_from_node node SyntaxError.error2059 :: errors
+      else errors
+  | Token _ when is_name node ->
+      if is_typechecker env then
+        make_error_from_node node SyntaxError.error2059 :: errors
+      else
+        errors
   | _ -> make_error_from_node node SyntaxError.error2059 :: errors
 
-let invalid_shape_field_check node errors =
+let invalid_shape_field_check env node errors =
   match syntax node with
   | FieldInitializer { field_initializer_name; _} ->
-    invalid_shape_initializer_name field_initializer_name errors
+    invalid_shape_initializer_name env field_initializer_name errors
   | _ -> make_error_from_node node SyntaxError.error2059 :: errors
 
 let is_in_unyieldable_magic_method parents =
@@ -1568,7 +1577,7 @@ let expression_errors env node parents errors =
     | _ -> errors
     end
   | ShapeExpression { shape_expression_fields; _} ->
-    List.fold_right invalid_shape_field_check
+    List.fold_right (invalid_shape_field_check env)
       (syntax_to_list_no_separators shape_expression_fields) errors
   | DecoratedExpression
     { decorated_expression_decorator = decorator

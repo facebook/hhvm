@@ -21,6 +21,7 @@ interface Throwable {
   public function getCode(): mixed;
   public function getFile(): string;
   public function getLine(): int;
+  /* HH_FIXME[2082] T30662901 */
   public function getTrace(): array<mixed>;
   public function getTraceAsString(): string;
   public function getPrevious(): ?Throwable;
@@ -48,6 +49,7 @@ class Error implements Throwable {
   final public function getFile(): string;
   <<__Rx>>
   final public function getLine(): int;
+  /* HH_FIXME[2082] T30662901 */
   final public function getTrace(): array<mixed>;
   final public function getTraceAsString(): string;
   public function __toString(): string;
@@ -65,6 +67,7 @@ class Exception implements Throwable {
   protected int $code;
   protected string $file;
   protected int $line;
+  /* HH_FIXME[2082] T30662901 */
   protected array $trace;
 
   <<__Rx>>
@@ -83,7 +86,9 @@ class Exception implements Throwable {
   final public function getFile(): string;
   <<__Rx>>
   final public function getLine(): int;
+  /* HH_FIXME[2082] T30662901 */
   final public function getTrace(): array<mixed>;
+  /* HH_FIXME[2082] T30662901 */
   final protected function __prependTrace(array $trace): void;
   final public function getTraceAsString(): string;
   public function __toString(): string;

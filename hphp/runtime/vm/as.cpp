@@ -2585,7 +2585,12 @@ void parse_method(AsmState& as) {
     as.error(".method requires a method name");
   }
 
-  as.fe = as.ue->newMethodEmitter(makeStaticString(name), as.pce);
+  auto const sname = makeStaticString(name);
+  if (as.pce->hasMethod(sname)) {
+    as.error("duplicate method name " + sname->toCppString());
+  }
+
+  as.fe = as.ue->newMethodEmitter(sname, as.pce);
   as.pce->addMethod(as.fe);
   as.fe->init(line0, line1,
               as.ue->bcPos(), attrs, false, 0);

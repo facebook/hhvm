@@ -179,7 +179,9 @@ struct PreClassEmitter {
   Id id() const { return m_id; }
   void setIfaceVtableSlot(Slot s) { m_ifaceVtableSlot = s; }
   const MethodVec& methods() const { return m_methods; }
-  FuncEmitter* findMethod(const StringData* name) { return m_methodMap[name]; }
+  bool hasMethod(const StringData* name) {
+    return m_methodMap.find(name) != m_methodMap.end();
+  }
   const PropMap::Builder& propMap() const { return m_propMap; }
   const ConstMap::Builder& constMap() const { return m_constMap; }
   const StringData* docComment() const { return m_docComment; }

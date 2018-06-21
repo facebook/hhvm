@@ -87,6 +87,7 @@ val from_text_with_legacy : env -> string -> Parser_return.t
 val from_file_with_legacy : env -> Parser_return.t
 val defensive_program :
   ?quick:bool ->
+  ?fail_open:bool ->
   ?elaborate_namespaces:bool ->
   ParserOptions.t ->
   Relative_path.t ->
@@ -98,6 +99,7 @@ val defensive_from_file :
   ?quick:bool -> ParserOptions.t -> Relative_path.t -> Parser_return.t
 val defensive_program_with_default_popt :
   ?quick:bool ->
+  ?fail_open:bool ->
   ?elaborate_namespaces:bool ->
   Relative_path.t ->
   string -> Parser_return.t

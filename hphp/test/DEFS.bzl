@@ -2,6 +2,7 @@
 
 import os
 
+load("@fbcode_macros//build_defs:compiler.bzl", "compiler")
 include_defs("//hphp/DEFS.bzl")
 
 def verify_unittest(suite, repo, dir, mode='interp,jit',
@@ -38,7 +39,7 @@ def verify_unittest(suite, repo, dir, mode='interp,jit',
   target_name = target_name.replace(',', '_')
 
   generate_hhir_asserts = not is_opt_hhvm_build() and \
-    get_compiler_type(get_fbcode_platform()) == 'clang'
+    compiler.get_compiler_for_current_buildfile() == 'clang'
 
   command = [
     '$(location //hphp/test:run)',

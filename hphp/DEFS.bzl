@@ -7,9 +7,6 @@ load("@fbcode_macros//build_defs:platform.bzl", "platform")
 def get_fbcode_platform():
     return platform.get_platform_for_base_path(get_base_path())
 
-def get_compiler_type(platform):
-    return read_config("fbcode", "compiler_family")
-
 def is_opt_hhvm_build():
     buck_out = read_config('project', 'buck_out')
     return '/opt' in buck_out

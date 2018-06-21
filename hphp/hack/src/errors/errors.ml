@@ -1105,6 +1105,10 @@ let goto_invoked_in_finally pos =
     pos
     "It is illegal to invoke goto within a finally block."
 
+let method_needs_visibility pos =
+  add (Naming.err_code Naming.MethodNeedsVisibility)
+    pos ("Methods need to be marked public, private, or protected.")
+
 let dynamic_class_property_name_in_strict_mode pos =
   add (Naming.err_code Naming.DynamicClassPropertyNameInStrictMode)
     pos

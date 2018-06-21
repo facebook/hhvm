@@ -456,6 +456,7 @@ module type S = sig
   val goto_label_undefined : Pos.t -> string -> unit
   val goto_label_defined_in_finally : Pos.t -> unit
   val goto_invoked_in_finally : Pos.t -> unit
+  val method_needs_visibility : Pos.t -> unit
   val dynamic_class_property_name_in_strict_mode : Pos.t -> unit
   val dynamic_class_name_in_strict_mode : Pos.t -> unit
   val reading_from_append: Pos.t -> unit
@@ -552,7 +553,6 @@ module type S = sig
   val shapes_key_exists_always_true: Pos.t -> string -> Pos.t -> unit
   val shapes_key_exists_always_false: Pos.t -> string -> Pos.t -> [< `Undefined | `Unset] -> unit
   val shapes_idx_with_non_existent_field: Pos.t -> string -> Pos.t -> [< `Undefined | `Unset] -> unit
-
   val forward_compatibility_not_current: Pos.t -> ForwardCompatibilityLevel.t -> unit
   val forward_compatibility_below_minimum: Pos.t -> ForwardCompatibilityLevel.t -> unit
 end

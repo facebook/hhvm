@@ -1,7 +1,7 @@
 <?php
 
 class C {
-  static function f() {
+  public static function f() {
     return "lol";
   }
   static $x = dict['a' => C::f()];

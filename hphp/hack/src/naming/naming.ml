@@ -1689,6 +1689,15 @@ module Make (GetLocals : GetLocals) = struct
     let env = genv, Env.empty_local UBMErr in
     (* Cannot use 'this' if it is a public instance method *)
     let variadicity, paraml = fun_paraml env m.m_params in
+    let contains_visibility = List.exists m.m_kind ~f:(
+        function
+        | Private
+        | Public
+        | Protected -> true
+        | _ -> false
+      ) in
+    if not contains_visibility then
+      Errors.method_needs_visibility (fst m.m_name);
     let acc = false, false, N.Public in
     let final, abs, vis = List.fold_left ~f:kind ~init:acc m.m_kind in
     List.iter m.m_tparams check_constraint;

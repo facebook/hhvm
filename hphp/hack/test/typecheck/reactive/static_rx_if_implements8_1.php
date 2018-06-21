@@ -4,7 +4,7 @@ interface Rx {}
 
 class A {
   <<__Rx, __OnlyRxIfImpl(Rx::class)>>
-  static function f(): int {
+  public static function f(): int {
     return 1;
   }
 }

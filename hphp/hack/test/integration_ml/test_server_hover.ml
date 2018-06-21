@@ -124,7 +124,7 @@ let class_members_cases = [
 
 let classname_call = "<?hh // strict
 class ClassnameCall {
-  static function foo(): int {
+  public static function foo(): int {
     return 0;
   }
 }
@@ -141,7 +141,7 @@ let classname_call_cases = [
       pos = pos_at (9, 3) (9, 15);
     }];
   ("classname_call.php", 9, 18), [{
-      snippet = "static function foo(): int";
+      snippet = "public static function foo(): int";
       addendum = ["Full name: `ClassnameCall::foo`"];
       pos = pos_at (9, 18) (9, 20);
     }];

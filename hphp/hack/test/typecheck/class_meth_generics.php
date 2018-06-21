@@ -2,10 +2,10 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class C<T as arraykey> {
-  static function nongeneric(T $x): T {
+  public static function nongeneric(T $x): T {
     return $x;
   }
-  static function generic<Tu>(T $x, Tu $y): (T, Tu) {
+  public static function generic<Tu>(T $x, Tu $y): (T, Tu) {
     return tuple($x, $y);
   }
 }

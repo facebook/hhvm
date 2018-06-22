@@ -116,6 +116,7 @@ t, u {{ ocaml ty }} :: 'ty_' ::=                           {{ com syntax of type
   | T      ::   :: typeparam                {{ com generic type parameter }}
   | N inst ::   :: classish                 {{ com possibly-instantiated named type }}
   | # N inst :: :: exact                    {{ com exact named type }}
+  | this   ::   :: this                     {{ com this type }}
   | ? t    ::   :: option                   {{ com nullable }}
   | t1 '|' t2         :: :: union           {{ com union type }}
   | ( t )  :: S :: paren {{ coq [[t]] }}    {{ com parentheses }} {{ ocaml [[t]] }}
@@ -133,6 +134,10 @@ t, u {{ ocaml ty }} :: 'ty_' ::=                           {{ com syntax of type
 
   | { t1 / T1 , .. , tn / Tn } t :: M :: Tsub
     {{ com substitution (meta-operation) }}
+    {{ coq [[t]] }}  % TODO
+    {{ ocaml [[t]] }} % TODO
+  | { u / this } t :: M :: Tsub_this
+    {{ com substitution (meta-operation) for this }}
     {{ coq [[t]] }}  % TODO
     {{ ocaml [[t]] }} % TODO
 
@@ -437,6 +442,33 @@ string_literal : string
 
 ------------------------ :: int
 C :: f : int
+
+{{ com \section*{Inheritance and implementation} }}
+
+defn
+  t1 <:: t2 :: :: derives ::'derives_'
+  {{ com [[t1]] extends or implements [[t2]] }}
+by
+
+{{ com
+We define a separate relation (`derives from') for the transitive closure of extending a class or implementing an interface.
+Subtyping adds the substitution of the \texttt{this} type, which is not handled by the derives relation.
+\\\\
+}}
+
+
+class C < var1 T1 constraint1, .. , varn Tn constraintn > extends t cimpls classbody
+------------------------------------------------------ :: extends
+C < t1 , .. , tn > <:: { t1 / T1 , .. , tn / Tn } t
+
+class C < var1 T1 constraint1, .. , varn Tn constraintn > cextends implements u1 , .. , um classbody
+-------------------------------------------------------------------- :: implements
+C < t1 , .. , tn > <:: { t1 / T1 , .. , tn / Tn } ui
+
+t1 <:: t2
+t2 <:: t3
+------------------- :: trans
+t1 <:: t3
 
 {{ com \section*{Subtyping} }}
 {{ com \addcontentsline{toc}{section}{Subtyping} }}
@@ -812,26 +844,23 @@ G |- shape ( sft1, ..., sftm, vardots ) <: shape (sft1, ..., sftm, ?sfn1' => mix
 
 {{ com \subsection{Class and interface inheritance} }}
 
------------------------ :: exact_as_class
-G |- # C inst <: C inst
-
-class C < var1 T1 constraint1, ... , varn Tn constraintn > cextends cimpls classbody
-G |- t1 <: var1 :> u1 ... G |- tn <: varn :> un
+class C < var1 T1 constraint1, .. , varn Tn constraintn > cextends cimpls classbody
+G |- t1 <: var1 :> u1 .. G |- tn <: varn :> un
 ----------------------------------------------------- :: exact_variance
-G |- # C < t1 , ... , tn > <: # C < u1 , ... , un >
+G |- # C < t1 , .. , tn > <: # C < u1 , .. , un >
 
-class C < var1 T1 constraint1, ... , varn Tn constraintn > cextends cimpls classbody
-G |- t1 <: var1 :> u1 ... G |- tn <: varn :> un
+class C < var1 T1 constraint1, .. , varn Tn constraintn > cextends cimpls classbody
+G |- t1 <: var1 :> u1 .. G |- tn <: varn :> un
 ----------------------------------------------------- :: class_variance
-G |- C < t1 , ... , tn > <: C < u1 , ... , un >
+G |- C < t1 , .. , tn > <: C < u1 , .. , un >
 
-class C < var1 T1 constraint1, ... , varn Tn constraintn > extends t cimpls classbody
------------------------------------------------------- :: class_extends
-G |- C < t1 , ... , tn > <: { t1 / T1 , ... , tn / Tn } t
+class C < var1 T1 constraint1, .. , varn Tn constraintn > extends t cimpls classbody
+------------------------------------------------- :: exact
+G |- # C < t1 , .. , tn > <: C < t1 , .. , tn >
 
-class C < var1 T1 constraint1, ... , varn Tn constraintn > cextends implements u1 , .. , um classbody
--------------------------------------------------------------------- :: class_implements
-G |- C < t1 , ... , tn > <: { t1 / T1 , ... , tn / Tn } ui
+G |- t1 <: t2      t2 <:: t3
+---------------------------- :: derives
+G |- t1 <: { t1 / this } t3
 
 {{ com \subsection{Enumerations} }}
 

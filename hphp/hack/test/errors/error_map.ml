@@ -138,6 +138,7 @@ ArrayLiteralsDisallowed = 2083
 WildcardDisallowed = 2084
 AttributeClassNameConflict = 2085
 MethodNeedsVisibility = 2086
+ReferenceInStrictMode = 2087
 
 NastCheck Errors:
 AbstractBody = 3001

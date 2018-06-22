@@ -1768,6 +1768,10 @@ module Make (GetLocals : GetLocals) = struct
     Env.add_lvar env param.param_id (p, ident);
     let ty = Option.map param.param_hint (hint env) in
     let eopt = Option.map param.param_expr (expr env) in
+    let _ = match (fst env).in_mode with
+    | FileInfo.Mstrict when param.param_is_reference ->
+      Errors.reference_in_strict_mode p;
+    | _ -> () in
     { N.param_annotation = p;
       param_hint = ty;
       param_is_reference = param.param_is_reference;
@@ -2532,11 +2536,15 @@ module Make (GetLocals : GetLocals) = struct
     | NewAnonClass _ ->
       N.Null
     | Efun (f, idl) ->
-        let idl = List.map idl fst in
+        let _ = match (fst env).in_mode with
+        | FileInfo.Mstrict -> List.iter idl ~f:(function
+          | (p, _), is_ref when is_ref -> Errors.reference_in_strict_mode p;
+          | _ -> ())
+        | _ -> () in
         let idl =
           List.fold_right idl
             ~init:[]
-            ~f:(fun ((p, x) as id) acc ->
+            ~f:(fun ((p, x) as id, _) acc ->
                if x = SN.SpecialIdents.this
                then (Errors.this_as_lexical_variable p; acc)
                else id :: acc)

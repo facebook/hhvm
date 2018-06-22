@@ -1145,6 +1145,10 @@ let wildcard_disallowed pos =
   add (Naming.err_code Naming.WildcardDisallowed) pos
     "Wildcard typehints are not allowed in this position"
 
+let reference_in_strict_mode pos =
+  add (Naming.err_code Naming.ReferenceInStrictMode) pos
+    "Don't use references!"
+
 (*****************************************************************************)
 (* Init check errors *)
 (*****************************************************************************)

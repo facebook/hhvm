@@ -11,5 +11,5 @@
 
 function foo(): void {
   $x = 0;
-  $f = function() use (&$x) { };
+  $f = function() use (&$x) {};
 }

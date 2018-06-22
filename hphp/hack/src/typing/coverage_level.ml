@@ -76,10 +76,10 @@ let empty_level_stats_entry = {
 }
 
 let empty_counter =
-  let m = CLMap.empty in
-  let m = CLMap.add Checked empty_level_stats_entry m in
-  let m = CLMap.add Partial empty_level_stats_entry m in
-  CLMap.add Unchecked empty_level_stats_entry m
+  CLMap.empty
+  |> CLMap.add Checked empty_level_stats_entry
+  |> CLMap.add Partial empty_level_stats_entry
+  |> CLMap.add Unchecked empty_level_stats_entry
 
 (* This is highly unscientific and not really uniform sampling, but for
  * debugging purposes should be enough. *)
@@ -180,10 +180,6 @@ let level_of_type fixme_map (pos, ty) =
           then Partial
           else Checked
         end
-
-let level_of_type_mapper fn =
-  let fixme_map = Fixmes.HH_FIXMES.find_unsafe fn in
-  level_of_type fixme_map
 
 class level_getter fixme_map =
   object

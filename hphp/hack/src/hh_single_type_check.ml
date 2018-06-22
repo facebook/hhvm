@@ -514,9 +514,8 @@ let print_colored fn type_acc =
   then Tty.cprint (ClientColorFile.replace_colors results)
   else print_string (List.map ~f: replace_color results |> String.concat "")
 
-let print_coverage fn type_acc =
-  let counts = ServerCoverageMetric.count_exprs fn type_acc in
-  ClientCoverageMetric.go ~json:false (Some (Coverage_level.Leaf counts))
+let print_coverage type_acc =
+  ClientCoverageMetric.go ~json:false (Some (Coverage_level.Leaf type_acc))
 
 let check_errors opts errors files_info =
   Relative_path.Map.fold files_info ~f:begin fun fn fileinfo errors ->
@@ -769,11 +768,12 @@ let handle_mode
         end
       end
   | Coverage ->
+      let p_tcopt = TypecheckerOptions.make_permissive tcopt in
       Relative_path.Map.iter files_info begin fun fn fileinfo ->
         if Relative_path.Map.mem builtins fn then () else begin
-          let type_acc =
-            ServerCoverageMetric.accumulate_types fn fileinfo tcopt in
-          print_coverage fn type_acc;
+          let tast, _ = Typing_check_utils.type_file p_tcopt fn fileinfo in
+          let type_acc = ServerCoverageMetric.accumulate_types tast filename in
+          print_coverage type_acc;
         end
       end
   | Cst_search ->

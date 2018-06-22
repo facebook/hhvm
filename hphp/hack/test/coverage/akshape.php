@@ -16,5 +16,5 @@ function test() {
   $c = array();
   $c['a'] = 4; // checked (AKmap)
   $c['b'] = no_type(); // checked
-  $c; // partially checked
+  $c; // checked
 }

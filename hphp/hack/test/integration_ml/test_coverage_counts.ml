@@ -20,7 +20,7 @@ function h($b): int {
   return $a + $b;
 }
 function f(): int {
-  return h(1) + 2
+  return h(1) + 2;
 }
 "
 let foo_name = "foo.php"
@@ -54,5 +54,5 @@ let () =
   Test.assert_coverage_counts loop_output [
     "/foo.php( array_get< checked=1 partial=0 unchecked=0 >"
     ^" call< checked=1 partial=0 unchecked=0 >"
-    ^" lvar< checked=2 partial=0 unchecked=1 > )";
+    ^" lvar< checked=4 partial=0 unchecked=1 > )";
     ];

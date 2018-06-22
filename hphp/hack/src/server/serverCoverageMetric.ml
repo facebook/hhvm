@@ -17,39 +17,47 @@ module FileInfoStore = GlobalStorage.Make(struct
   type t = FileInfo.t Relative_path.Map.t
 end)
 
-(* Count the number of expressions of each kind of Coverage_level. *)
-let count_exprs fn type_acc =
-  let level_of_type = level_of_type_mapper fn in
-  Hashtbl.fold (fun (p, kind) ty acc ->
-    let lvl = level_of_type (p, ty) in
-    let r = fst ty in
-    let counter = match SMap.get acc kind with
-      | Some counter -> counter
-      | None -> empty_counter in
-    SMap.add acc ~key:kind ~data:(incr_counter lvl (r, p, counter))
-  ) type_acc SMap.empty
-
-let accumulate_types fn defs tcopt =
-  let type_acc = Hashtbl.create 0 in
-  let tcopt = TypecheckerOptions.make_permissive tcopt in
-  Typing.with_expr_hook (fun (p, e) ty ->
-    let expr_kind_opt = match e with
-      | Nast.Array_get _ -> Some "array_get"
-      | Nast.Call _ -> Some "call"
-      | Nast.Class_get _ -> Some "class_get"
-      | Nast.Class_const _ -> Some "class_const"
-      | Nast.Lvar _ -> Some "lvar"
-      | Nast.New _ -> Some "new"
-      | Nast.Obj_get _ -> Some "obj_get"
-      | _ -> None in
-    Option.iter expr_kind_opt (fun kind ->
-      Hashtbl.replace type_acc (p, kind) ty))
-    (fun () ->
-      ignore (Typing_check_utils.check_defs tcopt fn defs));
-  type_acc
-
 let combine v1 v2 =
   SMap.merge ~f:(fun _ cs1 cs2 -> Option.merge cs1 cs2 merge_and_sum) v1 v2
+
+class count_getter fixme_map =
+  object
+    inherit [level_stats SMap.t] Tast_visitor.reduce as super
+    method zero = SMap.empty
+    method plus = combine
+    method! on_expr env expr =
+      let acc = super#on_expr env expr in
+      let ((pos, ty), e) = expr in
+      let expr_kind_opt =
+        match e with
+        | Tast.Array_get _ -> Some "array_get"
+        | Tast.Call _ -> Some "call"
+        | Tast.Class_get _ -> Some "class_get"
+        | Tast.Class_const _ -> Some "class_const"
+        | Tast.Lvar _ -> Some "lvar"
+        | Tast.New _ -> Some "new"
+        | Tast.Obj_get _ -> Some "obj_get"
+        | _ -> None
+      in
+      match expr_kind_opt with
+      | None -> acc
+      | Some kind ->
+        begin
+          let r = fst ty in
+          let lvl = level_of_type fixme_map (pos, ty) in
+          let counter = match SMap.get acc kind with
+            | Some counter -> counter
+            | None -> empty_counter in
+          SMap.add acc ~key:kind ~data:(incr_counter lvl (r, pos, counter))
+        end
+  end
+
+(* This should likely take in tasts made with type checker options that were
+ * made permissive using TypecheckerOptions.make_permissive
+ *)
+let accumulate_types tast check =
+  let cg = new count_getter (Fixmes.HH_FIXMES.find_unsafe check) in
+  cg#go tast
 
 (* Create a trie for a single key. More complicated tries can then be built from
  * path tries using merge_trie* functions *)
@@ -99,13 +107,14 @@ let relativize root path =
 (* Returns a list of (file_name, assoc list of counts) *)
 let get_coverage root tcopt neutral fnl  =
   SharedMem.invalidate_caches();
+  let p_tcopt = TypecheckerOptions.make_permissive tcopt in
   let files_info = FileInfoStore.load () in
   let file_counts = List.rev_filter_map fnl begin fun fn ->
     relativize root (Relative_path.to_absolute fn) >>= fun relativized_fn ->
     Relative_path.Map.get files_info fn >>= fun defs ->
-    let type_acc = accumulate_types fn defs tcopt in
-    let counts = count_exprs fn type_acc in
-    Some (relativized_fn, counts)
+    let tast, _ = Typing_check_utils.type_file p_tcopt fn defs in
+    let type_acc = accumulate_types tast fn in
+    Some (relativized_fn, type_acc)
   end in
   mk_trie neutral file_counts
 

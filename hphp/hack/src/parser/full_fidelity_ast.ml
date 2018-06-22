@@ -3097,7 +3097,12 @@ let lower_tree
   (mode : FileInfo.mode)
   (tree : PositionedSyntaxTree.t)
 : result =
-  let env = { env with lower_coroutines = env.lower_coroutines && PositionedSyntaxTree.sc_state tree } in
+  let env =
+    { env with lower_coroutines =
+        env.lower_coroutines &&
+        PositionedSyntaxTree.sc_state tree &&
+        env.codegen
+    } in
   let () =
     if env.codegen && not env.lower_coroutines then
       let hhvm_compat_mode = if env.systemlib_compat_mode

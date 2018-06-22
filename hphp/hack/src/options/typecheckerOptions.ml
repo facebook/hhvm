@@ -55,6 +55,9 @@ let experimental_void_is_type_of_null =
 let experimental_shape_field_check =
   GlobalOptions.tco_experimental_shape_field_check
 
+let experimental_null_coalesce_assignment =
+  GlobalOptions.tco_experimental_null_coalesce_assignment
+
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all
 let dynamic_view = GlobalOptions.tco_dynamic_view

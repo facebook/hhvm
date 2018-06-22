@@ -1,0 +1,2 @@
+File "bad_lvalue.php", line 8, characters 10-12:
+Invalid lvalue (Parsing[1002])

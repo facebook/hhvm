@@ -831,7 +831,7 @@ module WithStatementAndDeclAndTypeParser
     | PlusEqual | MinusEqual | StarEqual | SlashEqual |
       StarStarEqual | DotEqual | PercentEqual | AmpersandEqual |
       BarEqual | CaratEqual | LessThanLessThanEqual |
-      GreaterThanGreaterThanEqual
+      GreaterThanGreaterThanEqual | QuestionQuestionEqual
       when can_be_used_as_lvalue parser left_term ->
       Prefix_assignment
     | _ -> Prefix_none

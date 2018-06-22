@@ -3037,7 +3037,7 @@ and expr_remain env e1 =
   | Tqmqm ->
       expr_binop env Tqmqm QuestionQuestion e1
   | Tqmqmeq ->
-      expr_binop env Tqmqmeq (Eq (Some QuestionQuestion)) e1
+      expr_assign env Tqmqmeq (Eq (Some QuestionQuestion)) e1
   | Tnullableas when !(env.allow_as_expressions) ->
       expr_as env ~is_nullable:true e1
   | Tword when Lexing.lexeme env.lb = "instanceof" ->

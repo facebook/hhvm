@@ -1317,6 +1317,11 @@ and expr_
         (Env.get_options env)
         TypecheckerOptions.experimental_disable_shape_and_tuple_arrays in
 
+  let null_coalesce_assignment_enabled =
+      TypecheckerOptions.experimental_feature_enabled
+        (Env.get_options env)
+        TypecheckerOptions.experimental_null_coalesce_assignment in
+
   let non_arraykey_keys_disallowed =
     TypecheckerOptions.disallow_non_arraykey_keys (Env.get_options env) in
 
@@ -1898,14 +1903,16 @@ and expr_
       env, te, ty
   | Binop (Ast.QuestionQuestion, e1, e2) ->
       eif env ~expected ~coalesce:true ~in_cond p e1 None e2
-  | Binop (Ast.Eq (Some Ast.QuestionQuestion), _e1, _e2) ->
-      Errors.experimental_feature p "is expression";
-      expr_error env p (Reason.Rnone)
     (* For example, e1 += e2. This is typed and translated as if
      * written e1 = e1 + e2.
      * TODO TAST: is this right? e1 will get evaluated more than once
      *)
   | Binop (Ast.Eq (Some op), e1, e2) ->
+      if op = Ast.QuestionQuestion && not null_coalesce_assignment_enabled
+      then begin
+        Errors.experimental_feature p "null coalesce assignment operator";
+        expr_error env p (Reason.Rnone)
+      end else
       let e_fake = (p, Binop (Ast.Eq None, e1, (p, Binop (op, e1, e2)))) in
       let env, te_fake, ty = raw_expr in_cond env e_fake in
       begin match snd te_fake with

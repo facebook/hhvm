@@ -150,6 +150,11 @@ let tco_experimental_void_is_type_of_null = "void_is_type_of_null"
  *)
 let tco_experimental_shape_field_check = "shape_field_check"
 
+(**
+ * Enable the null coalescence assignment (`??=`) operator.
+ *)
+let tco_experimental_null_coalesce_assignment = "null_coalesce_assignment"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -173,6 +178,7 @@ let tco_experimental_all =
      tco_decl_override_require_hint;
      tco_experimental_void_is_type_of_null;
      tco_experimental_shape_field_check;
+     tco_experimental_null_coalesce_assignment;
    ]
 
 let tco_migration_flags_all =

@@ -60,7 +60,7 @@ metavar userid ::=
   {{ ocaml string }}
 metavar T {{ ocaml typaram_id }} ::= {{ coq string }} {{ com type parameter, different from other identifiers for simplicity }}
   {{ ocaml string }}
-indexvar i, j, m, n, p ::= {{ coq nat }} {{ com natural number indices }} {{ ocaml int}}
+indexvar i, j, m, n ::= {{ coq nat }} {{ com natural number indices }} {{ ocaml int}}
 
 grammar
 

@@ -451,3 +451,6 @@ let do_not_use_or =
 
 let do_not_use_and =
   "Do not use \"and\", it has surprising precedence. Use \"&&\" instead"
+
+let invalid_foreach_element = "An arrow ('=>') or right parenthesis (')') \
+  is expected here."

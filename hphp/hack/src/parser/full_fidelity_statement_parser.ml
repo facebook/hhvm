@@ -352,9 +352,8 @@ module WithExpressionAndDeclAndTypeParser
         let parser, value = parse_expression parser in
         (parser, after_as, arrow, value)
       | _ ->
-        (* TODO ERROR RECOVERY. Now assumed that the arrow is missing
-         * and goes on to parse the next expression *)
-        let (parser, token) = fetch_token parser1 in
+        let parser = with_error parser1 SyntaxError.invalid_foreach_element in
+        let (parser, token) = fetch_token parser in
         let (parser, error) = Make.error parser token in
         let (parser, foreach_value) = parse_expression parser in
         (parser, after_as, error, foreach_value)

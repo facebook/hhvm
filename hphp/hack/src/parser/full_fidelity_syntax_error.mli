@@ -259,3 +259,4 @@ val invalid_default_argument: string -> string
 val do_not_use_xor : string
 val do_not_use_or : string
 val do_not_use_and : string
+val invalid_foreach_element: string

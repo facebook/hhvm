@@ -1,0 +1,2 @@
+File "invalid_foreach_arrow3.php", line 4, characters 24-25:
+Undefined variable: $v (Naming[2050])

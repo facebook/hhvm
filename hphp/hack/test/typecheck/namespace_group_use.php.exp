@@ -1,1 +1,2 @@
-No errors
+File "namespace_group_use.php", line 25, characters 29-29:
+Cannot use function f1 as f1 because the name is already in use (Parsing[1002])

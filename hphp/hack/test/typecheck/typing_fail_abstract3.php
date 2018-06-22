@@ -12,5 +12,5 @@
 // method with a body in an interface
 
 interface A {
-  function f(): int { return 0; }
+  public function f(): int { return 0; }
 }

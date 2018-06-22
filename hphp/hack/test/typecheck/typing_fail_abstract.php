@@ -12,7 +12,7 @@
 // Abstract method with body
 
 abstract class A {
-  abstract function f(): int {
+  abstract public function f(): int {
     return 0;
   }
 }

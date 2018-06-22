@@ -220,6 +220,7 @@ val fn_with_inout_and_ref_params : string
 val method_calls_on_xhp_attributes : string
 val invalid_constant_initializer : string
 val no_args_in_halt_compiler : string
+val no_async_before_lambda_body : string
 val halt_compiler_top_level_only : string
 val trait_alias_rule_allows_only_final_and_visibility_modifiers : string
 val namespace_decl_first_statement : string

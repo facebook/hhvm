@@ -362,6 +362,10 @@ let invalid_constant_initializer =
   "Invalid expression in constant initializer"
 let no_args_in_halt_compiler =
   "__halt_compiler function does not accept any arguments"
+
+let no_async_before_lambda_body =
+  "Unexpected use of async {...} as lambda expression"
+
 let halt_compiler_top_level_only =
   "__halt_compiler function should appear only at the top level"
 let trait_alias_rule_allows_only_final_and_visibility_modifiers =

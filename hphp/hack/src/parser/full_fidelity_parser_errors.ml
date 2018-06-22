@@ -1572,6 +1572,13 @@ let function_call_on_xhp_name_errors node errors =
     end
   | _ -> errors
 
+let no_async_before_lambda_body env body_node errors =
+  match syntax body_node with
+  | AwaitableCreationExpression _ when not env.codegen ->
+    (make_error_from_node body_node SyntaxError.no_async_before_lambda_body)
+      :: errors
+  | _ -> errors
+
 let no_memoize_attribute_on_lambda node errors =
   match syntax node with
   | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
@@ -1808,7 +1815,12 @@ let expression_errors env node parents errors =
       && env.disallow_elvis_space
       && is_hack env ->
     make_error_from_node node SyntaxError.elvis_operator_space :: errors
-  | LambdaExpression { lambda_attribute_spec = s; _}
+  | LambdaExpression
+    { lambda_attribute_spec = s
+    ; lambda_body = body
+    ; _ } ->
+    let errors = no_memoize_attribute_on_lambda s errors in
+    no_async_before_lambda_body env body errors
   | AnonymousFunction { anonymous_attribute_spec = s; _ }
   | Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }
   | AwaitableCreationExpression { awaitable_attribute_spec = s; _ }

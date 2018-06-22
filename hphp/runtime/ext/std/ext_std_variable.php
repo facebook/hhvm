@@ -233,6 +233,9 @@ namespace HH {
   <<__Native, __ParamCoerceModeFalse, __IsFoldable>>
   function is_darray(mixed $var): bool;
 
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable>>
+  function is_any_array(mixed $var): bool;
+
  /*
   * Behaves like serialize() but takes an optional set of options.
   *

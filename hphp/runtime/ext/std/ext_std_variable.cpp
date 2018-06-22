@@ -196,6 +196,10 @@ bool HHVM_FUNCTION(HH_is_darray, const Variant& val) {
   return val.isPHPArray() && val.toCArrRef().isDArray();
 }
 
+bool HHVM_FUNCTION(HH_is_any_array, const Variant& val) {
+  return val.isArray();
+}
+
 bool HHVM_FUNCTION(is_object, const Variant& v) {
   return is_object(v);
 }
@@ -639,6 +643,7 @@ void StandardExtension::initVariable() {
   HHVM_FALIAS(HH\\is_keyset, HH_is_keyset);
   HHVM_FALIAS(HH\\is_varray, HH_is_varray);
   HHVM_FALIAS(HH\\is_darray, HH_is_darray);
+  HHVM_FALIAS(HH\\is_any_array, HH_is_any_array);
   HHVM_FE(is_object);
   HHVM_FE(is_resource);
   HHVM_FE(boolval);

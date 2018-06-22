@@ -390,6 +390,7 @@ let istype_op lower_fq_id =
   | "hh\\is_vec" -> Some OpVec
   | "hh\\is_varray" -> Some (if hack_arr_dv_arrs () then OpVec else OpVArray)
   | "hh\\is_darray" -> Some (if hack_arr_dv_arrs () then OpDict else OpDArray)
+  | "hh\\is_any_array" -> Some OpArrLike
   | _ -> None
 
 (* T29079834: Using this for the is expressions migration *)

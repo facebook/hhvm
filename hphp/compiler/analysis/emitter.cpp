@@ -6348,6 +6348,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   TYPE_CHECK_INSTR_HH(vec, Vec)
   TYPE_CHECK_INSTR_HH(dict, Dict)
   TYPE_CHECK_INSTR_HH(keyset, Keyset)
+  TYPE_CHECK_INSTR_HH(any_array, ArrLike)
 #undef TYPE_CHECK_INSTR_HH
 
 #define TYPE_CHECK_INSTR_DVARR(what, What1, What2)                      \

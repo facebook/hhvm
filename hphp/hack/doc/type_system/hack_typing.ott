@@ -719,6 +719,10 @@ G |- keyset<t> <: keyset<u>
 
 {{ com Legacy arrays are covariant in all parameters. }}
 
+G |- t <: u
+------------------------------ :: vecarray_co
+G |- array<t> <: array<u>
+
 G |- t1 <: u1
 G |- t2 <: u2
 ------------------------------ :: maparray_co

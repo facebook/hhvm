@@ -1637,7 +1637,6 @@ let expression_errors env node parents errors =
     end
   | SafeMemberSelectionExpression _ when not (is_hack env) ->
     make_error_from_node node SyntaxError.error2069 :: errors
-
   | SubscriptExpression { subscript_left_bracket; _}
     when (is_typechecker env)
       && is_left_brace subscript_left_bracket ->
@@ -1742,16 +1741,34 @@ let expression_errors env node parents errors =
     { scope_resolution_qualifier = qualifier
     ; scope_resolution_name = name
     ; _ } ->
-      let is_dynamic_name, is_self_or_parent =
+      let is_dynamic_name, is_self_or_parent, is_valid =
+        (* PHP langspec allows string literals, variables
+          qualified names, static, self and parent as valid qualifiers *)
+        (* We do not allow string literals in hack *)
         match syntax qualifier, token_kind qualifier with
-        | (LiteralExpression _ | QualifiedName _), _ -> false, false
+        | LiteralExpression _, _ ->
+          false, false, not (is_typechecker env)
+        | QualifiedName _, _ -> false, false, true
         | _, Some TokenKind.Name
         | _, Some TokenKind.XHPClassName
-        | _, Some TokenKind.Static -> false, false
+        | _, Some TokenKind.Static -> false, false, true
         | _, Some TokenKind.Self
-        | _, Some TokenKind.Parent -> false, true
-        | _ -> true, false
+        | _, Some TokenKind.Parent -> false, true, true
+        (* ${}::class *)
+        | PrefixUnaryExpression {
+          prefix_unary_operator = op; _
+        }, _ when token_kind op = Some TokenKind.Dollar ->
+          true, false, true
+        | PipeVariableExpression _, _
+        | VariableExpression _, _
+        | SimpleTypeSpecifier _, _
+        | GenericTypeSpecifier _, _ -> true, false, true
+        | _ -> true, false, not (is_typechecker env)
       in
+      let errors = if not is_valid then
+        make_error_from_node
+          node SyntaxError.invalid_scope_resolution_qualifier :: errors
+        else errors in
       let is_name_class = String.lowercase_ascii @@ text name = "class" in
       let errors = if is_dynamic_name && is_name_class then
         make_error_from_node

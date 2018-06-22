@@ -458,3 +458,5 @@ let do_not_use_and =
 
 let invalid_foreach_element = "An arrow ('=>') or right parenthesis (')') \
   is expected here."
+
+let invalid_scope_resolution_qualifier = "Only classnames and variables are allowed before '::'."

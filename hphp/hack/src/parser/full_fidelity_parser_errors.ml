@@ -1997,8 +1997,10 @@ let use_class_or_namespace_clause_errors
   match syntax cl with
   | NamespaceUseClause {
       namespace_use_name  = name;
-      namespace_use_alias = alias; _
+      namespace_use_alias = alias;
+      namespace_use_clause_kind; _
     } when not (is_missing name) ->
+    let kind = if is_missing kind then namespace_use_clause_kind else kind in
     let name_text = text name in
     let qualified_name =
       match namespace_prefix with

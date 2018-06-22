@@ -134,21 +134,70 @@ let make_first_use_or_def ~kind ?(is_method=false) location namespace_name name 
     f_global = not is_method && namespace_name = global_namespace_name;
   }
 
+type 'a strmap =
+  | YesCase of 'a SMap.t
+  | NoCase of 'a LSMap.t
+
+
 type used_names = {
-  t_classes: first_use_or_def SMap.t;
-  t_namespaces: first_use_or_def SMap.t;
-  t_functions: first_use_or_def SMap.t;
-  t_constants: first_use_or_def SMap.t;
+  t_classes: first_use_or_def strmap;    (* NoCase *)
+  t_namespaces: first_use_or_def strmap; (* NoCase *)
+  t_functions: first_use_or_def strmap;  (* NoCase *)
+  t_constants: first_use_or_def strmap;  (* YesCase *)
 }
 
 let empty_names = {
-  t_classes = SMap.empty;
-  t_namespaces = SMap.empty;
-  t_functions = SMap.empty;
-  t_constants = SMap.empty;
+  t_classes = NoCase LSMap.empty;
+  t_namespaces = NoCase LSMap.empty;
+  t_functions = NoCase LSMap.empty;
+  t_constants = YesCase SMap.empty;
 }
 
-let empty_trait_require_clauses = SMap.empty
+let strmap_mem : string -> 'a strmap -> bool =
+  fun k m ->
+  begin match m with
+  | NoCase m -> LSMap.mem k m
+  | YesCase m -> SMap.mem k m
+  end
+
+let strmap_add : string -> 'a -> 'a strmap -> 'a strmap =
+  fun k v m ->
+  begin match m with
+  | NoCase m' -> NoCase (LSMap.add k v m')
+  | YesCase m' -> YesCase (SMap.add k v m')
+  end
+
+let strmap_get : string -> 'a strmap -> 'a option =
+  fun k m ->
+  begin match m with
+  | NoCase m' -> LSMap.get k m'
+  | YesCase m' -> SMap.get k m'
+  end
+
+let strmap_find_first_opt : (string -> bool) -> 'a strmap -> (string * 'a) option =
+  fun k m ->
+  begin match m with
+  | NoCase m' -> LSMap.find_first_opt k m'
+  | YesCase m' -> SMap.find_first_opt k m'
+  end
+
+let strmap_filter : (string -> 'a -> bool) -> 'a strmap -> 'a strmap =
+  fun f m ->
+  begin match m with
+  | NoCase m' -> NoCase (LSMap.filter f m')
+  | YesCase m' -> YesCase (SMap.filter f m')
+  end
+
+let strmap_union : 'a strmap -> 'a strmap -> 'a strmap =
+  fun x y ->
+  begin match x, y with
+  | NoCase x', NoCase y' -> NoCase (LSMap.union x' y')
+  | YesCase x', YesCase y' -> YesCase (SMap.union x' y')
+  | NoCase _, YesCase _ -> failwith "cannot union NoCase and YesCase."
+  | YesCase _, NoCase _ -> failwith "cannot union YesCase and NoCase."
+  end
+
+let empty_trait_require_clauses = NoCase LSMap.empty
 
 let get_short_name_from_qualified_name name alias =
   if String.length alias <> 0 then alias
@@ -163,7 +212,7 @@ type accumulator = {
   namespace_type : namespace_type;
   namespace_name: string;
   names: used_names;
-  trait_require_clauses: TokenKind.t SMap.t;
+  trait_require_clauses: TokenKind.t strmap;
 }
 
 let make_acc
@@ -855,11 +904,11 @@ let make_name_already_used_error node name short_name original_location
     ~child:(Some original_location_error) s e (report_error ~name ~short_name)
 
 let check_type_name_reference env name_text location names errors =
-  if not (is_hack env && Hh_autoimport.is_hh_autoimport name_text) || SMap.mem name_text names.t_classes
+  if not (is_hack env && Hh_autoimport.is_hh_autoimport name_text) || strmap_mem name_text names.t_classes
   then names, errors
   else
     let def = make_first_use_or_def ~kind:Name_implicit_use location "HH" name_text in
-    let names = { names with t_classes = SMap.add name_text def names.t_classes} in
+    let names = { names with t_classes = strmap_add name_text def names.t_classes} in
     names, errors
 
 let check_type_hint env node names errors =
@@ -1287,7 +1336,7 @@ let redeclaration_errors env node parents namespace_name names errors =
         let def = make_first_use_or_def ~is_method
           ~kind:Name_def location namespace_name function_name in
         let errors =
-          match SMap.get function_name names.t_functions with
+          match strmap_get function_name names.t_functions with
           | Some { f_location = { start_offset; _}; f_kind = Name_def; f_global; _ }
               when f_global = def.f_global ->
             let text = SyntaxTree.text env.syntax_tree in
@@ -1311,7 +1360,7 @@ let redeclaration_errors env node parents namespace_name names errors =
           | _ -> errors
         in
         { names with
-          t_functions = SMap.add function_name def names.t_functions }, errors
+          t_functions = strmap_add function_name def names.t_functions }, errors
       | _ -> names, errors
     end
   | _ -> names, errors
@@ -1766,8 +1815,8 @@ let require_errors env node parents trait_use_clauses errors =
     let name = text p.require_name in
     let req_kind = token_kind p.require_kind in
     let trait_use_clauses, errors =
-      match SMap.get name trait_use_clauses, req_kind with
-      | None, Some tk -> SMap.add name tk trait_use_clauses, errors
+      match strmap_get name trait_use_clauses, req_kind with
+      | None, Some tk -> strmap_add name tk trait_use_clauses, errors
       | Some tk1, Some tk2 when tk1 = tk2 -> (* duplicate, it is okay *)
         trait_use_clauses, errors
       | _ -> (* Conflicting entry *)
@@ -1786,7 +1835,7 @@ let require_errors env node parents trait_use_clauses errors =
   | _ -> trait_use_clauses, errors
 
 let check_type_name syntax_tree name namespace_name name_text location names errors =
-  begin match SMap.get name_text names.t_classes with
+  begin match strmap_get name_text names.t_classes with
   | Some { f_location = location; f_kind; f_name; _ }
     when combine_names namespace_name name_text <> f_name && f_kind <> Name_def ->
     let text = SyntaxTree.text syntax_tree in
@@ -1806,7 +1855,7 @@ let check_type_name syntax_tree name namespace_name name_text location names err
       make_first_use_or_def ~kind:Name_def location namespace_name name_text in
     let names =
       { names with
-        t_classes = SMap.add name_text def names.t_classes} in
+        t_classes = strmap_add name_text def names.t_classes} in
     names, errors
   end
 
@@ -2017,7 +2066,7 @@ let use_class_or_namespace_clause_errors
         then short_name = name
         else (String.lowercase_ascii short_name) = String.lowercase_ascii name in
       let map = get_map names in
-      match SMap.find_first_opt find_name map with
+      match strmap_find_first_opt find_name map with
       | Some (_, { f_location = location; f_kind; f_global; _ }) ->
         if (f_kind <> Name_def
            || (error_on_global_redefinition && (is_global_namespace || f_global)))
@@ -2034,7 +2083,7 @@ let use_class_or_namespace_clause_errors
             ~kind:Name_use
             (make_location_of_node name)
             global_namespace_name qualified_name in
-        update_map names (SMap.add short_name new_use map), errors
+        update_map names (strmap_add short_name new_use map), errors
     in
 
     begin match syntax kind with
@@ -2079,7 +2128,7 @@ let use_class_or_namespace_clause_errors
 
       let names, errors =
         let location = make_location_of_node name in
-        match SMap.get short_name names.t_classes with
+        match strmap_get short_name names.t_classes with
         | Some { f_location = loc; f_name; f_kind; _ } ->
           if qualified_name = f_name && f_kind = Name_def then names, errors
           else
@@ -2100,11 +2149,11 @@ let use_class_or_namespace_clause_errors
         | None ->
           let new_use =
             make_first_use_or_def ~kind:Name_use location global_namespace_name qualified_name in
-          let t_classes = SMap.add short_name new_use names.t_classes in
+          let t_classes = strmap_add short_name new_use names.t_classes in
           let t_namespaces =
-            if SMap.mem short_name names.t_namespaces
+            if strmap_mem short_name names.t_namespaces
             then names.t_namespaces
-            else SMap.add short_name new_use names.t_namespaces in
+            else strmap_add short_name new_use names.t_namespaces in
           { names with t_classes; t_namespaces }, errors in
 
       names, errors
@@ -2313,7 +2362,7 @@ let const_decl_errors env node parents namespace_name names errors =
     let def =
       make_first_use_or_def ~kind:Name_def location namespace_name constant_name in
     let errors =
-      match SMap.get constant_name names.t_constants with
+      match strmap_get constant_name names.t_constants with
       | None -> errors
       | Some _ ->
         (* Only error if this is inside a class *)
@@ -2327,7 +2376,7 @@ let const_decl_errors env node parents namespace_name names errors =
     in
     let names = {
       names with t_constants =
-        SMap.add constant_name def names.t_constants } in
+        strmap_add constant_name def names.t_constants } in
     names, errors
   | _ -> names, errors
 
@@ -2727,7 +2776,7 @@ let find_syntax_errors env =
          keeping global function names *)
       let namespace_name = get_namespace_name parents namespace_name in
       let is_global _ f = f.f_global in
-      let global_funs names = SMap.filter is_global names.t_functions in
+      let global_funs names = strmap_filter is_global names.t_functions in
       let new_names = {empty_names with t_functions = global_funs names} in
       let acc1 =
         make_acc
@@ -2738,7 +2787,7 @@ let find_syntax_errors env =
       (* add newly declared global functions to the old set of names *)
       let old_names =
         {acc.names with t_functions =
-          SMap.union (global_funs acc1.names) acc.names.t_functions}
+          strmap_union (global_funs acc1.names) acc.names.t_functions}
       in
       (* resume with old set of names and pull back
         accumulated errors/last seen namespace type *)
@@ -2770,8 +2819,8 @@ let find_syntax_errors env =
           { new_acc with names =
             { new_acc.names with t_constants = acc.names.t_constants;
                                  t_functions = acc.names.t_functions }} in
-      let names = { names with t_constants = SMap.empty;
-                               t_functions = SMap.empty } in
+      let names = { names with t_constants = YesCase SMap.empty;
+                               t_functions = NoCase LSMap.empty } in
       let acc =
         make_acc
           acc errors namespace_type names

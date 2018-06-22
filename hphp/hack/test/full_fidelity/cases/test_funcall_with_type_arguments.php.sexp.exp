@@ -39,9 +39,9 @@
          (list 14
           ((list_item 6
             ((binary_expression 5
-              ((literal 1 ((() octal_literal 1 ((whitespace 1)))))
+              ((literal 1 ((() decimal_literal 1 ((whitespace 1)))))
                (() < 1 ((whitespace 1)))
-               (literal 1 ((() octal_literal 1 ())))))
+               (literal 1 ((() decimal_literal 1 ())))))
              (() , 1 ((whitespace 1)))))
            (list_item 7
             ((tuple_expression 7
@@ -56,7 +56,7 @@
           ((list_item 8
             ((binary_expression 7
               ((() name 3 ((whitespace 1))) (() < 1 ((whitespace 1)))
-               (literal 1 ((() octal_literal 1 ())))))
+               (literal 1 ((() decimal_literal 1 ())))))
              (() , 1 ((whitespace 1)))))
            (list_item 8
             ((binary_expression 8

@@ -378,7 +378,7 @@ let scan_octal_or_float lexer =
             scan_decimal_digits_with_underscores lexer in
           (lexer_dec_with_underscores, TokenKind.OctalLiteral)
       end
-  | _ -> (* 0 *) (lexer, TokenKind.OctalLiteral)
+  | _ -> (* 0 is a decimal literal *) (lexer, TokenKind.DecimalLiteral)
 
 let scan_decimal_or_float lexer =
   (* We've scanned a leading non-zero digit. *)

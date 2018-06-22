@@ -52,7 +52,7 @@
             ((binary_expression 8
               ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
                (() ??= 3 ((whitespace 1)))
-               (literal 1 ((() octal_literal 1 ())))))
+               (literal 1 ((() decimal_literal 1 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 7
             ((binary_expression 6

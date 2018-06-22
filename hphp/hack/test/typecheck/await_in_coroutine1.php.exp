@@ -1,2 +1,2 @@
-File "", line 0, characters 0--1:
-Unbound name: CoroutineResult (an object type) (Naming[2049])
+File "await_in_coroutine1.php", line 4, characters 8-15:
+await is not allowed in coroutines. (NastCheck[3036])

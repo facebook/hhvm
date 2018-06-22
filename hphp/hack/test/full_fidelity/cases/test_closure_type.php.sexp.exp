@@ -44,7 +44,7 @@
                 ((variable 2 ((() variable 2 ()))) (() "(" 1 ())
                  (list 1
                   ((list_item 1
-                    ((literal 1 ((() octal_literal 1 ()))) (missing 0 ())))))
+                    ((literal 1 ((() decimal_literal 1 ()))) (missing 0 ())))))
                  (() ")" 1 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (return_statement 10

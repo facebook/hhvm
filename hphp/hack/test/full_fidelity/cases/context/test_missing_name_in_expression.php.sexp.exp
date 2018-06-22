@@ -25,7 +25,7 @@
         ((variable 2 ((() variable 2 ((whitespace 1)))))
          (() = 1 ((whitespace 1)))
          (binary_expression 3
-          ((literal 1 ((() octal_literal 1 ((whitespace 1)))))
+          ((literal 1 ((() decimal_literal 1 ((whitespace 1)))))
            (() - 1 ((whitespace 1))) (missing 0 ())))))
        (() ";" 1 ((end_of_line 1)))))
      (end_of_file 0 ((() end_of_file 0 ()))))))))

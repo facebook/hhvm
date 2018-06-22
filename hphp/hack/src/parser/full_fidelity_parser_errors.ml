@@ -517,8 +517,24 @@ let class_non_constructor_has_visibility_param node parents =
     (not (is_construct label)) && (List.exists has_visibility params)
   | _ -> false
 
-
-
+(* check that a constructor or a destructor is type annotated *)
+let class_constructor_destructor_has_non_void_type env node parents =
+  if not (is_typechecker env) then false
+  else
+  match node with
+  | FunctionDeclarationHeader node ->
+    let label = node.function_name in
+    let type_ano = node.function_type in
+    let function_colon = node.function_colon in
+    let is_missing = is_missing type_ano && is_missing function_colon in
+    let is_void = match syntax type_ano with
+      | SimpleTypeSpecifier spec ->
+        is_void spec.simple_type_specifier
+      | _ -> false
+    in
+    (is_construct label || is_destruct label) &&
+    not (is_missing || is_void)
+  | _ -> false
 let async_magic_method node parents =
   match node with
   | FunctionDeclarationHeader node ->
@@ -663,7 +679,18 @@ let is_invalid_xhp_attr_enum_item node =
 
 let xhp_errors env node errors =
   match syntax node with
-  |  XHPExpression
+  | XHPEnumType enumType when
+  (is_typechecker env) &&
+  (is_missing enumType.xhp_enum_values) ->
+    make_error_from_node enumType.xhp_enum_values SyntaxError.error2055 :: errors
+  | XHPEnumType enumType when
+    (is_typechecker env) ->
+    let invalid_enum_items = List.filter is_invalid_xhp_attr_enum_item
+      (syntax_to_list_no_separators enumType.xhp_enum_values) in
+    let mapper errors item =
+      make_error_from_node item SyntaxError.error2063 :: errors in
+    List.fold_left mapper errors invalid_enum_items
+  | XHPExpression
     { xhp_open =
       { syntax = XHPOpen { xhp_open_name; _ }; _ }
     ; xhp_close =
@@ -738,6 +765,19 @@ let first_parent_function_name parents =
       extract_function_name header
     | _ -> None
   end
+
+
+(* Given a particular TokenKind.(Trait/Interface), tests if a given
+ * classish_declaration node is both of that kind and declared abstract. *)
+let is_classish_kind_declared_abstract env cd_node =
+  if not (is_hack env) then false
+  else
+  match syntax cd_node with
+  | ClassishDeclaration { classish_keyword; classish_modifiers; _ }
+    when is_token_kind classish_keyword TokenKind.Trait
+      || is_token_kind classish_keyword TokenKind.Interface ->
+      list_contains_predicate is_abstract classish_modifiers
+  | _ -> false
 
 let rec is_immediately_in_lambda = function
   | { syntax = LambdaExpression _; _} :: _ -> true
@@ -1090,7 +1130,11 @@ let methodish_errors env node parents errors =
   match syntax node with
   (* TODO how to narrow the range of error *)
   | FunctionDeclarationHeader { function_parameter_list; function_type; _} ->
-    let errors =
+     let errors =
+       produce_error_for_header errors
+       (class_constructor_destructor_has_non_void_type env)
+       node parents SyntaxError.error2018 function_type in
+     let errors =
       produce_error_for_header errors class_non_constructor_has_visibility_param
       node parents SyntaxError.error2010 function_parameter_list in
     errors
@@ -1586,6 +1630,11 @@ let expression_errors env node parents errors =
     end
   | SafeMemberSelectionExpression _ when not (is_hack env) ->
     make_error_from_node node SyntaxError.error2069 :: errors
+
+  | SubscriptExpression { subscript_left_bracket; _}
+    when (is_typechecker env)
+      && is_left_brace subscript_left_bracket ->
+    make_error_from_node node SyntaxError.error2020 :: errors
   | HaltCompilerExpression { halt_compiler_argument_list = args; _ } ->
     let errors =
       if Core_list.is_empty (syntax_to_list_no_separators args) then errors
@@ -1612,6 +1661,16 @@ let expression_errors env node parents errors =
     in
     let errors =
       function_call_on_xhp_name_errors function_call_receiver errors in
+    errors
+  | ConstructorCall ctr_call when (is_typechecker env) ->
+  if is_missing ctr_call.constructor_call_left_paren ||
+      is_missing ctr_call.constructor_call_right_paren
+  then
+    let node = ctr_call.constructor_call_type in
+    let constructor_name = text ctr_call.constructor_call_type in
+    make_error_from_node node
+      (SyntaxError.error2038 constructor_name) :: errors
+  else
     errors
   | ListExpression { list_members; _ }
     when is_hhvm_compat env ->
@@ -1898,11 +1957,27 @@ let classish_errors env node parents namespace_name names errors =
           | _ -> false)
       | _ -> false in
 
+    (* Given a ClassishDeclaration node, test whether or not length of
+     * extends_list is appropriate for the classish_keyword. *)
+    let classish_invalid_extends_list env _ =
+      (* Invalid if is a class and has list of length greater than one. *)
+      (is_typechecker env) &&
+      token_kind cd.classish_keyword = Some TokenKind.Class &&
+        token_kind cd.classish_extends_keyword = Some TokenKind.Extends &&
+        match syntax_to_list_no_separators cd.classish_extends_list with
+        | [x1] -> false
+        | _ -> true (* General bc empty list case is already caught by error1007 *) in
+    let abstract_keyword =
+      Option.value (extract_keyword is_abstract node) ~default:node  in
+    let errors = produce_error errors
+      (is_classish_kind_declared_abstract env)
+      node SyntaxError.error2042 abstract_keyword in
     (* Given a ClassishDeclaration node, test whether it is sealed and final. *)
     let classish_sealed_final env _ =
       list_contains_predicate is_final cd.classish_modifiers &&
       classish_is_sealed in
-
+    let errors = produce_error errors (classish_invalid_extends_list env) ()
+      SyntaxError.error2037 cd.classish_extends_list in
     let errors =
       produce_error errors
       classish_duplicate_modifiers cd.classish_modifiers
@@ -2192,6 +2267,7 @@ let namespace_use_declaration_errors
         env is_global_namespace (Some (text prefix)) kind in
     List.fold_left f (names, errors) (syntax_to_list_no_separators clauses)
   | _ -> names, errors
+
 
 let rec check_constant_expression errors node =
   let is_namey token =
@@ -2702,6 +2778,8 @@ let find_syntax_errors env =
       | AsExpression _
       | AnonymousFunction _
       | Php7AnonymousFunction _
+      | SubscriptExpression _
+      | ConstructorCall _
       | AwaitableCreationExpression _
       | ConditionalExpression _ ->
         let errors =
@@ -2756,6 +2834,7 @@ let find_syntax_errors env =
       | DeclareBlockStatement _ ->
         let errors = declare_errors env node parents errors in
         trait_require_clauses, names, errors
+      | XHPEnumType _
       | XHPExpression _ ->
         let errors = xhp_errors env node errors in
         trait_require_clauses, names, errors

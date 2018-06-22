@@ -6,7 +6,7 @@
        (missing 0 ())))
      (alternate_if_statement 14
       ((((end_of_line 1)) if 2 ((whitespace 1))) (() "(" 1 ())
-       (literal 1 ((() octal_literal 1 ()))) (() ")" 1 ())
+       (literal 1 ((() decimal_literal 1 ()))) (() ")" 1 ())
        (() : 1 ((end_of_line 1)))
        (list 0 ((expression_statement 0 ((missing 0 ()) (missing 0 ())))))
        (missing 0 ()) (missing 0 ()) (() endif 5 ())

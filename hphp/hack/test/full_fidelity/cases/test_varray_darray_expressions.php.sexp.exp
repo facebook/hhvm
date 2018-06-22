@@ -40,7 +40,7 @@
                             ((() single_quoted_string_literal 5
                               ((whitespace 1)))))
                            (() => 2 ((whitespace 1)))
-                           (literal 1 ((() octal_literal 1 ())))))
+                           (literal 1 ((() decimal_literal 1 ())))))
                          (() , 1 ((whitespace 1)))))
                        (list_item 11
                         ((element_initializer 10

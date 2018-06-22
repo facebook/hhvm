@@ -356,7 +356,7 @@
                     ((variable 16
                       ((((whitespace 4)) variable 16 ((whitespace 1)))))
                      (() = 1 ((whitespace 1)))
-                     (literal 1 ((() octal_literal 1 ())))))
+                     (literal 1 ((() decimal_literal 1 ())))))
                    (() ";" 1 ((end_of_line 1)))))
                  (switch_statement 1220
                   ((((whitespace 4)) switch 6 ((whitespace 1))) (() "(" 1 ())

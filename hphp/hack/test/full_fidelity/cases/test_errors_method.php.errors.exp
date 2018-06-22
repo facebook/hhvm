@@ -20,7 +20,9 @@
 (17,3)-(17,8) Destructor E::__destruct() cannot be static
 (17,3)-(17,31) Redeclared method E::__destruct
 (18,3)-(18,38) Redeclared method E::__construct
+(18,36)-(18,38) A constructor or destructor cannot have a non-void type annotation.
 (19,3)-(19,35) Redeclared method E::__destruct
+(19,35)-(19,35) A constructor or destructor cannot have a non-void type annotation.
 (20,3)-(20,39) Redeclared method E::__construct
 (21,3)-(21,38) Redeclared method E::__destruct
 (22,3)-(22,32) Redeclared method E::f

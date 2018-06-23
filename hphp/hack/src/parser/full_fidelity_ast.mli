@@ -29,7 +29,6 @@ val make_env
   -> ?quick_mode:bool
   -> ?lower_coroutines:bool
   -> ?enable_hh_syntax:bool
-  -> ?disallow_elvis_space:bool
   -> ?fail_open:bool
   -> ?parser_options:ParserOptions.t
   -> ?fi_mode:FileInfo.mode

@@ -3903,8 +3903,7 @@ and expr_if env e1 =
     if is_colon_if env
     then begin
       expect env Tcolon;
-      if ParserOptions.disallow_elvis_space env.popt then
-        error env "Remove all whitespace between ? and :";
+      error env "Remove all whitespace between ? and :";
       let e2 = expr env in
       Pos.btw (fst e1) (fst e2), Eif (e1, None, e2)
     end

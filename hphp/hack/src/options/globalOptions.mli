@@ -133,12 +133,6 @@ type t = {
   *)
  tco_unsafe_rx : bool;
 
- (*
-  * Flag to stop parsing the degenerate ternary ?<whitespace>: as if it
-  * were the Elvis operator ?:
-  *)
- po_disallow_elvis_space : bool;
-
  (* Error codes for which we do not allow HH_FIXMEs *)
  ignored_fixme_codes : ISet.t;
 
@@ -166,7 +160,6 @@ val make :
   tco_disallow_array_cell_pass_by_ref: bool ->
   tco_language_feature_logging: bool ->
   tco_unsafe_rx: bool ->
-  po_disallow_elvis_space: bool ->
   ignored_fixme_codes: ISet.t ->
   forward_compatibility_level: ForwardCompatibilityLevel.t ->
   t
@@ -192,7 +185,6 @@ val tco_disallow_return_by_ref : t -> bool
 val tco_disallow_array_cell_pass_by_ref : t -> bool
 val tco_language_feature_logging : t -> bool
 val tco_unsafe_rx : t -> bool
-val po_disallow_elvis_space : t -> bool
 val default : t
 val make_permissive : t -> t
 val tco_experimental_instanceof : string

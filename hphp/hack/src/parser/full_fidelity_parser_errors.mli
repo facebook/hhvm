@@ -22,7 +22,6 @@ module WithSmartConstructors : functor (SmartConstructors : SmartConstructors.Sm
        ?level:error_level
     -> ?hhvm_compat_mode:hhvm_compat_mode
     -> ?enable_hh_syntax:bool
-    -> ?disallow_elvis_space:bool
     (* Required parts *)
     -> Full_fidelity_syntax_tree.WithSyntax(Syntax).WithSmartConstructors(SmartConstructors).t
     -> codegen:bool

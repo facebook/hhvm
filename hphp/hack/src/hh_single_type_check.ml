@@ -153,7 +153,6 @@ let parse_options () =
   let disallow_array_typehint = ref false in
   let disallow_array_literal = ref false in
   let no_fallback_in_namespaces = ref false in
-  let disallow_elvis_space = ref false in
   let dynamic_view = ref false in
   let allow_unsafe_comparisons = ref false in
   let allow_non_arraykey_keys = ref false in
@@ -303,10 +302,6 @@ let parse_options () =
     "--no-fallback-in-namespaces",
       Arg.Set no_fallback_in_namespaces,
       " Treat foo() as namespace\\foo() and MY_CONST as namespace\\MY_CONST.";
-    "--disallow-elvis-space",
-      Arg.Set disallow_elvis_space,
-      " Stop parsing the degenerate ternary ? : (when the halves are" ^
-      " separated by whitespace) as an Elvis operator ?:";
     "--infer-return-types",
       Arg.Unit (set_mode Infer_return_types),
       " Infers return types of functions and methods.";
@@ -359,7 +354,6 @@ let parse_options () =
       GlobalOptions.tco_disallow_ambiguous_lambda = !disallow_ambiguous_lambda;
       GlobalOptions.tco_disallow_array_typehint = !disallow_array_typehint;
       GlobalOptions.tco_disallow_array_literal = !disallow_array_literal;
-      GlobalOptions.po_disallow_elvis_space = !disallow_elvis_space;
       GlobalOptions.tco_dynamic_view = !dynamic_view;
       GlobalOptions.tco_disallow_unsafe_comparisons = not !allow_unsafe_comparisons;
       GlobalOptions.tco_disallow_non_arraykey_keys = not !allow_non_arraykey_keys;

@@ -64,7 +64,6 @@ module FullFidelityParseArgs = struct
     quick_mode : bool;
     lower_coroutines : bool;
     enable_hh_syntax : bool;
-    disallow_elvis_space : bool;
     fail_open : bool;
     (* Defining the input *)
     files : string list;
@@ -94,7 +93,6 @@ module FullFidelityParseArgs = struct
     quick_mode
     lower_coroutines
     enable_hh_syntax
-    disallow_elvis_space
     fail_open
     show_file_name
     files
@@ -121,7 +119,6 @@ module FullFidelityParseArgs = struct
     quick_mode;
     lower_coroutines;
     enable_hh_syntax;
-    disallow_elvis_space;
     fail_open;
     show_file_name;
     files;
@@ -165,7 +162,6 @@ module FullFidelityParseArgs = struct
     let quick_mode = ref false in
     let lower_coroutines = ref true in
     let enable_hh_syntax = ref false in
-    let disallow_elvis_space = ref false in
     let fail_open = ref true in
     let show_file_name = ref false in
     let set_show_file_name () = show_file_name := true in
@@ -263,12 +259,6 @@ No errors are filtered out.";
       "--no-lower-coroutines",
         Arg.Clear lower_coroutines,
         "Unset the lower_coroutines option for the parser.";
-      "--disallow-elvis-space",
-        Arg.Set disallow_elvis_space,
-        "Set the disallow_elvis_space option for the parser.";
-      "--no-disallow-elvis-space",
-        Arg.Clear disallow_elvis_space,
-        "Unset the disallow_elvis_space option for the parser.";
       "--fail-open",
         Arg.Set fail_open,
         "Set the fail_open option for the parser.";
@@ -309,7 +299,6 @@ No errors are filtered out.";
       !quick_mode
       !lower_coroutines
       !enable_hh_syntax
-      !disallow_elvis_space
       !fail_open
       !show_file_name
       (List.rev !files)
@@ -339,8 +328,6 @@ let handle_existing_file args filename =
   let popt = ParserOptions.default in
   let popt = ParserOptions.with_hh_syntax_for_hhvm popt
     (args.codegen && args.enable_hh_syntax) in
-  let popt = ParserOptions.with_disallow_elvis_space popt
-    args.disallow_elvis_space in
 
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
@@ -382,7 +369,6 @@ let handle_existing_file args filename =
     let error_env = ParserErrors.make_env syntax_tree
       ~level
       ~hhvm_compat_mode
-      ~disallow_elvis_space:args.disallow_elvis_space
       ~codegen:args.codegen
     in
     print_full_fidelity_errors ~source_text ~error_env
@@ -405,7 +391,6 @@ let handle_existing_file args filename =
         ~quick_mode:args.quick_mode
         ~lower_coroutines:args.lower_coroutines
         ~enable_hh_syntax:args.enable_hh_syntax
-        ~disallow_elvis_space:args.disallow_elvis_space
         ~parser_options:popt
         ~fail_open:args.fail_open
         ~is_hh_file:args.is_hh_file

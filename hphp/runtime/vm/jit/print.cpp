@@ -168,8 +168,7 @@ void printOpcode(std::ostream& os, const IRInstruction* inst,
 void printSrcs(std::ostream& os, const IRInstruction* inst) {
   bool first = true;
   if (inst->op() == IncStat) {
-    os << " " << Stats::g_counterNames[inst->src(0)->intVal()]
-       << ", " << inst->src(1)->intVal();
+    os << " " << Stats::g_counterNames[inst->src(0)->intVal()];
     return;
   }
   for (uint32_t i = 0, n = inst->numSrcs(); i < n; i++) {

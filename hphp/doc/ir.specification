@@ -2476,12 +2476,9 @@ To string conversions:
 
 16. Debugging, instrumentation, and profiling
 
-| IncStat, ND, C(Int) C(Int) C(Bool), NF
+| IncStat, ND, C(Int), NF
 
-  Increment stat counter. S0 is the implementation defined stat counter index,
-  S1 is the amount to increment the counter (may be negative), and S2 is a
-  'force' flag. This opcode becomes a noop iff (force == false and runtime
-  stats are not enabled) at translation time.
+  Increment stat counter. S0 is the implementation defined stat counter index.
 
 | IncProfCounter<TransID>, ND, NA, NF
 

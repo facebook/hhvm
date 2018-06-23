@@ -22,7 +22,7 @@ namespace HPHP { namespace jit { namespace irgen {
 
 struct IRGS;
 
-void implIncStat(IRGS& env, uint32_t counter, uint32_t value);
+void implIncStat(IRGS& env, uint32_t counter);
 
 }}}
 

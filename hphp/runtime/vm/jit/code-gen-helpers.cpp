@@ -487,10 +487,10 @@ void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
              v.makeTuple({})};
 }
 
-void emitIncStat(Vout& v, Stats::StatCounter stat, int n, bool force) {
-  if (!force && !Stats::enabled()) return;
+void emitIncStat(Vout& v, Stats::StatCounter stat) {
+  if (!Stats::enabled()) return;
   intptr_t disp = uintptr_t(&Stats::tl_counters[stat]) - tlsBase();
-  v << addqim{n, Vptr{baseless(disp), Vptr::FS}, v.makeReg()};
+  v << incqm{Vptr{baseless(disp), Vptr::FS}, v.makeReg()};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -653,9 +653,7 @@ void cgRBTraceMsg(IRLS& env, const IRInstruction* inst) {
 
 void cgIncStat(IRLS& env, const IRInstruction *inst) {
   auto const stat = Stats::StatCounter(inst->src(0)->intVal());
-  auto const n = inst->src(1)->intVal();
-  auto const force = inst->src(2)->boolVal();
-  emitIncStat(vmain(env), stat, n, force);
+  emitIncStat(vmain(env), stat);
 }
 
 void cgIncProfCounter(IRLS& env, const IRInstruction* inst) {

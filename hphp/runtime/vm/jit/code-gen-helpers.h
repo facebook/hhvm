@@ -251,12 +251,9 @@ void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp);
 void emitRB(Vout& v, Trace::RingBufferType t, const char* msg);
 
 /*
- * Increment the counter for `stat' by `n'.
- *
- * If `force' is set, do so even if stats aren't enabled.
+ * Increment the counter for `stat'.
  */
-void emitIncStat(Vout& v, Stats::StatCounter stat, int n = 1,
-                 bool force = false);
+void emitIncStat(Vout& v, Stats::StatCounter stat);
 
 ///////////////////////////////////////////////////////////////////////////////
 // RDS manipulation.

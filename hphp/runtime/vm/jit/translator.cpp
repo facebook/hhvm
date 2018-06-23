@@ -1306,9 +1306,9 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni,
          ni.offset(), ni, show(irgs));
 
   irgen::ringbufferEntry(irgs, Trace::RBTypeBytecodeStart, ni.source, 2);
-  irgen::implIncStat(irgs, Stats::Instr_TC, 1);
+  irgen::implIncStat(irgs, Stats::Instr_TC);
   if (Stats::enableInstrCount()) {
-    irgen::implIncStat(irgs, Stats::opToTranslStat(ni.op()), 1);
+    irgen::implIncStat(irgs, Stats::opToTranslStat(ni.op()));
   }
 
   if (isAlwaysNop(ni)) return;

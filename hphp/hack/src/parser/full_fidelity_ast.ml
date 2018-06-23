@@ -1236,7 +1236,10 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           (match expr with
           | p, String s
           | p, Int s
-          | p, Float s when location <> InGlobalVar -> Lvar (p, "$" ^ s)
+          | p, Float s when location <> InGlobalVar ->
+            if not env.codegen
+            then raise_parsing_error env operator SyntaxError.invalid_variable_name;
+            Lvar (p, "$" ^ s)
           | _ -> Dollar expr
           )
         | _ -> missing_syntax "unary operator" node env

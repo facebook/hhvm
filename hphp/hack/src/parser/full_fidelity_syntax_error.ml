@@ -460,3 +460,7 @@ let invalid_foreach_element = "An arrow ('=>') or right parenthesis (')') \
   is expected here."
 
 let invalid_scope_resolution_qualifier = "Only classnames and variables are allowed before '::'."
+
+let invalid_variable_name =
+  "A valid variable name starts with a letter or underscore, followed \
+  by any number of letters, numbers, or underscores"

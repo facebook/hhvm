@@ -262,3 +262,4 @@ val do_not_use_or : string
 val do_not_use_and : string
 val invalid_foreach_element: string
 val invalid_scope_resolution_qualifier : string
+val invalid_variable_name : string

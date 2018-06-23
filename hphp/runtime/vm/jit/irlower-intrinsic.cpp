@@ -658,8 +658,6 @@ void cgIncStat(IRLS& env, const IRInstruction *inst) {
   emitIncStat(vmain(env), stat, n, force);
 }
 
-IMPL_OPCODE_CALL(IncStatGrouped)
-
 void cgIncProfCounter(IRLS& env, const IRInstruction* inst) {
   auto const transID = inst->extra<TransIDData>()->transId;
   auto const counterAddr = profData()->transCounterAddr(transID);

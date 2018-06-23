@@ -2483,10 +2483,6 @@ To string conversions:
   'force' flag. This opcode becomes a noop iff (force == false and runtime
   stats are not enabled) at translation time.
 
-| IncStatGrouped, ND, CStr CStr C(Int), NF
-
-  Adds the value S2 to the counter named S1, in the category S0.
-
 | IncProfCounter<TransID>, ND, NA, NF
 
   Increment the profiling counter associated with translation TransID.

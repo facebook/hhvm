@@ -553,7 +553,6 @@ bool canDCE(IRInstruction* inst) {
   case AFWHBlockOn:
   case CountWHNotDone:
   case IncStat:
-  case IncStatGrouped:
   case IncProfCounter:
   case DbgAssertRefCount:
   case DbgAssertARFunc:

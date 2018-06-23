@@ -699,7 +699,6 @@ bool opcodeMayRaise(Opcode opc) {
   case IncProfCounter:
   case IncRef:
   case IncStat:
-  case IncStatGrouped:
   case InitCtx:
   case InitObjProps:
   case InitPackedLayoutArray:

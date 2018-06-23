@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 
+#include "hphp/runtime/vm/jit/irgen-basic.h"
 #include "hphp/runtime/vm/jit/irgen-builtin.h"
 #include "hphp/runtime/vm/jit/irgen-create.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
@@ -55,7 +56,7 @@ void fpushObjMethodUnknown(IRGS& env,
                            const StringData* methodName,
                            uint32_t numParams,
                            bool shouldFatal) {
-  emitIncStat(env, Stats::ObjMethod_cached, 1);
+  implIncStat(env, Stats::ObjMethod_cached, 1);
   fpushActRec(env,
               cns(env, TNullptr),  // Will be set by LdObjMethod
               obj,
@@ -128,7 +129,7 @@ void fpushObjMethodExactFunc(
    * cloned closure body.
    */
   SSATmp* objOrCls = obj;
-  emitIncStat(env, Stats::ObjMethod_known, 1);
+  implIncStat(env, Stats::ObjMethod_known, 1);
   if (func->isStaticInPrologue()) {
     objOrCls = exactClass ? cns(env, exactClass) : gen(env, LdObjClass, obj);
     decRef(env, obj);
@@ -160,7 +161,7 @@ void fpushObjMethodInterfaceFunc(
 ) {
   auto const vtableSlot = ifaceFunc->cls()->preClass()->ifaceVtableSlot();
 
-  emitIncStat(env, Stats::ObjMethod_ifaceslot, 1);
+  implIncStat(env, Stats::ObjMethod_ifaceslot, 1);
   auto cls = gen(env, LdObjClass, obj);
   auto func = gen(env, LdIfaceMethod,
                   IfaceMethodData{vtableSlot, ifaceFunc->methodSlot()},
@@ -184,7 +185,7 @@ void fpushObjMethodInterfaceFunc(
 void fpushObjMethodNonExactFunc(IRGS& env, SSATmp* obj,
                                 const Class* /*baseClass*/, const Func* func,
                                 uint32_t numParams) {
-  emitIncStat(env, Stats::ObjMethod_methodslot, 1);
+  implIncStat(env, Stats::ObjMethod_methodslot, 1);
   auto const clsTmp = gen(env, LdObjClass, obj);
   auto const funcTmp = gen(
     env,
@@ -455,7 +456,7 @@ void fpushObjMethod(IRGS& env,
                     uint32_t numParams,
                     bool shouldFatal,
                     Block* sideExit) {
-  emitIncStat(env, Stats::ObjMethod_total, 1);
+  implIncStat(env, Stats::ObjMethod_total, 1);
 
   assertx(obj->type() <= TObj);
   const Class* knownClass = nullptr;
@@ -1122,7 +1123,7 @@ void emitFPushClsMethodD(IRGS& env,
       return gen(env, LdClsMethodCacheFunc, data, taken);
     },
     [&] (SSATmp* func) { // next
-      emitIncStat(env, Stats::TgtCache_StaticMethodHit, 1);
+      implIncStat(env, Stats::TgtCache_StaticMethodHit, 1);
       return func;
     },
     [&] { // taken

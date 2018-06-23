@@ -53,6 +53,7 @@
 #include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/irgen-basic.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen.h"
@@ -408,7 +409,6 @@ static const struct {
   { OpLateBoundCls,{None,             None,         OutNone         }},
   { OpNativeImpl,  {None,             None,         OutNone         }},
   { OpCreateCl,    {BStackN,          Stack1,       OutObject       }},
-  { OpIncStat,     {None,             None,         OutNone         }},
   { OpIdx,         {StackTop3,        Stack1,       OutUnknown      }},
   { OpArrayIdx,    {StackTop3,        Stack1,       OutUnknown      }},
   { OpCheckProp,   {None,             Stack1,       OutBoolean      }},
@@ -904,7 +904,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::IncDecL:
   case Op::DefCls:
   case Op::AliasCls:
-  case Op::IncStat:
   case Op::Eq:
   case Op::Neq:
   case Op::AssertRATL:
@@ -1307,9 +1306,9 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni,
          ni.offset(), ni, show(irgs));
 
   irgen::ringbufferEntry(irgs, Trace::RBTypeBytecodeStart, ni.source, 2);
-  irgen::emitIncStat(irgs, Stats::Instr_TC, 1);
+  irgen::implIncStat(irgs, Stats::Instr_TC, 1);
   if (Stats::enableInstrCount()) {
-    irgen::emitIncStat(irgs, Stats::opToTranslStat(ni.op()), 1);
+    irgen::implIncStat(irgs, Stats::opToTranslStat(ni.op()), 1);
   }
 
   if (isAlwaysNop(ni)) return;

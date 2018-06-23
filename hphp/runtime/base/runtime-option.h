@@ -428,7 +428,6 @@ struct RuntimeOption {
   static bool EnableXHP;
   static bool CheckParamTypeInvariance;
   static bool EnableObjDestructCall;
-  static bool EnableEmitterStats;
   static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;
   static bool EnableArgsInBacktraces;

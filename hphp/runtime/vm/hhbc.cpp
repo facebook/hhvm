@@ -804,11 +804,7 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 
 #define READIVA() do {                                          \
   auto imm = decode_iva(it);                                    \
-  if (op == OpIncStat && immIdx == 0) {                         \
-    folly::format(&out, " {}", Stats::g_counterNames[imm]);     \
-  } else {                                                      \
-    folly::format(&out, " {}", imm);                            \
-  }                                                             \
+  folly::format(&out, " {}", imm);                              \
   immIdx++;                                                     \
 } while (false)
 

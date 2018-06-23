@@ -6686,10 +6686,6 @@ OPTBLD_INLINE void iopInitProp(const StringData* propName, InitPropOp propOp) {
   vmStack().popC();
 }
 
-OPTBLD_INLINE void iopIncStat(uint32_t counter, uint32_t value) {
-  Stats::inc(Stats::StatCounter(counter), value);
-}
-
 OPTBLD_INLINE void iopOODeclExists(OODeclExistsOp subop) {
   TypedValue* aloadTV = vmStack().topTV();
   if (aloadTV->m_type != KindOfBoolean) {

@@ -4321,8 +4321,6 @@ void in(ISS& env, const bc::AwaitAll& op) {
   push(env, TInitNull);
 }
 
-void in(ISS& /*env*/, const bc::IncStat&) {}
-
 void in(ISS& env, const bc::Idx&) {
   popC(env); popC(env); popC(env);
   push(env, TInitCell);

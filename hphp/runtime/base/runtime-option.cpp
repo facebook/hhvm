@@ -98,7 +98,6 @@ bool RuntimeOption::EnableShortTags = true;
 bool RuntimeOption::EnableAspTags = false;
 bool RuntimeOption::EnableXHP = false;
 bool RuntimeOption::EnableObjDestructCall = true;
-bool RuntimeOption::EnableEmitterStats = true;
 bool RuntimeOption::EnableIntrinsicsExtension = false;
 bool RuntimeOption::CheckSymLink = true;
 bool RuntimeOption::EnableArgsInBacktraces = true;
@@ -1353,8 +1352,6 @@ void RuntimeOption::Load(
                           EvalProfileHWFastReads,
                           EvalProfileHWExportInterval);
 
-    Config::Bind(EnableEmitterStats, ini, config, "Eval.EnableEmitterStats",
-                 EnableEmitterStats);
     Config::Bind(EnableIntrinsicsExtension, ini,
                  config, "Eval.EnableIntrinsicsExtension",
                  EnableIntrinsicsExtension);

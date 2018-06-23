@@ -266,7 +266,6 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IMisc VerifyRetTypeC);
     (fun () -> IMisc VerifyRetTypeV);
     (*(fun () -> IMisc NativeImpl);*)
-    (*(fun () -> IMisc (IncStat (Random.int 100, Random.int 100)));*)
     (fun () -> IMisc AKExists);
     (fun () -> IMisc (CreateCl (Random.int 10, Random.int 10)));
     (fun () -> IMisc Idx);

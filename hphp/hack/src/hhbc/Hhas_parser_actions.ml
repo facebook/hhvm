@@ -1054,7 +1054,6 @@ match s with
     IMisc (StaticLocDef (localidofiarg arg1, stringofiarg arg2))
  | "StaticLocInit" ->
     IMisc (StaticLocInit (localidofiarg arg1, stringofiarg arg2))
- | "IncStat" -> IMisc (IncStat (intofiarg arg1, intofiarg arg2))
  | "CreateCl" -> IMisc (CreateCl (intofiarg arg1, intofiarg arg2))
  | "AssertRATL" -> IMisc (AssertRATL (localidofiarg arg1, stringofiarg arg2))
  | "AssertRATStk" -> IMisc (AssertRATStk (intofiarg arg1, stringofiarg arg2))

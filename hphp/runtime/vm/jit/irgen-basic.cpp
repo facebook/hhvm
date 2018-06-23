@@ -528,7 +528,7 @@ void emitDblAsBits(IRGS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitIncStat(IRGS& env, uint32_t counter, uint32_t value) {
+void implIncStat(IRGS& env, uint32_t counter, uint32_t value) {
   if (!Stats::enabled()) return;
   gen(env, IncStat, cns(env, counter), cns(env, value), cns(env, false));
 }

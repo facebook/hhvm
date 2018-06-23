@@ -601,7 +601,7 @@ let check_instruct_misc asn i i' =
   | VerifyParamType _, _ | VerifyRetTypeC, _ | VerifyRetTypeV, _ | Self _, _
   | Parent _, _ | LateBoundCls _, _ | ClsRefName _, _ | NativeImpl, _
   | VerifyOutType _, _
-  | IncStat _, _ | AKExists, _ | Idx, _ | ArrayIdx, _
+  | AKExists, _ | Idx, _ | ArrayIdx, _
   | AssertRATStk _, _ | BreakTraceHint, _
   | CGetCUNop, _ | UGetCUNop, _ ->
     if i=i' then Some asn else None

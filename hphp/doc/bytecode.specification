@@ -3987,12 +3987,6 @@ NativeImpl    []  ->  []
   associated with current function and returns the return value to the caller
   of the current function.
 
-IncStat <counter id> <value>    []  ->  []
-
-  Increment stat counter. If stats are enabled, this instruction adds <value>
-  to the counter specified by <counter id>. The meaning of the <counter id>
-  immediate is implementation defined
-
 AKExists    [C C] -> [C:Bool]
 
   Checks if array (object) in $1 contains key (property) in $2 and pushes the

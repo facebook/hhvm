@@ -785,7 +785,7 @@ let get_input_output_count i =
     | This | BareThis _ | StaticLocCheck _ | Catch | ChainFaults | ClsRefName _
     | GetMemoKeyL _ -> (0, 1)
     | CheckThis | InitThisLoc _ | VerifyParamType _ | Self _ | Parent _
-    | LateBoundCls _ | NativeImpl | IncStat _ | AssertRATL _ | AssertRATStk _
+    | LateBoundCls _ | NativeImpl | AssertRATL _ | AssertRATStk _
     | BreakTraceHint| Silence _ -> (0, 0)
     | StaticLocDef _ | StaticLocInit _ -> (1, 0)
     | OODeclExists _ | AKExists -> (2, 1)

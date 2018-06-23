@@ -583,8 +583,6 @@ let string_of_misc instruction =
       sep ["AssertRATStk"; string_of_int n; s]
     | NativeImpl -> "NativeImpl"
     | BreakTraceHint -> "BreakTraceHint"
-    | IncStat (counter, value) ->
-      sep ["IncStat"; string_of_int counter; string_of_int value]
 
 let iterator_instruction_name_prefix instruction =
   let iterator_instruction_name =

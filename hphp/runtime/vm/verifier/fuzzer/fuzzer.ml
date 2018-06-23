@@ -469,8 +469,6 @@ let mut_imms (is : IS.t) : IS.t =
     | Parent          i       -> Parent          (mutate_int      i   !mag)
     | LateBoundCls    i       -> LateBoundCls    (mutate_int      i   !mag)
     | ClsRefName      i       -> ClsRefName      (mutate_int      i   !mag)
-    | IncStat        (i,  i') -> IncStat         (mutate_int      i   !mag,
-                                                  mutate_int      i'  !mag)
     | CreateCl       (i,  i') -> CreateCl        (mutate_int      i   !mag,
                                                   mutate_int      i'  !mag)
     | GetMemoKeyL    id       -> GetMemoKeyL     (mutate_local_id id !mag)

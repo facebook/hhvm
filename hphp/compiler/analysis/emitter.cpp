@@ -289,11 +289,6 @@ struct Emitter {
     m_tempLoc = r;
   }
   const OptLocation& getTempLocation() { return m_tempLoc; }
-  void incStat(int counter, int value) {
-    if (RuntimeOption::EnableEmitterStats) {
-      IncStat(counter, value);
-    }
-  }
 
   struct StrOff {
     StrOff(Id s, Label* d) : str(s), dest(d) {}

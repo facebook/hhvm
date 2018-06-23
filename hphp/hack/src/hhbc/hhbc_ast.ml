@@ -519,7 +519,6 @@ type instruct_misc =
   | LateBoundCls of classref_id
   | ClsRefName of classref_id
   | NativeImpl
-  | IncStat of int * int (* counter id, value *)
   | AKExists
   | CreateCl of num_params * class_num
   | Idx

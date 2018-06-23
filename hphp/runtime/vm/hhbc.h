@@ -674,7 +674,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(WHResult,        NA,               ONE(CV),         ONE(CV),    NF) \
   O(Await,           NA,               ONE(CV),         ONE(CV),    CF) \
   O(AwaitAll,        ONE(LAR),         NOV,             ONE(CV),    CF) \
-  O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \
   O(Idx,             NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(ArrayIdx,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(CheckProp,       ONE(SA),          NOV,             ONE(CV),    NF) \

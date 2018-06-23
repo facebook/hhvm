@@ -552,7 +552,7 @@ and parse_array_type_specifier parser =
       TODO: Add this to the specification
     *)
     let (parser, keyword) = assert_token parser Tuple in
-    let (parser, left_angle) = assert_token parser LessThan in
+    let (parser, left_angle) = require_left_angle parser in
     let (parser, args) = parse_type_list parser GreaterThan in
     let (parser1, right_angle) = next_token parser in
     if (Token.kind right_angle) = GreaterThan then

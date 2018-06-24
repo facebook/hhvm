@@ -28,7 +28,9 @@ let default_return_value = ref instr_null
 let default_dropthrough = ref None
 let return_by_ref = ref false
 let verify_out = ref empty
+let num_out = ref 0
 let function_pos = ref Pos.none
+let set_num_out c = num_out := c
 let set_verify_return b = verify_return := b
 let set_default_return_value i = default_return_value := i
 let set_default_dropthrough i = default_dropthrough := i
@@ -41,6 +43,7 @@ let emit_return ~need_ref env =
     ~need_ref
     ~verify_return:!verify_return
     ~verify_out:!verify_out
+    ~num_out:!num_out
     ~in_finally_epilogue:false
     env
 
@@ -497,7 +500,7 @@ and emit_using env pos is_block_scoped has_await e b =
     in
     let finally_epilogue =
       TFR.emit_finally_epilogue
-        env pos ~verify_return:!verify_return ~verify_out:!verify_out
+        env pos ~verify_return:!verify_return ~verify_out:!verify_out ~num_out:!num_out
         jump_instructions finally_end
     in
     let exn_local = Local.get_unnamed_local () in
@@ -769,7 +772,7 @@ and emit_try_finally_ env pos try_block finally_block =
 
   let finally_epilogue =
     TFR.emit_finally_epilogue
-      env pos ~verify_return:!verify_return ~verify_out:!verify_out
+      env pos ~verify_return:!verify_return ~verify_out:!verify_out ~num_out:!num_out
       jump_instructions finally_end
   in
 

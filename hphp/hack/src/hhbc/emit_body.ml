@@ -298,11 +298,7 @@ let emit_verify_out params =
       )) in
   let param_instrs = if msrv then List.rev param_instrs else param_instrs in
   let len = List.length param_instrs in
-  if len = 0 then empty else
-  gather [
-    gather param_instrs;
-    if msrv then instr_retm (len + 1) else instr_new_vec_array (len + 1)
-  ]
+  if len = 0 then (0, empty) else (len, gather param_instrs)
 
 let emit_body
   ~pos
@@ -367,9 +363,10 @@ let emit_body
   in
   let params = if is_closure_body
     then List.map ~f:Hhas_param.switch_inout_to_reference params else params in
-  let verify_out = if is_closure_body then empty else emit_verify_out params in
+  let num_out, verify_out = if is_closure_body then 0, empty else emit_verify_out params in
   Emit_statement.set_verify_return verify_return;
   Emit_statement.set_verify_out verify_out;
+  Emit_statement.set_num_out num_out;
   Emit_statement.set_default_dropthrough default_dropthrough;
   Emit_statement.set_default_return_value return_value;
   Emit_statement.set_return_by_ref is_return_by_ref;

@@ -150,7 +150,7 @@ let emit_goto ~in_finally_epilogue env label =
     end
 
 let emit_return
-  ~need_ref ~verify_return ~verify_out ~in_finally_epilogue env =
+  ~need_ref ~verify_return ~verify_out ~num_out ~in_finally_epilogue env =
   let ret_instr = if need_ref then instr_retv else instr_retc in
   (* check if there are try/finally region *)
   let jump_targets = Emit_env.get_jump_targets env in
@@ -181,14 +181,16 @@ let emit_return
         load_retval_instr;
         verify_return_instr;
         verify_out;
+        if not msrv && num_out <> 0 then instr_new_vec_array (num_out + 1) else empty;
         release_iterators_instr;
-        if msrv && verify_out != empty then empty else ret_instr
+        if msrv && num_out <> 0 then instr_retm (num_out + 1) else ret_instr
       ]
     else gather [
       verify_return_instr;
-      release_iterators_instr;
       verify_out;
-      if msrv && verify_out != empty then empty else ret_instr
+      if not msrv && num_out <> 0 then instr_new_vec_array (num_out + 1) else empty;
+      release_iterators_instr;
+      if msrv && num_out <> 0 then instr_retm (num_out + 1) else ret_instr
     ]
   (* ret is in finally block and there might be iterators to release -
     jump to finally block via Jmp/IterBreak *)
@@ -255,16 +257,16 @@ and emit_break_or_continue ~is_break ~in_finally_epilogue env pos level =
     ]
 
 let emit_finally_epilogue
-  ~verify_return ~verify_out env pos jump_instructions finally_end =
+  ~verify_return ~verify_out ~num_out env pos jump_instructions finally_end =
   let emit_instr i =
     match i with
     | IContFlow RetM _
     | IContFlow RetC ->
       emit_return
-        ~need_ref:false ~verify_return ~verify_out ~in_finally_epilogue:true env
+        ~need_ref:false ~verify_return ~verify_out ~num_out ~in_finally_epilogue:true env
     | IContFlow RetV ->
       emit_return
-        ~need_ref:true ~verify_return ~verify_out ~in_finally_epilogue:true env
+        ~need_ref:true ~verify_return ~verify_out ~num_out ~in_finally_epilogue:true env
     | ISpecialFlow (Break l) ->
       emit_break_or_continue ~is_break:true ~in_finally_epilogue:true env pos l
     | ISpecialFlow (Continue l) ->

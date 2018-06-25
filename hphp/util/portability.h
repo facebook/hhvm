@@ -72,10 +72,16 @@
   __attribute__((__format__ (__printf__, a1, a2)))
 #define ATTRIBUTE_UNUSED   __attribute__((__unused__))
 #define ATTRIBUTE_USED     __attribute__((__used__))
-#define ALWAYS_INLINE      inline __attribute__((__always_inline__))
+#ifdef DEBUG
+# define FLATTEN           /*nop*/
+# define ALWAYS_INLINE     inline
+# define INLINE_FLATTEN    inline
+#else
+# define FLATTEN           __attribute__((__flatten__))
+# define ALWAYS_INLINE     inline __attribute__((__always_inline__))
+# define INLINE_FLATTEN    inline __attribute__((__always_inline__,__flatten__))
+#endif
 #define EXTERNALLY_VISIBLE __attribute__((__externally_visible__))
-#define FLATTEN            __attribute__((__flatten__))
-#define INLINE_FLATTEN     inline __attribute__((__always_inline__,__flatten__))
 #define NEVER_INLINE       __attribute__((__noinline__))
 #define UNUSED             __attribute__((__unused__))
 

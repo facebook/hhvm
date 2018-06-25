@@ -408,7 +408,7 @@ int computeTranslationCost(SrcKey at, Op callerFPushOp,
     cost = std::numeric_limits<int>::max();
   }
 
-  if (cacheResult && !s_inlCostCache.asConst()->count(irk)) {
+  if (cacheResult && !as_const(s_inlCostCache)->count(irk)) {
     s_inlCostCache->emplace(irk, cost);
   }
   FTRACE(3, "computeTranslationCost(at {}) = {}\n", showShort(at), cost);

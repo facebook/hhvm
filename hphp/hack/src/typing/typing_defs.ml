@@ -794,3 +794,19 @@ let rec ty_compare ty1 ty2 =
       abstract_kind_con_ordinal t1 - abstract_kind_con_ordinal t2
 
 let ty_equal ty1 ty2 = ty_compare ty1 ty2 = 0
+
+let make_function_type_mayberx reactivity param_ty =
+  (* strip conditional reactivity if parent has one *)
+  let reactivity =
+    match reactivity with
+    | Local _ | MaybeReactive (Local _) -> Local None
+    | Shallow _ | MaybeReactive (Shallow _) -> Shallow None
+    | Reactive _ | MaybeReactive (Reactive _) -> Reactive None
+    | r -> r in
+  match param_ty with
+  | (r, Tfun tfun) ->
+    r, Tfun { tfun with ft_reactive = MaybeReactive reactivity }
+  | (r, Toption (r1, Tfun tfun)) ->
+    r, Toption (r1, Tfun { tfun with ft_reactive = MaybeReactive reactivity })
+  | _ ->
+    param_ty

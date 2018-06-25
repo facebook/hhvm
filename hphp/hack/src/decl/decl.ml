@@ -41,13 +41,15 @@ let conditionally_reactive_attribute_to_hint env { ua_params = l; _ } =
        naming step, do nothing *)
     Reason.none, Tany
 
+let condition_type_from_attributes env user_attributes =
+  Attributes.find SN.UserAttributes.uaOnlyRxIfImpl user_attributes
+  |> Option.map ~f:(conditionally_reactive_attribute_to_hint env)
+
 let fun_reactivity env user_attributes =
   let has attr = Attributes.mem attr user_attributes in
   let module UA = SN.UserAttributes in
 
-  let rx_condition =
-    Attributes.find UA.uaOnlyRxIfImpl user_attributes
-    |> Option.map ~f:(conditionally_reactive_attribute_to_hint env) in
+  let rx_condition = condition_type_from_attributes env user_attributes in
 
   if has UA.uaReactive then Reactive rx_condition
   else if has UA.uaShallowReactive then Shallow rx_condition
@@ -55,22 +57,9 @@ let fun_reactivity env user_attributes =
   else Nonreactive
 
 let adjust_reactivity_of_mayberx_parameter attrs reactivity param_ty =
-  let has_only_rx_if_args =
-    Attributes.mem SN.UserAttributes.uaOnlyRxIfArgs attrs in
-  (* strip conditional reactivity if parent has one *)
-  let reactivity =
-    match reactivity with
-    | Local (Some _) -> Local None
-    | Shallow (Some _) -> Shallow None
-    | Reactive (Some _) -> Reactive None
-    | r -> r in
-  match has_only_rx_if_args, param_ty with
-  | true, (r, Tfun tfun) ->
-    r, Tfun { tfun with ft_reactive = MaybeReactive reactivity }
-  | true, (r, Toption (r1, Tfun tfun)) ->
-    r, Toption (r1, Tfun { tfun with ft_reactive = MaybeReactive reactivity })
-  | _ ->
-    param_ty
+  if Attributes.mem SN.UserAttributes.uaOnlyRxIfArgs attrs
+  then make_function_type_mayberx reactivity param_ty
+  else param_ty
 
 (*****************************************************************************)
 (* Checking that the kind of a class is compatible with its parent

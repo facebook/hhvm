@@ -337,6 +337,7 @@ let empty tcopt file ~droot = {
       return_void_to_rx = false;
     };
     params  = Local_id.Map.empty;
+    condition_types = SMap.empty;
     self_id = "";
     self    = Reason.none, Tany;
     static  = false;
@@ -355,6 +356,14 @@ let set_env_reactive env reactive =
 
 let set_env_function_pos env function_pos =
   { env with function_pos }
+
+let set_condition_type env n ty =
+  { env with genv = {
+    env.genv with condition_types = SMap.add n ty env.genv.condition_types }
+  }
+
+let get_condition_type env n =
+  SMap.get n env.genv.condition_types
 
 let env_reactivity env =
   env.lenv.local_reactive

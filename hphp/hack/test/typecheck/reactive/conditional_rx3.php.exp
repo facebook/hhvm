@@ -1,0 +1,6 @@
+File "conditional_rx3.php", line 13, characters 5-11:
+Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
+File "conditional_rx3.php", line 7, characters 21-21:
+Receiver type must be a subtype of \RxA, now \C.
+File "conditional_rx3.php", line 16, characters 19-19:
+This is the function declaration

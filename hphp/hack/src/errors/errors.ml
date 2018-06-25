@@ -2262,15 +2262,6 @@ let untyped_lambda_strict_mode pos =
   in
     add (Typing.err_code Typing.UntypedLambdaStrictMode) pos msg
 
-let invalid_conditionally_reactive_call pos def_pos condition_type receiver_type =
-  add_list (Typing.err_code Typing.InvalidConditionallyReactiveCall) [
-    pos, "Conditionally reactive method with condition type '" ^ condition_type ^
-    "' cannot be called";
-    def_pos, "Calling such methods is allowed only from conditionally " ^
-    "reactive methods with the same condition type or if static type of method " ^
-    "receiver is a subtype of condition type, now '" ^ receiver_type ^ "'."
-  ]
-
 let echo_in_reactive_context pos =
   add (Typing.err_code Typing.EchoInReactiveContext) pos (
     "'echo' or 'print' are not allowed in reactive or shallow-reactive functions."
@@ -2382,6 +2373,40 @@ let freeze_in_nonreactive_context pos1 =
 let mutable_in_nonreactive_context pos =
   add (Typing.err_code Typing.MutableInNonreactiveContext) pos
   ("\\HH\\Rx\\mutable can only be used in reactive functions")
+
+let invalid_argument_type_for_condition_in_rx
+  ~is_receiver f_pos def_pos arg_pos expected_type actual_type =
+  let arg_msg =
+    if is_receiver then "Receiver type" else "Argument type" in
+  let arg_msg =
+    arg_msg ^ " must be a subtype of " ^ expected_type ^
+    ", now " ^ actual_type ^ "." in
+  add_list (Typing.err_code Typing.InvalidConditionallyReactiveCall) [
+    f_pos, "Cannot invoke conditionally reactive function in reactive context, \
+    because at least one reactivity condition is not met.";
+    arg_pos, arg_msg;
+    def_pos, "This is the function declaration";
+  ]
+
+let callsite_reactivity_mismatch f_pos def_pos callee_reactivity caller_reactivity =
+  add_list (Typing.err_code Typing.CallSiteReactivityMismatch) [
+    f_pos, "Reactivity mismatch: " ^ caller_reactivity ^ " function cannot call " ^
+           callee_reactivity ^ " function.";
+    def_pos, "This is declaration of the function being called."
+  ]
+
+let invalid_function_type_for_condition_in_rx
+  f_pos def_pos arg_pos actual_reactivity expected_reactivity =
+  let arg_msg =
+    "Argument type is must be " ^ expected_reactivity ^ " function, " ^
+    actual_reactivity ^ " given." in
+  add_list (Typing.err_code Typing.InvalidConditionallyReactiveCall) [
+    f_pos, "Cannot invoke conditionally reactive function in reactive context, \
+    because at least one reactivity condition is not met.";
+    arg_pos, arg_msg;
+    def_pos, "This is the function declaration";
+  ]
+
 
 let invalid_argument_of_rx_mutable_function pos =
   add (Typing.err_code Typing.InvalidArgumentOfRxMutableFunction) pos (
@@ -2964,6 +2989,12 @@ let rx_enabled_in_lambdas pos =
     "\\HH\\Rx\\IS_ENABLED cannot be used inside lambdas."
   )
 
+let rx_parameter_condition_mismatch cond pos def_pos =
+  add_list (Typing.err_code Typing.RxParameterConditionMismatch) [
+    pos, "This parameter does not satisfy "^ cond ^ " condition defined on \
+    matching parameter in function super type.";
+    def_pos, "This is parameter declaration from the function super type."
+  ]
 let nonreactive_append pos =
   let msg = "Cannot append to a Hack Collection object in a reactive context" in
   add (Typing.err_code Typing.NonreactiveAppend) pos msg

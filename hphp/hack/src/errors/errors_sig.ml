@@ -522,7 +522,6 @@ module type S = sig
   val binding_ref_in_array : Pos.t -> unit
   val return_ref_in_array : Pos.t -> unit
   val passing_array_cell_by_ref : Pos.t -> unit
-  val invalid_conditionally_reactive_call : Pos.t -> Pos.t -> string -> string -> unit
   val conditionally_reactive_function : Pos.t -> unit
   val multiple_conditionally_reactive_annotations : Pos.t -> string -> unit
   val conditionally_reactive_annotation_invalid_arguments : is_method:bool -> Pos.t -> unit
@@ -556,4 +555,10 @@ module type S = sig
   val shapes_idx_with_non_existent_field: Pos.t -> string -> Pos.t -> [< `Undefined | `Unset] -> unit
   val forward_compatibility_not_current: Pos.t -> ForwardCompatibilityLevel.t -> unit
   val forward_compatibility_below_minimum: Pos.t -> ForwardCompatibilityLevel.t -> unit
+  val invalid_argument_type_for_condition_in_rx:
+    is_receiver: bool -> Pos.t -> Pos.t -> Pos.t -> string -> string -> unit
+  val invalid_function_type_for_condition_in_rx:
+    Pos.t -> Pos.t -> Pos.t -> string -> string -> unit
+  val callsite_reactivity_mismatch: Pos.t -> Pos.t -> string -> string -> unit
+  val rx_parameter_condition_mismatch: string -> Pos.t -> Pos.t -> unit
 end

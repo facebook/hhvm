@@ -117,6 +117,7 @@ val get_env_mutability : env -> Typing_mutability_env.mutability_env
 val env_with_global_tpenv : env -> tpenv -> env
 val add_generic_parameters : env -> Nast.tparam list -> env
 val get_generic_parameters : env -> string list
+val is_generic_parameter: env -> string -> bool
 val error_if_reactive_context : env -> (unit -> unit) -> unit
 val error_if_shallow_reactive_context : env -> (unit -> unit) -> unit
 val forward_compat_ge : env -> int -> bool
@@ -140,3 +141,5 @@ val in_loop : env -> (env -> env * 'a) -> env * 'a
 val in_try : env -> (env -> env * 'a) -> env * 'a
 val in_case : env -> (env -> env * 'a) -> env * 'a
 val save : tpenv -> env -> Tast.saved_env
+val set_condition_type: env -> SMap.key -> Typing_defs.decl Typing_defs.ty -> env
+val get_condition_type: env -> SMap.key -> Typing_defs.decl Typing_defs.ty option

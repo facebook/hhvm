@@ -46,6 +46,7 @@ module TySet        = Typing_set
 module C            = Typing_continuations
 module CMap         = C.Map
 module Try          = Typing_try
+module TR           = Typing_reactivity
 
 (*****************************************************************************)
 (* Debugging *)
@@ -237,6 +238,12 @@ let enforce_param_not_disposable env param ty =
   | None ->
     ()
 
+let fun_reactivity env attrs =
+  let r = Decl.fun_reactivity env attrs in
+  if Attributes.mem Naming_special_names.UserAttributes.uaOnlyRxIfArgs attrs
+  then MaybeReactive r
+  else r
+
 (* This function is used to determine the type of an argument.
  * When we want to type-check the body of a function, we need to
  * introduce the type of the arguments of the function in the environment
@@ -292,12 +299,43 @@ let make_param_local_ty attrs env param =
       env, (r, ty)
     | Some x ->
       let ty = Decl_hint.hint env.Env.decl_env x in
-      let ty =
-        Decl.adjust_reactivity_of_mayberx_parameter
-          attrs
-          (Env.env_reactivity env)
-          ty in
-      Phase.localize ~ety_env env ty
+      let condition_type =
+        Decl.condition_type_from_attributes env.Env.decl_env param.param_user_attributes in
+      let fresh_type_argument_name =
+        Option.bind condition_type
+        (Typing_reactivity.generate_fresh_name_for_target_of_condition_type env ty) in
+      begin match condition_type, fresh_type_argument_name  with
+      (* if parameter has associated condition type and we can generate
+         a name N that identifies pair (parameter type * condition type) -
+         instead of using declared type of parameter as is we create generic type
+         with name N and constrain it to declared type. Also condition type is stored in
+         env with N as as key. As a consequence later we can obtain condition type
+         using name of generic type as a key.  *)
+      | Some condition_ty, Some fresh_type_argument_name ->
+        let param_ty = Reason.none, Tabstract ((AKgeneric fresh_type_argument_name), None) in
+        (* if generic type is already registered this means we already saw
+           parameter with the same pair (declared type * condition type) so there
+           is no need to add condition type to env again  *)
+        if Env.is_generic_parameter env fresh_type_argument_name
+        then env, param_ty
+        else begin
+          let env, ty = Phase.localize ~ety_env env ty in
+          (* constraint type argument to hint *)
+          let env = Env.add_upper_bound env fresh_type_argument_name ty in
+          (* link type argument name to condition type *)
+          let env = Env.set_condition_type env fresh_type_argument_name condition_ty in
+          env, param_ty
+        end
+      | _ when Attributes.mem SN.UserAttributes.uaOnlyRxIfArgs attrs ->
+        let env, ty = Phase.localize ~ety_env env ty in
+        (* expand type to track aliased function types *)
+        let env, expanded_ty = Env.expand_type env ty in
+        let adjusted_ty =
+          make_function_type_mayberx (Env.env_reactivity env) expanded_ty in
+        env, if adjusted_ty == expanded_ty then ty else adjusted_ty
+      | _ ->
+        Phase.localize ~ety_env env ty
+      end
   in
   let ty = match ty with
     | _, t when param.param_is_variadic ->
@@ -400,7 +438,7 @@ and fun_def tcopt f =
   );
   let env = Env.set_env_function_pos env pos in
   let env = Typing_attributes.check_def env new_object SN.AttributeKinds.fn f.f_user_attributes in
-  let reactive = Decl.fun_reactivity env.Env.decl_env f.f_user_attributes in
+  let reactive = fun_reactivity env.Env.decl_env f.f_user_attributes in
   let mut = TUtils.fun_mutable f.f_user_attributes in
   let env = Env.set_env_reactive env reactive in
   let env = Env.set_fun_mutable env mut in
@@ -2299,7 +2337,7 @@ and expr_
       end;
       (* Is the return type declared? *)
       let is_explicit_ret = Option.is_some f.f_ret in
-      let reactivity = Decl.fun_reactivity env.Env.decl_env f.f_user_attributes in
+      let reactivity = fun_reactivity env.Env.decl_env f.f_user_attributes in
       let check_body_under_known_params ?ret_ty ft =
         let old_reactivity = Env.env_reactivity env in
         let env = Env.set_env_reactive env reactivity in
@@ -2403,7 +2441,7 @@ and expr_
                 ("Typing.expr Efun unknown params",
                   [Typing_log.Log_type ("declared_ft", (Reason.Rwitness p, Tfun declared_ft))])];
             (* check for recursive function calls *)
-            let reactivity = Decl.fun_reactivity env.Env.decl_env f.f_user_attributes in
+            let reactivity = fun_reactivity env.Env.decl_env f.f_user_attributes in
             let old_reactivity = Env.env_reactivity env in
             let env = Env.set_env_reactive env reactivity in
             let is_coroutine, counter, pos, anon = anon_make env p f declared_ft idl in
@@ -3969,7 +4007,10 @@ and is_abstract_ft fty = match fty with
         let fty = check_abstract_parent_meth (snd m) p fty in
         check_coroutine_call env fty;
         let env, tel, tuel, ty =
-          call ~expected ~is_expr_statement ~receiver_type:ty1 p env fty el uel in
+          call ~expected ~is_expr_statement
+          ~method_call_info:(TR.make_call_info ~receiver_is_self:false
+              ~is_static:true ty1 (snd m))
+          p env fty el uel in
         make_call env (T.make_typed_expr fpos fty
           (T.Class_const (tcid, m))) hl tel tuel ty
       end
@@ -3992,7 +4033,9 @@ and is_abstract_ft fty = match fty with
                 let fty = check_abstract_parent_meth (snd m) p fty in
                 check_coroutine_call env fty;
                 let env, _tel, _tuel, method_ = call ~expected
-                  ~receiver_type:ty1 p env fty el uel in
+                  ~method_call_info:(TR.make_call_info ~receiver_is_self:false
+                    ~is_static:false ty1 (snd m))
+                  p env fty el uel in
                 env, method_, None
               end
               k_lhs
@@ -4004,7 +4047,11 @@ and is_abstract_ft fty = match fty with
               class_get ~is_method:true ~is_const:false ~explicit_tparams:hl env ty1 m CIparent in
             let fty = check_abstract_parent_meth (snd m) p fty in
             check_coroutine_call env fty;
-            let env, tel, tuel, ty = call ~expected ~receiver_type:ty1 p env fty el uel in
+            let env, tel, tuel, ty =
+              call ~expected
+                ~method_call_info:(TR.make_call_info ~receiver_is_self:false
+                  ~is_static:true ty1 (snd m))
+                p env fty el uel in
             make_call env (T.make_typed_expr fpos fty
               (T.Class_const (tcid, m))) hl tel tuel ty
       end
@@ -4048,7 +4095,10 @@ and is_abstract_ft fty = match fty with
         | _ -> () in
       check_coroutine_call env fty;
       let env, tel, tuel, ty =
-        call ~expected ~receiver_type:ty1 ~is_expr_statement p env fty el uel in
+        call ~expected
+        ~method_call_info:(TR.make_call_info ~receiver_is_self:(e1 = CIself)
+          ~is_static:true ty1 (snd m))
+        ~is_expr_statement p env fty el uel in
       make_call env (T.make_typed_expr fpos fty
         (T.Class_const(te1, m))) hl tel tuel ty
 
@@ -4065,7 +4115,10 @@ and is_abstract_ft fty = match fty with
       let k = (fun (env, fty, _) ->
         check_coroutine_call env fty;
         let env, tel_, tuel_, method_ =
-          call ~expected ~receiver_type:ty1 ~is_expr_statement p env fty el uel in
+          call ~expected
+            ~method_call_info:(TR.make_call_info ~receiver_is_self:false
+              ~is_static:false ty1 (snd m))
+            ~is_expr_statement p env fty el uel in
         tel := tel_; tuel := tuel_;
         tftyl := fty :: !tftyl;
         env, method_, None) in
@@ -5187,8 +5240,8 @@ and inout_write_back env { fp_type; _ } (_, e) =
       env
     | _ -> env
 
-and call ~expected ?(is_expr_statement=false) ?receiver_type pos env fty el uel =
-  let env, tel, tuel, ty = call_ ~expected ~is_expr_statement ~receiver_type pos env fty el uel in
+and call ~expected ?(is_expr_statement=false) ?method_call_info pos env fty el uel =
+  let env, tel, tuel, ty = call_ ~expected ~is_expr_statement ~method_call_info pos env fty el uel in
   (* We need to solve the constraints after every single function call.
    * The type-checker is control-flow sensitive, the same value could
    * have different type depending on the branch that we are in.
@@ -5197,7 +5250,7 @@ and call ~expected ?(is_expr_statement=false) ?receiver_type pos env fty el uel 
   let env = Env.check_todo env in
   env, tel, tuel, ty
 
-and call_ ~expected ~receiver_type ~is_expr_statement pos env fty el uel =
+and call_ ~expected ~method_call_info ~is_expr_statement pos env fty el uel =
   let make_unpacked_traversable_ty pos ty =
     let unpack_r = Reason.Runpack_param pos in
     unpack_r, Tclass ((pos, SN.Collections.cTraversable), [ty])
@@ -5304,7 +5357,7 @@ and call_ ~expected ~receiver_type ~is_expr_statement pos env fty el uel =
     let tel, tys =
       let l = List.map rl (fun (_, opt) -> get_param opt) in
       Core_list.unzip l in
-    Typing_reactivity.check_call env receiver_type pos r2 ft tys;
+    TR.check_call env method_call_info pos r2 ft tys;
     let env, tuel, arity, did_unpack =
       match uel with
       | [] -> env, [], List.length el, false
@@ -6678,7 +6731,7 @@ and method_def env m =
   let env = Env.set_env_function_pos env pos in
   let env = Typing_attributes.check_def env new_object
     SN.AttributeKinds.mthd m.m_user_attributes in
-  let reactive = Decl.fun_reactivity env.Env.decl_env m.m_user_attributes in
+  let reactive = fun_reactivity env.Env.decl_env m.m_user_attributes in
   let mut =
     TUtils.fun_mutable m.m_user_attributes ||
     (* <<__Mutable>> is implicit on constructors  *)

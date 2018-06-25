@@ -17,11 +17,10 @@ val fun_reactivity :
   Nast.user_attribute list ->
   Typing_defs.reactivity
 
-val adjust_reactivity_of_mayberx_parameter:
+val condition_type_from_attributes:
+  Decl_env.env ->
   Nast.user_attribute list ->
-  Typing_defs.reactivity ->
-  Typing_defs.decl Typing_defs.ty ->
-  Typing_defs.decl Typing_defs.ty
+  Typing_defs.decl Typing_defs.ty option
 
 (*
  * This function works by side effects. It is adding in the

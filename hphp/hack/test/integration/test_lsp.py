@@ -221,6 +221,11 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         variables = self.setup_php_file('messy.php')
         self.load_and_run('formatting', variables)
 
+    def test_ontypeformatting(self):
+        self.prepare_environment()
+        variables = self.setup_php_file('ontypeformatting.php')
+        self.load_and_run('ontypeformatting', variables)
+
     def test_did_change(self):
         # Disabling this test because it has a race condition:
         # see T27194253 for transcript

@@ -1,0 +1,90 @@
+[
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {
+      "initializationOptions": {},
+      "processId": null,
+      "rootPath": "${root_path}",
+      "capabilities": {}
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "textDocument/didOpen",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}",
+        "languageId": "hack",
+        "version": 1,
+        "text": "${php_file}"
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 11,
+    "method": "textDocument/onTypeFormatting",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 9,
+        "character": 58
+      },
+      "ch": ";",
+      "options": {
+        "tabSize": 2,
+        "insertSpaces": true
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 12,
+    "method": "textDocument/onTypeFormatting",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 13,
+        "character": 1
+      },
+      "ch": "}",
+      "comment": "NOTE: This tests bracket-matching",
+      "comment": "The position describes that of the cursor position after typing '{' (AKA the cursor space in between '{' and '}'), not that of the closing brace '}'",
+      "options": {
+        "tabSize": 2,
+        "insertSpaces": true
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 13,
+    "method": "textDocument/onTypeFormatting",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 15,
+        "character": 16
+      },
+      "ch": "}",
+      "options": {
+        "tabSize": 2,
+        "insertSpaces": true
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 999,
+    "method": "shutdown",
+    "params": {}
+  }
+]

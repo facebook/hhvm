@@ -527,7 +527,7 @@ let extract_unquoted_string ~start ~len content =
               content
             else
               String.sub content start len
-  with Invalid_argument _ -> content
+  with Invalid_argument _ | Not_found -> content
 
 let mkStr env node : (string -> string) -> string -> string = fun unescaper content ->
   let content = if String.length content > 0 && content.[0] = 'b'

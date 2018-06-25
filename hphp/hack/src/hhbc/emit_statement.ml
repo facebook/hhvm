@@ -643,9 +643,10 @@ and emit_switch env pos scrutinee_expr cl =
   end
 
 and block_pos b =
-  if b = []
-    then Pos.none
-    else Pos.btw (fst (List.hd_exn b)) (fst (List.last_exn b))
+  let bpos = List.map b fst in
+  let valid_pos = List.filter bpos (fun e -> e <> Pos.none) in
+  if valid_pos = [] then Pos.none
+  else Pos.btw (List.hd_exn valid_pos) (List.last_exn valid_pos)
 
 and emit_catch env pos end_label (catch_type, (_, catch_local), b) =
     (* Note that this is a "regular" label; we're not going to branch to

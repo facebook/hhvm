@@ -1295,21 +1295,26 @@ let do_documentOnTypeFormatting
   : DocumentOnTypeFormatting.result =
   let open DocumentOnTypeFormatting in
   let open TextDocumentIdentifier in
-  let fixup_position position =
-    (* temporary workaround for T29372533: Nuclide points at the trigger character...
-        Temporarily checks if current position points to trigger character,
-        otherwise returns the previous position
-     *)
-    let uri = params.textDocument.uri in
-    let lsp_doc = SMap.get uri editor_open_files in
-    let open Lsp.TextDocumentItem in
-    let content = Option.value_map ~default:"" ~f:(fun item -> item.text) lsp_doc in
-    let current_char = Lsp_helpers.get_char_from_lsp_position content position in
-    let prev_position = {position with character = position.character - 1}
-    in
-    if ((current_char = ';') || (current_char = '}')) then position
-    else prev_position
-  in
+  (*
+    In LSP, positions do not point directly to characters, but to spaces in between characters.
+    Thus, the LSP position that the cursor points to after typing a character is the space
+    immediately after the character.
+
+    For example:
+          Character positions:      0 1 2 3 4 5 6
+                                    f o o ( ) { }
+          LSP positions:           0 1 2 3 4 5 6 7
+
+          The cursor is at LSP position 7 after typing the "}" of "foo(){}"
+          But the character position of "}" is 6.
+
+    Nuclide currently sends positions according to LSP, but everything else in the server
+    and in hack formatting assumes that positions point directly to characters.
+
+    Thus, to send the position of the character itself for formatting,
+      we must subtract one.
+  *)
+  let fixup_position position = {position with character = position.character - 1} in
   let action = ServerFormatTypes.Position
       { Ide_api_types.
         filename = lsp_uri_to_path params.textDocument.uri;

@@ -34,8 +34,7 @@ let union env local1 local2 =
     else
       let env, ty1 = TUtils.unresolved env ty1 in
       let env, ty2 = TUtils.unresolved env ty2 in
-      let env, ty = Type.union env.Env.pos Reason.URnone env ty1 ty2 in
-      env, ty in
+      Type.union env.Env.pos Reason.URnone env ty1 ty2 in
   env, (ty, eid)
 
 let get_cont env cont =

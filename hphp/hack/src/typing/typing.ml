@@ -1225,9 +1225,13 @@ and eif env ~expected ~coalesce ~in_cond p c e1 e2 =
    * latter takes local environments as arguments, but our types here
    * aren't assigned to local variables in an environment *)
   (* TODO: Omit if expected type is present and checked in calls to expr *)
-  let env, ty1 = TUtils.unresolved env ty1 in
-  let env, ty2 = TUtils.unresolved env ty2 in
-  let env, ty = Unify.unify env ty1 ty2 in
+  let env, ty =
+    if Typing_defs.ty_equal ty1 ty2
+    then env, ty1
+    else
+      let env, ty1 = TUtils.unresolved env ty1 in
+      let env, ty2 = TUtils.unresolved env ty2 in
+      Type.union env.Env.pos Reason.URnone env ty1 ty2 in
   let te = if coalesce then T.Binop(Ast.QuestionQuestion, tc, te2) else T.Eif(tc, te1, te2) in
   env, T.make_typed_expr p ty te, ty
 

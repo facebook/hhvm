@@ -3031,7 +3031,7 @@ let lower env ~source_text ~script : result =
     List.filter ~f:(fun (_,c) -> not (Prim_defs.is_line_comment c)) comments
   in
   let content = if env.codegen then "" else SourceText.text source_text in
-  let () = if env.keep_errors then Fixmes.HH_FIXMES.add env.file fixmes in
+  let () = if env.keep_errors && not env.quick_mode then Fixmes.HH_FIXMES.add env.file fixmes in
   { fi_mode = env.fi_mode
   ; is_hh_file = env.is_hh_file
   ; ast

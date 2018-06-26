@@ -1,0 +1,2 @@
+File "function_static_bad.php", line 4, characters 7-12:
+Top-level function cannot have modifier 'static' (Parsing[1002])

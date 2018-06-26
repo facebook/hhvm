@@ -1,0 +1,2 @@
+File "function_protected_bad.php", line 4, characters 7-15:
+Top-level function cannot have modifier 'protected' (Parsing[1002])

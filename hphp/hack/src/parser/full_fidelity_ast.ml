@@ -437,16 +437,20 @@ type modifiers = {
   kinds: kind list
 }
 
-let pModifiers node env =
+let pModifiers check_modifier node env =
   let f (has_async, has_coroutine, kinds) node =
+    let add_kind k =
+      check_modifier node;
+      k :: kinds
+    in
     match token_kind node with
-    | Some TK.Final     -> has_async, has_coroutine, (Final :: kinds)
-    | Some TK.Static    -> has_async, has_coroutine, (Static :: kinds)
-    | Some TK.Abstract  -> has_async, has_coroutine, (Abstract :: kinds)
-    | Some TK.Private   -> has_async, has_coroutine, (Private :: kinds)
-    | Some TK.Public    -> has_async, has_coroutine, (Public :: kinds)
-    | Some TK.Protected -> has_async, has_coroutine, (Protected :: kinds)
-    | Some TK.Var       -> has_async, has_coroutine, (Public :: kinds)
+    | Some TK.Final     -> has_async, has_coroutine, add_kind Final
+    | Some TK.Static    -> has_async, has_coroutine, add_kind Static
+    | Some TK.Abstract  -> has_async, has_coroutine, add_kind Abstract
+    | Some TK.Private   -> has_async, has_coroutine, add_kind Private
+    | Some TK.Public    -> has_async, has_coroutine, add_kind Public
+    | Some TK.Protected -> has_async, has_coroutine, add_kind Protected
+    | Some TK.Var       -> has_async, has_coroutine, add_kind Public
     | Some TK.Async     -> true, has_coroutine, kinds
     | Some TK.Coroutine -> has_async, true, kinds
     | _ -> missing_syntax "kind" node env in
@@ -454,7 +458,8 @@ let pModifiers node env =
     Core_list.fold_left ~init:(false, false, []) ~f (as_list node) in
   { has_async; has_coroutine; kinds = List.rev kinds }
 
-let pKinds node env = (pModifiers node env).kinds
+let pKinds check_modifier node env =
+  (pModifiers check_modifier node env).kinds
 
 let pParamKind : param_kind parser = fun node env ->
   match token_kind node with
@@ -883,7 +888,7 @@ and pFunParam : fun_param parser = fun node env ->
       | x :: _ when List.mem [Private; Public; Protected] x -> Some x
       | _ :: xs -> go xs
       in
-      go (pKinds parameter_visibility env)
+      go (pKinds (fun _ -> ()) parameter_visibility env)
     }
   | VariadicParameter _
   | Token _ when text node = "..."
@@ -2049,7 +2054,7 @@ and pTParaml : tparam list parser = fun node env ->
     couldMap ~f:pTParam type_parameters_parameters env
   | _ -> missing_syntax "type parameter list" node env
 
-and pFunHdr : fun_hdr parser = fun node env ->
+and pFunHdr check_modifier : fun_hdr parser = fun node env ->
   match syntax node with
   | FunctionDeclarationHeader
     { function_modifiers
@@ -2066,7 +2071,7 @@ and pFunHdr : fun_hdr parser = fun node env ->
       let num_params = List.length (syntax_to_list_no_separators function_parameter_list) in
       if is_autoload && num_params > 1 then
         raise_parsing_error env node SyntaxError.autoload_takes_one_argument;
-      let modifiers = pModifiers function_modifiers env in
+      let modifiers = pModifiers check_modifier function_modifiers env in
       let fh_parameters = couldMap ~f:pFunParam function_parameter_list env in
       let fh_return_type = mpOptional pHint function_type env in
       let fh_suspension_kind =
@@ -2272,12 +2277,12 @@ and pClassElt : class_elt list parser = fun node env ->
        * the middle of the declaration, to be associated with individual
        * properties, right now we don't handle this *)
       let doc_comment_opt = extract_docblock node in
-      let modifiers = syntax_to_list_no_separators property_modifiers in
-      if Hh_core.List.exists ~f:is_final modifiers then
-        raise_parsing_error env node SyntaxError.final_property;
+      let check_modifier node =
+        if is_final node
+        then raise_parsing_error env node SyntaxError.final_property in
 
       [ ClassVars
-        { cv_kinds = pKinds property_modifiers env
+        { cv_kinds = pKinds check_modifier property_modifiers env
         ; cv_hint = mpOptional pHint property_type env
         ; cv_is_promoted_variadic = false
         ; cv_names = couldMap property_declarators env ~f:begin fun node env ->
@@ -2327,7 +2332,7 @@ and pClassElt : class_elt list parser = fun node env ->
           }
         )
       in
-      let hdr = pFunHdr header env in
+      let hdr = pFunHdr (fun _ -> ()) header env in
       let member_init, member_def =
         List.unzip @@
           List.filter_map hdr.fh_parameters ~f:(fun p ->
@@ -2344,7 +2349,7 @@ and pClassElt : class_elt list parser = fun node env ->
         member_init @ body
       in
       let body, body_has_yield = mpYielding pBody methodish_function_body env in
-      let kind = pKinds h.function_modifiers env in
+      let kind = pKinds (fun _ -> ()) h.function_modifiers env in
       member_def @ [Method
       { m_kind            = kind
       ; m_tparams         = hdr.fh_type_parameters
@@ -2397,7 +2402,7 @@ and pClassElt : class_elt list parser = fun node env ->
             pos_name scope_resolution_name env
           | _ -> None, pos_name aliasing_name env
         in
-        let modifiers = pKinds modifiers env in
+        let modifiers = pKinds (fun _ -> ()) modifiers env in
         Core_list.iter modifiers ~f:(fun modifier ->
           match modifier with
           | Public | Private | Protected | Final ->  ();
@@ -2550,7 +2555,9 @@ and pDef : def list parser = fun node env ->
   | FunctionDeclaration
     { function_attribute_spec; function_declaration_header; function_body } ->
       let env = non_tls env in
-      let hdr = pFunHdr function_declaration_header env in
+      let check_modifier node =
+        raise_parsing_error env node (SyntaxError.function_modifier (text node)) in
+      let hdr = pFunHdr check_modifier function_declaration_header env in
       let block, yield =
         if is_semicolon function_body then [], false else
           mpYielding pFunctionBody function_body env
@@ -2591,7 +2598,8 @@ and pDef : def list parser = fun node env ->
       let env = non_tls env in
       let c_mode = mode_annotation env.fi_mode in
       let c_user_attributes = pUserAttributes env attr in
-      let c_final = List.mem (pKinds mods env) Final in
+      let kinds = pKinds (fun _ -> ()) mods env in
+      let c_final = List.mem kinds Final in
       let c_is_xhp =
         match token_kind name with
         | Some (TK.XHPElementName | TK.XHPClassName) -> true
@@ -2620,7 +2628,7 @@ and pDef : def list parser = fun node env ->
       let c_enum = None in
       let c_span = pPos node env in
       let c_kind =
-        let is_abs = List.mem (pKinds mods env) Abstract in
+        let is_abs = List.mem kinds Abstract in
         match token_kind kw with
         | Some TK.Class when is_abs -> Cabstract
         | Some TK.Class             -> Cnormal

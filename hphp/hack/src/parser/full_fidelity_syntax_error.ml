@@ -464,3 +464,6 @@ let invalid_scope_resolution_qualifier = "Only classnames and variables are allo
 let invalid_variable_name =
   "A valid variable name starts with a letter or underscore, followed \
   by any number of letters, numbers, or underscores"
+
+let function_modifier s =
+  Printf.sprintf "Top-level function cannot have modifier '%s'" s

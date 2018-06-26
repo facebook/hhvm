@@ -1,0 +1,2 @@
+File "function_final_bad.php", line 4, characters 7-11:
+Top-level function cannot have modifier 'final' (Parsing[1002])

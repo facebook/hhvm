@@ -1331,15 +1331,14 @@ and expr_
       match expected with
       | None -> Env.fresh_unresolved_type env
       | Some (_, _, ty) -> env, ty in
-    let has_unknown = List.exists tys (fun (_, ty) -> ty = Typing_utils.tany env) in
     let subtype_value env ty =
       Type.sub_type p Reason.URarray_value env ty supertype in
-    if has_unknown then
+    let env = List.fold_left tys ~init:env ~f:subtype_value in
+    if List.exists tys (fun (_, ty) -> ty = Typing_utils.tany env) then
       (* If one of the values comes from PHP land, we have to be conservative
        * and consider that we don't know what the type of the values are. *)
       env, (Reason.Rwitness p, Typing_utils.tany env)
     else
-      let env = List.fold_left tys ~init:env ~f:subtype_value in
       env, supertype in
 
   (**

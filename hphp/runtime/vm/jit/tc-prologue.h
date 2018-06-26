@@ -61,7 +61,7 @@ void smashFuncCallers(TCA start, ProfTransRec* rec);
 TCA emitFuncBodyDispatchInternal(Func* func, const DVFuncletsVec& dvs,
                                  CodeCache::View view);
 
-void publishFuncBodyDispatch(Func* func, TCA tca, CodeCache::View view);
+void publishFuncBodyDispatch(Func* func, TCA start, TCA end);
 
 }
 

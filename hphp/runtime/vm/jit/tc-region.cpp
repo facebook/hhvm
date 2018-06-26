@@ -349,7 +349,9 @@ void relocateOptFunc(FuncMetaInfo& info, SrcKeyTransMap& srcKeyTrans,
     const auto tca = emitFuncBodyDispatchInternal(func, func->getDVFunclets(),
                                                   view);
     if (tca != nullptr) {
-      info.bodyDispatch = std::make_unique<BodyDispatchMetaInfo>(tca, view);
+      info.bodyDispatch = std::make_unique<BodyDispatchMetaInfo>(
+        tca, view.main().frontier()
+      );
     }
   }
 
@@ -442,12 +444,12 @@ void publishOptFuncCode(FuncMetaInfo& info,
   auto const func = info.func;
 
   if (info.bodyDispatch) {
-    const auto& view = info.bodyDispatch->finalView;
-    const auto   tca = info.bodyDispatch->tca;
-    always_assert(tca);
-    // NB: this already calls func->setFuncBody() with the new TCA
-    publishFuncBodyDispatch(func, tca, view);
-    if (publishedSet) publishedSet->insert(tca);
+    const auto start = info.bodyDispatch->start;
+    const auto   end = info.bodyDispatch->end;
+    always_assert(start);
+    // NB: this already calls func->setFuncBody() with the new start address
+    publishFuncBodyDispatch(func, start, end);
+    if (publishedSet) publishedSet->insert(start);
   }
 
   // Publish all prologues and translations for func in order.

@@ -88,11 +88,11 @@ struct PrologueMetaInfo {
 };
 
 struct BodyDispatchMetaInfo {
-  BodyDispatchMetaInfo(TCA tca, CodeCache::View view)
-    : tca(tca), finalView(view)
+  BodyDispatchMetaInfo(TCA start, TCA end)
+    : start(start), end(end)
   { }
-  TCA             tca;
-  CodeCache::View finalView;
+  TCA             start;
+  TCA             end;
 };
 
 struct LocalTCBuffer {

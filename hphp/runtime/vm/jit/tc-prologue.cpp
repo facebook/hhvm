@@ -287,25 +287,23 @@ TCA emitFuncBodyDispatchInternal(Func* func, const DVFuncletsVec& dvs,
   return genFuncBodyDispatch(func, dvs, view);
 }
 
-void publishFuncBodyDispatch(Func* func, TCA tca, CodeCache::View view) {
+void publishFuncBodyDispatch(Func* func, TCA start, TCA end) {
   TRACE(2, "emitFuncBodyDispatch: emitted code for %s at %p\n",
-        func->fullName()->data(), tca);
+        func->fullName()->data(), start);
 
-  func->setFuncBody(tca);
+  func->setFuncBody(start);
 
   if (!RuntimeOption::EvalJitNoGdb) {
     Debug::DebugInfo::Get()->recordStub(
-      Debug::TCRange(tca, view.main().frontier(), false),
+      Debug::TCRange(start, end, false),
       Debug::lookupFunction(func, false, false, true));
   }
   if (RuntimeOption::EvalJitUseVtuneAPI) {
-    reportHelperToVtune(func->fullName()->data(),
-                        tca,
-                        view.main().frontier());
+    reportHelperToVtune(func->fullName()->data(), start, end);
   }
   if (RuntimeOption::EvalPerfPidMap) {
     Debug::DebugInfo::Get()->recordPerfMap(
-      Debug::TCRange(tca, view.main().frontier(), false),
+      Debug::TCRange(start, end, false),
       SrcKey{}, func, false, false);
   }
 }
@@ -318,7 +316,7 @@ TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs, TransKind kind) {
 
   const auto& view = code().view(kind);
   const auto tca = emitFuncBodyDispatchInternal(func, dvs, view);
-  publishFuncBodyDispatch(func, tca, view);
+  publishFuncBodyDispatch(func, tca, view.main().frontier());
   return tca;
 }
 

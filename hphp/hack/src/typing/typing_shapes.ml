@@ -196,12 +196,9 @@ let to_array env shape_ty res =
     method! on_tshape env r fields_known fdm =
       match fields_known with
       | FieldsFullyKnown ->
-        let env, values =
-          ShapeFieldList.map_env
-            env (ShapeMap.values fdm) (Typing_utils.unresolved) in
         let keys = ShapeMap.keys fdm in
         let env, keys = List.map_env env keys begin fun env key ->
-          let env, ty = match key with
+          match key with
           | Ast.SFlit (p, _) -> env, (Reason.Rwitness p, Tprim Tstring)
           | Ast.SFclass_const ((p, cid), (_, mid)) ->
             begin match Env.get_class env cid with
@@ -211,10 +208,10 @@ let to_array env shape_ty res =
                   | None -> env, (Reason.Rwitness p, TUtils.tany env)
                 end
               | None -> env, (Reason.Rwitness p, TUtils.tany env)
-            end in
-          Typing_utils.unresolved env ty
+            end
         end in
         let env, key = Typing_arrays.union_keys env keys in
+        let values = ShapeMap.values fdm in
         let values = List.map ~f:(fun { sft_ty; _ } -> sft_ty) values in
         let env, value = Typing_arrays.union_values env values in
         env, (r, Tarraykind (AKmap (key, value)))

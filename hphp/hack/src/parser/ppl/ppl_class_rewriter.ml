@@ -79,8 +79,12 @@ let rewrite_ppl_method_header method_header =
         new_method_header
   | _ -> failwith "Expected function declaration header"
 
-(* Determines whether a function call receiver is $this or self *)
-let is_this_or_self receiver =
+(**
+ * Determines whether a function call receiver should be rewritten.
+ * $this, self, parent, static prefaced methods should be rewritten.
+ * parent::__construct should not.
+ *)
+let should_be_rewritten receiver =
   match syntax receiver with
   | MemberSelectionExpression {
       member_object = {
@@ -97,11 +101,20 @@ let is_this_or_self receiver =
     } when Token.text token = "$this" -> true
   | ScopeResolutionExpression {
       scope_resolution_qualifier = {
-        syntax = Token token;
+        syntax = Token qualifier;
+        _;
+      };
+      scope_resolution_name = {
+        syntax = Token m;
         _;
       };
       _;
-    } when Token.text token = "self" -> true
+    } ->
+      let qualifier = Token.text qualifier in
+      let m = Token.text m in
+         (qualifier = "parent" && m <> "__construct")
+      || qualifier = "static"
+      || qualifier = "self"
   | _ -> false
 
 (**
@@ -111,13 +124,14 @@ let is_this_or_self receiver =
 let rewrite_ppl_method_body method_body suspension_id =
   let rewrite node suspension_id =
     match syntax node with
-    (* $this->method_call(...) or self::method_call(...) *)
+    (* $this->method_call(...) or self/parent/static::method_call(...) *)
+    (* Excludes parent::__construct *)
     | FunctionCallExpression ({
         function_call_receiver;
         function_call_argument_list;
         _;
       } as function_call_expression)
-      when is_this_or_self function_call_receiver ->
+      when should_be_rewritten function_call_receiver ->
         let new_function_call_argument_list =
           function_call_argument_list
           |> prepend_to_comma_delimited_syntax_list receiver_variable_syntax in

@@ -214,11 +214,9 @@ let to_array env shape_ty res =
             end in
           Typing_utils.unresolved env ty
         end in
-        let env, key =
-          Typing_arrays.array_type_list_to_single_type env keys in
+        let env, key = Typing_arrays.union_keys env keys in
         let values = List.map ~f:(fun { sft_ty; _ } -> sft_ty) values in
-        let env, value =
-          Typing_arrays.array_type_list_to_single_type env values in
+        let env, value = Typing_arrays.union_values env values in
         env, (r, Tarraykind (AKmap (key, value)))
       | FieldsPartiallyKnown _ ->
         env, res

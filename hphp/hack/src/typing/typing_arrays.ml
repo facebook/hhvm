@@ -68,28 +68,32 @@ class virtual downcast_tabstract_to_array_type_mapper = object(this)
   method virtual on_type : env -> locl ty -> result
 end
 
-let array_type_list_to_single_type env values =
+let union env tyl =
+  let env, union_ty = Env.fresh_unresolved_type env in
+  let env = List.fold_left tyl ~init:env ~f:begin fun env ty ->
+    let env, ty = Typing_env.unbind env ty in
+    TUtils.sub_type env ty union_ty
+  end in
+  env, union_ty
+
+let union_keys = union
+
+let union_values env values =
   let unknown = List.find values (fun ty ->
-    snd (snd (TUtils.fold_unresolved env ty)) = Tany)
-  in match unknown with
-    | Some (r, _) -> env, (r, TUtils.tany env)
-    | None ->
-      let env, value = Env.fresh_unresolved_type env in
-      List.fold_left_env env values ~init:value ~f:TUtils.unify
+    snd (snd (TUtils.fold_unresolved env ty)) = Tany) in
+  match unknown with
+  | Some (r, _) -> env, (r, TUtils.tany env)
+  | None -> union env values
 
 let downcast_akshape_to_akmap_ env r fdm =
   let keys, values = List.unzip (ShapeMap.values fdm) in
-  let env, values = List.map_env env values Typing_env.unbind in
-  let env, value = array_type_list_to_single_type env values in
-  let env, keys = List.map_env env keys Typing_env.unbind in
-  let env, key = Env.fresh_unresolved_type env in
-  let env, key = List.fold_left_env env keys ~init:key ~f:TUtils.unify in
+  let env, value = union_values env values in
+  let env, key = union_keys env keys in
   env, (r, Tarraykind (AKmap (key, value)))
 
 let downcast_aktuple_to_akvec_ env r fields =
   let tyl = List.rev (IMap.values fields) in
-  let env, tyl = List.map_env env tyl Typing_env.unbind in
-  let env, value = array_type_list_to_single_type env tyl in
+  let env, value = union_values env tyl in
   env, (r, Tarraykind (AKvec (value)))
 
 class virtual downcast_aktypes_mapper = object(this)

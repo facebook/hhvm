@@ -318,6 +318,8 @@ static const struct {
   { OpFPushCufIter,{None,             FStack,       OutFDesc        }},
   { OpFIsParamByRef,
                    {None,             Stack1,       OutBoolean      }},
+  { OpFIsParamByRefCufIter,
+                   {None,             Stack1,       OutBoolean      }},
   { OpFThrowOnRefMismatch,
                    {None,             None,         OutNone         }},
   { OpFHandleRefMismatch,
@@ -879,6 +881,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FCallAwait:
   case Op::ClsCnsD:
   case Op::FIsParamByRef:
+  case Op::FIsParamByRefCufIter:
   case Op::FThrowOnRefMismatch:
   case Op::FCallBuiltin:
   case Op::NewStructArray:

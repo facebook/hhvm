@@ -302,7 +302,7 @@ final class Map implements \MutableMap {
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 1 0
-            FIsParamByRef 0 Any
+            FIsParamByRefCufIter 0 Any 0
             JmpNZ by_ref
             CGetL $v
             Jmp call
@@ -362,13 +362,13 @@ EOT
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 2 0
-            FIsParamByRef 0 Any
+            FIsParamByRefCufIter 0 Any 0
             JmpNZ by_ref_k
             CGetL $k
             Jmp pass_v
     by_ref_k:
             VGetL $k
-    pass_v: FIsParamByRef 1 Any
+    pass_v: FIsParamByRefCufIter 1 Any 0
             JmpNZ by_ref_v
             CGetL $v
             Jmp call
@@ -430,7 +430,7 @@ EOT
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 1 0
-            FIsParamByRef 0 Any
+            FIsParamByRefCufIter 0 Any 0
             JmpNZ by_ref
             CGetL $v
             Jmp call
@@ -493,13 +493,13 @@ EOT
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 2 0
-            FIsParamByRef 0 Any
+            FIsParamByRefCufIter 0 Any 0
             JmpNZ by_ref_k
             CGetL $k
             Jmp pass_v
     by_ref_k:
             VGetL $k
-    pass_v: FIsParamByRef 1 Any
+    pass_v: FIsParamByRefCufIter 1 Any 0
             JmpNZ by_ref_v
             CGetL $v
             Jmp call
@@ -595,7 +595,7 @@ EOT
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 1 0
-            FIsParamByRef 0 Any
+            FIsParamByRefCufIter 0 Any 0
             JmpNZ by_ref
             CGetL $v
             Jmp call
@@ -943,7 +943,7 @@ final class ImmMap implements \ConstMap {
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 1 0
-            FIsParamByRef 0 Any
+            FIsParamByRefCufIter 0 Any 0
             JmpNZ by_ref
             CGetL $v
             Jmp call
@@ -1008,13 +1008,13 @@ EOT
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 2 0
-            FIsParamByRef 0 Any
+            FIsParamByRefCufIter 0 Any 0
             JmpNZ by_ref_k
             CGetL $k
             Jmp pass_v
     by_ref_k:
             VGetL $k
-    pass_v: FIsParamByRef 1 Any
+    pass_v: FIsParamByRefCufIter 1 Any 0
             JmpNZ by_ref_v
             CGetL $v
             Jmp call
@@ -1079,7 +1079,7 @@ EOT
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 1 0
-            FIsParamByRef 0 Any
+            FIsParamByRefCufIter 0 Any 0
             JmpNZ by_ref
             CGetL $v
             Jmp call
@@ -1145,13 +1145,13 @@ EOT
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 2 0
-            FIsParamByRef 0 Any
+            FIsParamByRefCufIter 0 Any 0
             JmpNZ by_ref_k
             CGetL $k
             Jmp pass_v
     by_ref_k:
             VGetL $k
-    pass_v: FIsParamByRef 1 Any
+    pass_v: FIsParamByRefCufIter 1 Any 0
             JmpNZ by_ref_v
             CGetL $v
             Jmp call
@@ -1234,7 +1234,7 @@ EOT
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 1 0
-            FIsParamByRef 0 Any
+            FIsParamByRefCufIter 0 Any 0
             JmpNZ by_ref
             CGetL $v
             Jmp call

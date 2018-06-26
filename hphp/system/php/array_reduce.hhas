@@ -44,13 +44,13 @@ check_func:
 
   .try 1 {
     loop_x:   FPushCufIter 2 0
-              FIsParamByRef 0 Any
+              FIsParamByRefCufIter 0 Any 0
               JmpNZ by_ref_res
               CGetL $res
               Jmp pass_v
     by_ref_res:
               VGetL $res
-    pass_v:   FIsParamByRef 1 Any
+    pass_v:   FIsParamByRefCufIter 1 Any 0
               JmpNZ by_ref_v
               CGetL $v
               Jmp call

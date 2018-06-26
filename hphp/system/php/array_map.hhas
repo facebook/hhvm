@@ -66,7 +66,7 @@ not_array:
             WIterInitK 1 endloop_kt $v $k
   .try 1 {
     loop_x_kt:FPushCufIter 1 0
-              FIsParamByRef 0 Any
+              FIsParamByRefCufIter 0 Any 0
               JmpNZ by_ref_kt
               CGetL $v
               Jmp call_kt
@@ -109,7 +109,7 @@ one_array:
 
   .try 1 {
     loop_x:   FPushCufIter 1 0
-              FIsParamByRef 0 Any
+              FIsParamByRefCufIter 0 Any 0
               JmpNZ by_ref
               CGetL $v
               Jmp call

@@ -772,7 +772,7 @@ let get_input_output_count i =
     | FPushFuncD _ | FThrowOnRefMismatch _ | FHandleRefMismatch _ -> (0, 0)
     | FPushObjMethod _ -> (2, 0)
     | FPushCtor _ | FPushCtorD _ | FPushCtorI _ | FPushCtorS _
-    | FIsParamByRef _ -> (0, 1)
+    | FIsParamByRef _ | FIsParamByRefCufIter _ -> (0, 1)
     | FCall n | FCallD (n, _, _) | FCallAwait (n, _, _)| FCallUnpack n
     | FCallBuiltin (n, _, _) -> (n, 1) | FCallM (n1, n2) -> (n1, n2)
     | FCallDM (n1, n2, _, _) -> (n1, n2) | FCallUnpackM (n1, n2) -> (n1, n2)

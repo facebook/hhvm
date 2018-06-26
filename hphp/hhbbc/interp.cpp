@@ -3155,6 +3155,13 @@ void in(ISS& env, const bc::FIsParamByRef& op) {
   }
 }
 
+void in(ISS& env, const bc::FIsParamByRefCufIter& op) {
+  if (op.subop2 == FPassHint::Any) {
+    nothrow(env);
+  }
+  return push(env, TBool);
+}
+
 void in(ISS& env, const bc::FThrowOnRefMismatch& op) {
   auto& ar = fpiTop(env);
   if (!ar.func || ar.fallbackFunc) return;

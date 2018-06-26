@@ -491,6 +491,9 @@ let string_of_call instruction =
     sep ["FPushCufIter"; string_of_int n; string_of_iterator_id id]
   | FIsParamByRef (i, h) ->
     sep ["FIsParamByRef"; string_of_param_num i; string_of_fpasshint h]
+  | FIsParamByRefCufIter (i, h, id) ->
+    sep ["FIsParamByRefCufIter"; string_of_param_num i; string_of_fpasshint h;
+         string_of_iterator_id id]
   | FThrowOnRefMismatch l ->
     sep ["FThrowOnRefMismatch"; string_of_list_of_bools l]
   | FHandleRefMismatch (i, h, f) ->

@@ -411,6 +411,7 @@ type instruct_call =
   | DecodeCufIter of Iterator.t * Label.t
   | FPushCufIter of num_params * Iterator.t
   | FIsParamByRef of param_num * fpass_hint
+  | FIsParamByRefCufIter of param_num * fpass_hint * Iterator.t
   | FThrowOnRefMismatch of bool list
   | FHandleRefMismatch of param_num * fpass_hint * string
   | FCall of num_params

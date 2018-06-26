@@ -583,6 +583,8 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FPushCufIter,    TWO(IVA,IA),      NOV,             NOV,        PF) \
   O(FIsParamByRef,   TWO(IVA,OA(FPassHint)),                            \
                                        NOV,             ONE(CV),    FF) \
+  O(FIsParamByRefCufIter, THREE(IVA,OA(FPassHint),IA),                  \
+                                       NOV,             ONE(CV),    NF) \
   O(FThrowOnRefMismatch, ONE(BLLA),    NOV,             NOV,        FF) \
   O(FHandleRefMismatch, THREE(IVA,OA(FPassHint),SA),                    \
                                        NOV,             NOV,        NF) \

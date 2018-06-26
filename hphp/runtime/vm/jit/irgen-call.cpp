@@ -1303,10 +1303,8 @@ void handleRefMismatch(IRGS& env, SSATmp* func, uint32_t paramId) {
   gen(env, RaiseParamRefMismatchForFunc, ParamData { (int32_t)paramId }, func);
 }
 
-}
-
-void emitFIsParamByRef(IRGS& env, uint32_t paramId, FPassHint hint) {
-  auto const func = ldPreLiveFunc(env);
+void implFIsParamByRef(IRGS& env, SSATmp* func, uint32_t paramId,
+                       FPassHint hint) {
   if (func->hasConstVal(TFunc)) {
     auto const byRef = func->funcVal()->byRef(paramId);
     if (hint == (byRef ? FPassHint::Cell : FPassHint::Ref)) {
@@ -1337,6 +1335,18 @@ void emitFIsParamByRef(IRGS& env, uint32_t paramId, FPassHint hint) {
       return cns(env, true);
     }
   ));
+}
+
+}
+
+void emitFIsParamByRef(IRGS& env, uint32_t paramId, FPassHint hint) {
+  implFIsParamByRef(env, ldPreLiveFunc(env), paramId, hint);
+}
+
+void emitFIsParamByRefCufIter(IRGS& env, uint32_t paramId, FPassHint hint,
+                              int32_t itId) {
+  auto const func = gen(env, LdCufIterFunc, TFunc, IterId(itId), fp(env));
+  implFIsParamByRef(env, func, paramId, hint);
 }
 
 void emitFThrowOnRefMismatch(IRGS& env, const ImmVector& immVec) {

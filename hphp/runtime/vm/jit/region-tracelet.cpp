@@ -74,7 +74,7 @@ struct Env {
     , unit(TransContext{kInvalidTransID, kind, TransFlags{},
                         sk, ctx.spOffset, 0})
     , irgs(unit, nullptr)
-    , arStates(1)
+    , arState()
     , numJmps(0)
     , numBCInstrs(maxBCInstrs)
     , profiling(kind == TransKind::Profile)
@@ -96,8 +96,7 @@ struct Env {
   bool blockFinished;
   IRUnit unit;
   irgen::IRGS irgs;
-  jit::vector<ActRecState> arStates;
-  RefDeps refDeps;
+  ActRecState arState;
   uint32_t numJmps;
   int32_t numBCInstrs;
   // This map memoizes reachability of IR blocks during tracelet
@@ -218,7 +217,7 @@ bool prepareInstruction(Env& env) {
     opcodeBreaksBB(env.inst.op());
   env.inst.endsRegion = breaksBB ||
     (dontGuardAnyInputs(env.inst) && opcodeChangesPC(env.inst.op()));
-  env.inst.funcd = env.arStates.back().knownFunc();
+  env.inst.funcd = env.arState.knownFunc();
   irgen::prepareForNextHHBC(env.irgs, &env.inst, env.sk, false);
 
   auto const inputInfos = getInputs(env.inst, env.irgs.irb->fs().bcSPOff());
@@ -236,36 +235,9 @@ bool prepareInstruction(Env& env) {
     }
   }
 
-  if (inputInfos.needsRefCheck) {
-    // Reffiness guards are always at the beginning of the trace for now, so
-    // calculate the delta from the original sp to the ar. The FPI delta from
-    // instrFpToArDelta includes locals and iterators, so when we're in a
-    // resumed context we have to adjust for the fact that they're in a
-    // different place.
-    auto argNum =  env.inst.imm[0].u_IVA;
-    auto entryArDelta = env.ctx.spOffset.offset -
-      instrFpToArDelta(curFunc(env), env.inst.pc());
-    if (env.sk.resumeMode() != ResumeMode::None) {
-      entryArDelta += curFunc(env)->numSlotsInFrame();
-    }
+  addInstruction(env);
 
-    try {
-      env.inst.preppedByRef =
-        env.arStates.back().checkByRef(argNum, entryArDelta, &env.refDeps,
-                                       env.ctx);
-    } catch (const UnknownInputExc& exn) {
-      // We don't have a guess for the current ActRec.
-      FTRACE(1, "selectTracelet: don't have reffiness guess for {}\n",
-             env.inst.toString());
-      return false;
-    }
-    addInstruction(env);
-    env.curBlock->setParamByRef(env.inst.source, env.inst.preppedByRef);
-  } else {
-    addInstruction(env);
-  }
-
-  if (isFPush(env.inst.op())) env.arStates.back().pushFunc(env.inst);
+  if (isFPush(env.inst.op())) env.arState.pushFunc(env.inst);
 
   return true;
 }
@@ -399,17 +371,9 @@ void visitGuards(IRUnit& unit, F func) {
 }
 
 /*
- * Records any type/reffiness predictions we depend on in the region.
+ * Records any type predictions we depend on in the region.
  */
 void recordDependencies(Env& env) {
-  // Record the incrementally constructed reffiness predictions.
-  assertx(!env.region->empty());
-  auto& frontBlock = *env.region->blocks().front();
-  for (auto const& dep : env.refDeps.m_arMap) {
-    frontBlock.addReffinessPred({dep.second.m_mask, dep.second.m_vals,
-                                 dep.first});
-  }
-
   // Relax guards and record the ones that survived.
   auto& firstBlock = *env.region->blocks().front();
   auto& unit = env.irgs.unit;
@@ -621,7 +585,7 @@ RegionDescPtr form_region(Env& env) {
       break;
     }
 
-    if (isFCallStar(env.inst.op())) env.arStates.back().pop();
+    if (isFCallStar(env.inst.op())) env.arState.pop();
   }
 
   if (env.region && !env.region->empty()) {

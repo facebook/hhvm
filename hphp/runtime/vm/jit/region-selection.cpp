@@ -95,28 +95,6 @@ PGORegionMode pgoRegionMode(const Func& /*func*/) {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Checks whether two RefPredVecs contain the same elements, which may
- * appear in different orders.
- */
-bool operator==(const RegionDesc::Block::RefPredVec& reffys1,
-                const RegionDesc::Block::RefPredVec& reffys2) {
-  if (reffys1.size() != reffys2.size()) return false;
-
-  for (size_t r1 = 0; r1 < reffys1.size(); r1++) {
-    size_t r2 = 0;
-    for (; r2 < reffys2.size(); r2++) {
-      if (reffys1[r1].arSpOffset == reffys2[r2].arSpOffset) break;
-    }
-    if (r2 == reffys2.size()) return false;
-    if (reffys1[r1] != reffys2[r2]) return false;
-  }
-
-  return true;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 bool RegionDesc::empty() const {
   return m_blocks.empty();
 }
@@ -682,7 +660,6 @@ void RegionDesc::Block::truncateAfter(SrcKey final) {
   m_length = newLen;
   m_last = final.offset();
 
-  truncateMap(m_byRefs, final);
   truncateMap(m_knownFuncs, final);
 
   checkInstructions();
@@ -706,19 +683,6 @@ void RegionDesc::Block::addPreCondition(const GuardedLocation& locGuard) {
   assertx(locGuard.type.isSpecialized() ||
           typeFitsConstraint(locGuard.type, locGuard.category));
   m_typePreConditions.push_back(locGuard);
-}
-
-void RegionDesc::Block::setParamByRef(SrcKey sk, bool byRef) {
-  FTRACE(2, "Block::setParamByRef({}, {})\n", showShort(sk),
-         byRef ? "by ref" : "by val");
-  assertx(m_byRefs.find(sk) == m_byRefs.end());
-  assertx(contains(sk));
-  m_byRefs.insert(std::make_pair(sk, byRef));
-}
-
-void RegionDesc::Block::addReffinessPred(const ReffinessPred& pred) {
-  FTRACE(2, "Block::addReffinessPred({})\n", show(pred));
-  m_refPreds.push_back(pred);
 }
 
 void RegionDesc::Block::setKnownFunc(SrcKey sk, const Func* func) {
@@ -774,8 +738,8 @@ void RegionDesc::Block::checkInstruction(Op op) const {
 /*
  * Check invariants about the metadata for this Block.
  *
- * 1. Each SrcKey in m_typePredictions, m_preConditions, m_byRefs, m_refPreds,
- *    and m_knownFuncs is within the bounds of the block.
+ * 1. Each SrcKey in m_typePredictions, m_preConditions, and m_knownFuncs is
+ *    within the bounds of the block.
  *
  * 2. Each local id referred to in the type prediction list is valid.
  *
@@ -830,9 +794,6 @@ void RegionDesc::Block::checkMetadata() const {
   checkTypedLocations("type prediction", m_typePredictions);
   checkGuardedLocations("type precondition", m_typePreConditions);
 
-  for (auto& byRef : m_byRefs) {
-    rangeCheck("parameter reference flag", byRef.first.offset());
-  }
   for (auto& func : m_knownFuncs) {
     rangeCheck("known Func*", func.first.offset());
   }
@@ -1221,15 +1182,6 @@ std::string show(const PostConditions& pconds) {
   return ret;
 }
 
-std::string show(const RegionDesc::ReffinessPred& pred) {
-  std::ostringstream out;
-  out << "offset: " << pred.arSpOffset << " mask: ";
-  for (auto const bit : pred.mask) out << (bit ? '1' : '0');
-  out << " vals: ";
-  for (auto const bit : pred.vals) out << (bit ? '1' : '0');
-  return out.str();
-}
-
 std::string show(RegionContext::LiveType ta) {
   return folly::format(
     "{} :: {}",
@@ -1238,21 +1190,11 @@ std::string show(RegionContext::LiveType ta) {
   ).str();
 }
 
-std::string show(RegionContext::PreLiveAR ar) {
-  return folly::format(
-    "AR@{}: {} ({})",
-    ar.stackOff,
-    ar.func->fullName(),
-    ar.objOrCls.toString()
-  ).str();
-}
-
 std::string show(const RegionContext& ctx) {
   std::string ret;
   folly::toAppend(ctx.func->fullName()->data(), "@", ctx.bcOffset,
                   resumeModeShortName(ctx.resumeMode), "\n", &ret);
   for (auto& t : ctx.liveTypes) folly::toAppend(" ", show(t), "\n", &ret);
-  for (auto& ar : ctx.preLiveARs) folly::toAppend(" ", show(ar), "\n", &ret);
 
   return ret;
 }
@@ -1271,8 +1213,6 @@ std::string show(const RegionDesc::Block& b) {
 
   auto& predictions   = b.typePredictions();
   auto& preconditions = b.typePreConditions();
-  auto  byRefs        = makeMapWalker(b.paramByRefs());
-  auto& refPreds      = b.reffinessPreds();
   auto  knownFuncs    = makeMapWalker(b.knownFuncs());
   auto  skIter        = b.start();
 
@@ -1283,9 +1223,6 @@ std::string show(const RegionDesc::Block& b) {
   }
   for (auto const& p : preconditions) {
     folly::toAppend("  precondition: ", show(p), "\n", &ret);
-  }
-  for (auto const& rp : refPreds) {
-    folly::toAppend("  predict reffiness: ", show(rp), "\n", &ret);
   }
 
   for (int i = 0; i < b.length(); ++i) {
@@ -1299,15 +1236,8 @@ std::string show(const RegionDesc::Block& b) {
                                 topFunc->fullName(), inlined).str();
     }
 
-    std::string byRef;
-    if (byRefs.hasNext(skIter)) {
-      byRef = folly::format(" (passed by {})", byRefs.next() ? "reference"
-                                                             : "value").str();
-    }
-
     std::string instrString;
     folly::toAppend(instrToString(b.unit()->at(skIter.offset()), b.unit()),
-                    byRef,
                     &instrString);
 
     folly::toAppend(

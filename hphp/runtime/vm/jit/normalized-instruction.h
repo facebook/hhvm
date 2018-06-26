@@ -49,7 +49,6 @@ struct NormalizedInstruction {
   IterTable immIters;
 
   bool endsRegion:1;
-  bool preppedByRef:1;
   bool ignoreInnerType:1;
 
   /*

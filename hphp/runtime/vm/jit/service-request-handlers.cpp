@@ -69,19 +69,11 @@ RegionContext getContext(SrcKey sk) {
     FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
   }
 
-  // Track stack types and pre-live ActRecs.
+  // Track stack types.
   int32_t stackOff = 0;
   visitStackElems(
     fp, sp, ctx.bcOffset,
     [&] (const ActRec* ar, Offset) {
-      auto const objOrCls =
-        !ar->func()->cls() ? TNullptr :
-        (ar->hasThis()  ?
-         Type::SubObj(ar->getThis()->getVMClass()) :
-         Type::SubCls(ar->getClass()));
-
-      ctx.preLiveARs.push_back({ stackOff, ar->func(), objOrCls });
-      FTRACE(2, "added prelive ActRec {}\n", show(ctx.preLiveARs.back()));
       stackOff += kNumActRecCells;
     },
     [&] (const TypedValue* tv) {

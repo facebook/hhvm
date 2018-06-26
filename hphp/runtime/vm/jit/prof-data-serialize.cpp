@@ -156,23 +156,6 @@ SrcKey read_srckey(ProfDataDeserializer& ser) {
   return sk;
 }
 
-void write_reffiness_pred(ProfDataSerializer& ser,
-                          const RegionDesc::ReffinessPred& pred) {
-  write_container(ser, pred.mask, write_raw<bool>);
-  write_container(ser, pred.vals, write_raw<bool>);
-  write_raw(ser, pred.arSpOffset);
-}
-
-RegionDesc::ReffinessPred read_reffiness_pred(ProfDataDeserializer& ser) {
-  RegionDesc::ReffinessPred ret;
-  read_container(ser,
-                 [&] { ret.mask.push_back(read_raw<bool>(ser)); });
-  read_container(ser,
-                 [&] { ret.vals.push_back(read_raw<bool>(ser)); });
-  ret.arSpOffset = read_raw<decltype(ret.arSpOffset)>(ser);
-  return ret;
-}
-
 void write_type(ProfDataSerializer& ser, Type t) {
   t.serialize(ser);
 }
@@ -230,12 +213,6 @@ void write_region_block(ProfDataSerializer& ser,
   write_raw(ser, block->profTransID());
   write_container(ser, block->typePredictions(), write_typed_location);
   write_container(ser, block->typePreConditions(), write_guarded_location);
-  write_container(ser, block->paramByRefs(),
-                  [] (ProfDataSerializer& s, std::pair<SrcKey, bool> byRef) {
-                    write_srckey(s, byRef.first);
-                    write_raw(s, byRef.second);
-                  });
-  write_container(ser, block->reffinessPreds(), write_reffiness_pred);
   write_container(ser, block->knownFuncs(),
                   [] (ProfDataSerializer& s,
                       std::pair<SrcKey, const Func*> knownFunc) {
@@ -270,18 +247,6 @@ RegionDesc::BlockPtr read_region_block(ProfDataDeserializer& ser) {
   read_container(ser,
                  [&] {
                    block->addPreCondition(read_guarded_location(ser));
-                 });
-
-  read_container(ser,
-                 [&] {
-                   auto const sk = read_srckey(ser);
-                   auto const byRef = read_raw<bool>(ser);
-                   block->setParamByRef(sk, byRef);
-                 });
-
-  read_container(ser,
-                 [&] {
-                   block->addReffinessPred(read_reffiness_pred(ser));
                  });
 
   read_container(ser,

@@ -25,33 +25,6 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(trans);
 
-std::string RefDeps::Record::pretty() const {
-  std::ostringstream out;
-  out << "mask=";
-  for (size_t i = 0; i < m_mask.size(); ++i) {
-    out << (m_mask[i] ? "1" : "0");
-  }
-  out << " vals=";
-  for (size_t i = 0; i < m_vals.size(); ++i) {
-    out << (m_vals[i] ? "1" : "0");
-  }
-  return out.str();
-}
-
-void RefDeps::addDep(int entryArDelta, unsigned argNum, bool isRef) {
-  if (m_arMap.find(entryArDelta) == m_arMap.end()) {
-    m_arMap[entryArDelta] = Record();
-  }
-  Record& r = m_arMap[entryArDelta];
-  if (argNum >= r.m_mask.size()) {
-    assertx(argNum >= r.m_vals.size());
-    r.m_mask.resize(argNum + 1);
-    r.m_vals.resize(argNum + 1);
-  }
-  r.m_mask[argNum] = true;
-  r.m_vals[argNum] = isRef;
-}
-
 void
 ActRecState::pushFunc(const NormalizedInstruction& inst) {
   assertx(isFPush(inst.op()));
@@ -75,32 +48,13 @@ ActRecState::pushFunc(const NormalizedInstruction& inst) {
   }
 
   if (func) {
+    TRACE(2, "ActRecState: pushFunc %p(%s)\n", func, func->name()->data());
     func->validate();
-    pushFuncD(func);
+    m_arStack.push_back(func);
   } else {
-    pushDynFunc();
+    TRACE(2, "ActRecState: pushFunc dyn\n");
+    m_arStack.push_back(nullptr);
   }
-}
-
-void
-ActRecState::pushFuncD(const Func* func) {
-  TRACE(2, "ActRecState: pushStatic func %p(%s)\n", func, func->name()->data());
-  func->validate();
-  Record r;
-  r.m_state = State::KNOWN;
-  r.m_topFunc = func;
-  r.m_entryArDelta = InvalidEntryArDelta;
-  m_arStack.push_back(r);
-}
-
-void
-ActRecState::pushDynFunc() {
-  TRACE(2, "ActRecState: pushDynFunc\n");
-  Record r;
-  r.m_state = State::UNKNOWABLE;
-  r.m_topFunc = nullptr;
-  r.m_entryArDelta = InvalidEntryArDelta;
-  m_arStack.push_back(r);
 }
 
 void
@@ -110,64 +64,10 @@ ActRecState::pop() {
   }
 }
 
-/**
- * checkByRef() returns true if the parameter specified by argNum is pass
- * by reference, otherwise it returns false. This function may also throw an
- * UnknownInputException if the reffiness cannot be determined.
- *
- * Note that the 'entryArDelta' parameter specifies the delta between sp at
- * the beginning of the tracelet and ar.
- */
-bool
-ActRecState::checkByRef(int argNum, int entryArDelta, RefDeps* refDeps,
-                        const RegionContext& ctx) {
-  FTRACE(2, "ActRecState: getting reffiness for arg {}, arDelta {}\n",
-         argNum, entryArDelta);
-  if (m_arStack.empty()) {
-    // The ActRec in question was pushed before the beginning of the
-    // tracelet, so we can make a guess about parameter reffiness and
-    // record our assumptions about parameter reffiness as tracelet
-    // guards.
-    auto const func = [&] {
-      for (auto& ar : ctx.preLiveARs) {
-        if (ar.stackOff == entryArDelta) return ar.func;
-      }
-      not_reached();
-    }();
-    Record r;
-    r.m_state = State::GUESSABLE;
-    r.m_entryArDelta = entryArDelta;
-    func->validate();
-    r.m_topFunc = func;
-    m_arStack.push_back(r);
-  }
-  Record& r = m_arStack.back();
-  if (r.m_state == State::UNKNOWABLE) {
-    TRACE(2, "ActRecState: unknowable, throwing in the towel\n");
-    throwUnknownInput();
-    not_reached();
-  }
-  assertx(r.m_topFunc);
-  bool retval = r.m_topFunc->byRef(argNum);
-  if (r.m_state == State::GUESSABLE) {
-    assertx(r.m_entryArDelta != InvalidEntryArDelta);
-    TRACE(2, "ActRecState: guessing arg%d -> %d\n", argNum, retval);
-    refDeps->addDep(r.m_entryArDelta, argNum, retval);
-  }
-  return retval;
-}
-
 const Func*
 ActRecState::knownFunc() {
-  if (currentState() != State::KNOWN) return nullptr;
-  assertx(!m_arStack.empty());
-  return m_arStack.back().m_topFunc;
-}
-
-ActRecState::State
-ActRecState::currentState() {
-  if (m_arStack.empty()) return State::GUESSABLE;
-  return m_arStack.back().m_state;
+  if (m_arStack.empty()) return nullptr;
+  return m_arStack.back();
 }
 
 } } // HPHP::jit

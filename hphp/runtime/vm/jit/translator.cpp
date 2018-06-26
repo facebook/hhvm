@@ -513,9 +513,9 @@ const InstrInfo& getInstrInfo(Op op) {
 
 namespace {
 int64_t countOperands(uint64_t mask) {
-  const uint64_t ignore = FuncdRef | Local | Iter | AllLocals |
-    DontGuardStack1 | IgnoreInnerType | DontGuardAny | This |
-    MBase | StackI | MKey | LocalRange | DontGuardBase;
+  const uint64_t ignore = Local | Iter | AllLocals | DontGuardStack1 |
+    IgnoreInnerType | DontGuardAny | This | MBase | StackI | MKey | LocalRange |
+    DontGuardBase;
   mask &= ~ignore;
 
   static const uint64_t counts[][2] = {
@@ -738,7 +738,6 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
     stackOff -= ni.imm[0].u_IVA; // arguments consumed
     stackOff -= kNumActRecCells; // ActRec is torn down as well
   }
-  if (flags & FuncdRef) inputs.needsRefCheck = true;
   if (flags & IgnoreInnerType) ni.ignoreInnerType = true;
 
   if (flags & Stack1) {

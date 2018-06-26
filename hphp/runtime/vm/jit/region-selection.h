@@ -70,7 +70,6 @@ struct RegionDesc {
   struct Arc;
   struct TypedLocation;
   struct GuardedLocation;
-  struct ReffinessPred;
   using BlockPtr = std::shared_ptr<Block>;
   using BlockId = TransID;
   // BlockId Encoding:
@@ -266,41 +265,12 @@ struct PostConditions {
 };
 
 /*
- * A prediction for the argument reffiness of the Func for a pre-live ActRec.
- *
- * mask is a bitmask of all 1's, with one bit for each parameter being passed.
- *
- * vals is a bitmask of the same length as mask, with a 1 representing a
- * parameter that will be passed by reference and a 0 for for value.
- *
- * arSpOffset is the offset from the initialSpOffset to the ActRec.
- */
-struct RegionDesc::ReffinessPred {
-  std::vector<bool> mask;
-  std::vector<bool> vals;
-  int64_t arSpOffset;
-};
-
-inline bool operator==(const RegionDesc::ReffinessPred& a,
-                       const RegionDesc::ReffinessPred& b) {
-  return a.mask == b.mask && a.vals == b.vals && a.arSpOffset == b.arSpOffset;
-}
-
-
-inline bool operator!=(const RegionDesc::ReffinessPred& a,
-                       const RegionDesc::ReffinessPred& b) {
-  return !(a == b);
-}
-
-/*
  * A basic block in the region, with type predictions for conditions
  * at various execution points, including at entry to the block.
  */
 struct RegionDesc::Block {
   using TypedLocVec   = jit::vector<TypedLocation>;
   using GuardedLocVec = jit::vector<GuardedLocation>;
-  using RefPredVec    = jit::vector<ReffinessPred>;
-  using ParamByRefMap = boost::container::flat_map<SrcKey,bool>;
   using KnownFuncMap  = boost::container::flat_map<SrcKey,const Func*>;
 
   Block(BlockId id, const Func* func, ResumeMode resumeMode, bool hasThis,
@@ -356,16 +326,6 @@ struct RegionDesc::Block {
   void addPreCondition(const GuardedLocation&);
 
   /*
-   * Add information about parameter reffiness to this block.
-   */
-  void setParamByRef(SrcKey sk, bool);
-
-  /*
-   * Add a reffiness prediction about a pre-live ActRec.
-   */
-  void addReffinessPred(const ReffinessPred&);
-
-  /*
    * Update the statically known Func*. It remains active until another is
    * specified, so pass nullptr to indicate that there is no longer a known
    * Func*.
@@ -390,8 +350,6 @@ struct RegionDesc::Block {
    */
   const TypedLocVec&    typePredictions()   const { return m_typePredictions;  }
   const GuardedLocVec&  typePreConditions() const { return m_typePreConditions;}
-  const ParamByRefMap&  paramByRefs()       const { return m_byRefs;           }
-  const RefPredVec&     reffinessPreds()    const { return m_refPreds;         }
   const KnownFuncMap&   knownFuncs()        const { return m_knownFuncs;       }
   const PostConditions& postConds()         const { return m_postConds;        }
 
@@ -412,16 +370,9 @@ private:
   TransID          m_profTransID;
   TypedLocVec      m_typePredictions;
   GuardedLocVec    m_typePreConditions;
-  ParamByRefMap    m_byRefs;
-  RefPredVec       m_refPreds;
   KnownFuncMap     m_knownFuncs;
   PostConditions   m_postConds;
 };
-
-//////////////////////////////////////////////////////////////////////
-
-bool operator==(const RegionDesc::Block::RefPredVec& reffys1,
-                const RegionDesc::Block::RefPredVec& reffys2);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -435,7 +386,6 @@ bool operator==(const RegionDesc::Block::RefPredVec& reffys1,
  */
 struct RegionContext {
   struct LiveType;
-  struct PreLiveAR;
 
   RegionContext(const Func* f, Offset bcOff, FPInvOffset spOff,
                 ResumeMode rm, bool ht) :
@@ -447,7 +397,6 @@ struct RegionContext {
   ResumeMode resumeMode;
   bool hasThis;
   jit::vector<LiveType> liveTypes;
-  jit::vector<PreLiveAR> preLiveARs;
 };
 
 /*
@@ -456,18 +405,6 @@ struct RegionContext {
 struct RegionContext::LiveType {
   Location location;
   Type type;
-};
-
-/*
- * Pre-live ActRec information for a RegionContext.  The ActRec is
- * located stackOff slots above the stack at the start of the context,
- * contains the supplied func, and the m_this/m_class field is of type
- * objOrClass.
- */
-struct RegionContext::PreLiveAR {
-  int32_t stackOff;
-  const Func* func;
-  Type        objOrCls;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -598,9 +535,7 @@ std::string show(RegionDesc::TypedLocation);
 std::string show(const RegionDesc::GuardedLocation&);
 std::string show(const RegionDesc::Block::GuardedLocVec&);
 std::string show(const PostConditions&);
-std::string show(const RegionDesc::ReffinessPred&);
 std::string show(RegionContext::LiveType);
-std::string show(RegionContext::PreLiveAR);
 std::string show(const RegionContext&);
 std::string show(const RegionDesc::Block&);
 std::string show(const RegionDesc&);

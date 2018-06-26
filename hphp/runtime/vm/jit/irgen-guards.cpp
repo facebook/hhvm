@@ -26,19 +26,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-uint64_t packBitVec(const std::vector<bool>& bits, unsigned i) {
-  uint64_t retval = 0;
-  assertx(i % 64 == 0);
-  assertx(i < bits.size());
-  while (i < bits.size()) {
-    retval |= ((uint64_t)bits[i]) << (i % 64);
-    if ((++i % 64) == 0) {
-      break;
-    }
-  }
-  return retval;
-}
-
 // If its known that the location doesn't contain a boxed value, then everything
 // after the check should be unreachable. Bail out now to avoid asserting on
 // incompatible types. This can happen if we're inlining and one of the
@@ -202,39 +189,6 @@ void predictType(IRGS& env, const Location& loc, Type type) {
 
 void makeExitPlaceholder(IRGS& env) {
   gen(env, ExitPlaceholder, makeGuardExit(env, TransFlags{}));
-}
-
-void checkRefs(IRGS& env,
-               int64_t entryArDelta,
-               const std::vector<bool>& mask,
-               const std::vector<bool>& vals,
-               Offset dest) {
-  auto const actRecOff = entryArDelta + spOffBCFromIRSP(env);
-  auto const funcPtr = gen(env, LdARFuncPtr, TFunc,
-                           IRSPRelOffsetData { actRecOff }, sp(env));
-  SSATmp* nParams = nullptr;
-
-  for (unsigned i = 0; i < mask.size(); i += 64) {
-    assertx(i < vals.size());
-
-    uint64_t mask64 = packBitVec(mask, i);
-    if (mask64 == 0) {
-      continue;
-    }
-
-    if (i == 0) {
-      nParams = cns(env, 64);
-    } else if (!nParams || nParams->hasConstVal()) {
-      nParams = gen(env, LdFuncNumParams, funcPtr);
-    }
-
-    auto const vals64 = packBitVec(vals, i);
-    auto failBlock = env.irb->guardFailBlock();
-    if (failBlock == nullptr) failBlock = makeExit(env, dest);
-    gen(env, CheckRefs, failBlock,
-        CheckRefsData { i, mask64, vals64 },
-        funcPtr, nParams);
-  }
 }
 
 //////////////////////////////////////////////////////////////////////

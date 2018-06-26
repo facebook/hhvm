@@ -213,7 +213,6 @@ void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
   auto const bcOff = sk.offset();
   auto& typePredictions = block.typePredictions();
   auto& typePreConditions = block.typePreConditions();
-  auto& refPreds = block.reffinessPreds();
 
   if (isEntry) {
     irgen::ringbufferEntry(irgs, Trace::RBTypeTraceletGuards, sk);
@@ -234,11 +233,6 @@ void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
     auto loc  = preCond.location;
     assertx(type <= TGen);
     irgen::checkType(irgs, loc, type, bcOff, checkOuterTypeOnly);
-  }
-
-  // Emit reffiness predictions.
-  for (auto const& pred : refPreds) {
-    irgen::checkRefs(irgs, pred.arSpOffset, pred.mask, pred.vals, bcOff);
   }
 
   // Finish emitting guards, and emit profiling counters.
@@ -262,7 +256,6 @@ void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
 
 void initNormalizedInstruction(
   NormalizedInstruction& inst,
-  MapWalker<RegionDesc::Block::ParamByRefMap>& byRefs,
   irgen::IRGS& irgs,
   const RegionDesc& region,
   RegionDesc::BlockId blockId,
@@ -282,10 +275,6 @@ void initNormalizedInstruction(
   inst.interp = toInterp;
 
   auto const inputInfos = getInputs(inst, irgs.irb->fs().bcSPOff());
-
-  if (inputInfos.needsRefCheck) {
-    inst.preppedByRef = byRefs.next();
-  }
 }
 
 bool shouldTrySingletonInline(const RegionDesc& region,
@@ -620,7 +609,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     auto const blockId = optBlockId.value();
     auto const& block  = *region.block(blockId);
     auto sk            = block.start();
-    auto byRefs        = makeMapWalker(block.paramByRefs());
     auto knownFuncs    = makeMapWalker(block.knownFuncs());
     auto skipTrans     = false;
     bool emitedSurpriseCheck = false;
@@ -698,7 +686,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       // Create and initialize the instruction.
       NormalizedInstruction inst(sk, block.unit());
       bool toInterpInst = retry.toInterp.count(psk);
-      initNormalizedInstruction(inst, byRefs, irgs, region, blockId,
+      initNormalizedInstruction(inst, irgs, region, blockId,
                                 topFunc, lastInstr, toInterpInst);
 
       // Singleton inlining optimization.
@@ -882,7 +870,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
 
     processedBlocks.insert(blockId);
 
-    assertx(!byRefs.hasNext());
     assertx(!knownFuncs.hasNext());
   }
 

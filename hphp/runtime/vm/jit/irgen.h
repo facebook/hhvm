@@ -122,14 +122,6 @@ void assertTypeLocation(IRGS&, const Location&, Type);
 void predictType(IRGS&, const Location&, Type);
 
 /*
- * Special type of guards for param-passing reffiness. These checks are needed
- * when an FPush* instruction is in a different region from its FCall, and we
- * don't know statically whether the callee will want arguments by reference.
- */
-void checkRefs(IRGS&, int64_t entryArDelta, const std::vector<bool>& mask,
-               const std::vector<bool>& vals, Offset);
-
-/*
  * After all initial guards instructions have been emitted, the client of this
  * module calls the following function to allow some "region header" code to be
  * emitted.

@@ -26,7 +26,6 @@
     String "ClassWithArray"
     ClsRefGetC 0
     CGetS 0
-    FPassCNop
   FCall 1
   PopR
 
@@ -40,7 +39,6 @@
     ClsRefGetL $x 0
     BaseSC 1 0
     QueryM 2 CGet EC:0
-    FPassCNop
   FCall 1
   PopR
 
@@ -101,7 +99,6 @@ unset_label:  String "win\n"
 
               FPushFuncD 1 "var_dump"
               CGetL $arr
-              FPassCNop
               FCall 1
               PopR
 
@@ -109,7 +106,6 @@ unset_label:  String "win\n"
               Int 1
               String "b"
               NewPackedArray 2
-              FPassCNop
               FCall 1
               PopR
 

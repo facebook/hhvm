@@ -352,12 +352,13 @@ function. The entry on the top of the FPI stack is called the "current FPI".
 
 The FPush* instructions push a new entry onto the FPI stack, initializing the
 entry with a reference to the FPI structure for a given function and the
-bytecode address of the appropriate entry point. The FPass* instructions
-prepare the parameters that will be passed into the callee. The FCall*
-instructions look at the current FPI to get the bytecode address of the
-function (the callee), transfers the parameters from the evaluation stack to
-the callee, pops the current FPI off of the FPI stack, and then invokes the
-dispatcher to call the function.
+bytecode address of the appropriate entry point. Arguments are pushed on the
+stack either as cells or as refs, but they may be refs only if the parameter
+is passed by ref. The FIsParamByRef* and FThrowOnRefMismatch instructions are
+used to enforce proper flavor. The FCall* instructions look at the current
+FPI to get the bytecode address of the function (the callee), transfers the
+parameters from the evaluation stack to the callee, pops the current FPI off
+of the FPI stack, and then invokes the dispatcher to call the function.
 
 Calls to builtin functions may be optimized to avoid pushing an entry on the
 FPI stack if it is known that the builtin function does not need access to the
@@ -371,14 +372,13 @@ all FCall instructions other than FCallBuiltin.
 Calling convention
 ------------------
 
-The caller may pass any number of parameters to the callee by executing FPass*
-instructions zero or more times prior to executing an FCall* instruction. The
-caller must pass the parameters in forward order, i.e. the first use of FPass*
-passes the first parameter, the second use of FPass* passes the second
-parameter, and so forth.
+The caller may pass any number of parameters to the callee by pushing zero or
+more cells or refs on the stack prior to executing an FCall* instruction. The
+caller must pass the parameters in forward order, i.e. the first pushed value
+corresponds to the first parameter, and so forth.
 
-The FPush*/FPass*/FCall* instructions can be used to call a global function, a
-method on an object, or a method from a class. The caller is responsible for
+The FPush*/FCall* instructions can be used to call a global function, a method
+on an object, or a method from a class. The caller is responsible for
 evaluating all of the parameters in forward order. When the caller executes an
 FCall* instruction, the dispatcher creates a new frame and moves the parameters
 prepared by the caller into the callee's variable environment. The dispatcher
@@ -681,9 +681,9 @@ other FPI region. An FPI region may not contain backward jumps, nor may it
 contain forward jumps that jump past the end of the FPI region.
 
 In the case of an exception, an FPI region can terminate without an FCall*, and
-without including an FPass for each argument if they would be unreachable
-(e.g. calling a function that never returns). In this case it is possible for
-multiple fpi regions to end at the same bytecode.
+without pushing a value on the stack for each argument if these instructions
+would be unreachable (e.g. calling a function that never returns). In this case
+it is possible for multiple fpi regions to end at the same bytecode.
 
 Each function has an "FPI region table". Each row in the FPI region table
 consists of offset of the FPush* instruction that begins the region, the FCall
@@ -710,9 +710,6 @@ Here is a description of each flavor descriptor:
   R - return value; specifies that the value may be a cell or a ref at run
       time; this flavor descriptor is used for return values from function
       calls
-  F - function argument; specifies that the value may be a cell or a ref at run
-      time; this flavor descriptor is used for parameter values that are about
-      to be passed into a function
   U - uninit; specifies that the value must be an uninitialized null at run
       time; this is only used for FCallBuiltin, CreateCl, and CUGetL.
 
@@ -790,8 +787,8 @@ must point to a Catch instruction.
 after an FPush* instruction and it must end with an FCall* instruction. Each
 use of the FPush* instruction must be the instruction immediately before
 exactly one FPI region. Likewise, each use of the FCall* instruction must be
-the last instruction in exactly one FPI region. Finally, FPass* instructions
-may not be used outside an FPI region.
+the last instruction in exactly one FPI region. Finally, FIsParamByRef and
+FThrowOnRefMismatch instructions may not be used outside an FPI region.
 
 10) Each FPI region may not contain backward jumps, nor may it contain forward
 jumps that jump outside the end of the FPI region. Also, there may not be jumps
@@ -803,15 +800,13 @@ an instruction inside an FPI region.
 11) The depth of the FPI stack at any given point in the bytecode must be the
 same for all possible control flow paths. Also, for any given FPI region that
 passes n parameters, all possible control flow paths from the beginning of the
-region to the end must pass through exactly n FPass* instructions associated
-with the region which pass the parameters in forward order.
+region to the end must push exactly n cells or values on the stack.
 
 12) Given an evaluation stack of depth n after an FPush* instruction, the
 evaluation stack before the corresponding FCall* instruction must also have a
-depth of n. Likewise, the evaluation stack after corresponding FPass*
-instructions must have a depth of n as well. Finally, no instruction between an
-FPush* and its corresponding FCall* may consume any of the values from the
-evaluation stack that were pushed onto the stack before the FPush* instruction.
+depth of n. Finally, no instruction between an FPush* and its corresponding
+FCall* may consume any of the values from the evaluation stack that were
+pushed onto the stack before the FPush* instruction.
 
 13) The initialization state of each iterator variable must be known at every
 point in the code and must be the same for all control paths. There are four
@@ -2257,17 +2252,7 @@ FHandleRefMismatch <param id> <reffiness hint> <func name>   []  ->  []
   named %3 and the reffiness hint %2, which may be 'Cell', or 'Ref'. Depending
   on the runtime configuration, may raise a warning or throw an exception.
 
-FPassCNop   [C]  ->  [F]
-
-  FPI pass parameter, no op. This instruction pushes $1 onto the stack as
-  a cell.
-
-FPassVNop   [V]  ->  [F]
-
-  FPI pass parameter, no op. This instruction pushes $1 onto the stack as
-  a ref.
-
-FCall <num params>    [F..F]  ->  [R]
+FCall <num params>    [C|V..C|V]  ->  [R]
 
   FPI call. This instruction gets the bytecode address of the function
   associated with the current FPI (the callee), transfers the top %1 values
@@ -2276,7 +2261,7 @@ FCall <num params>    [F..F]  ->  [R]
   callee returns, it will transfer the return value onto the caller's
   evaluation stack using the R flavor.
 
-FCallD <num params> <class name> <func name>   [F..F]  ->  [R]
+FCallD <num params> <class name> <func name>   [C|V..C|V]  ->  [R]
 
   FPI call direct. This instruction has exactly the effects of FCall %1, but
   provides hints from static analysis to assist the region selector in
@@ -2284,7 +2269,7 @@ FCallD <num params> <class name> <func name>   [F..F]  ->  [R]
   of the class (if any) and method being called. If the call is targeting a
   non-method, %2 must be the empty string.
 
-FCallAwait <num params> <class name> <func name> [F..F] -> [R]
+FCallAwait <num params> <class name> <func name> [C|V..C|V] -> [R]
 
   FPI call direct to a known async function. Equivalent to the sequence
 
@@ -2295,7 +2280,7 @@ FCallAwait <num params> <class name> <func name> [F..F] -> [R]
   but may enable the runtime to avoid creating a StaticWaitHandle in the event
   that the called function returns eagerly.
 
-FCallUnpack <num params> [F..F] [C:Arr] -> [R]
+FCallUnpack <num params> [C|V..C|V] [C:Arr] -> [R]
 
   FPI call with params and array. This instruction gets the bytecode address of
   the function associated with the current FPI (the callee), transfers the top
@@ -2307,9 +2292,9 @@ FCallUnpack <num params> [F..F] [C:Arr] -> [R]
   When the callee returns, it will transfer the return value onto the caller's
   evaluation stack using the R flavor.
 
-FCallM <num params> <num returns> [F..F] -> [C..C]
-FCallDM <num params> <num returns> <class name> <func name> [F..F] -> [C..C]
-FCallUnpackM <num params> <num returns> [F..F] [C:Arr] -> [C..C]
+FCallM <num params> <num returns> [C..C] -> [C..C]
+FCallDM <num params> <num returns> <class name> <func name> [C..C] -> [C..C]
+FCallUnpackM <num params> <num returns> [C..C] [C:Arr] -> [C..C]
 
   These "M" variants of FCall behave similarly to FCall, FCallD, and FCallUnpack
   respectively. These instructions must be used iff the callee returns via the
@@ -4360,7 +4345,7 @@ short-circuit semantics correctly. All Jmp* instructions used to implement
 "and" and "or" operators will be forward jumps.
 
 5) The new expression
-The new expression is implemented by using the FPushCtor*, FPass*, and FCall
+The new expression is implemented by using the FPushCtor* and FCall
 instructions.
 
 6) The ternary operator (?:)

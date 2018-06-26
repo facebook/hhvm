@@ -367,10 +367,6 @@ let make_nullary_inst s =
  | "Clone" -> IOp (Clone)
  | "Exit" -> IOp (Hhbc_ast.Exit) (* Need to qualify because of shadowing *)
 
- (* instruct_call *)
- | "FPassCNop" -> ICall (FPassCNop)
- | "FPassVNop" -> ICall (FPassVNop)
-
  (* instruct_control_flow *)
  | "RetC" -> IContFlow (RetC)
  | "RetV" -> IContFlow (RetV)

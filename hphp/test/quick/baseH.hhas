@@ -22,7 +22,6 @@
   PopC
   FPushFuncD 1 "var_dump"
   CGetL $foo
-  FPassCNop
   FCall 1
   PopR
   RetC

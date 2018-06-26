@@ -461,7 +461,6 @@ namespace imm {
 #define POP_UV  if (i == 0) return Flavor::U
 #define POP_CV  if (i == 0) return Flavor::C
 #define POP_VV  if (i == 0) return Flavor::V
-#define POP_FV  if (i == 0) return Flavor::F
 #define POP_RV  if (i == 0) return Flavor::R
 #define POP_CUV if (i == 0) return Flavor::CU
 
@@ -504,35 +503,36 @@ namespace imm {
                       return Flavor::C;                       \
                     }
 
-#define POP_FMANY   uint32_t numPop() const { return arg1; }  \
+#define POP_CVMANY  uint32_t numPop() const { return arg1; }  \
                     Flavor popFlavor(uint32_t i) const {      \
                       assert(i < numPop());                   \
-                      return Flavor::F;                       \
+                      return Flavor::CV;                      \
                     }
-
-#define POP_C_FMANY uint32_t numPop() const { return arg1; }  \
-                    Flavor popFlavor(uint32_t i) const {      \
-                      assert(i < numPop());                   \
-                      return i == 0 ? Flavor::C : Flavor::F;  \
-                    }
-
-#define POP_UFMANY   uint32_t numPop() const { return arg1 + arg2 - 1; } \
-                     Flavor popFlavor(uint32_t i) const {                \
-                       assert(i < numPop());                             \
-                       return i < arg1 ? Flavor::F : Flavor::U;          \
-                     }
-
-#define POP_C_UFMANY uint32_t numPop() const { return arg1 + arg2 - 1; } \
-                     Flavor popFlavor(uint32_t i) const {                \
-                       assert(i < numPop());                             \
-                       if (i == 0) return Flavor::C;                     \
-                       return i < arg1 ? Flavor::F : Flavor::U;          \
-                     }
 
 #define POP_CVUMANY uint32_t numPop() const { return arg1; }  \
                     Flavor popFlavor(uint32_t i) const {      \
+                      assert(i < numPop());                   \
                       return Flavor::CVU;                     \
                     }
+
+#define POP_C_CVMANY       uint32_t numPop() const { return arg1; }  \
+                           Flavor popFlavor(uint32_t i) const {      \
+                             assert(i < numPop());                   \
+                             return i == 0 ? Flavor::C : Flavor::CV; \
+                           }
+
+#define POP_CVMANY_UMANY   uint32_t numPop() const { return arg1 + arg2 - 1; } \
+                           Flavor popFlavor(uint32_t i) const {                \
+                             assert(i < numPop());                             \
+                             return i < arg1 ? Flavor::CV : Flavor::U;         \
+                           }
+
+#define POP_C_CVMANY_UMANY uint32_t numPop() const { return arg1 + arg2 - 1; } \
+                           Flavor popFlavor(uint32_t i) const {                \
+                             assert(i < numPop());                             \
+                             if (i == 0) return Flavor::C;                     \
+                             return i < arg1 ? Flavor::CV : Flavor::U;         \
+                           }
 
 #define PUSH_NOV          uint32_t numPush() const { return 0; }
 
@@ -643,7 +643,6 @@ OPCODES
 #undef POP_UV
 #undef POP_CV
 #undef POP_VV
-#undef POP_FV
 #undef POP_RV
 
 #undef POP_NOV
@@ -655,11 +654,11 @@ OPCODES
 #undef POP_V_MFINAL
 #undef POP_CMANY
 #undef POP_SMANY
-#undef POP_FMANY
-#undef POP_C_FMANY
-#undef POP_UFMANY
-#undef POP_C_UFMANY
+#undef POP_CVMANY
 #undef POP_CVUMANY
+#undef POP_C_CVMANY
+#undef POP_CVMANY_UMANY
+#undef POP_C_CVMANY_UMANY
 
 #undef IMM_TY_MA
 #undef IMM_TY_BLA

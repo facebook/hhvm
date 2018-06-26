@@ -496,10 +496,6 @@ let string_of_call instruction =
   | FHandleRefMismatch (i, h, f) ->
     sep ["FHandleRefMismatch"; string_of_param_num i; string_of_fpasshint h;
          "\"" ^ f ^ "\""]
-  | FPassCNop ->
-    sep ["FPassCNop"]
-  | FPassVNop ->
-    sep ["FPassVNop"]
   | FCall n ->
     sep ["FCall"; string_of_int n]
   | FCallD (n, c, f) ->

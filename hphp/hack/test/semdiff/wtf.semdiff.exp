@@ -17,6 +17,4 @@ Edits =
 
 for mymain:
 - BoxR
-- FPassVNop
 + UnboxR
-+ FPassCNop

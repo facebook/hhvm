@@ -3176,7 +3176,6 @@ void in(ISS& env, const bc::FThrowOnRefMismatch& op) {
         env,
         bc::FPushCtorD { 1, exCls, false },
         bc::String { err },
-        bc::FPassCNop {},
         bc::FCall { 1 },
         bc::UnboxRNop {},
         bc::PopC {},
@@ -3189,22 +3188,6 @@ void in(ISS& env, const bc::FThrowOnRefMismatch& op) {
 }
 
 void in(ISS& /*env*/, const bc::FHandleRefMismatch& /*op*/) {}
-
-void in(ISS& env, const bc::FPassCNop& /*op*/) {
-  auto& ar = fpiTop(env);
-  if (ar.kind == FPIKind::Builtin || ar.foldable) {
-    return reduce(env, bc::Nop {});
-  }
-  effect_free(env);
-}
-
-void in(ISS& env, const bc::FPassVNop& /*op*/) {
-  auto& ar = fpiTop(env);
-  if (ar.kind == FPIKind::Builtin || ar.foldable) {
-    return reduce(env, bc::Nop {});
-  }
-  effect_free(env);
-}
 
 constexpr int32_t kNoUnpack = -1;
 

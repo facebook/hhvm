@@ -31,7 +31,6 @@
   .try_fault F2 {
     FPushClsMethodD 1 "fromDArray" "HH\\AwaitAllWaitHandle"
     CGetL _1
-    FPassCNop
     FCall 1
     UnboxR
     Await

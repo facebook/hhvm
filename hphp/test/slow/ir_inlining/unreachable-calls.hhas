@@ -32,15 +32,10 @@
   AssertRATStk 0 Obj=Cls1
   FPushObjMethodD 5 "foobaz" NullThrows
   CGetL $x
-  FPassCNop
   CGetL $x
-  FPassCNop
   CGetL $x
-  FPassCNop
   CGetL $x
-  FPassCNop
   CGetL $x
-  FPassCNop
   FCallD 5 "Cls1" "foobaz"
   UnboxRNop
   Jmp end
@@ -50,15 +45,10 @@ cls2:
   AssertRATStk 0 Obj=Cls2
   FPushObjMethodD 5 "foobaz" NullThrows
   CGetL $x
-  FPassCNop
   CGetL $x
-  FPassCNop
   CGetL $x
-  FPassCNop
   CGetL $x
-  FPassCNop
   CGetL $x
-  FPassCNop
   FCallD 5 "Cls2" "foobaz"
   UnboxRNop
   Jmp end
@@ -78,11 +68,8 @@ end:
   PopC
   FPushFuncD 3 "test"
   CGetL $obj
-  FPassCNop
   CGetL $type
-  FPassCNop
   CGetL $x
-  FPassCNop
   FCall 3
   UnboxRNop
   RetC
@@ -95,11 +82,8 @@ cls2:
   PopC
   FPushFuncD 3 "test"
   CGetL $obj
-  FPassCNop
   CGetL $type
-  FPassCNop
   CGetL $x
-  FPassCNop
   FCall 3
   UnboxRNop
   RetC
@@ -118,9 +102,7 @@ header:
 
   FPushFuncD 2 "test_outer"
   CGetL $type
-  FPassCNop
   Int 1
-  FPassCNop
   FCall 2
   PopR
 
@@ -136,17 +118,13 @@ end:
 .function main() {
   FPushFuncD 2 "loop"
   False
-  FPassCNop
   Int 40
-  FPassCNop
   FCall 2
   PopR
 
   FPushFuncD 2 "loop"
   True
-  FPassCNop
   Int 100
-  FPassCNop
   FCall 2
   UnboxRNop
   RetC

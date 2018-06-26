@@ -154,8 +154,6 @@ let instr_fthrow_on_ref_mismatch by_refs =
   instr (ICall (FThrowOnRefMismatch by_refs))
 let instr_fhandle_ref_mismatch i hint name =
   instr (ICall (FHandleRefMismatch (i, hint, name)))
-let instr_fpasscnop = instr (ICall (FPassCNop))
-let instr_fpassvnop = instr (ICall (FPassVNop))
 
 let instr_popu = instr (IBasic PopU)
 let instr_popr = instr (IBasic PopR)
@@ -775,7 +773,6 @@ let get_input_output_count i =
     | FPushObjMethod _ -> (2, 0)
     | FPushCtor _ | FPushCtorD _ | FPushCtorI _ | FPushCtorS _
     | FIsParamByRef _ -> (0, 1)
-    | FPassCNop | FPassVNop -> (1, 1)
     | FCall n | FCallD (n, _, _) | FCallAwait (n, _, _)| FCallUnpack n
     | FCallBuiltin (n, _, _) -> (n, 1) | FCallM (n1, n2) -> (n1, n2)
     | FCallDM (n1, n2, _, _) -> (n1, n2) | FCallUnpackM (n1, n2) -> (n1, n2)

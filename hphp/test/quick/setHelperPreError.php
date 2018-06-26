@@ -9,7 +9,6 @@ $w[0] =& $v[0];
 var_dump($v);
 var_dump($w);
 
-# FPassM.
 function f(&$x) {
   var_dump($x);
 }

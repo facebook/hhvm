@@ -413,8 +413,6 @@ type instruct_call =
   | FIsParamByRef of param_num * fpass_hint
   | FThrowOnRefMismatch of bool list
   | FHandleRefMismatch of param_num * fpass_hint * string
-  | FPassCNop
-  | FPassVNop
   | FCall of num_params
   | FCallM of num_params * num_params
   | FCallDM of num_params * num_params * class_id * function_id

@@ -6,12 +6,9 @@
   FPushFuncD 1 "var_dump"
   FPushFuncD 2 "add"
   String "1"
-  FPassCNop
   String "2"
-  FPassCNop
   FCall 2
   UnboxR
-  FPassCNop
   FCall 1
   PopR
   Int 1

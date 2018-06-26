@@ -74,8 +74,6 @@ bool ignoresStackInput(Op op) {
   case Op::BoxRNop:
   case Op::UGetCUNop:
   case Op::CGetCUNop:
-  case Op::FPassCNop:
-  case Op::FPassVNop:
   case Op::PopU:
     return true;
   default:
@@ -274,8 +272,6 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::IsTypeL:
   case Op::OODeclExists:
   case Op::AliasCls:
-  case Op::FPassCNop:
-  case Op::FPassVNop:
     return true;
 
   case Op::This:
@@ -446,13 +442,13 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
       gen(bc::UnboxRNop {});
       gen(bc::PopC {});
       break;
-    case Flavor::F:  not_reached();    break;
     case Flavor::U:  not_reached();    break;
     case Flavor::CR: not_reached();    break;
     case Flavor::CU:
       // We only support C's for CU right now.
       gen(bc::PopC {});
       break;
+    case Flavor::CV: not_reached();    break;
     case Flavor::CVU:
       // Note that we only support C's for CVU so far (this only comes up with
       // FCallBuiltin)---we'll fail the verifier if something changes to send

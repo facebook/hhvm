@@ -13,7 +13,6 @@
   PopC
   FPushFuncD 1 "var_dump"
   CGetL $myinf
-  FPassCNop
   FCall 1
   PopR
   Null

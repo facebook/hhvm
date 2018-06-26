@@ -5,7 +5,6 @@
   DefCls 0
   FPushCtorD 1 "A"
   String "foo"
-  FPassCNop
   FCall 1
   PopR
   SetL $x
@@ -13,7 +12,6 @@
   CGetL $x
   FPushObjMethodD 1 "set" NullThrows
   String "bar"
-  FPassCNop
   FCall 1
   PopR
   FPushFuncD 1 "var_dump"
@@ -21,7 +19,6 @@
   FPushObjMethodD 0 "get" NullThrows
   FCall 0
   UnboxR
-  FPassCNop
   FCall 1
   PopR
   Int 1

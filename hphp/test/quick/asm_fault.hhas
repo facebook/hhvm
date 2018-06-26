@@ -20,7 +20,6 @@
 
     FPushCtorD 1 "Exception"
     CGetL $msg
-    FPassCNop
     FCall 1
     PopR
     Throw
@@ -44,7 +43,6 @@
 
     FPushFuncD 1 "throw_stuff"
     String "the message"
-    FPassCNop
     FCall 1
     PopR
 
@@ -88,7 +86,6 @@ make_two:    FPushCtorD 0 "Two"
              Throw
 make_three:  FPushCtorD 1 "Three"
              String "third exception from throw_various"
-             FPassCNop
              FCall 1
              PopR
              Throw

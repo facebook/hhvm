@@ -37,9 +37,7 @@
       CGetL $f
       FPushFunc 2
       CGetL $a
-      FPassCNop
       CGetL $b
-      FPassCNop
       FThrowOnRefMismatch "00"
       FCall 2
       UnboxR
@@ -94,12 +92,9 @@ F4:
   FPushFuncD 1 "var_dump"
   FPushFuncD 2 "silly"
   CGetL $p
-  FPassCNop
   CGetL $f
-  FPassCNop
   FCall 2
   UnboxR
-  FPassCNop
   FCall 1
   PopR
   Null

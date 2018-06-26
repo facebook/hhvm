@@ -1025,7 +1025,6 @@ and emit_execution_operator env pos exprs =
   gather [
     instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "shell_exec");
     instrs;
-    instr_fpasscnop;
     instr_fcall 1;
   ]
 
@@ -1421,7 +1420,6 @@ and inline_gena_call env arg = Local.scope @@ fun () ->
                (if hack_arr_dv_arrs () then "fromDict" else "fromDArray"))
             (Hhbc_id.Class.from_raw_string "HH\\AwaitAllWaitHandle");
           instr_cgetl arr_local;
-          instr_fpasscnop;
           instr_fcall 1;
           instr_unboxr;
           instr_await;
@@ -2895,8 +2893,6 @@ and emit_args_and_call env call_pos args uargs =
           emit_pos name_pos;
           instr_cgetl @@ Local.Named s;
           move_instrs;
-          emit_pos call_pos;
-          instr_fpasscnop;
           aux (i + 1) rest inout_setters
         ]
       | A.Array_get (base_expr, opt_elem_expr) -> begin
@@ -2917,14 +2913,10 @@ and emit_args_and_call env call_pos args uargs =
             ] in
           gather [
             instrs;
-            instr_fpasscnop;
             aux (i + 1) rest (setter :: inout_setters) ]
         | Array_get_inout { load; store } ->
           rebuild_sequence load @@ begin fun () ->
-            gather [
-              instr_fpasscnop;
-              aux (i + 1) rest (store :: inout_setters)
-            ]
+            aux (i + 1) rest (store :: inout_setters)
           end
         end
       | _ -> failwith "emit_args_and_call: Unexpected inout expression type"
@@ -2939,11 +2931,7 @@ and emit_args_and_call env call_pos args uargs =
         emit_expr ~need_ref:false env expr
       else
       if throw_on_mismatch && hint = Cell then
-        gather [
-          emit_expr ~need_ref:false env expr;
-          emit_pos param_pos;
-          instr_fpasscnop
-        ]
+        emit_expr ~need_ref:false env expr
       else if throw_on_mismatch && hint = Ref then
         match snd expr with
         | A.Lvar _
@@ -2952,23 +2940,14 @@ and emit_args_and_call env call_pos args uargs =
         | A.Obj_get _
         | A.Class_get _
         | A.Binop (A.Eq None, (_, A.List _), (_, A.Lvar _)) ->
-          gather [
-            emit_expr_as_ref env expr;
-            emit_pos param_pos;
-            instr_fpassvnop
-          ]
+          emit_expr_as_ref env expr;
         | _ ->
           let instrs, flavor = emit_flavored_expr env ~last_pos:call_pos expr in
-          let instr_fpass =
-            match flavor with
-            | Flavor.Ref -> instr_fpassvnop
-            | Flavor.ReturnVal -> gather [ instr_boxr; instr_fpassvnop ]
-            | Flavor.Cell -> instr_fpasscnop
-          in
+          if flavor != Flavor.ReturnVal then instrs else
           gather [
             instrs;
             emit_pos param_pos;
-            instr_fpass
+            instr_boxr
           ]
       else
       let emit_ref_cond instrs_init instrs_by_val instrs_by_ref =
@@ -2980,11 +2959,9 @@ and emit_args_and_call env call_pos args uargs =
           instr_fis_param_by_ref i hint;
           instr_jmpnz by_ref_label;
           instrs_by_val;
-          instr_fpasscnop;
           instr_jmp done_label;
           instr_label by_ref_label;
           instrs_by_ref;
-          instr_fpassvnop;
           instr_label done_label
         ]
       in
@@ -3037,7 +3014,6 @@ and emit_args_and_call env call_pos args uargs =
             emit_pos param_pos;
             instr_fis_param_by_ref i hint;
             instr_popc;
-            instr_fpasscnop;
           ]
   in
   Local.scope @@ fun () -> aux 0 all_args []

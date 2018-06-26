@@ -603,13 +603,12 @@ let mutate_exceptions (input : HP.t) : mutation_monad =
 let mutate_replace (input : HP.t) : mutation_monad =
   debug_print "Replacing";
   let mut (is : IS.t) =
-    let sig_base, sig_final, sig_fpass, sig_all =
-      sig_map_base is, sig_map_final is, sig_map_fpass is, sig_map_all is in
+    let sig_base, sig_final, sig_all =
+      sig_map_base is, sig_map_final is, sig_map_all is in
     let equiv_instr (i : instruct) : instruct =
       let equiv_map = match i with
                       | IBase _ -> sig_base
                       | IFinal _ -> sig_final
-                      | ICall _ -> sig_fpass
                       | _ -> sig_all in
       match i with
       | IContFlow _

@@ -1394,9 +1394,6 @@ void emitFHandleRefMismatch(IRGS& env, uint32_t paramId, FPassHint hint,
   );
 }
 
-void emitFPassCNop(IRGS&) {}
-void emitFPassVNop(IRGS&) {}
-
 void emitUnboxR(IRGS& env) { implUnboxR(env); }
 void emitBoxR(IRGS& env) { implBoxR(env); }
 

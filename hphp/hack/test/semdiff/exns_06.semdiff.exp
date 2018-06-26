@@ -31,7 +31,6 @@ for lop:
 + } .catch {
 - FPushCtorD 1 "Exception"
 - String "two"
-- FPassCNop
 - FCall 1
 - PopR
 - Throw
@@ -94,7 +93,6 @@ for blah:
 - PopC
 - FPushCtorD 1 "Exception"
 - String "two"
-- FPassCNop
 - FCall 1
 - PopR
 - Throw
@@ -145,7 +143,6 @@ for baz:
 - RetC
 - FPushCtorD 1 "Exception"
 - String "two"
-- FPassCNop
 - FCall 1
 - PopR
 - Throw

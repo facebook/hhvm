@@ -322,8 +322,6 @@ static const struct {
                    {None,             None,         OutNone         }},
   { OpFHandleRefMismatch,
                    {None,             None,         OutNone         }},
-  { OpFPassCNop,   {None,             None,         OutSameAsInput1 }},
-  { OpFPassVNop,   {None,             None,         OutSameAsInput1 }},
   /*
    * FCall is special. Like the Ret* instructions, its manipulation of the
    * runtime stack are outside the boundaries of the tracelet abstraction.
@@ -614,8 +612,6 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
   case Op::CGetCUNop:
   case Op::UGetCUNop:
   case Op::EntryNop:
-  case Op::FPassCNop:
-  case Op::FPassVNop:
     return true;
   case Op::VerifyRetTypeC:
   case Op::VerifyRetTypeV:
@@ -1118,8 +1114,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Fatal:
   case Op::Unwind:
   case Op::Throw:
-  case Op::FPassCNop:
-  case Op::FPassVNop:
   case Op::CGetN:
   case Op::CGetQuietN:
   case Op::VGetN:
@@ -1263,7 +1257,7 @@ Type flavorToType(FlavorDesc f) {
     case CUV: return TCell;
     case UV: return TUninit;
     case VV: return TBoxedInitCell;
-    case RV: case CRV: case FV: case CVV: case CVUV: return TGen;
+    case RV: case CRV: case CVV: case CVUV: return TGen;
   }
   not_reached();
 }

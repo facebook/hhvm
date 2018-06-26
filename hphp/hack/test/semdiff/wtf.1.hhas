@@ -42,20 +42,16 @@
   FPushObjMethodD 1 "m" NullThrows
   FPushFuncD 1 "h"
   VGetL $b
-  FPassVNop
   FCall 1
   BoxR
-  FPassVNop
   FCall 1
   PopR
   FPushFuncD 1 "var_dump"
   CGetL $a
-  FPassCNop
   FCall 1
   PopR
   FPushFuncD 1 "var_dump"
   CGetL $b
-  FPassCNop
   FCall 1
   PopR
   Null
@@ -66,7 +62,6 @@
   .method [public] <"" N  > m(&$y) {
     FPushFuncD 1 "f"
     VGetL $y
-    FPassVNop
     FCall 1
     PopR
     Null

@@ -389,9 +389,7 @@ bool can_emit_builtin(borrowed_ptr<const php::Func> func,
 
   // We rely on strength reduction to convert builtins, but if we do
   // the analysis on the assumption that builtins will be created, but
-  // don't actually create them, all sorts of things can go wrong (eg
-  // attempting to constprop the result will fail, because we have a
-  // bunch of FPass results on the stack).
+  // don't actually create them, all sorts of things can go wrong.
   if (!options.StrengthReduce) {
     return false;
   }

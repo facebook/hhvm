@@ -17,9 +17,7 @@
 
   FPushFuncD 2 "main"
     PushL $a
-    FPassCNop
     PushL $b
-    FPassCNop
   FCall 2
   UnboxR
   RetC

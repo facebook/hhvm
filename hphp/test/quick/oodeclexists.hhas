@@ -5,7 +5,6 @@
   String "abc"
   String "asdfasdf"
   OODeclExists Interface
-  FPassCNop
   FCall 1
   PopR
   Int 1

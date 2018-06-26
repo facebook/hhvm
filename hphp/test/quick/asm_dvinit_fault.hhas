@@ -9,7 +9,6 @@
     FPushFuncD 0 "main"
     FCall 0
     UnboxR
-    FPassCNop
   FCall 1
   PopR
   Int 1

@@ -37,8 +37,6 @@ let rec rebalance_stk n (req : stack) : instruct list * stack =
   | "C", (buf, extra) -> ILitConst (Int (Int64.of_int 1)) :: buf, "C" :: extra
   | "V", (buf, extra) ->
     ILitConst (Int (Int64.of_int 1)) :: IBasic (Box) :: buf, "V" :: extra
-  | "F", (buf, extra) ->
-    ILitConst (Int (Int64.of_int 1)) :: ICall (FPassCNop) :: buf, "F" :: extra
   | "R", (buf, extra) ->
     ILitConst (Int (Int64.of_int 1)) :: IBasic (BoxR) :: buf,"R" :: extra
   | "U", (buf, extra) -> ILitConst NullUninit :: buf, "U" :: extra
@@ -213,15 +211,13 @@ let stk_data : instruct -> stack_sig = function
   | IAsync _
   | ILitConst ColFromArray _               -> ["C"], ["C"]
   | IMisc VerifyRetTypeV                   -> ["V"], ["V"]
-  | ICall FPassCNop                        -> ["C"], ["F"]
-  | ICall FPassVNop                        -> ["V"], ["F"]
   | ILitConst NewPair
   | IOp _
   | ILitConst AddNewElemC                  -> ["C"; "C"], ["C"]
   | ICall FCallD (n, _, _)
   | ICall FCallAwait (n, _, _)
   | ICall FCallUnpack n
-  | ICall FCall n                          -> produce "F" n, ["R"]
+  | ICall FCall n                          -> produce "C" n, ["R"]
   | ICall FCallBuiltin (n, _, _)           -> produce "C" n, ["R"]
   | ILitConst _                            -> [], ["C"]
   | ICall _                                -> ["C"], []

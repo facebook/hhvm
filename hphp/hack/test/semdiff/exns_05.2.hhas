@@ -3,27 +3,22 @@
 .main {
   FPushFuncD 1 "foo"
   String "lop"
-  FPassCNop
   FCall 1
   PopR
   FPushFuncD 1 "foo"
   String "goo"
-  FPassCNop
   FCall 1
   PopR
   FPushFuncD 1 "foo"
   String "blah"
-  FPassCNop
   FCall 1
   PopR
   FPushFuncD 1 "foo"
   String "baz"
-  FPassCNop
   FCall 1
   PopR
   FPushFuncD 1 "foo"
   String "bar"
-  FPassCNop
   FCall 1
   PopR
   Int 1
@@ -35,7 +30,6 @@
     .try_fault F3 {
       FPushCtorD 1 "Exception"
       String "one"
-      FPassCNop
       FCall 1
       PopR
       Throw
@@ -44,7 +38,6 @@
 F3:
   FPushCtorD 1 "Exception"
   String "two"
-  FPassCNop
   FCall 1
   PopR
   Throw
@@ -61,7 +54,6 @@ F2:
       .try_fault F3 {
         FPushCtorD 1 "Exception"
         String "one"
-        FPassCNop
         FCall 1
         PopR
         Throw
@@ -108,7 +100,6 @@ F2:
     PopC
     FPushCtorD 1 "Exception"
     String "one"
-    FPassCNop
     FCall 1
     PopR
     Throw
@@ -120,7 +111,6 @@ F1:
     PopC
     FPushCtorD 1 "Exception"
     String "two"
-    FPassCNop
     FCall 1
     PopR
     Throw
@@ -149,7 +139,6 @@ F1:
     .try_fault F1 {
       FPushCtorD 1 "Exception"
       String "one"
-      FPassCNop
       FCall 1
       PopR
       Throw
@@ -158,7 +147,6 @@ F1:
  .try_fault F0 {
    FPushCtorD 1 "Exception"
    String "two"
-   FPassCNop
    FCall 1
    PopR
    Throw
@@ -178,7 +166,6 @@ F0:
     .try_fault F2 {
       FPushCtorD 1 "Exception"
       String "bar"
-      FPassCNop
       FCall 1
       PopR
       Throw
@@ -218,7 +205,6 @@ F2:
   .try {
     FPushFuncD 1 "call_user_func"
     CGetL $fname
-    FPassCNop
     FCall 1
     PopR
     Jmp L0

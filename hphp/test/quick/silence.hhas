@@ -3,9 +3,7 @@
   .declvars $z;
   FPushFuncD 2 "add"
   Int 3
-  FPassCNop
   Int 2
-  FPassCNop
   FCall 2
   UnboxR
   Silence $z Start
@@ -30,7 +28,6 @@
   Silence _8 End
   FPushFuncD 1 "var_dump"
   Int 1
-  FPassCNop
   FCall 1
   PopR
   Jmp L1
@@ -40,7 +37,6 @@ L0:
   Silence _9 End
   FPushFuncD 1 "var_dump"
   Int 2
-  FPassCNop
   FCall 1
   PopR
 L1:

@@ -21,9 +21,7 @@
 
   FPushFuncD 2 "obj_type"
   CGetL $x
-  FPassCNop
   CGetL $y
-  FPassCNop
   FCall 2
   PopR
 

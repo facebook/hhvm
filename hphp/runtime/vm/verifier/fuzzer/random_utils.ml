@@ -330,11 +330,6 @@ let final_instrs (_ : IS.t) : lazy_instruct list =
    (fun () -> IFinal (SetWithRefLML (random_local (), random_local())));
    (fun () -> IFinal (SetWithRefRML (random_local ())))]
 
-(* Generators for FPass* instructions *)
-let fpass_instrs (_ : IS.t) : lazy_instruct list =
-  [(fun () -> ICall (FPassCNop));
-   (fun () -> ICall (FPassVNop))]
-
 (* An association list of stack signatures to random generators for
     instructions with that stack signature, produced from input list of
     generators *)
@@ -349,4 +344,3 @@ let by_signature (gens : lazy_instruct list) :
 let sig_map_all   fn  = all_instrs   fn |> by_signature
 let sig_map_base  fn  = base_instrs  fn |> by_signature
 let sig_map_final fn  = final_instrs fn |> by_signature
-let sig_map_fpass fn  = fpass_instrs fn |> by_signature

@@ -19,7 +19,6 @@
           PopC
           FPushFuncD 1 "var_dump"
           NewLikeArrayL $ks 3
-          FPassCNop
           FCall 1
           PopR
           True

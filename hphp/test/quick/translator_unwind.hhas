@@ -4,7 +4,6 @@
 .main {
   FPushFuncD 1 "set_error_handler"
     String "thrower"
-    FPassCNop
   FCall 1
   PopR
 
@@ -15,7 +14,6 @@
   # alive past the end of test_unwind_dirty_stack_regs.
   FPushClsMethodD 1 "setTraceOptions" "Exception"
     Cns "DEBUG_BACKTRACE_IGNORE_ARGS"
-    FPassCNop
   FCall 1
   PopR
 
@@ -45,7 +43,6 @@
 .function thrower() {
   FPushCtorD 1 "Exception"
     String "hi"
-    FPassCNop
   FCall 1
   PopR
   Throw
@@ -88,7 +85,6 @@
 .function make_obj($id) {
   FPushCtorD 1 "DtorPrinter"
     CGetL $id
-    FPassCNop
   FCall 1
   PopR
   RetC
@@ -112,105 +108,90 @@
 .function test_unwind_dirty_stack_regs() {
   FPushFuncD 1 "make_obj"
     Int 0
-    FPassCNop
   FCall 1
   UnboxR
   SetL $k_0
   PopC
   FPushFuncD 1 "make_obj"
     Int 1
-    FPassCNop
   FCall 1
   UnboxR
   SetL $k_1
   PopC
   FPushFuncD 1 "make_obj"
     Int 2
-    FPassCNop
   FCall 1
   UnboxR
   SetL $k_2
   PopC
   FPushFuncD 1 "make_obj"
     Int 3
-    FPassCNop
   FCall 1
   UnboxR
   SetL $k_3
   PopC
   FPushFuncD 1 "make_obj"
     Int 4
-    FPassCNop
   FCall 1
   UnboxR
   SetL $k_4
   PopC
   FPushFuncD 1 "make_obj"
     Int 5
-    FPassCNop
   FCall 1
   UnboxR
   SetL $k_5
   PopC
   FPushFuncD 1 "make_obj"
     Int 6
-    FPassCNop
   FCall 1
   UnboxR
   SetL $k_6
   PopC
   FPushFuncD 1 "make_obj"
     Int 7
-    FPassCNop
   FCall 1
   UnboxR
   SetL $k_7
   PopC
   FPushFuncD 1 "make_obj"
     Int 8
-    FPassCNop
   FCall 1
   UnboxR
   SetL $k_8
   PopC
   FPushFuncD 1 "make_obj"
     Int 9
-    FPassCNop
   FCall 1
   UnboxR
   SetL $k_9
   PopC
   FPushFuncD 1 "make_obj"
     Int 10
-    FPassCNop
   FCall 1
   UnboxR
   SetL $k_10
   PopC
   FPushFuncD 1 "make_obj"
     Int 11
-    FPassCNop
   FCall 1
   UnboxR
   SetL $k_11
   PopC
   FPushFuncD 1 "make_obj"
     Int 12
-    FPassCNop
   FCall 1
   UnboxR
   SetL $k_12
   PopC
   FPushFuncD 1 "make_obj"
     Int 13
-    FPassCNop
   FCall 1
   UnboxR
   SetL $k_13
   PopC
   FPushFuncD 1 "make_obj"
     Int 14
-    FPassCNop
   FCall 1
   UnboxR
   SetL $k_14

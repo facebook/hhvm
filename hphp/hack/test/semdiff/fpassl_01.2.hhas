@@ -16,13 +16,11 @@
     FPushFuncU 2 "HH\\Lib\\Dict\\map_with_key" "map_with_key"
     CGetL _6
 # the line above is the tricky one
-    FPassCNop
     CUGetL $predicate
     CreateCl 1 0
 # and the two above construct the parameter inline
 # so needed the extension to the fpassl special-case
 # semdiff pattern
-    FPassCNop
     FCall 2
     UnboxR
   }
@@ -32,7 +30,6 @@
   .try_fault F5 {
     FPushFuncU 1 "HH\\Lib\\Dict\\gen" "gen"
     CGetL _6
-    FPassCNop
     FCall 1
     UnboxR
   }
@@ -89,9 +86,7 @@ F6:
     CGetL $predicate
     FPushFunc 2
     CGetL $k
-    FPassCNop
     CGetL $v
-    FPassCNop
     FThrowOnRefMismatch "00"
     FCall 2
     UnboxR

@@ -45,9 +45,8 @@ namespace Verifier {
 struct FpiState {
   Offset fpush;   // offset of fpush (can get num_params from this)
   int stkmin;     // stklen before FPush
-  int next;       // next expected param number
   bool operator==(const FpiState& s) const {
-    return fpush == s.fpush && stkmin == s.stkmin && next == s.next;
+    return fpush == s.fpush && stkmin == s.stkmin;
   }
   bool operator!=(const FpiState& s) const {
     return !(*this == s);
@@ -122,7 +121,6 @@ struct FuncChecker {
   bool checkEHStack(const EHEnt&, Block* b);
   bool checkTerminal(State* cur, PC pc);
   bool checkFpi(State* cur, PC pc);
-  bool checkFPass(State* cur, PC pc);
   bool checkIter(State* cur, PC pc);
   bool checkClsRefSlots(State* cur, PC pc);
   bool checkIterBreak(State* cur, PC pc);
@@ -736,7 +734,6 @@ static const char* stkflav(FlavorDesc f) {
   case CV:   return "C";
   case VV:   return "V";
   case RV:   return "R";
-  case FV:   return "F";
   case UV:   return "U";
   case CRV:  return "C|R";
   case CUV:  return "C|U";
@@ -774,11 +771,11 @@ bool FuncChecker::checkSig(PC pc, int len, const FlavorDesc* args,
 const FlavorDesc* FuncChecker::sig(PC pc) {
   static const FlavorDesc inputSigs[][kMaxHhbcImms] = {
   #define NOV { },
-  #define FMANY { },
-  #define C_FMANY { },
-  #define UFMANY { },
-  #define C_UFMANY { },
+  #define CVMANY { },
   #define CVUMANY { },
+  #define C_CVMANY { },
+  #define CVMANY_UMANY { },
+  #define C_CVMANY_UMANY { },
   #define CMANY { },
   #define SMANY { },
   #define ONE(a) { a },
@@ -797,11 +794,11 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef F_MFINAL
   #undef C_MFINAL
   #undef V_MFINAL
-  #undef FMANY
-  #undef C_FMANY
-  #undef UFMANY
-  #undef C_UFMANY
+  #undef CVMANY
   #undef CVUMANY
+  #undef C_CVMANY
+  #undef CVMANY_UMANY
+  #undef C_CVMANY_UMANY
   #undef CMANY
   #undef SMANY
   #undef FIVE
@@ -831,33 +828,33 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = i == n - 1 ? VV : CRV;
     }
     return m_tmp_sig;
-  case Op::FCall:        // ONE(IVA),            FMANY,   ONE(RV)
-  case Op::FCallD:       // THREE(IVA,SA,SA),    FMANY,   ONE(RV)
-  case Op::FCallAwait:   // THREE(IVA,SA,SA),    FMANY,   ONE(CV)
+  case Op::FCall:        // ONE(IVA),            CVMANY,  ONE(RV)
+  case Op::FCallD:       // THREE(IVA,SA,SA),    CVMANY,  ONE(RV)
+  case Op::FCallAwait:   // THREE(IVA,SA,SA),    CVMANY,  ONE(CV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
-      m_tmp_sig[i] = FV;
+      m_tmp_sig[i] = CVV;
     }
     return m_tmp_sig;
-  case Op::FCallUnpack:  // ONE(IVA),            C_FMANY, ONE(RV)
+  case Op::FCallUnpack:  // ONE(IVA),            C_CVMANY, ONE(RV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
-      m_tmp_sig[i] = (i < n - 1) ? FV : CV;
+      m_tmp_sig[i] = (i < n - 1) ? CVV : CV;
     }
     return m_tmp_sig;
-  case Op::FCallM:       // TWO(IVA,IVA),        UFMANY,   CMANY
-  case Op::FCallDM:      // FOUR(IVA,IVA,SA,SA), UFMANY,   CMANY
+  case Op::FCallM:       // TWO(IVA,IVA),        CVMANY_UMANY, CMANY
+  case Op::FCallDM:      // FOUR(IVA,IVA,SA,SA), CVMANY_UMANY, CMANY
     for (int i = 0, n = getImm(pc, 1).u_IVA - 1; i < n; ++i) {
       m_tmp_sig[i] = UV;
     }
     for (int i = getImm(pc, 1).u_IVA - 1, n = instrNumPops(pc); i < n; ++i) {
-      m_tmp_sig[i] = FV;
+      m_tmp_sig[i] = CVV;
     }
     return m_tmp_sig;
-  case Op::FCallUnpackM: // TWO(IVA,IVA),        C_UFMANY, CMANY
+  case Op::FCallUnpackM: // TWO(IVA,IVA),        C_CVMANY_UMANY, CMANY
     for (int i = 0, n = getImm(pc, 1).u_IVA - 1; i < n; ++i) {
       m_tmp_sig[i] = UV;
     }
     for (int i = getImm(pc, 1).u_IVA - 1, n = instrNumPops(pc); i < n; ++i) {
-      m_tmp_sig[i] = (i < n - 1) ? FV : CV;
+      m_tmp_sig[i] = (i < n - 1) ? CVV : CV;
     }
     return m_tmp_sig;
   case Op::FCallBuiltin: //TWO(IVA, SA), CVUMANY,  ONE(RV)
@@ -1029,9 +1026,6 @@ bool FuncChecker::checkFpi(State* cur, PC pc) {
   auto const op = peek_op(pc);
 
   if (isFCallStar(op)) {
-    // Account for the variadic arg not using FPass*
-    if (op == Op::FCallUnpack || op == Op::FCallUnpackM) fpi.next++;
-
     --cur->fpilen;
     int call_params = getImmIva(pc);
     int push_params = getImmIva(at(fpi.fpush));
@@ -1040,16 +1034,12 @@ bool FuncChecker::checkFpi(State* cur, PC pc) {
              call_params, push_params);
       ok = false;
     }
-    if (fpi.next != push_params) {
-      error("wrong # of params were passed; got %d expected %d\n",
-             fpi.next, push_params);
-      ok = false;
-    }
     auto const adjust =
       op == OpFCallM || op == OpFCallDM || op == OpFCallUnpackM
       ? getImm(pc, 1).u_IVA - 1 : 0;
     if (cur->stklen != fpi.stkmin - adjust) {
-      error("%s", "FCall didn't consume the proper param count\n");
+      error("wrong # of params were passed; got %d expected %d\n",
+            push_params + cur->stklen + adjust - fpi.stkmin, push_params);
       ok = false;
     }
   } else if (op == Op::FThrowOnRefMismatch) {
@@ -1069,39 +1059,9 @@ bool FuncChecker::checkFpi(State* cur, PC pc) {
              push_params);
       return false;
     }
-    if (param_id != fpi.next) {
-      error("FIsParamByRef out of order; got id %d expected %d\n",
-             param_id, fpi.next);
-      ok = false;
-    }
   }
 
   return ok;
-}
-
-bool FuncChecker::checkFPass(State* cur, PC pc) {
-  assertx(isFPassStar(peek_op(pc)));
-  if (cur->fpilen <= 0) {
-    error("%s", "cannot access empty FPI stack\n");
-    return false;
-  }
-  FpiState& fpi = cur->fpi[cur->fpilen - 1];
-  int push_params = getImmIva(at(fpi.fpush));
-  if (fpi.next >= push_params) {
-    error("param_id %d out of range [0:%d)\n", fpi.next,
-           push_params);
-    return false;
-  }
-  // we have already popped FPass's input, but not pushed the output, so this
-  // check doesn't count the F result of this FPass, but does count the
-  // previous FPass*s.
-  if (cur->stklen != fpi.stkmin + fpi.next) {
-    error("Stack depth incorrect after FPass; got %d expected %d\n",
-           cur->stklen, fpi.stkmin + fpi.next);
-    return false;
-  }
-  fpi.next++;
-  return true;
 }
 
 // Check that the initialization state of the iterator referenced by
@@ -1568,12 +1528,7 @@ bool FuncChecker::checkIterBreak(State* cur, PC pc) {
 bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   static const FlavorDesc outputSigs[][kMaxHhbcImms] = {
   #define NOV { },
-  #define FMANY { },
-  #define C_FMANY { },
-  #define UFMANY { },
-  #define C_UFMANY { },
   #define CMANY { },
-  #define SMANY { },
   #define ONE(a) { a },
   #define TWO(a,b) { a, b },
   #define THREE(a,b,c) { a, b, c },
@@ -1583,18 +1538,13 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #define O(name, imm, pop, push, flags) push
     OPCODES
   #undef O
-  #undef FMANY
-  #undef C_FMANY
-  #undef UFMANY
-  #undef C_UFMANY
-  #undef CMANY
-  #undef SMANY
   #undef INS_1
   #undef FIVE
   #undef FOUR
   #undef THREE
   #undef TWO
   #undef ONE
+  #undef CMANY
   #undef NOV
   };
   bool ok = true;
@@ -1635,7 +1585,6 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
       FpiState& fpi = cur->fpi[cur->fpilen];
       cur->fpilen++;
       fpi.fpush = offset(pc);
-      fpi.next = 0;
       fpi.stkmin = cur->stklen;
     }
   }
@@ -1714,7 +1663,7 @@ std::string FuncChecker::stateToString(const State& cur) const {
 
 std::string FuncChecker::fpiToString(const FpiState& fpi) const {
   std::stringstream out;
-  out << '(' << fpi.fpush << ':' << fpi.stkmin << ',' << fpi.next << ')';
+  out << '(' << fpi.fpush << ':' << fpi.stkmin << ')';
   return out.str();
 }
 
@@ -1788,7 +1737,6 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     auto const flags = instrFlags(op);
     if (flags & TF) ok &= checkTerminal(&cur, pc);
     if (flags & FF) ok &= checkFpi(&cur, pc);
-    if (isFPassStar(op)) ok &= checkFPass(&cur, pc);
     if (isIter(pc)) ok &= checkIter(&cur, pc);
     if (Op(*pc) == Op::IterBreak) ok &= checkIterBreak(&cur, pc);
     ok &= checkClsRefSlots(&cur, pc);
@@ -1920,7 +1868,8 @@ bool FuncChecker::checkEHStack(const EHEnt& /*handler*/, Block* b) {
 /**
  * Check the edge b->t, given the current state at the end of b.
  * If this is the first edge ->t we've seen, copy the state to t.
- * Otherwise, require the state exactly match.
+ * Otherwise, unify the state and require the nonunifiable parts
+ * to exactly match.
  */
 bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
   State& state = m_info[t->id].state_in;
@@ -1959,10 +1908,17 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
   }
   for (int i = 0, n = cur.stklen; i < n; i++) {
     if (state.stk[i] != cur.stk[i]) {
-      error("mismatch on edge B%d->B%d, current %s target %s\n",
-             b->id, t->id, stkToString(n, cur.stk).c_str(),
-             stkToString(n, state.stk).c_str());
-      return false;
+      // Allow C and V to unify into C|V
+      if ((state.stk[i] == CV || state.stk[i] == VV || state.stk[i] == CVV) &&
+          (cur.stk[i] == CV || cur.stk[i] == VV || cur.stk[i] == CVV)) {
+        stateChange = true;
+        state.stk[i] = CVV;
+      } else {
+        error("mismatch on edge B%d->B%d, current %s target %s\n",
+               b->id, t->id, stkToString(n, cur.stk).c_str(),
+               stkToString(n, state.stk).c_str());
+        return false;
+      }
     }
   }
   // Check FPI stack.

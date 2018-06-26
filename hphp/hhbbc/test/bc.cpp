@@ -28,7 +28,6 @@ std::vector<Bytecode> samples {
   bc::True {},
   bc::Int { 52 },
   bc::False {},
-  bc::FPassCNop {},
   bc::FPushFunc { 2, {}, false },
 };
 

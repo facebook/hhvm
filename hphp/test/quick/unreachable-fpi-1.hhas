@@ -1,7 +1,6 @@
 .main {
   FPushCtorD 1 "Exception"
   String "foo"
-  FPassCNop
   FCall 1
   PopR
   Throw

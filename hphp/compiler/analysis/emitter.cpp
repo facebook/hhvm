@@ -188,11 +188,10 @@ namespace StackSym {
   static const char V = 0x02; // Ref symbolic flavor
   static const char A = 0x03; // Classref symbolic flavor
   static const char R = 0x04; // Return value symbolic flavor
-  static const char F = 0x05; // Function argument symbolic flavor
-  static const char L = 0x06; // Local symbolic flavor
-  static const char T = 0x07; // String literal symbolic flavor
-  static const char I = 0x08; // int literal symbolic flavor
-  static const char H = 0x09; // $this symbolic flavor
+  static const char L = 0x05; // Local symbolic flavor
+  static const char T = 0x06; // String literal symbolic flavor
+  static const char I = 0x07; // int literal symbolic flavor
+  static const char H = 0x08; // $this symbolic flavor
 
   static const char N = 0x10; // Name marker
   static const char G = 0x20; // Global name marker
@@ -242,7 +241,6 @@ namespace StackSym {
       case StackSym::V: res = "V"; break;
       case StackSym::A: res = "A"; break;
       case StackSym::R: res = "R"; break;
-      case StackSym::F: res = "F"; break;
       case StackSym::L: res = "L"; break;
       case StackSym::T: res = "T"; break;
       case StackSym::I: res = "I"; break;
@@ -1502,11 +1500,11 @@ struct OpEmitContext {
 #define COUNT_MFINAL 0
 #define COUNT_C_MFINAL 0
 #define COUNT_V_MFINAL 0
-#define COUNT_FMANY 0
-#define COUNT_C_FMANY 0
-#define COUNT_UFMANY 0
-#define COUNT_C_UFMANY 0
+#define COUNT_CVMANY 0
 #define COUNT_CVUMANY 0
+#define COUNT_C_CVMANY 0
+#define COUNT_CVMANY_UMANY 0
+#define COUNT_C_CVMANY_UMANY 0
 #define COUNT_CMANY 0
 #define COUNT_SMANY 0
 
@@ -1571,20 +1569,20 @@ struct OpEmitContext {
 #define POP_V_MFINAL \
   getEmitterVisitor().popEvalStack(StackSym::V); \
   getEmitterVisitor().popEvalStackMMany()
-#define POP_FMANY \
-  getEmitterVisitor().popEvalStackMany(a1, StackSym::F)
-#define POP_C_FMANY \
-  getEmitterVisitor().popEvalStack(StackSym::C); \
-  getEmitterVisitor().popEvalStackMany(a1 - 1, StackSym::F)
-#define POP_UFMANY \
-  getEmitterVisitor().popEvalStackMany(a1, StackSym::F); \
-  getEmitterVisitor().popEvalStackMany(a2 - 1, StackSym::C)
-#define POP_C_UFMANY \
-  getEmitterVisitor().popEvalStack(StackSym::C); \
-  getEmitterVisitor().popEvalStackMany(a1 - 1, StackSym::F); \
-  getEmitterVisitor().popEvalStackMany(a2 - 1, StackSym::C)
+#define POP_CVMANY \
+  getEmitterVisitor().popEvalStackCVMany(a1)
 #define POP_CVUMANY \
   getEmitterVisitor().popEvalStackCVMany(a1)
+#define POP_C_CVMANY \
+  getEmitterVisitor().popEvalStack(StackSym::C); \
+  getEmitterVisitor().popEvalStackCVMany(a1 - 1)
+#define POP_CVMANY_UMANY \
+  getEmitterVisitor().popEvalStackCVMany(a1); \
+  getEmitterVisitor().popEvalStackMany(a2 - 1, StackSym::C)
+#define POP_C_CVMANY_UMANY \
+  getEmitterVisitor().popEvalStack(StackSym::C); \
+  getEmitterVisitor().popEvalStackCVMany(a1 - 1); \
+  getEmitterVisitor().popEvalStackMany(a2 - 1, StackSym::C)
 #define POP_CMANY \
   getEmitterVisitor().popEvalStackMany(a1, StackSym::C)
 #define POP_SMANY \
@@ -1593,7 +1591,6 @@ struct OpEmitContext {
 #define POP_CV(i) getEmitterVisitor().popEvalStack(StackSym::C)
 #define POP_VV(i) getEmitterVisitor().popEvalStack(StackSym::V)
 #define POP_RV(i) getEmitterVisitor().popEvalStack(StackSym::R)
-#define POP_FV(i) getEmitterVisitor().popEvalStack(StackSym::F)
 #define POP_UV(i) POP_CV(i)
 #define POP_CUV(i) POP_CV(i)
 
@@ -1763,7 +1760,6 @@ struct OpEmitContext {
 #define PUSH_CUV PUSH_CV
 #define PUSH_VV getEmitterVisitor().pushEvalStackFromOp(StackSym::V, ctx)
 #define PUSH_RV getEmitterVisitor().pushEvalStackFromOp(StackSym::R, ctx)
-#define PUSH_FV getEmitterVisitor().pushEvalStackFromOp(StackSym::F, ctx)
 
 #define PUSH_INS_1_CV \
   getEmitterVisitor().insertEvalStackFromOp(StackSym::C, 1, ctx);
@@ -2034,13 +2030,12 @@ struct OpEmitContext {
 #undef POP_VV
 #undef POP_HV
 #undef POP_RV
-#undef POP_FV
 #undef POP_LREST
-#undef POP_FMANY
-#undef POP_C_FMANY
-#undef POP_UFMANY
-#undef POP_C_UFMANY
+#undef POP_CVMANY
 #undef POP_CVUMANY
+#undef POP_C_CVMANY
+#undef POP_CVMANY_UMANY
+#undef POP_C_CVMANY_UMANY
 #undef POP_CMANY
 #undef POP_SMANY
 #undef POP_LA_ONE
@@ -2120,7 +2115,6 @@ struct OpEmitContext {
 #undef PUSH_VV
 #undef PUSH_HV
 #undef PUSH_RV
-#undef PUSH_FV
 #undef IMPL_ONE
 #undef IMPL_TWO
 #undef IMPL_THREE
@@ -6032,7 +6026,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
     if (el->getType() == '`') {
       emitConvertToCell(e);
-      e.FPassCNop();
       delete fpi;
       e.FCall(1);
     }
@@ -7301,7 +7294,6 @@ bool EmitterVisitor::emitInlineGena(
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fromDArrayStart);
     emitVirtualLocal(array);
     emitCGet(e);
-    e.FPassCNop();
   }
   e.FCall(1);
   e.UnboxR();
@@ -8074,13 +8066,11 @@ EmitterVisitor::MInstrChain EmitterVisitor::emitInOutArg(
       e.Null();
       e.PopL(loc);
     }
-    e.FPassCNop();
   } else {
     auto const stackCount = emitMOp(i, iLast, e, MInstrOpts{MOpMode::InOut});
     e.QueryM(
       stackCount, QueryMOp::InOut, symToMemberKey(e, iLast, false /* allowW */)
     );
-    e.FPassCNop();
   }
   return chain;
 }
@@ -8094,11 +8084,8 @@ void EmitterVisitor::emitFPassStrict(Emitter& e, ExpressionPtr exp) {
 
   if (!exp->hasContext(Expression::RefParameter)) {
     emitCGet(e);
-    e.FPassCNop();
-  } else if (emitVGet(e, true)) {
-    e.FPassCNop();
   } else {
-    e.FPassVNop();
+    emitVGet(e, true);
   }
 }
 
@@ -8113,12 +8100,16 @@ void EmitterVisitor::emitFPass(Emitter& e, ExpressionPtr exp, int paramId) {
     e.JmpNZ(byRef);
     if (shouldVisit) visit(exp);
     emitCGet(e, true);
-    e.FPassCNop();
+    // hphpc doesn't support the CV unified type so let's pretend this is a V
+    // on a symbolic stack as it's going to be consumed only by FCall anyway
+    assertx(m_evalStack.top() == StackSym::C);
+    m_evalStack.pop();
+    m_evalStack.push(StackSym::V);
     e.Jmp(done);
     byRef.set(e);
     if (shouldVisit) visit(exp);
     emitVGet(e);
-    e.FPassVNop();
+    assertx(m_evalStack.top() == StackSym::V);
     done.set(e);
   };
 
@@ -8161,7 +8152,6 @@ void EmitterVisitor::emitFPass(Emitter& e, ExpressionPtr exp, int paramId) {
       case StackSym::C: {
         e.FIsParamByRef(paramId, hint);
         e.PopC();
-        e.FPassCNop();
         return;
       }
       case StackSym::LN:
@@ -9319,11 +9309,9 @@ void EmitterVisitor::emitInOutToRefWrapper(PostponedMeth& p,
         inoutParams.push_back(i);
         emitVirtualLocal(i);
         emitVGet(e);
-        e.FPassVNop();
       } else {
         emitVirtualLocal(i);
         e.PushL(i);
-        e.FPassCNop();
       }
     },
     [&] (Emitter& e) {
@@ -9361,9 +9349,6 @@ void EmitterVisitor::emitRefToInOutWrapper(PostponedMeth& p,
       } else {
         emitVirtualLocal(i);
         e.PushL(i);
-      }
-      if (!fe->params[i].variadic) {
-        e.FPassCNop();
       }
     },
     [&] (Emitter& e) {
@@ -10122,7 +10107,6 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
     for (uint32_t i = 0; i < numParams; i++) {
       emitVirtualLocal(i);
       emitCGet(e);
-      e.FPassCNop();
     }
   }
   e.FCall(numParams);

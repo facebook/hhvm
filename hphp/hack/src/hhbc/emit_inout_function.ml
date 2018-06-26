@@ -21,18 +21,14 @@ let emit_body_instrs_inout params call_instrs =
   let param_count = List.length params in
   let param_instrs = gather @@
     List.map params ~f:(fun p ->
-        gather [
-          if Hhas_param.is_inout p
-          then gather [
-            instr_cgetquietl (Local.Named (Hhas_param.name p));
-            instr_null;
-            instr_popl (Local.Named (Hhas_param.name p))
-          ]
-          else instr_pushl (Local.Named (Hhas_param.name p));
-          if not (Hhas_param.is_variadic p)
-          then instr_fpasscnop
-          else empty
-        ]) in
+      if Hhas_param.is_inout p
+      then gather [
+        instr_cgetquietl (Local.Named (Hhas_param.name p));
+        instr_null;
+        instr_popl (Local.Named (Hhas_param.name p))
+      ]
+      else instr_pushl (Local.Named (Hhas_param.name p))
+    ) in
   let inout_params = List.filter_map params ~f:(fun p ->
       if not @@ Hhas_param.is_inout p then None else
         Some (instr_setl @@ Local.Named (Hhas_param.name p))) in
@@ -62,18 +58,11 @@ let emit_body_instrs_ref params call_instrs =
   let param_instrs = gather @@
     List.map params ~f:(fun p ->
       let local = Local.Named (Hhas_param.name p) in
-      if Hhas_param.is_variadic p then
-        instr_pushl local
-      else if Hhas_param.is_reference p then
-        gather [
-          instr_vgetl local;
-          instr_fpassvnop
-        ]
+      if Hhas_param.is_reference p then
+        instr_vgetl local
       else
-        gather [
-          instr_pushl local;
-          instr_fpasscnop
-        ]) in
+        instr_pushl local
+    ) in
   let param_get_instrs =
     List.filter_map params ~f:(fun p ->
         if Hhas_param.is_reference p

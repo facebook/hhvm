@@ -50,7 +50,6 @@ fail:
 
   FPushFuncD 1 "sswitch_on"
   CGetL $foo
-  FPassCNop
   FCall 1
   UnboxR
   RetC
@@ -73,7 +72,6 @@ fail:
 
   FPushFuncD 1 "sswitch_on"
   CGetL $obj
-  FPassCNop
   FCall 1
   UnboxR
   RetC
@@ -82,7 +80,6 @@ fail:
 .function case_default() {
   FPushFuncD 1 "sswitch_on"
   String "kujhasekguheku"
-  FPassCNop
   FCall 1
   UnboxR
   RetC

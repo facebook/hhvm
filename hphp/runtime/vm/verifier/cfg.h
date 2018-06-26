@@ -269,7 +269,7 @@ inline LinearBlocks linearBlocks(const Graph* g) {
   return LinearBlocks(g->first_linear, 0);
 }
 
-// A callsite starts with FPush*, has 0 or more FPass*, and usually
+// A callsite starts with FPush*, pushes 0 or more values, and usually
 // ends with FCall* (If there is a terminal making the FCall*
 // unreachable, the fpi region will end there). The FPI Region
 // protects the range of instructions that execute with the partial

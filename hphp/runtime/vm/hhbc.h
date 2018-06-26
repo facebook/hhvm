@@ -112,7 +112,6 @@ enum FlavorDesc {
   CV,   // Cell
   VV,   // Var
   RV,   // Return value (cell or var)
-  FV,   // Function parameter (cell or var)
   UV,   // Uninit
   CVV,  // Cell or Var argument
   CRV,  // Cell or Return value argument
@@ -587,15 +586,13 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FThrowOnRefMismatch, ONE(BLLA),    NOV,             NOV,        FF) \
   O(FHandleRefMismatch, THREE(IVA,OA(FPassHint),SA),                    \
                                        NOV,             NOV,        NF) \
-  O(FPassCNop,       NA,               ONE(CV),         ONE(FV),    NF) \
-  O(FPassVNop,       NA,               ONE(VV),         ONE(FV),    NF) \
-  O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
-  O(FCallM,          TWO(IVA,IVA),     UFMANY,          CMANY,      CF_FF) \
-  O(FCallDM,         FOUR(IVA,IVA,SA,SA),UFMANY,        CMANY,      CF_FF) \
-  O(FCallUnpackM,    TWO(IVA,IVA),     C_UFMANY,        CMANY,      CF_FF) \
-  O(FCallAwait,      THREE(IVA,SA,SA), FMANY,           ONE(CV),    CF_FF) \
-  O(FCallD,          THREE(IVA,SA,SA), FMANY,           ONE(RV),    CF_FF) \
-  O(FCallUnpack,     ONE(IVA),         C_FMANY,         ONE(RV),    CF_FF) \
+  O(FCall,           ONE(IVA),         CVMANY,          ONE(RV),    CF_FF) \
+  O(FCallM,          TWO(IVA,IVA),     CVMANY_UMANY,    CMANY,      CF_FF) \
+  O(FCallDM,         FOUR(IVA,IVA,SA,SA),CVMANY_UMANY,  CMANY,      CF_FF) \
+  O(FCallUnpackM,    TWO(IVA,IVA),     C_CVMANY_UMANY,  CMANY,      CF_FF) \
+  O(FCallAwait,      THREE(IVA,SA,SA), CVMANY,          ONE(CV),    CF_FF) \
+  O(FCallD,          THREE(IVA,SA,SA), CVMANY,          ONE(RV),    CF_FF) \
+  O(FCallUnpack,     ONE(IVA),         C_CVMANY,        ONE(RV),    CF_FF) \
   O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(RV),    NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
   O(MIterInit,       THREE(IA,BA,LA),  ONE(VV),         NOV,        CF) \
@@ -1020,17 +1017,6 @@ inline bool isFCallStar(Op opcode) {
     case Op::FCallDM:
     case Op::FCallUnpackM:
       return true;
-    default:
-      return false;
-  }
-}
-
-inline bool isFPassStar(Op opcode) {
-  switch (opcode) {
-    case OpFPassCNop:
-    case OpFPassVNop:
-      return true;
-
     default:
       return false;
   }

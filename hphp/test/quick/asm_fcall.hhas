@@ -14,7 +14,6 @@
   CGetL $who
   FPushFunc 1
   CGetL $arg
-  FPassCNop
   FCall 1
   UnboxR
 
@@ -59,9 +58,7 @@
 .function main() {
   FPushFuncD 2 "caller"
   String "a"
-  FPassCNop
   String "b"
-  FPassCNop
   FCall 2
   PopR
 
@@ -70,7 +67,6 @@
   PopC
   FPushFuncD 1 "byref"
   VGetL $funk
-  FPassVNop
   FCall 1
   PopR
   CGetL $funk

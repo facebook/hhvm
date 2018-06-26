@@ -66,11 +66,10 @@ bool checkUnit(const Unit*, ErrorMode mode = kStderr);
  * 8.  each section must end with a terminal;  main body cannot contain Unwind;
  *     Funclets may not contain Ret*.
  * 9.  each fpi starts with FPush* and ends with FCall; each FPush must be
- *     the first instr in exactly 1 fpi region; FPass* never outside FPI.
+ *     the first instr in exactly 1 fpi region.
  * 10. no back-jumps in FPI; no forward jumps out of FPI; no jumps into
  *     FPI from outside; no terminals inside FPI region.
- * 11. FPI depth same for all ctrl paths. every path must have N FPass's
- *     and params must be passed in forward order.
+ * 11. FPI depth same for all ctrl paths. every path must push N values.
  * 12. stack depth @FPush == depth @FCall.  No instr can pop past depth of
  *     FPush.
  * 13. State of each iterator variable known everywhere.
@@ -83,7 +82,6 @@ bool checkUnit(const Unit*, ErrorMode mode = kStderr);
  * -- every array table index in-bounds
  * -- Local variable ids must be < Func.numLocals
  * -- iter variable ids must be < Func.numIterators
- * -- FPass* parameter ids must be < FPush*'s <num params>
  * -- FCall <num params> == FPush* <num params>
  * -- init-state of every iterator must be known everywhere
  *

@@ -305,10 +305,8 @@ final class Map implements \MutableMap {
             FIsParamByRef 0 Any
             JmpNZ by_ref
             CGetL $v
-            FPassCNop
             Jmp call
     by_ref: VGetL $v
-            FPassVNop
     call:   FCall 1
             UnboxR
             AssertRATL $res Obj=HH\Map
@@ -334,7 +332,6 @@ final class Map implements \MutableMap {
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassCNop
           FCall 1
           PopR
           Throw
@@ -368,19 +365,15 @@ EOT
             FIsParamByRef 0 Any
             JmpNZ by_ref_k
             CGetL $k
-            FPassCNop
             Jmp pass_v
     by_ref_k:
             VGetL $k
-            FPassVNop
     pass_v: FIsParamByRef 1 Any
             JmpNZ by_ref_v
             CGetL $v
-            FPassCNop
             Jmp call
     by_ref_v:
             VGetL $v
-            FPassVNop
     call:   FCall 2
             UnboxR
             AssertRATL $res Obj=HH\Map
@@ -406,7 +399,6 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassCNop
           FCall 1
           PopR
           Throw
@@ -441,10 +433,8 @@ EOT
             FIsParamByRef 0 Any
             JmpNZ by_ref
             CGetL $v
-            FPassCNop
             Jmp call
     by_ref: VGetL $v
-            FPassVNop
     call:   FCall 1
             UnboxR
             JmpZ next
@@ -472,7 +462,6 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassCNop
           FCall 1
           PopR
           Throw
@@ -507,19 +496,15 @@ EOT
             FIsParamByRef 0 Any
             JmpNZ by_ref_k
             CGetL $k
-            FPassCNop
             Jmp pass_v
     by_ref_k:
             VGetL $k
-            FPassVNop
     pass_v: FIsParamByRef 1 Any
             JmpNZ by_ref_v
             CGetL $v
-            FPassCNop
             Jmp call
     by_ref_v:
             VGetL $v
-            FPassVNop
     call:   FCall 2
             UnboxR
             JmpZ next
@@ -547,7 +532,6 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassCNop
           FCall 1
           PopR
           Throw
@@ -614,10 +598,8 @@ EOT
             FIsParamByRef 0 Any
             JmpNZ by_ref
             CGetL $v
-            FPassCNop
             Jmp call
     by_ref: VGetL $v
-            FPassVNop
     call:   FCall 1
             UnboxR
             JmpNZ skip
@@ -647,7 +629,6 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassCNop
           FCall 1
           PopR
           Throw
@@ -965,10 +946,8 @@ final class ImmMap implements \ConstMap {
             FIsParamByRef 0 Any
             JmpNZ by_ref
             CGetL $v
-            FPassCNop
             Jmp call
     by_ref: VGetL $v
-            FPassVNop
     call:   FCall 1
             UnboxR
             AssertRATL $res Obj=HH\Map
@@ -997,7 +976,6 @@ final class ImmMap implements \ConstMap {
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassCNop
           FCall 1
           PopR
           Throw
@@ -1033,19 +1011,15 @@ EOT
             FIsParamByRef 0 Any
             JmpNZ by_ref_k
             CGetL $k
-            FPassCNop
             Jmp pass_v
     by_ref_k:
             VGetL $k
-            FPassVNop
     pass_v: FIsParamByRef 1 Any
             JmpNZ by_ref_v
             CGetL $v
-            FPassCNop
             Jmp call
     by_ref_v:
             VGetL $v
-            FPassVNop
     call:   FCall 2
             UnboxR
             AssertRATL $res Obj=HH\Map
@@ -1074,7 +1048,6 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassCNop
           FCall 1
           PopR
           Throw
@@ -1109,10 +1082,8 @@ EOT
             FIsParamByRef 0 Any
             JmpNZ by_ref
             CGetL $v
-            FPassCNop
             Jmp call
     by_ref: VGetL $v
-            FPassVNop
     call:   FCall 1
             UnboxR
             JmpZ next
@@ -1143,7 +1114,6 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassCNop
           FCall 1
           PopR
           Throw
@@ -1178,19 +1148,15 @@ EOT
             FIsParamByRef 0 Any
             JmpNZ by_ref_k
             CGetL $k
-            FPassCNop
             Jmp pass_v
     by_ref_k:
             VGetL $k
-            FPassVNop
     pass_v: FIsParamByRef 1 Any
             JmpNZ by_ref_v
             CGetL $v
-            FPassCNop
             Jmp call
     by_ref_v:
             VGetL $v
-            FPassVNop
     call:   FCall 2
             UnboxR
             JmpZ next
@@ -1221,7 +1187,6 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassCNop
           FCall 1
           PopR
           Throw
@@ -1272,10 +1237,8 @@ EOT
             FIsParamByRef 0 Any
             JmpNZ by_ref
             CGetL $v
-            FPassCNop
             Jmp call
     by_ref: VGetL $v
-            FPassVNop
     call:   FCall 1
             UnboxR
             JmpNZ skip
@@ -1308,7 +1271,6 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassCNop
           FCall 1
           PopR
           Throw

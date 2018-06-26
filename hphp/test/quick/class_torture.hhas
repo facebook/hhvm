@@ -6,7 +6,6 @@
   DefCls 0
   FPushCtorD 1 "A"
   String "foo"
-  FPassCNop
   FCall 1
   PopR
   PopC
@@ -14,7 +13,6 @@
   DefCls 0
   FPushCtorD 1 "B"
   String "foo"
-  FPassCNop
   FCall 1
   PopR
   PopC
@@ -22,7 +20,6 @@
   DefCls 0
   FPushCtorD 1 "C"
   String "foo"
-  FPassCNop
   FCall 1
   PopR
   PopC
@@ -30,7 +27,6 @@
   DefCls 0
   FPushCtorD 1 "E"
   String "foo"
-  FPassCNop
   FCall 1
   PopR
   PopC
@@ -38,7 +34,6 @@
   DefCls 0
   FPushCtorD 1 "G"
   String "foo"
-  FPassCNop
   FCall 1
   PopR
   PopC

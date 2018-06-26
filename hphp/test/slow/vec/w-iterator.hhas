@@ -20,12 +20,10 @@
 loop:
           FPushFuncD 1 "var_dump"
           CGetL $k
-          FPassCNop
           FCall 1
           PopR
           FPushFuncD 1 "var_dump"
           CGetL $v
-          FPassCNop
           FCall 1
           PopR
           WIterNextK 0 loop $v $k

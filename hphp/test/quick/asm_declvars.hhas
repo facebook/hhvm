@@ -5,7 +5,6 @@
 .main {
   FPushFuncD 1 "main"
   Int 12
-  FPassCNop
   FCall 1
   PopR
   Null

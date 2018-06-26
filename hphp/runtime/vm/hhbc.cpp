@@ -441,11 +441,11 @@ int instrNumPops(PC pc) {
 #define MFINAL -3
 #define C_MFINAL -5
 #define V_MFINAL C_MFINAL
-#define FMANY -3
-#define C_FMANY -3
-#define UFMANY -4
-#define C_UFMANY -4
+#define CVMANY -3
 #define CVUMANY -3
+#define C_CVMANY -3
+#define CVMANY_UMANY -4
+#define C_CVMANY_UMANY -4
 #define CMANY -3
 #define SMANY -1
 #define O(name, imm, pop, push, flags) pop,
@@ -459,11 +459,11 @@ int instrNumPops(PC pc) {
 #undef MFINAL
 #undef C_MFINAL
 #undef V_MFINAL
-#undef FMANY
-#undef C_FMANY
-#undef UFMANY
-#undef C_UFMANY
+#undef CVMANY
 #undef CVUMANY
+#undef C_CVMANY
+#undef CVMANY_UMANY
+#undef C_CVMANY_UMANY
 #undef CMANY
 #undef SMANY
 #undef O
@@ -540,9 +540,9 @@ FlavorDesc manyFlavor(PC op, uint32_t i, FlavorDesc flavor) {
   return flavor;
 }
 
-FlavorDesc ufFlavor(PC op, uint32_t i) {
+FlavorDesc manyManyFlavor(PC op, uint32_t i, FlavorDesc f1, FlavorDesc f2) {
   always_assert(i < uint32_t(instrNumPops(op)));
-  return i < getImm(op, 0).u_IVA ? FV : UV;
+  return i < getImm(op, 0).u_IVA ? f1 : f2;
 }
 
 }
@@ -560,11 +560,11 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define MFINAL return manyFlavor(op, idx, CRV);
 #define C_MFINAL return idx == 0 ? CV : CRV;
 #define V_MFINAL return idx == 0 ? VV : CRV;
-#define FMANY return manyFlavor(op, idx, FV);
-#define C_FMANY return idx == 0 ? CV : manyFlavor(op, idx, FV);
-#define UFMANY return ufFlavor(op, idx);
-#define C_UFMANY return idx == 0 ? CV : ufFlavor(op, idx);
+#define CVMANY return manyFlavor(op, idx, CVV);
 #define CVUMANY return manyFlavor(op, idx, CVUV);
+#define C_CVMANY return idx == 0 ? CV : manyFlavor(op, idx, CVV);
+#define CVMANY_UMANY return manyManyFlavor(op, idx, CVV, UV);
+#define C_CVMANY_UMANY return idx == 0 ? CV : manyManyFlavor(op, idx, CVV, UV);
 #define CMANY return manyFlavor(op, idx, CV);
 #define SMANY return manyFlavor(op, idx, CV);
 #define O(name, imm, pop, push, flags) case Op::name: pop
@@ -581,11 +581,11 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef MFINAL
 #undef C_MFINAL
 #undef V_MFINAL
-#undef FMANY
-#undef C_FMANY
-#undef UFMANY
-#undef C_UFMANY
+#undef CVMANY
 #undef CVUMANY
+#undef C_CVMANY
+#undef CVMANY_UMANY
+#undef C_CVMANY_UMANY
 #undef CMANY
 #undef SMANY
 #undef O

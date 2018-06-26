@@ -5240,9 +5240,6 @@ OPTBLD_INLINE void iopFHandleRefMismatch(uint32_t paramId, FPassHint hint,
   raiseParamRefMismatchForFuncName(funcName, paramId, hint == FPassHint::Cell);
 }
 
-OPTBLD_INLINE void iopFPassCNop() {}
-OPTBLD_INLINE void iopFPassVNop() {}
-
 bool doFCall(ActRec* ar, PC& pc) {
   TRACE(3, "FCall: pc %p func %p base %d\n", vmpc(),
         vmfp()->m_func->unit()->entry(),

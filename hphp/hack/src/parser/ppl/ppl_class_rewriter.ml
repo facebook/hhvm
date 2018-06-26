@@ -85,20 +85,26 @@ let rewrite_ppl_method_header method_header =
  * parent::__construct should not.
  *)
 let should_be_rewritten receiver =
-  match syntax receiver with
-  | MemberSelectionExpression {
-      member_object = {
-        syntax = VariableExpression {
-          variable_expression = {
-            syntax = Token token;
-            _;
-          };
+  let rec is_this e =
+    match syntax e with
+    | VariableExpression {
+        variable_expression = {
+          syntax = Token token;
           _;
         };
         _;
-      };
+      } when Token.text token = "$this" -> true
+    | ParenthesizedExpression {
+        parenthesized_expression_expression;
+        _;
+      } -> is_this parenthesized_expression_expression
+    | _ -> false
+  in
+  match syntax receiver with
+  | MemberSelectionExpression {
+      member_object = e;
       _;
-    } when Token.text token = "$this" -> true
+    } -> is_this e
   | ScopeResolutionExpression {
       scope_resolution_qualifier = {
         syntax = Token qualifier;

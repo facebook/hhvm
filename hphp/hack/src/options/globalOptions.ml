@@ -142,14 +142,6 @@ let tco_decl_override_require_hint = "decl_override_require_hint"
 let tco_experimental_void_is_type_of_null = "void_is_type_of_null"
 
 (**
- * Enable extra shape field checks; e.g., if an existence test for a field
- * name using Shapes::keyExists() will always succeed or always fail,
- * or if a field that is known to not exist in a given shape is accessed
- * using Shapes::idx().
- *)
-let tco_experimental_shape_field_check = "shape_field_check"
-
-(**
  * Enable the null coalescence assignment (`??=`) operator.
  *)
 let tco_experimental_null_coalesce_assignment = "null_coalesce_assignment"
@@ -176,7 +168,6 @@ let tco_experimental_all =
      tco_hacksperimental;
      tco_decl_override_require_hint;
      tco_experimental_void_is_type_of_null;
-     tco_experimental_shape_field_check;
      tco_experimental_null_coalesce_assignment;
    ]
 

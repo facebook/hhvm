@@ -205,7 +205,6 @@ val tco_experimental_is_expression : string
 val tco_experimental_as_expression : string
 val tco_decl_override_require_hint : string
 val tco_experimental_void_is_type_of_null : string
-val tco_experimental_shape_field_check : string
 val tco_experimental_null_coalesce_assignment : string
 val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t

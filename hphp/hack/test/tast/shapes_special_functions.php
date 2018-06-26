@@ -1,6 +1,6 @@
 <?hh // strict
 
-type Point = shape('x' => int, 'y' => int);
+type Point = shape('x' => int, ?'y' => int);
 
 function test(Point $p): void {
   Shapes::idx($p, 'x');

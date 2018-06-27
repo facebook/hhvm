@@ -94,13 +94,13 @@ struct DependencyContextHash {
   }
 };
 
-using DependencyContextSet = std::unordered_set<DependencyContext,
-                                                DependencyContextHash>;
-using ContextSet = std::unordered_set<Context, ContextHash>;
+using DependencyContextSet = hphp_hash_set<DependencyContext,
+                                           DependencyContextHash>;
+using ContextSet = hphp_hash_set<Context, ContextHash>;
 
 std::string show(Context);
 
-using ConstantMap = std::unordered_map<SString, Cell>;
+using ConstantMap = hphp_hash_map<SString, Cell>;
 
 /*
  * State of properties on a class.  Map from property name to its

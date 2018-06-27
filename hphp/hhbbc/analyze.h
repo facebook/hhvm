@@ -108,7 +108,7 @@ struct FuncAnalysisResult {
   /*
    * A set of pair of functions and their push blocks that we failed to fold.
    */
-  std::unordered_set<std::pair<borrowed_ptr<const php::Func>, BlockId>>
+  hphp_fast_set<std::pair<borrowed_ptr<const php::Func>, BlockId>>
     unfoldableFuncs;
 
   /*

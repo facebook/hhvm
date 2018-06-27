@@ -135,12 +135,12 @@ std::vector<borrowed_ptr<php::Block>> initial_sort(const php::Func& f) {
 
   // We give each fpi region a unique id
   auto nextFpi = 0;
-  // Map from fpi region id to the block containing its FCall
-  std::unordered_map<int, borrowed_ptr<php::Block>> fpiToCallBlkMap;
+  // Map from fpi region id to the block containing its FCall.
+  // Needs value stability because extraEdges holds pointers into this map.
+  hphp_hash_map<int, borrowed_ptr<php::Block>> fpiToCallBlkMap;
   // Map from the ids of terminal blocks within fpi regions to the
   // entries in fpiToCallBlkMap corresponding to the active fpi regions.
-  std::unordered_map<BlockId,
-                     std::vector<borrowed_ptr<php::Block>*>> extraEdges;
+  hphp_fast_map<BlockId, std::vector<borrowed_ptr<php::Block>*>> extraEdges;
   // The fpi state at the start of each block
   std::vector<folly::Optional<std::vector<int>>> blkFpiState(f.blocks.size());
   for (auto blk : sorted) {
@@ -191,7 +191,7 @@ std::vector<borrowed_ptr<php::Block>> initial_sort(const php::Func& f) {
     }
   }
 
-  if (extraEdges.size()) {
+  if (!extraEdges.empty()) {
     auto changes = false;
     for (auto& elm : extraEdges) {
       auto const blk = borrow(f.blocks[elm.first]);

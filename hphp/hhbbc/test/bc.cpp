@@ -57,7 +57,7 @@ TEST(Bytecode, Hash) {
     size_t operator()(const Bytecode& b) const { return hash(b); }
   };
 
-  std::unordered_map<Bytecode,Bytecode,bc_hash> map {
+  hphp_fast_map<Bytecode,Bytecode,bc_hash> map {
     { bc::Nop {}, bc::Int { 3 } },
     { bc::Int { 42 }, bc::Int { 4 } },
     { bc::Int { 47 }, bc::Int { 5 } },

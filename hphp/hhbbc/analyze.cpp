@@ -318,7 +318,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
 
   // Used to force blocks that depended on the types of local statics
   // to be re-analyzed when the local statics change.
-  std::unordered_map<borrowed_ptr<const php::Block>, std::map<LocalId, Type>>
+  hphp_fast_map<borrowed_ptr<const php::Block>, std::map<LocalId, Type>>
     usedLocalStatics;
 
   /*

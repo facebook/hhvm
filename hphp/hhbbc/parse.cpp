@@ -106,9 +106,9 @@ struct ParseUnitState {
    * Map from Closure index to the function(s) containing their
    * associated CreateCl opcode(s).
    */
-  std::unordered_map<
+  hphp_fast_map<
     int32_t,
-    std::unordered_set<borrowed_ptr<php::Func>>
+    hphp_fast_set<borrowed_ptr<php::Func>>
   > createClMap;
 
   struct SrcLocHash {
@@ -118,7 +118,7 @@ struct ParseUnitState {
       return hash_int64_pair(h1, h2);
     }
   };
-  std::unordered_map<php::SrcLoc, int32_t, SrcLocHash> srcLocs;
+  hphp_fast_map<php::SrcLoc, int32_t, SrcLocHash> srcLocs;
 
   /*
    * Set of functions that should be processed in the constant
@@ -128,7 +128,7 @@ struct ParseUnitState {
    * pinit and sinit functions are added to improve overall
    * performance.
    */
-  std::unordered_map<borrowed_ptr<php::Func>, int> constPassFuncs;
+  hphp_fast_map<borrowed_ptr<php::Func>, int> constPassFuncs;
 
   /*
    * List of class aliases defined by this unit
@@ -1425,8 +1425,7 @@ void assign_closure_context(const ParseUnitState& puState,
   auto it = begin(clIt->second);
   auto const representative = find_closure_context(puState, *it);
   if (debug) {
-    ++it;
-    for (; it != end(clIt->second); ++it) {
+    for (++it; it != end(clIt->second); ++it) {
       assert(find_closure_context(puState, *it) == representative);
     }
   }

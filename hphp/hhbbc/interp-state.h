@@ -409,7 +409,7 @@ struct CollectedInfo {
   PropertiesInfo props;
   PublicSPropIndexer* const publicStatics;
   ConstantMap cnsMap;
-  std::unordered_set<std::pair<borrowed_ptr<const php::Func>, BlockId>>
+  hphp_fast_set<std::pair<borrowed_ptr<const php::Func>, BlockId>>
     unfoldableFuncs;
   bool mayUseVV{false};
   bool effectFree{true};

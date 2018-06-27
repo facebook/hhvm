@@ -46,11 +46,18 @@ namespace HPHP {
 #define GOOD_UNORDERED_CTOR (0)
 #endif
 
+// Replacements for std::unordered_map do not move values
 template <class T, class U, class V=std::hash<T>, class W=std::equal_to<T>>
 using hphp_hash_map = folly::F14NodeMap<T,U,V,W>;
-
 template <class T, class V=std::hash<T>, class W=std::equal_to<T>>
 using hphp_hash_set = folly::F14NodeSet<T,V,W>;
+
+// Dense variants move values on insert/rehash/erase. will use F14ValueMap
+// or F14VectorMap depending on value size.
+template <class T, class U, class V=std::hash<T>, class W=std::equal_to<T>>
+using hphp_fast_map = folly::F14FastMap<T,U,V,W>;
+template <class T, class V=std::hash<T>, class W=std::equal_to<T>>
+using hphp_fast_set = folly::F14FastSet<T,V,W>;
 
 //////////////////////////////////////////////////////////////////////
 

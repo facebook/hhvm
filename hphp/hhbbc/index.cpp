@@ -109,7 +109,7 @@ template<class T> using ISStringToMany =
  * and the values are some T.
  */
 template<class T> using ISStringToOneT =
-  std::unordered_map<
+  hphp_hash_map<
     SString,
     T,
     string_data_hash,
@@ -409,7 +409,7 @@ struct ClassInfo {
    * that it came from.  This map is flattened across the inheritance
    * hierarchy.
    */
-  std::unordered_map<SString,borrowed_ptr<const php::Const>> clsConstants;
+  hphp_fast_map<SString,borrowed_ptr<const php::Const>> clsConstants;
 
   /*
    * A vector of the used traits, in class order, mirroring the
@@ -482,7 +482,7 @@ struct ClassInfo {
    * where the name is known, but not which class was affected, these always
    * need to be unioned with values from IndexData::unknownClassSProps.
    */
-  std::unordered_map<SString,PublicSPropEntry> publicStaticProps;
+  hphp_hash_map<SString,PublicSPropEntry> publicStaticProps;
 
 
   /*
@@ -890,7 +890,7 @@ std::string show(const Func& f) {
 
 //////////////////////////////////////////////////////////////////////
 
-using IfaceSlotMap = std::unordered_map<borrowed_ptr<const php::Class>, Slot>;
+using IfaceSlotMap = hphp_hash_map<borrowed_ptr<const php::Class>, Slot>;
 
 struct Index::IndexData {
   IndexData() = default;
@@ -910,26 +910,24 @@ struct Index::IndexData {
   ISStringToMany<const php::Func>        funcs;
   ISStringToMany<const php::TypeAlias>   typeAliases;
   ISStringToMany<const php::Class>       enums;
-  std::unordered_map<SString, ConstInfo> constants;
-  std::unordered_set<SString,
-                     string_data_hash,
-                     string_data_isame>  classAliases;
+  hphp_fast_map<SString, ConstInfo> constants;
+  hphp_fast_set<SString, string_data_hash, string_data_isame> classAliases;
 
   // Map from each class to all the closures that are allocated in
   // functions of that class.
-  std::unordered_map<
+  hphp_hash_map<
     borrowed_ptr<const php::Class>,
     CompactVector<borrowed_ptr<const php::Class>>
   > classClosureMap;
 
-  std::unordered_map<
+  hphp_hash_map<
     borrowed_ptr<const php::Class>,
     std::set<borrowed_ptr<php::Func>>
   > classExtraMethodMap;
 
   // Map from every interface to the list of instantiable classes which can
   // implement it.
-  std::unordered_map<
+  hphp_fast_map<
     borrowed_ptr<const php::Class>,
     CompactVector<borrowed_ptr<ClassInfo>>
   > ifaceImplementerMap;
@@ -961,11 +959,11 @@ struct Index::IndexData {
   // Private instance and static property types are stored separately
   // from ClassInfo, because you don't need to resolve a class to get
   // at them.
-  std::unordered_map<
+  hphp_hash_map<
     borrowed_ptr<const php::Class>,
     PropState
   > privatePropInfo;
-  std::unordered_map<
+  hphp_hash_map<
     borrowed_ptr<const php::Class>,
     PropState
   > privateStaticPropInfo;
@@ -993,7 +991,7 @@ struct Index::IndexData {
    */
   IfaceSlotMap ifaceSlotMap;
 
-  std::unordered_map<
+  hphp_hash_map<
     borrowed_ptr<const php::Class>,
     std::vector<Type>
   > closureUseVars;
@@ -1259,10 +1257,8 @@ using TMIData = TraitMethodImportData<TraitMethod,
 struct BuildClsInfo {
   IndexData& index;
   borrowed_ptr<ClassInfo> rleaf;
-  std::unordered_map<SString,
-                     std::pair<php::Prop,
-                               borrowed_ptr<const ClassInfo>>,
-                     string_data_hash, string_data_same> pbuilder;
+  hphp_hash_map<SString, std::pair<php::Prop, borrowed_ptr<const ClassInfo>>,
+                string_data_hash, string_data_same> pbuilder;
 };
 
 /*
@@ -1422,11 +1418,11 @@ auto build_methods_for_iface(IndexData& data, borrowed_ptr<ClassInfo> iface) {
     }
   }
 
-  std::unordered_set<SString> added;
+  hphp_fast_set<SString> added;
 
   auto add_method = [&] (SString name) {
     res::Func::FuncFamily ff;
-    std::unordered_set<borrowed_ptr<const php::Func>> seen;
+    hphp_hash_set<borrowed_ptr<const php::Func>> seen;
     auto& funcs = ff.possibleFuncs;
     for (auto cinfo : impls->second) {
       assertx(!(cinfo->cls->attrs & AttrInterface));
@@ -1597,7 +1593,7 @@ bool build_class_methods(BuildClsInfo& info) {
         assertx(!methods[m.second.idx]);
         methods[m.second.idx] = mteFromElm(m);
       }
-      for(auto const m : methods) {
+      for (auto const m : methods) {
         if (!m) continue;
         TraitMethod traitMethod { t, m->second.func, m->second.attrs };
         tmid.add(traitMethod, m->first);
@@ -1846,9 +1842,9 @@ void attribute_setter(const Attr& attrs, bool set, Attr attr) {
 }
 
 void add_unit_to_index(IndexData& index, const php::Unit& unit) {
-  std::unordered_map<
+  hphp_hash_map<
     borrowed_ptr<const php::Class>,
-    std::unordered_set<borrowed_ptr<const php::Class>>
+    hphp_hash_set<borrowed_ptr<const php::Class>>
   > closureMap;
 
   for (auto& c : unit.classes) {
@@ -2013,7 +2009,7 @@ private:
   SString n;
 };
 
-using ClonedClosureMap = std::unordered_map<
+using ClonedClosureMap = hphp_hash_map<
   php::Class*,
   std::pair<std::unique_ptr<php::Class>, uint32_t>
 >;
@@ -2322,7 +2318,7 @@ void flatten_traits(NamingEnv& env, ClassInfo* cinfo) {
     }
   };
 
-  std::unordered_set<PreClass::ClassRequirement, EqHash, EqHash> reqs;
+  hphp_hash_set<PreClass::ClassRequirement, EqHash, EqHash> reqs;
 
   for (auto const t : cinfo->usedTraits) {
     for (auto const& req : t->cls->requirements) {
@@ -2625,7 +2621,7 @@ struct ConflictGraph {
     conflicts.push_back(j);
   }
 
-  std::unordered_map<borrowed_ptr<const php::Class>,
+  hphp_hash_map<borrowed_ptr<const php::Class>,
                      std::vector<borrowed_ptr<const php::Class>>> map;
 };
 
@@ -2757,7 +2753,7 @@ void compute_iface_vtables(IndexData& index) {
 
   ConflictGraph cg;
   std::vector<borrowed_ptr<const php::Class>>             ifaces;
-  std::unordered_map<borrowed_ptr<const php::Class>, int> iface_uses;
+  hphp_hash_map<borrowed_ptr<const php::Class>, int> iface_uses;
 
   // Build up the conflict sets.
   for (auto& cinfo : index.allClassInfos) {
@@ -2797,7 +2793,7 @@ void compute_iface_vtables(IndexData& index) {
   // Assign slots, keeping track of the largest assigned slot and the total
   // number of uses for each slot.
   Slot max_slot = 0;
-  std::unordered_map<Slot, int> slot_uses;
+  hphp_hash_map<Slot, int> slot_uses;
   for (auto* iface : ifaces) {
     auto const slot = find_min_slot(iface, index.ifaceSlotMap, cg);
     index.ifaceSlotMap[iface] = slot;
@@ -3599,7 +3595,7 @@ folly::Optional<res::Class> Index::parentCls(const Context& ctx) const {
 }
 
 Index::ResolvedInfo Index::resolve_type_name(SString inName) const {
-  folly::Optional<std::unordered_set<const void*>> seen;
+  folly::Optional<hphp_fast_set<const void*>> seen;
 
   auto nullable = false;
   auto name = inName;

@@ -73,7 +73,7 @@ using ExnNode = php::ExnNode;
 std::unique_ptr<ExnNode> cloneExnTree(
   borrowed_ptr<ExnNode> in,
   BlockId delta,
-  std::unordered_map<borrowed_ptr<ExnNode>, borrowed_ptr<ExnNode>>& processed) {
+  hphp_fast_map<borrowed_ptr<ExnNode>, borrowed_ptr<ExnNode>>& processed) {
 
   auto clone = std::make_unique<ExnNode>();
   always_assert(!processed.count(in));
@@ -130,7 +130,7 @@ void fixupBlockIds(Bytecode& bc, BlockId delta) {
 }
 
 void copy_into(php::FuncBase* dst, const php::FuncBase& other) {
-  std::unordered_map<borrowed_ptr<ExnNode>, borrowed_ptr<ExnNode>> processed;
+  hphp_fast_map<borrowed_ptr<ExnNode>, borrowed_ptr<ExnNode>> processed;
 
   BlockId delta = dst->blocks.size();
   for (auto& theirs : other.exnNodes) {

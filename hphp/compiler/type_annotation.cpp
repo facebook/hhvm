@@ -290,6 +290,9 @@ TypeStructure::Kind TypeAnnotation::getKind() const {
   if (!strcasecmp(m_name.c_str(), "HH\\vec_or_dict")) {
     return TypeStructure::Kind::T_vec_or_dict;
   }
+  if (!strcasecmp(m_name.c_str(), "HH\\arraylike")) {
+    return TypeStructure::Kind::T_arraylike;
+  }
   if (!strcasecmp(m_name.c_str(), "HH\\dict")) {
     return TypeStructure::Kind::T_dict;
   }

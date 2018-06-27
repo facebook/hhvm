@@ -480,6 +480,10 @@ public:
   Type operator-(Type other) const;
   Type& operator-=(Type other) { return *this = *this - other; }
 
+  template<typename... Types>
+  static Type unionAll(Type t, Types... ts);
+  static Type unionAll();
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Is-a methods.                                                      [const]

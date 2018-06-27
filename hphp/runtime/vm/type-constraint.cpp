@@ -49,8 +49,7 @@ const StaticString s___invoke("__invoke"),
   s_darray{"HH\\darray"},
   s_varray_or_darray{"HH\\varray_or_darray"},
   s_vec{"HH\\vec"},
-  s_dict{"HH\\dict"},
-  s_vec_or_dict{"HH\\vec_or_dict"};
+  s_dict{"HH\\dict"};
 
 void TypeConstraint::init() {
   if (m_typeName == nullptr || isTypeVar() || isTypeConstant()) {
@@ -147,6 +146,7 @@ std::string TypeConstraint::displayName(const Func* func /*= nullptr*/,
       case AnnotType::DArray:   str = "darray"; break;
       case AnnotType::VArrOrDArr: str = "varray_or_darray"; break;
       case AnnotType::VecOrDict: str = "vec_or_dict"; break;
+      case AnnotType::ArrayLike: str = "arraylike"; break;
       case AnnotType::Nonnull:  str = "nonnull"; break;
       case AnnotType::Self:
       case AnnotType::This:
@@ -394,6 +394,7 @@ bool TypeConstraint::checkTypeAliasObj(const Class* cls) const {
     case AnnotMetaType::DArray:
     case AnnotMetaType::VArrOrDArr:
     case AnnotMetaType::VecOrDict:
+    case AnnotMetaType::ArrayLike:
       // Self and Parent should never happen, because type
       // aliases are not allowed to use those MetaTypes
       return false;
@@ -477,6 +478,7 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
         case MetaType::DArray:
         case MetaType::VArrOrDArr:
         case MetaType::VecOrDict:
+        case MetaType::ArrayLike:
           return false;
         case MetaType::Nonnull:
           return tv->m_type != KindOfNull;
@@ -693,6 +695,12 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     return false;
   }();
   if (done) return;
+
+  if (m_type == AnnotType::ArrayLike &&
+      (isArrayType(c->m_type) || isVecType(c->m_type) ||
+       isDictType(c->m_type) || isKeysetType(c->m_type))) {
+    return;
+  }
 
   if (UNLIKELY(isThis() && c->m_type == KindOfObject)) {
     Class* cls = c->m_data.pobj->getVMClass();
@@ -936,6 +944,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
     case AnnotMetaType::DArray:
     case AnnotMetaType::VArrOrDArr:
     case AnnotMetaType::VecOrDict:
+    case AnnotMetaType::ArrayLike:
       return MK::None;
   }
   not_reached();

@@ -2848,6 +2848,10 @@ folly::Optional<Type> type_of_type_structure(SArray ts) {
       return is_nullable ? TOptKeyset : TKeyset;
     case TypeStructure::Kind::T_vec_or_dict:
       return is_nullable ? union_of(TOptVec, TOptDict) : union_of(TVec, TDict);
+    case TypeStructure::Kind::T_arraylike:
+      return is_nullable
+        ? union_of(union_of(union_of(TOptArr, TOptVec), TOptDict), TOptKeyset)
+        : union_of(union_of(union_of(TArr, TVec), TDict), TKeyset);
     case TypeStructure::Kind::T_void:
       return TNull;
     case TypeStructure::Kind::T_tuple: {
@@ -3005,6 +3009,7 @@ Type from_hni_constraint(SString s) {
   if (!strcasecmp(p, "HH\\float"))    return union_of(ret, TDbl);
   if (!strcasecmp(p, "HH\\num"))      return union_of(ret, TNum);
   if (!strcasecmp(p, "HH\\string"))   return union_of(ret, TStr);
+  if (!strcasecmp(p, "HH\\arraykey")) return union_of(ret, TArrKey);
   if (!strcasecmp(p, "HH\\dict"))     return union_of(ret, TDict);
   if (!strcasecmp(p, "HH\\vec"))      return union_of(ret, TVec);
   if (!strcasecmp(p, "HH\\keyset"))   return union_of(ret, TKeyset);
@@ -3020,13 +3025,16 @@ Type from_hni_constraint(SString s) {
     }
     return union_of(ret, TArr);
   }
-  if (!strcasecmp(p, "array"))        return union_of(ret, TArr);
-  if (!strcasecmp(p, "HH\\arraykey")) return union_of(ret, TArrKey);
-  if (!strcasecmp(p, "HH\\mixed"))    return TInitGen;
-  if (!strcasecmp(p, "HH\\nonnull"))  return TInitGen;
   if (!strcasecmp(p, "HH\\vec_or_dict")) {
     return union_of(ret, union_of(TVec, TDict));
   }
+  if (!strcasecmp(p, "HH\\arraylike")) {
+    return union_of(ret,
+                    union_of(TArr, union_of(TVec, union_of(TDict, TKeyset))));
+  }
+  if (!strcasecmp(p, "array"))        return union_of(ret, TArr);
+  if (!strcasecmp(p, "HH\\mixed"))    return TInitGen;
+  if (!strcasecmp(p, "HH\\nonnull"))  return TInitGen;
 
   // It might be an object, or we might want to support type aliases in HNI at
   // some point.  For now just be conservative.

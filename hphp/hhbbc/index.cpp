@@ -4138,6 +4138,14 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
       if (candidate.subtypeOf(TVec)) return TVec;
       if (candidate.subtypeOf(TDict)) return TDict;
       break;
+    case AnnotMetaType::ArrayLike:
+      if (candidate.subtypeOf(TVArr)) return TVArr;
+      if (candidate.subtypeOf(TDArr)) return TDArr;
+      if (candidate.subtypeOf(TArr)) return TArr;
+      if (candidate.subtypeOf(TVec)) return TVec;
+      if (candidate.subtypeOf(TDict)) return TDict;
+      if (candidate.subtypeOf(TKeyset)) return TKeyset;
+      break;
     }
     return folly::none;
   }();

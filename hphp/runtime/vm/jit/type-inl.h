@@ -182,6 +182,18 @@ inline bool Type::maybe(Type t2) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Combinators.
+
+inline Type Type::unionAll() {
+  return TBottom;
+}
+
+template<typename... Types>
+inline Type Type::unionAll(Type t, Types... ts) {
+  return t | unionAll(ts...);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Is-a methods.
 
 inline bool Type::isUnion() const {

@@ -743,6 +743,42 @@ const ArrayData* staticallyResolveTypeStructure(
   return ts;
 }
 
+SSATmp* check_nullable(IRGS& env, SSATmp* res, SSATmp* var) {
+  return cond(
+    env,
+    [&] (Block* taken) { gen(env, JmpNZero, taken, res); },
+    [&] { return gen(env, IsType, TNull, var); },
+    [&] { return cns(env, true); }
+  );
+};
+
+void chain_is_type(IRGS& env, SSATmp* c, bool nullable, Type ty) {
+  always_assert(false);
+}
+
+template<typename... Types>
+void chain_is_type(IRGS& env, SSATmp* c, bool nullable,
+                 Type ty1, Type ty2, Types&&... rest) {
+  ifThenElse(
+    env,
+    [&](Block* taken) {
+      auto const res = gen(env, IsType, ty1, c);
+      gen(env, JmpNZero, taken, res);
+    },
+    [&] {
+      if (sizeof...(rest) == 0) {
+        auto const res = gen(env, IsType, ty2, c);
+        push(env, nullable ? check_nullable(env, res, c) : res);
+      } else {
+        chain_is_type(env, c, nullable, ty2, rest...);
+      }
+    },
+    [&] { // taken block
+      push(env, cns(env, true));
+    }
+  );
+};
+
 bool emitIsAsTypeStructWithoutResolvingIfPossible(
   IRGS& env,
   const ArrayData* ts,
@@ -763,15 +799,6 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
   auto const success = [&] { return asExpr ? true : cnsResult(true); };
   auto const fail = [&] { return asExpr ? false : cnsResult(false); };
 
-  auto const check_nullable = [&] (SSATmp* res, SSATmp* var) {
-    return cond(
-      env,
-      [&] (Block* taken) { gen(env, JmpNZero, taken, res); },
-      [&] { return gen(env, IsType, TNull, var); },
-      [&] { return cns(env, true); }
-    );
-  };
-
   auto const primitive = [&] (Type ty, bool should_negate = false) {
     auto const nty = is_nullable_ts ? ty|TNull : ty;
     if (t->isA(nty)) return should_negate ? fail() : success();
@@ -779,32 +806,25 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
     if (asExpr) return false;
     auto const c = popC(env);
     auto const res = gen(env, should_negate ? IsNType : IsType, ty, c);
-    push(env, is_nullable_ts ? check_nullable(res, c) : res);
+    push(env, is_nullable_ts ? check_nullable(env, res, c) : res);
     decRef(env, c);
     return true;
   };
 
-  auto const unionOf = [&] (Type ty1, Type ty2) {
-    auto const ty = is_nullable_ts ? ty1|ty2|TNull : ty1|ty2;
+  // We explicitly bind is_nullable_ts because failing to do so causes a
+  // spurious compiler error on some g++ versions.
+  auto const unionOf = [&,is_nullable_ts] (Type ty1, Type ty2,
+                                           auto&&... rest) {
+    auto const ty = Type::unionAll(ty1, ty2, rest...) |
+                    (is_nullable_ts ? TNull : TBottom);
     if (t->isA(ty)) return success();
     if (!t->type().maybe(ty)) return fail();
     if (asExpr) return false;
+
     auto const c = popC(env);
-    ifThenElse(
-      env,
-      [&](Block* taken) {
-        auto const res = gen(env, IsType, ty1, c);
-        gen(env, JmpNZero, taken, res);
-      },
-      [&]{
-        auto const res = gen(env, IsType, ty2, c);
-        push(env, is_nullable_ts ? check_nullable(res, c) : res);
-      },
-      [&]{ // taken block
-        push(env, cns(env, true));
-      }
-    );
+    chain_is_type(env, c, is_nullable_ts, ty1, ty2, rest...);
     decRef(env, c);
+
     return true;
   };
 
@@ -823,13 +843,15 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_num:         return unionOf(TInt, TDbl);
     case TypeStructure::Kind::T_arraykey:    return unionOf(TInt, TStr);
     case TypeStructure::Kind::T_vec_or_dict: return unionOf(TVec, TDict);
+    case TypeStructure::Kind::T_arraylike:
+      return unionOf(TArr, TVec, TDict, TKeyset);
     case TypeStructure::Kind::T_dict:
     case TypeStructure::Kind::T_vec: {
       auto const c = popC(env);
       auto const res = kind == TypeStructure::Kind::T_dict
         ? isDictImpl(env, c)
         : isVecImpl(env, c);
-      push(env, is_nullable_ts ? check_nullable(res, c) : res);
+      push(env, is_nullable_ts ? check_nullable(env, res, c) : res);
       decRef(env, c);
       return true;
     }

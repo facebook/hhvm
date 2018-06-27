@@ -66,6 +66,14 @@ TypedValue HHVM_FUNCTION(dummy_varr_or_darr_builtin, const Variant& var) {
   return tvReturn(staticEmptyVArray());
 }
 
+TypedValue HHVM_FUNCTION(dummy_arraylike_builtin, const Variant& var) {
+  if (var.isArray()) {
+    auto const& arr = var.asCArrRef();
+    return tvReturn(arr);
+  }
+  return tvReturn(staticEmptyKeysetArray());
+}
+
 Array HHVM_FUNCTION(dummy_array_builtin, const Array& arr) {
   if (!arr.isVecOrVArray() && !arr.isDictOrDArray()) return arr;
   return Array::Create();
@@ -82,6 +90,8 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_darray_builtin, dummy_darray_builtin);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_varr_or_darr_builtin,
               dummy_varr_or_darr_builtin);
+  HHVM_FALIAS(__hhvm_intrinsics\\dummy_arraylike_builtin,
+              dummy_arraylike_builtin);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_array_builtin, dummy_array_builtin);
 
   loadSystemlib("std_intrinsics");

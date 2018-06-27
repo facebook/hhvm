@@ -46,7 +46,8 @@ enum class AnnotMetaType : uint8_t {
   DArray = 9,
   VArrOrDArr = 10,
   VecOrDict = 11,
-  Nonnull = 12,
+  ArrayLike = 12,
+  Nonnull = 13,
 };
 
 enum class AnnotType : uint16_t {
@@ -75,6 +76,7 @@ enum class AnnotType : uint16_t {
   DArray   = (uint16_t)AnnotMetaType::DArray << 8       | (uint8_t)KindOfUninit,
   VArrOrDArr = (uint16_t)AnnotMetaType::VArrOrDArr << 8 | (uint8_t)KindOfUninit,
   VecOrDict  = (uint16_t)AnnotMetaType::VecOrDict << 8  | (uint8_t)KindOfUninit,
+  ArrayLike  = (uint16_t)AnnotMetaType::ArrayLike << 8  | (uint8_t)KindOfUninit,
 };
 
 inline AnnotMetaType getAnnotMetaType(AnnotType at) {
@@ -227,7 +229,13 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         : AnnotAction::Pass;
     case AnnotMetaType::VecOrDict:
       return (isVecType(dt) || isDictType(dt))
-        ? AnnotAction::Pass : AnnotAction::Fail;
+        ? AnnotAction::Pass
+        : AnnotAction::Fail;
+    case AnnotMetaType::ArrayLike:
+      return (isArrayType(dt) || isVecType(dt) ||
+              isDictType(dt) || isKeysetType(dt))
+        ? AnnotAction::Pass
+        : AnnotAction::Fail;
     case AnnotMetaType::Precise:
       if (UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices) &&
           at == AnnotType::Array && isArrayType(dt)) {

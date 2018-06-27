@@ -207,6 +207,7 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
                                       strcasecmp(hint, "HH\\darray") &&
                                       strcasecmp(hint, "HH\\varray_or_darray") &&
                                       strcasecmp(hint, "HH\\vec_or_dict") &&
+                                      strcasecmp(hint, "HH\\arraylike") &&
                                       strcasecmp(hint, "array"));
 
   // Normally a named type like 'int' is compatible with Int but not integer
@@ -254,6 +255,7 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
         compat = (acceptAny ||
                   !strcasecmp(hint, "HH\\vec") ||
                   !strcasecmp(hint, "HH\\vec_or_dict") ||
+                  !strcasecmp(hint, "HH\\arraylike") ||
                   (RuntimeOption::EvalHackArrDVArrs &&
                    (!strcasecmp(hint, "HH\\varray") ||
                     !strcasecmp(hint, "HH\\varray_or_darray")))
@@ -265,6 +267,7 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
         compat = (acceptAny ||
                   !strcasecmp(hint, "HH\\dict") ||
                   !strcasecmp(hint, "HH\\vec_or_dict") ||
+                  !strcasecmp(hint, "HH\\arraylike") ||
                   (RuntimeOption::EvalHackArrDVArrs &&
                    (!strcasecmp(hint, "HH\\darray") ||
                     !strcasecmp(hint, "HH\\varray_or_darray")))
@@ -273,13 +276,16 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
 
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-        compat = (acceptAny || !strcasecmp(hint, "HH\\keyset"));
+        compat = (acceptAny ||
+                  !strcasecmp(hint, "HH\\keyset") ||
+                  !strcasecmp(hint, "HH\\arraylike"));
         return;
 
       case KindOfPersistentArray:
       case KindOfArray:
         compat = (acceptAny ||
                   !strcasecmp(hint, "array") ||
+                  !strcasecmp(hint, "HH\\arraylike") ||
                   (!RuntimeOption::EvalHackArrDVArrs &&
                    (!strcasecmp(hint, "HH\\varray") ||
                     !strcasecmp(hint, "HH\\darray") ||

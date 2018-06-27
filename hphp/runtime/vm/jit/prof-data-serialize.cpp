@@ -431,6 +431,7 @@ bool write_type_alias(ProfDataSerializer& ser, const TypeAliasReq* td) {
         case TypeStructure::Kind::T_vec:
         case TypeStructure::Kind::T_keyset:
         case TypeStructure::Kind::T_vec_or_dict:
+        case TypeStructure::Kind::T_arraylike:
         case TypeStructure::Kind::T_nonnull:
           break;
 

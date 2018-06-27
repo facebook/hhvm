@@ -189,6 +189,10 @@ bool checkTypeStructureMatchesCellImpl(
     case TypeStructure::Kind::T_vec_or_dict:
       result = isVecType(type) || isDictType(type);
       break;
+    case TypeStructure::Kind::T_arraylike:
+      result = isArrayType(type) || isVecType(type) ||
+               isDictType(type) || isKeysetType(type);
+      break;
     case TypeStructure::Kind::T_enum: {
       assertx(ts.exists(s_classname));
       auto const cls = Unit::lookupClass(ts[s_classname].asStrRef().get());
@@ -417,6 +421,7 @@ void errorOnIsAsExpressionInvalidTypes(const Array& ts) {
     case TypeStructure::Kind::T_vec:
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
+    case TypeStructure::Kind::T_arraylike:
     case TypeStructure::Kind::T_enum:
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
@@ -477,6 +482,7 @@ bool typeStructureCouldBeNonStatic(const Array& ts) {
     case TypeStructure::Kind::T_vec:
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
+    case TypeStructure::Kind::T_arraylike:
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:
       return true;

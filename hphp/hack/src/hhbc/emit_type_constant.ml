@@ -33,9 +33,6 @@ let get_kind_num ~tparams p =
   | "hh\\mixed" -> 9
   | "tuple" -> 10
   | "fun" -> 11
-  | "hh\\darray" -> 24
-  | "hh\\varray" -> 25
-  | "hh\\varray_or_darray" ->  26
   | "array" -> 12
   | "typevar" | "hh\\_" -> 13 (* corresponds to user OF_GENERIC *)
   | "shape" -> 14
@@ -48,6 +45,10 @@ let get_kind_num ~tparams p =
   | "hh\\keyset" -> 21
   | "hh\\vec_or_dict" -> 22
   | "hh\\nonnull" -> 23
+  | "hh\\darray" -> 24
+  | "hh\\varray" -> 25
+  | "hh\\varray_or_darray" ->  26
+  | "hh\\arraylike" -> 27
   | "typeaccess" -> 102
   | _ when String.length p > 4 && String.sub p 0 4 = "xhp_" -> 103
   | "unresolved"
@@ -63,10 +64,15 @@ and is_prim = function
   | _ -> false
 
 and is_resolved_classname = function
-  | "HH\\darray" | "HH\\varray" | "HH\\varray_or_darray"
-  | "array" | "HH\\vec"
-  | "HH\\dict" | "HH\\keyset"
-  | "HH\\vec_or_dict" -> true
+  | "array"
+  | "HH\\darray"
+  | "HH\\varray"
+  | "HH\\varray_or_darray"
+  | "HH\\vec"
+  | "HH\\dict"
+  | "HH\\keyset"
+  | "HH\\vec_or_dict"
+  | "HH\\arraylike" -> true
   | _ -> false
 
 let add_ns ~namespace id =

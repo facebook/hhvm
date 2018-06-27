@@ -89,6 +89,7 @@ let alias_map = List.fold_left ~f:add_alias ~init:SMap.empty
   HH_ONLY_TYPE("this");
   HH_ONLY_TYPE("varray_or_darray");
   HH_ONLY_TYPE("vec_or_dict");
+  HH_ONLY_TYPE("arraylike");
   HH_ONLY_TYPE("nonnull");
 
   HH_ALIAS("classname", "string");

@@ -100,6 +100,7 @@ const std::string
   s_hh_dict("HH\\dict"),
   s_hh_keyset("HH\\keyset"),
   s_hh_vec_or_dict("HH\\vec_or_dict"),
+  s_hh_arraylike("HH\\arraylike"),
   s_hh("HH\\")
 ;
 
@@ -327,6 +328,12 @@ std::string fullName(const Array& arr, bool forDisplay) {
       break;
     case TypeStructure::Kind::T_vec_or_dict:
       name += s_hh_vec_or_dict;
+      if (arr.exists(s_generic_types)) {
+        genericTypeName(arr, name, forDisplay);
+      }
+      break;
+    case TypeStructure::Kind::T_arraylike:
+      name += s_hh_arraylike;
       if (arr.exists(s_generic_types)) {
         genericTypeName(arr, name, forDisplay);
       }
@@ -617,7 +624,8 @@ Array resolveTS(TSEnv& env,
     case TypeStructure::Kind::T_dict:
     case TypeStructure::Kind::T_vec:
     case TypeStructure::Kind::T_keyset:
-    case TypeStructure::Kind::T_vec_or_dict: {
+    case TypeStructure::Kind::T_vec_or_dict:
+    case TypeStructure::Kind::T_arraylike: {
       if (kind == TypeStructure::Kind::T_array ||
         kind == TypeStructure::Kind::T_darray ||
         kind == TypeStructure::Kind::T_varray ||

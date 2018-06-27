@@ -218,6 +218,7 @@ struct TypeConstraint {
   bool isCallable() const { return m_type == Type::Callable; }
   bool isNumber()   const { return m_type == Type::Number; }
   bool isArrayKey() const { return m_type == Type::ArrayKey; }
+  bool isArrayLike() const { return m_type == Type::ArrayLike; }
 
   bool isArray()    const {
     return m_type == Type::Array ||

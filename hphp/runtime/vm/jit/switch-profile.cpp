@@ -34,15 +34,14 @@ std::vector<SwitchCaseCount>
 sortedSwitchProfile(TargetProfile<SwitchProfile>& profile, int32_t nCases) {
   // SwitchProfile is variable-sized so we have to manually allocate it and
   // pass the buffer to TargetProfile::data().
-  auto& data = *static_cast<SwitchProfile*>(
-    calloc(nCases, sizeof(SwitchProfile::cases[0]))
-  );
+  auto const size = sizeof(SwitchProfile) + SwitchProfile::extraSize(nCases);
+  auto& data = *static_cast<SwitchProfile*>(calloc(1, size));
   SCOPE_EXIT { free(&data); };
-  profile.data(data, nCases * sizeof(SwitchProfile::cases[0]));
+  profile.data(data, size);
 
   std::vector<SwitchCaseCount> values;
   for (int i = 0; i < nCases; ++i) {
-    values.emplace_back(SwitchCaseCount { i, data.cases[i] });
+    values.emplace_back(SwitchCaseCount { i, data.cases()[i] });
   }
   std::sort(values.begin(), values.end());
   return values;

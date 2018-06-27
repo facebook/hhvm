@@ -153,7 +153,7 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
     PUNT(Switch-UnknownType);
   }
 
-  auto const dataSize = iv.size() * sizeof(SwitchProfile::cases[0]);
+  auto const dataSize = SwitchProfile::extraSize(iv.size());
   TargetProfile<SwitchProfile> profile(
     env.unit.context(), env.irb->curMarker(), s_switchProfile.get(),
     dataSize

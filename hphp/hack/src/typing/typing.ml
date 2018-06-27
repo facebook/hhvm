@@ -1667,7 +1667,7 @@ and expr_
       | None ->
           make_result env (T.Id id) (Reason.Rwitness cst_pos, Typing_utils.tany env)
       | Some (ty, _) ->
-        if cst_name = SN.HH.rx_is_enabled
+        if cst_name = SN.Rx.is_enabled
           && Env.env_reactivity env = Nonreactive
           && not (TypecheckerOptions.unsafe_rx (Env.get_options env))
         then Errors.rx_enabled_in_non_rx_context cst_pos;
@@ -5934,7 +5934,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
   | p, Binop ((Ast.Diff | Ast.Diff2 as op), e1, e2) ->
       let op = if op = Ast.Diff then Ast.Eqeq else Ast.EQeqeq in
       condition env (not tparamet) (p, Binop (op, e1, e2))
-  | _, Id (_, s) when s = SN.HH.rx_is_enabled ->
+  | _, Id (_, s) when s = SN.Rx.is_enabled ->
       (* when Rx\IS_ENABLED is false - switch env to non-reactive *)
       if not tparamet
       then Env.set_env_reactive env Nonreactive

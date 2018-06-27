@@ -354,7 +354,6 @@ module HH = struct
   let asio_va                = "\\HH\\Asio\\va"
   let lib_tuple_from_async   = "\\HH\\Lib\\Tuple\\from_async"
   let lib_tuple_gen          = "\\HH\\Lib\\Tuple\\gen"
-  let rx_is_enabled          = "\\HH\\Rx\\IS_ENABLED"
 
 end
 
@@ -362,6 +361,7 @@ module Rx = struct
   let freeze = "\\HH\\Rx\\freeze"
   let mutable_ = "\\HH\\Rx\\mutable"
   let cTraversable = "\\HH\\Rx\\Traversable"
+  let is_enabled = "\\HH\\Rx\\IS_ENABLED"
   let cKeyedTraversable = "\\HH\\Rx\\KeyedTraversable"
 end
 

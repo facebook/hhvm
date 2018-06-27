@@ -164,7 +164,7 @@ module CheckFunctionBody = struct
           else {}
         }
       *)
-      when c = SN.HH.rx_is_enabled ->
+      when c = SN.Rx.is_enabled ->
       block f_type env then_stmt;
       block f_type env else_stmt;
     | _ ->
@@ -220,7 +220,7 @@ module CheckFunctionBody = struct
     | _, Typename _
     | _, Lplaceholder _
     | _, Dollardollar _ -> ()
-    | _, Id (pos, const) when const = SN.HH.rx_is_enabled ->
+    | _, Id (pos, const) when const = SN.Rx.is_enabled ->
         Errors.rx_is_enabled_invalid_location pos
     | _, Id _ -> ()
 

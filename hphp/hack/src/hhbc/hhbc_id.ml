@@ -21,6 +21,7 @@ let default_auto_aliased_namespaces = [
   ; "PHP", "HH\\Lib\\PHP"
   ; "Str", "HH\\Lib\\Str"
   ; "Vec", "HH\\Lib\\Vec"
+  ; "Rx", "HH\\Rx"
   ]
 let auto_namespace_map () =
   Option.value Hhbc_options.(aliased_namespaces !compiler_options)

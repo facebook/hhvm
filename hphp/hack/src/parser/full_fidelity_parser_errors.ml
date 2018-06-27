@@ -2083,10 +2083,13 @@ let classish_errors env node parents namespace_name names errors =
     names, errors
   | _ -> names, errors
 
-let class_element_errors _env node parents errors =
+let class_element_errors env node parents errors =
   match syntax node with
   | ConstDeclaration _ when is_inside_trait parents ->
     make_error_from_node node SyntaxError.const_in_trait :: errors
+  | ConstDeclaration { const_visibility; _ }
+    when not (is_missing const_visibility) && env.is_hh_file && not env.codegen ->
+      make_error_from_node node SyntaxError.const_visibility :: errors
   | _ -> errors
 
 

@@ -1,19 +1,17 @@
-((script 320
-  ((list 320
-    ((markup_section 4
+((script 335
+  ((list 335
+    ((markup_section 5
       ((missing 0 ()) (() markup 0 ())
-       (markup_suffix 4
-        ((() <? 2 ())
-         (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
+       (markup_suffix 5 ((() <? 2 ()) (() name 3 ((end_of_line 1)))))
        (missing 0 ())))
-     (classish_declaration 304
+     (classish_declaration 328
       ((missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 11 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (classish_body 286
+       (classish_body 310
         ((() { 1 ((end_of_line 1)))
-         (list 280
+         (list 304
           ((const_declaration 22
             ((missing 0 ()) (missing 0 ())
              (((whitespace 2)) const 5 ((whitespace 1))) (missing 0 ())
@@ -60,43 +58,43 @@
                      (literal 14 ((() double_quoted_string_literal 14 ())))))))
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))
-           (const_declaration 53
+           (const_declaration 61
             ((((whitespace 2)) public 6 ((whitespace 1))) (missing 0 ())
              (() const 5 ((whitespace 1)))
              (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
-             (list 32
-              ((list_item 32
-                ((constant_declarator 32
+             (list 40
+              ((list_item 40
+                ((constant_declarator 40
                   ((() name 11 ((whitespace 1)))
-                   (simple_initializer 20
+                   (simple_initializer 28
                     ((() = 1 ((whitespace 1)))
-                     (literal 18 ((() double_quoted_string_literal 18 ())))))))
+                     (literal 26 ((() double_quoted_string_literal 26 ())))))))
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))
-           (const_declaration 59
+           (const_declaration 67
             ((((whitespace 2)) protected 9 ((whitespace 1))) (missing 0 ())
              (() const 5 ((whitespace 1)))
              (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
-             (list 35
-              ((list_item 35
-                ((constant_declarator 35
+             (list 43
+              ((list_item 43
+                ((constant_declarator 43
                   ((() name 14 ((whitespace 1)))
-                   (simple_initializer 20
+                   (simple_initializer 28
                     ((() = 1 ((whitespace 1)))
-                     (literal 18 ((() double_quoted_string_literal 18 ())))))))
+                     (literal 26 ((() double_quoted_string_literal 26 ())))))))
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))
-           (const_declaration 55
+           (const_declaration 63
             ((((whitespace 2)) private 7 ((whitespace 1))) (missing 0 ())
              (() const 5 ((whitespace 1)))
              (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
-             (list 33
-              ((list_item 33
-                ((constant_declarator 33
+             (list 41
+              ((list_item 41
+                ((constant_declarator 41
                   ((() name 12 ((whitespace 1)))
-                   (simple_initializer 20
+                   (simple_initializer 28
                     ((() = 1 ((whitespace 1)))
-                     (literal 18 ((() double_quoted_string_literal 18 ())))))))
+                     (literal 26 ((() double_quoted_string_literal 26 ())))))))
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))

@@ -246,6 +246,8 @@ let using_st_function_scoped_top_level =
   "Using statement in function scoped form may only be used at the top " ^
   "level of a function or a method"
 let const_in_trait = "Traits cannot have constants"
+let const_visibility = "Class constants cannot have visibility modifiers in " ^
+  "Hack files"
 let strict_namespace_hh =
   "To use strict hack, place // strict after the open tag. " ^
   "If it's already there, remove this line. " ^

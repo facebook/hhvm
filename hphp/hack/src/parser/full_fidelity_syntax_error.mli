@@ -173,6 +173,7 @@ val list_as_subscript : string
 val vdarray_in_php : string
 val using_st_function_scoped_top_level : string
 val const_in_trait : string
+val const_visibility : string
 val strict_namespace_hh : string
 val strict_namespace_not_hh : string
 val original_definition : string

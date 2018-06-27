@@ -13,6 +13,7 @@ let make_local_changes () =
   Errors.set_allow_errors_in_default_path true;
   SharedMem.allow_hashtable_writes_by_current_process false;
   Fixmes.HH_FIXMES.LocalChanges.push_stack();
+  Fixmes.DECL_HH_FIXMES.LocalChanges.push_stack();
   File_heap.FileHeap.LocalChanges.push_stack();
   Parser_heap.ParserHeap.LocalChanges.push_stack();
 
@@ -37,6 +38,7 @@ let revert_local_changes () =
   Errors.set_allow_errors_in_default_path false;
   SharedMem.allow_hashtable_writes_by_current_process true;
   Fixmes.HH_FIXMES.LocalChanges.pop_stack();
+  Fixmes.DECL_HH_FIXMES.LocalChanges.pop_stack();
   File_heap.FileHeap.LocalChanges.pop_stack();
   Parser_heap.ParserHeap.LocalChanges.pop_stack();
 
@@ -78,6 +80,7 @@ let declare_and_check_ast ?(path=path) ~make_ast ~f tcopt =
   Autocomplete.auto_complete := false;
   Errors.do_ @@ make_then_revert_local_changes begin fun () ->
     Fixmes.HH_FIXMES.(remove_batch @@ KeySet.singleton path);
+    Fixmes.DECL_HH_FIXMES.(remove_batch @@ KeySet.singleton path);
     let ast = make_ast () in
     let funs, classes, typedefs, consts =
       List.fold_left ast ~f:begin fun (funs, classes, typedefs, consts) def ->

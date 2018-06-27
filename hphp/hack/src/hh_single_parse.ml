@@ -286,10 +286,12 @@ let run_parsers dumper (file : Relative_path.t) (conf : parser_config) ~hash ~co
     let open Printf in
     let filename = Relative_path.S.to_string file in
     let ast_result = run_ast file in
-    let ast_fixmes = Fixmes.HH_FIXMES.get file in
+    let ast_fixmes = Fixmes.get_fixmes_from_heap file in
     Fixmes.HH_FIXMES.remove_batch (Relative_path.Set.singleton file);
+    Fixmes.DECL_HH_FIXMES.remove_batch (Relative_path.Set.singleton file);
+
     let ffp_result = run_ffp file in
-    let ffp_fixmes = Fixmes.HH_FIXMES.get file in
+    let ffp_fixmes = Fixmes.get_fixmes_from_heap file in
     let sexpr = compare_asts dumper filename diff_cmd ast_result ffp_result in
     let () = compare_pos ast_result.Parser_return.ast ffp_result.Lowerer.ast in
     let () = compare_fixmes ast_fixmes ffp_fixmes in

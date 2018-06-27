@@ -26,6 +26,18 @@ module HH_FIXMES = SharedMem.WithCache (Relative_path.S) (struct
   let use_sqlite_fallback () = false
   end)
 
+module DECL_HH_FIXMES = SharedMem.WithCache (Relative_path.S) (struct
+  type t = Pos.t IMap.t IMap.t
+  let prefix = Prefix.make()
+  let description = "DECL_HH_FIXMES"
+  let use_sqlite_fallback () = false
+  end)
+
+  let get_fixmes_from_heap filename =
+    match HH_FIXMES.get filename with
+    | None -> DECL_HH_FIXMES.get filename
+    | Some x -> Some x
+
 (*****************************************************************************)
 (* We register the function that can look up a position and determine if
  * a given position is affected by an HH_FIXME. We use a reference to avoid
@@ -39,7 +51,7 @@ let () =
   Errors.get_hh_fixme_pos := begin fun err_pos err_code ->
     let filename = Pos.filename err_pos in
     let err_line, _, _ = Pos.info_pos err_pos in
-    HH_FIXMES.get filename
+    get_fixmes_from_heap filename
     |> Option.value_map ~f:(IMap.get err_line) ~default:None
     |> Option.value_map ~f:(IMap.get err_code) ~default:None
     end;
@@ -70,7 +82,7 @@ let add_applied_fixme applied_fixmes err_code fn err_line =
     (add_applied_fixme_file file_value err_code err_line)
 
 let get_unused_fixmes_for codes applied_fixme_map fn acc =
-  match HH_FIXMES.get fn with
+  match get_fixmes_from_heap fn with
   | None -> acc
   | Some fixme_map ->
     IMap.fold (fun line code_map acc ->

@@ -574,11 +574,11 @@ bool PDOMySqlConnection::begin() {
 }
 
 bool PDOMySqlConnection::commit() {
-  return mysql_commit(m_server) >= 0;
+  return !mysql_commit(m_server);
 }
 
 bool PDOMySqlConnection::rollback() {
-  return mysql_rollback(m_server) >= 0;
+  return !mysql_rollback(m_server);
 }
 
 bool PDOMySqlConnection::setAttribute(int64_t attr, const Variant& value) {

@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/analysis.h"
-#include "hphp/runtime/vm/jit/type-constraint.h"
+#include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
 
@@ -1535,7 +1535,7 @@ void nativeImplInlined(IRGS& env) {
 SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
   if (src->isA(TObj) && src->type().clsSpec()) {
     auto const cls = src->type().clsSpec().cls();
-    if (!env.irb->constrainValue(src, TypeConstraint(cls).setWeak())) {
+    if (!env.irb->constrainValue(src, GuardConstraint(cls).setWeak())) {
       // If we know the class without having to specialize a guard
       // any further, use it.
       return cns(env, cls != SystemLib::s___PHP_Incomplete_ClassClass);
@@ -1956,10 +1956,10 @@ void implGenericIdx(IRGS& env) {
 }
 
 /*
- * Return the TypeConstraint that should be used to constrain baseType for an
+ * Return the GuardConstraint that should be used to constrain baseType for an
  * Idx bytecode.
  */
-TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
+GuardConstraint idxBaseConstraint(Type baseType, Type keyType,
                                  bool& useVec, bool& useDict) {
   if (baseType < TObj && baseType.clsSpec()) {
     auto const cls = baseType.clsSpec().cls();
@@ -1975,7 +1975,7 @@ TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
               collections::isType(cls, CollectionType::Set) ||
               collections::isType(cls, CollectionType::ImmSet);
 
-    if (useVec || useDict) return TypeConstraint(cls);
+    if (useVec || useDict) return GuardConstraint(cls);
   }
 
   useVec = useDict = false;

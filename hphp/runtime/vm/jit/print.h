@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_VM_PRINT_H_
 #define incl_HPHP_VM_PRINT_H_
 
+#include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
-#include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/util/trace.h"
@@ -89,8 +89,8 @@ void printUnit(int level, const IRUnit&, const char* caption,
 inline std::ostream& operator<<(std::ostream& os, const Type& t) {
   return os << t.toString();
 }
-inline std::ostream& operator<<(std::ostream& os, TypeConstraint tc) {
-  return os << tc.toString();
+inline std::ostream& operator<<(std::ostream& os, GuardConstraint gc) {
+  return os << gc.toString();
 }
 
 std::string banner(const char* caption);

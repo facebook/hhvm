@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime.h"
 
-#include "hphp/runtime/vm/jit/type-constraint.h"
+#include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -99,7 +99,7 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
    */
   if (srcType < TObj && srcType.clsSpec()) {
     auto const cls = srcType.clsSpec().cls();
-    if (!env.irb->constrainValue(src, TypeConstraint(cls).setWeak()) &&
+    if (!env.irb->constrainValue(src, GuardConstraint(cls).setWeak()) &&
         ((knownCls && cls->classof(knownCls)) ||
          cls->name()->isame(className))) {
       return cns(env, true);
@@ -144,7 +144,7 @@ void verifyTypeImpl(IRGS& env, int32_t const id, bool isReturnType,
   if (isReturnType && !RuntimeOption::EvalCheckReturnTypeHints) return;
 
   auto func = curFunc(env);
-  auto const& tc = id == HPHP::TypeConstraint::ReturnId
+  auto const& tc = id == TypeConstraint::ReturnId
     ? func->returnTypeConstraint()
     : func->params()[id].typeConstraint;
   if (tc.isMixed() || (RuntimeOption::EvalThisTypeHintLevel == 0
@@ -945,18 +945,18 @@ void emitAsTypeStruct(IRGS& env, const ArrayData* a) {
 }
 
 void emitVerifyRetTypeC(IRGS& env) {
-  verifyTypeImpl(env, HPHP::TypeConstraint::ReturnId, true);
+  verifyTypeImpl(env, TypeConstraint::ReturnId, true);
 }
 
 void emitVerifyRetTypeV(IRGS& env) {
-  verifyTypeImpl(env, HPHP::TypeConstraint::ReturnId, true);
+  verifyTypeImpl(env, TypeConstraint::ReturnId, true);
 }
 
 void emitVerifyRetNonNullC(IRGS& env) {
   auto func = curFunc(env);
   auto const& tc = func->returnTypeConstraint();
   always_assert(!tc.isNullable());
-  verifyTypeImpl(env, HPHP::TypeConstraint::ReturnId, true, true);
+  verifyTypeImpl(env, TypeConstraint::ReturnId, true, true);
 }
 
 void emitVerifyParamType(IRGS& env, int32_t paramId) {

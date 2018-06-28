@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TYPE_CONSTRAINT_H_
-#define incl_HPHP_JIT_TYPE_CONSTRAINT_H_
+#ifndef incl_HPHP_JIT_GUARD_CONSTRAINT_H_
+#define incl_HPHP_JIT_GUARD_CONSTRAINT_H_
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -35,16 +35,16 @@ namespace jit {
  * Type information used by guard relaxation code to track the properties of a
  * type that consumers care about.
  */
-struct TypeConstraint {
+struct GuardConstraint {
 
   /*
    * Constructors.
    */
-  /* implicit */ TypeConstraint(DataTypeCategory cat = DataTypeGeneric);
-  explicit TypeConstraint(const Class* cls);
+  /* implicit */ GuardConstraint(DataTypeCategory cat = DataTypeGeneric);
+  explicit GuardConstraint(const Class* cls);
 
   /*
-   * Stringify the TypeConstraint.
+   * Stringify the GuardConstraint.
    */
   std::string toString() const;
 
@@ -53,9 +53,9 @@ struct TypeConstraint {
   // Basic info.
 
   /*
-   * Mark the TypeConstraint as weak; see documentation for `weak'.
+   * Mark the GuardConstraint as weak; see documentation for `weak'.
    */
-  TypeConstraint& setWeak(bool w = true);
+  GuardConstraint& setWeak(bool w = true);
 
   /*
    * Is this a trivial constraint?
@@ -65,8 +65,8 @@ struct TypeConstraint {
   /*
    * Comparison.
    */
-  bool operator==(TypeConstraint tc2) const;
-  bool operator!=(TypeConstraint tc2) const;
+  bool operator==(GuardConstraint gc2) const;
+  bool operator!=(GuardConstraint gc2) const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -75,7 +75,7 @@ struct TypeConstraint {
   static constexpr uint8_t kWantArrayKind = 0x1;
 
   /*
-   * Is this TypeConstraint for a specialized type?
+   * Is this GuardConstraint for a specialized type?
    */
   bool isSpecialized() const;
 
@@ -84,7 +84,7 @@ struct TypeConstraint {
    *
    * @requires: isSpecialized()
    */
-  TypeConstraint& setWantArrayKind();
+  GuardConstraint& setWantArrayKind();
   bool wantArrayKind() const;
 
   /*
@@ -96,7 +96,7 @@ struct TypeConstraint {
    *                     or a child of `cls'
    *    desiredClass:    wantClass()
    */
-  TypeConstraint& setDesiredClass(const Class* cls);
+  GuardConstraint& setDesiredClass(const Class* cls);
   bool wantClass() const;
   const Class* desiredClass() const;
 
@@ -131,16 +131,16 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Returns true iff `t' is specific enough to fit `tc', meaning a consumer
- * constraining a value with `tc' would be satisfied with `t' as the value's
+ * Returns true iff `t' is specific enough to fit `gc', meaning a consumer
+ * constraining a value with `gc' would be satisfied with `t' as the value's
  * type after relaxation.
  */
-bool typeFitsConstraint(Type t, TypeConstraint tc);
+bool typeFitsConstraint(Type t, GuardConstraint gc);
 
 /*
- * relaxConstraint returns the least specific TypeConstraint 'tc' that doesn't
- * prevent the intersection of knownType and relaxType(toRelax, tc.category)
- * from satisfying origTc. It is used in IRBuilder::constrain*() functions to
+ * relaxConstraint returns the least specific GuardConstraint 'gc' that doesn't
+ * prevent the intersection of knownType and relaxType(toRelax, gc.category)
+ * from satisfying origGc. It is used in IRBuilder::constrain*() functions to
  * determine how to constrain the typeParam and src values of Check
  * instructions, and the src values of Assert instructions.
  *
@@ -154,18 +154,18 @@ bool typeFitsConstraint(Type t, TypeConstraint tc);
  * instruction to satisfy DataTypeSpecialized, because relaxType(Obj,
  * DataTypeBoxAndCountness) == Obj.
  */
-TypeConstraint relaxConstraint(const TypeConstraint origTc,
-                               const Type knownType, const Type toRelax);
+GuardConstraint relaxConstraint(GuardConstraint origGc,
+                                Type knownType, Type toRelax);
 
 /*
- * Return a copy of tc refined with any new information in newTc.
+ * Return a copy of gc refined with any new information in newGc.
  */
-TypeConstraint applyConstraint(TypeConstraint origTc, TypeConstraint newTc);
+GuardConstraint applyConstraint(GuardConstraint origGc, GuardConstraint newGc);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
 
-#include "hphp/runtime/vm/jit/type-constraint-inl.h"
+#include "hphp/runtime/vm/jit/guard-constraint-inl.h"
 
 #endif

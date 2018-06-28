@@ -266,7 +266,7 @@ void cgRaiseHackArrParamNotice(IRLS& env, const IRInstruction* inst) {
   auto args = argGroup(env, inst).ssa(1).ssa(0).imm(int64_t(extra->type));
   auto const target = [&] {
     if (extra->isReturn) {
-      if (extra->id == HPHP::TypeConstraint::ReturnId) {
+      if (extra->id == TypeConstraint::ReturnId) {
         return CallSpec::direct(hackArrRetNoticeImpl);
       }
       args.imm(extra->id);

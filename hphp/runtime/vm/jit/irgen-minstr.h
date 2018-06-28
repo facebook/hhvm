@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/static-string-table.h"
 
 #include "hphp/runtime/vm/jit/extra-data.h"
+#include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
@@ -95,7 +96,7 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
           if (!is_dict && !is_keyset) {
             env.irb->constrainValue(
               arr,
-              TypeConstraint(DataTypeSpecialized).setWantArrayKind()
+              GuardConstraint(DataTypeSpecialized).setWantArrayKind()
             );
             auto const TMixedArr = Type::Array(ArrayData::kMixedKind);
             marr = gen(env, CheckType, TMixedArr, taken, arr);

@@ -21,13 +21,13 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
+#include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/guard-constraints.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
-#include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 #include <folly/Optional.h>
@@ -115,11 +115,11 @@ struct IRBuilder {
    *
    * These simply constrain the location, then delegate to fs().
    */
-  const LocalState& local(uint32_t id, TypeConstraint tc);
-  const StackState& stack(IRSPRelOffset offset, TypeConstraint tc);
+  const LocalState& local(uint32_t id, GuardConstraint gc);
+  const StackState& stack(IRSPRelOffset offset, GuardConstraint gc);
   const CSlotState& clsRefSlot(uint32_t slot);
-  SSATmp* valueOf(Location l, TypeConstraint tc);
-  Type     typeOf(Location l, TypeConstraint tc);
+  SSATmp* valueOf(Location l, GuardConstraint gc);
+  Type     typeOf(Location l, GuardConstraint gc);
 
   /*
    * Helper for unboxing predicted types.
@@ -153,29 +153,29 @@ struct IRBuilder {
   const GuardConstraints* guards() const { return &m_constraints; }
 
   /*
-   * Return true iff `tc' is more specific than the existing constraint for the
+   * Return true iff `gc' is more specific than the existing constraint for the
    * guard `inst'.
    *
-   * This does not necessarily constrain the guard, if `tc.weak' is true.
+   * This does not necessarily constrain the guard, if `gc.weak' is true.
    */
-  bool constrainGuard(const IRInstruction* inst, TypeConstraint tc);
+  bool constrainGuard(const IRInstruction* inst, GuardConstraint gc);
 
   /*
    * Trace back to the guard that provided the type of `val', if any, then
-   * constrain it so that its type will not be relaxed beyond `tc'.
+   * constrain it so that its type will not be relaxed beyond `gc'.
    *
-   * Like constrainGuard(), this returns true iff `tc' is more specific than
-   * the existing constraint, and does not constrain the guard if `tc.weak' is
+   * Like constrainGuard(), this returns true iff `gc' is more specific than
+   * the existing constraint, and does not constrain the guard if `gc.weak' is
    * true.
    */
-  bool constrainValue(SSATmp* const val, TypeConstraint tc);
+  bool constrainValue(SSATmp* const val, GuardConstraint gc);
 
   /*
    * Constrain the type sources of the given bytecode location.
    */
-  bool constrainLocation(Location l, TypeConstraint tc);
-  bool constrainLocal(uint32_t id, TypeConstraint tc, const std::string& why);
-  bool constrainStack(IRSPRelOffset offset, TypeConstraint tc);
+  bool constrainLocation(Location l, GuardConstraint gc);
+  bool constrainLocal(uint32_t id, GuardConstraint gc, const std::string& why);
+  bool constrainStack(IRSPRelOffset offset, GuardConstraint gc);
 
   /*
    * Returns the number of instructions that have non-generic type constraints.
@@ -332,14 +332,14 @@ private:
   /*
    * Type constraint helpers.
    */
-  bool constrainLocation(Location l, TypeConstraint tc,
+  bool constrainLocation(Location l, GuardConstraint gc,
                          const std::string& why);
   bool constrainCheck(const IRInstruction* inst,
-                      TypeConstraint tc, Type srcType);
+                      GuardConstraint gc, Type srcType);
   bool constrainAssert(const IRInstruction* inst,
-                       TypeConstraint tc, Type srcType,
+                       GuardConstraint gc, Type srcType,
                        folly::Optional<Type> knownType = folly::none);
-  bool constrainTypeSrc(TypeSource typeSrc, TypeConstraint tc);
+  bool constrainTypeSrc(TypeSource typeSrc, GuardConstraint gc);
   bool shouldConstrainGuards() const;
 
   /////////////////////////////////////////////////////////////////////////////

@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/type-constraint.h"
+#include "hphp/runtime/vm/jit/guard-constraint.h"
 
 #include "hphp/runtime/base/datatype.h"
 
@@ -26,7 +26,7 @@ TRACE_SET_MOD(hhir);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string TypeConstraint::toString() const {
+std::string GuardConstraint::toString() const {
   std::string ret = "<" + typeCategoryName(category);
 
   if (category == DataTypeSpecialized) {
@@ -43,8 +43,8 @@ std::string TypeConstraint::toString() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool typeFitsConstraint(Type t, TypeConstraint tc) {
-  switch (tc.category) {
+bool typeFitsConstraint(Type t, GuardConstraint gc) {
+  switch (gc.category) {
     case DataTypeGeneric:
       return true;
 
@@ -68,17 +68,17 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
       // Type::isSpecialized() returns true for types like {Arr<Packed>|Int}
       // and Arr has non-specialized subtypes, so we require that t is
       // specialized, a strict subtype of Obj or Arr, and that it fits the
-      // specific requirements of tc.
+      // specific requirements of gc.
 
-      assertx(tc.wantClass() ^ tc.wantArrayKind());
+      assertx(gc.wantClass() ^ gc.wantArrayKind());
 
       if (t < TObj && t.clsSpec()) {
-        return tc.wantClass() &&
-               t.clsSpec().cls()->classof(tc.desiredClass());
+        return gc.wantClass() &&
+               t.clsSpec().cls()->classof(gc.desiredClass());
       }
       if (t < TArr && t.arrSpec()) {
         auto arrSpec = t.arrSpec();
-        if (tc.wantArrayKind() && !arrSpec.kind()) return false;
+        if (gc.wantArrayKind() && !arrSpec.kind()) return false;
         return true;
       }
 
@@ -93,42 +93,42 @@ static void incCategory(DataTypeCategory& c) {
   c = static_cast<DataTypeCategory>(static_cast<uint8_t>(c) + 1);
 }
 
-TypeConstraint relaxConstraint(const TypeConstraint origTc,
-                               const Type knownType, const Type toRelax) {
+GuardConstraint relaxConstraint(GuardConstraint origGc,
+                                Type knownType, Type toRelax) {
   ITRACE(4, "relaxConstraint({}, knownType = {}, toRelax = {})\n",
-         origTc, knownType, toRelax);
+         origGc, knownType, toRelax);
   Trace::Indent _i;
 
   // AssertType can be given TCtx, which should never relax.
   if (toRelax.maybe(TCctx)) {
     always_assert(toRelax <= TCtx);
-    return origTc;
+    return origGc;
   }
 
   auto const dstType = knownType & toRelax;
-  always_assert_flog(typeFitsConstraint(dstType, origTc),
+  always_assert_flog(typeFitsConstraint(dstType, origGc),
                      "refine({}, {}) doesn't fit {}",
-                     knownType, toRelax, origTc);
+                     knownType, toRelax, origGc);
 
-  // Preserve origTc's weak property.
-  TypeConstraint newTc{DataTypeGeneric};
-  newTc.weak = origTc.weak;
+  // Preserve origGc's weak property.
+  GuardConstraint newGc{DataTypeGeneric};
+  newGc.weak = origGc.weak;
 
   while (true) {
-    if (newTc.isSpecialized()) {
+    if (newGc.isSpecialized()) {
       // We need to ask for the right kind of specialization, so grab it from
-      // origTc.
-      if (origTc.wantArrayKind()) newTc.setWantArrayKind();
-      if (origTc.wantClass()) newTc.setDesiredClass(origTc.desiredClass());
+      // origGc.
+      if (origGc.wantArrayKind()) newGc.setWantArrayKind();
+      if (origGc.wantClass()) newGc.setDesiredClass(origGc.desiredClass());
     }
 
-    auto const relaxed = relaxType(toRelax, newTc.category);
+    auto const relaxed = relaxType(toRelax, newGc.category);
     auto const newDstType = relaxed & knownType;
-    if (typeFitsConstraint(newDstType, origTc)) break;
+    if (typeFitsConstraint(newDstType, origGc)) break;
 
-    ITRACE(5, "newDstType = {}, newTc = {}; incrementing constraint\n",
-      newDstType, newTc);
-    incCategory(newTc.category);
+    ITRACE(5, "newDstType = {}, newGc = {}; incrementing constraint\n",
+      newDstType, newGc);
+    incCategory(newGc.category);
   }
   // DataTypeCountness can be relaxed to DataTypeGeneric in
   // optimizeProfiledGuards, so we can't rely on this category to give type
@@ -136,33 +136,34 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
   // DataTypeCategory for guards, we cannot return DataTypeCountness unless we
   // already had it to start with.  Instead, we return DataTypeBoxCountness,
   // which won't be further relaxed by optimizeProfiledGuards.
-  if (newTc.category == DataTypeCountness && origTc != DataTypeCountness) {
-    newTc.category = DataTypeBoxAndCountness;
+  if (newGc.category == DataTypeCountness && origGc != DataTypeCountness) {
+    newGc.category = DataTypeBoxAndCountness;
   }
-  ITRACE(4, "Returning {}\n", newTc);
-  // newTc shouldn't be any more specific than origTc.
-  always_assert(newTc.category <= origTc.category);
-  return newTc;
+  ITRACE(4, "Returning {}\n", newGc);
+  // newGc shouldn't be any more specific than origGc.
+  always_assert(newGc.category <= origGc.category);
+  return newGc;
 }
 
-TypeConstraint applyConstraint(TypeConstraint tc, const TypeConstraint newTc) {
-  tc.category = std::max(newTc.category, tc.category);
+GuardConstraint applyConstraint(GuardConstraint gc,
+                                GuardConstraint newGc) {
+  gc.category = std::max(newGc.category, gc.category);
 
-  if (newTc.wantArrayKind()) tc.setWantArrayKind();
+  if (newGc.wantArrayKind()) gc.setWantArrayKind();
 
-  if (newTc.wantClass()) {
-    if (tc.wantClass()) {
-      // It only makes sense to constrain tc with a class that's related to its
+  if (newGc.wantClass()) {
+    if (gc.wantClass()) {
+      // It only makes sense to constrain gc with a class that's related to its
       // existing class, and we want to preserve the more derived of the two.
-      auto cls1 = tc.desiredClass();
-      auto cls2 = newTc.desiredClass();
-      tc.setDesiredClass(cls1->classof(cls2) ? cls1 : cls2);
+      auto cls1 = gc.desiredClass();
+      auto cls2 = newGc.desiredClass();
+      gc.setDesiredClass(cls1->classof(cls2) ? cls1 : cls2);
     } else {
-      tc.setDesiredClass(newTc.desiredClass());
+      gc.setDesiredClass(newGc.desiredClass());
     }
   }
 
-  return tc;
+  return gc;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

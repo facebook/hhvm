@@ -26,6 +26,7 @@
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/analysis.h"
+#include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -34,7 +35,6 @@
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/type-constraint.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -609,30 +609,30 @@ void IRBuilder::setCurMarker(BCMarker newMarker) {
 ///////////////////////////////////////////////////////////////////////////////
 // Guard relaxation.
 
-bool IRBuilder::constrainGuard(const IRInstruction* inst, TypeConstraint tc) {
+bool IRBuilder::constrainGuard(const IRInstruction* inst, GuardConstraint gc) {
   if (!shouldConstrainGuards()) return false;
 
   auto& guard = m_constraints.guards[inst];
-  auto newTc = applyConstraint(guard, tc);
-  ITRACE(2, "constrainGuard({}, {}): {} -> {}\n", *inst, tc, guard, newTc);
+  auto newGc = applyConstraint(guard, gc);
+  ITRACE(2, "constrainGuard({}, {}): {} -> {}\n", *inst, gc, guard, newGc);
   Indent _i;
 
-  auto const changed = guard != newTc;
-  if (changed && !tc.weak) guard = newTc;
+  auto const changed = guard != newGc;
+  if (changed && !gc.weak) guard = newGc;
 
   return changed;
 }
 
-bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
-  if (!shouldConstrainGuards() || tc.empty()) return false;
+bool IRBuilder::constrainValue(SSATmp* const val, GuardConstraint gc) {
+  if (!shouldConstrainGuards() || gc.empty()) return false;
 
   if (!val) {
-    ITRACE(1, "attempted to constrain nullptr SSATmp*; bailing\n", tc);
+    ITRACE(1, "attempted to constrain nullptr SSATmp*; bailing\n", gc);
     return false;
   }
   auto inst = val->inst();
 
-  ITRACE(1, "constraining {} to {}\n", *inst, tc);
+  ITRACE(1, "constraining {} to {}\n", *inst, gc);
   Indent _i;
 
   if (inst->is(LdLoc, LdStk)) {
@@ -657,7 +657,7 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
                  inst->extra<LdStk>()->offset.offset);
         }
       }
-      changed |= constrainTypeSrc(typeSrc, tc);
+      changed |= constrainTypeSrc(typeSrc, gc);
     }
     return changed;
   }
@@ -666,22 +666,22 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
     // Sometimes code in irgen asks for a value with DataTypeSpecific but can
     // tolerate a less specific value.  If that happens, there's nothing to
     // constrain.
-    if (!typeFitsConstraint(val->type(), tc)) return false;
+    if (!typeFitsConstraint(val->type(), gc)) return false;
 
-    return constrainAssert(inst, tc, inst->src(0)->type());
+    return constrainAssert(inst, gc, inst->src(0)->type());
   }
 
   if (inst->is(CheckType)) {
     // Sometimes code in irgen asks for a value with DataTypeSpecific but can
     // tolerate a less specific value.  If that happens, there's nothing to
     // constrain.
-    if (!typeFitsConstraint(val->type(), tc)) return false;
+    if (!typeFitsConstraint(val->type(), gc)) return false;
 
-    return constrainCheck(inst, tc, inst->src(0)->type());
+    return constrainCheck(inst, gc, inst->src(0)->type());
   }
 
   if (inst->isPassthrough()) {
-    return constrainValue(inst->getPassthroughValue(), tc);
+    return constrainValue(inst->getPassthroughValue(), gc);
   }
 
   if (inst->is(DefLabel)) {
@@ -694,7 +694,7 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
     for (auto& pred : inst->block()->preds()) {
       assertx(pred.inst()->is(Jmp));
       auto src = pred.inst()->src(dst);
-      changed |= constrainValue(src, tc);
+      changed |= constrainValue(src, gc);
     }
     return changed;
   }
@@ -705,42 +705,42 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
   return false;
 }
 
-bool IRBuilder::constrainLocation(Location l, TypeConstraint tc,
+bool IRBuilder::constrainLocation(Location l, GuardConstraint gc,
                                   const std::string& why) {
   if (!shouldConstrainGuards() ||
       l.tag() == LTag::CSlot ||
-      tc.empty()) return false;
+      gc.empty()) return false;
 
-  ITRACE(1, "constraining {} to {} (for {})\n", show(l), tc, why);
+  ITRACE(1, "constraining {} to {} (for {})\n", show(l), gc, why);
   Indent _i;
 
   bool changed = false;
   for (auto typeSrc : m_state.typeSrcsOf(l)) {
-    changed |= constrainTypeSrc(typeSrc, tc);
+    changed |= constrainTypeSrc(typeSrc, gc);
   }
   return changed;
 }
 
-bool IRBuilder::constrainLocation(Location l, TypeConstraint tc) {
-  return constrainLocation(l, tc, "");
+bool IRBuilder::constrainLocation(Location l, GuardConstraint gc) {
+  return constrainLocation(l, gc, "");
 }
 
-bool IRBuilder::constrainLocal(uint32_t locID, TypeConstraint tc,
+bool IRBuilder::constrainLocal(uint32_t locID, GuardConstraint gc,
                                const std::string& why) {
-  return constrainLocation(loc(locID), tc, why);
+  return constrainLocation(loc(locID), gc, why);
 }
 
-bool IRBuilder::constrainStack(IRSPRelOffset offset, TypeConstraint tc) {
-  return constrainLocation(stk(offset), tc);
+bool IRBuilder::constrainStack(IRSPRelOffset offset, GuardConstraint gc) {
+  return constrainLocation(stk(offset), gc);
 }
 
-bool IRBuilder::constrainTypeSrc(TypeSource typeSrc, TypeConstraint tc) {
-  if (!shouldConstrainGuards() || tc.empty()) return false;
+bool IRBuilder::constrainTypeSrc(TypeSource typeSrc, GuardConstraint gc) {
+  if (!shouldConstrainGuards() || gc.empty()) return false;
 
-  ITRACE(1, "constraining type source {} to {}\n", show(typeSrc), tc);
+  ITRACE(1, "constraining type source {} to {}\n", show(typeSrc), gc);
   Indent _i;
 
-  if (typeSrc.isValue()) return constrainValue(typeSrc.value, tc);
+  if (typeSrc.isValue()) return constrainValue(typeSrc.value, gc);
 
   assertx(typeSrc.isGuard());
   auto const guard = typeSrc.guard;
@@ -749,17 +749,17 @@ bool IRBuilder::constrainTypeSrc(TypeSource typeSrc, TypeConstraint tc) {
                           AssertStk,   CheckStk,
                           AssertMBase, CheckMBase));
 
-  // If the dest of the Assert/Check doesn't fit `tc', there's no point in
+  // If the dest of the Assert/Check doesn't fit `gc', there's no point in
   // continuing.
   auto prevType = get_required(m_constraints.prevTypes, guard);
-  if (!typeFitsConstraint(prevType & guard->typeParam(), tc)) {
+  if (!typeFitsConstraint(prevType & guard->typeParam(), gc)) {
     return false;
   }
 
   if (guard->is(AssertLoc, AssertStk)) {
-    return constrainAssert(guard, tc, prevType);
+    return constrainAssert(guard, gc, prevType);
   }
-  return constrainCheck(guard, tc, prevType);
+  return constrainCheck(guard, gc, prevType);
 }
 
 /*
@@ -771,26 +771,26 @@ bool IRBuilder::constrainTypeSrc(TypeSource typeSrc, TypeConstraint tc) {
  * typeParam will be used as the `knownType'.)
  */
 bool IRBuilder::constrainAssert(const IRInstruction* inst,
-                                TypeConstraint tc, Type srcType,
+                                GuardConstraint gc, Type srcType,
                                 folly::Optional<Type> knownType) {
   if (!knownType) knownType = inst->typeParam();
 
   // If the known type fits the constraint, we're done.
-  if (typeFitsConstraint(*knownType, tc)) return false;
+  if (typeFitsConstraint(*knownType, gc)) return false;
 
-  auto const newTC = relaxConstraint(tc, *knownType, srcType);
-  ITRACE(1, "tracing through {}, orig tc: {}, new tc: {}\n",
-         *inst, tc, newTC);
+  auto const newGC = relaxConstraint(gc, *knownType, srcType);
+  ITRACE(1, "tracing through {}, orig gc: {}, new gc: {}\n",
+         *inst, gc, newGC);
 
   if (inst->is(AssertType, CheckType)) {
-    return constrainValue(inst->src(0), newTC);
+    return constrainValue(inst->src(0), newGC);
   }
 
   auto changed = false;
   auto const& typeSrcs = get_required(m_constraints.typeSrcs, inst);
 
   for (auto typeSrc : typeSrcs) {
-    changed |= constrainTypeSrc(typeSrc, newTC);
+    changed |= constrainTypeSrc(typeSrc, newGC);
   }
   return changed;
 }
@@ -799,7 +799,7 @@ bool IRBuilder::constrainAssert(const IRInstruction* inst,
  * Constrain the typeParam and sources of a Check instruction.
  */
 bool IRBuilder::constrainCheck(const IRInstruction* inst,
-                               TypeConstraint tc, Type srcType) {
+                               GuardConstraint gc, Type srcType) {
   assertx(inst->is(CheckType, CheckLoc, CheckStk, CheckMBase));
 
   auto changed = false;
@@ -807,15 +807,15 @@ bool IRBuilder::constrainCheck(const IRInstruction* inst,
 
   // Constrain the guard on the Check instruction, but first relax the
   // constraint based on what's known about `srcType'.
-  auto const guardTC = relaxConstraint(tc, srcType, typeParam);
-  changed |= constrainGuard(inst, guardTC);
+  auto const guardGC = relaxConstraint(gc, srcType, typeParam);
+  changed |= constrainGuard(inst, guardGC);
 
   // Relax typeParam with its current constraint.  This is used below to
   // recursively relax the constraint on the source, if needed.
-  auto constraint = applyConstraint(m_constraints.guards[inst], guardTC);
+  auto constraint = applyConstraint(m_constraints.guards[inst], guardGC);
   auto const knownType = relaxType(typeParam, constraint.category);
 
-  changed |= constrainAssert(inst, tc, srcType, knownType);
+  changed |= constrainAssert(inst, gc, srcType, knownType);
 
   return changed;
 }
@@ -830,13 +830,13 @@ uint32_t IRBuilder::numGuards() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const LocalState& IRBuilder::local(uint32_t id, TypeConstraint tc) {
-  constrainLocal(id, tc, "");
+const LocalState& IRBuilder::local(uint32_t id, GuardConstraint gc) {
+  constrainLocal(id, gc, "");
   return m_state.local(id);
 }
 
-const StackState& IRBuilder::stack(IRSPRelOffset offset, TypeConstraint tc) {
-  constrainStack(offset, tc);
+const StackState& IRBuilder::stack(IRSPRelOffset offset, GuardConstraint gc) {
+  constrainStack(offset, gc);
   return m_state.stack(offset);
 }
 
@@ -844,13 +844,13 @@ const CSlotState& IRBuilder::clsRefSlot(uint32_t slot) {
   return m_state.clsRefSlot(slot);
 }
 
-SSATmp* IRBuilder::valueOf(Location l, TypeConstraint tc) {
-  constrainLocation(l, tc, "");
+SSATmp* IRBuilder::valueOf(Location l, GuardConstraint gc) {
+  constrainLocation(l, gc, "");
   return m_state.valueOf(l);
 }
 
-Type IRBuilder::typeOf(Location l, TypeConstraint tc) {
-  constrainLocation(l, tc, "");
+Type IRBuilder::typeOf(Location l, GuardConstraint gc) {
+  constrainLocation(l, gc, "");
   return m_state.typeOf(l);
 }
 

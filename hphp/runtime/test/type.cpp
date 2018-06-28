@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
-#include "hphp/runtime/vm/jit/type-constraint.h"
+#include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/type.h"
 
@@ -309,18 +309,18 @@ TEST(Type, Top) {
 }
 
 namespace {
-inline bool fits(Type t, TypeConstraint tc) {
-  return typeFitsConstraint(t, tc);
+inline bool fits(Type t, GuardConstraint gc) {
+  return typeFitsConstraint(t, gc);
 }
 }
 
-TEST(Type, TypeConstraints) {
+TEST(Type, GuardConstraints) {
   EXPECT_TRUE(fits(TGen, DataTypeGeneric));
   EXPECT_FALSE(fits(TGen, DataTypeBoxAndCountness));
   EXPECT_FALSE(fits(TGen, DataTypeBoxAndCountnessInit));
   EXPECT_FALSE(fits(TGen, DataTypeSpecific));
   EXPECT_FALSE(fits(TGen,
-                    TypeConstraint(DataTypeSpecialized).setWantArrayKind()));
+                    GuardConstraint(DataTypeSpecialized).setWantArrayKind()));
 
   EXPECT_TRUE(fits(TCell,
                    {DataTypeGeneric}));
@@ -328,9 +328,9 @@ TEST(Type, TypeConstraints) {
                     {DataTypeGeneric}));
 
   EXPECT_FALSE(fits(TArr,
-                    TypeConstraint(DataTypeSpecialized).setWantArrayKind()));
+                    GuardConstraint(DataTypeSpecialized).setWantArrayKind()));
   EXPECT_TRUE(fits(Type::Array(ArrayData::kPackedKind),
-                   TypeConstraint(DataTypeSpecialized).setWantArrayKind()));
+                   GuardConstraint(DataTypeSpecialized).setWantArrayKind()));
 }
 
 TEST(Type, RelaxType) {
@@ -340,12 +340,12 @@ TEST(Type, RelaxType) {
                       DataTypeBoxAndCountness));
 
 
-  auto tc = TypeConstraint{DataTypeSpecialized};
-  tc.setDesiredClass(SystemLib::s_IteratorClass);
-  tc.category = DataTypeSpecialized;
+  auto gc = GuardConstraint{DataTypeSpecialized};
+  gc.setDesiredClass(SystemLib::s_IteratorClass);
+  gc.category = DataTypeSpecialized;
   auto subIter = Type::SubObj(SystemLib::s_IteratorClass);
   EXPECT_EQ("Obj<=Iterator", subIter.toString());
-  EXPECT_EQ(subIter, relaxType(subIter, tc.category));
+  EXPECT_EQ(subIter, relaxType(subIter, gc.category));
 
   EXPECT_EQ(TBoxedInitCell,
             relaxType(TBoxedInitCell, DataTypeBoxAndCountnessInit));
@@ -354,13 +354,13 @@ TEST(Type, RelaxType) {
 }
 
 TEST(Type, RelaxConstraint) {
-  EXPECT_EQ(TypeConstraint(DataTypeBoxAndCountness),
-            relaxConstraint(TypeConstraint{DataTypeSpecific},
+  EXPECT_EQ(GuardConstraint(DataTypeBoxAndCountness),
+            relaxConstraint(GuardConstraint{DataTypeSpecific},
                             TCell,
                             TArr));
 
-  EXPECT_EQ(TypeConstraint(DataTypeGeneric),
-            relaxConstraint(TypeConstraint{DataTypeBoxAndCountness},
+  EXPECT_EQ(GuardConstraint(DataTypeGeneric),
+            relaxConstraint(GuardConstraint{DataTypeBoxAndCountness},
                             TArr,
                             TCell));
 }

@@ -19,57 +19,57 @@
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline TypeConstraint::TypeConstraint(DataTypeCategory cat
+inline GuardConstraint::GuardConstraint(DataTypeCategory cat
                                       /* = DataTypeGeneric */)
   : category(cat)
   , weak(false)
   , m_specialized(0)
 {}
 
-inline TypeConstraint::TypeConstraint(const Class* cls)
-  : TypeConstraint(DataTypeSpecialized)
+inline GuardConstraint::GuardConstraint(const Class* cls)
+  : GuardConstraint(DataTypeSpecialized)
 {
   setDesiredClass(cls);
 }
 
-inline TypeConstraint& TypeConstraint::setWeak(bool w /* = true */) {
+inline GuardConstraint& GuardConstraint::setWeak(bool w /* = true */) {
   weak = w;
   return *this;
 }
 
-inline bool TypeConstraint::empty() const {
+inline bool GuardConstraint::empty() const {
   return category == DataTypeGeneric && !weak;
 }
 
-inline bool TypeConstraint::operator==(TypeConstraint tc2) const {
-  return category == tc2.category &&
-         weak == tc2.weak &&
-         m_specialized == tc2.m_specialized;
+inline bool GuardConstraint::operator==(GuardConstraint gc2) const {
+  return category == gc2.category &&
+         weak == gc2.weak &&
+         m_specialized == gc2.m_specialized;
 }
 
-inline bool TypeConstraint::operator!=(TypeConstraint tc2) const {
-  return !(*this == tc2);
+inline bool GuardConstraint::operator!=(GuardConstraint gc2) const {
+  return !(*this == gc2);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Specialization.
 
-inline bool TypeConstraint::isSpecialized() const {
+inline bool GuardConstraint::isSpecialized() const {
   return category == DataTypeSpecialized;
 }
 
-inline TypeConstraint& TypeConstraint::setWantArrayKind() {
+inline GuardConstraint& GuardConstraint::setWantArrayKind() {
   assertx(!wantClass());
   assertx(isSpecialized());
   m_specialized |= kWantArrayKind;
   return *this;
 }
 
-inline bool TypeConstraint::wantArrayKind() const {
+inline bool GuardConstraint::wantArrayKind() const {
   return m_specialized & kWantArrayKind;
 }
 
-inline TypeConstraint& TypeConstraint::setDesiredClass(const Class* cls) {
+inline GuardConstraint& GuardConstraint::setDesiredClass(const Class* cls) {
   assertx(m_specialized == 0 ||
          desiredClass()->classof(cls) || cls->classof(desiredClass()));
   assertx(isSpecialized());
@@ -78,11 +78,11 @@ inline TypeConstraint& TypeConstraint::setDesiredClass(const Class* cls) {
   return *this;
 }
 
-inline bool TypeConstraint::wantClass() const {
+inline bool GuardConstraint::wantClass() const {
   return m_specialized && !wantArrayKind();
 }
 
-inline const Class* TypeConstraint::desiredClass() const {
+inline const Class* GuardConstraint::desiredClass() const {
   assertx(wantClass());
   return reinterpret_cast<const Class*>(m_specialized);
 }

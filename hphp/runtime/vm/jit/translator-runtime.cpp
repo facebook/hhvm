@@ -560,7 +560,7 @@ void raise_error_sd(const StringData *msg) {
 ALWAYS_INLINE
 static bool VerifyTypeSlowImpl(const Class* cls,
                                const Class* constraint,
-                               const HPHP::TypeConstraint* expected) {
+                               const TypeConstraint* expected) {
   // This helper should only be called for the Object, This, Self, and Parent
   // cases
   assertx(expected->isObject() || expected->isSelf() || expected->isParent()
@@ -588,7 +588,7 @@ static bool VerifyTypeSlowImpl(const Class* cls,
 
 void VerifyParamTypeSlow(const Class* cls,
                          const Class* constraint,
-                         const HPHP::TypeConstraint* expected,
+                         const TypeConstraint* expected,
                          int param) {
   if (!VerifyTypeSlowImpl(cls, constraint, expected)) {
     VerifyParamTypeFail(param);
@@ -615,7 +615,7 @@ void VerifyParamTypeFail(int paramNum) {
 void VerifyRetTypeSlow(int32_t id,
                        const Class* cls,
                        const Class* constraint,
-                       const HPHP::TypeConstraint* expected,
+                       const TypeConstraint* expected,
                        TypedValue tv) {
   if (!VerifyTypeSlowImpl(cls, constraint, expected)) {
     VerifyRetTypeFail(id, &tv);
@@ -632,7 +632,7 @@ void VerifyRetTypeFail(int32_t id, TypedValue* tv) {
   VMRegAnchor _;
   const ActRec* ar = liveFrame();
   const Func* func = ar->m_func;
-  if (id == HPHP::TypeConstraint::ReturnId) {
+  if (id == TypeConstraint::ReturnId) {
     auto const& tc = func->returnTypeConstraint();
     assertx(!tc.check(tv, func));
     tc.verifyReturnFail(func, tv);

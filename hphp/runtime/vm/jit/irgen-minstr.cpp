@@ -23,11 +23,11 @@
 
 #include "hphp/runtime/vm/jit/array-kind-profile.h"
 #include "hphp/runtime/vm/jit/array-offset-profile.h"
+#include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/type-array-elem.h"
-#include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/vm/jit/irgen-arith.h"
@@ -194,15 +194,15 @@ bool prop_ignores_tvref(IRGS& env, SSATmp* base, const SSATmp* key) {
   if (!isDeclared && cls->hasNativePropHandler()) return false;
 
   if (propClass == cls ||
-      env.irb->constrainValue(base, TypeConstraint(propClass).setWeak())) {
-    env.irb->constrainValue(base, TypeConstraint(cls));
+      env.irb->constrainValue(base, GuardConstraint(propClass).setWeak())) {
+    env.irb->constrainValue(base, GuardConstraint(cls));
   }
   return true;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-folly::Optional<TypeConstraint> simpleOpConstraint(SimpleOp op) {
+folly::Optional<GuardConstraint> simpleOpConstraint(SimpleOp op) {
   switch (op) {
     case SimpleOp::None:
       return folly::none;
@@ -213,19 +213,19 @@ folly::Optional<TypeConstraint> simpleOpConstraint(SimpleOp op) {
     case SimpleOp::Dict:
     case SimpleOp::Keyset:
     case SimpleOp::String:
-      return TypeConstraint(DataTypeSpecific);
+      return GuardConstraint(DataTypeSpecific);
 
     case SimpleOp::PackedArray:
-      return TypeConstraint(DataTypeSpecialized).setWantArrayKind();
+      return GuardConstraint(DataTypeSpecialized).setWantArrayKind();
 
     case SimpleOp::Vector:
-      return TypeConstraint(c_Vector::classof());
+      return GuardConstraint(c_Vector::classof());
 
     case SimpleOp::Map:
-      return TypeConstraint(c_Map::classof());
+      return GuardConstraint(c_Map::classof());
 
     case SimpleOp::Pair:
-      return TypeConstraint(c_Pair::classof());
+      return GuardConstraint(c_Pair::classof());
   }
 
   always_assert(false);
@@ -303,7 +303,8 @@ bool mightCallMagicPropMethod(MOpMode mode, PropInfo propInfo) {
  */
 void specializeObjBase(IRGS& env, SSATmp* base) {
   if (base && base->isA(TObj) && base->type().clsSpec().cls()) {
-    env.irb->constrainValue(base, TypeConstraint(base->type().clsSpec().cls()));
+    env.irb->constrainValue(
+      base, GuardConstraint(base->type().clsSpec().cls()));
   }
 }
 
@@ -322,8 +323,8 @@ PropInfo getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType,
   auto const info = getPropertyOffset(env, curClass(env), baseCls, keyType);
   if (info.offset == -1) return info;
 
-  if (env.irb->constrainValue(base,
-                              TypeConstraint(info.propClass).setWeak())) {
+  if (env.irb->constrainValue(
+        base, GuardConstraint(info.propClass).setWeak())) {
     if (!constrain) {
       // We can't use this specialized class without making a guard more
       // expensive, so don't do it.
@@ -675,7 +676,7 @@ SSATmp* emitProfiledPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
       base = gen(env, CheckType, typePackedArr, exit, base);
       env.irb->constrainValue(
         base,
-        TypeConstraint(DataTypeSpecialized).setWantArrayKind()
+        GuardConstraint(DataTypeSpecialized).setWantArrayKind()
       );
       return emitPackedArrayGet(env, base, key, mode, finish);
     }
@@ -1723,8 +1724,8 @@ SSATmp* setNewElemImpl(IRGS& env) {
   // mismatched in-states for any catch block edges we emit later on.
   auto const basePtr = ldMBase(env);
 
-  auto const tc = TypeConstraint(DataTypeSpecialized).setWantArrayKind();
-  env.irb->constrainLocation(Location::MBase{}, tc);
+  auto const gc = GuardConstraint(DataTypeSpecialized).setWantArrayKind();
+  env.irb->constrainLocation(Location::MBase{}, gc);
 
   if (baseType <= Type::Array(ArrayData::kPackedKind) || baseType <= TVec) {
     setNewElemPackedArrayDataImpl(env, basePtr, baseType, value);
@@ -1751,8 +1752,8 @@ SSATmp* setElemImpl(IRGS& env, SSATmp* key) {
   auto const baseType = predictedBaseType(env);
   auto const simpleOp = simpleCollectionOp(baseType, key->type(), false, false);
 
-  if (auto tc = simpleOpConstraint(simpleOp)) {
-    env.irb->constrainLocation(Location::MBase{}, *tc);
+  if (auto gc = simpleOpConstraint(simpleOp)) {
+    env.irb->constrainLocation(Location::MBase{}, *gc);
   }
 
   switch (simpleOp) {

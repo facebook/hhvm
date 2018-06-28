@@ -19,10 +19,10 @@
 #include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/runtime/vm/jit/call-target-profile.h"
+#include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/meth-profile.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
-#include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/vm/jit/irgen-basic.h"
@@ -358,7 +358,7 @@ bool optimizeProfiledPushMethod(IRGS& env,
                                Type::ExactCls(uniqueClass) :
                                Type::ExactObj(uniqueClass),
                                sideExit, objOrCls);
-      env.irb->constrainValue(refined, TypeConstraint(uniqueClass));
+      env.irb->constrainValue(refined, GuardConstraint(uniqueClass));
       auto const ctx = getCtx(uniqueMeth, refined, uniqueClass);
       fpushActRec(env, cns(env, uniqueMeth), ctx, numParams,
                   isMagic ? methodName : nullptr, cns(env, dynamic));
@@ -463,7 +463,7 @@ void fpushObjMethod(IRGS& env,
   bool exactClass = false;
 
   if (auto cls = obj->type().clsSpec().cls()) {
-    if (!env.irb->constrainValue(obj, TypeConstraint(cls).setWeak())) {
+    if (!env.irb->constrainValue(obj, GuardConstraint(cls).setWeak())) {
       // We know the class without having to specialize a guard any further.  We
       // may still want to use MethProfile to gather more information in case
       // the class isn't known exactly.

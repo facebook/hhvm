@@ -1,0 +1,6 @@
+File "return.php", line 8, characters 10-11:
+Invalid return type (Typing[4110])
+File "return.php", line 7, characters 25-31:
+This is a dynamic value
+File "return.php", line 7, characters 14-18:
+It is incompatible with a mixed value

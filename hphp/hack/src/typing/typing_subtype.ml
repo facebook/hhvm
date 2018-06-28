@@ -405,9 +405,17 @@ let rec simplify_subtype
   (* Tvoid is not allowed to subtype Tdynamic *)
   | (_, Tprim Nast.Tvoid), (_, Tdynamic) -> invalid ()
 
+  (* everything subtypes mixed *)
   | _, (_, Tmixed) -> valid ()
-  | _, (_, Tdynamic) -> valid ()
   | _, (_, Toption (_, Tnonnull)) -> valid ()
+
+  (* mixed doesn't subtype dynamic *)
+  | (_, Tmixed), (_, Tdynamic) -> invalid ()
+  | (_, Toption (_, Tnonnull)), (_, Tdynamic) -> invalid ()
+
+  (* everything else non-mixed subtypes dynamic *)
+  | _, (_, Tdynamic) -> valid ()
+
   | (_, Tprim (Nast.Tint | Nast.Tfloat)), (_, Tprim Nast.Tnum) -> valid ()
   | (_, Tprim (Nast.Tint | Nast.Tstring)), (_, Tprim Nast.Tarraykey) -> valid ()
   | (_,

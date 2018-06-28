@@ -195,7 +195,7 @@ void emitClsCnsD(IRGS& env,
 void emitClsCns(IRGS& env, const StringData* cnsNameStr, uint32_t clsRefSlot) {
   auto const clsTmp = peekClsRef(env, clsRefSlot);
   auto const clsTy = clsTmp->type();
-  if (!clsTy.clsSpec()) {
+  if (!clsTy.clsSpec() || !isNormalClass(clsTy.clsSpec().cls())) {
     if (RuntimeOption::RepoAuthoritative) {
       TargetProfile<ClsCnsProfile> profile(env.context, env.irb->curMarker(),
                                            clsCnsProfileKey.get());

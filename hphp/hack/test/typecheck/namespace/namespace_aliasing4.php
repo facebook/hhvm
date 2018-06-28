@@ -11,10 +11,11 @@ namespace HH\Lib\Dict {
     return 1;
   }
 }
+namespace {
+  function main() {
+    expect_int(Dict\foo()); // error
+    expect_int(\Dict\foo()); // error
+  }
 
-function main() {
-  expect_int(Dict\foo()); // error
-  expect_int(\Dict\foo()); // error
+  function expect_int(int $x): void {}
 }
-
-function expect_int(int $x): void {}

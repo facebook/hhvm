@@ -1,8 +1,8 @@
-File "namespace_aliasing2.php", line 10, characters 14-21:
+File "namespace_aliasing2.php", line 10, characters 16-23:
 Unbound name: Dict\foo (a global function) (Naming[2049])
-File "namespace_aliasing2.php", line 10, characters 14-21:
+File "namespace_aliasing2.php", line 10, characters 16-23:
 Unbound name: Dict\foo (a global constant) (Naming[2049])
-File "namespace_aliasing2.php", line 11, characters 14-22:
+File "namespace_aliasing2.php", line 11, characters 16-24:
 Unbound name: Dict\foo (a global function) (Naming[2049])
-File "namespace_aliasing2.php", line 11, characters 14-22:
+File "namespace_aliasing2.php", line 11, characters 16-24:
 Unbound name: Dict\foo (a global constant) (Naming[2049])

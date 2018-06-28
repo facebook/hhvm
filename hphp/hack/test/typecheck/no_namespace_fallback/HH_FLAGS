@@ -1,1 +1,1 @@
---no-fallback-in-namespaces
+--parser ffp --no-fallback-in-namespaces

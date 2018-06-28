@@ -1,0 +1,2 @@
+File "yield_from_bad1.php", line 4, characters 7-22:
+`yield from` can only appear as a statement, after `return`, or on the right of an assignment (Parsing[1002])

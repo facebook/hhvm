@@ -294,6 +294,9 @@ type expr_location =
   | InDoubleQuotedString
   | InBacktickedString
   | InGlobalVar
+  | AsStatement
+  | RightOfAssignment
+  | RightOfReturn
 
 let in_string l =
   l = InDoubleQuotedString || l = InBacktickedString
@@ -1252,9 +1255,12 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
     | BinaryExpression
       { binary_left_operand; binary_operator; binary_right_operand }
       ->
+        let rlocation =
+          if location = AsStatement && token_kind binary_operator = Some TK.Equal
+          then RightOfAssignment else TopLevel in
         pBop binary_operator env
           (pExpr binary_left_operand  env)
-          (pExpr binary_right_operand env)
+          (pExpr binary_right_operand ~location:rlocation env)
 
     | Token t ->
       (match location, Token.kind t with
@@ -1267,20 +1273,27 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       | InBacktickedString, _ -> String (Php_escaping.unescape_backtick (text node))
       | MemberSelect, _
       | InGlobalVar, _
-      | TopLevel, _ -> Id (pos_name node env)
+      | TopLevel, _
+      | AsStatement, _
+      | RightOfAssignment, _
+      | RightOfReturn, _ -> Id (pos_name node env)
       )
 
-    | YieldExpression { yield_operand; _ } when text yield_operand = "break" ->
-      env.saw_yield <- true;
-      Yield_break
-    | YieldExpression { yield_operand; _ } when is_missing yield_operand ->
-      env.saw_yield <- true;
-      Yield (AFvalue (pos, Null))
     | YieldExpression { yield_operand; _ } ->
       env.saw_yield <- true;
-      Yield (pAField yield_operand env)
+      if location <> AsStatement && location <> RightOfAssignment
+      then raise_parsing_error env node SyntaxError.invalid_yield;
+      if text yield_operand = "break"
+      then Yield_break
+      else
+      if is_missing yield_operand
+      then Yield (AFvalue (pos, Null))
+      else Yield (pAField yield_operand env)
+
     | YieldFromExpression { yield_from_operand; _ } ->
       env.saw_yield <- true;
+      if location <> AsStatement && location <> RightOfAssignment && location <> RightOfReturn
+      then raise_parsing_error env node SyntaxError.invalid_yield_from;
       Yield_from (pExpr yield_from_operand env)
 
     | DefineExpression { define_keyword; define_argument_list; _ } -> Call
@@ -1809,7 +1822,7 @@ and pStmt : stmt parser = fun node env ->
   | ExpressionStatement { expression_statement_expression; _ } ->
     if is_missing expression_statement_expression
     then pos, Noop
-    else pos, Expr (pExpr expression_statement_expression env)
+    else pos, Expr (pExpr ~location:AsStatement expression_statement_expression env)
   | CompoundStatement { compound_statements; compound_right_brace; _ } ->
     let tail =
       match leading_token compound_right_brace with
@@ -1934,7 +1947,7 @@ and pStmt : stmt parser = fun node env ->
   | ReturnStatement { return_expression; return_keyword; _ } ->
     let expr = match syntax return_expression with
       | Missing -> None
-      | _ -> Some (pExpr return_expression env)
+      | _ -> Some (pExpr ~location:RightOfReturn return_expression env)
     in
     pos, Return (expr)
   | Syntax.GotoLabel { goto_label_name; _ } ->

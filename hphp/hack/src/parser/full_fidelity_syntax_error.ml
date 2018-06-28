@@ -469,3 +469,9 @@ let invalid_variable_name =
 
 let function_modifier s =
   Printf.sprintf "Top-level function cannot have modifier '%s'" s
+
+let invalid_yield =
+  "Yield can only appear as a statement or on the right of an assignment"
+
+let invalid_yield_from =
+  "`yield from` can only appear as a statement, after `return`, or on the right of an assignment"

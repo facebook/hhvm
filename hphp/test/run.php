@@ -3065,7 +3065,8 @@ function print_failure($argv, $results, $options) {
 
     print_commands($failed, $options);
 
-    $rerun = make_header("Re-run just the failing tests:") . $argv[0];
+    $rerun = make_header("Re-run just the failing tests:") .
+      str_replace("run.php", "run", $argv[0]);
     foreach ($options as $option => $value) {
       if ($option === "servers") continue;
       if ($option === "threads") {

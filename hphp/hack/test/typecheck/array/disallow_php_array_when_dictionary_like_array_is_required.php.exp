@@ -1,6 +1,6 @@
 File "disallow_php_array_when_dictionary_like_array_is_required.php", line 10, characters 30-53:
 Invalid argument (Typing[4110])
-File "disallow_php_array_when_dictionary_like_array_is_required.php", line 3, characters 37-41:
+File "disallow_php_array_when_dictionary_like_array_is_required.php", line 3, characters 37-54:
 This is an array (used like a hashtable)
 File "disallow_php_array_when_dictionary_like_array_is_required.php", line 5, characters 36-40:
 It is incompatible with an untyped array

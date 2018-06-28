@@ -1,8 +1,8 @@
-File "disallow_varray_where_dict_like_array_is_required.php", line 4, characters 10-15:
+File "disallow_varray_where_dict_like_array_is_required.php", line 4, characters 10-26:
 Invalid return type (Typing[4110])
 File "disallow_varray_where_dict_like_array_is_required.php", line 3, characters 24-29:
 This is a string
-File "disallow_varray_where_dict_like_array_is_required.php", line 4, characters 10-15:
+File "disallow_varray_where_dict_like_array_is_required.php", line 4, characters 10-26:
 It is incompatible with an int
-File "disallow_varray_where_dict_like_array_is_required.php", line 4, characters 10-15:
+File "disallow_varray_where_dict_like_array_is_required.php", line 4, characters 10-26:
 This can only be indexed with integers

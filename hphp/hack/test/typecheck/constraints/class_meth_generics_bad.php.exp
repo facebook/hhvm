@@ -20,7 +20,7 @@ Some type constraint(s) here are violated (Typing[4110])
   'Tu' is a constrained type parameter
   File "class_meth_generics_bad.php", line 11, characters 51-58:
   This is an array key (int/string)
-  File "class_meth_generics_bad.php", line 30, characters 34-36:
+  File "class_meth_generics_bad.php", line 30, characters 34-41:
   It is incompatible with an object of type vec
 File "class_meth_generics_bad.php", line 31, characters 19-19:
 Some type constraint(s) here are violated (Typing[4110])

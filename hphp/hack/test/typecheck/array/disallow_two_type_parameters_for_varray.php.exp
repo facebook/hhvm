@@ -1,2 +1,2 @@
-File "disallow_two_type_parameters_for_varray.php", line 3, characters 18-23:
-Too many type arguments for this type (Naming[2065])
+File "disallow_two_type_parameters_for_varray.php", line 3, characters 33-33:
+Encountered unexpected token '>'. (Parsing[1002])

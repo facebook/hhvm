@@ -1084,7 +1084,18 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       { tuple_expression_keyword = recv
       ; tuple_expression_items   = args
       ; _ }
-      -> Call (pExpr recv env, [], couldMap ~f:pExpr args env, [])
+      ->
+      let pos_if_has_parens =
+        match syntax recv with
+        | ParenthesizedExpression _ -> Some (pPos recv env)
+        | _ -> None in
+      let recv = pExpr recv env in
+      let recv =
+        match snd recv, pos_if_has_parens with
+        | (Obj_get _ | Class_get _), Some p -> p, ParenthesizedExpr recv
+        | _ -> recv in
+      let args, varargs = split_args_varargs args in
+      Call (recv, [], args, varargs)
     | FunctionCallExpression
       { function_call_receiver = recv
       ; function_call_argument_list =
@@ -1222,7 +1233,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
          * fixities.
          *)
         let postfix = kind node = SyntaxKind.PostfixUnaryExpression in
-        (match token_kind operator with
+        let kind = token_kind operator in
+        (match kind with
         | Some TK.PlusPlus   when postfix -> Unop (Upincr, expr)
         | Some TK.MinusMinus when postfix -> Unop (Updecr, expr)
         | Some TK.PlusPlus                -> Unop (Uincr,  expr)
@@ -1250,6 +1262,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
             Lvar (p, "$" ^ s)
           | _ -> Dollar expr
           )
+
         | _ -> missing_syntax "unary operator" node env
         )
     | BinaryExpression

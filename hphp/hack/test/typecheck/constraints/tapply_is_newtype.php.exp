@@ -1,4 +1,4 @@
-File "tapply_is_newtype.php--file2.php", line 4, characters 18-30:
+File "tapply_is_newtype.php--file2.php", line 4, characters 18-37:
 Some type constraint(s) here are violated (Typing[4110])
   File "tapply_is_newtype.php--file1.php", line 3, characters 22-22:
   'T' is a constrained type parameter

@@ -1,6 +1,6 @@
 File "disallow_php_array_when_vector_like_array_is_required.php", line 10, characters 22-45:
 Invalid argument (Typing[4110])
-File "disallow_php_array_when_vector_like_array_is_required.php", line 3, characters 29-33:
+File "disallow_php_array_when_vector_like_array_is_required.php", line 3, characters 29-38:
 This is an array (used like a vector)
 File "disallow_php_array_when_vector_like_array_is_required.php", line 5, characters 36-40:
 It is incompatible with an untyped array

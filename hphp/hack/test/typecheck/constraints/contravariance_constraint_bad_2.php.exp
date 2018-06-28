@@ -1,4 +1,4 @@
-File "contravariance_constraint_bad_2.php", line 39, characters 7-14:
+File "contravariance_constraint_bad_2.php", line 39, characters 7-55:
 Invalid argument (Typing[4110])
   File "contravariance_constraint_bad_2.php", line 43, characters 12-13:
   Some type constraint(s) here are violated

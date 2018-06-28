@@ -4168,13 +4168,19 @@ void in(ISS& env, const bc::VerifyRetNonNullC& /*op*/) {
 
   auto stackT = topC(env);
 
-  if (!is_opt(stackT)) {
+  if (!stackT.couldBe(TInitNull)) {
     reduce(env, bc::Nop {});
     return;
   }
 
+  if (stackT.subtypeOf(TNull)) return unreachable(env);
+
+  auto const equiv = topStkEquiv(env);
+
+  if (is_opt(stackT)) stackT = unopt(std::move(stackT));
+
   popC(env);
-  push(env, unopt(std::move(stackT)));
+  push(env, stackT, equiv);
 }
 
 void in(ISS& env, const bc::Self& op) {

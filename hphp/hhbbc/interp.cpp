@@ -1200,12 +1200,13 @@ void isTypeHelper(ISS& env,
     return intersection_of(t, testTy);
   };
   auto const was_false = [&] (Type t) {
+    auto tinit = remove_uninit(t);
     if (testTy.subtypeOf(TNull)) {
-      t = remove_uninit(std::move(t));
-      return is_opt(t) ? unopt(t) : t;
+      return is_opt(tinit) ? unopt(tinit) : tinit;
     }
-    if (is_opt(t)) {
-      if (unopt(t).subtypeOf(testTy)) return TInitNull;
+    if (is_opt(tinit)) {
+      assertx(!testTy.couldBe(TNull));
+      if (unopt(tinit).subtypeOf(testTy)) return TNull;
     }
     return t;
   };
@@ -1421,11 +1422,10 @@ void instanceOfJmpImpl(ISS& env,
   if (locId == NoLocalId || interface_supports_non_objects(inst.str1)) {
     return bail();
   }
-  auto const val = peekLocation(env, locId, 1);
-  assertx(!val.couldBe(TRef)); // we shouldn't have an equivLoc if it was
   auto const rcls = env.index.resolve_class(env.ctx, inst.str1);
   if (!rcls) return bail();
 
+  auto const val = topC(env);
   auto const instTy = subObj(*rcls);
   if (val.subtypeOf(instTy) || !val.couldBe(instTy)) {
     return bail();
@@ -1438,8 +1438,7 @@ void instanceOfJmpImpl(ISS& env,
   popC(env);
   auto const negate = jmp.op == Op::JmpNZ;
   auto const result = [&] (Type t, bool pass) {
-    return pass ? instTy :
-      fail_implies_null ? (t.couldBe(TUninit) ? TNull : TInitNull) : t;
+    return pass ? instTy : fail_implies_null ? TNull : t;
   };
   auto const pre  = [&] (Type t) { return result(t, negate); };
   auto const post = [&] (Type t) { return result(t, !negate); };
@@ -1483,10 +1482,24 @@ void isTypeStructJmpImpl(ISS& env,
   auto const negate = jmp.op == Op::JmpNZ;
   auto const result = [&] (Type t, bool pass) {
     if (!pass) {
-      if ((ts_type.value()).subtypeOf(TNull) && is_opt(t)) {
-        return unopt(std::move(t));
+      auto tinit = remove_uninit(t);
+      if (tinit.subtypeOf(*ts_type)) return TBottom;
+      if (t.couldBe(TNull)) {
+        auto tnonnull = is_opt(tinit) ? unopt(tinit) : tinit;
+        if (ts_type->couldBe(TNull)) {
+          return tnonnull;
+        }
+        if (tnonnull.subtypeOf(*ts_type)) {
+          return TNull;
+        }
       }
+
       return t;
+    }
+    if (t.couldBe(TUninit) && ts_type->couldBe(TNull)) {
+      return union_of(intersection_of(std::move(t),
+                                      std::move(ts_type.value())),
+                      TUninit);
     }
     return intersection_of(std::move(t), std::move(ts_type.value()));
   };

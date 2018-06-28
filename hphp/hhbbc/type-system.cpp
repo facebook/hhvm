@@ -2846,12 +2846,6 @@ folly::Optional<Type> type_of_type_structure(SArray ts) {
       return is_nullable ? TOptVec : TVec;
     case TypeStructure::Kind::T_keyset:
       return is_nullable ? TOptKeyset : TKeyset;
-    case TypeStructure::Kind::T_vec_or_dict:
-      return is_nullable ? union_of(TOptVec, TOptDict) : union_of(TVec, TDict);
-    case TypeStructure::Kind::T_arraylike:
-      return is_nullable
-        ? union_of(union_of(union_of(TOptArr, TOptVec), TOptDict), TOptKeyset)
-        : union_of(union_of(union_of(TArr, TVec), TDict), TKeyset);
     case TypeStructure::Kind::T_void:
       return TNull;
     case TypeStructure::Kind::T_tuple: {
@@ -2886,6 +2880,22 @@ folly::Optional<Type> type_of_type_structure(SArray ts) {
       auto const arrT = arr_map_darray(map);
       return is_nullable ? union_of(std::move(arrT), TNull) : arrT;
     }
+    case TypeStructure::Kind::T_vec_or_dict:
+      // Ideally, we would return this union; but thats not an allowed type, so
+      // we end up with TInitCell as the result, which makes hhbbc think that
+      // the condition is always true.
+      //
+      // return is_nullable ?
+      //   union_of(TOptVec, TOptDict) : union_of(TVec, TDict);
+      return folly::none;
+    case TypeStructure::Kind::T_arraylike:
+      // Similar to the above, we can't (yet) do this.
+      //
+      // return is_nullable
+      //  ? union_of(union_of(union_of(TOptArr, TOptVec), TOptDict), TOptKeyset)
+      //  : union_of(union_of(union_of(TArr, TVec), TDict), TKeyset);
+      return folly::none;
+
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_mixed:
     case TypeStructure::Kind::T_nonnull:

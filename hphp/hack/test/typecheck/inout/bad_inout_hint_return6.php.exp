@@ -1,4 +1,4 @@
-File "bad_inout_hint_return6.php", line 4, characters 10-17:
+File "bad_inout_hint_return6.php", line 4, characters 10-52:
 Invalid return type (Typing[4110])
 File "bad_inout_hint_return6.php", line 4, characters 25-27:
 This is a num (int/float)

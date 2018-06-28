@@ -1,1 +1,1 @@
---disallow-array-typehint --disallow-array-literal
+--disallow-array-typehint --disallow-array-literal --parser ffp

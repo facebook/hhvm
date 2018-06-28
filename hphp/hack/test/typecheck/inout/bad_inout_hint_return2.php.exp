@@ -1,4 +1,4 @@
-File "bad_inout_hint_return2.php", line 4, characters 10-10:
+File "bad_inout_hint_return2.php", line 4, characters 10-26:
 Invalid return type (Typing[4184])
 File "bad_inout_hint_return2.php", line 4, characters 17-18:
 This is an inout parameter

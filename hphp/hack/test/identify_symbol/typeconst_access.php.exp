@@ -4,7 +4,7 @@ definition:
    kind: typeconst
    id: class_const::C::BAR
    position: line 4, characters 14-16
-   span: line 4, character 3 - line 4, character 25
+   span: line 4, character 3 - line 4, character 26
    modifiers: 
 
 

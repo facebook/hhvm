@@ -130,7 +130,7 @@
     }
   },
   {
-    "comment": "autocomplete after '$x = <ab:'. KNOWN BUG.",
+    "comment": "autocomplete after '$x = <ab:'.",
     "jsonrpc": "2.0",
     "method": "textDocument/completion",
     "id": 32,

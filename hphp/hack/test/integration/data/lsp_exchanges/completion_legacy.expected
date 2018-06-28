@@ -129,7 +129,36 @@
     "id": 32,
     "result": {
       "isIncomplete": false,
-      "items": []
+      "items": [
+        {
+          "label": "ab:cd:alpha",
+          "kind": 7,
+          "detail": "class",
+          "inlineDetail": "class",
+          "insertText": "ab:cd:alpha",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 9,
+            "char": 13,
+            "base_class": null
+          }
+        },
+        {
+          "label": "ab:cd:text",
+          "kind": 7,
+          "detail": "class",
+          "inlineDetail": "class",
+          "insertText": "ab:cd:text",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 4,
+            "char": 13,
+            "base_class": null
+          }
+        }
+      ]
     }
   },
   {

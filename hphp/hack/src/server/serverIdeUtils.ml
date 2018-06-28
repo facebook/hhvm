@@ -129,12 +129,19 @@ let declare_and_check_ast ?(path=path) ~make_ast ~f tcopt =
  * original definitions can (and should) be restored using "unshelve".
  *)
 let declare_and_check ?(path=path) content ~f tcopt =
-  try
-    declare_and_check_ast
-      ~make_ast:(fun () -> (Parser_hack.program tcopt path content).Parser_return.ast)
-      ~f
-      ~path
+  let make_ast () =
+    (* We need to fail open since IDE services need to be able to run over
+       malformed files. *)
+    (Full_fidelity_ast.defensive_program
+      ~fail_open:true
+      ~quick:false
       tcopt
+      path
+      content
+    ).Parser_return.ast
+  in
+  try
+    declare_and_check_ast ~make_ast ~f ~path tcopt
   with Decl_class.Decl_heap_elems_bug -> begin
     Hh_logger.log "%s" content;
     Exit_status.(exit Decl_heap_elems_bug)

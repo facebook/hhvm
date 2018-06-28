@@ -573,6 +573,23 @@ let visitor = object (self)
     super#on_Obj_get env obj mid ognf
 
   method! on_Xml env sid attrs el =
+    (* In the case where we're autocompleting an open XHP bracket but haven't
+       typed anything beyond that yet:
+
+          $x = <
+
+       we'll end up with the following AST:
+
+          (Xml () () (:AUTO332))
+
+       In order to handle this, we strip off the leading `:` if one exists and
+       use that as the search term. *)
+    let trimmed_sid =
+      snd sid
+      |> Utils.strip_ns
+      |> (fun s -> (fst sid, lstrip s ":"))
+    in
+    autocomplete_id trimmed_sid env;
     let cid = Nast.CI (sid, []) in
     Typing_lazy_heap.get_class (Tast_env.get_tcopt env) (snd sid)
     |> Option.iter ~f:begin fun c ->

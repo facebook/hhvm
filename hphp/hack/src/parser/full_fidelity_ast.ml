@@ -1966,11 +1966,17 @@ and pStmt : stmt parser = fun node env ->
   | GlobalStatement { global_variables; _ } ->
     pos, Global_var (couldMap ~f:(pExpr ~location:InGlobalVar) global_variables env)
   | MarkupSection _ -> pMarkup node env
-  | _ when env.max_depth > 0 ->
+  | _ when env.max_depth > 0 && env.codegen ->
     (* OCaml optimisers; Forgive them, for they know not what they do!
      *
      * The max_depth is only there to stop the *optimised* version from an
      * unbounded recursion. Sad times.
+     *
+     * As for the code gen check, we only want to have a blanket assumption that
+     * a statement we don't recognize is an inline definition when we're in
+     * code generation mode, since typechecking runs with env.codegen set to
+     * false, and typechecking needs to support ASTs with missing nodes to
+     * support IDE features, such as autocomplete.
      *)
     let outer_max_depth = env.max_depth in
     let () = env.max_depth <- outer_max_depth - 1 in
@@ -3231,10 +3237,12 @@ let defensive_program
   parser_options fn content =
   try begin
     let source = Full_fidelity_source_text.make fn content in
+    (* If we fail open, we don't want errors. *)
     let env = make_env
-      ~elaborate_namespaces
       ~fail_open
       ~quick_mode:quick
+      ~elaborate_namespaces
+      ~keep_errors:(not fail_open)
       ~parser_options
       fn
     in

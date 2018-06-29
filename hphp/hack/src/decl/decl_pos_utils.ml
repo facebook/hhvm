@@ -190,6 +190,7 @@ let rec ty (p, x) =
   and class_type dc =
     { dc_final                 = dc.dc_final                          ;
       dc_const                 = dc.dc_const                          ;
+      dc_ppl                   = dc.dc_ppl                            ;
       dc_need_init             = dc.dc_need_init                      ;
       dc_deferred_init_members = dc.dc_deferred_init_members          ;
       dc_abstract              = dc.dc_abstract                       ;

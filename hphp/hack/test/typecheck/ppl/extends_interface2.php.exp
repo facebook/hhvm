@@ -1,0 +1,4 @@
+File "extends_interface2.php", line 9, characters 11-20:
+an interface annotated with <<__PPL>> cannot extend non <<__PPL>> class: BaseInterface (Typing[4257])
+File "extends_interface2.php", line 5, characters 11-23:
+Declaration is here

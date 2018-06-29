@@ -12,6 +12,7 @@ let visitor = Tast_visitor.iter_with [
   Sketchy_null_check.handler;
   Tautology_check.handler;
   Type_test_hint_check.handler;
+  Ppl_check.handler;
 ]
 
 let program = visitor#go

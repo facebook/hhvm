@@ -1,0 +1,4 @@
+File "require_implements2.php", line 8, characters 7-13:
+a trait must be annotated with <<__PPL>> to require <<__PPL>> interface: BaseInterface (Typing[4257])
+File "require_implements2.php", line 6, characters 11-23:
+Declaration is here

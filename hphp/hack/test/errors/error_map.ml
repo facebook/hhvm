@@ -467,4 +467,5 @@ PassingArrayCellByRef = 4253
 CallSiteReactivityMismatch = 4254
 RxParameterConditionMismatch = 4255
 AmbiguousObjectAccess = 4256
+ExtendPPL = 4257
   |}]

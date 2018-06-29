@@ -57,6 +57,7 @@ let to_class_type {
   dc_abstract;
   dc_final;
   dc_const;
+  dc_ppl = _;
   dc_deferred_init_members;
   dc_kind;
   dc_is_xhp;

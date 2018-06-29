@@ -2177,6 +2177,20 @@ let trait_implement_sealed child_pos parent_pos parent_name =
     parent_pos, "Declaration is here"
   ]
 
+let extend_ppl
+  child_pos child_class_type child_is_ppl parent_pos parent_class_type parent_name verb =
+  let name = (strip_ns parent_name) in
+  let warning =
+    if child_is_ppl
+    then child_class_type^" annotated with <<__PPL>> cannot "^verb^
+      " non <<__PPL>> "^parent_class_type^": "^name
+    else child_class_type^" must be annotated with <<__PPL>> to "^verb^
+      " <<__PPL>> "^parent_class_type^": "^name in
+  add_list (Typing.err_code Typing.ExtendPPL) [
+    child_pos, warning;
+    parent_pos, "Declaration is here";
+  ]
+
 let sealed_final pos name =
   let name = (strip_ns name) in
   add (Typing.err_code Typing.SealedFinal) pos ("Sealed class "^name^" cannot be marked final")

@@ -16,7 +16,6 @@ let global_options =
     ~tco_experimental_features:TypecheckerOptions.experimental_all
     ~tco_migration_flags:SSet.empty
     ~tco_dynamic_view:false
-    ~tco_disallow_unsafe_comparisons:false
     ~tco_disallow_array_as_tuple:false
     ~po_auto_namespace_map:[]
     ~tco_disallow_ambiguous_lambda:false

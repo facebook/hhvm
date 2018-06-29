@@ -5794,36 +5794,32 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
   | Ast.EQeqeq | Ast.Diff2 ->
       make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
   | Ast.Lt | Ast.Lte | Ast.Gt | Ast.Gte | Ast.Cmp ->
-      let error_enabled = TypecheckerOptions.disallow_unsafe_comparisons (Env.get_options env) in
       let ty_result = match bop with Ast.Cmp -> Tprim Tint | _ -> Tprim Tbool in
-      if error_enabled
+      let ty_num = (Reason.Rcomp p, Tprim Nast.Tnum) in
+      let ty_string = (Reason.Rcomp p, Tprim Nast.Tstring) in
+      let ty_datetime =
+        (Reason.Rcomp p, Tclass ((p, SN.Classes.cDateTime), [])) in
+      let ty_datetimeimmutable =
+        (Reason.Rcomp p, Tclass ((p, SN.Classes.cDateTimeImmutable), [])) in
+      let both_sub tyl =
+        List.exists tyl ~f:(SubType.is_sub_type env ty1) &&
+        List.exists tyl ~f:(SubType.is_sub_type env ty2) in
+      (* So we have three different types here:
+       *   function(num, num): bool
+       *   function(string, string): bool
+       *   function(DateTime | DateTimeImmutable, DateTime | DateTimeImmutable): bool
+       *)
+      if not (both_sub [ty_num] || both_sub [ty_string] ||
+                both_sub [ty_datetime; ty_datetimeimmutable] ||
+                  TUtils.is_dynamic env ty1 || TUtils.is_dynamic env ty2)
       then begin
-        let ty_num = (Reason.Rcomp p, Tprim Nast.Tnum) in
-        let ty_string = (Reason.Rcomp p, Tprim Nast.Tstring) in
-        let ty_datetime =
-          (Reason.Rcomp p, Tclass ((p, SN.Classes.cDateTime), [])) in
-        let ty_datetimeimmutable =
-          (Reason.Rcomp p, Tclass ((p, SN.Classes.cDateTimeImmutable), [])) in
-        let both_sub tyl =
-          List.exists tyl ~f:(SubType.is_sub_type env ty1) &&
-          List.exists tyl ~f:(SubType.is_sub_type env ty2) in
-        (* So we have three different types here:
-         *   function(num, num): bool
-         *   function(string, string): bool
-         *   function(DateTime | DateTimeImmutable, DateTime | DateTimeImmutable): bool
-         *)
-        if not (both_sub [ty_num] || both_sub [ty_string] ||
-                  both_sub [ty_datetime; ty_datetimeimmutable] ||
-                    TUtils.is_dynamic env ty1 || TUtils.is_dynamic env ty2)
-        then begin
-          let ty1 = Typing_expand.fully_expand env ty1 in
-          let ty2 = Typing_expand.fully_expand env ty2 in
-          let tys1 = Typing_print.error (snd ty1) in
-          let tys2 = Typing_print.error (snd ty2) in
-          Errors.comparison_invalid_types p
-            (Reason.to_string ("This is " ^ tys1) (fst ty1))
-            (Reason.to_string ("This is " ^ tys2) (fst ty2))
-        end;
+        let ty1 = Typing_expand.fully_expand env ty1 in
+        let ty2 = Typing_expand.fully_expand env ty2 in
+        let tys1 = Typing_print.error (snd ty1) in
+        let tys2 = Typing_print.error (snd ty2) in
+        Errors.comparison_invalid_types p
+          (Reason.to_string ("This is " ^ tys1) (fst ty1))
+          (Reason.to_string ("This is " ^ tys2) (fst ty2))
       end;
       make_result env te1 te2 (Reason.Rcomp p, ty_result)
   | Ast.Dot ->

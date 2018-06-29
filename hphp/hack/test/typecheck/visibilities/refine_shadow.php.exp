@@ -1,0 +1,6 @@
+File "refine_shadow.php", line 9, characters 19-21:
+This object access to get is ambiguous (Typing[4256])
+File "refine_shadow.php", line 4, characters 20-22:
+You will access the private instance declared in A
+File "refine_shadow.php", line 19, characters 19-21:
+Instead of the public instance declared in B

@@ -466,4 +466,5 @@ NonClassMember = 4252
 PassingArrayCellByRef = 4253
 CallSiteReactivityMismatch = 4254
 RxParameterConditionMismatch = 4255
+AmbiguousObjectAccess = 4256
   |}]

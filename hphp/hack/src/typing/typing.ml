@@ -4744,7 +4744,22 @@ and obj_get_concrete_ty ~is_method ~valkind ~pos_params ?(explicit_tparams=[])
         then List.map class_info.tc_tparams
             (fun _ -> Reason.Rwitness id_pos, Typing_utils.tany env)
         else paraml in
-      let member_info = Env.get_member is_method env class_info id_str in
+      let old_member_info = Env.get_member is_method env class_info id_str in
+      let self = Env.get_self_id env in
+      let member_info, shadowed = if SMap.mem self class_info.tc_ancestors
+      then
+        (* We look up the current context to see if there is a field/method with
+        * private visibility. If there is one, that one takes precedence *)
+        begin match Env.get_class env self with
+        | None -> old_member_info, false
+        | Some self_class ->
+          match Env.get_member is_method env self_class id_str with
+          | Some { ce_visibility = Vprivate _; _ } as member_info ->
+            member_info, true
+          | _ -> old_member_info, false
+        end
+      else old_member_info, false
+      in
       Typing_hooks.dispatch_cmethod_hook class_info paraml ~pos_params id
         env (Some class_id) ~is_method;
 
@@ -4788,8 +4803,18 @@ and obj_get_concrete_ty ~is_method ~valkind ~pos_params ?(explicit_tparams=[])
 
         end (* match Env.get_member is_method env class_info SN.Members.__call *)
 
-      | Some ({ce_visibility = vis; ce_type = lazy member_; ce_const; _ } as member_ce) ->
+      | Some ({ce_visibility = vis; ce_type = lazy member_; _ } as member_ce) ->
         let mem_pos = Reason.to_pos (fst member_) in
+        if shadowed then begin match old_member_info with
+          | Some ({ce_visibility = old_vis; ce_type = lazy old_member; _ }) ->
+            let old_mem_pos = Reason.to_pos (fst old_member) in
+            begin match class_id with
+            | CIexpr (_, This) when snd x = self -> ()
+            | _ -> Errors.ambiguous_object_access
+              id_pos id_str mem_pos (TUtils.string_of_visibility old_vis) old_mem_pos self (snd x)
+            end;
+          | _ -> ()
+        end;
         TVis.check_obj_access id_pos env (mem_pos, vis);
         let member_ty = Typing_enum.member_type env member_ce in
         let ety_env = mk_ety_env r class_info x paraml in
@@ -4804,7 +4829,7 @@ and obj_get_concrete_ty ~is_method ~valkind ~pos_params ?(explicit_tparams=[])
             | _ -> Phase.localize ~ety_env env member_ty
           end in
 
-        if ce_const && valkind = `lvalue then
+        if member_ce.ce_const && valkind = `lvalue then
           if not (env.Env.inside_constructor &&
             (* expensive call behind short circuiting && *)
             SubType.is_sub_type env (Env.get_self env) concrete_ty) then

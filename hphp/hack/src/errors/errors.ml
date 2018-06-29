@@ -3138,6 +3138,15 @@ let shapes_idx_with_non_existent_field pos1 name pos2 reason =
     pos2, shape_field_non_existence_reason name reason
   ]
 
+let ambiguous_object_access pos name self_pos vis subclass_pos class_self class_subclass =
+  let class_self = Utils.strip_ns class_self in
+  let class_subclass = Utils.strip_ns class_subclass in
+  add_list (Typing.err_code Typing.AmbiguousObjectAccess) [
+    pos, "This object access to " ^ name ^ " is ambiguous";
+    self_pos, "You will access the private instance declared in " ^ class_self;
+    subclass_pos, "Instead of the " ^ vis ^ " instance declared in " ^ class_subclass;
+  ]
+
 let forward_compatibility_not_current pos value =
   let current = ForwardCompatibilityLevel.current in
   add (Init.err_code Init.ForwardCompatibilityNotCurrent)

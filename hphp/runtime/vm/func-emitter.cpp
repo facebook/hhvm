@@ -199,8 +199,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     }
   }
 
-  if (!containsCalls) { attrs |= AttrPhpLeafFn; }
-
   assertx(!m_pce == !preClass);
   auto f = m_ue.newFunc(this, unit, name, attrs, params.size());
 
@@ -215,9 +213,9 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->m_shared.reset(
     needsExtendedSharedData
       ? new Func::ExtendedSharedData(preClass, base, past, line1, line2,
-                                     top, docComment)
+                                     top, !containsCalls, docComment)
       : new Func::SharedData(preClass, base, past,
-                             line1, line2, top, docComment)
+                             line1, line2, top, !containsCalls, docComment)
   );
 
   f->init(params.size());

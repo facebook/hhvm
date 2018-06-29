@@ -992,6 +992,14 @@ struct Func final {
   bool isHot() const;
   void setHot();
 
+  /*
+   * Indicates that a function does not make any explicit calls to other PHP
+   * functions.  It may still call other user-level functions via re-entry
+   * (e.g., for destructors and autoload), and it may make calls to builtins
+   * using FCallBuiltin.
+   */
+  bool isPhpLeafFn() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Unit table entries.                                                [const]
 
@@ -1184,7 +1192,8 @@ private:
    */
   struct SharedData : AtomicCountable {
     SharedData(PreClass* preClass, Offset base, Offset past,
-               int line1, int line2, bool top, const StringData* docComment);
+               int line1, int line2, bool top, bool isPhpLeafFn,
+               const StringData* docComment);
     ~SharedData();
 
     /*
@@ -1224,12 +1233,13 @@ private:
     bool m_hasExtendedSharedData : 1;
     bool m_returnByValue : 1; // only for builtins
     bool m_isMemoizeWrapper : 1;
+    bool m_isPhpLeafFn : 1;
     // Needing more than 2 class ref slots basically doesn't happen, so just use
     // two bits normally. If we actually need more than that, we'll store the
     // count in ExtendedSharedData.
     unsigned int m_numClsRefSlots : 2;
 
-    // 21 bits of padding here in LOWPTR builds
+    // 20 bits of padding here in LOWPTR builds
 
     LowStringPtr m_retUserType;
     UserAttributeMap m_userAttributes;

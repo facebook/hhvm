@@ -1693,8 +1693,8 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
     // because we won't have checked that the stack is deep enough for a
     // leaf function /after/ re-entry, and the prologue for the leaf
     // function will not make a check.
-    if (f->attrs() & AttrPhpLeafFn ||
-        !(f->numParams() + kNumActRecCells <= kStackCheckReenterPadding)) {
+    if (f->isPhpLeafFn() ||
+        !(f->numParams() <= kStackCheckReenterPadding - kNumActRecCells)) {
       // Check both the native stack and VM stack for overflow.
       checkStack(vmStack(), f,
         kNumActRecCells /* numParams is included in f->maxStackCells */);
@@ -1759,8 +1759,8 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
                                            bool dynamic /* = true */) {
   auto const doCheckStack = [&](TypedValue&) {
     // See comments in invokeFunc().
-    if (f->attrs() & AttrPhpLeafFn ||
-        !(argc + kNumActRecCells <= kStackCheckReenterPadding)) {
+    if (f->isPhpLeafFn() ||
+        !(argc <= kStackCheckReenterPadding - kNumActRecCells)) {
       checkStack(vmStack(), f, argc + kNumActRecCells);
     } else {
       checkNativeStack();

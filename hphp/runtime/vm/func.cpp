@@ -617,7 +617,6 @@ static void print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrPrivate)   { out << " private"; }
   if (attrs & AttrAbstract)  { out << " abstract"; }
   if (attrs & AttrFinal)     { out << " final"; }
-  if (attrs & AttrPhpLeafFn) { out << " (leaf)"; }
   if (attrs & AttrNoOverride){ out << " (nooverride)"; }
   if (attrs & AttrInterceptable) { out << " (interceptable)"; }
   if (attrs & AttrPersistent) { out << " (persistent)"; }
@@ -639,6 +638,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
   } else if (preClass() != nullptr) {
     out << "Method";
     print_attrs(out, m_attrs);
+    if (isPhpLeafFn()) out << " (leaf)";
     if (isMemoizeWrapper()) out << " (memoize_wrapper)";
     if (isHot()) out << " (hot)";
     if (cls() != nullptr) {
@@ -649,6 +649,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
   } else {
     out << "Function";
     print_attrs(out, m_attrs);
+    if (isPhpLeafFn()) out << " (leaf)";
     if (isMemoizeWrapper()) out << " (memoize_wrapper)";
     if (isHot()) out << " (hot)";
     out << ' ' << m_name->data();
@@ -742,7 +743,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
 // SharedData.
 
 Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
-                             int line1, int line2, bool top,
+                             int line1, int line2, bool top, bool isPhpLeafFn,
                              const StringData* docComment)
   : m_base(base)
   , m_preClass(preClass)
@@ -760,6 +761,7 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
   , m_hasExtendedSharedData(false)
   , m_returnByValue(false)
   , m_isMemoizeWrapper(false)
+  , m_isPhpLeafFn(isPhpLeafFn)
   , m_numClsRefSlots(0)
   , m_originalFilename(nullptr)
 {
@@ -1161,7 +1163,7 @@ void logFunc(const Func* func, StructuredLogEntry& ent) {
   if (func->isHot()) attrSet.emplace("hot");
   if (func->attrs() & AttrMayUseVV) attrSet.emplace("may_use_vv");
   if (func->attrs() & AttrRequiresThis) attrSet.emplace("must_have_this");
-  if (func->attrs() & AttrPhpLeafFn) attrSet.emplace("leaf_function");
+  if (func->isPhpLeafFn()) attrSet.emplace("leaf_function");
   if (func->cls() && func->cls()->isPersistent()) attrSet.emplace("persistent");
 
   ent.setSet("func_attributes", attrSet);

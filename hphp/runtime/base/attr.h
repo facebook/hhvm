@@ -65,12 +65,6 @@ enum Attr {
   // Is this class an interface?         //       |          |         //
   AttrInterface            = (1u <<  7), //    X  |          |         //
                                          //       |          |         //
-  // Indicates that a function does not make any explicit calls to other PHP
-  // functions.  It may still call other user-level functions via re-entry
-  // (e.g., for destructors and autoload), and it may make calls to builtins
-  // using FCallBuiltin.                 //       |          |         //
-  AttrPhpLeafFn            = (1u <<  7), //       |          |    X    //
-                                         //       |          |         //
   // Is this class a trait?  On methods, or properties, this indicates that
   // the method was imported from a trait.
   AttrTrait                = (1u <<  8), //    X  |    X     |    X    //

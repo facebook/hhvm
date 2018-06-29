@@ -595,6 +595,10 @@ inline void Func::setHot() {
   m_hot = true;
 }
 
+inline bool Func::isPhpLeafFn() const {
+  return shared()->m_isPhpLeafFn;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Unit table entries.
 

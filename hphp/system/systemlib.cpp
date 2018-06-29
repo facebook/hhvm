@@ -309,13 +309,13 @@ void setupNullCtor(Class* cls) {
     s_nullFunc =
       Unit::lookupFunc(makeStaticString("__SystemLib\\__86null"));
     assertx(s_nullFunc);
+    assertx(s_nullFunc->isPhpLeafFn());
   }
 
   auto clone = s_nullFunc->clone(cls, makeStaticString("86ctor"));
   clone->setNewFuncId();
   clone->setAttrs(static_cast<Attr>(
-                    AttrPublic | AttrNoInjection |
-                    AttrPhpLeafFn | AttrSkipFrame |
+                    AttrPublic | AttrNoInjection | AttrSkipFrame |
                     AttrRequiresThis | AttrHasForeignThis |
                     AttrDynamicallyCallable));
   s_nullCtor = clone;

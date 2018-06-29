@@ -32,159 +32,159 @@ namespace HPHP {
  * three different Attr types.
  */
 enum Attr {
-  AttrNone                 = 0,         // class | property | method  //
-                                        //       |          |         //
-  // Does this function return by reference?     |          |         //
-  AttrReference            = (1 <<  0), //       |          |    X    //
-                                        //       |          |         //
-  // Class forbids dynamic properties?  //       |          |         //
-  AttrForbidDynamicProps   = (1 <<  0), //   X   |          |         //
-                                        //       |          |         //
-  // Method visibility.  The relative ordering of these is important. //
+  AttrNone                 = 0,          // class | property | method  //
+                                         //       |          |         //
+  // Does this function return by reference?      |          |         //
+  AttrReference            = (1u <<  0), //       |          |    X    //
+                                         //       |          |         //
+  // Class forbids dynamic properties?   //       |          |         //
+  AttrForbidDynamicProps   = (1u <<  0), //   X   |          |         //
+                                         //       |          |         //
+  // Method visibility.  The relative ordering of these is important.  //
   // N.B. the values are overlayed with some of the no-override bits for magic
   // class methods (next), since they don't apply to classes.
-  AttrPublic               = (1 <<  1), //       |    X     |    X    //
-  AttrProtected            = (1 <<  2), //       |    X     |    X    //
-  AttrPrivate              = (1 <<  3), //       |    X     |    X    //
-                                        //       |          |         //
+  AttrPublic               = (1u <<  1), //       |    X     |    X    //
+  AttrProtected            = (1u <<  2), //       |    X     |    X    //
+  AttrPrivate              = (1u <<  3), //       |    X     |    X    //
+                                         //       |          |         //
   // No-override bits for magic class methods.  If set, the class does not
   // define that magic function, and neither does any derived class.  Note that
   // the bit for __unset is further down due to Attr-sharing across types.
-  AttrNoOverrideMagicGet   = (1 <<  1), //   X   |          |         //
-  AttrNoOverrideMagicSet   = (1 <<  2), //   X   |          |         //
-  AttrNoOverrideMagicIsset = (1 <<  3), //   X   |          |         //
+  AttrNoOverrideMagicGet   = (1u <<  1), //   X   |          |         //
+  AttrNoOverrideMagicSet   = (1u <<  2), //   X   |          |         //
+  AttrNoOverrideMagicIsset = (1u <<  3), //   X   |          |         //
   // N.B.: AttrEnum and AttrStatic overlap! But they can't be set on the
   // same things.
   // Is this class an enum?
-  AttrEnum                 = (1 <<  4), //    X  |          |         //
-  // Was this declared static, abstract, or final?          |         //
-  AttrStatic               = (1 <<  4), //       |    X     |    X    //
-  AttrAbstract             = (1 <<  5), //    X  |          |    X    //
-  AttrFinal                = (1 <<  6), //    X  |          |    X    //
-                                        //       |          |         //
-  // Is this class an interface?        //       |          |         //
-  AttrInterface            = (1 <<  7), //    X  |          |         //
-                                        //       |          |         //
+  AttrEnum                 = (1u <<  4), //    X  |          |         //
+  // Was this declared static, abstract, or final?           |         //
+  AttrStatic               = (1u <<  4), //       |    X     |    X    //
+  AttrAbstract             = (1u <<  5), //    X  |          |    X    //
+  AttrFinal                = (1u <<  6), //    X  |          |    X    //
+                                         //       |          |         //
+  // Is this class an interface?         //       |          |         //
+  AttrInterface            = (1u <<  7), //    X  |          |         //
+                                         //       |          |         //
   // Indicates that a function does not make any explicit calls to other PHP
   // functions.  It may still call other user-level functions via re-entry
   // (e.g., for destructors and autoload), and it may make calls to builtins
-  // using FCallBuiltin.                //       |          |         //
-  AttrPhpLeafFn            = (1 <<  7), //       |          |    X    //
-                                        //       |          |         //
+  // using FCallBuiltin.                 //       |          |         //
+  AttrPhpLeafFn            = (1u <<  7), //       |          |    X    //
+                                         //       |          |         //
   // Is this class a trait?  On methods, or properties, this indicates that
   // the method was imported from a trait.
-  AttrTrait                = (1 <<  8), //    X  |    X     |    X    //
-                                        //       |          |         //
-  // Indicates that this function should be ignored in backtraces.    //
-  AttrNoInjection          = (1 <<  9), //       |          |    X    //
+  AttrTrait                = (1u <<  8), //    X  |    X     |    X    //
+                                         //       |          |         //
+  // Indicates that this function should be ignored in backtraces.     //
+  AttrNoInjection          = (1u <<  9), //       |          |    X    //
   // Indicates a class has no derived classes that have a magic __unset method.
-  AttrNoOverrideMagicUnset = (1 <<  9), //   X   |          |         //
-                                        //       |          |         //
+  AttrNoOverrideMagicUnset = (1u <<  9), //   X   |          |         //
+                                         //       |          |         //
   // Indicates that the function or class is uniquely named among functions or
   // classes across the codebase.  Note that function and class names are in
   // separate namespaces, so it is possible to have a Func and Class which
-  // share a name but both of which are unique.  |          |         //
-  AttrUnique               = (1 << 10), //    X  |          |    X    //
-                                        //       |          |         //
+  // share a name but both of which are unique.   |          |         //
+  AttrUnique               = (1u << 10), //    X  |          |    X    //
+                                         //       |          |         //
   // Indicates that a function can be used with fb_rename_function---even if
   // JitEnableRenameFunction is false --- and can be used with fb_intercept.
   // (Note: we could split this into two bits, since you can technically
   // pessimize less for fb_intercept than you need to for fb_rename_function,
-  //  but we haven't done so at this point.)     |          |         //
-  AttrInterceptable        = (1 << 11), //       |          |    X    //
-                                        //       |          |         //
-  // This class is sealed               //       |          |         //
-  AttrSealed               = (1 << 11), //    X  |          |         //
+  //  but we haven't done so at this point.)      |          |         //
+  AttrInterceptable        = (1u << 11), //       |          |    X    //
+                                         //       |          |         //
+  // This class is sealed                //       |          |         //
+  AttrSealed               = (1u << 11), //    X  |          |         //
   // Traits have been flattened on this class.
-  AttrNoExpandTrait        = (1 << 12), //    X  |          |         //
-                                        //       |          |         //
+  AttrNoExpandTrait        = (1u << 12), //    X  |          |         //
+                                         //       |          |         //
   // Set on functions where the $this class may not be a subclass of the
   // context (scope) class.
-  AttrHasForeignThis       = (1 << 12), //       |          |    X    //
-                                        //       |          |         //
+  AttrHasForeignThis       = (1u << 12), //       |          |    X    //
+                                         //       |          |         //
   // Only valid in WholeProgram mode.  Indicates on a class that the class is
   // not extended, or on a method that no extending class defines the method.
-  AttrNoOverride           = (1 << 13), //    X  |          |    X    //
-                                        //       |          |         //
+  AttrNoOverride           = (1u << 13), //    X  |          |    X    //
+                                         //       |          |         //
   // Indicates that a function is a builtin that takes variadic arguments,
   // where the arguments are either by ref or optionally by ref.  It is
   // equivalent to ClassInfo's (RefVariableArguments).
-  AttrVariadicByRef        = (1 << 15), //       |          |    X    //
-                                        //       |          |         //
+  AttrVariadicByRef        = (1u << 15), //       |          |    X    //
+                                         //       |          |         //
   // Indicates that a function may need to use a VarEnv or varargs (i.e.,
   // extraArgs) at runtime.  If the debugger is enabled, all functions
   // must be treated as having this flag.
-  AttrMayUseVV             = (1 << 16), //       |          |    X    //
-                                        //       |          |         //
+  AttrMayUseVV             = (1u << 16), //       |          |    X    //
+                                         //       |          |         //
   // Indicates that the function or class can be loaded once and then persisted
-  // across all requests.               //       |          |         //
-  AttrPersistent           = (1 << 17), //    X  |          |    X    //
-                                        //       |          |         //
+  // across all requests.                //       |          |         //
+  AttrPersistent           = (1u << 17), //    X  |          |    X    //
+                                         //       |          |         //
   // Indicates that this property cannot be initialized on an ObjectData by
-  // simply memcpy-ing from the initializer vector.         |         //
-  AttrDeepInit             = (1 << 18), //       |    X     |         //
-                                        //       |          |         //
+  // simply memcpy-ing from the initializer vector.          |         //
+  AttrDeepInit             = (1u << 18), //       |    X     |         //
+                                         //       |          |         //
   // This HNI method takes an additional "func_num_args()" value at the
   // beginning of its signature (after Class*/ObjectData* for methods)
-  AttrNumArgs              = (1 << 18), //       |          |    X    //
-                                        //       |          |         //
+  AttrNumArgs              = (1u << 18), //       |          |    X    //
+                                         //       |          |         //
   // Set on functions to mark them as being able to be dynamically called
-  AttrDynamicallyCallable  = (1 << 19), //       |          |    X    //
-                                        //       |          |         //
+  AttrDynamicallyCallable  = (1u << 19), //       |          |    X    //
+                                         //       |          |         //
   // Set on all builtin functions, whether PHP or C++.
-  AttrBuiltin              = (1 << 20), //    X  |          |    X    //
-                                        //       |          |         //
+  AttrBuiltin              = (1u << 20), //    X  |          |    X    //
+                                         //       |          |         //
   // Set on all properties that should not be serialized (e.g.
   // <<__Memoize> caches).  Reuses the AttrBuiltin bit.
-  AttrNoSerialize          = (1 << 20), //       |    X     |         //
-                                        //       |          |         //
+  AttrNoSerialize          = (1u << 20), //       |    X     |         //
+                                         //       |          |         //
   // Set on all functions which take at least one inout parameter. Also implies
   // that the function takes no parameters by reference.
-  AttrTakesInOutParams     = (1 << 21), //       |          |    X    //
-                                        //       |          |         //
+  AttrTakesInOutParams     = (1u << 21), //       |          |    X    //
+                                         //       |          |         //
   // Set on properties to indicate they can't be changed after construction
   // and on classes to indicate that all that class' properties are immutable.
-  AttrIsImmutable          = (1 << 21), //    X  |    X     |         //
-                                        //       |          |         //
+  AttrIsImmutable          = (1u << 21), //    X  |    X     |         //
+                                         //       |          |         //
   // Set on classes to indicate that they have at least one immutable property.
-  AttrHasImmutable         = (1 << 22), //    X  |          |         //
-                                        //       |          |         //
+  AttrHasImmutable         = (1u << 22), //    X  |          |         //
+                                         //       |          |         //
   // Indicates that the frame should be ignored when searching for context
   // (e.g., array_map evalutates its callback in the context of the caller).
-  AttrSkipFrame            = (1 << 22), //       |          |    X    //
-                                        //       |          |         //
+  AttrSkipFrame            = (1u << 22), //       |          |    X    //
+                                         //       |          |         //
   // Indicates that the function might read from the caller's frame. Only
   // allowed for builtins.
-  AttrReadsCallerFrame     = (1 << 23), //       |          |    X    //
-                                        //       |          |         //
+  AttrReadsCallerFrame     = (1u << 23), //       |          |    X    //
+                                         //       |          |         //
   // Indicates that the function might write to the caller's frame. Only allowed
   // for builtins.
-  AttrWritesCallerFrame    = (1 << 24), //       |          |    X    //
-                                        //       |          |         //
-  // Is this a (non-static) method that *must* have a non-null this?  //
-  AttrRequiresThis         = (1 << 25), //       |          |    X    //
-                                        //       |          |         //
+  AttrWritesCallerFrame    = (1u << 24), //       |          |    X    //
+                                         //       |          |         //
+  // Is this a (non-static) method that *must* have a non-null this?   //
+  AttrRequiresThis         = (1u << 25), //       |          |    X    //
+                                         //       |          |         //
   // Indicates that this function can be constant-folded if it is called with
-  // all constant arguments.            //       |          |         //
-  AttrIsFoldable           = (1 << 26), //       |          |    X    //
-                                        //       |          |         //
+  // all constant arguments.             //       |          |         //
+  AttrIsFoldable           = (1u << 26), //       |          |    X    //
+                                         //       |          |         //
   // Indicates that this function cannot be called with FCallBuiltin because it
-  // requires an ActRec argument.       //       |          |         //
-  AttrNoFCallBuiltin       = (1 << 27), //       |          |    X    //
-                                        //       |          |         //
-  // Does this function have a `...' parameter?  |          |         //
-  AttrVariadicParam        = (1 << 28), //       |          |    X    //
-                                        //       |          |         //
+  // requires an ActRec argument.        //       |          |         //
+  AttrNoFCallBuiltin       = (1u << 27), //       |          |    X    //
+                                         //       |          |         //
+  // Does this function have a `...' parameter?   |          |         //
+  AttrVariadicParam        = (1u << 28), //       |          |    X    //
+                                         //       |          |         //
   // Indicates that a function will attempt to coerce parameters to the correct
   // type.  This isn't the same as casting---for example, a string can be cast
   // to an array, but cannot be coerced to an array.  If it fails, the function
   // returns either false or null, depending on the mode.  This behavior is
-  // common in PHP5 builtins.           //       |          |         //
-  AttrParamCoerceModeFalse = (1 << 29), //       |          |    X    //
-  AttrParamCoerceModeNull  = (1 << 30), //       |          |    X    //
+  // common in PHP5 builtins.            //       |          |         //
+  AttrParamCoerceModeFalse = (1u << 29), //       |          |    X    //
+  AttrParamCoerceModeNull  = (1u << 30), //       |          |    X    //
   // Indicates that this function wraps either a function taking inout or ref
-  // parameters.                        //       |          |         //
-  AttrIsInOutWrapper       = (1 << 31), //       |          |    X    //
+  // parameters.                         //       |          |         //
+  AttrIsInOutWrapper       = (1u << 31), //       |          |    X    //
 };
 
 constexpr Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }

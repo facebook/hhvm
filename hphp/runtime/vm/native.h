@@ -214,9 +214,9 @@ inline bool allowFCallBuiltinDoubles() {
 }
 
 enum Attr {
-  AttrNone = 0,
-  AttrActRec = 1 << 0,
-  AttrOpCodeImpl = 1 << 2, //Methods whose implementation is in the emitter
+  AttrNone       = 0,
+  AttrActRec     = (1u << 0),
+  AttrOpCodeImpl = (1u << 1), //Methods whose implementation is in the emitter
 };
 
 /**

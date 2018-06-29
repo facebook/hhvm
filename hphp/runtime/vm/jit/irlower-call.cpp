@@ -573,7 +573,11 @@ void cgCheckRefs(IRLS& env, const IRInstruction* inst)  {
       ifThenElse(v, CC_NLE, sf, thenBody, [&] (Vout& v) {
         // If not special builtin...
         auto const sf = v.makeReg();
-        v << testlim{AttrVariadicByRef, func[Func::attrsOff()], sf};
+        v << testlim{
+          static_cast<int32_t>(AttrVariadicByRef),
+          func[Func::attrsOff()],
+          sf
+        };
         fwdJcc(v, env, vals64 ? CC_Z : CC_NZ, sf, inst->taken());
       });
     }

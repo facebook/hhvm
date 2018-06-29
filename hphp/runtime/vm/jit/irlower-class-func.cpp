@@ -184,7 +184,11 @@ void cgIsFuncDynCallable(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   auto const sf = v.makeReg();
-  v << testlim{AttrDynamicallyCallable, func[Func::attrsOff()], sf};
+  v << testlim{
+    static_cast<int32_t>(AttrDynamicallyCallable),
+    func[Func::attrsOff()],
+    sf
+  };
   v << setcc{CC_NZ, sf, dst};
 }
 

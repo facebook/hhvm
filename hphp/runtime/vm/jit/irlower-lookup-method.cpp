@@ -345,7 +345,11 @@ void cgCheckFuncStatic(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   auto const sf = v.makeReg();
-  v << testlim{AttrStatic, funcPtrReg[Func::attrsOff()], sf};
+  v << testlim{
+    static_cast<int32_t>(AttrStatic),
+    funcPtrReg[Func::attrsOff()],
+    sf
+  };
   v << jcc{CC_NZ, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 

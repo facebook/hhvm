@@ -104,6 +104,7 @@ sk {{ ocaml Shape_key }} :: 'SF' ::= {{ com shape keys }}
 {{ com \subhead{Syntax of types} }}
 
 t, u {{ ocaml ty }} :: 'ty_' ::=                           {{ com syntax of types }}
+  | noreturn :: :: noreturn                 {{ com bottom type }}
   | mixed  ::   :: mixed                    {{ com top type }}
   | nonnull ::  :: nonnull                  {{ com nonnull type }}
   | int    ::   :: int                      {{ com integer }}
@@ -609,6 +610,23 @@ enum N : t asdecl
 ---------------------- :: enum_as_arraykey
 G |- N <: arraykey
 
+{{ com \subsection{Noreturn} }}
+
+{{ com
+
+Hack has a bottom type.
+
+}}
+
+------------------ :: noreturn_bottom
+G |- noreturn <: t
+
+{{ com
+
+Note that this makes $[[noreturn]]$ a neutral element with respect to union.
+
+}}
+
 {{ com \subsection{Nonnull} }}
 
 {{ com
@@ -730,6 +748,11 @@ G |- t1 <: u1 .. G |- tn <: un
 ---------------------------- :: tuple_co
 G |- ( t1,..,tn ) <: (u1,..,un)
 
+{{ com A tuple collapses if any of its types is the bottom type $[[noreturn]]$ }}
+
+------------------------------------------------------ :: tuple_noreturn
+G |- (t1 , .. , tm , noreturn , t1', .. , tn') <: noreturn
+
 {{ com \subsection{Hack arrays} }}
 
 {{ com Vectors, dicts and keysets are covariant in all parameters }}
@@ -776,6 +799,14 @@ G |- array<> <: array<t>
 ------------------------------- :: emptyarray_as_maparray
 G |- array<> <: array<t1,t2>
 
+{{ com Arrays over the bottom type $[[nonnull]]$ are inhabited by the empty array only. }}
+
+------------------------------- :: vecarray_over_noreturn_as_emptyarray
+G |- array<noreturn> <: array<>
+
+---------------------------------- :: maparray_over_noreturn_as_emptyarray
+G |- array<t, noreturn> <: array<>
+
 {{ com \subsection{Functions} }}
 {{ com
 Function types are somewhat complicated: there are multiple parameters, zero
@@ -812,35 +843,50 @@ G |- function (t1 , .. , tn , t' vardots ) : t <: function ( u1 , .. , un , u1',
 
 {{ com Depth subtyping on closed shapes: types of fields behave covariantly }}
 
-G |- sft1 <: sft1' ... G |- sftn <: sftn'
+G |- sft1 <: sft1' .. G |- sftn <: sftn'
 -------------------------------------------------- :: closed_shape_co
-G |- shape ( sft1 , ... , sftn ) <: shape ( sft1' , ... , sftn' )
+G |- shape ( sft1 , .. , sftn ) <: shape ( sft1' , .. , sftn' )
 
 {{ com Width subtyping on closed shapes: optional fields can be introduced }}
 
 -------------------------------------------------- :: closed_shape_widen
-G |- shape ( sft1 , ... , sftm ) <: shape ( sft1 , ... , sftm , ?sfn1' => t1' , ... , ?sfnn' => tn' )
+G |- shape ( sft1 , .. , sftm ) <: shape ( sft1 , .. , sftm , ?sfn1' => t1' , .. , ?sfnn' => tn' )
+
+{{ com Width subtyping on closed shapes: optional fields of type $[[noreturn]]$ can be dropped }}
+
+-------------------------------------------------- :: closed_shape_narrow
+G |- shape ( sft1 , .. , sftm , ?sfn1' => noreturn , .. , ?sfnn' => noreturn ) <: shape ( sft1 , .. , sftm )
+
+{{ com A closed shape collapses if any of its required field types is $[[noreturn]]$ }}
+
+-------------------------------------------------- :: closed_shape_empty
+G |- shape ( sft1 , .. , sftm , sfn => noreturn , sft1' , .. , sftn') <: noreturn
 
 {{ com Closed shapes can be opened }}
 
 -------------------------------------------------- :: shape_open
-G |- shape ( sft1 , ... , sftn ) <: shape ( sft1 , ... , sftn , vardots )
+G |- shape ( sft1 , .. , sftn ) <: shape ( sft1 , .. , sftn , vardots )
 
 {{ com Depth subtyping on open shapes: types of fields behave covariantly }}
 
-G |- sft1 <: sft1' ... G |- sftn <: sftn'
+G |- sft1 <: sft1' .. G |- sftn <: sftn'
 -------------------------------------------------- :: open_shape_co
-G |- shape ( sft1 , ... , sftn , vardots ) <: shape ( sft1' , ... , sftn' , vardots )
+G |- shape ( sft1 , .. , sftn , vardots ) <: shape ( sft1' , .. , sftn' , vardots )
 
 {{ com Width subtyping on open shapes: fields can be forgotten }}
 
 -------------------------------------------------- :: open_shape_narrow
-G |- shape ( sft1 , ..., sftm , sft1' , ... , sftn', vardots ) <: shape ( sft1 , ... , sftm , vardots )
+G |- shape ( sft1 , .. , sftm , sft1' , .. , sftn', vardots ) <: shape ( sft1 , .. , sftm , vardots )
 
 {{ com Width subtyping on open shapes: optional fields of type $[[mixed]]$ can be introduced }}
 
 -------------------------------------------------- :: open_shape_widen
-G |- shape ( sft1, ..., sftm, vardots ) <: shape (sft1, ..., sftm, ?sfn1' => mixed, ..., ?sfnn' => mixed, vardots )
+G |- shape ( sft1 , .. , sftm , vardots ) <: shape (sft1 , .. , sftm , ?sfn1' => mixed , .. , ?sfnn' => mixed , vardots )
+
+{{ com An open shape collapses if any of its required field types is $[[noreturn]]$ }}
+
+-------------------------------------------------- :: open_shape_empty
+G |- shape ( sft1 , .. , sftm , sfn => noreturn , sft1' , .. , sftn' , vardots ) <: noreturn
 
 {{ com \subsection{Class and interface inheritance} }}
 

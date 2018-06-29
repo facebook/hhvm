@@ -457,16 +457,12 @@ let do_not_use_or =
 
 let do_not_use_and =
   "Do not use \"and\", it has surprising precedence. Use \"&&\" instead"
-
 let invalid_foreach_element = "An arrow ('=>') or right parenthesis (')') \
   is expected here."
-
 let invalid_scope_resolution_qualifier = "Only classnames and variables are allowed before '::'."
-
 let invalid_variable_name =
   "A valid variable name starts with a letter or underscore, followed \
   by any number of letters, numbers, or underscores"
-
 let function_modifier s =
   Printf.sprintf "Top-level function cannot have modifier '%s'" s
 
@@ -475,3 +471,7 @@ let invalid_yield =
 
 let invalid_yield_from =
   "`yield from` can only appear as a statement, after `return`, or on the right of an assignment"
+let invalid_class_in_collection_initializer =
+  "Cannot use collection initialization for non-collection class."
+let invalid_brace_kind_in_collection_initializer =
+  "Initializers of 'vec', 'dict' and 'keyset' should use '[...]' instead of '{...}'."

@@ -267,3 +267,5 @@ val invalid_variable_name : string
 val function_modifier : string -> string
 val invalid_yield : string
 val invalid_yield_from : string
+val invalid_class_in_collection_initializer: string
+val invalid_brace_kind_in_collection_initializer: string

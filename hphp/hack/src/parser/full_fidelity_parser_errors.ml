@@ -1601,7 +1601,7 @@ let is_assignment node =
     Token.kind token = TokenKind.Equal
   | _ -> false
 
-let expression_errors env node parents errors =
+let expression_errors env namespace_name node parents errors =
   let is_decimal_or_hexadecimal_literal token =
     match Token.kind token with
     | TokenKind.DecimalLiteral | TokenKind.HexadecimalLiteral -> true
@@ -1838,6 +1838,59 @@ let expression_errors env node parents errors =
   | Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }
   | AwaitableCreationExpression { awaitable_attribute_spec = s; _ }
     -> no_memoize_attribute_on_lambda s errors
+  | CollectionLiteralExpression { collection_literal_name = n; _ } ->
+    let is_standard_collection lc_name =
+      lc_name = "pair" || lc_name = "vector" || lc_name = "map" ||
+      lc_name = "set"  || lc_name = "immvector" || lc_name = "immmap" ||
+      lc_name = "immset" in
+    let is_qualified_std_collection l r =
+      token_kind l = Some TokenKind.Name &&
+      token_kind r = Some TokenKind.Name &&
+      String.lowercase_ascii (text l) = "hh" &&
+      is_standard_collection (String.lowercase_ascii (text r)) in
+    let status =
+      match syntax n with
+      (* non-qualified name *)
+      | SimpleTypeSpecifier { simple_type_specifier = ({
+          syntax = Token t; _
+        } as n);_ }
+      | GenericTypeSpecifier { generic_class_type = ({
+          syntax = Token t; _
+        } as n);_ }
+        when Token.kind t = TokenKind.Name ->
+        begin match String.lowercase_ascii (text n) with
+        | "dict" | "vec" | "keyset" -> `InvalidBraceKind
+        | n -> if is_standard_collection n then `Ok else `Error
+        end
+      (* qualified name *)
+      | SimpleTypeSpecifier { simple_type_specifier = {
+          syntax = QualifiedName { qualified_name_parts = parts; _ }; _
+        };_ }
+      | GenericTypeSpecifier { generic_class_type = {
+          syntax = QualifiedName { qualified_name_parts = parts; _ }; _
+        };_ } ->
+        begin match syntax_to_list false parts with
+        (* HH\Vector in global namespace *)
+        | [l; r]
+          when namespace_name = global_namespace_name &&
+          is_qualified_std_collection l r -> `Ok
+        (* \HH\Vector *)
+        | [{ syntax = Missing; _}; l; r]
+          when is_qualified_std_collection l r -> `Ok
+        | _ -> `Error
+        end
+      | _ -> `Error in
+    begin match status with
+    | `Ok -> errors
+    | `InvalidBraceKind ->
+      let e =
+        make_error_from_node node SyntaxError.invalid_brace_kind_in_collection_initializer in
+      e :: errors
+    | `Error ->
+      let e =
+        make_error_from_node node SyntaxError.invalid_class_in_collection_initializer in
+      e :: errors
+    end
   | DecoratedExpression { decorated_expression_decorator = op; _ }
   | PrefixUnaryExpression { prefix_unary_operator = op; _ }
     when token_kind op = Some TokenKind.Await ->
@@ -2809,9 +2862,10 @@ let find_syntax_errors env =
       | SubscriptExpression _
       | ConstructorCall _
       | AwaitableCreationExpression _
-      | ConditionalExpression _ ->
+      | ConditionalExpression _
+      | CollectionLiteralExpression _ ->
         let errors =
-          expression_errors env node parents errors in
+          expression_errors env namespace_name node parents errors in
         let errors = assignment_errors env node errors in
         trait_require_clauses, names, errors
       | RequireClause _ ->

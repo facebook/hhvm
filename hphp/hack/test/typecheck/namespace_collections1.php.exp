@@ -1,1 +1,2 @@
-No errors
+File "namespace_collections1.php", line 15, characters 8-13:
+Cannot use collection initialization for non-collection class. (Parsing[1002])

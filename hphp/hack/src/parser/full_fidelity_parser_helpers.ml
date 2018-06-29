@@ -844,7 +844,7 @@ module WithParser(Parser : Parser_S) = struct
 
   (* Parse with parse_item while a condition is met. *)
   let parse_list_while parser (parse_item : Parser.t -> Parser.t * Parser.SC.r) predicate =
-    let rec aux parser acc =
+    let rec aux parser acc (recent_lexer: Lexer.t option) =
       if peek_token_kind parser = TokenKind.EndOfFile ||
         not (predicate parser)
       then
@@ -855,10 +855,16 @@ module WithParser(Parser : Parser_S) = struct
          * the parser bailed out of that scope. So, pass on whatever's been
          * accumulated so far, but with a 'Missing' SyntaxNode prepended. *)
         if SC.is_missing result
-        then (parser, result :: acc )
-        else aux parser (result :: acc) (* Or if nothing's wrong, recurse. *)
+        then (parser, result :: acc)
+        else let current_lexer = Some (Parser.lexer parser) in
+        (* INFINITE LOOP PREVENTION: If parse_item does not actually make
+         * progress, just bail
+         *)
+        if current_lexer = recent_lexer
+        then (parser, result :: acc)
+        else aux parser (result :: acc) current_lexer (* Or if nothing's wrong, recurse. *)
     in
-    let (parser, items) = aux parser [] in
+    let (parser, items) = aux parser [] None in
     make_list parser (List.rev items)
 
   let parse_terminated_list parser parse_item terminator =

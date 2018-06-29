@@ -782,8 +782,6 @@ module WithExpressionAndDeclAndTypeParser
     match Token.kind opening_token with
     | Colon -> assert_token parser Colon, Endswitch
     | _ -> require_left_brace parser, RightBrace in
-    (* TODO: I'm not convinced that this always terminates in some cases.
-    Check that. *)
     let (parser, section_list) =
       let (parser1, token) = next_token parser in
       match Token.kind token with

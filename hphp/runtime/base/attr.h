@@ -118,10 +118,6 @@ enum Attr {
   // simply memcpy-ing from the initializer vector.          |         //
   AttrDeepInit             = (1u << 18), //       |    X     |         //
                                          //       |          |         //
-  // This HNI method takes an additional "func_num_args()" value at the
-  // beginning of its signature (after Class*/ObjectData* for methods)
-  AttrNumArgs              = (1u << 18), //       |          |    X    //
-                                         //       |          |         //
   // Set on functions to mark them as being able to be dynamically called
   AttrDynamicallyCallable  = (1u << 19), //       |          |    X    //
                                          //       |          |         //

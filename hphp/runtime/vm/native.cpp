@@ -179,7 +179,7 @@ void callFunc(const Func* func, void *ctx,
     GP_args[GP_count++] = (int64_t)ctx;
   }
 
-  if (func->attrs() & AttrNumArgs) {
+  if (func->takesNumArgs()) {
     GP_args[GP_count++] = (int64_t)numNonDefault;
   }
 
@@ -633,7 +633,7 @@ const char* checkTypeFunc(const NativeSig& sig,
     }
   }
 
-  if (func->attrs() & AttrNumArgs) {
+  if (func->takesNumArgs()) {
     if (*argIt++ != T::Int64) return kInvalidNumArgsMessage;
   }
 

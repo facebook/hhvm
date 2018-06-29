@@ -788,6 +788,12 @@ struct Func final {
   bool accessesCallerFrame() const;
 
   /*
+   * This HNI method takes an additional "func_num_args()" value at the
+   * beginning of its signature (after Class* / ObjectData* for methods)
+   */
+  bool takesNumArgs() const;
+
+  /*
    * The builtinFuncPtr takes an ActRec*, unpacks it, and usually dispatches to
    * a nativeFuncPtr.
    *
@@ -1234,12 +1240,13 @@ private:
     bool m_returnByValue : 1; // only for builtins
     bool m_isMemoizeWrapper : 1;
     bool m_isPhpLeafFn : 1;
+    bool m_takesNumArgs : 1;
     // Needing more than 2 class ref slots basically doesn't happen, so just use
     // two bits normally. If we actually need more than that, we'll store the
     // count in ExtendedSharedData.
     unsigned int m_numClsRefSlots : 2;
 
-    // 20 bits of padding here in LOWPTR builds
+    // 19 bits of padding here in LOWPTR builds
 
     LowStringPtr m_retUserType;
     UserAttributeMap m_userAttributes;

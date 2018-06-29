@@ -762,6 +762,7 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
   , m_returnByValue(false)
   , m_isMemoizeWrapper(false)
   , m_isPhpLeafFn(isPhpLeafFn)
+  , m_takesNumArgs(false)
   , m_numClsRefSlots(0)
   , m_originalFilename(nullptr)
 {

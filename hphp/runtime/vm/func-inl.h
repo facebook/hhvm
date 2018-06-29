@@ -457,6 +457,10 @@ inline bool Func::accessesCallerFrame() const {
   return m_attrs & (AttrReadsCallerFrame | AttrWritesCallerFrame);
 }
 
+inline bool Func::takesNumArgs() const {
+  return shared()->m_takesNumArgs;
+}
+
 inline BuiltinFunction Func::builtinFuncPtr() const {
   if (auto const ex = extShared()) return ex->m_builtinFuncPtr;
   return nullptr;

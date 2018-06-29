@@ -348,7 +348,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   }
 
   // Add the func_num_args() value if needed.
-  if (callee->attrs() & AttrNumArgs) {
+  if (callee->takesNumArgs()) {
     // If `numNonDefault' is negative, this is passed as an src.
     if (extra->numNonDefault >= 0) {
       args.imm((int64_t)extra->numNonDefault);

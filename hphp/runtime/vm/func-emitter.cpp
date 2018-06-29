@@ -289,13 +289,14 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       ex->m_builtinFuncPtr,
       ex->m_nativeFuncPtr
     );
+    ex->m_takesNumArgs = !!(nativeAttributes & Native::AttrTakesNumArgs);
 
     if (ex->m_nativeFuncPtr) {
       if (info.sig.ret == Native::NativeSig::Type::MixedTV) {
         ex->m_returnByValue = true;
       }
       int extra =
-        (attrs & AttrNumArgs ? 1 : 0) +
+        (nativeAttributes & Native::AttrTakesNumArgs ? 1 : 0) +
         (isMethod() ? 1 : 0);
       assertx(info.sig.args.size() == params.size() + extra);
       for (auto i = params.size(); i--; ) {
@@ -517,7 +518,7 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
       } else if (userAttrStrVal.get()->isame(s_noinjection.get())) {
         attrs_ |= AttrNoInjection;
       } else if (userAttrStrVal.get()->isame(s_numargs.get())) {
-        attrs_ |= AttrNumArgs;
+        ret |= Native::AttrTakesNumArgs;
       } else if (userAttrStrVal.get()->isame(s_opcodeimpl.get())) {
         ret |= Native::AttrOpCodeImpl;
       } else if (userAttrStrVal.get()->isame(s_readsCallerFrame.get())) {

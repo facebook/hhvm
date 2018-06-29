@@ -16,7 +16,6 @@ type t = {
   tco_migration_flags : SSet.t;
   tco_dynamic_view : bool;
   tco_disallow_unsafe_comparisons : bool;
-  tco_disallow_non_arraykey_keys : bool;
   tco_disallow_array_as_tuple : bool;
   po_auto_namespace_map : (string * string) list;
   po_enable_hh_syntax_for_hhvm : bool;
@@ -188,7 +187,6 @@ let default = {
  tco_migration_flags = SSet.empty;
  tco_dynamic_view = false;
  tco_disallow_unsafe_comparisons = false;
- tco_disallow_non_arraykey_keys = false;
  tco_disallow_array_as_tuple = false;
  po_auto_namespace_map = [];
  po_enable_hh_syntax_for_hhvm = false;
@@ -229,7 +227,6 @@ let make ~tco_assume_php
          ~tco_migration_flags
          ~tco_dynamic_view
          ~tco_disallow_unsafe_comparisons
-         ~tco_disallow_non_arraykey_keys
          ~tco_disallow_array_as_tuple
          ~po_auto_namespace_map
          ~tco_disallow_ambiguous_lambda
@@ -249,7 +246,6 @@ let make ~tco_assume_php
                    tco_migration_flags;
                    tco_dynamic_view;
                    tco_disallow_unsafe_comparisons;
-                   tco_disallow_non_arraykey_keys;
                    tco_disallow_array_as_tuple;
                    po_auto_namespace_map;
                    po_enable_hh_syntax_for_hhvm = false;
@@ -280,8 +276,6 @@ let tco_dynamic_view t =
   t.tco_dynamic_view
 let tco_disallow_unsafe_comparisons t =
   t.tco_disallow_unsafe_comparisons
-let tco_disallow_non_arraykey_keys t =
-  t.tco_disallow_non_arraykey_keys
 let tco_disallow_array_as_tuple t =
   t.tco_disallow_array_as_tuple
 let po_auto_namespace_map t = t.po_auto_namespace_map

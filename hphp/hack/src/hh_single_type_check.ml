@@ -155,7 +155,6 @@ let parse_options () =
   let no_fallback_in_namespaces = ref false in
   let dynamic_view = ref false in
   let allow_unsafe_comparisons = ref false in
-  let allow_non_arraykey_keys = ref false in
   let allow_array_as_tuple = ref false in
   let allow_return_by_ref = ref false in
   let allow_array_cell_pass_by_ref = ref false in
@@ -313,10 +312,6 @@ let parse_options () =
     "--allow-unsafe-comparisons",
         Arg.Set allow_unsafe_comparisons,
         " Allow unsafe comparisons, e.g. > where the args aren't strings/ints/DateTimes";
-    "--allow-non-arraykey-keys",
-        Arg.Set allow_non_arraykey_keys,
-        " Allow values of types other than int and string as keys \
-        in literal Maps, Sets, dicts, keysets, and darrays";
     "--allow-array-as-tuple",
         Arg.Set allow_array_as_tuple,
         " Allow tuples to be passed as untyped arrays and vice versa";
@@ -350,7 +345,6 @@ let parse_options () =
       GlobalOptions.tco_disallow_array_literal = !disallow_array_literal;
       GlobalOptions.tco_dynamic_view = !dynamic_view;
       GlobalOptions.tco_disallow_unsafe_comparisons = not !allow_unsafe_comparisons;
-      GlobalOptions.tco_disallow_non_arraykey_keys = not !allow_non_arraykey_keys;
       GlobalOptions.tco_disallow_array_as_tuple = not !allow_array_as_tuple;
       GlobalOptions.tco_disallow_return_by_ref = not !allow_return_by_ref;
       GlobalOptions.tco_disallow_array_cell_pass_by_ref = not !allow_array_cell_pass_by_ref;

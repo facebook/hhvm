@@ -60,7 +60,6 @@ let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all
 let dynamic_view = GlobalOptions.tco_dynamic_view
 let disallow_unsafe_comparisons = GlobalOptions.tco_disallow_unsafe_comparisons
-let disallow_non_arraykey_keys = GlobalOptions.tco_disallow_non_arraykey_keys
 let disallow_array_as_tuple = GlobalOptions.tco_disallow_array_as_tuple
 let disallow_return_by_ref = GlobalOptions.tco_disallow_return_by_ref
 let disallow_array_cell_pass_by_ref = GlobalOptions.tco_disallow_array_cell_pass_by_ref

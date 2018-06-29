@@ -1363,9 +1363,6 @@ and expr_
         (Env.get_options env)
         TypecheckerOptions.experimental_null_coalesce_assignment in
 
-  let non_arraykey_keys_disallowed =
-    TypecheckerOptions.disallow_non_arraykey_keys (Env.get_options env) in
-
   let subtype_arraykey ~class_name ~key_pos env key_ty =
     let ty_arraykey = Reason.Ridx_dict key_pos, Tprim Tarraykey in
     Type.sub_type p (Reason.index_class class_name) env key_ty ty_arraykey in
@@ -1485,13 +1482,10 @@ and expr_
       let env, key_exprs, key_ty =
         compute_exprs_and_supertype ~expected:kexpected env keys array_value in
       let env =
-        if non_arraykey_keys_disallowed
-        then
-          List.fold_left key_exprs ~init:env ~f:begin
-            fun env ((key_pos, key_ty), _) ->
-              subtype_arraykey ~class_name:"darray" ~key_pos env key_ty
-          end
-        else env in
+        List.fold_left key_exprs ~init:env ~f:begin
+          fun env ((key_pos, key_ty), _) ->
+            subtype_arraykey ~class_name:"darray" ~key_pos env key_ty
+        end in
       let field_exprs = List.zip_exn key_exprs value_exprs in
       make_result env
         (T.Darray field_exprs)
@@ -1538,15 +1532,12 @@ and expr_
       let class_name = vc_kind_to_name kind in
       let subtype_val env ((pos, _), ty) =
         let env = Type.sub_type p Reason.URvector env ty elem_ty in
-        if non_arraykey_keys_disallowed
-        then
-          begin match kind with
-          | `Set | `ImmSet | `Keyset ->
-            subtype_arraykey ~class_name ~key_pos:pos env ty
-          | `Vector | `ImmVector | `Vec | `Pair ->
-             env
-          end
-        else env in
+        begin match kind with
+        | `Set | `ImmSet | `Keyset ->
+          subtype_arraykey ~class_name ~key_pos:pos env ty
+        | `Vector | `ImmVector | `Vec | `Pair ->
+           env
+        end in
       let env =
         List.fold_left (List.zip_exn el tyl) ~init:env ~f:subtype_val in
       let tvector = Tclass ((p, class_name), [elem_ty]) in
@@ -1580,9 +1571,7 @@ and expr_
       let class_name = kvc_kind_to_name kind in
       let subtype_key env (((key_pos, _), _), ty) =
         let env = Type.sub_type p Reason.URkey env ty k in
-        if non_arraykey_keys_disallowed
-        then subtype_arraykey ~class_name ~key_pos env ty
-        else env in
+        subtype_arraykey ~class_name ~key_pos env ty in
       let env =
         List.fold_left (List.zip_exn tkl kl) ~init:env ~f:subtype_key in
       let subtype_val env ty = Type.sub_type p Reason.URvalue env ty v in

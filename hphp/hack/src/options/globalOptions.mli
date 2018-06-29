@@ -68,12 +68,6 @@ type t = {
   *)
  tco_disallow_unsafe_comparisons : bool;
 
- (*
-  * Flag to disallow values of types other than int and string used as
-  * keys in literal Maps, Sets, dicts, keysets, and darrays.
-  *)
- tco_disallow_non_arraykey_keys : bool;
-
   (*
    * Flag to disallow subtyping of untyped arrays and tuples (both ways)
   *)
@@ -150,7 +144,6 @@ val make :
   tco_migration_flags: SSet.t ->
   tco_dynamic_view: bool ->
   tco_disallow_unsafe_comparisons: bool ->
-  tco_disallow_non_arraykey_keys: bool ->
   tco_disallow_array_as_tuple: bool ->
   po_auto_namespace_map: (string * string) list ->
   tco_disallow_ambiguous_lambda: bool ->
@@ -171,7 +164,6 @@ val tco_experimental_feature_enabled : t -> SSet.elt -> bool
 val tco_migration_flag_enabled : t -> SSet.elt -> bool
 val tco_dynamic_view : t -> bool
 val tco_disallow_unsafe_comparisons : t -> bool
-val tco_disallow_non_arraykey_keys : t -> bool
 val tco_disallow_array_as_tuple : t -> bool
 val tco_allowed_attribute : t -> SSet.elt -> bool
 val po_auto_namespace_map : t -> (string * string) list

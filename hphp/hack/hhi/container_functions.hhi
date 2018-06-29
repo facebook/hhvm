@@ -47,17 +47,17 @@ function uksort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, mixed $c): bool;
 /**
  * Creates a `dict` from a `KeyedTraversable`, preserving keys and order.
  */
-<<__Rx>>
-function dict<Tk, Tv>(KeyedTraversable<Tk, Tv> $arr): dict<Tk, Tv>;
+<<__Rx, __OnlyRxIfArgs>>
+function dict<Tk, Tv>(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> KeyedTraversable<Tk, Tv> $arr): dict<Tk, Tv>;
 /**
  * Creates a `vec` from a `Traversable`, preserving order. Keys are not
  * preserved.
  */
-<<__Rx>>
-function vec<Tv>(Traversable<Tv> $arr): vec<Tv>;
+<<__Rx, __OnlyRxIfArgs>>
+function vec<Tv>(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tv> $arr): vec<Tv>;
 /**
  * Create a `keyset` from a `Traversable` of strings or ints, preserving order.
  * Keys are not preserved.
  */
-<<__Rx>>
-function keyset<Tv as arraykey>(Traversable<Tv> $arr): keyset<Tv>;
+<<__Rx, __OnlyRxIfArgs>>
+function keyset<Tv as arraykey>(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tv> $arr): keyset<Tv>;

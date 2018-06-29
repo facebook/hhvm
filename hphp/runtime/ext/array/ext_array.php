@@ -1375,20 +1375,20 @@ namespace __SystemLib {
 }
 
 namespace HH {
-  <<__Native, __IsFoldable>>
-  function dict(mixed $arr): dict;
+  <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
+  function dict(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed $arr): dict;
 
-  <<__Native, __IsFoldable>>
-  function vec(mixed $arr): vec;
+  <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
+  function vec(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed $arr): vec;
 
-  <<__Native, __IsFoldable>>
-  function keyset(mixed $arr): keyset;
+  <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
+  function keyset(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed $arr): keyset;
 
-  <<__Native, __IsFoldable>>
-  function varray(mixed $arr): varray;
+  <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
+  function varray(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed $arr): varray;
 
-  <<__Native, __IsFoldable>>
-  function darray(mixed $arr): darray;
+  <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
+  function darray(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed $arr): darray;
 
   /**
    * array_key_cast() can be used to convert a given value to the equivalent

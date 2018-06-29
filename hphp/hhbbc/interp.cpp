@@ -2276,7 +2276,10 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
   ) {
     auto const location = topStkEquiv(env);
     popC(env);
-    if (!asExpression) return push(env, out);
+    if (!asExpression) {
+      constprop(env);
+      return push(env, out);
+    }
     if (out.subtypeOf(TTrue)) {
       constprop(env);
       push(env, t);
@@ -2333,7 +2336,10 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
     return result(TBool);
   }
 
-  if (!asExpression) constprop(env);
+  if (!asExpression) {
+    if (ts_type && !is_type_might_raise(*ts_type, t)) nothrow(env);
+    constprop(env);
+  }
   switch (get_ts_kind(ts)) {
     case TypeStructure::Kind::T_int:
     case TypeStructure::Kind::T_bool:

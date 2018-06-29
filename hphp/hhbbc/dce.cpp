@@ -1328,6 +1328,15 @@ void dce(Env& env, const bc::IsTypeL& op) {
     });
 }
 
+void dce(Env& env, const bc::IsTypeStruct& op) {
+  stack_ops(env, [&] (UseInfo& ui) {
+      if (!env.flags.wasPEI && allUnused(ui)) {
+        return PushFlags::MarkUnused;
+      }
+      return PushFlags::MarkLive;
+    });
+}
+
 void dce(Env& env, const bc::Array& op) {
   stack_ops(env, [&] (UseInfo& ui) {
       if (allUnusedIfNotLastRef(ui)) return PushFlags::MarkUnused;

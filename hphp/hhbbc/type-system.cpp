@@ -4652,6 +4652,7 @@ bool could_copy_on_write(const Type& t) {
 
 bool is_type_might_raise(const Type& testTy, const Type& valTy) {
   if (!RuntimeOption::EvalHackArrCompatIsArrayNotices) return false;
+  if (is_opt(testTy)) return is_type_might_raise(unopt(testTy), valTy);
   if (testTy.subtypeOf(TVArr)) return valTy.couldBe(TVec);
   if (testTy.subtypeOf(TDArr)) return valTy.couldBe(TDict);
   if (testTy.subtypeOf(TArr))  return valTy.couldBeAny(TVArr, TDArr,

@@ -1,35 +1,4 @@
 ---
-AccessModifierOffset: 0
-AlignAfterOpenBracket: Align
-AlignEscapedNewlines: Right
-AllowShortBlocksOnASingleLine: true
-AllowShortCaseLabelsOnASingleLine: true
-AllowShortFunctionsOnASingleLine: Inline
-AllowShortIfStatementsOnASingleLine: true
-AllowShortLoopsOnASingleLine: true
-AlwaysBreakTemplateDeclarations: true
-BinPackArguments: true
-BinPackParameters: true
-ColumnLimit: 80
-ContinuationIndentWidth: 2
-Cpp11BracedListStyle: false
-FixNamespaceComments: true
-IndentCaseLabels: true
-IndentWidth: 2
-PenaltyBreakFirstLessLess: 0
-PenaltyReturnTypeOnItsOwnLine: 0
-PointerAlignment: Left
-SortIncludes: true
-SpaceAfterCStyleCast: false
-SpaceBeforeAssignmentOperators: true
-SpaceBeforeParens: ControlStatements
-SpaceInEmptyParentheses: false
-SpacesBeforeTrailingComments: 1
-SpacesInAngles:  false
-SpacesInContainerLiterals: true
-SpacesInCStyleCastParentheses: false
-SpacesInParentheses: false
-SpacesInSquareBrackets: false
-Standard: Cpp11
-UseTab: Never
+DisableFormat: true
+SortIncludes: false
 ...

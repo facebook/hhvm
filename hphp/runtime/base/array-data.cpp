@@ -1169,7 +1169,7 @@ namespace {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const char* describeKeyType(const TypedValue* tv) {
+std::string describeKeyType(const TypedValue* tv) {
   switch (tv->m_type) {
   case KindOfUninit:
   case KindOfNull:             return "null";
@@ -1187,10 +1187,10 @@ const char* describeKeyType(const TypedValue* tv) {
   case KindOfPersistentArray:
   case KindOfArray:            return "array";
   case KindOfResource:
-    return tv->m_data.pres->data()->o_getClassName().c_str();
+    return tv->m_data.pres->data()->o_getClassName().toCppString();
 
   case KindOfObject:
-    return tv->m_data.pobj->getClassName().c_str();
+    return tv->m_data.pobj->getClassName().get()->toCppString();
 
   case KindOfRef:
     return describeKeyType(tv->m_data.pref->var()->asTypedValue());

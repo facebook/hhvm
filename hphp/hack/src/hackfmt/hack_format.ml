@@ -3060,7 +3060,7 @@ and transform_trivia ~is_leading trivia =
         let prefix_space_count str =
           let len = String.length str in
           let rec aux i =
-            if i = len || str.[i] <> ' '
+            if i = len || (str.[i] <> ' ' && str.[i] <> '\t')
             then 0
             else 1 + (aux (i + 1))
           in

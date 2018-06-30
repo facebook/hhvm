@@ -847,6 +847,7 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
       return unionOf(TArr, TVec, TDict, TKeyset);
     case TypeStructure::Kind::T_dict:
     case TypeStructure::Kind::T_vec: {
+      if (asExpr) return false;
       auto const c = popC(env);
       auto const res = kind == TypeStructure::Kind::T_dict
         ? isDictImpl(env, c)

@@ -210,6 +210,9 @@ module NastCheck                            = struct
   | IllegalReturnByRef
   | IllegalByRefExpr
   | VariadicByRefParam
+  | MaybeMutableAttributeOnFunction
+  | ConflictingMutableAndMaybeMutableAttributes
+  | MaybeMutableMethodsMustBeReactive
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum
@@ -474,6 +477,12 @@ module Typing                               = struct
   | RxParameterConditionMismatch
   | AmbiguousObjectAccess
   | ExtendPPL
+  | ReassignMaybeMutableVar
+  | MaybeMutableArgumentMismatch
+  | ImmutableArgumentMismatch
+  | ImmutableCallOnMutable
+  | InvalidCallMaybeMutable
+  | MutabilityMismatch
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum

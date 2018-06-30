@@ -692,7 +692,7 @@ let default_fun_param ?(pos=Pos.none) ty : 'a fun_param = {
   fp_type = ty;
   fp_kind = FPnormal;
   fp_accept_disposable = false;
-  fp_mutable = false;
+  fp_mutability = None;
   fp_rx_condition = None;
 }
 

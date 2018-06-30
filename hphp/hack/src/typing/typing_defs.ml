@@ -369,6 +369,10 @@ and reactivity =
   | Reactive of decl ty option
   | MaybeReactive of reactivity
 
+and param_mutability =
+  | Param_mutable
+  | Param_maybe_mutable
+
 (* The type of a function AND a method.
  * A function has a min and max arity because of optional arguments *)
 and 'phase fun_type = {
@@ -384,7 +388,8 @@ and 'phase fun_type = {
   ft_ret_by_ref : bool                ;
   ft_reactive   : reactivity          ;
   ft_return_disposable : bool         ;
-  ft_mutable : bool                   ;
+  (* mutability of the receiver *)
+  ft_mutability : param_mutability option   ;
   ft_returns_mutable : bool           ;
   ft_decl_errors : Errors.t option    ;
   ft_returns_void_to_rx: bool         ;
@@ -415,7 +420,7 @@ and 'phase fun_param = {
   fp_type : 'phase ty;
   fp_kind : param_mode;
   fp_accept_disposable : bool;
-  fp_mutable           : bool;
+  fp_mutability           : param_mutability option;
   fp_rx_condition: param_rx_condition option;
 }
 
@@ -737,9 +742,9 @@ let rec ty_compare ty1 ty2 =
       | 0 ->
         compare
           (fty1.ft_is_coroutine, fty1.ft_arity, fty1.ft_ret_by_ref, fty1.ft_reactive,
-          fty1.ft_return_disposable, fty1.ft_mutable, fty1.ft_returns_mutable)
+          fty1.ft_return_disposable, fty1.ft_mutability, fty1.ft_returns_mutable)
           (fty2.ft_is_coroutine, fty2.ft_arity, fty2.ft_ret_by_ref, fty2.ft_reactive,
-          fty2.ft_return_disposable, fty2.ft_mutable, fty2.ft_returns_mutable)
+          fty2.ft_return_disposable, fty2.ft_mutability, fty2.ft_returns_mutable)
       | n -> n
       end
     | n -> n
@@ -752,8 +757,8 @@ let rec ty_compare ty1 ty2 =
     match ty_compare param1.fp_type param2.fp_type with
     | 0 ->
       compare
-        (param1.fp_kind, param1.fp_accept_disposable, param1.fp_mutable)
-        (param2.fp_kind, param2.fp_accept_disposable, param2.fp_mutable)
+        (param1.fp_kind, param1.fp_accept_disposable, param1.fp_mutability)
+        (param2.fp_kind, param2.fp_accept_disposable, param2.fp_mutability)
     | n -> n
 
   and tyl_compare tyl1 tyl2 =

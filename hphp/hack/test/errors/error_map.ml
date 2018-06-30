@@ -209,6 +209,9 @@ CoroutineInConstructor = 3065
 IllegalReturnByRef = 3066
 IllegalByRefExpr = 3067
 VariadicByRefParam = 3068
+MaybeMutableAttributeOnFunction = 3069
+ConflictingMutableAndMaybeMutableAttributes = 3070
+MaybeMutableMethodsMustBeReactive = 3071
 
 Typing Errors:
 AbstractClassFinalDEPRECATED = 4001
@@ -468,4 +471,10 @@ CallSiteReactivityMismatch = 4254
 RxParameterConditionMismatch = 4255
 AmbiguousObjectAccess = 4256
 ExtendPPL = 4257
+ReassignMaybeMutableVar = 4258
+MaybeMutableArgumentMismatch = 4259
+ImmutableArgumentMismatch = 4260
+ImmutableCallOnMutable = 4261
+InvalidCallMaybeMutable = 4262
+MutabilityMismatch = 4263
   |}]

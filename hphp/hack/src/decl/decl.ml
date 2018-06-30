@@ -223,8 +223,12 @@ let fun_returns_mutable user_attributes =
 let fun_returns_void_to_rx user_attributes =
   Attributes.mem SN.UserAttributes.uaReturnsVoidToRx user_attributes
 
-let has_mutable_attribute user_attributes =
-  Attributes.mem SN.UserAttributes.uaMutable user_attributes
+let get_param_mutability user_attributes =
+  if Attributes.mem SN.UserAttributes.uaMutable user_attributes
+  then Some Param_mutable
+  else if Attributes.mem SN.UserAttributes.uaMaybeMutable user_attributes
+  then Some Param_maybe_mutable
+  else None
 
 let rec ifun_decl tcopt (f: Ast.fun_) =
   let f = Errors.ignore_ (fun () -> Naming.fun_ tcopt f) in
@@ -261,7 +265,7 @@ and make_param_ty env attrs reactivity param =
     fp_name = Some param.param_name;
     fp_type = ty;
     fp_kind = mode;
-    fp_mutable = has_mutable_attribute param.param_user_attributes;
+    fp_mutability = get_param_mutability param.param_user_attributes;
     fp_accept_disposable =
       has_accept_disposable_attribute param.param_user_attributes;
     fp_rx_condition = rx_condition;
@@ -330,7 +334,7 @@ and fun_decl_in_env env f =
     ft_ret         = ret_ty;
     ft_ret_by_ref  = f.f_ret_by_ref;
     ft_reactive    = reactivity;
-    ft_mutable     = false; (* Functions can't be mutable because they don't have "this" *)
+    ft_mutability     = None; (* Functions can't be mutable because they don't have "this" *)
     ft_returns_mutable = returns_mutable;
     ft_return_disposable = return_disposable;
     ft_decl_errors = None;
@@ -876,7 +880,7 @@ and typeconst_decl env c (acc, acc2) {
 and method_decl env m =
   check_params env m.m_params;
   let reactivity = fun_reactivity env m.m_user_attributes in
-  let mut = has_mutable_attribute m.m_user_attributes in
+  let mut = get_param_mutability m.m_user_attributes in
   let returns_mutable = fun_returns_mutable m.m_user_attributes in
   let returns_void_to_rx = fun_returns_void_to_rx m.m_user_attributes in
   let return_disposable = has_return_disposable_attribute m.m_user_attributes in
@@ -909,7 +913,7 @@ and method_decl env m =
     ft_ret      = ret;
     ft_ret_by_ref = m.m_ret_by_ref;
     ft_reactive = reactivity;
-    ft_mutable = mut;
+    ft_mutability = mut;
     ft_returns_mutable = returns_mutable;
     ft_return_disposable = return_disposable;
     ft_decl_errors = None;

@@ -12,7 +12,6 @@ module T = Tast
 module Env = Typing_env
 module LMap = Local_id.Map
 open Typing_defs
-open Hh_core
 
 let fun_returns_mutable (env : Typing_env.env) (id : Nast.sid) =
   match Env.get_fun env (snd id) with
@@ -66,7 +65,7 @@ let check_function_return_value
     let kind =
       match mut_opt with
       | None -> "non-mutable"
-      | Some Const -> "const"
+      | Some MaybeMutable -> "maybe-mutable"
       | Some Borrowed -> "borrowed"
       | Some Mutable -> assert false in
     Errors.invalid_mutable_return_result (T.get_position e) fun_pos kind in
@@ -138,6 +137,18 @@ let expr_is_mutable
  | T.Call(_, (_, T.Id (_, id)), _, _, _) when id = SN.Rx.mutable_ -> true
  | _ -> false
 
+let expr_is_maybe_mutable
+  (env: Typing_env.env)
+  (e: T.expr): bool =
+  match e with
+  | _, T.Lvar (_, id) ->
+    let mut_env = Env.get_env_mutability env in
+    begin match LMap.get id mut_env with
+    | Some (_, MaybeMutable) -> true
+    | _ -> false
+    end
+  | _ -> false
+
 let check_rx_mutable_arguments
   (p : Pos.t) (env : Typing_env.env) (tel : T.expr list) =
   match tel with
@@ -179,29 +190,65 @@ let rec check_param_mutability (env : Typing_env.env)
   | [], _
   | _, [] -> el
   | param::ps, e::es ->
-    if param.fp_mutable then
-      if not (expr_is_mutable env e) then
-        Env.error_if_reactive_context env @@ begin fun () ->
-          Errors.mutable_argument_mismatch (param.fp_pos) (T.get_position e)
-        end;
-
+    (* maybe mutable parameters allow anything *)
+    if param.fp_mutability <> Some Param_maybe_mutable
+    then Env.error_if_reactive_context env @@ begin fun () ->
+      let is_mutable = expr_is_mutable env e in
+      let is_maybe_mutable = expr_is_maybe_mutable env e in
+      begin match param.fp_mutability with
+      (* maybe-mutable argument value *)
+      | _ when is_maybe_mutable ->
+        Errors.maybe_mutable_argument_mismatch
+          (param.fp_pos)
+          (T.get_position e)
+      | Some Param_mutable when not is_mutable ->
+      (* mutable parameter, immutable argument *)
+        Errors.mutable_argument_mismatch
+          (param.fp_pos)
+          (T.get_position e)
+      | None when is_mutable ->
+      (* immutable parameter, mutable argument *)
+        Errors.immutable_argument_mismatch
+          (param.fp_pos)
+          (T.get_position e)
+      | _ -> ()
+      end
+    end;
     (* Check the rest *)
     check_param_mutability env ps es
 
 let check_mutability_fun_params env fty el =
+  (* exit early if when calling non-reactive function *)
+  if fty.ft_reactive = Nonreactive then ()
+  else
   let params = fty.ft_params in
   let remaining_exprs = check_param_mutability env params el in
-  begin match fty.ft_arity with
-  | Fvariadic (_, param) when param.fp_mutable ->
-    begin match List.find remaining_exprs
-      ~f:(fun e -> not (expr_is_mutable env e)) with
-    | Some expr ->
-      Env.error_if_reactive_context env @@ begin fun () ->
-        Errors.mutable_argument_mismatch (param.fp_pos) (T.get_position expr)
+  let rec error_on_first_mismatched_argument ~needs_mutable param es =
+    match es with
+    | [] -> ()
+    | e::es ->
+      if expr_is_maybe_mutable env e then
+        Errors.maybe_mutable_argument_mismatch (param.fp_pos) (T.get_position e)
+      else if expr_is_mutable env e <> needs_mutable then begin
+        if needs_mutable
+        then Errors.mutable_argument_mismatch (param.fp_pos) (T.get_position e)
+        else Errors.immutable_argument_mismatch (param.fp_pos) (T.get_position e)
       end
-    | None -> ()
+      else error_on_first_mismatched_argument ~needs_mutable param es in
+  Env.error_if_reactive_context env @@ begin fun () ->
+    begin match fty.ft_arity with
+    (* maybe mutable variadic parameter *)
+    | Fvariadic (_, ({ fp_mutability = Some Param_maybe_mutable; _ })) ->
+      ()
+    (* mutable variadic parameter, ensure that all values being passed are mutable *)
+    | Fvariadic (_, ({ fp_mutability = Some Param_mutable; _ } as param)) ->
+      error_on_first_mismatched_argument ~needs_mutable:true param remaining_exprs
+    (* immutable variadic parameter, ensure that all values being passed are immutable *)
+    | Fvariadic (_, ({ fp_mutability = None; _ } as param)) ->
+      error_on_first_mismatched_argument ~needs_mutable:false param remaining_exprs
+    | _ -> ()
     end
-  | _ -> () end
+  end
 
 
 let enforce_mutable_call (env : Typing_env.env) (te : T.expr) =
@@ -213,13 +260,33 @@ let enforce_mutable_call (env : Typing_env.env) (te : T.expr) =
       check_mutability_fun_params env fty el
     | None -> ()
     end
+  (* static methods *)
+  | T.Call (_, ((_, (_, Tfun fty)), T.Class_const _), _, el, _) ->
+    check_mutability_fun_params env fty el
   (* $x->method() where method is mutable *)
   | T.Call (_, ((pos, (r, Tfun fty)), T.Obj_get (expr, _, _)), _, el, _) ->
-    (if fty.ft_mutable && not (expr_is_mutable env expr) then
-      Env.error_if_reactive_context env @@ begin fun () ->
-        let fpos = Reason.to_pos r in
+    (* do not check receiver mutability when calling non-reactive function *)
+    if fty.ft_reactive <> Nonreactive
+    then Env.error_if_reactive_context env @@ begin fun () ->
+      let fpos = Reason.to_pos r in
+      match fty.ft_mutability with
+      (* mutable-or-immutable function - ok *)
+      | Some Param_maybe_mutable -> ()
+      (* mutable call on mutable-or-immutable value - error *)
+      | Some Param_mutable when expr_is_maybe_mutable env expr ->
+        Errors.invalid_call_on_maybe_mutable ~fun_is_mutable:true pos fpos
+      (* non-mutable call on mutable-or-immutable value - error *)
+      | None when expr_is_maybe_mutable env expr ->
+        Errors.invalid_call_on_maybe_mutable ~fun_is_mutable:false pos fpos
+      (* mutable call on immutable value - error *)
+      | Some Param_mutable when not (expr_is_mutable env expr) ->
         Errors.mutable_call_on_immutable fpos pos
-      end);
+      (* immutable call on mutable value - error *)
+      | None when expr_is_mutable env expr ->
+        Errors.immutable_call_on_mutable fpos pos
+      (* anything else - ok *)
+      | _ -> ()
+    end;
     check_mutability_fun_params env fty el
   (* TAny, T.Calls that don't have types, etc *)
   | _ -> ()
@@ -275,7 +342,9 @@ let handle_assignment_mutability
  | _, T.Lvar(p, id2) when LMap.mem id2 mut_env ->
    Env.error_if_reactive_context env @@ begin fun () ->
      (* Reassigning mutables is not allowed; error *)
-     Errors.reassign_mutable_var p
+     match LMap.find id2 mut_env with
+     | _, MaybeMutable -> Errors.reassign_maybe_mutable_var p
+     | _ -> Errors.reassign_mutable_var p
    end;
    mut_env
  (* var = mutable(v) - add the var to the env since it points to a owned mutable value *)

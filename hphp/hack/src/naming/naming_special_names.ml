@@ -134,6 +134,7 @@ module UserAttributes = struct
   let uaOnlyRxIfArgs        = "__OnlyRxIfArgs"
   let uaSealed              = "__Sealed"
   let uaReturnsVoidToRx     = "__ReturnsVoidToRx"
+  let uaMaybeMutable  = "__MaybeMutable"
 
   let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
     [
@@ -158,7 +159,8 @@ module UserAttributes = struct
       uaOnlyRxIfRxFunc;
       uaOnlyRxIfArgs;
       uaSealed;
-      uaReturnsVoidToRx
+      uaReturnsVoidToRx;
+      uaMaybeMutable;
     ]
 end
 

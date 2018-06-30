@@ -463,7 +463,7 @@ and pp_fun_type : type a. Format.formatter -> a fun_type -> unit = fun fmt x ->
   Format.fprintf fmt ";@ ";
 
   Format.fprintf fmt "@[%s =@ " "ft_mutable";
-  Format.fprintf fmt "%B" x.ft_mutable;
+  Format.fprintf fmt "%s" (show_param_mutability x.ft_mutability);
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 
@@ -471,6 +471,12 @@ and pp_fun_type : type a. Format.formatter -> a fun_type -> unit = fun fmt x ->
   Format.fprintf fmt "%B" x.ft_returns_mutable;
   Format.fprintf fmt "@]";
   Format.fprintf fmt "@ }@]"
+
+and show_param_mutability : param_mutability option -> string = fun x ->
+  match x with
+  | None -> "none"
+  | Some Param_mutable -> "mutable"
+  | Some Param_maybe_mutable -> "maybe-mutable"
 
 and show_fun_type : type a. a fun_type -> string = fun x ->
   Format.asprintf "%a" pp_fun_type x
@@ -545,7 +551,7 @@ fun fmt x ->
   Format.fprintf fmt ";@ ";
 
   Format.fprintf fmt "@[%s =@ " "fp_mutable";
-  Format.fprintf fmt "%B" x.fp_mutable;
+  Format.fprintf fmt "%s" (show_param_mutability x.fp_mutability);
   Format.fprintf fmt "@]";
 
   Format.fprintf fmt "@ }@]"

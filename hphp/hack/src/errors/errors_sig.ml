@@ -563,4 +563,13 @@ module type S = sig
     Pos.t -> Pos.t -> Pos.t -> string -> string -> unit
   val callsite_reactivity_mismatch: Pos.t -> Pos.t -> string -> string -> unit
   val rx_parameter_condition_mismatch: string -> Pos.t -> Pos.t -> unit
+  val maybe_mutable_attribute_on_function: Pos.t -> unit
+  val conflicting_mutable_and_maybe_mutable_attributes: Pos.t -> unit
+  val maybe_mutable_methods_must_be_reactive: Pos.t -> string -> unit
+  val reassign_maybe_mutable_var: Pos.t -> unit
+  val immutable_argument_mismatch : Pos.t -> Pos.t -> unit
+  val maybe_mutable_argument_mismatch : Pos.t -> Pos.t -> unit
+  val immutable_call_on_mutable: Pos.t -> Pos.t -> unit
+  val invalid_call_on_maybe_mutable: fun_is_mutable:bool -> Pos.t -> Pos.t -> unit
+  val mutability_mismatch: is_receiver: bool -> Pos.t -> string -> Pos.t -> string -> unit
 end

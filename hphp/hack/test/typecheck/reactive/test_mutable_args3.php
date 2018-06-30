@@ -6,7 +6,7 @@ class Test {
 }
 
 class Foo {
-  <<__Rx>>
+  <<__Rx, __Mutable>>
   public function bar(<<__Mutable>>Test $x, <<__Mutable>>Test $y): void {
     $x->val = 5;
   }

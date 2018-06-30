@@ -209,15 +209,19 @@ let try_over_concrete_supertypes env ty f =
 (*****************************************************************************)
 (* Handling function/method arguments *)
 (*****************************************************************************)
-
+let param_has_attribute param attr =
+  List.exists param.param_user_attributes
+    (fun { ua_name; _ } -> attr = snd ua_name)
 
 let has_accept_disposable_attribute param =
-  List.exists param.param_user_attributes
-    (fun { ua_name; _ } -> SN.UserAttributes.uaAcceptDisposable = snd ua_name)
+  param_has_attribute param SN.UserAttributes.uaAcceptDisposable
 
-let has_mutable_attribute param =
-  List.exists param.param_user_attributes
-    (fun { ua_name; _ } -> SN.UserAttributes.uaMutable = snd ua_name)
+let get_param_mutability param =
+  if param_has_attribute param SN.UserAttributes.uaMutable
+  then Some Param_mutable
+  else if param_has_attribute param SN.UserAttributes.uaMaybeMutable
+  then Some Param_maybe_mutable
+  else None
 
 (* Check whether this is a function type that (a) either returns a disposable
  * or (b) has the <<__ReturnDisposable>> attribute
@@ -386,9 +390,13 @@ let rec bind_param env (ty1, param) =
   let env = Env.set_param env id (ty1, mode) in
   let env = if has_accept_disposable_attribute param
             then Env.set_using_var env id else env in
-  let env = if has_mutable_attribute param
-            then Env.add_mutable_var env id (param.param_pos, Typing_mutability_env.Borrowed)
-            else env in
+  let env =
+    match get_param_mutability param with
+    | Some Param_mutable ->
+      Env.add_mutable_var env id (param.param_pos, Typing_mutability_env.Borrowed)
+    | Some Param_maybe_mutable ->
+      Env.add_mutable_var env id (param.param_pos, Typing_mutability_env.MaybeMutable)
+    | None -> env in
   env, tparam
 
 (* In strict mode, we force you to give a type declaration on a parameter *)
@@ -1755,7 +1763,7 @@ and expr_
               ft_ret = fty.ft_ret;
               ft_ret_by_ref = fty.ft_ret_by_ref;
               ft_reactive = fty.ft_reactive;
-              ft_mutable = fty.ft_mutable;
+              ft_mutability = fty.ft_mutability;
               ft_returns_mutable = fty.ft_returns_mutable;
               ft_return_disposable = fty.ft_return_disposable;
               ft_decl_errors = None;
@@ -3756,7 +3764,7 @@ and is_abstract_ft fty = match fty with
                 ft_ret = tr;
                 ft_ret_by_ref = fty.ft_ret_by_ref;
                 ft_reactive = fty.ft_reactive;
-                ft_mutable = fty.ft_mutable;
+                ft_mutability = fty.ft_mutability;
                 ft_returns_mutable = fty.ft_returns_mutable;
                 ft_return_disposable = fty.ft_return_disposable;
                 ft_decl_errors = None;
@@ -5458,7 +5466,7 @@ and call_ ~expected ~method_call_info ~is_expr_statement pos env fty el uel =
              fp_type = ty;
              fp_kind = FPnormal;
              fp_accept_disposable = false;
-             fp_mutable = false;
+             fp_mutability = None;
              fp_rx_condition = None;
            }
          in

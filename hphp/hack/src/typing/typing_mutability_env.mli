@@ -20,7 +20,7 @@
   vars. They cannot have their object properties be written toward, and cannot be
   reassigned. They are essentially read only.
 *)
-type mut_type = Mutable | Borrowed | Const
+type mut_type = Mutable | Borrowed | MaybeMutable
 type mutability = Pos.t * mut_type
 
 (* Mapping from local variables to their mutability

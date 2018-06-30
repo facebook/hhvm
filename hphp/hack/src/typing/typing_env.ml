@@ -103,7 +103,7 @@ let make_ft p reactivity is_coroutine params ret_ty =
     ft_reactive = reactivity;
     ft_return_disposable = false;
     ft_returns_mutable = false;
-    ft_mutable = false;
+    ft_mutability = None;
     ft_decl_errors = None;
     ft_returns_void_to_rx = false;
   }
@@ -848,7 +848,10 @@ let unset_local env local =
 
 
 let is_mutable env local =
-  Local_id.Map.mem local env.lenv.local_mutability
+  let module TME = Typing_mutability_env in
+  match Local_id.Map.get local env.lenv.local_mutability with
+  | Some (_, (TME.Mutable | TME.Borrowed)) -> true
+  | _ -> false
 
 let add_mutable_var env local mutability_type =
 env_with_mut

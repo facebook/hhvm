@@ -1,0 +1,4 @@
+File "mutable_value_immutable_method2.php", line 18, characters 3-21:
+Cannot call non-mutable function on mutable expression (Typing[4261])
+File "mutable_value_immutable_method2.php", line 10, characters 19-33:
+This function is not marked as <<__Mutable>>.

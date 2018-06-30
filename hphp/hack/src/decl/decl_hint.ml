@@ -67,7 +67,7 @@ and hint_ p env = function
         fp_type = hint env x;
         fp_kind = get_param_mode ~is_ref:false k;
         fp_accept_disposable = false;
-        fp_mutable = false;
+        fp_mutability = None;
         fp_rx_condition = None;
       }
     in
@@ -92,7 +92,7 @@ and hint_ p env = function
       ft_ret_by_ref = false;
       ft_reactive = if is_reactive then Reactive None else Nonreactive;
       ft_return_disposable = false;
-      ft_mutable = false;
+      ft_mutability = None;
       ft_returns_mutable = false;
       ft_decl_errors = None;
       ft_returns_void_to_rx = false;

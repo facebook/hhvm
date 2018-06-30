@@ -10,13 +10,13 @@
   See typing_mutability.ml for a description of the fields.
 *)
 module LMap = Local_id.Map
-type mut_type = Mutable | Borrowed | Const
+type mut_type = Mutable | Borrowed | MaybeMutable
 type mutability = Pos.t * mut_type
 
 let to_string = function
 | _, Mutable -> "mutably-owned"
 | _, Borrowed -> "mutably-borrowed"
-| _, Const -> "constant"
+| _, MaybeMutable -> "maybe-mutable"
 
 (* Mapping from local variables to their mutability
   Local mutability is stored in the local environment.
@@ -48,7 +48,7 @@ let intersect_mutability
         (* do a conservative merge for mutability values *)
         begin match mut1, mut2 with
         | Mutable, Borrowed | Borrowed, Mutable -> Borrowed
-        | _ -> if mut1 = mut2 then mut1 else Const
+        | _ -> if mut1 = mut2 then mut1 else MaybeMutable
         end in
       Some (p1, assumed_mut)
     | Some l, None when keep_left -> Some l

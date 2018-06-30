@@ -1373,6 +1373,15 @@ let mutable_attribute_on_function pos =
     "<<__Mutable>> only makes sense on methods, or parameters on functions or methods."
   )
 
+let maybe_mutable_attribute_on_function pos =
+  add (NastCheck.err_code NastCheck.MaybeMutableAttributeOnFunction) pos (
+    "<<__MaybeMutable>> only makes sense on methods, or parameters on functions or methods."
+  )
+
+let conflicting_mutable_and_maybe_mutable_attributes pos =
+  add  (NastCheck.err_code NastCheck.ConflictingMutableAndMaybeMutableAttributes) pos (
+    "Declaration cannot have both <<__Mutable>> and <<__MaybeMutable>> attributtes."
+  )
 
 let mutable_methods_must_be_reactive pos name =
   add (NastCheck.err_code NastCheck.MutableMethodsMustBeReactive) pos (
@@ -1385,6 +1394,13 @@ let mutable_return_annotated_decls_must_be_reactive kind pos name =
     "The " ^ kind ^ " " ^ (strip_ns name) ^ " is annotated with <<__MutableReturn>>, " ^
     " so it must be marked reactive with <<__Rx>>."
   )
+
+let maybe_mutable_methods_must_be_reactive pos name =
+  add (NastCheck.err_code NastCheck.MaybeMutableMethodsMustBeReactive) pos (
+    "The method " ^ (strip_ns name) ^ " is annotated with <<__MaybeMutable> attribute, \
+    or has this attribute on one of parameters so it must be marked reactive."
+  )
+
 
 let inout_params_special pos =
   add (NastCheck.err_code NastCheck.InoutParamsSpecial) pos
@@ -2357,11 +2373,44 @@ let reassign_mutable_var pos1 =
   add (Typing.err_code Typing.ReassignMutableVar) pos1
   ("This variable is mutable. You cannot create a new reference to it.")
 
+let reassign_maybe_mutable_var pos1 =
+  add (Typing.err_code Typing.ReassignMaybeMutableVar) pos1
+  ("This variable is maybe mutable. You cannot create a new reference to it.")
+
+
 let mutable_call_on_immutable fpos pos1 =
   add_list (Typing.err_code Typing.MutableCallOnImmutable)
   [
     pos1, "Cannot call mutable function on immutable expression";
     fpos, "This function is marked <<__Mutable>>, so it has a mutable $this.";
+  ]
+
+let immutable_call_on_mutable fpos pos1 =
+  add_list (Typing.err_code Typing.ImmutableCallOnMutable)
+  [
+    pos1, "Cannot call non-mutable function on mutable expression";
+    fpos, "This function is not marked as <<__Mutable>>.";
+  ]
+
+let mutability_mismatch ~is_receiver pos1 mut1 pos2 mut2 =
+  let msg mut =
+    let msg = if is_receiver then "Receiver of this function" else "This parameter" in
+    msg ^ " is " ^ mut in
+  add_list (Typing.err_code Typing.MutabilityMismatch)
+  [
+    pos1, "Incompatible mutabilities:";
+    pos1, msg mut1;
+    pos2, msg mut2;
+  ]
+
+let invalid_call_on_maybe_mutable ~fun_is_mutable pos fpos =
+  let msg =
+    "Cannot call " ^ (if fun_is_mutable then "mutable" else "non-mutable") ^ " \
+    function on maybe mutable value." in
+  add_list (Typing.err_code Typing.InvalidCallMaybeMutable)
+  [
+    pos, msg;
+    fpos, "This function is not marked as <<__MaybeMutable>>."
   ]
 
 let mutable_argument_mismatch param_pos arg_pos =
@@ -2370,6 +2419,22 @@ let mutable_argument_mismatch param_pos arg_pos =
     arg_pos, "Invalid argument";
     param_pos, "This parameter is marked mutable";
     arg_pos, "But this expression is not";
+  ]
+
+let immutable_argument_mismatch param_pos arg_pos =
+  add_list (Typing.err_code Typing.ImmutableArgumentMismatch)
+  [
+    arg_pos, "Invalid argument";
+    param_pos, "This parameter is not marked as mutable";
+    arg_pos, "But this expression is mutable";
+  ]
+
+let maybe_mutable_argument_mismatch param_pos arg_pos =
+  add_list (Typing.err_code Typing.MaybeMutableArgumentMismatch)
+  [
+    arg_pos, "Invalid argument";
+    param_pos, "This parameter is not marked <<__MaybeMutable>>";
+    arg_pos, "But this expression is maybe mutable"
   ]
 
 let invalid_mutable_return_result error_pos function_pos value_kind =

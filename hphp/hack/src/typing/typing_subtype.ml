@@ -680,6 +680,7 @@ end
 let rec subtype_params
   ?(is_method : bool = false)
   ?(check_params_reactivity = false)
+  ?(check_params_mutability = false)
   (env : Env.env)
   (subl : locl fun_param list)
   (superl : locl fun_param list)
@@ -721,6 +722,10 @@ let rec subtype_params
   | sub :: subl, super :: superl ->
     if check_params_reactivity
     then subtype_fun_params_reactivity env sub super;
+    if check_params_mutability
+    then check_mutability
+      ~is_receiver:false
+      sub.fp_pos sub.fp_mutability super.fp_pos super.fp_mutability;
 
     let { fp_type = ty_sub; _ } = sub in
     let { fp_type = ty_super; _ } = super in
@@ -980,6 +985,29 @@ and subtype_fun_params_reactivity
         SN.UserAttributes.uaOnlyRxIfImpl p_sub.fp_pos p_super.fp_pos
     end;
 
+and check_mutability
+  ~(is_receiver: bool)
+  (p_sub : Pos.t)
+  (mut_sub: param_mutability option)
+  (p_super : Pos.t)
+  (mut_super: param_mutability option) =
+  let str m =
+    match m with
+    | None -> "immutable"
+    | Some Param_mutable -> "mutable"
+    | Some Param_maybe_mutable -> "maybe-mutable" in
+  match mut_sub, mut_super with
+  (* immutable is not compatible with mutable *)
+  | None, Some Param_mutable
+  (* mutable is not compatible with immutable  *)
+  | Some Param_mutable, None
+  (* maybe-mutable is not compatible with immutable *)
+  | Some Param_maybe_mutable, None
+  (* maybe mutable is not compatible with immutable *)
+  | Some Param_maybe_mutable, Some Param_mutable ->
+    Errors.mutability_mismatch
+      ~is_receiver p_sub (str mut_sub) p_super (str mut_super)
+  | _ -> ()
 
 (* This function checks that the method ft_sub can be used to replace
  * (is a subtype of) ft_super.
@@ -1088,6 +1116,17 @@ and subtype_funs_generic
        $a1 = $a->f(); // immutable alias to mutable reference *)
       Errors.return_void_to_rx_mismatch ~pos1_has_attribute:true p_sub p_super
   end;
+
+  (* check mutability only for reactive functions *)
+  let check_params_mutability =
+    ft_super.ft_reactive <> Nonreactive &&
+    ft_sub.ft_reactive <> Nonreactive in
+  if check_params_mutability
+  (* check mutability of receivers *)
+  then check_mutability
+    ~is_receiver:true
+    p_super ft_super.ft_mutability p_sub ft_sub.ft_mutability;
+
   if (arity_min ft_sub.ft_arity) > (arity_min ft_super.ft_arity)
   then Errors.fun_too_many_args p_sub p_super;
   (match ft_sub.ft_arity, ft_super.ft_arity with
@@ -1124,6 +1163,7 @@ and subtype_funs_generic
     subtype_params
       ~is_method
       ~check_params_reactivity:(should_check_fun_params_reactivity ft_super)
+      ~check_params_mutability
       env ft_super.ft_params ft_sub.ft_params variadic_subtype variadic_supertype
   in
 

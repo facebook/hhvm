@@ -1,0 +1,10 @@
+not noreturn: integer
+not noreturn: boolean
+not noreturn: double
+not noreturn: string
+not noreturn: resource
+not noreturn: object
+not noreturn: vec
+not noreturn: dict
+not noreturn: keyset
+not noreturn: NULL

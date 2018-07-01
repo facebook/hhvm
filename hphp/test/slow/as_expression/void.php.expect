@@ -1,0 +1,10 @@
+not void: integer
+not void: boolean
+not void: double
+not void: string
+not void: resource
+not void: object
+not void: vec
+not void: dict
+not void: keyset
+NULL

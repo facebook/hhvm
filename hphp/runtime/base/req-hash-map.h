@@ -33,10 +33,10 @@ template <class T,
           class W = std::equal_to<T>>
 struct hash_map : folly::F14NodeMap<
   T, U, V, W,
-  ConservativeAllocator<std::pair<const T,U>>
+  Allocator<std::pair<const T,U>>
 > {
   using Base = folly::F14NodeMap<
-    T, U, V, W, ConservativeAllocator<std::pair<const T, U>>
+    T, U, V, W, Allocator<std::pair<const T, U>>
   >;
   hash_map() : Base() {}
 
@@ -102,7 +102,10 @@ struct vector_map : folly::F14VectorMap<
 
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T, U) {
-    for (const auto& pair : *this) scanner.scan(pair);
+    // use rbegin/rend to visit entries in address order within the container
+    // (see the iteration order comment for F14ValueMap in F14Map.h)
+    const auto it = Base::rbegin();
+    scanner.scan(*it, Base::size() * sizeof(*it));
   }
 };
 

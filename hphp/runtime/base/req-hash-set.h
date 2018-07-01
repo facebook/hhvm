@@ -30,8 +30,8 @@ namespace HPHP { namespace req {
 template <class T,
           class V = std::hash<T>,
           class W = std::equal_to<T>>
-struct hash_set : folly::F14NodeSet<T,V,W,ConservativeAllocator<T>> {
-  using Base = folly::F14NodeSet<T,V,W,ConservativeAllocator<T>>;
+struct hash_set : folly::F14NodeSet<T,V,W,Allocator<T>> {
+  using Base = folly::F14NodeSet<T,V,W,Allocator<T>>;
   hash_set() : Base() {}
 
   TYPE_SCAN_IGNORE_BASES(Base);
@@ -83,7 +83,10 @@ struct vector_set : folly::F14VectorSet<T,V,W,ConservativeAllocator<T>> {
 
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
-    for (const auto& key : *this) scanner.scan(key);
+    // use rbegin/rend to visit entries in address order within the container
+    // (see the iteration order for F14ValueSet in F14Set.h)
+    const auto it = Base::rbegin();
+    scanner.scan(*it, Base::size() * sizeof(*it));
   }
 };
 

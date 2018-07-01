@@ -52,7 +52,7 @@ let make_header comment_style (header_comment : string) : string =
 
 
 type valign =
-  (string -> string -> string, unit, string, string -> string) format4 [@@deriving show]
+  (string -> string -> string, unit, string, string -> string) format4
 
 let all_tokens = given_text_tokens @ variable_text_tokens @ no_text_tokens
 let align_fmt : 'a . ('a -> string) -> 'a list -> valign = fun f xs ->

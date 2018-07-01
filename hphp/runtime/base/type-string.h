@@ -18,6 +18,8 @@
 #define incl_HPHP_STRING_H_
 
 #include "hphp/runtime/base/req-ptr.h"
+#include "hphp/runtime/base/req-hash-map.h"
+#include "hphp/runtime/base/req-hash-set.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"

@@ -760,7 +760,7 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
 
   // Check if this file has already been included.
   auto it = eContext->m_evaledFiles.find(spath.get());
-  if (it != end(eContext->m_evaledFiles)) {
+  if (it != eContext->m_evaledFiles.end()) {
     // In RepoAuthoritative mode we assume that the files are unchanged.
     initial = false;
     if (RuntimeOption::RepoAuthoritative ||

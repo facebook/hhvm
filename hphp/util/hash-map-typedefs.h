@@ -28,25 +28,6 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Note: these deliberately change the default-constructor behavior of
- * unordered_{map,set} to allocate slightly less memory.
- *
- * Generally be careful about using these hashtables.  They're not
- * cheap, although they may be convenient.
- */
-
-#if (defined(__GNUC__) && __GNUC__ >= 5) ||\
-    (defined(__clang) && (__clang_major__ > 3 ||\
-                           __clang_major__ == 3 && __clang_minor__ >= 4))
-// default constructors of unordered containers do not allocate
-#define GOOD_UNORDERED_CTOR ()
-#else
-// minimize allocation when default constructed
-#define GOOD_UNORDERED_CTOR (0)
-#endif
-
-// Replacements for std::unordered_map do not move values
 template <class T, class U, class V=std::hash<T>, class W=std::equal_to<T>>
 using hphp_hash_map = folly::F14NodeMap<T,U,V,W>;
 template <class T, class V=std::hash<T>, class W=std::equal_to<T>>

@@ -27,8 +27,6 @@
 #include <queue>
 #include <set>
 #include <stack>
-#include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -42,7 +40,6 @@
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/tiny-vector.h"
 #include "hphp/util/type-scan.h"
-#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP { namespace req {
 
@@ -399,71 +396,6 @@ struct flat_multiset final : boost::container::flat_multiset<
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(K) {
     for (const auto& v : *this) scanner.scan(v);
-  }
-};
-
-template <class T,
-          class U,
-          class V = std::hash<T>,
-          class W = std::equal_to<T>>
-struct hash_map final : std::unordered_map<
-  T, U, V, W,
-  ConservativeAllocator<std::pair<const T,U>>
-> {
-  hash_map()
-    : std::unordered_map<T, U, V, W,
-      ConservativeAllocator<std::pair<const T,U>>>
-      GOOD_UNORDERED_CTOR
-  {}
-
-  using Base = std::unordered_map<
-    T, U, V, W, ConservativeAllocator<std::pair<const T, U>>
-  >;
-
-  TYPE_SCAN_IGNORE_BASES(Base);
-  TYPE_SCAN_CUSTOM(T, U) {
-   for (const auto& pair : *this) scanner.scan(pair);
-  }
-};
-
-template <class T,
-          class U,
-          class V = std::hash<T>,
-          class W = std::equal_to<T>>
-struct hash_multimap final : std::unordered_multimap<
-  T, U, V, W,
-  ConservativeAllocator<std::pair<const T,U>>
-> {
-  hash_multimap()
-    : std::unordered_multimap<T, U, V, W,
-      ConservativeAllocator<std::pair<const T,U>>>
-      GOOD_UNORDERED_CTOR
-  {}
-
-  using Base = std::unordered_multimap<
-    T, U, V, W, ConservativeAllocator<std::pair<const T, U>>
-  >;
-
-  TYPE_SCAN_IGNORE_BASES(Base);
-  TYPE_SCAN_CUSTOM(T, U) {
-   for (const auto& pair : *this) scanner.scan(pair);
-  }
-};
-
-template <class T,
-          class V = std::hash<T>,
-          class W = std::equal_to<T>>
-struct hash_set final : std::unordered_set<T,V,W,ConservativeAllocator<T> > {
-  hash_set()
-    : std::unordered_set<T,V,W,ConservativeAllocator<T>>
-      GOOD_UNORDERED_CTOR
-  {}
-
-  using Base = std::unordered_set<T,V,W,ConservativeAllocator<T>>;
-
-  TYPE_SCAN_IGNORE_BASES(Base);
-  TYPE_SCAN_CUSTOM(T) {
-   for (const auto& v : *this) scanner.scan(v);
   }
 };
 

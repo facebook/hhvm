@@ -1572,9 +1572,9 @@ static Array HHVM_METHOD(ReflectionClass, getDynamicPropertyInfos,
     return empty_array();
   }
 
-  auto const dynPropArray = obj_data->dynPropArray().get();
-  ArrayInit ret(dynPropArray->size(), ArrayInit::Mixed{});
-  for (ArrayIter it(dynPropArray); !it.end(); it.next()) {
+  auto const dynPropArrayData = obj_data->dynPropArray().get();
+  ArrayInit ret(dynPropArrayData->size(), ArrayInit::Mixed{});
+  for (ArrayIter it(dynPropArrayData); !it.end(); it.next()) {
     Array info = Array::Create();
     set_dyn_prop_info(info, it.first(), cls->name());
     ret.setValidKey(*it.first().asTypedValue(), VarNR(info).tv());
@@ -1765,7 +1765,8 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
   if (cls_or_obj.is(KindOfObject)) {
     auto obj = cls_or_obj.toCObjRef().get();
     assertx(cls == obj->getVMClass());
-    if (obj->hasDynProps() && obj->dynPropArray().exists(prop_name)) {
+    if (obj->getAttribute(ObjectData::HasDynPropArr) &&
+        obj->dynPropArray().exists(prop_name)) {
       data->setDynamicProp();
       this_->setProp(nullptr, s_class.get(),
                      make_tv<KindOfPersistentString>(cls->name()));

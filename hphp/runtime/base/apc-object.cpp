@@ -266,7 +266,7 @@ Object APCObject::createObject() const {
     assertx(dynProps->kind() == APCKind::StaticArray ||
            dynProps->kind() == APCKind::UncountedArray ||
            dynProps->kind() == APCKind::SharedArray);
-    obj->setDynPropArray(dynProps->toLocal().asCArrRef());
+    obj->setDynProps(dynProps->toLocal().asCArrRef());
   }
 
   if (!m_no_wakeup) obj->invokeWakeup();

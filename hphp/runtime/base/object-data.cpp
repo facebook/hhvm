@@ -319,13 +319,24 @@ Array& ObjectData::dynPropArray() const {
   return g_context->dynPropTable[this].arr();
 }
 
+void ObjectData::setDynProps(const Array& newArr) {
+  // don't expose the ref returned by setDynPropArr
+  (void)setDynPropArray(newArr);
+}
+
+void ObjectData::reserveDynProps(int numDynamic) {
+  // don't expose the ref returned by reserveProperties()
+  (void)reserveProperties(numDynamic);
+}
+
 Array& ObjectData::reserveProperties(int numDynamic /* = 2 */) {
   if (getAttribute(HasDynPropArr)) {
     return dynPropArray();
   }
 
-  return
-    setDynPropArray(Array::attach(MixedArray::MakeReserveMixed(numDynamic)));
+  return setDynPropArray(
+      Array::attach(MixedArray::MakeReserveMixed(numDynamic))
+  );
 }
 
 Array& ObjectData::setDynPropArray(const Array& newArr) {
@@ -343,6 +354,7 @@ Array& ObjectData::setDynPropArray(const Array& newArr) {
     });
   }
 
+  // newArr can have refcount 2 or higher
   auto& arr = g_context->dynPropTable[this].arr();
   assertx(arr.isPHPArray());
   arr = newArr;
@@ -585,16 +597,17 @@ size_t getPropertyIfAccessible(ObjectData* obj,
 
 Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
   if (mode == PreserveRefs && !m_cls->numDeclProperties()) {
-    if (getAttribute(HasDynPropArr)) return dynPropArray();
+    if (getAttribute(HasDynPropArr)) {
+      // not returning Array&; makes a copy
+      return dynPropArray();
+    }
     return Array::Create();
   }
 
-  Array* dynProps = nullptr;
   size_t accessibleProps = m_cls->declPropNumAccessible();
   size_t size = accessibleProps;
   if (getAttribute(HasDynPropArr)) {
-    dynProps = &dynPropArray();
-    size += dynProps->size();
+    size += dynPropArray().size();
   }
   Array retArray { Array::attach(MixedArray::MakeReserveMixed(size)) };
 
@@ -630,13 +643,15 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
   }
 
   // Now get dynamic properties.
-  if (dynProps) {
-    auto ad = dynProps->get();
+  if (getAttribute(HasDynPropArr)) {
+    auto& dynProps = dynPropArray();
+    auto ad = dynProps.get();
     ssize_t iter = ad->iter_begin();
     auto pos_limit = ad->iter_end();
     while (iter != pos_limit) {
-      auto const key = dynProps->get()->nvGetKey(iter);
-      iter = dynProps->get()->iter_advance(iter);
+      ad = dynProps.get();
+      auto const key = ad->nvGetKey(iter);
+      iter = ad->iter_advance(iter);
 
       // You can get this if you cast an array to object. These
       // properties must be dynamic because you can't declare a
@@ -645,17 +660,17 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
         assertx(key.m_type == KindOfInt64);
         switch (mode) {
         case CreateRefs: {
-          auto const lval = dynProps->lvalAt(key.m_data.num);
+          auto const lval = dynProps.lvalAt(key.m_data.num);
           retArray.setRef(key.m_data.num, lval);
           break;
         }
         case EraseRefs: {
-          auto const val = dynProps->get()->at(key.m_data.num);
+          auto const val = dynProps.get()->at(key.m_data.num);
           retArray.set(key.m_data.num, val);
           break;
         }
         case PreserveRefs: {
-          auto const val = dynProps->get()->at(key.m_data.num);
+          auto const val = dynProps.get()->at(key.m_data.num);
           retArray.setWithRef(key.m_data.num, val);
           break;
         }
@@ -666,17 +681,17 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
       auto const strKey = key.m_data.pstr;
       switch (mode) {
       case CreateRefs: {
-        auto const lval = dynProps->lvalAt(StrNR(strKey), AccessFlags::Key);
+        auto const lval = dynProps.lvalAt(StrNR(strKey), AccessFlags::Key);
         retArray.setRef(StrNR(strKey), lval, true /* isKey */);
         break;
       }
       case EraseRefs: {
-        auto const val = dynProps->get()->at(strKey);
+        auto const val = dynProps.get()->at(strKey);
         retArray.set(StrNR(strKey), val, true /* isKey */);
         break;
       }
       case PreserveRefs: {
-        auto const val = dynProps->get()->at(strKey);
+        auto const val = dynProps.get()->at(strKey);
         retArray.setWithRef(make_tv<KindOfString>(strKey),
                             val, true /* isKey */);
         break;
@@ -1148,16 +1163,16 @@ ObjectData::PropLookup ObjectData::getPropImpl(
   // We could not find a visible declared property. We need to check for a
   // dynamic property with this name.
   if (UNLIKELY(getAttribute(HasDynPropArr))) {
-    if (auto const rval = dynPropArray()->rval(key)) {
+    auto& arr = dynPropArray();
+    if (auto const rval = arr->rval(key)) {
       // Returning a non-declared property. We know that it is accessible and
       // not immutable since all dynamic properties are. If we may write to
       // the property we need to allow the array to escalate.
       if (forWrite) {
-        auto const lval = dynPropArray().lvalAt(StrNR(key), AccessFlags::Key);
+        auto const lval = arr.lvalAt(StrNR(key), AccessFlags::Key);
         return { lval, true, false };
-      } else {
-        return  { rval.as_lval(), true, true };
       }
+      return { rval.as_lval(), true, true };
     }
   }
 

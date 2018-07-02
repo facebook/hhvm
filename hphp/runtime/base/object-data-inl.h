@@ -295,7 +295,7 @@ inline tv_rval ObjectData::propRvalAtOffset(Slot idx) const {
 }
 
 inline bool ObjectData::hasDynProps() const {
-  return getAttribute(HasDynPropArr) && dynPropArray().size() != 0;
+  return getAttribute(HasDynPropArr) && !dynPropArray().empty();
 }
 
 inline MemoSlot* ObjectData::memoSlot(Slot slot) {

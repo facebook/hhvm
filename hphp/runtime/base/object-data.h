@@ -387,7 +387,10 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   bool hasDynProps() const;
 
   /*
-   * Returns the dynamic properties array for this object.
+   * Returns a reference to dynamic properties Array for this object.
+   * The reference points into an entry in ExecutionContext::dynPropArray,
+   * so is only valid for a short lifetime, until another entry is inserted
+   * or erased (anything that moves entries).
    *
    * Note: you're generally not going to want to copy-construct the
    * return value of this function.  If you want to make changes to
@@ -398,19 +401,12 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   Array& dynPropArray() const;
 
   /*
-   * Create the dynamic property array for this ObjectData if it
-   * doesn't already exist yet.
-   *
-   * Post: getAttribute(HasDynPropArr)
-   */
-  Array& reserveProperties(int nProp = 2);
-
-  /*
    * Use the given array for this object's dynamic properties. HasDynPropArry
    * must not already be set. Returns a reference to the Array in its final
    * location.
    */
-  Array& setDynPropArray(const Array&);
+  void setDynProps(const Array&);
+  void reserveDynProps(int nProp);
 
   // accessors for the declared properties area
   TypedValue* propVecForWrite();
@@ -440,6 +436,21 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   //============================================================================
   // Properties.
  private:
+  /*
+   * Use the given array for this object's dynamic properties. HasDynPropArry
+   * must not already be set. Returns a reference to the Array in its final
+   * location.
+   */
+  Array& setDynPropArray(const Array&);
+
+  /*
+   * Create the dynamic property array for this ObjectData if it
+   * doesn't already exist yet.
+   *
+   * Post: getAttribute(HasDynPropArr)
+   */
+  Array& reserveProperties(int nProp = 2);
+
   Slot declPropInd(tv_rval prop) const;
   [[noreturn]] NEVER_INLINE
   void throwMutateImmutable(tv_rval prop) const;

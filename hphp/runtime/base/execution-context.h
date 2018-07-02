@@ -568,7 +568,7 @@ public:
   // Although the error handlers may want to access dynamic properties,
   // we cannot *call* the error handlers (or their destructors) while
   // destroying the context, so C++ order of destruction is not an issue.
-  req::hash_map<const ObjectData*,ArrayNoDtor> dynPropTable;
+  req::fast_map<const ObjectData*,ArrayNoDtor> dynPropTable;
   TYPE_SCAN_IGNORE_FIELD(dynPropTable);
   VarEnv* m_globalVarEnv;
   struct FileInfo {

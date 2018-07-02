@@ -1054,7 +1054,10 @@ void VariableUnserializer::unserializeVariant(
             }
             // If everything matched, all remaining properties are dynamic.
             if (!mismatch && remainingProps > 0) {
-              auto& arr = obj->reserveProperties(remainingProps);
+              // the dynPropTable can be mutated while we're deserializing
+              // the contents of this object's prop array. Don't hold a
+              // reference to this object's entry in the table while looping.
+              obj->reserveDynProps(remainingProps);
               while (remainingProps > 0) {
                 Variant v;
                 unserializeVariant(v.asTypedValue(), UnserializeMode::Key);
@@ -1069,6 +1072,7 @@ void VariableUnserializer::unserializeVariant(
                   }
                   auto t = [&]() {
                     SuppressHackArrCompatNotices shacn;
+                    auto& arr = obj->dynPropArray();
                     return arr.lvalAt(key, AccessFlags::Key);
                   }();
                   if (UNLIKELY(isRefcountedType(t.type()))) {

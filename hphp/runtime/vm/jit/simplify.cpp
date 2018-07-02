@@ -2393,11 +2393,9 @@ SSATmp* simplifyCoerceCellToInt(State& env, const IRInstruction* inst) {
   auto const src      = inst->src(0);
   auto const srcType  = src->type();
 
-  if (srcType <= TInt) return gen(env, Mov, src);
-
-  if (isSimplifyOkay(inst) && srcType.subtypeOfAny(TBool, TNull, TDbl)) {
-    if (RuntimeOption::EvalWarnOnCoerceBuiltinParams) return nullptr;
-    return gen(env, ConvCellToInt, inst->taken(), src);
+  if (srcType <= TInt ||
+       (isSimplifyOkay(inst) && srcType.subtypeOfAny(TBool, TNull, TDbl))) {
+         return gen(env, ConvCellToInt, inst->taken(), src);
   }
 
   if (srcType <= TStr) return gen(env, CoerceStrToInt, inst->taken(),

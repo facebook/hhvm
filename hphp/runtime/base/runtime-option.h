@@ -520,6 +520,7 @@ struct RuntimeOption {
   F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \
   F(bool, DisassemblerSourceMapping,   true)                            \
+  F(bool, DisableReturnByReference,    false)                           \
   F(bool, GenerateDocComments,         true)                            \
   F(bool, DisassemblerDocComments,     true)                            \
   F(bool, DisassemblerPropDocComments, true)                            \

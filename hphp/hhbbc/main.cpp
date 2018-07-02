@@ -287,7 +287,7 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
     gd.HackArrCompatSerializeNotices;
   RuntimeOption::EvalUseMSRVForInOut = gd.UseMSRVForInOut;
   RuntimeOption::EvalHackArrDVArrs = gd.HackArrDVArrs;
-
+  RuntimeOption::EvalDisableReturnByReference = gd.DisableReturnByReference;
   return {
     parallel::map(Repo::get().enumerateUnits(RepoIdCentral, false, true),
                   [&] (const std::pair<std::string,MD5>& kv) {
@@ -371,6 +371,8 @@ void write_global_data(
     RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =
     RuntimeOption::EvalInitialStaticStringTableSize;
+  gd.DisableReturnByReference =
+    RuntimeOption::EvalDisableReturnByReference;
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     gd.ConstantFunctions.push_back(elm);
   }

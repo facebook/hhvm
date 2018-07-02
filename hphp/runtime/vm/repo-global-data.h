@@ -143,6 +143,11 @@ struct Repo::GlobalData {
   bool PromoteEmptyObject = true;
 
   /*
+   * Disable return by reference in PHP
+   */
+  bool DisableReturnByReference = true;
+
+  /*
    * Should all functions be interceptable?
    */
   bool EnableRenameFunction = false;
@@ -238,6 +243,7 @@ struct Repo::GlobalData {
       (UseMSRVForInOut)
       (AllowObjectDestructors)
       (Signature)
+      (DisableReturnByReference)
       ;
   }
 };

@@ -1,0 +1,2 @@
+
+Fatal error: Return by reference is disabled by the compiler through the option hhvm.disable_return_by_reference or Eval.DisableReturnByReference in %s/test/slow/disable_return_by_reference.php on line 7

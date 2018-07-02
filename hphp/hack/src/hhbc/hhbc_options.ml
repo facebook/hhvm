@@ -45,6 +45,7 @@ type t = {
   option_include_search_paths             : string list;
   option_include_roots                    : string SMap.t;
   option_enable_perf_logging              : bool;
+  option_disable_return_by_reference      : bool;
 }
 
 let default = {
@@ -83,6 +84,8 @@ let default = {
   option_include_search_paths = [];
   option_include_roots = SMap.empty;
   option_enable_perf_logging = false;
+  option_disable_return_by_reference = false;
+
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -118,7 +121,7 @@ let doc_root o = o.option_doc_root
 let include_search_paths o = o.option_include_search_paths
 let include_roots o = o.option_include_roots
 let enable_perf_logging o = o.option_enable_perf_logging
-
+let disable_return_by_reference o = o.option_disable_return_by_reference
 let to_string o =
   let dynamic_invokes =
     String.concat ", " (SSet.elements (dynamic_invoke_functions o)) in
@@ -163,6 +166,7 @@ let to_string o =
     ; Printf.sprintf "include_search_paths: [%s]" search_paths
     ; Printf.sprintf "include_roots: {%s}" inc_roots
     ; Printf.sprintf "enable_perf_logging: %B" @@ enable_perf_logging o
+    ; Printf.sprintf "disable_return_by_reference: %B" @@ disable_return_by_reference o
     ]
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
@@ -235,6 +239,8 @@ let set_option options name value =
     { options with option_hacksperimental = as_bool value }
   | "eval.logexterncompilerperf" ->
     { options with option_enable_perf_logging = as_bool value }
+  | "hhvm.disable_return_by_reference" ->
+    { options with option_disable_return_by_reference = as_bool value}
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -355,6 +361,8 @@ let value_setters = [
      fun opts v -> { opts with option_include_roots = v });
   (set_value "hhvm.log_extern_compiler_perf" get_value_from_config_int @@
      fun opts v -> { opts with option_enable_perf_logging = (v = 1) });
+  (set_value "hhvm.disable_return_by_reference" get_value_from_config_int @@
+     fun opts v -> { opts with option_disable_return_by_reference = (v = 1)});
 ]
 
 let extract_config_options_from_json ~init config_json =

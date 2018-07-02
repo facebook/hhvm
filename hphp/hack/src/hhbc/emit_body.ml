@@ -314,6 +314,13 @@ let emit_body
   ~return_value
   ~namespace
   ~doc_comment params ret body =
+  if is_return_by_ref && Hhbc_options.disable_return_by_reference !Hhbc_options.compiler_options
+  then begin
+    Emit_fatal.raise_fatal_runtime pos (
+      "Return by reference is disabled by the " ^
+      "compiler through the option hhvm.disable_return_by_reference " ^
+      "or Eval.DisableReturnByReference")
+  end;
   if is_async && skipawaitable
   then begin
     let report_error =

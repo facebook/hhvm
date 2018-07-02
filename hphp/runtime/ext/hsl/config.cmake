@@ -14,3 +14,10 @@ HHVM_DEFINE_EXTENSION("hsl_time"
   SYSTEMLIB
     ext_hsl_time.php
 )
+
+HHVM_DEFINE_EXTENSION("hsl_regex"
+  SOURCES
+    ext_hsl_regex.cpp
+  SYSTEMLIB
+    ext_hsl_regex.php
+)

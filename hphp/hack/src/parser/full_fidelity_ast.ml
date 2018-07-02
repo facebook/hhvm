@@ -1484,7 +1484,14 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       | SyntaxList ts -> String2 (pString2 InDoubleQuotedString (prepString2 env ts) env)
       | _ -> missing_syntax "literal expression" expr env
       )
-
+    | PrefixedStringExpression
+      { prefixed_string_name = name
+      ; prefixed_string_str = str } ->
+        (* Temporarily allow only`re`- prefixed strings *)
+        let name_text = text name in
+        if name_text <> "re"
+        then raise_parsing_error env node SyntaxError.non_re_prefix;
+        PrefixedString (text name, pExpr str env)
     | InstanceofExpression
       { instanceof_left_operand; instanceof_right_operand; _ } ->
       let ty =

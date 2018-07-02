@@ -403,6 +403,7 @@ and expr_ =
   | Float of string
   | String of string
   | String2 of expr list
+  | PrefixedString of string * expr
   | Yield of afield
   | Yield_break
   | Yield_from of expr

@@ -1253,6 +1253,8 @@ and string_of_param_default_value ~env expr =
     e ^ "[" ^ eo ^ "]"
   | A.String2 es ->
     String.concat " . " @@ List.map (string_of_param_default_value ~env) es
+  | A.PrefixedString (name, e) ->
+    String.concat " . " @@ [name; string_of_param_default_value ~env e]
   | A.Execution_operator es ->
     let s =
       String.concat " . " @@ List.map (string_of_param_default_value ~env) es in

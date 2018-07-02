@@ -1645,6 +1645,9 @@ and expr_
   | String2 idl ->
       let env, tel = string2 env idl in
       make_result env (T.String2 tel) (Reason.Rwitness p, Tprim Tstring)
+  | PrefixedString _ ->
+      Errors.experimental_feature p "prefixed strings";
+      expr_error env p (Reason.Rnone)
   | Fun_id x ->
       Typing_hooks.dispatch_id_hook x env;
       let env, fty = fun_type_of_id env x [] in

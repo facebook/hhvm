@@ -241,6 +241,7 @@ and expr tcopt acc (_, e) =
   | Execution_operator es
   | String2 es ->
     exprs acc es
+  | PrefixedString (_, e) -> expr tcopt acc e
   | Darray exprexprs ->
     List.fold_left exprexprs ~init:acc ~f:(fun acc -> fun (e1, e2) -> expr_expr acc e1 e2)
   | Shape fields ->

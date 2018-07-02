@@ -2185,6 +2185,7 @@ module Make (GetLocals : GetLocals) = struct
     | String2 idl
     (* treat execution operator similar to interpolated strings *)
     | Execution_operator idl -> N.String2 (string2 env idl)
+    | PrefixedString (n, e) -> N.PrefixedString (n, (expr env e))
     | Id x ->
       (** TODO: Emit proper error messages T28473207. Currently the error message
         * emitted has reason Naming[2049] unbound name for global constant *)

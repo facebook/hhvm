@@ -1606,6 +1606,7 @@ and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
     emit_pos_then pos @@
     emit_box_if_necessary pos need_ref @@
     instr (ILitConst (TypedValue v))
+  | A.PrefixedString (_, e)
   | A.ParenthesizedExpr e ->
     emit_expr ~need_ref env e
   | A.Lvar id ->

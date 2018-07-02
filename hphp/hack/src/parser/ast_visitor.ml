@@ -391,6 +391,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | Class_const (e1, pstr)   -> this#on_class_const acc e1 pstr
    | Call        (e, hl, el, uel) -> this#on_call acc e hl el uel
    | String2     el           -> this#on_string2 acc el
+   | PrefixedString (_, e)    -> this#on_expr acc e
    | Cast        (hint, e)   -> this#on_cast acc hint e
    | Unop        (uop, e)         -> this#on_unop acc uop e
    | Binop       (bop, e1, e2)    -> this#on_binop acc bop e1 e2

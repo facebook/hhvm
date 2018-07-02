@@ -53,6 +53,7 @@ and expr_ f = function
   | Call (ct, e, hl, el, uel) ->
     Call (ct, expr f e, hl, List.map el (expr f), List.map uel (expr f))
   | String2 el -> String2 (List.map el (expr f))
+  | PrefixedString (n, e) -> PrefixedString (n, (expr f e))
   | Pair (e1, e2) -> Pair (expr f e1, expr f e2)
   | Cast (h, e) -> Cast (hint f h, expr f e)
   | Unop (uop, e) -> Unop (uop, expr f e)

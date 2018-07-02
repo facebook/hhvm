@@ -265,6 +265,9 @@ module CheckFunctionBody = struct
         ()
     | _, True | _, False | _, Int _
     | _, Float _ | _, Null | _, String _ -> ()
+    | _, PrefixedString (_, e) ->
+        expr f_type env e;
+        ()
     | _, String2 el ->
         List.iter el (expr f_type env);
         ()
@@ -746,7 +749,7 @@ and check_class_property_initialization prop =
       match (snd e) with
       | Any | Typename _
       | Id _ | Class_const _ | True | False | Int _ | Float _
-      | Null | String _ ->
+      | Null | String _ | PrefixedString _ ->
         ()
       | Array field_list ->
         List.iter field_list begin function
@@ -1225,7 +1228,7 @@ and expr_ env p = function
       List.iter uel (expr env);
       ()
   | True | False | Int _
-  | Float _ | Null | String _ -> ()
+  | Float _ | Null | String _ | PrefixedString _ -> ()
   | String2 el ->
       List.iter el (expr env);
       ()

@@ -335,7 +335,8 @@ and expr_ env acc p e =
   | Float _
   | Null
   | String _
-  | String2 _ -> acc
+  | String2 _
+  | PrefixedString _ -> acc
   | Assert (AE_assert e) -> expr acc e
   | Yield e -> afield acc e
   | Yield_from e -> expr acc e

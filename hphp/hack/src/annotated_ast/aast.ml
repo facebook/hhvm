@@ -135,6 +135,7 @@ and expr_ =
   | Float of string
   | String of string
   | String2 of expr list
+  | PrefixedString of string * expr
   | Yield of afield
   | Yield_break
   | Yield_from of expr
@@ -397,6 +398,7 @@ let expr_to_string expr =
   | Null -> "Null"
   | String _  -> "String"
   | String2 _  -> "String2"
+  | PrefixedString _ -> "PrefixedString"
   | Special_func _  -> "Special_func"
   | Yield_break -> "Yield_break"
   | Yield _  -> "Yield"
@@ -705,6 +707,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | Class_const (cid, id)   -> this#on_class_const acc cid id
    | Call        (ct, e, _, el, uel) -> this#on_call acc ct e el uel
    | String2     el          -> this#on_string2 acc el
+   | PrefixedString (_, e)   -> this#on_expr acc e
    | Pair        (e1, e2)    -> this#on_pair acc e1 e2
    | Cast        (hint, e)   -> this#on_cast acc hint e
    | Unop        (uop, e)         -> this#on_unop acc uop e

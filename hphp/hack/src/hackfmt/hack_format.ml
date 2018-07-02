@@ -112,6 +112,13 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         end
       | _ -> failwith "Expected Token or SyntaxList"
     end
+  | Syntax.PrefixedStringExpression {
+      prefixed_string_name = name;
+      prefixed_string_str = str } ->
+      Concat [
+        t env name;
+        t env str;
+      ]
   | Syntax.MarkupSection {
       markup_prefix = prefix;
       markup_text = text;

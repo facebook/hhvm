@@ -48,6 +48,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     let make_qualified_name arg0 state = State.next state [arg0], Syntax.make_qualified_name arg0
     let make_simple_type_specifier arg0 state = State.next state [arg0], Syntax.make_simple_type_specifier arg0
     let make_literal_expression arg0 state = State.next state [arg0], Syntax.make_literal_expression arg0
+    let make_prefixed_string_expression arg0 arg1 state = State.next state [arg0; arg1], Syntax.make_prefixed_string_expression arg0 arg1
     let make_variable_expression arg0 state = State.next state [arg0], Syntax.make_variable_expression arg0
     let make_pipe_variable_expression arg0 state = State.next state [arg0], Syntax.make_pipe_variable_expression arg0
     let make_enum_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 state = State.next state [arg0; arg1; arg2; arg3; arg4; arg5; arg6; arg7; arg8], Syntax.make_enum_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8

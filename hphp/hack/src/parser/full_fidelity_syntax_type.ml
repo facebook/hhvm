@@ -161,6 +161,10 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | LiteralExpression                       of
     { literal_expression                                 : t
     }
+  | PrefixedStringExpression                of
+    { prefixed_string_name                               : t
+    ; prefixed_string_str                                : t
+    }
   | VariableExpression                      of
     { variable_expression                                : t
     }
@@ -1198,6 +1202,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | TLDGlobal                       of global_statement
   and expression =
   | ExprLiteral                       of literal_expression
+  | ExprPrefixedString                of prefixed_string_expression
   | ExprVariable                      of variable_expression
   | ExprPipeVariable                  of pipe_variable_expression
   | ExprDecorated                     of decorated_expression
@@ -1319,6 +1324,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | SwitchDefault of default_label
   and lambda_body =
   | LambdaLiteral                       of literal_expression
+  | LambdaPrefixedString                of prefixed_string_expression
   | LambdaVariable                      of variable_expression
   | LambdaPipeVariable                  of pipe_variable_expression
   | LambdaDecorated                     of decorated_expression
@@ -1371,6 +1377,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | LambdaTuple                         of tuple_expression
   and constructor_expression =
   | CExprLiteral                       of literal_expression
+  | CExprPrefixedString                of prefixed_string_expression
   | CExprVariable                      of variable_expression
   | CExprPipeVariable                  of pipe_variable_expression
   | CExprDecorated                     of decorated_expression
@@ -1448,6 +1455,10 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and literal_expression =
     { literal_expression: expression listesque value
+    }
+  and prefixed_string_expression =
+    { prefixed_string_name: Token.t value
+    ; prefixed_string_str: Token.t value
     }
   and variable_expression =
     { variable_expression: Token.t value

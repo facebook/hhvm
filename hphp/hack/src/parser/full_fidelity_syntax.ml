@@ -62,6 +62,7 @@ module WithToken(Token: TokenType) = struct
       | QualifiedName                           _ -> SyntaxKind.QualifiedName
       | SimpleTypeSpecifier                     _ -> SyntaxKind.SimpleTypeSpecifier
       | LiteralExpression                       _ -> SyntaxKind.LiteralExpression
+      | PrefixedStringExpression                _ -> SyntaxKind.PrefixedStringExpression
       | VariableExpression                      _ -> SyntaxKind.VariableExpression
       | PipeVariableExpression                  _ -> SyntaxKind.PipeVariableExpression
       | EnumDeclaration                         _ -> SyntaxKind.EnumDeclaration
@@ -243,6 +244,7 @@ module WithToken(Token: TokenType) = struct
     let is_qualified_name                               = has_kind SyntaxKind.QualifiedName
     let is_simple_type_specifier                        = has_kind SyntaxKind.SimpleTypeSpecifier
     let is_literal_expression                           = has_kind SyntaxKind.LiteralExpression
+    let is_prefixed_string_expression                   = has_kind SyntaxKind.PrefixedStringExpression
     let is_variable_expression                          = has_kind SyntaxKind.VariableExpression
     let is_pipe_variable_expression                     = has_kind SyntaxKind.PipeVariableExpression
     let is_enum_declaration                             = has_kind SyntaxKind.EnumDeclaration
@@ -494,6 +496,13 @@ module WithToken(Token: TokenType) = struct
         literal_expression;
       } ->
          let acc = f acc literal_expression in
+         acc
+      | PrefixedStringExpression {
+        prefixed_string_name;
+        prefixed_string_str;
+      } ->
+         let acc = f acc prefixed_string_name in
+         let acc = f acc prefixed_string_str in
          acc
       | VariableExpression {
         variable_expression;
@@ -2335,6 +2344,13 @@ module WithToken(Token: TokenType) = struct
       } -> [
         literal_expression;
       ]
+      | PrefixedStringExpression {
+        prefixed_string_name;
+        prefixed_string_str;
+      } -> [
+        prefixed_string_name;
+        prefixed_string_str;
+      ]
       | VariableExpression {
         variable_expression;
       } -> [
@@ -4175,6 +4191,13 @@ module WithToken(Token: TokenType) = struct
         literal_expression;
       } -> [
         "literal_expression";
+      ]
+      | PrefixedStringExpression {
+        prefixed_string_name;
+        prefixed_string_str;
+      } -> [
+        "prefixed_string_name";
+        "prefixed_string_str";
       ]
       | VariableExpression {
         variable_expression;
@@ -6076,6 +6099,14 @@ module WithToken(Token: TokenType) = struct
         ]) ->
         LiteralExpression {
           literal_expression;
+        }
+      | (SyntaxKind.PrefixedStringExpression, [
+          prefixed_string_name;
+          prefixed_string_str;
+        ]) ->
+        PrefixedStringExpression {
+          prefixed_string_name;
+          prefixed_string_str;
         }
       | (SyntaxKind.VariableExpression, [
           variable_expression;
@@ -8135,6 +8166,17 @@ module WithToken(Token: TokenType) = struct
       =
         let syntax = LiteralExpression {
           literal_expression;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_prefixed_string_expression
+        prefixed_string_name
+        prefixed_string_str
+      =
+        let syntax = PrefixedStringExpression {
+          prefixed_string_name;
+          prefixed_string_str;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

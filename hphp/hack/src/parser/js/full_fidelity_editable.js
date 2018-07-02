@@ -94,6 +94,8 @@ class EditableSyntax
       return SimpleTypeSpecifier.from_json(json, position, source);
     case 'literal':
       return LiteralExpression.from_json(json, position, source);
+    case 'prefixed_string':
+      return PrefixedStringExpression.from_json(json, position, source);
     case 'variable':
       return VariableExpression.from_json(json, position, source);
     case 'pipe_variable':
@@ -3234,6 +3236,70 @@ class LiteralExpression extends EditableSyntax
       LiteralExpression._children_keys = [
         'expression'];
     return LiteralExpression._children_keys;
+  }
+}
+class PrefixedStringExpression extends EditableSyntax
+{
+  constructor(
+    name,
+    str)
+  {
+    super('prefixed_string', {
+      name: name,
+      str: str });
+  }
+  get name() { return this.children.name; }
+  get str() { return this.children.str; }
+  with_name(name){
+    return new PrefixedStringExpression(
+      name,
+      this.str);
+  }
+  with_str(str){
+    return new PrefixedStringExpression(
+      this.name,
+      str);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var str = this.str.rewrite(rewriter, new_parents);
+    if (
+      name === this.name &&
+      str === this.str)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new PrefixedStringExpression(
+        name,
+        str), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let name = EditableSyntax.from_json(
+      json.prefixed_string_name, position, source);
+    position += name.width;
+    let str = EditableSyntax.from_json(
+      json.prefixed_string_str, position, source);
+    position += str.width;
+    return new PrefixedStringExpression(
+        name,
+        str);
+  }
+  get children_keys()
+  {
+    if (PrefixedStringExpression._children_keys == null)
+      PrefixedStringExpression._children_keys = [
+        'name',
+        'str'];
+    return PrefixedStringExpression._children_keys;
   }
 }
 class VariableExpression extends EditableSyntax
@@ -21365,6 +21431,7 @@ exports.Script = Script;
 exports.QualifiedName = QualifiedName;
 exports.SimpleTypeSpecifier = SimpleTypeSpecifier;
 exports.LiteralExpression = LiteralExpression;
+exports.PrefixedStringExpression = PrefixedStringExpression;
 exports.VariableExpression = VariableExpression;
 exports.PipeVariableExpression = PipeVariableExpression;
 exports.EnumDeclaration = EnumDeclaration;

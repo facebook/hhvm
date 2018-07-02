@@ -82,6 +82,16 @@ let schema : schema_node list =
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields      = [ "expression", ZeroOrMore (Aggregate Expression) ]
     }
+  ; { kind_name   = "PrefixedStringExpression"
+    ; type_name   = "prefixed_string_expression"
+    ; func_name   = "prefixed_string_expression"
+    ; description = "prefixed_string"
+    ; prefix      = "prefixed_string"
+    ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
+    ; fields      =
+      [ "name", Token
+      ; "str", Token ]
+    }
   ; { kind_name   = "VariableExpression"
     ; type_name   = "variable_expression"
     ; func_name   = "variable_expression"

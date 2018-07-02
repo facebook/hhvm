@@ -475,3 +475,5 @@ let invalid_class_in_collection_initializer =
   "Cannot use collection initialization for non-collection class."
 let invalid_brace_kind_in_collection_initializer =
   "Initializers of 'vec', 'dict' and 'keyset' should use '[...]' instead of '{...}'."
+
+let prefixed_invalid_string_kind = "Only double-quoted strings may be prefixed."

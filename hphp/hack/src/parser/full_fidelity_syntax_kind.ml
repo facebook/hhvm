@@ -26,6 +26,7 @@ type t =
   | QualifiedName
   | SimpleTypeSpecifier
   | LiteralExpression
+  | PrefixedStringExpression
   | VariableExpression
   | PipeVariableExpression
   | EnumDeclaration
@@ -201,6 +202,7 @@ let to_string kind =
   | QualifiedName                           -> "qualified_name"
   | SimpleTypeSpecifier                     -> "simple_type_specifier"
   | LiteralExpression                       -> "literal"
+  | PrefixedStringExpression                -> "prefixed_string"
   | VariableExpression                      -> "variable"
   | PipeVariableExpression                  -> "pipe_variable"
   | EnumDeclaration                         -> "enum_declaration"

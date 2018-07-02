@@ -489,6 +489,14 @@
       "fields" : [
         { "field_name" : "expression" }
       ] },
+    { "kind_name" : "PrefixedStringExpression",
+      "type_name" : "prefixed_string_expression",
+      "description" : "prefixed_string",
+      "prefix" : "prefixed_string",
+      "fields" : [
+        { "field_name" : "name" },
+        { "field_name" : "str" }
+      ] },
     { "kind_name" : "VariableExpression",
       "type_name" : "variable_expression",
       "description" : "variable",

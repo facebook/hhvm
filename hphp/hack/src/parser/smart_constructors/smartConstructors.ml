@@ -36,6 +36,7 @@ module type SmartConstructors_S = sig
   val make_qualified_name : r -> t -> t * r
   val make_simple_type_specifier : r -> t -> t * r
   val make_literal_expression : r -> t -> t * r
+  val make_prefixed_string_expression : r -> r -> t -> t * r
   val make_variable_expression : r -> t -> t * r
   val make_pipe_variable_expression : r -> t -> t * r
   val make_enum_declaration : r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
@@ -218,6 +219,7 @@ end) = struct
     let qualified_name parser arg0 = call parser (SCI.make_qualified_name arg0)
     let simple_type_specifier parser arg0 = call parser (SCI.make_simple_type_specifier arg0)
     let literal_expression parser arg0 = call parser (SCI.make_literal_expression arg0)
+    let prefixed_string_expression parser arg0 arg1 = call parser (SCI.make_prefixed_string_expression arg0 arg1)
     let variable_expression parser arg0 = call parser (SCI.make_variable_expression arg0)
     let pipe_variable_expression parser arg0 = call parser (SCI.make_pipe_variable_expression arg0)
     let enum_declaration parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 = call parser (SCI.make_enum_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8)

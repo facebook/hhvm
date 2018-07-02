@@ -54,6 +54,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val qualified_name : t -> SC.r -> t * SC.r
         val simple_type_specifier : t -> SC.r -> t * SC.r
         val literal_expression : t -> SC.r -> t * SC.r
+        val prefixed_string_expression : t -> SC.r -> SC.r -> t * SC.r
         val variable_expression : t -> SC.r -> t * SC.r
         val pipe_variable_expression : t -> SC.r -> t * SC.r
         val enum_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r

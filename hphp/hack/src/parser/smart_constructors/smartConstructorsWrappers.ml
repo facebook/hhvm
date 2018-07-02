@@ -36,6 +36,7 @@ module type SyntaxKind_S = sig
   val is_qualified_name : r -> bool
   val is_simple_type_specifier : r -> bool
   val is_literal_expression : r -> bool
+  val is_prefixed_string_expression : r -> bool
   val is_variable_expression : r -> bool
   val is_pipe_variable_expression : r -> bool
   val is_enum_declaration : r -> bool
@@ -228,6 +229,7 @@ module SyntaxKind(SC : SC_S)
   let make_qualified_name arg0 state = compose SK.QualifiedName (SC.make_qualified_name (snd arg0) state)
   let make_simple_type_specifier arg0 state = compose SK.SimpleTypeSpecifier (SC.make_simple_type_specifier (snd arg0) state)
   let make_literal_expression arg0 state = compose SK.LiteralExpression (SC.make_literal_expression (snd arg0) state)
+  let make_prefixed_string_expression arg0 arg1 state = compose SK.PrefixedStringExpression (SC.make_prefixed_string_expression (snd arg0) (snd arg1) state)
   let make_variable_expression arg0 state = compose SK.VariableExpression (SC.make_variable_expression (snd arg0) state)
   let make_pipe_variable_expression arg0 state = compose SK.PipeVariableExpression (SC.make_pipe_variable_expression (snd arg0) state)
   let make_enum_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 state = compose SK.EnumDeclaration (SC.make_enum_declaration (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) (snd arg8) state)
@@ -402,6 +404,7 @@ module SyntaxKind(SC : SC_S)
   let is_qualified_name                               = has_kind SK.QualifiedName
   let is_simple_type_specifier                        = has_kind SK.SimpleTypeSpecifier
   let is_literal_expression                           = has_kind SK.LiteralExpression
+  let is_prefixed_string_expression                   = has_kind SK.PrefixedStringExpression
   let is_variable_expression                          = has_kind SK.VariableExpression
   let is_pipe_variable_expression                     = has_kind SK.PipeVariableExpression
   let is_enum_declaration                             = has_kind SK.EnumDeclaration

@@ -46,6 +46,10 @@ module type Syntax_S = sig
   | LiteralExpression                       of
     { literal_expression                                 : t
     }
+  | PrefixedStringExpression                of
+    { prefixed_string_name                               : t
+    ; prefixed_string_str                                : t
+    }
   | VariableExpression                      of
     { variable_expression                                : t
     }
@@ -1057,6 +1061,7 @@ module type Syntax_S = sig
   val make_qualified_name : t -> t
   val make_simple_type_specifier : t -> t
   val make_literal_expression : t -> t
+  val make_prefixed_string_expression : t -> t -> t
   val make_variable_expression : t -> t
   val make_pipe_variable_expression : t -> t
   val make_enum_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
@@ -1230,6 +1235,7 @@ module type Syntax_S = sig
   val is_qualified_name : t -> bool
   val is_simple_type_specifier : t -> bool
   val is_literal_expression : t -> bool
+  val is_prefixed_string_expression : t -> bool
   val is_variable_expression : t -> bool
   val is_pipe_variable_expression : t -> bool
   val is_enum_declaration : t -> bool

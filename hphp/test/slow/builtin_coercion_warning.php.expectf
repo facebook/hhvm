@@ -1,0 +1,16 @@
+
+Warning: Argument 1 of type boolean was passed to strlen, it was coerced to string in %s/test/slow/builtin_coercion_warning.php on line 2
+
+Warning: Argument 1 of type boolean was passed to intdiv, it was coerced to integer in %s/test/slow/builtin_coercion_warning.php on line 3
+
+Warning: Argument 2 of type boolean was passed to intdiv, it was coerced to integer in %s/test/slow/builtin_coercion_warning.php on line 3
+
+Warning: Argument 1 of type null was passed to strrev, it was coerced to string in %s/test/slow/builtin_coercion_warning.php on line 4
+
+Warning: Argument 1 of type string was passed to intdiv, it was coerced to integer in %s/test/slow/builtin_coercion_warning.php on line 3
+
+Warning: Argument 2 of type string was passed to intdiv, it was coerced to integer in %s/test/slow/builtin_coercion_warning.php on line 3
+
+Warning: Argument 1 of type double was passed to intdiv, it was coerced to integer in %s/test/slow/builtin_coercion_warning.php on line 3
+
+Warning: Argument 2 of type double was passed to intdiv, it was coerced to integer in %s/test/slow/builtin_coercion_warning.php on line 3

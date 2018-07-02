@@ -554,6 +554,11 @@ folly::Optional<Type> const_fold(ISS& env,
 
   FTRACE(1, "invoking: {}\n", func->fullName()->data());
 
+  auto const warn = RuntimeOption::EvalWarnOnCoerceBuiltinParams;
+
+  RuntimeOption::EvalWarnOnCoerceBuiltinParams = true;
+  SCOPE_EXIT { RuntimeOption::EvalWarnOnCoerceBuiltinParams = warn; };
+
   assert(!RuntimeOption::EvalJit);
   return eval_cell(
     [&] {

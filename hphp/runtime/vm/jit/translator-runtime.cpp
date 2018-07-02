@@ -424,6 +424,21 @@ inline void coerceCellFail(DataType expected, DataType actual, int64_t argNum,
   throw TVCoercionException(func, argNum, actual, expected);
 }
 
+void builtinCoercionWarningHelper(DataType ty, DataType expKind,
+                                  const Func* callee, int64_t arg_num) {
+  if (RuntimeOption::EvalWarnOnCoerceBuiltinParams &&
+      !equivDataTypes(ty, expKind)) {
+    raise_warning(
+      "Argument %ld of type %s was passed to %s, "
+      "it was coerced to %s",
+      arg_num,
+      getDataTypeString(ty).data(),
+      callee->fullDisplayName()->data(),
+      getDataTypeString(expKind).data()
+    );
+  }
+}
+
 bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func) {
   assertx(cellIsPlausible(tv));
 
@@ -434,6 +449,8 @@ bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func) {
     coerceCellFail(KindOfBoolean, type, argNum, func);
     not_reached();
   }
+
+  builtinCoercionWarningHelper(tv.m_type, KindOfBoolean, func, argNum);
 
   return cellToBool(tv);
 }
@@ -452,6 +469,8 @@ int64_t coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func) {
     not_reached();
   }
 
+  builtinCoercionWarningHelper(KindOfString, KindOfDouble, func, argNum);
+
   return reinterpretDblAsInt(sd->toDouble());
 }
 
@@ -465,6 +484,7 @@ int64_t coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
+      builtinCoercionWarningHelper(tv.m_type, KindOfDouble, func, argNum);
       return convCellToDblHelper(tv);
 
     case KindOfPersistentString:
@@ -505,6 +525,8 @@ int64_t coerceStrToIntHelper(StringData* sd, int64_t argNum, const Func* func) {
     not_reached();
   }
 
+  builtinCoercionWarningHelper(KindOfString, KindOfInt64, func, argNum);
+
   return sd->toInt64();
 }
 
@@ -518,6 +540,7 @@ int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
+      builtinCoercionWarningHelper(tv.m_type, KindOfInt64, func, argNum);
       return cellToInt(tv);
 
     case KindOfPersistentString:

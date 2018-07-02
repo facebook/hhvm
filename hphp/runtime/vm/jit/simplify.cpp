@@ -2375,9 +2375,11 @@ SSATmp* simplifyCoerceCellToBool(State& env, const IRInstruction* inst) {
   auto const src     = inst->src(0);
   auto const srcType = src->type();
 
-  if (srcType <= TBool ||
-       (isSimplifyOkay(inst)
-        && srcType.subtypeOfAny(TNull, TDbl, TInt, TStr))) {
+  if (srcType <= TBool) return gen(env, Mov, src);
+
+  if (isSimplifyOkay(inst) &&
+      srcType.subtypeOfAny(TNull, TDbl, TInt, TStr)) {
+    if (RuntimeOption::EvalWarnOnCoerceBuiltinParams) return nullptr;
     return gen(env, ConvCellToBool, src);
   }
 
@@ -2391,8 +2393,10 @@ SSATmp* simplifyCoerceCellToInt(State& env, const IRInstruction* inst) {
   auto const src      = inst->src(0);
   auto const srcType  = src->type();
 
-  if (srcType <= TInt ||
-       (isSimplifyOkay(inst) && srcType.subtypeOfAny(TBool, TNull, TDbl))) {
+  if (srcType <= TInt) return gen(env, Mov, src);
+
+  if (isSimplifyOkay(inst) && srcType.subtypeOfAny(TBool, TNull, TDbl)) {
+    if (RuntimeOption::EvalWarnOnCoerceBuiltinParams) return nullptr;
     return gen(env, ConvCellToInt, inst->taken(), src);
   }
 
@@ -2409,8 +2413,11 @@ SSATmp* simplifyCoerceCellToDbl(State& env, const IRInstruction* inst) {
   auto const src      = inst->src(0);
   auto const srcType  = src->type();
 
-  if (srcType.subtypeOfAny(TInt, TDbl) ||
-       (isSimplifyOkay(inst) && srcType.subtypeOfAny(TBool, TNull))) {
+  if (srcType <= TDbl) return gen(env, Mov, src);
+
+  if (isSimplifyOkay(inst) &&
+      srcType.subtypeOfAny(TBool, TNull, TInt)) {
+    if (RuntimeOption::EvalWarnOnCoerceBuiltinParams) return nullptr;
     return gen(env, ConvCellToDbl, inst->taken(), src);
   }
 

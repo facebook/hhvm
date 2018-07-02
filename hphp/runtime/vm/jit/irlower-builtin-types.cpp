@@ -50,8 +50,21 @@ void tvCoerceParamTo##kind##OrThrow(TypedValue* tv,                   \
                                     const Func* callee,               \
                                     unsigned int arg_num) {           \
   tvCoerceIfStrict(*tv, arg_num, callee);                             \
+  auto ty = tv->m_type;                                               \
   if (LIKELY(tvCoerceParamTo##kind##InPlace(tv,                       \
                                             callee->isBuiltin()))) {  \
+    if (RuntimeOption::EvalWarnOnCoerceBuiltinParams &&               \
+        tv->m_type != KindOfNull &&                                   \
+        !equivDataTypes(ty, KindOf##expkind)) {                       \
+      raise_warning(                                                  \
+        "Argument %i of type %s was passed to %s, "                   \
+        "it was coerced to %s",                                       \
+        arg_num,                                                      \
+        getDataTypeString(ty).data(),                                 \
+        callee->fullDisplayName()->data(),                            \
+        getDataTypeString(KindOf##expkind).data()                     \
+      );                                                              \
+    }                                                                 \
     return;                                                           \
   }                                                                   \
   raise_param_type_warning(callee->displayName()->data(),             \

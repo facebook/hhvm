@@ -265,6 +265,7 @@ void callFunc(const Func* func, void *ctx,
 
 #define COERCE_OR_CAST(kind, warn_kind)                         \
   if (paramCoerceMode) {                                        \
+    auto ty = args[-i].m_type;                                  \
     if (!tvCoerceParamTo##kind##InPlace(&args[-i],              \
                                         func->isBuiltin())) {   \
       raise_param_type_warning(                                 \
@@ -274,6 +275,19 @@ void callFunc(const Func* func, void *ctx,
         args[-i].m_type                                         \
       );                                                        \
       return false;                                             \
+    } else {                                                    \
+      if (RuntimeOption::EvalWarnOnCoerceBuiltinParams &&       \
+          !equivDataTypes(ty, KindOf##warn_kind) &&             \
+          args[-i].m_type != KindOfNull) {                      \
+        raise_warning(                                          \
+          "Argument %i of type %s was passed to %s, "           \
+          "it was coerced to %s",                               \
+          i + 1,                                                \
+          getDataTypeString(ty).data(),                         \
+          func->fullDisplayName()->data(),                      \
+          getDataTypeString(KindOf##warn_kind).data()           \
+        );                                                      \
+      }                                                         \
     }                                                           \
   } else {                                                      \
     tvCastTo##kind##InPlace(&args[-i]);                         \

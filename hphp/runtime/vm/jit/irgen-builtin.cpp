@@ -449,6 +449,10 @@ SSATmp* opt_strlen(IRGS& env, const ParamPrep& params) {
     return gen(env, LdStrLen, val);
   }
 
+  if (RuntimeOption::EvalWarnOnCoerceBuiltinParams) {
+    return nullptr;
+  }
+
   if (ty <= TNull) return cns(env, 0);
   if (ty <= TBool) return gen(env, ConvBoolToInt, val);
 

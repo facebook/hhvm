@@ -471,6 +471,7 @@ let invalid_yield =
 
 let invalid_yield_from =
   "`yield from` can only appear as a statement, after `return`, or on the right of an assignment"
+
 let invalid_class_in_collection_initializer =
   "Cannot use collection initialization for non-collection class."
 let invalid_brace_kind_in_collection_initializer =
@@ -479,3 +480,6 @@ let invalid_brace_kind_in_collection_initializer =
 let prefixed_invalid_string_kind = "Only double-quoted strings may be prefixed."
 
 let non_re_prefix = "Only `re`-prefixed strings allowed."
+
+let collection_intrinsic_generic =
+  "Cannot initialize collection builtins with type parameters"

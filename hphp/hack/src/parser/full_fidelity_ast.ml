@@ -819,6 +819,10 @@ let empty_fun_hdr =
   ; fh_ret_by_ref      = false
   }
 
+let prevent_intrinsic_generic env node ty =
+  if not (is_missing ty) && not env.codegen then
+    raise_parsing_error env node SyntaxError.collection_intrinsic_generic
+
 let rec pSimpleInitializer node env =
   match syntax node with
   | SimpleInitializer { simple_initializer_value; simple_initializer_equal } ->
@@ -1021,17 +1025,21 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
 
     | DictionaryIntrinsicExpression
       { dictionary_intrinsic_keyword = kw
+      ; dictionary_intrinsic_explicit_type = ty
       ; dictionary_intrinsic_members = members
       ; _ }
     | KeysetIntrinsicExpression
       { keyset_intrinsic_keyword = kw
+      ; keyset_intrinsic_explicit_type = ty
       ; keyset_intrinsic_members = members
       ; _ }
     | VectorIntrinsicExpression
       { vector_intrinsic_keyword = kw
+      ; vector_intrinsic_explicit_type = ty
       ; vector_intrinsic_members = members
       ; _ }
       ->
+      prevent_intrinsic_generic env node ty;
       if env.is_hh_file || env.enable_hh_syntax then
         Collection (pos_name kw env, couldMap ~f:pAField members env)
       else
@@ -1059,9 +1067,15 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | _ -> pos_name collection_name env in
       Collection (collection_name, couldMap ~f:pAField members env)
 
-    | VarrayIntrinsicExpression { varray_intrinsic_members = members; _ } ->
+    | VarrayIntrinsicExpression
+    { varray_intrinsic_members = members
+    ; varray_intrinsic_explicit_type = ty; _ } ->
+      prevent_intrinsic_generic env node ty;
       Varray (couldMap ~f:pExpr members env)
-    | DarrayIntrinsicExpression { darray_intrinsic_members = members; _ } ->
+    | DarrayIntrinsicExpression
+    { darray_intrinsic_members = members
+    ; darray_intrinsic_explicit_type = ty; _ } ->
+      prevent_intrinsic_generic env node ty;
       Darray (couldMap ~f:pMember members env)
     | ArrayIntrinsicExpression { array_intrinsic_members = members; _ }
     | ArrayCreationExpression  { array_creation_members  = members; _ }

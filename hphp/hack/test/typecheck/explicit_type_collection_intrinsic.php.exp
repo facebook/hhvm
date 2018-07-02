@@ -1,0 +1,2 @@
+File "explicit_type_collection_intrinsic.php", line 4, characters 8-24:
+Cannot initialize collection builtins with type parameters (Parsing[1002])

@@ -121,7 +121,6 @@ let stepfun (p, faultsection) =
       | [] -> failwith "pop underflow"
       | _ :: s' -> (es,s',pc+1)
      end
-   | _ -> failwith "not implemented"
  and unwind (es,s) =
    match es with
    | [] -> failwith "empty exn stack in unwind"

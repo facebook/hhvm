@@ -755,7 +755,7 @@ G |- (t1 , .. , tm , noreturn , t1', .. , tn') <: noreturn
 
 {{ com \subsection{Hack arrays} }}
 
-{{ com Vectors, dicts and keysets are covariant in all parameters }}
+{{ com Vecs, dicts, and keysets are covariant in all parameters }}
 
 G |- t <: u
 ----------------- :: vec_co
@@ -769,6 +769,17 @@ G |- dict <t1,t2> <: dict<u1,u2>
 G |- t <: u
 ---------------------- :: keyset_co
 G |- keyset<t> <: keyset<u>
+
+{{ com Vecs, dicts, and keysets are Indexish }}
+
+--------------------------------- :: vec_as_indexish
+G |- vec<t> <: `Indexish`<int, t>
+
+--------------------------------------- :: dict_as_indexish
+G |- dict<t1, t2> <: `Indexish`<t1, t2>
+
+---------------------------------- :: keyset_as_indexish
+G |- keyset<t> <: `Indexish`<t, t>
 
 {{ com \subsection{Legacy arrays} }}
 

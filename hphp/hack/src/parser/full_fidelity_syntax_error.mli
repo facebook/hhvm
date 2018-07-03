@@ -148,7 +148,6 @@ val error2055 : string
 val error2056 : string
 val error2057 : string
 val error2058 : string
-val error2059 : string
 val error2060 : string
 val error2061 : string
 val error2062 : string
@@ -273,3 +272,4 @@ val invalid_brace_kind_in_collection_initializer: string
 val prefixed_invalid_string_kind : string
 val non_re_prefix : string
 val collection_intrinsic_generic: string
+val invalid_shape_field_name : string

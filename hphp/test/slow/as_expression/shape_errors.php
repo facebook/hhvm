@@ -38,7 +38,7 @@ $arr = vec[
   shape('hi' => 'wow'),
   shape('hi' => 1, 'wow' => 2),
   shape('hi' => 1, 'wow' => 2, 'extra' => 3),
-  shape(wow => "hi"),
+  shape('wow' => "hi"),
 ];
 
 test($arr, fun('f'));

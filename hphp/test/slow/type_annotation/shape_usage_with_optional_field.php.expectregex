@@ -1,1 +1,1 @@
-((Fatal error\: syntax error, unexpected '\?', expecting '\)' in [^\r\n]+ on line 4)|(Fatal error\: Shape field name must be a string or a class constant in [^\r\n]+\/type_annotation\/shape_usage_with_optional_field\.php on line 4))
+((Fatal error\: syntax error, unexpected '\?', expecting '\)' in [^\r\n]+ on line 4)|(Fatal error\: Shape field name must be a single-quoted string or a class constant in [^\r\n]+\/type_annotation\/shape_usage_with_optional_field\.php on line 4))

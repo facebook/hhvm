@@ -1472,7 +1472,7 @@ let invalid_shape_initializer_name env node errors =
       end
     in
     if not is_str
-    then make_error_from_node node SyntaxError.error2059 :: errors else begin
+    then make_error_from_node node SyntaxError.invalid_shape_field_name :: errors else begin
       let str = text expr in
       if string_starts_with_int str
       then make_error_from_node node SyntaxError.error2060 :: errors
@@ -1481,20 +1481,20 @@ let invalid_shape_initializer_name env node errors =
   | ScopeResolutionExpression _ -> errors
   | QualifiedName _ ->
       if is_typechecker env then
-      make_error_from_node node SyntaxError.error2059 :: errors
+      make_error_from_node node SyntaxError.invalid_shape_field_name :: errors
       else errors
   | Token _ when is_name node ->
       if is_typechecker env then
-        make_error_from_node node SyntaxError.error2059 :: errors
+        make_error_from_node node SyntaxError.invalid_shape_field_name :: errors
       else
         errors
-  | _ -> make_error_from_node node SyntaxError.error2059 :: errors
+  | _ -> make_error_from_node node SyntaxError.invalid_shape_field_name :: errors
 
 let invalid_shape_field_check env node errors =
   match syntax node with
   | FieldInitializer { field_initializer_name; _} ->
     invalid_shape_initializer_name env field_initializer_name errors
-  | _ -> make_error_from_node node SyntaxError.error2059 :: errors
+  | _ -> make_error_from_node node SyntaxError.invalid_shape_field_name :: errors
 
 let is_in_unyieldable_magic_method parents =
   match first_parent_function_name parents with

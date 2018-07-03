@@ -1,0 +1,1 @@
+((Fatal error: Shape field name must be a single-quoted string or a class constant)|(Fatal error\: syntax error, unexpected T_DOUBLE_ARROW, expecting T_DOUBLE_COLON)) in [^\r\n]+ on line 8

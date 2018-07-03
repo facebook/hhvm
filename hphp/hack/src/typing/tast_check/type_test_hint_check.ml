@@ -64,6 +64,8 @@ let visitor = object(this)
     let name = snd cls in
     if acc.op = "as" && (name = SN.Collections.cDict || name = SN.Collections.cVec)
     then update acc @@ Invalid (r, Tclass (cls, tyl))
+    else if String_utils.string_starts_with name "\\:"
+    then update acc @@ Invalid (r, Tclass (cls, tyl))
     else match tyl with
       | [] -> acc
       | tyl when List.for_all tyl this#is_wildcard -> acc
@@ -88,13 +90,15 @@ end
 let print_type: type a. a ty_ -> string -> string = fun ty_ op ->
   match ty_ with
   | Tclass ((_, name), _) when name = SN.Collections.cDict && op = "as" ->
-      "a dict (temporarily)"
+    "a dict (temporarily)"
   | Tclass ((_, name), _) when name = SN.Collections.cVec && op = "as" ->
-      "a vec (temporarily)"
+    "a vec (temporarily)"
+  | Tclass ((_, name), _) when String_utils.string_starts_with name "\\:" ->
+    "an XHP class (temporarily)"
   | Tclass (_, tyl) when tyl <> [] ->
-      "a type with generics, because generics are erased at runtime"
+    "a type with generics, because generics are erased at runtime"
   | Tapply (_, tyl) when tyl <> [] ->
-      "a type with generics, because generics are erased at runtime"
+    "a type with generics, because generics are erased at runtime"
   | ty_ -> Typing_print.error ty_
 
 let validate_hint env hint op =

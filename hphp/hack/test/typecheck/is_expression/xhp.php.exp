@@ -1,0 +1,4 @@
+File "xhp.php", line 6, characters 13-19:
+Invalid "is" expression hint (Typing[4195])
+  File "xhp.php", line 6, characters 13-19:
+  The "is" operator cannot be used with an XHP class (temporarily)

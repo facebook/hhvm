@@ -17,27 +17,20 @@
 #define incl_HPHP_RUNTIME_BASE_REQ_CONTAINERS_H_
 
 #include <cstdlib>
-#include <deque>
-#include <forward_list>
 #include <functional>
 #include <limits>
 #include <list>
 #include <map>
 #include <memory>
-#include <queue>
 #include <set>
-#include <stack>
 #include <utility>
 #include <vector>
-
-#include <boost/container/flat_map.hpp>
 
 #include <folly/Memory.h>
 #include <folly/Optional.h>
 
 #include "hphp/runtime/base/req-malloc.h"
 
-#include "hphp/util/fixed-vector.h"
 #include "hphp/util/tiny-vector.h"
 #include "hphp/util/type-scan.h"
 
@@ -261,34 +254,9 @@ struct map final : std::map<Key, T, Compare,
   }
 };
 
-template <typename Key,
-          typename T,
-          typename Compare = std::less<Key>>
-struct multimap final : std::multimap<Key, T, Compare,
-                                      ConservativeAllocator<
-                                        std::pair<const Key,T>>> {
-  using Base = std::multimap<Key, T, Compare,
-                             ConservativeAllocator<std::pair<const Key, T>>>;
-  using Base::Base;
-  TYPE_SCAN_IGNORE_BASES(Base);
-  TYPE_SCAN_CUSTOM(Key, T) {
-    for (const auto& pair : *this) scanner.scan(pair);
-  }
-};
-
 template <typename T, typename Compare = std::less<T>>
 struct set final : std::set<T, Compare, ConservativeAllocator<T>> {
   using Base = std::set<T, Compare, ConservativeAllocator<T>>;
-  using Base::Base;
-  TYPE_SCAN_IGNORE_BASES(Base);
-  TYPE_SCAN_CUSTOM(T) {
-    for (const auto& v : *this) scanner.scan(v);
-  }
-};
-
-template <typename T, typename Compare = std::less<T>>
-struct multiset final : std::multiset<T, Compare, ConservativeAllocator<T>> {
-  using Base = std::multiset<T, Compare, ConservativeAllocator<T>>;
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
@@ -319,89 +287,6 @@ struct vector final : std::vector<T, ConservativeAllocator<T>> {
 template <typename T>
 struct list final : std::list<T, ConservativeAllocator<T>> {
   using Base = std::list<T, ConservativeAllocator<T>>;
-  using Base::Base;
-  TYPE_SCAN_IGNORE_BASES(Base);
-  TYPE_SCAN_CUSTOM(T) {
-    for (const auto& v : *this) scanner.scan(v);
-  }
-};
-
-template <typename T>
-struct forward_list final : std::forward_list<T, ConservativeAllocator<T>> {
-  using Base = std::forward_list<T, ConservativeAllocator<T>>;
-  using Base::Base;
-  TYPE_SCAN_IGNORE_BASES(Base);
-  TYPE_SCAN_CUSTOM(T) {
-    for (const auto& v : *this) scanner.scan(v);
-  }
-};
-
-template <typename T, typename Container = req::deque<T>>
-using stack = std::stack<T, Container>;
-
-template <typename T, typename Container = req::deque<T>>
-using queue = std::queue<T, Container>;
-
-template <typename T,
-          typename Container = req::vector<T>,
-          typename Compare = std::less<T>>
-using priority_queue = std::priority_queue<T, Container, Compare>;
-
-template<typename K, typename V, typename Pred = std::less<K>>
-struct flat_map final : boost::container::flat_map<
-  K, V, Pred, ConservativeAllocator<std::pair<K,V>>
-> {
-  using Base =
-    boost::container::flat_map<K, V, Pred,
-                               ConservativeAllocator<std::pair<K,V>>>;
-  using Base::Base;
-  TYPE_SCAN_IGNORE_BASES(Base);
-  TYPE_SCAN_CUSTOM(K, V) {
-    for (const auto& pair : *this) scanner.scan(pair);
-  }
-};
-
-template<typename K, typename V, typename Pred = std::less<K>>
-struct flat_multimap final : boost::container::flat_multimap<
-  K, V, Pred, ConservativeAllocator<std::pair<K,V>>
-> {
-  using Base = boost::container::flat_multimap<
-    K, V, Pred, ConservativeAllocator<std::pair<K,V>>
-  >;
-  using Base::Base;
-  TYPE_SCAN_IGNORE_BASES(Base);
-  TYPE_SCAN_CUSTOM(K, V) {
-    for (const auto& pair : *this) scanner.scan(pair);
-  }
-};
-
-template<typename K, typename Compare = std::less<K>>
-struct flat_set final : boost::container::flat_set<K, Compare,
-                                                   ConservativeAllocator<K>> {
-  using Base = boost::container::flat_set<K, Compare, ConservativeAllocator<K>>;
-  using Base::Base;
-  TYPE_SCAN_IGNORE_BASES(Base);
-  TYPE_SCAN_CUSTOM(K) {
-    for (const auto& v : *this) scanner.scan(v);
-  }
-};
-
-template<typename K, typename Compare = std::less<K>>
-struct flat_multiset final : boost::container::flat_multiset<
-  K, Compare, ConservativeAllocator<K>
-> {
-  using Base =
-    boost::container::flat_multiset<K, Compare, ConservativeAllocator<K>>;
-  using Base::Base;
-  TYPE_SCAN_IGNORE_BASES(Base);
-  TYPE_SCAN_CUSTOM(K) {
-    for (const auto& v : *this) scanner.scan(v);
-  }
-};
-
-template <typename T>
-struct FixedVector final : HPHP::FixedVector<T, ConservativeAllocator<T>> {
-  using Base = HPHP::FixedVector<T, ConservativeAllocator<T>>;
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {

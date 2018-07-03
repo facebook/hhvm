@@ -555,6 +555,8 @@ let check_if_in_async_context { scope; pos; _ } =
 
 let rec convert_expr env st (p, expr_ as expr) =
   match expr_ with
+  | Null | True | False | Omitted | Yield_break
+  | Id_type_arguments _ | Int _ | Float _ | String _ -> st, expr
   | Varray es ->
     let st, es = List.map_env st es (convert_expr env) in
     st, (p, Varray es)
@@ -661,6 +663,12 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, e1 = convert_expr env st e1 in
     let st, e2 = convert_expr env st e2 in
     st, (p, InstanceOf (e1, e2))
+  | Is (e, h) ->
+    let st, e = convert_expr env st e in
+    st, (p, Is (e, h))
+  | As (e, h, b) ->
+    let st, e = convert_expr env st e in
+    st, (p, As (e, h, b))
   | New (e, el1, el2) ->
     let st, e = convert_expr env st e in
     let st, el1 = convert_exprs env st el1 in
@@ -732,8 +740,24 @@ let rec convert_expr env st (p, expr_ as expr) =
   | Class_const (cid, n) ->
     let st, e = convert_expr env st cid in
     st, (p, Class_const (e, n))
-  | _ ->
-    st, expr
+  | PrefixedString (s, e) ->
+    let st, e = convert_expr env st e in
+    st, (p, PrefixedString (s, e))
+  | Yield_from e ->
+    let st, e = convert_expr env st e in
+    st, (p, Yield_from e)
+  | Suspend e ->
+    let st, e = convert_expr env st e in
+    st, (p, Suspend e)
+  | ParenthesizedExpr e ->
+    let st, e = convert_expr env st e in
+    st, (p, ParenthesizedExpr e)
+  | Callconv (k, e) ->
+    let st, e = convert_expr env st e in
+    st, (p, Callconv (k, e))
+  | Execution_operator el ->
+    let st, el = convert_exprs env st el in
+    st, (p, Execution_operator el)
 
 and convert_prop_expr env st (_, expr_ as expr) =
   match expr_ with

@@ -1,0 +1,6 @@
+File "special_functions_incorrect.php", line 28, characters 15-16:
+Invalid argument (Typing[4110])
+File "special_functions_incorrect.php", line 17, characters 29-31:
+This is an int
+File "special_functions_incorrect.php", line 14, characters 36-41:
+It is incompatible with a string

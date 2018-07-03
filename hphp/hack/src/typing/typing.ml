@@ -4100,6 +4100,32 @@ and is_abstract_ft fty = match fty with
         ~is_expr_statement p env fty el uel in
       make_call env (T.make_typed_expr fpos fty
         (T.Class_const(te1, m))) hl tel tuel ty
+  (* <<__PPL>>: sample, factor, observe, condition *)
+  | Id (pos, id) when env.Env.inside_ppl_class && SN.PPLFunctions.is_reserved id ->
+      let m = (pos, String_utils.lstrip id "\\") in
+      (* Mock these as type equivalent to \Infer -> sample... *)
+      let infer_e = CI ((p, "\\Infer"), []) in
+      let env, _, ty1 = static_class_id ~check_constraints:true p env infer_e in
+      let nullsafe = None in
+      let tel = ref [] and tuel = ref [] and tftyl = ref [] in
+      let fn = (fun (env, fty, _) ->
+        let env, tel_, tuel_, method_ =
+          call
+            ~expected
+            ~method_call_info:(TR.make_call_info ~receiver_is_self:false
+              ~is_static:false ty1 (snd m))
+            p env fty el uel in
+        tel := tel_; tuel := tuel_;
+        tftyl := fty :: !tftyl;
+        env, method_, None) in
+      let env, ty = obj_get ~is_method:true ~nullsafe ~pos_params:el
+                      ~explicit_tparams:hl env ty1 infer_e m fn in
+      let tfty =
+        match !tftyl with
+        | [fty] -> fty
+        | tftyl -> (Reason.none, Tunresolved tftyl)
+      in
+      make_call env (T.make_typed_expr fpos tfty (T.Fun_id m)) hl !tel !tuel ty
 
   (* Call instance method *)
   | Obj_get(e1, (pos_id, Id m), nullflavor) ->

@@ -2327,6 +2327,7 @@ and expr_
       let ety_env =
         { (Phase.env_with_self env) with from_class = Some CIstatic } in
       let env, declared_ft = Phase.localize_ft ~use_pos:p ~ety_env env declared_ft in
+      let env = { env with Typing_env.inside_ppl_class = false } in
       List.iter idl (check_escaping_var env);
       (* Ensure lambda arity is not Fellipsis in strict mode *)
       begin match declared_ft.ft_arity with
@@ -6498,6 +6499,10 @@ and class_def_ env c tc =
     | Ast.Cenum -> SN.AttributeKinds.enum
     | _ -> SN.AttributeKinds.cls in
     Typing_attributes.check_def env new_object kind c.c_user_attributes in
+  let env =
+    { env with Env.inside_ppl_class =
+        Attributes.mem SN.UserAttributes.uaProbabilisticModel c.c_user_attributes
+    } in
   let pc, _ = c.c_name in
   let impl = List.map
     (c.c_extends @ c.c_implements @ c.c_uses)

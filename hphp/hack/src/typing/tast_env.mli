@@ -192,3 +192,8 @@ val restore_method_env : env -> Tast.method_ -> env
 val restore_fun_env : env -> Tast.fun_ -> env
 (** Construct an {!env} from a lambda definition and the {!env} of the context
     it appears in. *)
+
+val set_ppl_lambda : env -> env
+(** Construct an {!env} where inside_ppl_class is {false}. Due to rewriting
+    limitations, we are unable to rewrite lambdas inside <<__PPL>> classes.
+    If you are using {!Tast_visitor}, you should have no need of this. *)

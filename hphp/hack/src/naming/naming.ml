@@ -113,6 +113,9 @@ module Env : sig
   val has_unsafe : genv * lenv -> bool
   val set_unsafe : genv * lenv -> bool -> unit
 
+  val in_ppl : genv * lenv -> bool
+  val set_ppl : genv * lenv -> bool -> genv * lenv
+
   val add_lvar : genv * lenv -> Ast.id -> positioned_ident -> unit
   val add_param : genv * lenv -> N.fun_param -> genv * lenv
   val new_lvar : genv * lenv -> Ast.id -> positioned_ident
@@ -328,6 +331,12 @@ end = struct
   let has_unsafe (_genv, lenv) = !(lenv.has_unsafe)
   let set_unsafe (_genv, lenv) x =
     lenv.has_unsafe := x
+
+  let in_ppl (genv, _lenv) = genv.in_ppl
+
+  let set_ppl (genv, lenv) in_ppl =
+    let genv = { genv with in_ppl } in
+    (genv, lenv)
 
   let lookup genv (env : string -> FileInfo.pos option) (p, x) =
     let v = env x in
@@ -2348,7 +2357,7 @@ module Make (GetLocals : GetLocals) = struct
         )
     (* sample, factor, observe, condition *)
     | Call ((p1, Id (p2, cn)), hl, el, uel)
-      when let (genv, _) = env in genv.in_ppl && SN.PPLFunctions.is_reserved cn ->
+      when Env.in_ppl env && SN.PPLFunctions.is_reserved cn ->
         let n_expr = N.Id (p2, cn) in
         N.Call (N.Cnormal, (p1, n_expr),
                 hintl_funcall env hl, exprl env el, exprl env uel)
@@ -2618,6 +2627,7 @@ module Make (GetLocals : GetLocals) = struct
       N.Callconv (kind, expr env e)
 
   and expr_lambda env f =
+    let env = Env.set_ppl env false in
     let h = Option.map f.f_ret (hint ~allow_retonly:true env) in
     let previous_unsafe = Env.has_unsafe env in
     (* save unsafe and yield state *)

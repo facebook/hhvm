@@ -240,6 +240,7 @@ let error2076 = "Cannot use both 'inout' and '&' on the same argument."
 let error2077 = "Cannot use empty list"
 
 (* Start giving names rather than numbers *)
+let async_not_last = "The 'async' modifier must be directly before the 'function' keyword."
 let list_as_subscript = "A subscript index cannot be a list"
 let vdarray_in_php = "varray and darray are only allowed in Hack files"
 let using_st_function_scoped_top_level =

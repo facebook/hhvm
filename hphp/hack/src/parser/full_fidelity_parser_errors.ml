@@ -469,6 +469,11 @@ let methodish_contains_private node =
 let is_visibility x =
   is_public x || is_private x || is_protected x
 
+let contains_async_not_last mods =
+  let mod_list = syntax_to_list_no_separators mods in
+  List.exists is_async mod_list
+    && not @@ is_async @@ List.nth mod_list (List.length mod_list - 1)
+
 let has_static node parents f =
   match node with
   | FunctionDeclarationHeader node ->
@@ -476,7 +481,6 @@ let has_static node parents f =
     (f label) &&
     (matches_first (methodish_contains_static) parents)
   | _ -> false
-
 
 (* checks if a methodish decl or property has multiple visibility modifiers *)
 let declaration_multiple_visibility node =
@@ -1132,8 +1136,8 @@ let methodish_errors env node parents errors =
        (class_constructor_destructor_has_non_void_type env)
        node parents SyntaxError.error2018 function_type in
      let errors =
-      produce_error_for_header errors class_non_constructor_has_visibility_param
-      node parents SyntaxError.error2010 function_parameter_list in
+       produce_error_for_header errors class_non_constructor_has_visibility_param
+       node parents SyntaxError.error2010 function_parameter_list in
     errors
   | MethodishDeclaration md ->
     let header_node = md.methodish_function_decl_header in
@@ -1187,8 +1191,14 @@ let methodish_errors env node parents errors =
       (is_abstract_and_async_method node) parents
       SyntaxError.error2046 async_annotation in
     let errors =
+      if is_typechecker env
+      then produce_error errors
+        contains_async_not_last
+        modifiers SyntaxError.async_not_last modifiers
+      else errors in
+    let errors =
       special_method_param_errors
-        md.methodish_function_decl_header parents errors in
+      md.methodish_function_decl_header parents errors in
     errors
   | _ -> errors
 

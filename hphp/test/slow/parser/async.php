@@ -15,4 +15,3 @@ abstract class C {
   async final function f13() {}
 }
 echo "Done\n";
-

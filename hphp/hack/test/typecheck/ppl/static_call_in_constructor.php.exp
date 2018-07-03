@@ -1,0 +1,2 @@
+File "static_call_in_constructor.php", line 12, characters 5-20:
+Cannot call a static method on a <<__PPL>> class inside a <<__PPL>> class constructor (Typing[4265])

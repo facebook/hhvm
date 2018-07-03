@@ -471,6 +471,7 @@ module type S = sig
   val function_is_not_coroutine : Pos.t -> string -> unit
   val coroutinness_mismatch : bool -> Pos.t -> Pos.t -> unit
   val invalid_ppl_call : Pos.t -> string -> unit
+  val invalid_ppl_static_call : Pos.t -> string -> unit
   val return_disposable_mismatch : bool -> Pos.t -> Pos.t -> unit
   val fun_reactivity_mismatch : Pos.t -> string -> Pos.t -> string -> unit
   val frozen_in_incorrect_scope : Pos.t -> unit

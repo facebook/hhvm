@@ -479,4 +479,5 @@ InvalidCallMaybeMutable = 4262
 MutabilityMismatch = 4263
 InvalidPPLCall = 4264
 InvalidPPLStaticCall = 4265
+TypeTestInLambda = 4266
   |}]

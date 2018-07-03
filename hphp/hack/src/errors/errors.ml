@@ -3234,6 +3234,14 @@ let ambiguous_object_access pos name self_pos vis subclass_pos class_self class_
     subclass_pos, "Instead of the " ^ vis ^ " instance declared in " ^ class_subclass;
   ]
 
+let type_test_in_lambda pos op =
+  add (Typing.err_code Typing.TypeTestInLambda) pos (
+    "The \"" ^ op ^ "\" operator is temporarily banned in lambdas due to a \
+    bug in capturing variables in closures (T31174901). If you are not \
+    using a captured variable, you may FIXME this error and it will be \
+    cleaned up automatically."
+  )
+
 let forward_compatibility_not_current pos value =
   let current = ForwardCompatibilityLevel.current in
   add (Init.err_code Init.ForwardCompatibilityNotCurrent)

@@ -1,0 +1,2 @@
+File "in_async_block.php", line 5, characters 16-24:
+The "as" operator is temporarily banned in lambdas due to a bug in capturing variables in closures (T31174901). If you are not using a captured variable, you may FIXME this error and it will be cleaned up automatically. (Typing[4266])

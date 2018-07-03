@@ -2279,6 +2279,7 @@ and expr_
         Errors.experimental_feature p "is expression";
         expr_error env p (Reason.Rwitness p)
       end else begin
+        if env.Env.in_lambda then Errors.type_test_in_lambda p "is";
         let env, te, _ = expr env e in
         make_result env (T.Is (te, hint)) (Reason.Rwitness p, Tprim Tbool)
       end
@@ -2290,6 +2291,7 @@ and expr_
       Errors.experimental_feature p "as expression";
       expr_error env p (Reason.Rnone)
     end else begin
+      if env.Env.in_lambda then Errors.type_test_in_lambda p "as";
       let env, te, _ = expr env e in
       let env, hint_ty = Phase.hint_locl env hint in
       let hint_ty =
@@ -2318,6 +2320,7 @@ and expr_
       make_result env (T.As (te, hint, is_nullable)) hint_ty
     end
   | Efun (f, idl) ->
+    Env.in_lambda env begin fun env ->
       (* This is the function type as declared on the lambda itself.
        * If type hints are absent then use Tany instead. *)
       let declared_ft = Decl.fun_decl_in_env env.Env.decl_env f in
@@ -2463,6 +2466,7 @@ and expr_
             env, tefun, (Reason.Rwitness p, Tanon (declared_ft.ft_arity, anon_id))
         end
       end
+    end
   | Xml (sid, attrl, el) ->
       let cid = CI (sid, []) in
       let env, _te, classes = class_id_for_new p env cid in

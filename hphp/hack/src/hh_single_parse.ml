@@ -53,18 +53,24 @@ let handle_errors : Errors.t -> unit = fun errorl ->
     exit_with ParseError
   end
 
-let run_ast ?(quick=false) file =
+let run_ast ?(quick=false) ~allow_malformed file =
   let parse_call () = Parser_hack.from_file ParserOptions.default ~quick file in
   let errorl, result = Errors.do_ parse_call in
-  handle_errors errorl;
+  if not allow_malformed then handle_errors errorl;
   result
 
-let run_ffp ?(codegen = true)?(iters = 0) (file : Relative_path.t) : Lowerer.result =
+let run_ffp
+  ?(iters = 0)
+  ~codegen
+  ~allow_malformed
+  (file : Relative_path.t)
+: Lowerer.result =
   let env =
     Lowerer.make_env
       ~codegen
       ~include_line_comments:true
-      ~fail_open:false
+      ~fail_open:allow_malformed
+      ~keep_errors:(not allow_malformed)
       file
   in
   if iters < 1 then () else
@@ -269,28 +275,35 @@ let compare_comments filename ast_result ffp_result =
   " filename (String.concat "" diff);
   end
 
-let run_parsers dumper (file : Relative_path.t) (conf : parser_config) ~hash ~codegen =
+let run_parsers
+  dumper
+  (file : Relative_path.t)
+  (conf : parser_config)
+  ~hash
+  ~codegen
+  ~allow_malformed
+=
   match conf with
   | AST ->
-    let ast = (run_ast file).Parser_return.ast in
+    let ast = (run_ast ~allow_malformed file).Parser_return.ast in
     let output =
-      if not hash then dumper (run_ast file).Parser_return.ast else
+      if not hash then dumper (run_ast ~allow_malformed file).Parser_return.ast else
         let decl_hash = Ast_utils.generate_ast_decl_hash ast in
         OpaqueDigest.to_hex decl_hash
     in
     Printf.printf "%s" output
-  | FFP -> Printf.printf "%s" (dumper (run_ffp ~codegen file).Lowerer.ast)
+  | FFP -> Printf.printf "%s" (dumper (run_ffp ~codegen ~allow_malformed file).Lowerer.ast)
   | ValidatedFFP ->
     Printf.printf "%s" (dumper (run_validated_ffp file).Lowerer.ast)
   | Compare diff_cmd ->
     let open Printf in
     let filename = Relative_path.S.to_string file in
-    let ast_result = run_ast file in
+    let ast_result = run_ast ~allow_malformed file in
     let ast_fixmes = Fixmes.get_fixmes_from_heap file in
     Fixmes.HH_FIXMES.remove_batch (Relative_path.Set.singleton file);
     Fixmes.DECL_HH_FIXMES.remove_batch (Relative_path.Set.singleton file);
 
-    let ffp_result = run_ffp file in
+    let ffp_result = run_ffp ~codegen ~allow_malformed file in
     let ffp_fixmes = Fixmes.get_fixmes_from_heap file in
     let sexpr = compare_asts dumper filename diff_cmd ast_result ffp_result in
     let () = compare_pos ast_result.Parser_return.ast ffp_result.Lowerer.ast in
@@ -300,8 +313,8 @@ let run_parsers dumper (file : Relative_path.t) (conf : parser_config) ~hash ~co
   | Benchmark ->
     let filename = Relative_path.S.to_string file in
     let (ast_result, ast_duration), (ffp_result, ffp_duration) =
-      try (measure (fun () -> run_ast file),
-           measure (fun () -> run_ffp ~codegen file))
+      try (measure (fun () -> run_ast ~allow_malformed file),
+           measure (fun () -> run_ffp ~codegen ~allow_malformed file))
       with _ -> begin
         Printf.printf "FAIL, %s\n" filename;
         exit_with ParseError
@@ -344,6 +357,7 @@ let () =
   let num_runs   = ref 100 in
   let benchmark_files      = ref [] in
   let no_codegen    = ref false in
+  let allow_malformed = ref false in
   Arg.(parse
     [ ("--parser", Set_string use_parser,
         "Which parser to use (ast, ffp, compare) [def: ast]"
@@ -368,7 +382,10 @@ let () =
         "Run benchmarking on a list of files"
     )
     ; ("--no-codegen", Set no_codegen,
-        "Turn off codegen mode when parsing with FFP [default: true]"
+        "Turn off codegen mode when parsing with FFP [default: false]"
+    )
+    ; ("--allow-malformed", Set allow_malformed,
+        "Allow malformed files (such as for testing IDE services) [default: false]"
     ) ;
     ]) (fun fn -> filename := fn) usage;
   let parse_function = match !use_parser with
@@ -386,7 +403,14 @@ let () =
   let dumper ast = !dumper (Ast.AProgram ast) in
   let parse_file fn =
     let file = Relative_path.create Relative_path.Dummy fn in
-    run_parsers dumper file ~hash:!hash parse_function ~codegen:(not !no_codegen) in
+    run_parsers
+      dumper
+      file
+      ~hash:!hash
+      parse_function
+      ~codegen:(not !no_codegen)
+      ~allow_malformed:!allow_malformed
+  in
   if !benchmark_files <> [] then
     List.iter parse_file !benchmark_files
   else

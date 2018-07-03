@@ -2267,10 +2267,13 @@ module Make (GetLocals : GetLocals) = struct
         )
     | Call ((p, Id (_, cn)), _, el, uel) when cn = SN.SpecialFunctions.fun_ ->
         arg_unpack_unexpected uel ;
+        let (genv, _) = env in
         (match el with
         | [] -> Errors.naming_too_few_arguments p; N.Any
         | [_, String s] when String.contains s ':' ->
           Errors.illegal_meth_fun p; N.Any
+        | [_, String s] when genv.in_ppl && SN.PPLFunctions.is_reserved s ->
+          Errors.ppl_meth_pointer p ("fun("^s^")"); N.Any
         | [p, String x] -> N.Fun_id (Env.fun_id env (p, x))
         | [p, _] ->
             Errors.illegal_fun p;

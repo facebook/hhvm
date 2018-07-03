@@ -2701,6 +2701,10 @@ let invalid_ppl_static_call pos reason =
   let error_msg = "Cannot call a static method on a <<__PPL>> class "^reason in
   add (Typing.err_code Typing.InvalidPPLStaticCall) pos error_msg
 
+let ppl_meth_pointer pos func =
+  let error_msg = func^" cannot be used with a <<__PPL>> class" in
+  add (Typing.err_code Typing.PPLMethPointer) pos error_msg
+
 let return_disposable_mismatch pos1_return_disposable pos1 pos2 =
   let m1 = "This is marked <<__ReturnDisposable>>." in
   let m2 = "This is not marked <<__ReturnDisposable>>." in

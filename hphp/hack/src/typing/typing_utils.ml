@@ -450,6 +450,7 @@ let flatten_unresolved env ty acc =
   let res = match ety with
     (* flatten Tunresolved[Tunresolved[...]] *)
     | (_, Tunresolved tyl) -> tyl @ acc
+    | (_, Tany) -> acc
     | _ -> ty :: acc in
   env, res
 

@@ -109,27 +109,6 @@ let check_ppl_class_const env p e =
     end
   | CIexpr e -> check_ppl_obj_get env e
 
-let check_ppl_meth_pointers env p classname special_name =
-  let decl_env = Env.get_decl_env env in
-  match Decl_env.get_class_dep decl_env classname with
-  | Some ({ dc_ppl = true; _ }) -> Errors.ppl_meth_pointer p special_name
-  | _ -> ()
-
-let check_ppl_inst_meth env ((p, ty), _) =
-  let rec base_type ty =
-    match snd ty with
-    | Tabstract(_, Some ty) -> base_type ty
-    | _ -> ty in
-  match snd (base_type ty) with
-  | Tclass ((_, name), _) ->
-    begin
-      let decl_env = Env.get_decl_env env in
-      match Decl_env.get_class_dep decl_env name with
-      | Some ({ dc_ppl = true; _ }) -> Errors.ppl_meth_pointer p "inst_meth"
-      | _ -> ()
-    end
-  | _ -> ()
-
 let on_call_expr env ((p, _), x) =
   match x with
   | Obj_get (e, (_, _), _) -> check_ppl_obj_get env e
@@ -141,15 +120,9 @@ let on_call_expr env ((p, _), x) =
 let handler = object
   inherit Tast_visitor.handler_base
 
-  method! at_expr env ((p, _), x) =
-    match x with
+  method! at_expr env x =
+    match snd x with
     | Call (_, e, _, _, _) -> on_call_expr env e
-    (* class_meth *)
-    | Smethod_id ((_, classname), _) -> check_ppl_meth_pointers env p classname "class_meth"
-    (* meth_caller *)
-    | Method_caller ((_, classname), _) -> check_ppl_meth_pointers env p classname "meth_caller"
-    (* inst_meth *)
-    | Method_id (instance, _) -> check_ppl_inst_meth env instance
     | _ -> ()
 
   method! at_class_ env c = check_ppl_class env c

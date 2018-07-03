@@ -16,12 +16,15 @@
 #ifndef incl_HPHP_DATA_WALKER_H_
 #define incl_HPHP_DATA_WALKER_H_
 
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/runtime/base/req-hash-map.h"
+#include "hphp/runtime/base/req-hash-set.h"
+#include "hphp/util/functional.h" // for pointer_hash
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+struct HeapObject;
 struct ArrayData;
 struct ObjectData;
 
@@ -64,6 +67,12 @@ struct DataWalker {
     unsigned hasObjectOrResource : 1;
   };
 
+  using PointerSet = req::fast_set<const HeapObject*,
+                                   pointer_hash<const HeapObject>>;
+
+  using PointerMap = req::fast_map<HeapObject*, HeapObject*,
+                                   pointer_hash<HeapObject>>;
+
 public:
   /*
    * Sets up a DataWalker to analyze an object or array.
@@ -98,10 +107,10 @@ private:
                     DataFeature& features,
                     PointerSet& visited) const;
 
-  bool markVisited(void* pvar,
+  bool markVisited(HeapObject* ptr,
                    DataFeature& features,
                    PointerSet& visited) const;
-  void objectFeature(ObjectData* pobj, DataFeature&, PointerSet&) const;
+  void objectFeature(ObjectData* pobj, DataFeature&) const;
 
   bool canStopWalk(DataFeature& features) const;
 

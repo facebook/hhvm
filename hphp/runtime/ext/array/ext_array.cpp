@@ -416,9 +416,11 @@ static bool couldRecur(tv_lval lval, const ArrayData* arr) {
   return tvIsReferenced(lval.tv()) || arr->kind() == ArrayData::kGlobalsKind;
 }
 
+using PointerSet = ArrayUtil::PointerSet;
+
 static void php_array_merge_recursive(PointerSet &seen, bool check,
                                       Array &arr1, const Array& arr2) {
-  auto const arr1_ptr = (void*)arr1.get();
+  auto const arr1_ptr = arr1.get();
   if (check) {
     if (seen.find(arr1_ptr) != seen.end()) {
       raise_warning("array_merge_recursive(): recursion detected");
@@ -612,7 +614,7 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
     return;
   }
 
-  auto const arr1_ptr = (void*)arr1.get();
+  auto const arr1_ptr = arr1.get();
   if (check) {
     if (seen.find(arr1_ptr) != seen.end()) {
       raise_warning("array_replace_recursive(): recursion detected");

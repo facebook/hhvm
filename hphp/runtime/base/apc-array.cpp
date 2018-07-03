@@ -32,7 +32,7 @@ namespace HPHP {
 
 namespace {
 
-size_t getMemSize(PointerMap* seenArrs) {
+size_t getMemSize(DataWalker::PointerMap* seenArrs) {
   always_assert(!use_jemalloc);
   size_t total = 0;
   for (auto kv : *seenArrs) {
@@ -53,7 +53,7 @@ APCArray::MakeSharedImpl(ArrayData* arr,
                          A shared, B uncounted, C serialized) {
   if (level == APCHandleLevel::Outer) {
     auto const seenArrs = apcExtension::ShareUncounted ?
-      std::make_unique<PointerMap>() : nullptr;
+      req::make_unique<DataWalker::PointerMap>() : nullptr;
     // only need to call traverseData() on the toplevel array
     DataWalker walker(DataWalker::LookupFeature::HasObjectOrResource);
     DataWalker::DataFeature features = walker.traverseData(arr, seenArrs.get());
@@ -104,7 +104,7 @@ APCArray::MakeSharedArray(ArrayData* arr, APCHandleLevel level,
         ? MakePacked(arr, APCKind::SharedPackedArray, unserializeObj)
         : MakeHash(arr, APCKind::SharedArray, unserializeObj);
     },
-    [&](PointerMap* m) { return MakeUncountedArray(arr, m); },
+    [&](DataWalker::PointerMap* m) { return MakeUncountedArray(arr, m); },
     [&](StringData* s) { return APCString::MakeSerializedArray(s); }
   );
 }
@@ -121,7 +121,7 @@ APCArray::MakeSharedVec(ArrayData* vec, APCHandleLevel level,
     vec,
     level,
     [&]() { return MakePacked(vec, APCKind::SharedVec, unserializeObj); },
-    [&](PointerMap* m) { return MakeUncountedVec(vec, m); },
+    [&](DataWalker::PointerMap* m) { return MakeUncountedVec(vec, m); },
     [&](StringData* s) { return APCString::MakeSerializedVec(s); }
   );
 }
@@ -138,7 +138,7 @@ APCArray::MakeSharedDict(ArrayData* dict, APCHandleLevel level,
     dict,
     level,
     [&]() { return MakeHash(dict, APCKind::SharedDict, unserializeObj); },
-    [&](PointerMap* m) { return MakeUncountedDict(dict, m); },
+    [&](DataWalker::PointerMap* m) { return MakeUncountedDict(dict, m); },
     [&](StringData* s) { return APCString::MakeSerializedDict(s); }
   );
 }
@@ -156,7 +156,7 @@ APCArray::MakeSharedKeyset(ArrayData* keyset, APCHandleLevel level,
     keyset,
     level,
     [&]() { return MakePacked(keyset, APCKind::SharedKeyset, unserializeObj); },
-    [&](PointerMap*) { return MakeUncountedKeyset(keyset); },
+    [&](DataWalker::PointerMap*) { return MakeUncountedKeyset(keyset); },
     [&](StringData* s) { return APCString::MakeSerializedKeyset(s); }
   );
 }
@@ -205,7 +205,9 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
   return {ret->getHandle(), size};
 }
 
-APCHandle* APCArray::MakeUncountedArray(ArrayData* array, PointerMap* m) {
+APCHandle* APCArray::MakeUncountedArray(
+    ArrayData* array,
+    DataWalker::PointerMap* m) {
   assertx(apcExtension::UseUncounted);
   assertx(array->isPHPArray());
   auto const value = [&] {
@@ -222,7 +224,9 @@ APCHandle* APCArray::MakeUncountedArray(ArrayData* array, PointerMap* m) {
   return value->getHandle();
 }
 
-APCHandle* APCArray::MakeUncountedVec(ArrayData* vec, PointerMap* m) {
+APCHandle* APCArray::MakeUncountedVec(
+    ArrayData* vec,
+    DataWalker::PointerMap* m) {
   assertx(apcExtension::UseUncounted);
   assertx(vec->isVecArray());
   auto data = PackedArray::MakeUncounted(vec, true, m);
@@ -231,7 +235,9 @@ APCHandle* APCArray::MakeUncountedVec(ArrayData* vec, PointerMap* m) {
   return value->getHandle();
 }
 
-APCHandle* APCArray::MakeUncountedDict(ArrayData* dict, PointerMap* m) {
+APCHandle* APCArray::MakeUncountedDict(
+    ArrayData* dict,
+    DataWalker::PointerMap* m) {
   assertx(apcExtension::UseUncounted);
   assertx(dict->isDict());
   auto data = MixedArray::MakeUncounted(dict, true, m);

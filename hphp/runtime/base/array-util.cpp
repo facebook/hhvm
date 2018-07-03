@@ -519,16 +519,16 @@ void ArrayUtil::Walk(Variant& input, PFUNC_WALK walk_function,
       ArrayData *arr = v.getArrayData();
 
       if (v.isReferenced()) {
-        if (seen->find((void*)arr) != seen->end()) {
+        if (seen->find(arr) != seen->end()) {
           raise_warning("array_walk_recursive(): recursion detected");
           return;
         }
-        seen->insert((void*)arr);
+        seen->insert(arr);
       }
 
       Walk(v, walk_function, data, recursive, seen, userdata);
       if (v.isReferenced()) {
-        seen->erase((void*)arr);
+        seen->erase(arr);
       }
     } else {
       walk_function(v, k, userdata, data);

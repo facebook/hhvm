@@ -398,7 +398,7 @@ NEVER_INLINE MixedArray* MixedArray::copyMixed() const {
 
 ArrayData* MixedArray::MakeUncounted(ArrayData* array,
                                      bool withApcTypedValue,
-                                     PointerMap* seen) {
+                                     DataWalker::PointerMap* seen) {
   auto const updateSeen = seen && array->hasMultipleRefs();
   if (updateSeen) {
     auto it = seen->find(array);
@@ -443,7 +443,7 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
         (!te.skey->isUncounted() || !te.skey->uncountedIncRef())) {
       te.skey = [&] {
         if (auto const st = lookupStaticString(te.skey)) return st;
-        void** seenStr = nullptr;
+        HeapObject** seenStr = nullptr;
         if (seen && te.skey->hasMultipleRefs()) {
           seenStr = &(*seen)[te.skey];
           if (auto const st = static_cast<StringData*>(*seenStr)) {

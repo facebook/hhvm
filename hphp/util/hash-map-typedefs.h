@@ -52,10 +52,6 @@ using hphp_string_imap =
 using hphp_string_iset =
   hphp_hash_set<std::string, string_hashi, string_eqstri>;
 
-// void* keyed tables
-using PointerMap = folly::F14ValueMap<void*, void*, pointer_hash<void>>;
-using PointerSet = hphp_hash_set<void*, pointer_hash<void>>;
-
 // c_str-keyed tables, entries do not move on rehash
 template<typename T>
 using hphp_const_char_imap = hphp_hash_map<const char *, T, hashi, eqstri>;

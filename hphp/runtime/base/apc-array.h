@@ -48,11 +48,11 @@ struct APCArray {
                                           bool unserializeObj);
 
   static APCHandle* MakeUncountedArray(ArrayData* array,
-                                       PointerMap* m = nullptr);
+                                       DataWalker::PointerMap* m = nullptr);
   static APCHandle* MakeUncountedVec(ArrayData* vec,
-                                     PointerMap* m = nullptr);
+                                     DataWalker::PointerMap* m = nullptr);
   static APCHandle* MakeUncountedDict(ArrayData* dict,
-                                      PointerMap* m = nullptr);
+                                      DataWalker::PointerMap* m = nullptr);
   static APCHandle* MakeUncountedKeyset(ArrayData* dict);
 
   static APCHandle::Pair MakeSharedEmptyArray();

@@ -49,7 +49,7 @@ void DataWalker::traverseData(ArrayData* data,
   auto const fn = [&] (TypedValue rval) {
     if (isRefType(rval.m_type)) {
       if (rval.m_data.pref->isReferenced()) {
-        if (markVisited(rval.m_data.pref->var(), features, visited)) {
+        if (markVisited(rval.m_data.pref, features, visited)) {
           // Don't recurse forever; we already went down this path, and
           // stop the walk if we've already got everything we need.
           return canStopWalk(features);
@@ -79,7 +79,7 @@ void DataWalker::traverseData(
     ObjectData* data,
     DataFeature& features,
     PointerSet& visited) const {
-  objectFeature(data, features, visited);
+  objectFeature(data, features);
   if (markVisited(data, features, visited)) {
     return; // avoid infinite recursion
   }
@@ -94,18 +94,18 @@ void DataWalker::traverseData(
 }
 
 inline bool DataWalker::markVisited(
-    void* pvar,
+    HeapObject* ptr,
     DataFeature& features,
     PointerSet& visited) const {
-  if (!visited.insert(pvar).second) {
+  if (!visited.insert(ptr).second) {
     features.isCircular = true;
     return true;
   }
   return false;
 }
 
-inline void DataWalker::objectFeature(ObjectData* pobj, DataFeature& features,
-                                      PointerSet& /*visited*/) const {
+inline void DataWalker::objectFeature(ObjectData* pobj,
+                                      DataFeature& features) const {
   if (pobj->isCollection()) return;
   if ((m_features & LookupFeature::DetectSerializable) &&
        pobj->instanceof(SystemLib::s_SerializableClass)) {

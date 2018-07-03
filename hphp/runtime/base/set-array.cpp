@@ -128,7 +128,7 @@ ArrayData* SetArray::MakeSet(uint32_t size, const TypedValue* values) {
 
 ArrayData* SetArray::MakeUncounted(ArrayData* array,
                                    bool withApcTypedValue,
-                                   PointerMap* seen) {
+                                   DataWalker::PointerMap* seen) {
   auto const updateSeen = seen && array->hasMultipleRefs();
   if (updateSeen) {
     auto it = seen->find(array);
@@ -170,7 +170,7 @@ ArrayData* SetArray::MakeUncounted(ArrayData* array,
           (!skey->isUncounted() || !skey->uncountedIncRef())) {
         skey = [&] {
           if (auto const st = lookupStaticString(skey)) return st;
-          void** seenStr = nullptr;
+          HeapObject** seenStr = nullptr;
           if (seen && skey->hasMultipleRefs()) {
             seenStr = &(*seen)[skey];
             if (auto const st = static_cast<StringData*>(*seenStr)) {

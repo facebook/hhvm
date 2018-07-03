@@ -22,6 +22,7 @@
 
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/sort-flags.h"
@@ -273,15 +274,16 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* MakeUninitializedVArray(uint32_t size);
   static ArrayData* MakeUninitializedVec(uint32_t size);
 
-  static ArrayData* MakeUncounted(ArrayData* array,
-                                  bool withApcTypedValue = false,
-                                  PointerMap* seen = nullptr);
-  static ArrayData* MakeUncounted(ArrayData* array,
-                                  int,
-                                  PointerMap* seen = nullptr) = delete;
-  static ArrayData* MakeUncounted(ArrayData* array,
-                                  size_t extra,
-                                  PointerMap* seen = nullptr) = delete;
+  static ArrayData* MakeUncounted(
+      ArrayData* array, bool withApcTypedValue = false,
+      DataWalker::PointerMap* seen = nullptr
+  );
+  static ArrayData* MakeUncounted(
+      ArrayData* array, int, DataWalker::PointerMap* seen = nullptr
+  ) = delete;
+  static ArrayData* MakeUncounted(
+      ArrayData* array, size_t extra, DataWalker::PointerMap* seen = nullptr
+  ) = delete;
   static ArrayData* MakeUncountedHelper(ArrayData* array, size_t extra);
 
   static ArrayData* MakeVecFromAPC(const APCArray* apc);

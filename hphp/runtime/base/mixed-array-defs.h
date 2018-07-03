@@ -22,11 +22,12 @@
 #include "hphp/runtime/base/array-helpers.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
-#include "hphp/runtime/base/tv-val.h"
+#include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/tv-val.h"
 
 #include "hphp/util/stacktrace-profiler.h"
 #include "hphp/util/word-mem.h"
@@ -305,7 +306,9 @@ private:
 // array elements (without manipulating refcounts, as an uncounted won't hold
 // any reference to refcounted values.
 ALWAYS_INLINE
-void ConvertTvToUncounted(TypedValue* source, PointerMap* seen = nullptr) {
+void ConvertTvToUncounted(
+    TypedValue* source,
+    DataWalker::PointerMap* seen = nullptr) {
   if (isRefType(source->m_type)) {
     // unbox
     auto const inner = source->m_data.pref->tv();
@@ -334,7 +337,7 @@ void ConvertTvToUncounted(TypedValue* source, PointerMap* seen = nullptr) {
       if (str->empty()) str = staticEmptyString();
       else if (auto const st = lookupStaticString(str)) str = st;
       else {
-        void** seenStr = nullptr;
+        HeapObject** seenStr = nullptr;
         if (seen && str->hasMultipleRefs()) {
           seenStr = &(*seen)[str];
           if (auto const st = static_cast<StringData*>(*seenStr)) {

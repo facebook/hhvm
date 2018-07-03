@@ -1387,7 +1387,7 @@ bool PackedArray::Uasort(ArrayData* ad, const Variant&) {
 
 ArrayData* PackedArray::MakeUncounted(ArrayData* array,
                                       bool withApcTypedValue,
-                                      PointerMap* seen) {
+                                      DataWalker::PointerMap* seen) {
   auto const updateSeen = seen && array->hasMultipleRefs();
   if (updateSeen) {
     auto it = seen->find(array);

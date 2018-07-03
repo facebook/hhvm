@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/hash-table.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/string-data.h"
@@ -257,15 +258,16 @@ struct MixedArray final : ArrayData,
    * If withApcTypedValue is true, space for an APCTypedValue will be
    * allocated in front of the returned pointer.
    */
-  static ArrayData* MakeUncounted(ArrayData* array,
-                                  bool withApcTypedValue,
-                                  PointerMap* seen = nullptr);
-  static ArrayData* MakeUncounted(ArrayData* array,
-                                  int,
-                                  PointerMap* seen = nullptr) = delete;
-  static ArrayData* MakeUncounted(ArrayData* array,
-                                  size_t extra,
-                                  PointerMap* seen = nullptr) = delete;
+  static ArrayData* MakeUncounted(
+      ArrayData* array, bool withApcTypedValue,
+      DataWalker::PointerMap* seen = nullptr
+  );
+  static ArrayData* MakeUncounted(
+      ArrayData* array, int, DataWalker::PointerMap* seen = nullptr
+  ) = delete;
+  static ArrayData* MakeUncounted(
+      ArrayData* array, size_t extra, DataWalker::PointerMap* seen = nullptr
+  ) = delete;
 
   static ArrayData* MakeDictFromAPC(const APCArray* apc);
   static ArrayData* MakeDArrayFromAPC(const APCArray* apc);

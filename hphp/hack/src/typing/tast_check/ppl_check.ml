@@ -47,8 +47,48 @@ let check_ppl_class env c =
   List.iter (c.c_req_extends) (check "require" "class");
   List.iter (c.c_req_implements) (check "require" "interface")
 
+
+(**
+ * When we call a method on an object, if the object is a <<__PPL>> object,
+ * then we can only call it via using the $this->method(...) syntax.
+ *
+ * This limits the ability to call it in a way that we are unable to rewrite.
+ *)
+let check_ppl_obj_get env ((p, ty), e) =
+  let rec base_type ty =
+    match snd ty with
+    | Tabstract(_, Some ty) -> base_type ty
+    | _ -> ty in
+  match snd (base_type ty) with
+  | Tclass ((_, name), _) ->
+    begin
+      let decl_env = Env.get_decl_env env in
+      match Decl_env.get_class_dep decl_env name with
+      | Some ({ dc_ppl = true; _ }) ->
+        if not @@ Env.get_inside_ppl_class env
+        then Errors.invalid_ppl_call p "from a different class";
+        if Env.get_inside_constructor env
+        then Errors.invalid_ppl_call p "from inside a <<__PPL>> class constructor";
+        if e != This
+        then Errors.invalid_ppl_call p
+          "inside a <<__PPL>> class without using $this->method(...) syntax";
+        ()
+      | _ -> ()
+    end
+  | _ -> ()
+
+let on_call_expr env x =
+  match snd x with
+  | Obj_get (e, (_, _), _) -> check_ppl_obj_get env e
+  | _ -> ()
+
 let handler = object
   inherit Tast_visitor.handler_base
+
+  method! at_expr env x =
+    match snd x with
+    | Call (_, e, _, _, _) -> on_call_expr env e
+    | _ -> ()
 
   method! at_class_ env c = check_ppl_class env c
 end

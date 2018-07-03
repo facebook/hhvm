@@ -163,8 +163,16 @@ val set_in_loop : env -> env
 (** Return an {!env} for which {!in_loop} will return {true}.
     If you are using {!Tast_visitor}, you should have no need of this. *)
 
+val get_inside_constructor : env -> bool
+(** Returns whether or not the typing environment is inside the
+    constructor of a class *)
+
 val get_decl_env : env -> Decl_env.env
 (** Returns a {!Decl_env.env} *)
+
+val get_inside_ppl_class : env -> bool
+(** Returns whether or not the typing environment is
+    inside a <<__PPL>> annotated class. *)
 
 val save : env -> Tast.saved_env
 (** Return the subset of this {!env} which is persisted in a TAST.

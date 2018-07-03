@@ -321,6 +321,7 @@ let empty tcopt file ~droot = {
   in_try  = false;
   in_case  = false;
   inside_constructor = false;
+  inside_ppl_class = false;
   decl_env = {
     mode = FileInfo.Mstrict;
     droot;
@@ -594,6 +595,9 @@ let set_fn_kind env fn_type =
   let genv = env.genv in
   let genv = { genv with fun_kind = fn_type } in
   { env with genv = genv }
+
+let set_inside_ppl_class env inside_ppl_class =
+  { env with inside_ppl_class }
 
 (* Add a function on environments that gets run at some later stage to check
  * constraints, by which time unresolved type variables may be resolved.

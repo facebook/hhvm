@@ -477,4 +477,5 @@ ImmutableArgumentMismatch = 4260
 ImmutableCallOnMutable = 4261
 InvalidCallMaybeMutable = 4262
 MutabilityMismatch = 4263
+InvalidPPLCall = 4264
   |}]

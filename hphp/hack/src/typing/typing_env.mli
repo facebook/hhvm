@@ -65,6 +65,7 @@ val get_fn_kind : env -> Ast.fun_kind
 val get_file : env -> Relative_path.t
 val get_fun : env -> Funs.key -> Funs.t option
 val set_fn_kind : env -> Ast.fun_kind -> env
+val set_inside_ppl_class : env -> bool -> env
 val add_todo : env -> tfun -> env
 val add_anonymous : env -> anon -> env * int
 val get_anonymous : env -> int -> anon option

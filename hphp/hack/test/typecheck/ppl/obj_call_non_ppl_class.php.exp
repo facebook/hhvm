@@ -1,0 +1,2 @@
+File "obj_call_non_ppl_class.php", line 11, characters 5-6:
+Cannot call a method on an object of a <<__PPL>> class from a different class (Typing[4264])

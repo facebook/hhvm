@@ -483,6 +483,7 @@ module Typing                               = struct
   | ImmutableCallOnMutable
   | InvalidCallMaybeMutable
   | MutabilityMismatch
+  | InvalidPPLCall
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum

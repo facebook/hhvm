@@ -695,6 +695,11 @@ let rec pHint : hint parser = fun node env ->
       let si_allows_unknown_fields =
         not (is_missing shape_type_ellipsis)
       in
+      (* if last element lacks a separator and ellipsis is present, error *)
+      Option.iter (List.last (syntax_to_list true shape_type_fields)) (fun last ->
+        if is_missing last && si_allows_unknown_fields then
+        raise_parsing_error env node SyntaxError.shape_type_ellipsis_without_trailing_comma
+      );
       let si_shape_field_list =
         couldMap ~f:(mpShapeField pHint) shape_type_fields env in
       Hshape { si_allows_unknown_fields; si_shape_field_list }

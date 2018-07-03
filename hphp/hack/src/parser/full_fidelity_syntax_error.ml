@@ -308,6 +308,9 @@ let parent_static_const_decl = "Cannot use static or parent::class in constant d
 let conflicting_trait_require_clauses ~name =
   "Conflicting requirements for '" ^ name ^ "'"
 
+let shape_type_ellipsis_without_trailing_comma =
+  "A comma is required before the ... in a shape type"
+
 let yield_in_magic_methods =
   "'yield' is not allowed in constructor, destructor, or magic methods"
 

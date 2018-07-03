@@ -196,6 +196,7 @@ val double_variadic : string
 val double_reference : string
 val global_in_const_decl : string
 val conflicting_trait_require_clauses : name:string -> string
+val shape_type_ellipsis_without_trailing_comma: string
 val yield_in_magic_methods : string
 val reference_not_allowed_on_key : string
 val reference_not_allowed_on_value : string

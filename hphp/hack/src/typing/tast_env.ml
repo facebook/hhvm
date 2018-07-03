@@ -138,6 +138,3 @@ let def_env d =
   | Class x -> class_env x
   | Typedef x -> typedef_env x
   | Constant x -> gconst_env x
-
-let set_ppl_lambda env =
-  { env with Typing_env.inside_ppl_class = false }

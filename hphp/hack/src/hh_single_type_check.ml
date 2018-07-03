@@ -162,6 +162,7 @@ let parse_options () =
   let parser = ref Legacy in
   let auto_namespace_map = ref [] in
   let dont_assume_php = ref false in
+  let unsafe_rx = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -323,6 +324,9 @@ let parse_options () =
     "--void-is-type-of-null",
         Arg.Set void_is_type_of_null,
         " Make void the type of null";
+    "--unsafe-rx",
+        Arg.Set unsafe_rx,
+        " Disables reactivity related errors"
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -332,7 +336,7 @@ let parse_options () =
   let tcopt = {
     GlobalOptions.default with
       GlobalOptions.tco_assume_php = not !dont_assume_php;
-      GlobalOptions.tco_unsafe_rx = false;
+      GlobalOptions.tco_unsafe_rx = !unsafe_rx;
       GlobalOptions.tco_safe_array = !safe_array;
       GlobalOptions.tco_safe_vector_array = !safe_vector_array;
       GlobalOptions.po_deregister_php_stdlib = !deregister_attributes;

@@ -187,6 +187,9 @@ let check_reactivity_matches env pos reason caller_reactivity callee_reactivity 
   end
 
 let check_call env method_info pos reason ft arg_types =
+  (* do nothing if unsafe_rx is set *)
+  if TypecheckerOptions.unsafe_rx (Env.get_options env) then ()
+  else
   match Env.env_reactivity env with
   (* non reactive and locally reactive functions can call pretty much anything
      - do nothing *)

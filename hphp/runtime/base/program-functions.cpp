@@ -1926,10 +1926,31 @@ static int execute_program_impl(int argc, char** argv) {
     RuntimeOption::EvalArenaMetadataReservedSize
   );
 #endif
+
+  auto const addTypeToEmbeddedPath = [&](std::string path, const char* type) {
+    auto const typePlaceholder = "%{type}";
+    assertx(strstr(type, typePlaceholder) == nullptr);
+    size_t idx;
+    if ((idx = path.find(typePlaceholder)) != std::string::npos) {
+      path.replace(idx, strlen(typePlaceholder), type);
+    }
+    return path;
+  };
+
   // We want to do this as early as possible because any allocations before-hand
   // will get a generic unknown type type-index.
   try {
-    type_scan::init();
+    type_scan::init(
+      addTypeToEmbeddedPath(
+        RuntimeOption::EvalEmbeddedDataExtractPath,
+        "type_scanners"
+      ),
+      addTypeToEmbeddedPath(
+        RuntimeOption::EvalEmbeddedDataFallbackPath,
+        "type_scanners"
+      ),
+      RuntimeOption::EvalEmbeddedDataTrustExtract
+    );
   } catch (const type_scan::InitException& exn) {
     Logger::Error("Unable to initialize GC type-scanners: %s", exn.what());
     exit(HPHP_EXIT_FAILURE);
@@ -1937,7 +1958,17 @@ static int execute_program_impl(int argc, char** argv) {
   ThreadLocalManager::GetManager().initTypeIndices();
 
   // It's okay if this fails.
-  init_member_reflection();
+  init_member_reflection(
+    addTypeToEmbeddedPath(
+      RuntimeOption::EvalEmbeddedDataExtractPath,
+      "member_reflection"
+    ),
+    addTypeToEmbeddedPath(
+      RuntimeOption::EvalEmbeddedDataFallbackPath,
+      "member_reflection"
+    ),
+    RuntimeOption::EvalEmbeddedDataTrustExtract
+  );
 
   if (!ShmCounters::initialize(true, Logger::Error)) {
     exit(HPHP_EXIT_FAILURE);

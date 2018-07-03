@@ -939,8 +939,9 @@ function hhvm_cmd_impl() {
       // load/store counters don't work on Ivy Bridge so disable for tests
       '-vEval.ProfileHWEnable=false',
 
-      // use a fixed hackc path
+      // use a fixed path for embedded data
       '-vEval.HackCompilerExtractPath='.bin_root().'/hackc_%{schema}',
+      '-vEval.EmbeddedDataExtractPath='.bin_root().'/hhvm_%{type}_%{buildid}',
 
       extra_args($options),
     );

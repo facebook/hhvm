@@ -201,7 +201,9 @@ inline bool hasConservativeScanner(Index index) {
 // getIndexForMalloc() will always return kIndexUnknown and any attempts to scan
 // will use conservative scanning. For this reason, its important to call init()
 // as early as possible.
-void init();
+void init(const std::string& extractPath,
+          const std::string& fallbackPath,
+          bool trust);
 
 // Thrown by init() if initialization fails.
 struct InitException: std::runtime_error {

@@ -24,6 +24,7 @@
 #include <folly/container/F14Set.h>
 #include <folly/Format.h>
 
+#include "hphp/util/build-info.h"
 #include "hphp/util/embedded-data.h"
 
 namespace {
@@ -140,7 +141,9 @@ bool isForcedConservativeTemplate(const std::string& name) {
 
 using namespace detail;
 
-void init() {
+void init(const std::string& extractPath,
+          const std::string& fallbackPath,
+          bool trust) {
 #if defined(__clang__)
   // Clang is currently broken... It doesn't emit uncalled member functions in a
   // template class, even when using ATTRIBUTE_USED. This prevents the custom
@@ -152,7 +155,7 @@ void init() {
 
   using init_func_t = const Metadata*(*)(std::size_t&);
 
-  auto const scanner_init = [] () -> init_func_t {
+  auto const scanner_init = [&] () -> init_func_t {
     auto const result = dlsym(RTLD_DEFAULT, kInitFuncName);
     if (result != nullptr) return reinterpret_cast<init_func_t>(result);
 
@@ -164,8 +167,13 @@ void init() {
     }
 
     // Link in the embedded object.
-    char tmp_filename[] = "/tmp/hhvm_type_scanner_XXXXXX";
-    auto const handle = dlopen_embedded_data(data, tmp_filename);
+    auto const handle = dlopen_embedded_data(
+      data,
+      extractPath,
+      fallbackPath,
+      buildId().toString(),
+      trust
+    );
     if (!handle) {
       throw InitException{"Failed to dlopen embedded data"};
     }

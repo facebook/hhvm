@@ -1328,6 +1328,14 @@ void RuntimeOption::Load(
       EvalHackCompilerFallbackPath.data()
     );
 
+    EvalEmbeddedDataExtractPath = insertSchema(
+      EvalEmbeddedDataExtractPath.data()
+    );
+
+    EvalEmbeddedDataFallbackPath = insertSchema(
+      EvalEmbeddedDataFallbackPath.data()
+    );
+
     if (EvalPerfRelocate > 0) {
       setRelocateRequests(EvalPerfRelocate);
     }

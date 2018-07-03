@@ -564,6 +564,12 @@ struct RuntimeOption {
   /* Whether the HackC compiler should inherit the compiler config of the
      HHVM process that launches it. */                                  \
   F(bool, HackCompilerInheritConfig,   true)                            \
+  /* When using embedded data, extract it to the ExtractPath or the
+   * ExtractFallback. */                                                \
+  F(string, EmbeddedDataExtractPath,   "/var/run/hhvm_%{type}_%{buildid}") \
+  F(string, EmbeddedDataFallbackPath,  "/tmp/hhvm_%{type}_%{buildid}_XXXXXX") \
+  /* Whether to trust existing versions of extracted embedded data. */  \
+  F(bool, EmbeddedDataTrustExtract,    true)                            \
   F(bool, EmitSwitch,                  true)                            \
   F(bool, LogThreadCreateBacktraces,   false)                           \
   F(bool, FailJitPrologs,              false)                           \

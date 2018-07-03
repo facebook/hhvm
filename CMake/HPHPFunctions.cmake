@@ -134,6 +134,7 @@ function(embed_sections TARGET DEST)
   add_custom_command(TARGET ${TARGET} PRE_BUILD
     # OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/generated-compiler-id.txt"
     #        "${CMAKE_CURRENT_SOURCE_DIR}/generated-repo-schema-id.txt"
+    #        "${CMAKE_CURRENT_SOURCE_DIR}/generated-build-id.txt"
     COMMAND "${HPHP_HOME}/hphp/hhvm/generate-buildinfo.sh"
     WORKING_DIRECTORY "${HPHP_HOME}/hphp/util"
     COMMENT "Generating Repo Schema ID and Compiler ID"
@@ -142,7 +143,8 @@ function(embed_sections TARGET DEST)
   if (APPLE)
     set(COMPILER_ID -Wl,-sectcreate,__text,"compiler_id","${HPHP_HOME}/hphp/util/generated-compiler-id.txt")
     set(REPO_SCHEMA -Wl,-sectcreate,__text,"repo_schema_id","${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt")
-    target_link_libraries(${TARGET} ${${TARGET}_SLIBS} ${COMPILER_ID} ${REPO_SCHEMA})
+    set(BUILD_ID -Wl,-sectcreate,__text,"build_id","${HPHP_HOME}/hphp/util/generated-build-id.txt")
+    target_link_libraries(${TARGET} ${${TARGET}_SLIBS} ${COMPILER_ID} ${REPO_SCHEMA} ${BUILD_ID})
   elseif(MSVC)
     set(RESOURCE_FILE "#pragma code_page(1252)\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}LANGUAGE 0, 0\n")
@@ -151,6 +153,7 @@ function(embed_sections TARGET DEST)
     file(READ "${HPHP_HOME}/hphp/hhvm/hhvm.rc" VERSION_INFO)
     set(RESOURCE_FILE "${RESOURCE_FILE}compiler_id RCDATA \"${HPHP_HOME}/hphp/util/generated-compiler-id.txt\"\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}repo_schema_id RCDATA \"${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt\"\n")
+    set(RESOURCE_FILE "${RESOURCE_FILE}build_id RCDATA \"${HPHP_HOME}/hphp/util/generated-build-id.txt\"\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}${VERSION_INFO}\n")
     set(i 0)
     foreach (nm ${${TARGET}_SLIBS_NAMES})
@@ -164,10 +167,12 @@ function(embed_sections TARGET DEST)
       COMMAND "objcopy"
       ARGS "--add-section" "compiler_id=${HPHP_HOME}/hphp/util/generated-compiler-id.txt"
            "--add-section" "repo_schema_id=${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt"
+           "--add-section" "build_id=${HPHP_HOME}/hphp/util/generated-build-id.txt"
            ${${TARGET}_SLIBS}
            ${DEST}
       DEPENDS "${HPHP_HOME}/hphp/util/generated-compiler-id.txt"
               "${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt"
+              "${HPHP_HOME}/hphp/util/generated-build-id.txt"
       COMMENT "Embedding php in ${TARGET}")
   endif()
 endfunction(embed_sections)

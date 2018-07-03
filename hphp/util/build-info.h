@@ -36,6 +36,14 @@ folly::StringPiece repoSchemaId();
 folly::StringPiece compilerId();
 
 /*
+ * Unique identifier for this hhvm binary, determined at build-time. Unlike
+ * compilerId(), this is computed based on the contents of the executable and
+ * thus varies depending on the type of build. It cannot be overridden and
+ * serves as an id for anything relying on an exact binary.
+ */
+folly::StringPiece buildId();
+
+/*
  * Replace %{schema} with the repo schema in path.
  */
 std::string insertSchema(const char* path);

@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/member-reflection.h"
 
+#include "hphp/util/build-info.h"
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/logger.h"
 
@@ -41,7 +42,10 @@ std::unordered_map<std::string, const char*(*)(const void*, const void*)> const*
 HPHP_REFLECTABLES
 #undef X
 
-bool init_member_reflection() {
+
+bool init_member_reflection(const std::string& extractPath,
+                            const std::string& fallbackPath,
+                            bool trust) {
   g_member_reflection_vtable =
     reinterpret_cast<decltype(g_member_reflection_vtable)>(
       dlsym(RTLD_DEFAULT, detail::kMemberReflectionTableName)
@@ -56,8 +60,13 @@ bool init_member_reflection() {
     return false;
   }
 
-  char tmp_filename[] = "/tmp/hhvm_member_reflection_XXXXXX";
-  auto const handle = dlopen_embedded_data(desc, tmp_filename);
+  auto const handle = dlopen_embedded_data(
+    desc,
+    extractPath,
+    fallbackPath,
+    buildId().toString(),
+    trust
+  );
   if (!handle) {
     Logger::Warning("init_member_reflection: "
                     "Failed to dlopen embedded data");

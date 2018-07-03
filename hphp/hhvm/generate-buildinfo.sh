@@ -57,15 +57,30 @@ fi
 
 ################################################################################
 
+# Hash the executable and a few other shared objects which will be embedded in
+# the binary to form the build-id. Unlike the others, this cannot be overridden
+# and uniquely identifies a particular binary. Skip if the script wasn't passed
+# any files
+if [[ $# -eq 0 ]] ; then
+    BUILD_ID="UNKNOWN"
+else
+    args=$*
+    BUILD_ID=$(sh -c "sha1sum ${args} | cut -d ' ' -f 1 | sha1sum | cut -b-40")
+fi
+
+################################################################################
+
 if [ -z "${INSTALL_DIR}" ]; then
   INSTALL_DIR=${DIR}
 fi
 
 COMPILER_FILE="${INSTALL_DIR}/generated-compiler-id.txt"
 REPO_SCHEMA_FILE="${INSTALL_DIR}/generated-repo-schema-id.txt"
+BUILD_ID_FILE="${INSTALL_DIR}/generated-build-id.txt"
 
 INPUT=$1
 OUTPUT="${INSTALL_DIR}/hhvm"
 
 echo -n "${COMPILER_ID}" > "${COMPILER_FILE}"
 echo -n "${HHVM_REPO_SCHEMA}" > "${REPO_SCHEMA_FILE}"
+echo -n "${BUILD_ID}" > "${BUILD_ID_FILE}"

@@ -61,7 +61,10 @@ namespace HPHP {
  *
  * Returns true on success, else false.
  */
-bool init_member_reflection();
+
+bool init_member_reflection(const std::string& extractPath,
+                            const std::string& fallbackPath,
+                            bool trust);
 
 /*
  * Given an object pointer `base' and an internal pointer `internal' for

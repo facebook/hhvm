@@ -2374,10 +2374,10 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
       }
       return result(TBool);
     case TypeStructure::Kind::T_class:
-    case TypeStructure::Kind::T_interface: {
+    case TypeStructure::Kind::T_interface:
+    case TypeStructure::Kind::T_xhp:
       if (asExpression) return result(TBool);
       return reduce(env, bc::InstanceOfD { get_ts_classname(ts) });
-    }
     case TypeStructure::Kind::T_unresolved: {
       if (asExpression) return result(TBool);
       auto const rcls = env.index.resolve_class(env.ctx, get_ts_classname(ts));
@@ -2399,7 +2399,6 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
-    case TypeStructure::Kind::T_xhp:
       return result(TBool);
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_typevar:

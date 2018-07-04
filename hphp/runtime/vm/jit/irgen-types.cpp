@@ -857,14 +857,14 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
       return true;
     }
     case TypeStructure::Kind::T_class:
-    case TypeStructure::Kind::T_interface: {
+    case TypeStructure::Kind::T_interface:
+    case TypeStructure::Kind::T_xhp: {
       if (asExpr) return false;
       auto c = popC(env);
       push(env, implInstanceOfD(env, c, get_ts_classname(ts)));
       decRef(env, c);
       return true;
     }
-    case TypeStructure::Kind::T_xhp:
     case TypeStructure::Kind::T_noreturn:
       return fail();
     case TypeStructure::Kind::T_typevar:

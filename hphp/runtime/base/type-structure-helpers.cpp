@@ -200,7 +200,8 @@ bool checkTypeStructureMatchesCellImpl(
       break;
     }
     case TypeStructure::Kind::T_class:
-    case TypeStructure::Kind::T_interface: {
+    case TypeStructure::Kind::T_interface:
+    case TypeStructure::Kind::T_xhp: {
       assertx(ts.exists(s_classname));
       auto const ne = NamedEntity::get(ts[s_classname].asStrRef().get());
       result = cellInstanceOf(&c1, ne);
@@ -357,7 +358,6 @@ bool checkTypeStructureMatchesCellImpl(
     case TypeStructure::Kind::T_varray_or_darray:
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:
-    case TypeStructure::Kind::T_xhp:
       result = false;
       break;
     case TypeStructure::Kind::T_fun:

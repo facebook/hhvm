@@ -71,6 +71,10 @@ struct AssemblerError : std::runtime_error {
   AssemblerError(int where, const std::string& what);
 };
 
+struct AssemblerUnserializationError : AssemblerError {
+  using AssemblerError::AssemblerError;
+};
+
 AsmResult assemble_expression(UnitEmitter&, FuncEmitter*, int,
                               const std::string&);
 

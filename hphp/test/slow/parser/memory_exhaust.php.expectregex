@@ -1,1 +1,1 @@
-Fatal error: (memory exhausted in|AssemblerError: Maximum stack size reached\n) [^\r\n]+\/test\/slow\/parser\/memory_exhaust\.php on line (3|-1)
+(Fatal error: (memory exhausted in|AssemblerUnserializationError: Maximum stack size reached\n) [^\r\n]+\/test\/slow\/parser\/memory_exhaust\.php on line (3|-1)|Notice: File could not be loaded: [^\r\n]+\/test\/slow\/parser\/memory_exhaust\.php)

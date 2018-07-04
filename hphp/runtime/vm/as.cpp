@@ -1670,7 +1670,15 @@ Variant parse_php_serialized(
     true
   );
   if (overrides) vu.setDVOverrides(overrides);
-  return vu.unserialize();
+  try {
+    return vu.unserialize();
+  } catch (const FatalErrorException&) {
+    throw;
+  } catch (const std::exception& e) {
+    auto const msg =
+      folly::sformat("AssemblerUnserializationError: {}", e.what());
+    throw AssemblerUnserializationError(msg);
+  }
 }
 
 /*
@@ -1680,7 +1688,15 @@ Variant parse_php_serialized(
 Variant parse_maybe_php_serialized(AsmState& as) {
   auto s = parse_maybe_long_string(as);
   if (!s.empty()) {
-    return unserialize_from_string(s, VariableUnserializer::Type::Internal);
+    try {
+      return unserialize_from_string(s, VariableUnserializer::Type::Internal);
+    } catch (const FatalErrorException&) {
+      throw;
+    } catch (const std::exception& e) {
+      auto const msg =
+        folly::sformat("AssemblerUnserializationError: {}", e.what());
+      throw AssemblerUnserializationError(msg);
+    }
   }
   return Variant();
 }
@@ -3375,12 +3391,15 @@ std::unique_ptr<UnitEmitter> assemble_string(
     if (ue->m_isHHFile) {
       ue->m_useStrictTypes = true;
     }
+  } catch (const FatalErrorException& e) {
+    if (!swallowErrors) throw;
+    ue = createFatalUnit(sd, md5, FatalOp::Runtime, makeStaticString(e.what()));
   } catch (const AssemblerError& e) {
     if (!swallowErrors) throw;
     ue = createFatalUnit(sd, md5, FatalOp::Runtime, makeStaticString(e.what()));
   } catch (const std::exception& e) {
     if (!swallowErrors) {
-      // the assembler should throw only AssemblerErrors
+      // assembler should throw only AssemblerErrors and FatalErrorExceptions
       throw AssemblerError(folly::sformat("AssemblerError: {}", e.what()));
     }
     ue = createFatalUnit(sd, md5, FatalOp::Runtime, makeStaticString(e.what()));

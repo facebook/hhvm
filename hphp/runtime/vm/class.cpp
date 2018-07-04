@@ -2214,6 +2214,7 @@ void Class::setProperties() {
       sProp.typeConstraint = parentProp.typeConstraint;
       sProp.docComment     = parentProp.docComment;
       sProp.cls            = parentProp.cls;
+      sProp.repoAuthType   = parentProp.repoAuthType;
       sProp.idx            = -parentProp.idx - 1;
       if (traitOffset < -sProp.idx) {
         traitOffset = -sProp.idx;

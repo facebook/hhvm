@@ -397,13 +397,18 @@ let rec simplify_subtype
   | (_, Tprim Nast.Tvoid), (_, Toption _)
     when TUtils.is_void_type_of_null env -> valid ()
 
+  | (_, Toption ty_sub'), (_, Tprim Nast.Tvoid)
+    when TUtils.is_void_type_of_null env ->
+    simplify_subtype ~deep ~this_ty ty_sub' ty_super res
+
   (* Subtype is known to be nullable, so never a subtype of nonnull *)
   | (_, (Tprim Nast.Tvoid | Tmixed | Tdynamic | Toption _
     | Tabstract (AKdependent _, None))), (_, Tnonnull) ->
     invalid ()
 
   (* Tvoid is not allowed to subtype Tdynamic *)
-  | (_, Tprim Nast.Tvoid), (_, Tdynamic) -> invalid ()
+  | (_, Tprim Nast.Tvoid), (_, Tdynamic) ->
+    if TUtils.is_void_type_of_null env then valid () else invalid ()
 
   (* everything subtypes mixed *)
   | _, (_, Tmixed) -> valid ()

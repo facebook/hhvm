@@ -32,12 +32,12 @@ module WithParser(Parser : Parser_S) = struct
     Make.list parser (pos parser) items
 
   module NextToken : sig
-    val next_token : t -> t * Syntax.Token.t
+    val next_token : ?tokenizer:(Lexer.t ->Lexer.t * Syntax.Token.t) -> t -> t * Syntax.Token.t
     val fetch_token : t -> t * Parser.SC.r
   end = struct
-    let next_token_impl parser =
+    let next_token_impl ~tokenizer parser =
       let lexer = lexer parser in
-      let (lexer, token) = Lexer.next_token lexer in
+      let (lexer, token) = tokenizer lexer in
       let parser = with_lexer parser lexer in
       (* ERROR RECOVERY: Check if the parser's carrying ExtraTokenError trivia.
        * If so, clear it and add it to the leading trivia of the current token. *)
@@ -66,7 +66,7 @@ module WithParser(Parser : Parser_S) = struct
       (parser, token)
 
     let magic_cache = Little_magic_cache.make ()
-    let next_token = Little_magic_cache.memoize magic_cache next_token_impl
+    let next_token ?(tokenizer=Lexer.next_token) = Little_magic_cache.memoize magic_cache (next_token_impl ~tokenizer)
     let fetch_token parser =
       let (parser, token) = next_token parser in
       Make.token parser token
@@ -596,8 +596,8 @@ module WithParser(Parser : Parser_S) = struct
     else
       Make.missing parser (pos parser)
 
-  let assert_token parser kind =
-    let (parser, token) = next_token parser in
+  let assert_token ?tokenizer parser kind =
+    let (parser, token) = next_token ?tokenizer parser in
     let lexer = lexer parser in
     let source = Lexer.source lexer in
     let file_path = SourceText.file_path source in
@@ -607,6 +607,8 @@ module WithParser(Parser : Parser_S) = struct
         (TokenKind.to_string (Token.kind token))
         (Relative_path.to_absolute file_path));
     Make.token parser token
+
+  let assert_xhp_body_token = assert_token ~tokenizer:Lexer.next_xhp_body_token
 
   type separated_list_kind =
     | NoTrailing

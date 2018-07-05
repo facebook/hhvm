@@ -15,8 +15,9 @@ module SyntaxError = Full_fidelity_syntax_error
 module Lexer : sig
   type t = {
     text : SourceText.t;
-    start : int;  (* Both start and offset are absolute offsets in the text. *)
-    offset : int;
+    (* Both start and offset are absolute offsets in the text. *)
+    start : int; (* set once when creating the lexer. *)
+    offset : int; (* the thing that is incremented when we advance the lexer *)
     errors : SyntaxError.t list;
     hacksperimental : bool
   } [@@deriving show]

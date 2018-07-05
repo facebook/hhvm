@@ -2377,7 +2377,7 @@ module WithStatementAndDeclAndTypeParser
       (parser, Some token)
     | LessThan ->
       let (parser, expr) =
-        parse_possible_xhp_expression ~consume_trailing_trivia:false  parser in
+        parse_possible_xhp_expression ~consume_trailing_trivia:false parser in
       (parser, Some expr)
     | _ -> (parser, None)
 
@@ -2470,7 +2470,7 @@ module WithStatementAndDeclAndTypeParser
 
   and parse_possible_xhp_expression ~consume_trailing_trivia parser =
     (* We got a < token where an expression was expected. *)
-    let (parser, less_than) = assert_token parser LessThan in
+    let (parser, less_than) = assert_xhp_body_token parser LessThan in
     let (parser1, name, text) = next_xhp_element_token parser in
     if (Token.kind name) = XHPElementName then
       let (parser, token) = Make.token parser1 name in

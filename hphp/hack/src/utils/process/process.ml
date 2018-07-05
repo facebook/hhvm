@@ -33,7 +33,7 @@ let chunk_size = 65536
 let sleep_seconds_per_retry = 0.04
 
 (** Reuse the buffer for reading. Just an allocation optimization. *)
-let buffer = String.create chunk_size
+let buffer = Bytes.create chunk_size
 
 let make_result status stdout stderr =
   let open Process_types in

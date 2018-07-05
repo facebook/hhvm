@@ -83,7 +83,7 @@ let print_reasons reasons_stats =
 
 let print_counts counts =
   CLMap.iter (fun k v ->
-    let level_name = String.capitalize (string_of_level k) in
+    let level_name = String.capitalize_ascii (string_of_level k) in
     Printf.printf "%s: %d\n" level_name v.count;
     print_reasons v.reason_stats) counts;
   Printf.printf "Checked / Total: %f\n" (calc_percentage 0.0 counts);

@@ -16,6 +16,6 @@
 */
 
 namespace HH\Lib\Regex {
-  newtype Match as shape(...) = shape(...);
+  type Match = shape(...);
   newtype Pattern as string = string;
 }

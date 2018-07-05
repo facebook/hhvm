@@ -72,7 +72,6 @@ type id = pos  * string [@@deriving show]
 (*****************************************************************************)
 
 type hash_type = OpaqueDigest.t option
-let show_hash_type _ = "<OpaqueDigest.t option>"
 let pp_hash_type _ _ _ = "<OpaqueDigest.t option>"
 
 type t = {

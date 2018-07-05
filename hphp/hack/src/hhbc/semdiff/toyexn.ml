@@ -58,7 +58,7 @@ match l with
   match current with
    | [] -> failwith "statics no matching try"
    | (CH _h) :: others -> current :: (statics (idx+1) others rest)
-   | (FH _h) :: others -> failwith "statics try matched with FH"
+   | (FH _h) :: _others -> failwith "statics try matched with FH"
   end
 | TryFault n :: rest ->
   let epc = find_label (idx+1) n rest (* must be later, this is rubbish but I'm lazy *)

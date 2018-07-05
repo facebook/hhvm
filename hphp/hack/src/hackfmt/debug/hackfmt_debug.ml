@@ -77,7 +77,7 @@ let debug_chunk_groups env ~range source_text chunk_groups =
   in
   chunk_groups
   |> List.filter_mapi ~f:print_chunk
-  |> List.filter ~f:(fun (i, cg) ->
+  |> List.filter ~f:(fun (_i, cg) ->
     let group_range = Chunk_group.get_char_range cg in
     Interval.intervals_overlap range group_range
   )

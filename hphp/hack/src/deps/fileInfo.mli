@@ -38,7 +38,6 @@ type mode =
 [@@deriving show]
 
 val string_of_mode : mode -> string
-val pp_mode : Format.formatter -> mode -> unit
 
 (*****************************************************************************)
 (* The record produced by the parsing phase. *)

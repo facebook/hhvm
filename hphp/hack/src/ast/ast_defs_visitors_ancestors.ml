@@ -7,7 +7,7 @@
  *
  *)
 
-class virtual ['e] monoid = object (self)
+class virtual ['e] monoid = object
   method private virtual zero: 'e
   method private virtual plus: 'e -> 'e -> 'e
 end
@@ -19,7 +19,7 @@ class virtual ['a] option_monoid = object (self)
   method private plus = Option.merge ~f:self#merge
 end
 
-class ['self] map_defs_base = object (self : 'self)
+class ['self] map_defs_base = object
   method private on_string       : 'env -> string -> string = fun _ x -> x
   method private on_int          : 'env -> int    -> int    = fun _ x -> x
   method private on_bool         : 'env -> bool   -> bool   = fun _ x -> x
@@ -32,7 +32,7 @@ class ['self] map_defs_base = object (self : 'self)
     = fun f env -> Option.map ~f:(f env)
 end
 
-class ['self] iter_defs_base = object (self : 'self)
+class ['self] iter_defs_base = object
   method private on_string       : 'env -> string -> unit = fun _ _ -> ()
   method private on_int          : 'env -> int    -> unit = fun _ _ -> ()
   method private on_bool         : 'env -> bool   -> unit = fun _ _ -> ()
@@ -45,7 +45,7 @@ class ['self] iter_defs_base = object (self : 'self)
     = fun f env -> Option.iter ~f:(f env)
 end
 
-class ['self] endo_defs_base = object (self : 'self)
+class ['self] endo_defs_base = object
   method private on_string       : 'env -> string -> string = fun _ x -> x
   method private on_int          : 'env -> int    -> int    = fun _ x -> x
   method private on_bool         : 'env -> bool   -> bool   = fun _ x -> x

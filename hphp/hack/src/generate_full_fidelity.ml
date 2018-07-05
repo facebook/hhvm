@@ -465,7 +465,7 @@ end (* GenerateFFSyntaxType *)
 module GenerateFFSyntaxSig = struct
 
   let to_constructor_methods x =
-    let mapper1 (f,_) = " t ->" in
+    let mapper1 (_f,_) = " t ->" in
     let fields1 = map_and_concat mapper1 x.fields in
     sprintf "  val make_%s :%s t\n"
       x.type_name fields1
@@ -1382,7 +1382,7 @@ end (* GenerateFFSyntax *)
 
 module GenerateFFTriviaKind = struct
 
-  let to_trivia { trivia_kind; trivia_text } =
+  let to_trivia { trivia_kind; trivia_text = _; } =
     sprintf "  | %s\n" trivia_kind
 
   let to_to_string { trivia_kind; trivia_text } =

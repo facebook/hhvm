@@ -22,6 +22,7 @@ Per-test flags passed to test executable. Expected to be in a file with
 same name as test, but with .flags extension.
 """
 
+
 def get_test_flags(f):
     prefix, _ext = os.path.splitext(f)
     path = prefix + '.flags'
@@ -68,6 +69,7 @@ def run_test_program(files, program, expect_ext, get_flags, use_stdin):
     results = [f.result() for f in futures]
     return [r for r in results if r is not None]
 
+
 def filter_ocaml_stacktrace(text):
     """take a string and remove all the lines that look like
     they're part of an OCaml stacktrace"""
@@ -86,6 +88,7 @@ def filter_ocaml_stacktrace(text):
     # force trailing newline
     return "\n".join(out) + "\n"
 
+
 def check_result(fname, expect_exp, out):
     try:
         with open(fname + expect_exp, 'rt') as fexp:
@@ -95,11 +98,13 @@ def check_result(fname, expect_exp, out):
     if exp != out and exp != filter_ocaml_stacktrace(out):
         return Failure(fname=fname, expected=exp, output=out)
 
+
 def record_failures(failures, out_ext):
     for failure in failures:
         outfile = failure.fname + out_ext
         with open(outfile, 'wb') as f:
             f.write(bytes(failure.output, 'UTF-8'))
+
 
 def dump_failures(failures):
     for f in failures:
@@ -118,6 +123,7 @@ def dump_failures(failures):
         print(''.join(diff))
         print("\n<<<<<     End Diff      <<<<<<<\n")
 
+
 def get_hh_flags(test_dir):
     path = os.path.join(test_dir, 'HH_FLAGS')
     if not os.path.isfile(path):
@@ -126,6 +132,7 @@ def get_hh_flags(test_dir):
         return []
     with open(path) as f:
         return shlex.split(f.read().strip())
+
 
 def files_with_ext(files, ext):
     """
@@ -137,6 +144,7 @@ def files_with_ext(files, ext):
         if suffix == ext:
             result.add(prefix)
     return result
+
 
 def list_test_files(root, disabled_ext, test_ext):
     if os.path.isfile(root):
@@ -164,11 +172,10 @@ def list_test_files(root, disabled_ext, test_ext):
         raise Exception('Could not find test file or directory at %s' %
             args.test_path)
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-            'test_path',
-            help='A file or a directory. ')
+    parser.add_argument('test_path', help='A file or a directory. ')
     parser.add_argument('--program', type=os.path.abspath)
     parser.add_argument('--out-extension', type=str, default='.out')
     parser.add_argument('--expect-extension', type=str, default='.exp')
@@ -192,6 +199,9 @@ if __name__ == '__main__':
     max_workers = args.max_workers
     verbose = args.verbose
     dump_on_failure = args.diff
+
+    if os.getenv('SANDCASTLE') is not None:
+        dump_on_failure = True
 
     if not os.path.isfile(args.program):
         raise Exception('Could not find program at %s' % args.program)

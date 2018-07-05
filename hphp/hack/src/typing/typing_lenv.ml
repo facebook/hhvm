@@ -81,6 +81,10 @@ let intersect env parent_lenv lenv1 lenv2 =
           let env, ty =
             if Typing_defs.ty_equal ty1 ty2
             then env, ty1
+            else if Typing_subtype.is_sub_type_alt env ty1 ty2 = Some true
+            then env, ty2
+            else if Typing_subtype.is_sub_type_alt env ty2 ty1 = Some true
+            then env, ty1
             else
               let env, ty1 = TUtils.unresolved env ty1 in
               let env, ty2 = TUtils.unresolved env ty2 in

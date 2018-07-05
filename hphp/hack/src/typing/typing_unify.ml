@@ -378,6 +378,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
         ~on_missing_non_omittable_optional_field:(
           on_missing_non_omittable_optional_field p2
         )
+        ~on_error:(fun x f -> f (); x)
         (env, res) (r1, fields_known1, fdm1) (r2, fields_known2, fdm2) in
       let env, res = TUtils.apply_shape
         ~on_common_field
@@ -385,6 +386,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
         ~on_missing_non_omittable_optional_field:(
           on_missing_non_omittable_optional_field p1
         )
+        ~on_error:(fun x f -> f (); x)
         (env, res) (r2, fields_known2, fdm2) (r1, fields_known1, fdm1) in
         (* After doing apply_shape in both directions we can be sure that
          * fields_known1 = fields_known2 *)

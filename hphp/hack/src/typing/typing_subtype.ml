@@ -44,7 +44,7 @@ module Phase = Typing_phase
  *)
 type simplification_result = {
   constraints: (locl ty * Ast.constraint_kind * locl ty) list;
-  failed_subtype: (locl ty * locl ty) option;
+  failed_subtype: (locl ty * locl ty * (unit -> unit)) option;
 }
 
 let rec simplify_subtype
@@ -66,9 +66,12 @@ let rec simplify_subtype
   let again env res ty_sub =
     simplify_subtype ~deep ~this_ty ty_sub ty_super (env, res) in
   (* We *know* that the assertion is unsatisfiable *)
-  let invalid ()  =
-    (env, { constraints = acc; failed_subtype = Some (ety_sub, ety_super) }) in
-  (* We *know* that the assertion is valid *)
+  let invalid_with f =
+    (env, { constraints = acc; failed_subtype = Some (ety_sub, ety_super, f) }) in
+  let invalid () =
+    invalid_with (fun () ->
+      TUtils.uerror (fst ety_super) (snd ety_super) (fst ety_sub) (snd ety_sub)) in
+    (* We *know* that the assertion is valid *)
   let valid () =
     res in
   (* We don't know whether the assertion is valid or not *)
@@ -267,11 +270,10 @@ let rec simplify_subtype
           | true, _ | false, false ->
             simplify_subtype ~deep ~this_ty ty_sub ty_super res
           | false, true ->
-            Errors.required_field_is_optional
+            invalid_with (fun () -> Errors.required_field_is_optional
               (Reason.to_pos r_sub)
               (Reason.to_pos r_super)
-              (Env.get_shape_field_name name);
-            invalid () in
+              (Env.get_shape_field_name name)) in
       let on_missing_omittable_optional_field res _ _ = res in
       let on_missing_non_omittable_optional_field
           res name { sft_ty = ty_super; _ } =
@@ -285,6 +287,7 @@ let rec simplify_subtype
         ~on_common_field
         ~on_missing_omittable_optional_field
         ~on_missing_non_omittable_optional_field
+        ~on_error:(fun _ f -> invalid_with f)
         res
         (r_super, fields_known_super, fdm_super)
         (r_sub, fields_known_sub, fdm_sub)
@@ -315,17 +318,18 @@ let rec simplify_subtype
         default ()
 
       | Some class_sub ->
-        let ety_env =
-          (* We handle the case where a generic A<T> is used as A *)
-          let tyl_sub =
-            if tyl_sub = [] && not (Env.is_strict env)
-            then List.map class_sub.tc_tparams (fun _ -> (p_sub, Tany))
-            else tyl_sub
-          in
-          if List.length class_sub.tc_tparams <> List.length tyl_sub
-          then
-            Errors.expected_tparam
-              (Reason.to_pos p_sub) (List.length class_sub.tc_tparams);
+        (* We handle the case where a generic A<T> is used as A *)
+        let tyl_sub =
+          if tyl_sub = [] && not (Env.is_strict env)
+          then List.map class_sub.tc_tparams (fun _ -> (p_sub, Tany))
+          else tyl_sub in
+        if List.length class_sub.tc_tparams <> List.length tyl_sub
+        then
+          invalid_with (fun () ->
+          Errors.expected_tparam
+            (Reason.to_pos p_sub) (List.length class_sub.tc_tparams))
+        else
+          let ety_env =
           (* NOTE: We rely on the fact that we fold all ancestors of
            * ty_sub in its class_type so we will never hit this case
            * again. If this ever changes then we would need to store
@@ -1126,8 +1130,8 @@ and sub_type_unwrapped
     simplify_subtype ~deep:false ~this_ty ty_sub ty_super
       (env, { constraints = []; failed_subtype = None }) in
     match failed_subtype with
-    | Some (ty_sub, ty_super) ->
-      TUtils.uerror (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub);
+    | Some (_ty_sub, _ty_super, f) ->
+      f ();
       env
     | None ->
       List.fold_right ~f:(fun (ty1,ck,ty2) env ->
@@ -1671,6 +1675,19 @@ and sub_string
   | _, (Tmixed | Tnonnull | Tarraykind _ | Tvar _
     | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _) ->
       fst (Unify.unify env (Reason.Rwitness p, Tprim Nast.Tstring) ty2)
+
+(* Non-side-effecting test for subtypes, using simplify_subtype.
+ * Result is
+ *   result = Some true implies ty1 <: ty2
+ *   result = Some false implies NOT ty1 <: ty2
+ *   result = None, we don't know
+ *)
+let is_sub_type_alt env ty1 ty2 =
+  match simplify_subtype ~deep:true ~this_ty:(Some ty1) ty1 ty2
+    (env, { constraints = []; failed_subtype = None }) with
+  | _, { constraints = []; failed_subtype = None } -> Some true
+  | _, { constraints = _; failed_subtype = Some _ }-> Some false
+  | _ -> None
 
 (*****************************************************************************)
 (* Exporting *)

@@ -399,17 +399,34 @@ let compute_complete_global
     (* and see if any of them really exist in the current codebase/hhconfig!    *)
     (* This will give a good experience only for codebases where users rarely   *)
     (* define their own namespaces...                                           *)
-    let standard_namespaces =
-      ["C"; "Vec"; "Dict"; "Str"; "Keyset"; "Math"; "Regex"; "SecureRandom"; "PHP"; "JS"] in
-    let namespace_permutations ns = [
-       Printf.sprintf "%s" ns;
-       Printf.sprintf "%s\\fb" ns;
-       Printf.sprintf "HH\\Lib\\%s" ns;
-       Printf.sprintf "HH\\Lib\\%s\\fb" ns;
+    let standard_namespaces = [
+      "C";
+      "Vec";
+      "Dict";
+      "Str";
+      "Keyset";
+      "Math";
+      "PseudoRandom";
+      "SecureRandom";
+      "PHP";
+      "JS";
     ] in
+    let auto_namespace_map = GlobalOptions.po_auto_namespace_map tcopt in
+    let all_standard_namespaces = List.concat_map standard_namespaces ~f:(
+      fun ns -> [
+         Printf.sprintf "%s" ns;
+         Printf.sprintf "%s\\fb" ns;
+         Printf.sprintf "HH\\Lib\\%s" ns;
+         Printf.sprintf "HH\\Lib\\%s\\fb" ns;
+      ]
+    ) in
+    let all_aliased_namespaces = List.concat_map auto_namespace_map ~f:(
+      fun (alias, fully_qualified) -> [alias; fully_qualified]
+    ) in
     let all_possible_namespaces =
-      List.map standard_namespaces ~f:namespace_permutations |> List.concat
-    in
+      (all_standard_namespaces @ all_aliased_namespaces)
+        |> SSet.of_list
+        |> SSet.elements in
     List.iter all_possible_namespaces ~f:(fun ns ->
       let ns_results = search_funs_and_classes (ns ^ "\\") ~limit:(Some 1)
         ~on_class:(fun _className -> on_namespace ns)

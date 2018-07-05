@@ -10,8 +10,6 @@
 
 module Test = Integration_test_base
 
-let foo_name = "foo.php"
-
 let foo_contents =
 "<?hh // strict
 
@@ -20,7 +18,7 @@ namespace HH\\LongName\\EvenLonger\\ShortName;
 function foo() : void {}
 "
 
-let autocomplete_contents1 =
+let autocomplete_contents0 =
 "<?hh // strict
 
 function testTypecheck(): void {
@@ -28,8 +26,64 @@ function testTypecheck(): void {
 }
 "
 
-let autocomplete_contents2 =
+let autocomplete_contents1 =
 "<?hh
+
+function testTypecheck(): void {
+  \\ShortName\\foAUTO332;
+}
+"
+
+let autocomplete_contents2 =
+"<?hh // strict
+
+function testTypecheck(): void {
+  HH\\LongName\\EvenLonger\\ShortName\\foAUTO332;
+}
+"
+
+let autocomplete_contents3 =
+"<?hh // strict
+
+function testTypecheck(): void {
+  \\HH\\LongName\\EvenLonger\\ShortName\\foAUTO332;
+}
+"
+
+let autocomplete_contents4 =
+"<?hh // strict
+
+namespace Test;
+
+function testTypecheck(): void {
+  HH\\LongName\\EvenLonger\\ShortName\\foAUTO332;
+}
+"
+
+let autocomplete_contents5 =
+"<?hh // strict
+
+namespace Test;
+
+function testTypecheck(): void {
+  \\HH\\LongName\\EvenLonger\\ShortName\\foAUTO332;
+}
+"
+
+let autocomplete_contents6 =
+"<?hh // strict
+
+namespace Test;
+
+function testTypecheck(): void {
+  ShortName\\foAUTO332;
+}
+"
+
+let autocomplete_contents7 =
+"<?hh // strict
+
+namespace Test;
 
 function testTypecheck(): void {
   \\ShortName\\foAUTO332;
@@ -61,19 +115,58 @@ let () =
     ~ignored_fixme_codes: ISet.empty
     ~forward_compatibility_level: ForwardCompatibilityLevel.default
   in
-  let custom_config = ServerConfig.default_config in
-  let custom_config = ServerConfig.set_parser_options
-    custom_config
-    global_opts in
-  let env = Test.setup_server ~custom_config () in
-  let env = Test.setup_disk env [
-    foo_name, foo_contents;
-  ] in
 
+  let custom_config = ServerConfig.default_config in
+  let custom_config = ServerConfig.set_tc_options custom_config global_opts in
+  let custom_config = ServerConfig.set_parser_options custom_config global_opts in
+
+  let env = Test.setup_server ~custom_config () in
+  let env = Test.setup_disk env ["foo.php", foo_contents] in
+  let env =
+    let get_name i = "test" ^ (string_of_int i) ^ ".php" in
+    Test.setup_disk env @@ List.mapi (fun i contents -> get_name i, contents) [
+      autocomplete_contents0;
+      autocomplete_contents1;
+      autocomplete_contents2;
+      autocomplete_contents3;
+      autocomplete_contents4;
+      autocomplete_contents5;
+      autocomplete_contents6;
+      autocomplete_contents7;
+    ] in
   let env = Test.connect_persistent_client env in
 
-  let _, loop_output = Test.autocomplete env autocomplete_contents1 in
-  Test.assert_autocomplete loop_output ["ShortName\\foo"];
+  let test_legacy env contents expected =
+    let _, loop_output = Test.autocomplete env contents in
+    Test.assert_autocomplete loop_output expected in
 
-  let _, loop_output = Test.autocomplete env autocomplete_contents2 in
-  Test.assert_autocomplete loop_output ["ShortName\\foo"]
+  let test_ide env contents i expected =
+    let path = "test" ^ (string_of_int i) ^ ".php" in
+    let alias_regexp = Str.regexp "HH\\\\LongName\\\\EvenLonger\\\\" in
+    let contents = Str.replace_first alias_regexp "" contents in
+    let offset = String_utils.substring_index "AUTO332" contents in
+    let position = File_content.offset_to_position contents offset in
+    let line = position.File_content.line - 1 in
+    let column = position.File_content.column - 1 in
+    let _, loop_output = Test.ide_autocomplete env (path, line, column) in
+    Test.assert_ide_autocomplete loop_output expected in
+
+  test_legacy env autocomplete_contents0 ["ShortName\\foo"];
+  test_legacy env autocomplete_contents1 ["ShortName\\foo"];
+  test_legacy env autocomplete_contents2 ["ShortName\\foo"];
+  test_legacy env autocomplete_contents3 ["ShortName\\foo"];
+  test_legacy env autocomplete_contents4 [""];
+  test_legacy env autocomplete_contents5 ["ShortName\\foo"];
+  test_legacy env autocomplete_contents6 [""];
+  test_legacy env autocomplete_contents7 ["ShortName\\foo"];
+
+  test_ide env autocomplete_contents0 0 ["ShortName\\foo"];
+  test_ide env autocomplete_contents1 1 ["ShortName\\foo"];
+  test_ide env autocomplete_contents2 2 ["ShortName\\foo"];
+  test_ide env autocomplete_contents3 3 ["ShortName\\foo"];
+  test_ide env autocomplete_contents4 4 [];
+  test_ide env autocomplete_contents5 5 ["ShortName\\foo"];
+  test_ide env autocomplete_contents6 6 [];
+  test_ide env autocomplete_contents7 7 ["ShortName\\foo"];
+
+  ()

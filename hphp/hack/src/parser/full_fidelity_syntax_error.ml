@@ -47,6 +47,9 @@ let exactly_equal err1 err2 =
     err1.end_offset = err2.end_offset &&
     err1.message = err2.message
 
+let expected_as_or_insteadof =
+  "The 'as' keyword or the 'insteadof' keyword is expected here."
+
 let error_type err = err.error_type
 
 let message err = err.message

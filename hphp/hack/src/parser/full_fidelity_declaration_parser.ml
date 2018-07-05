@@ -1050,7 +1050,8 @@ module WithExpressionAndStatementAndTypeParser
     Make.trait_use_precedence_item parser name keyword removed_names
 
   and parse_trait_use_alias_item parser aliasing_name =
-    let (parser, keyword) = assert_token parser As in
+    let (parser, keyword) =
+      require_token parser As SyntaxError.expected_as_or_insteadof in
     let (parser, visibility, _) = parse_modifiers parser in
     let (parser, aliased_name) = parse_qualified_name_type_opt parser in
     Make.trait_use_alias_item parser aliasing_name keyword visibility
@@ -1066,12 +1067,10 @@ module WithExpressionAndStatementAndTypeParser
         Make.scope_resolution_expression parser qualifier cc_token name
       else
         (* plain qualified name case *)
-        (parser, qualifier)
-    in
-    if (peek_token_kind parser) = As then
-      parse_trait_use_alias_item parser name
-    else
-      parse_trait_use_precedence_item parser name
+        (parser, qualifier) in
+    match peek_token_kind parser with
+    | Insteadof -> parse_trait_use_precedence_item parser name
+    | As | _ -> parse_trait_use_alias_item parser name
 
   (*  SPEC:
     trait-use-conflict-resolution:
@@ -1108,7 +1107,8 @@ module WithExpressionAndStatementAndTypeParser
         SyntaxError.error1004
         parse_trait_use_conflict_resolution_item
     in
-    let (parser, right_brace) = assert_token parser RightBrace in
+    let (parser, right_brace) =
+     require_token parser RightBrace SyntaxError.error1006 in
     Make.trait_use_conflict_resolution
       parser
       use_token

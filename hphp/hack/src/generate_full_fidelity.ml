@@ -1106,6 +1106,7 @@ open Full_fidelity_syntax_type
 module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module Operator = Full_fidelity_operator
+[@@@warning \"-27\"] (* unused variable *)
 
 module WithToken(Token: TokenType) = struct
   module WithSyntaxValue(SyntaxValue: SyntaxValueType) = struct

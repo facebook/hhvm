@@ -80,6 +80,7 @@ public:
   bool isHackArray() const { return isHackArrayType(getType()); }
   bool isObject()    const { return isObjectType(getType()); }
   bool isResource()  const { return isResourceType(getType()); }
+  bool isFunc()      const { return isFuncType(getType()); }
 
   auto toBoolean() const { return tvCastToBoolean(*m_val); }
   auto toInt64()   const { return tvCastToInt64(*m_val); }
@@ -99,6 +100,12 @@ public:
     assertx(isArray());
     return isRefType(type(m_val)) ? val(m_val).pref->tv()->m_data.parr
                                   : val(m_val).parr;
+  }
+
+  auto toFuncVal() const {
+    assertx(isFunc());
+    return isRefType(type(m_val)) ? val(m_val).pref->tv()->m_data.pfunc
+      : val(m_val).pfunc;
   }
 
 protected:
@@ -774,6 +781,7 @@ struct Variant : private TypedValue {
       case KindOfKeyset:
       case KindOfPersistentArray:
       case KindOfArray:
+      case KindOfFunc:
         return false;
       case KindOfRef:
         return m_data.pref->var()->isIntVal();

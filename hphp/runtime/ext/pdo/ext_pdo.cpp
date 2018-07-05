@@ -2519,6 +2519,7 @@ safe:
               case KindOfObject:
               case KindOfResource:
               case KindOfRef:
+              case KindOfFunc:
                 if (!stmt->dbh->conn()->quoter(
                       param->parameter.toString(),
                       plc->quoted,

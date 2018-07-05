@@ -713,6 +713,12 @@ public:
   }
 
   ALWAYS_INLINE
+  void pushFunc(Func* f) {
+    m_top--;
+    *m_top = make_tv<KindOfFunc>(f);
+  }
+
+  ALWAYS_INLINE
   void nalloc(size_t n) {
     assertx((uintptr_t)(m_top - n) <= (uintptr_t)m_base);
     m_top -= n;

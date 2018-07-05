@@ -435,9 +435,10 @@ void emitDecodeCufIter(IRGS& env, int32_t iterId, Offset relOffset) {
     return;
   }
 
-  if (type.subtypeOfAny(TArr, TVec, TStr)) {
+  if (type.subtypeOfAny(TArr, TVec, TStr, TFunc)) {
     // Do this first, because DecodeCufIter will do a sanity check on the flag.
-    gen(env, StCufIterDynamic, IterId(iterId), fp(env), cns(env, true));
+    auto const isDynamic = !(type <= TFunc);
+    gen(env, StCufIterDynamic, IterId(iterId), fp(env), cns(env, isDynamic));
     auto const res = gen(
       env,
       DecodeCufIter,

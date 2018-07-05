@@ -1485,6 +1485,11 @@ void VariableSerializer::serializeVariant(tv_rval tv,
     case KindOfRef:
       serializeRef(tv, isArrayKey);
       return;
+
+    case KindOfFunc:
+      SystemLib::throwInvalidOperationExceptionObject(
+        "Unable to serialize func"
+      );
   }
   not_reached();
 }

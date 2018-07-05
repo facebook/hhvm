@@ -77,11 +77,12 @@ inline const void* Func::mallocEnd() const {
          + numPrologues() * sizeof(m_prologueTable[0]);
 }
 
-inline void Func::validate() const {
+inline bool Func::validate() const {
 #ifdef DEBUG
   assertx(m_magic == kMagic);
 #endif
   assertx(m_name != nullptr);
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

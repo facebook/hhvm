@@ -237,6 +237,7 @@ DataType Variant::toNumeric(int64_t &ival, double &dval,
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
+    case KindOfFunc:
       return m_type;
 
     case KindOfInt64:
@@ -278,6 +279,7 @@ bool Variant::isScalar() const noexcept {
     case KindOfDouble:
     case KindOfPersistentString:
     case KindOfString:
+    case KindOfFunc:
       return true;
 
     case KindOfRef:
@@ -321,6 +323,7 @@ static bool isAllowedAsConstantValueImpl(TypedValue tv) {
     case KindOfUninit:
     case KindOfObject:
     case KindOfRef:
+    case KindOfFunc:
       return false;
   }
   not_reached();
@@ -361,6 +364,8 @@ bool Variant::toBooleanHelper() const {
     case KindOfObject:        return m_data.pobj->toBoolean();
     case KindOfResource:      return m_data.pres->data()->o_toBoolean();
     case KindOfRef:           return m_data.pref->var()->toBoolean();
+    // TODO (T29639296)
+    case KindOfFunc:          always_assert(false);
   }
   not_reached();
 }
@@ -385,6 +390,8 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfObject:        return m_data.pobj->toInt64();
     case KindOfResource:      return m_data.pres->data()->o_toInt64();
     case KindOfRef:           return m_data.pref->var()->toInt64(base);
+    // TODO (T29639296)
+    case KindOfFunc:          always_assert(false);
   }
   not_reached();
 }
@@ -409,6 +416,8 @@ double Variant::toDoubleHelper() const {
     case KindOfObject:        return m_data.pobj->toDouble();
     case KindOfResource:      return m_data.pres->data()->o_toDouble();
     case KindOfRef:           return m_data.pref->var()->toDouble();
+    // TODO (T29639296)
+    case KindOfFunc:          always_assert(false);
   }
   not_reached();
 }
@@ -435,6 +444,9 @@ Array Variant::toPHPArrayHelper() const {
     case KindOfObject:        return m_data.pobj->toArray();
     case KindOfResource:      return m_data.pres->data()->o_toArray();
     case KindOfRef:           return m_data.pref->var()->toArray();
+    // TODO (T29639296)
+    case KindOfFunc:          always_assert(false);
+
   }
   not_reached();
 }
@@ -474,6 +486,10 @@ Object Variant::toObjectHelper() const {
 
     case KindOfRef:
       return m_data.pref->var()->toObject();
+    // TODO (T29639296)
+    case KindOfFunc:
+      always_assert(false);
+
   }
   not_reached();
 }
@@ -503,6 +519,10 @@ Resource Variant::toResourceHelper() const {
 
     case KindOfRef:
       return m_data.pref->var()->toResource();
+    // TODO (T29639296)
+    case KindOfFunc:
+      always_assert(false);
+
   }
   not_reached();
 }
@@ -585,6 +605,7 @@ void Variant::setEvalScalar() {
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
+    case KindOfFunc:
       break;
   }
   not_reached();

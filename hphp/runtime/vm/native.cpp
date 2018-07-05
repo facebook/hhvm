@@ -255,6 +255,8 @@ void callFunc(const Func* func, void *ctx,
     }
 
     case KindOfUninit:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
 
@@ -380,6 +382,8 @@ bool coerceFCallArgs(TypedValue* args,
       case KindOfPersistentKeyset:
       case KindOfPersistentArray:
       case KindOfRef:
+      // TODO (T29639296)
+      case KindOfFunc:
         not_reached();
     }
   }
@@ -602,6 +606,9 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfNull:         return ty == T::Void;
     case KindOfRef:          return ty == T::Mixed    || ty == T::OutputArg;
     case KindOfInt64:        return ty == T::Int64    || ty == T::Int32;
+    // TODO (T29639296)
+    case KindOfFunc:
+      break;
   }
   not_reached();
 }

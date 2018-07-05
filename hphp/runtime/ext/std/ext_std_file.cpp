@@ -733,6 +733,9 @@ Variant HHVM_FUNCTION(file_put_contents,
       }
       break;
     }
+    // TODO (T29639296)
+    case KindOfFunc:
+      always_assert(false);
   }
 
   // like fwrite(), fclose() can error when fflush()ing

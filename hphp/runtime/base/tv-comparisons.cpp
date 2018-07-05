@@ -118,6 +118,8 @@ typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
       return op(cell.m_data.pres->data()->o_toInt64(), val);
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   not_reached();
@@ -177,6 +179,8 @@ typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
       return op(cell.m_data.pres->data()->o_toDouble(), val);
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   not_reached();
@@ -247,6 +251,8 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
     }
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   not_reached();
@@ -324,6 +330,8 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
       return op(false, true);
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   not_reached();
@@ -386,6 +394,8 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
       return op(false, true);
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   not_reached();
@@ -441,6 +451,8 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceData* rd) {
       return op(cell.m_data.pres->data(), rd);
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   not_reached();
@@ -529,6 +541,8 @@ typename Op::RetType cellRelOp(Op op, Cell c1, Cell c2) {
   case KindOfResource:     return cellRelOp(op, c1, c2.m_data.pres);
 
   case KindOfRef:
+  // TODO (T29639296)
+  case KindOfFunc:
     break;
   }
   not_reached();
@@ -906,6 +920,8 @@ bool cellSame(Cell c1, Cell c2) {
     case KindOfUninit:
     case KindOfNull:
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   not_reached();

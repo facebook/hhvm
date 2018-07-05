@@ -53,6 +53,8 @@ inline bool cellToBool(Cell cell) {
     case KindOfObject:        return cell.m_data.pobj->toBoolean();
     case KindOfResource:      return cell.m_data.pres->data()->o_toBoolean();
     case KindOfRef:           break;
+    // TODO (T29639296)
+    case KindOfFunc:          break;
   }
   not_reached();
 }
@@ -79,6 +81,8 @@ inline int64_t cellToInt(Cell cell) {
     case KindOfObject:        return cell.m_data.pobj->toInt64();
     case KindOfResource:      return cell.m_data.pres->data()->o_toInt64();
     case KindOfRef:           break;
+    // TODO (T29639296)
+    case KindOfFunc:          break;
   }
   not_reached();
 }
@@ -134,6 +138,7 @@ inline Cell cellToKey(Cell cell, const ArrayData* ad) {
     case KindOfPersistentKeyset:
     case KindOfKeyset:
     case KindOfObject:
+    case KindOfFunc:
       raise_warning("Invalid operand type was used: Invalid type used as key");
       return make_tv<KindOfNull>();
 

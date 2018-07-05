@@ -831,6 +831,7 @@ static void json_create_zval(Variant &z, UncheckedBuffer &buf, DataType type,
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
+    case KindOfFunc:
       z = uninit_null();
       return;
   }

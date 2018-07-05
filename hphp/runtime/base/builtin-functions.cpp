@@ -134,6 +134,8 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
   }
 
   auto const tv_func = v.asCell();
+  if (isFuncType(tv_func->m_type)) return true;
+
   if (isStringType(tv_func->m_type)) {
     if (name) *name->var() = v;
     return ret;
@@ -197,6 +199,14 @@ vm_decode_function(const_variant_ref function,
                    DecodeFlags flags /* = DecodeFlags::Warn */) {
   invName = nullptr;
   dynamic = true;
+
+  if (function.isFunc()) {
+    dynamic = false;
+    this_ = nullptr;
+    cls = nullptr;
+    return function.toFuncVal();
+  }
+
   if (function.isString() || function.isArray()) {
     HPHP::Class* ctx = nullptr;
     if (ar) ctx = arGetContextClass(ar);

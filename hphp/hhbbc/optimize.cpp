@@ -1275,6 +1275,7 @@ Bytecode gen_constant(const Cell& cell) {
     case KindOfRef:
     case KindOfResource:
     case KindOfObject:
+    case KindOfFunc:
       always_assert(0 && "invalid constant in propagate_constants");
   }
   not_reached();

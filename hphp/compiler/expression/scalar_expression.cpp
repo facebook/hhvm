@@ -96,6 +96,7 @@ ScalarExpression::ScalarExpression
       case KindOfObject:
       case KindOfResource:
       case KindOfRef:
+      case KindOfFunc:
         break;
     }
     not_reached();

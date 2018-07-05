@@ -380,6 +380,8 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     }
     case KindOfDouble:
     case KindOfObject:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
 
     case KindOfRef:

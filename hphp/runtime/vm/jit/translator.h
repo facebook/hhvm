@@ -282,6 +282,8 @@ enum OutTypeConstraints {
 
   OutIsTypeL,           // output for IsTypeL instructions
 
+  OutFunc,              // for function pointers
+
   OutNone,
 };
 

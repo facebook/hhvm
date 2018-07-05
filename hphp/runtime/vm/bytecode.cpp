@@ -814,6 +814,7 @@ static std::string toStringElm(const TypedValue* tv) {
   case KindOfArray:
   case KindOfObject:
   case KindOfResource:
+  case KindOfFunc:
     os << "C:";
     break;
   }
@@ -897,6 +898,11 @@ static std::string toStringElm(const TypedValue* tv) {
       print_count();
       os << ":Resource("
          << tv->m_data.pres->data()->o_getClassName().get()->data()
+         << ")";
+      continue;
+    case KindOfFunc:
+      os << ":Func("
+         << tv->m_data.pfunc->fullDisplayName()->data()
          << ")";
       continue;
     case KindOfRef:
@@ -2914,6 +2920,7 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
             case KindOfObject:
             case KindOfResource:
             case KindOfRef:
+            case KindOfFunc:
               not_reached();
           }
           if (val->m_type == KindOfString) tvDecRefStr(val);
@@ -2955,6 +2962,8 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
           return;
 
         case KindOfRef:
+        // TODO (T29639296)
+        case KindOfFunc:
           break;
       }
       not_reached();
@@ -4809,6 +4818,16 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
     } else if (origCell.m_type == KindOfString) {
       decRefStr(origCell.m_data.pstr);
     }
+    return;
+  }
+
+  if (c1->m_type == KindOfFunc) {
+    auto func = c1->m_data.pfunc;
+    assertx(func != nullptr);
+
+    vmStack().discard();
+    auto const ar = fPushFuncImpl(func, numArgs);
+    ar->trashThis();
     return;
   }
 

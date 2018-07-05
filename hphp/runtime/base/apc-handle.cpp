@@ -127,6 +127,9 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
 
     case KindOfRef:
       return {nullptr, 0};
+    // TODO (T29639296)
+    case KindOfFunc:
+      always_assert(false);
   }
   not_reached();
 }

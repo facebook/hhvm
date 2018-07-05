@@ -4092,6 +4092,7 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
       case KindOfObject:
         return resolve_class_or_type_alias(ctx, name, candidate);
       case KindOfRef:
+      case KindOfFunc:
         always_assert_flog(false, "Unexpected DataType");
         break;
       }

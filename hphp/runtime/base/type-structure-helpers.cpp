@@ -86,6 +86,8 @@ bool cellInstanceOf(const Cell* tv, const NamedEntity* ne) {
       return cls && tv->m_data.pobj->instanceof(cls);
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   not_reached();

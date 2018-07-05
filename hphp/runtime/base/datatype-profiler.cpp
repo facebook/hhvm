@@ -38,6 +38,7 @@ DataTypeProfiler::DataTypeProfiler(std::string name)
   , m_object(name + "=KindOfObject")
   , m_resource(name + "=KindOfResource")
   , m_ref(name + "=KindOfRef")
+  , m_func(name + "=KindOfFunc")
 {}
 
 DataType DataTypeProfiler::operator()(DataType type) {
@@ -60,6 +61,7 @@ DataType DataTypeProfiler::operator()(DataType type) {
     case KindOfObject:        m_object.count(); break;
     case KindOfResource:      m_resource.count(); break;
     case KindOfRef:           m_ref.count(); break;
+    case KindOfFunc:          m_func.count(); break;
   }
   return type;
 }
@@ -83,7 +85,8 @@ DataTypeProfiler::~DataTypeProfiler() {
                m_array.hits() +
                m_object.hits() +
                m_resource.hits() +
-               m_ref.hits();
+               m_ref.hits() +
+               m_func.hits();
   if (!total) return;
   fprintf(stderr, "%s: total=%zu KindOfUninit=%.1f%% "
                   "KindOfNull=%.1f%% "
@@ -102,7 +105,8 @@ DataTypeProfiler::~DataTypeProfiler() {
                   "KindOfKeyset=%.1f%% "
                   "KindOfObject=%.1f%% "
                   "KindOfResource=%.1f%% "
-                  "KindOfRef=%.1f%%\n",
+                  "KindOfRef=%.1f%% "
+                  "KindOfFunc=%.1f%% ",
           m_name.c_str(), total,
           100.0 * m_uninit.hits() / total,
           100.0 * m_null.hits() / total,
@@ -121,7 +125,8 @@ DataTypeProfiler::~DataTypeProfiler() {
           100.0 * m_keyset.hits() / total,
           100.0 * m_object.hits() / total,
           100.0 * m_resource.hits() / total,
-          100.0 * m_ref.hits() / total);
+          100.0 * m_ref.hits() / total,
+          100.0 * m_func.hits() / total);
 }
 
 }

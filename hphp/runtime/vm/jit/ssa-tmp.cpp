@@ -104,6 +104,8 @@ Variant SSATmp::variantVal() const {
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   always_assert(false);

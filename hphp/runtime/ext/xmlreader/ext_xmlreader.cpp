@@ -661,6 +661,7 @@ Variant HHVM_METHOD(XMLReader, __get,
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
+    case KindOfFunc:
       return init_null();
   }
   not_reached();

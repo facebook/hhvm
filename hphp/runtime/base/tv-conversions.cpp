@@ -108,6 +108,8 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
         continue;
 
       case KindOfRef:
+      // TODO (T29639296)
+      case KindOfFunc:
         break;
     }
     not_reached();
@@ -182,6 +184,8 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
         continue;
 
       case KindOfRef:
+      // TODO (T29639296)
+      case KindOfFunc:
         break;
     }
     not_reached();
@@ -250,6 +254,8 @@ void tvCastToInt64InPlace(TypedValue* tv) {
         continue;
 
       case KindOfRef:
+      // TODO (T29639296)
+      case KindOfFunc:
         break;
     }
     not_reached();
@@ -308,6 +314,8 @@ double tvCastToDouble(TypedValue tv) {
       return tv.m_data.pres->data()->o_toDouble();
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   not_reached();
@@ -391,6 +399,8 @@ void cellCastToStringInPlace(tv_lval tv) {
       return;
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   not_reached();
@@ -457,6 +467,8 @@ StringData* cellCastToStringData(Cell tv) {
       return tv.m_data.pres->data()->o_toString().detach();
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       not_reached();
   }
   not_reached();
@@ -505,6 +517,8 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
     }
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   not_reached();
@@ -615,6 +629,8 @@ void tvCastToArrayInPlace(TypedValue* tv) {
         continue;
 
       case KindOfRef:
+      // TODO (T29639296)
+      case KindOfFunc:
         break;
     }
     not_reached();
@@ -708,6 +724,8 @@ void tvCastToVecInPlace(TypedValue* tv) {
         continue;
 
       case KindOfRef:
+      // TODO (T29639296)
+      case KindOfFunc:
         break;
     }
     not_reached();
@@ -797,6 +815,8 @@ void tvCastToDictInPlace(TypedValue* tv) {
         continue;
 
       case KindOfRef:
+      // TODO (T29639296)
+      case KindOfFunc:
         break;
     }
     not_reached();
@@ -886,6 +906,8 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
         continue;
 
       case KindOfRef:
+      // TODO (T29639296)
+      case KindOfFunc:
         break;
     }
     not_reached();
@@ -985,6 +1007,8 @@ void tvCastToVArrayInPlace(TypedValue* tv) {
         continue;
 
       case KindOfRef:
+      // TODO (T29639296)
+      case KindOfFunc:
         break;
     }
     not_reached();
@@ -1087,6 +1111,8 @@ void tvCastToDArrayInPlace(TypedValue* tv) {
         continue;
 
       case KindOfRef:
+      // TODO (T29639296)
+      case KindOfFunc:
         break;
     }
     not_reached();
@@ -1141,6 +1167,8 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
       return tv.m_data.pobj;
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   not_reached();
@@ -1199,6 +1227,8 @@ void tvCastToObjectInPlace(TypedValue* tv) {
         return;
 
       case KindOfRef:
+      // TODO (T29639296)
+      case KindOfFunc:
         break;
     }
     not_reached();
@@ -1286,6 +1316,8 @@ bool tvCoerceParamToBooleanInPlace(TypedValue* tv,
       return false;
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   not_reached();
@@ -1321,6 +1353,8 @@ static bool tvCanBeCoercedToNumber(const TypedValue* tv,
       return false;
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   not_reached();
@@ -1398,6 +1432,8 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv,
       return false;
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   not_reached();
@@ -1437,6 +1473,8 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv, bool /*builtin*/) {
       return false;
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   not_reached();
@@ -1469,6 +1507,8 @@ bool tvCoerceParamToVecInPlace(TypedValue* tv, bool /*builtin*/) {
       return true;
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   not_reached();
@@ -1501,6 +1541,8 @@ bool tvCoerceParamToDictInPlace(TypedValue* tv, bool /*builtin*/) {
       return true;
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   not_reached();
@@ -1533,6 +1575,8 @@ bool tvCoerceParamToKeysetInPlace(TypedValue* tv, bool /*builtin*/) {
       return true;
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfFunc:
       break;
   }
   not_reached();

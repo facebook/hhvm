@@ -2469,6 +2469,7 @@ bool Class::compatibleTraitPropInit(const TypedValue& tv1,
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
+    case KindOfFunc:
       return false;
   }
   not_reached();

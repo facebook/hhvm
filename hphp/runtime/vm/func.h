@@ -236,7 +236,7 @@ struct Func final {
    *
    * FIXME: Currently this method does almost nothing.
    */
-  void validate() const;
+  bool validate() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // FuncId manipulation.

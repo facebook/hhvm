@@ -337,6 +337,7 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
+    case KindOfFunc:
       if (!ad->useWeakKeys()) throwInvalidArrayKeyException(cell, ad);
       if (checkHACMisc()) {
         raiseHackArrCompatImplicitArrayKey(cell);
@@ -784,6 +785,7 @@ TypedValue HHVM_FUNCTION(array_product,
       case KindOfArray:
       case KindOfObject:
       case KindOfResource:
+      case KindOfFunc:
         continue;
     }
     not_reached();
@@ -1059,6 +1061,7 @@ TypedValue HHVM_FUNCTION(array_sum,
       case KindOfArray:
       case KindOfObject:
       case KindOfResource:
+      case KindOfFunc:
         continue;
     }
     not_reached();
@@ -1364,6 +1367,7 @@ int64_t HHVM_FUNCTION(count,
     case KindOfPersistentString:
     case KindOfString:
     case KindOfResource:
+    case KindOfFunc:
       return 1;
 
     case KindOfPersistentVec:
@@ -2954,7 +2958,10 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
       SystemLib::throwInvalidArgumentExceptionObject(
         "Objects cannot be cast to an array-key"
       );
-
+    case KindOfFunc:
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "Funcs cannot be cast to an array-key"
+      );
     case KindOfRef:
       break;
   }

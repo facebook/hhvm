@@ -540,7 +540,7 @@ const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
     case KindOfObject:        return tv->m_data.pobj->getClassName().c_str();
     case KindOfResource:
       return tv->m_data.pres->data()->o_getClassName().c_str();
-
+    case KindOfFunc:          return "func";
     case KindOfRef:
       break;
   }
@@ -927,6 +927,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
         case KindOfNull:         return MK::None;
         case KindOfUninit:
         case KindOfRef:
+        case KindOfFunc:
           always_assert_flog(false, "Unexpected DataType");
       }
       not_reached();

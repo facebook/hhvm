@@ -2292,7 +2292,7 @@ and expr_
       expr_error env p (Reason.Rnone)
     end else begin
       if env.Env.in_lambda then Errors.type_test_in_lambda p "as";
-      let env, te, _ = expr env e in
+      let env, te, expr_ty = expr env e in
       let env, hint_ty = Phase.hint_locl env hint in
       let hint_ty =
         if not is_nullable then hint_ty else
@@ -2300,22 +2300,26 @@ and expr_
           (* Dont create ??hint *)
           | _ , Toption _ -> hint_ty
           | _ -> Reason.Rwitness p, Toption (hint_ty) in
+      let should_not_refine env lty rty =
+        snd rty <> Tdynamic && SubType.is_sub_type env lty rty in
+      let env, hint_ty = Env.expand_type env hint_ty in
       let env, hint_ty =
-        if not (is_instance_var e)
-        then env, hint_ty
-        else begin
+        if is_instance_var e
+        then begin
           let env, _, ivar_ty = raw_expr ~in_cond:false env e in
           let env, ((ivar_pos, _) as ivar) = get_instance_var env e in
-          let env, hint_ty = Env.expand_type env hint_ty in
+          let reason = Reason.Ras ivar_pos in
           let env, hint_ty =
-            if snd hint_ty <> Tdynamic && SubType.is_sub_type env ivar_ty hint_ty
+            if should_not_refine env ivar_ty hint_ty
             then env, ivar_ty
-            else begin
-              let reason = Reason.Ras ivar_pos in
-              safely_refine_type env p reason ivar_pos ivar_ty hint_ty
-            end in
+            else safely_refine_type env p reason ivar_pos ivar_ty hint_ty
+          in
           let env = set_local env ivar hint_ty in
           env, hint_ty
+        end else begin
+          if should_not_refine env expr_ty hint_ty
+          then env, expr_ty
+          else env, hint_ty
         end in
       make_result env (T.As (te, hint, is_nullable)) hint_ty
     end

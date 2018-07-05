@@ -213,6 +213,7 @@ and localize_tparam ~ety_env pos env ty (_, (_, name), cstrl) =
     | r, Tapply ((_, x), _argl) when x = SN.Typehints.wildcard ->
       let env, name = Env.add_fresh_generic_parameter env name in
       let ty_fresh = (r, Tabstract (AKgeneric name, None)) in
+      let ety_env = {ety_env with validate_dty = None} in
       let env = List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
           (* Substitute fresh type parameters for
            * original formals in constraint *)

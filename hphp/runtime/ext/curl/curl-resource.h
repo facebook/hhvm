@@ -2,6 +2,7 @@
 #define incl_HPHP_CURL_RESOURCE_H
 
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/curl/curl-pool.h"

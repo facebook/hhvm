@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/apc-gc-manager.h"
-#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/heap-scan.h"

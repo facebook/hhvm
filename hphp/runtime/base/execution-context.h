@@ -17,17 +17,9 @@
 #ifndef incl_HPHP_EXECUTION_CONTEXT_H_
 #define incl_HPHP_EXECUTION_CONTEXT_H_
 
-#include <list>
-#include <set>
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-
-#include "hphp/util/lock.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/thread-local.h"
-#include "hphp/util/tiny-vector.h"
+#include "hphp/runtime/base/req-list.h"
+#include "hphp/runtime/base/req-tiny-vector.h"
+#include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -39,6 +31,17 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/minstr-state.h"
 #include "hphp/runtime/vm/pc-filter.h"
+
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/thread-local.h"
+
+#include <list>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 namespace HPHP {
 struct RequestEventHandler;

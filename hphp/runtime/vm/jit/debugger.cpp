@@ -28,7 +28,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
-#include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/base/req-optional.h"
 
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/lock.h"

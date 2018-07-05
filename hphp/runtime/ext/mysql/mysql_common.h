@@ -18,16 +18,13 @@
 #ifndef incl_HPHP_MYSQL_COMMON_H_
 #define incl_HPHP_MYSQL_COMMON_H_
 
-#include <folly/Optional.h>
-
-#include <memory>
-#include <vector>
-
-#include "mysql.h"
-
-#include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/base/req-list.h"
+#include "hphp/runtime/base/req-optional.h"
+#include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/ext/extension.h"
+
+#include "mysql.h"
 
 #ifdef ENABLE_ASYNC_MYSQL
 #include "squangle/mysql_client/SSLOptionsProviderBase.h"

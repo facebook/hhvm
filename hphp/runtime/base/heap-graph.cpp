@@ -16,7 +16,6 @@
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/base/heap-algorithms.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/heap-scan.h"
 #include "hphp/runtime/base/thread-info.h"

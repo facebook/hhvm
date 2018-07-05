@@ -27,7 +27,6 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/set-array.h"
-#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/util/tls-pod-bag.h"

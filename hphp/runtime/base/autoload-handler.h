@@ -18,7 +18,7 @@
 
 #include <utility>
 
-#include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/base/req-deque.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/type-array.h"

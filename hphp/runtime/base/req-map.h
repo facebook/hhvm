@@ -13,35 +13,30 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_WEAKREF_DATA_H_
-#define incl_HPHP_WEAKREF_DATA_H_
+#ifndef incl_HPHP_RUNTIME_BASE_REQ_MAP_H_
+#define incl_HPHP_RUNTIME_BASE_REQ_MAP_H_
 
-#include "hphp/runtime/base/req-memory.h"
-#include "hphp/runtime/base/typed-value.h"
-
+#include "hphp/runtime/base/req-malloc.h"
 #include "hphp/util/type-scan.h"
+#include <map>
 
-namespace HPHP {
+namespace HPHP { namespace req {
 
-struct Object;
-
-// A single WeakRefData is shared between all WeakRefs to a given refcounted
-// object.
-struct WeakRefData {
-  TypedValue pointee; // Object being weakly referenced.
-  TYPE_SCAN_IGNORE_FIELD(pointee);
-
-  // Invalidate WeakRefData associated with a refcounted object.
-  static void invalidateWeakRef(uintptr_t ptr);
-
-  // Create or find WeakRefData for a given refcounted object.
-  static req::shared_ptr<WeakRefData> forObject(Object obj);
-
-  ~WeakRefData();
-  explicit WeakRefData(const TypedValue& tv): pointee(tv) {}
+template <typename Key,
+          typename T,
+          typename Compare = std::less<Key>>
+struct map final : std::map<Key, T, Compare,
+                            ConservativeAllocator<std::pair<const Key,T>>
+                            > {
+  using Base = std::map<Key, T, Compare,
+                        ConservativeAllocator<std::pair<const Key, T>>>;
+  using Base::Base;
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(Key, T) {
+    for (const auto& pair : *this) scanner.scan(pair);
+  }
 };
 
-void weakref_cleanup();
+}}
 
-} // namespace HPHP
-#endif // incl_HPHP_WEAKREF_DATA_H_
+#endif

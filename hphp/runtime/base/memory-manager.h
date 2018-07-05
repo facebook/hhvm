@@ -38,7 +38,6 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/header-kind.h"
-#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/req-malloc.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/slab-manager.h"

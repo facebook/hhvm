@@ -18,13 +18,9 @@
 #ifndef incl_HPHP_EXT_SQLITE3_H_
 #define incl_HPHP_EXT_SQLITE3_H_
 
-#include <memory>
-#include <vector>
-
-#include <sqlite3.h>
-
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/base/req-vector.h"
+#include <sqlite3.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -27,7 +27,6 @@
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/sort-flags.h"

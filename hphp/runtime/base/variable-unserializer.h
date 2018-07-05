@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_VARIABLE_UNSERIALIZER_H_
 #define incl_HPHP_VARIABLE_UNSERIALIZER_H_
 
-#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/util/compact-tagged-ptrs.h"

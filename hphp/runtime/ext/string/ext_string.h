@@ -19,8 +19,9 @@
 #define incl_HPHP_EXT_STRING_H_
 
 #include "hphp/zend/zend-html.h"
-#include"hphp/runtime/ext/std/ext_std_misc.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/util/bstring.h"

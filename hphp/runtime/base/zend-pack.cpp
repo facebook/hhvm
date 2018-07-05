@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/base/zend-pack.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/util/tiny-vector.h"
+#include "hphp/runtime/base/req-tiny-vector.h"
 
 #include <algorithm>
 

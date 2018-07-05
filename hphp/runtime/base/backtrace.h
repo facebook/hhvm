@@ -16,7 +16,6 @@
 #ifndef incl_HPHP_BACKTRACE_H_
 #define incl_HPHP_BACKTRACE_H_
 
-#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/util/low-ptr.h"
 

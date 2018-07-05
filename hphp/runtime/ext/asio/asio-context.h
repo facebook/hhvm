@@ -18,10 +18,12 @@
 #ifndef incl_HPHP_EXT_ASIO_CONTEXT_H_
 #define incl_HPHP_EXT_ASIO_CONTEXT_H_
 
-#include <functional>
-#include <queue>
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/base/req-deque.h"
+#include "hphp/runtime/base/req-map.h"
+#include "hphp/runtime/base/req-vector.h"
+
+#include <functional>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -76,8 +78,9 @@ struct AsioContext final {
   static constexpr uint32_t QUEUE_NO_PENDING_IO = 1;
 
 private:
-  typedef req::map<int64_t, req::deque<c_RescheduleWaitHandle*>>
-    reschedule_priority_queue_t;
+  using reschedule_priority_queue_t = req::map<
+    int64_t, req::deque<c_RescheduleWaitHandle*>
+  >;
 
   bool runSingle(reschedule_priority_queue_t& queue);
 

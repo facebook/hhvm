@@ -22,7 +22,6 @@
 #include <memory>
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/stream-wrapper.h"
-#include "hphp/runtime/base/req-containers.h"
 
 namespace HPHP { namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////

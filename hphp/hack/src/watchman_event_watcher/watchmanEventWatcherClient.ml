@@ -84,7 +84,7 @@ let get_status_ instance =
   | Mid_update reader
   | Unknown reader when Buffered_line_reader.is_readable reader ->
     begin try
-      let msg = Buffered_line_reader.get_next_line ~approx_size:25 reader in
+      let msg = Buffered_line_reader.get_next_line reader in
       let msg = Responses.of_string msg in
       let response = begin match msg with
       | Responses.Unknown ->

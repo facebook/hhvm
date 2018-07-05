@@ -360,39 +360,42 @@ let apply_shape
   ~on_common_field
   ~on_missing_omittable_optional_field
   ~on_missing_non_omittable_optional_field
+  ~on_error
   (env, acc)
   (r1, fields_known1, fdm1)
   (r2, fields_known2, fdm2) =
+  let (env, acc) =
   begin match fields_known1, fields_known2 with
     | FieldsFullyKnown, FieldsFullyKnown ->
         (* If both shapes are FieldsFullyKnown, then we must ensure that the
            supertype shape knows about every single field that could possibly
            be present in the subtype shape. *)
-        ShapeMap.iter begin fun name _ ->
+        ShapeMap.fold begin fun name _ (env, acc) ->
           if not @@ ShapeMap.mem name fdm1 then
             let pos1 = Reason.to_pos r1 in
             let pos2 = Reason.to_pos r2 in
-            Errors.unknown_field_disallowed_in_shape
+            on_error (env,acc) (fun () -> Errors.unknown_field_disallowed_in_shape
               pos1
               pos2
-              (get_printable_shape_field_name name)
-        end fdm2
+              (get_printable_shape_field_name name))
+          else (env, acc)
+        end fdm2 (env, acc)
     | FieldsFullyKnown, FieldsPartiallyKnown _  ->
         let pos1 = Reason.to_pos r1 in
         let pos2 = Reason.to_pos r2 in
-        Errors.shape_fields_unknown pos2 pos1
+        on_error (env, acc) (fun () -> Errors.shape_fields_unknown pos2 pos1)
     | FieldsPartiallyKnown unset_fields1,
       FieldsPartiallyKnown unset_fields2 ->
-        ShapeMap.iter begin fun name unset_pos ->
+        ShapeMap.fold begin fun name unset_pos (env, acc) ->
           match ShapeMap.get name unset_fields2 with
-            | Some _ -> ()
+            | Some _ -> (env, acc)
             | None ->
                 let pos2 = Reason.to_pos r2 in
-                Errors.shape_field_unset unset_pos pos2
-                  (get_printable_shape_field_name name);
-        end unset_fields1
-    | _ -> ()
-  end;
+                on_error (env, acc) (fun () -> Errors.shape_field_unset unset_pos pos2
+                  (get_printable_shape_field_name name))
+        end unset_fields1 (env, acc)
+    | _ -> (env, acc)
+  end in
   ShapeMap.fold begin fun name shape_field_type_1 (env, acc) ->
     match ShapeMap.get name fdm2 with
     | None when is_shape_field_optional env shape_field_type_1 ->
@@ -408,8 +411,8 @@ let apply_shape
     | None ->
         let pos1 = Reason.to_pos r1 in
         let pos2 = Reason.to_pos r2 in
-        Errors.missing_field pos2 pos1 (get_printable_shape_field_name name);
-        (env, acc)
+        on_error (env, acc) (fun () ->
+          Errors.missing_field pos2 pos1 (get_printable_shape_field_name name))
     | Some shape_field_type_2 ->
         on_common_field (env, acc) name shape_field_type_1 shape_field_type_2
   end fdm1 (env, acc)

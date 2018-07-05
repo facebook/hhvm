@@ -24,12 +24,20 @@ let get_all_locals env = env.lenv.local_types
 (*****************************************************************************)
 (* Functions dealing with old style local environment *)
 (*****************************************************************************)
-
 let union env local1 local2 =
   let (ty1, eid1), (ty2, eid2) = local1, local2 in
   let eid = if eid1 = eid2 then eid1 else Ident.tmp() in
   let env, ty =
+    (* In principle this is covered by the is_sub_type_alt tests, but
+     * that function isn't complete and sometimes returns None.
+     *)
     if Typing_defs.ty_equal ty1 ty2
+    then env, ty1
+    else
+    if Typing_subtype.is_sub_type_alt env ty1 ty2 = Some true
+    then env, ty2
+    else
+    if Typing_subtype.is_sub_type_alt env ty2 ty1 = Some true
     then env, ty1
     else
       let env, ty1 = TUtils.unresolved env ty1 in

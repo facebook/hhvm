@@ -27,7 +27,7 @@ File "arithmetic_any.php--file2.php", line 75, characters 35-45:
 File "arithmetic_any.php--file2.php", line 75, characters 48-58:
   _
 File "arithmetic_any.php--file2.php", line 84, characters 3-13:
-  (int | ?int)
+  ?int
 File "arithmetic_any.php--file2.php", line 89, characters 3-13:
   float
 No errors

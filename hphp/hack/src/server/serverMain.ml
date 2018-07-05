@@ -73,7 +73,8 @@ module Program =
          let has_errors = if Errors.is_empty env.errorl
            then false
            else
-             List.exists ~f:(fun e -> Errors.get_severity e = Errors.Error) (Errors.get_error_list env.errorl)
+             List.exists ~f:(fun e -> Errors.get_severity e = Errors.Error)
+               (Errors.get_error_list env.errorl)
          in
          exit (if has_errors then 1 else 0)
       | Some dirname ->
@@ -133,6 +134,7 @@ let shutdown_persistent_client client env  =
 (* The main loop *)
 (*****************************************************************************)
 
+[@@@warning "-52"] (* we have no alternative but to depend on Sys_error strings *)
 let handle_connection_exception env client e stack = match e with
   | ClientProvider.Client_went_away | ServerCommandTypes.Read_command_timeout ->
     ClientProvider.shutdown_client client;
@@ -157,6 +159,7 @@ let handle_connection_exception env client e stack = match e with
     Printexc.print_backtrace stderr;
     ClientProvider.shutdown_client client;
     env
+[@@@warning "+52"] (* CARE! scope of suppression should be only handle_connection_exception *)
 
 (* f represents a non-persistent command coming from client. If executing f
  * throws, we need to dispopose of this client (possibly recovering updated
@@ -216,6 +219,7 @@ let report_persistent_exception
   Printf.eprintf "Error: %s\n%s\n%!" message stack
 
 (* Same as handle_connection_try, but for persistent clients *)
+[@@@warning "-52"] (* we have no alternative but to depend on Sys_error strings *)
 let handle_persistent_connection_try return client env f =
   try f () with
   (** TODO: Make sure the pipe exception is really about this client. *)
@@ -232,6 +236,7 @@ let handle_persistent_connection_try return client env f =
     let stack = Printexc.get_backtrace () in
     report_persistent_exception ~e ~stack ~client ~is_fatal:true;
     return env (shutdown_persistent_client client) ~needs_writes:true
+[@@@warning "+52"] (* CARE! scope of suppression should be only handle_persistent_connection_try *)
 
 let handle_persistent_connection_ genv env client =
   let return env f ~needs_writes =

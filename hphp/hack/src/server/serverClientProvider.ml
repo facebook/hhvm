@@ -90,6 +90,7 @@ let read_connection_type ic =
     ~on_timeout: (fun _ -> raise Read_command_timeout)
     ~do_: (fun timeout -> Timeout.input_value ~timeout ic)
 
+[@@@warning "-52"] (* we have no alternative but to depend on Sys_error strings *)
 let read_connection_type = function
   | Non_persistent_client (ic, oc) ->
     begin try
@@ -105,6 +106,7 @@ let read_connection_type = function
      * desired connection type, can be turned into Persistent_client
      * (via make_persistent). *)
     assert false
+[@@@warning "+52"] (* CARE! scope of suppression should be only read_connection_type *)
 
 let send_response_to_client client response t =
   match client with

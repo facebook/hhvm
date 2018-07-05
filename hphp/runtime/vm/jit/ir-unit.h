@@ -281,9 +281,6 @@ private:
   // Default hint value for new blocks in this unit.
   Block::Hint m_defHint{Block::Hint::Neither};
 
-  // "Cursor" for IRInstructions in the current bytecode.  Managed externally.
-  uint16_t m_iroff{0};
-
   int64_t m_startNanos; // Timestamp at construction time.
   mutable folly::Optional<StructuredLogEntry> m_logEntry;
 };

@@ -1366,11 +1366,7 @@ void emitFThrowOnRefMismatch(IRGS& env, const ImmVector& immVec) {
 
   auto const exitSlow = makeExitSlow(env);
 
-  // CheckRefs only needs to know the number of parameters when there are more
-  // than 64 args.
-  SSATmp* numParams = immVec.size() <= 64
-    ? cns(env, 64) : gen(env, LdFuncNumParams, func);
-
+  SSATmp* numParams = nullptr;
   for (uint32_t i = 0; i * 8 < immVec.size(); i += 8) {
     uint64_t vals = 0;
     for (uint32_t j = 0; j < 8 && (i + j) * 8 < immVec.size(); ++j) {
@@ -1381,6 +1377,14 @@ void emitFThrowOnRefMismatch(IRGS& env, const ImmVector& immVec) {
     uint64_t mask = bits >= 64
       ? std::numeric_limits<uint64_t>::max()
       : (1UL << bits) - 1;
+
+    // CheckRefs only needs to know the number of parameters when there are more
+    // than 64 args.
+    if (i == 0) {
+      numParams = cns(env, 64);
+    } else if (!numParams || numParams->hasConstVal()) {
+      numParams = gen(env, LdFuncNumParams, func);
+    }
 
     gen(env, CheckRefs, exitSlow, CheckRefsData { i * 8, mask, vals }, func,
         numParams);

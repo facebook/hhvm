@@ -238,7 +238,7 @@ TEST(Type, Ptr) {
   auto const a2 = Type::Array(ArrayData::kMixedKind).ptr(Ptr::Frame);
   EXPECT_EQ(TBottom, a1 & a2);
   EXPECT_EQ(a1, a1 - a2);
-  EXPECT_EQ(TFunc, (TFunc | a1) - a1);
+  EXPECT_EQ(TVarEnv, (TVarEnv | a1) - a1);
 
   EXPECT_EQ(TBottom, TBottom.deref());
 
@@ -287,7 +287,7 @@ TEST(Type, Subtypes) {
   EXPECT_TRUE(TInt <= numbers);
   EXPECT_FALSE(TBool <= numbers);
 
-  EXPECT_FALSE(TFunc <= TCell);
+  EXPECT_TRUE(TFunc <= TCell);
   EXPECT_FALSE(TTCA <= TGen);
 
   EXPECT_TRUE(TPtrToCell < TPtrToGen);

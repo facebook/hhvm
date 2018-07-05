@@ -1,2 +1,6 @@
-File "async_block4.php", line 5, characters 15-39:
-Unexpected use of async {...} as lambda expression (Parsing[1002])
+File "async_block4.php", line 8, characters 10-19:
+Invalid return type (Typing[4110])
+File "async_block4.php", line 3, characters 31-36:
+This is a string
+File "async_block4.php", line 6, characters 12-13:
+It is incompatible with an int

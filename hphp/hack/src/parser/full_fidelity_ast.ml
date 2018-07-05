@@ -3095,20 +3095,11 @@ let elaborate_halt_compiler ast env source_text  =
   | None -> ast
 
 
-let lower env ~source_text ~script : result =
+let lower env ~source_text ~script comments : result =
   let ast = runP pScript script env in
   let ast = elaborate_toplevel_and_std_constants ast env source_text in
   let ast = elaborate_halt_compiler ast env source_text in
-  let comments, fixmes = scour_comments env.file source_text script env in
-  let comments = if env.include_line_comments then comments else
-    List.filter ~f:(fun (_,c) -> not (Prim_defs.is_line_comment c)) comments
-  in
   let content = if env.codegen then "" else SourceText.text source_text in
-  let () = if env.keep_errors then
-    if env.quick_mode then
-      Fixmes.DECL_HH_FIXMES.add env.file fixmes
-    else
-      Fixmes.HH_FIXMES.add env.file fixmes in
   { fi_mode = env.fi_mode
   ; is_hh_file = env.is_hh_file
   ; ast
@@ -3116,7 +3107,7 @@ let lower env ~source_text ~script : result =
   ; comments
   ; file = env.file
   }
-end (* FromPositionedSyntax *)
+end (* WithPositionedSyntax *)
 
 (* TODO: Make these not default to positioned_syntax *)
 include Full_fidelity_ast_types
@@ -3165,6 +3156,17 @@ let parse_text
   in
   (lang, mode, tree)
 
+let scour_comments_and_add_fixmes (env : env) source_text script =
+  let comments, fixmes =
+    FromPositionedSyntax.scour_comments env.file source_text script env in
+  let () = if env.keep_errors then
+    if env.quick_mode then
+      Fixmes.DECL_HH_FIXMES.add env.file fixmes
+    else
+      Fixmes.HH_FIXMES.add env.file fixmes in
+  if env.include_line_comments then comments else
+    List.filter ~f:(fun (_,c) -> not (Prim_defs.is_line_comment c)) comments
+
 let lower_tree
   (env : env)
   (source_text : SourceText.t)
@@ -3178,6 +3180,8 @@ let lower_tree
         PositionedSyntaxTree.sc_state tree &&
         env.codegen
     } in
+  let script = PositionedSyntaxTree.root tree in
+  let comments = scour_comments_and_add_fixmes env source_text script in
   let () =
     if env.codegen && not env.lower_coroutines then
       let hhvm_compat_mode = if env.systemlib_compat_mode
@@ -3239,7 +3243,6 @@ let lower_tree
   let popt = ParserOptions.with_hh_syntax_for_hhvm popt
     (env.codegen && (ParserOptions.enable_hh_syntax_for_hhvm popt || env.is_hh_file)) in
   let env = { env with parser_options = popt } in
-  let script = PositionedSyntaxTree.root tree in
   if env.lower_coroutines
   then
     let script =
@@ -3250,11 +3253,13 @@ let lower_tree
       env
       ~source_text
       ~script
+      comments
   else
     FromPositionedSyntax.lower
       env
       ~source_text
       ~script
+      comments
 
 let from_text (env : env) (source_text : SourceText.t) : result =
   let (lang, mode, tree) = parse_text env source_text in

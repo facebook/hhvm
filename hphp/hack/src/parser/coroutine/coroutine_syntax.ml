@@ -30,6 +30,8 @@ let make_syntax syntax =
 
 let single_space = " "
 
+let newline = "\n"
+
 let make_token_syntax ?text token_kind =
   let text = Option.value text ~default:(TokenKind.to_string token_kind) in
   make_syntax @@

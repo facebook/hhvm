@@ -304,7 +304,7 @@ let remove_strict_mode hh_decl =
       if matches_decl name
       then Rewriter.Result.Keep
       else
-        let new_suffix = Token.with_trailing_text single_space name in
+        let new_suffix = Token.with_trailing_text newline name in
         let markup_suffix_name =
           Syntax.synthesize_from suffix_name (Token new_suffix) in
         let new_node =

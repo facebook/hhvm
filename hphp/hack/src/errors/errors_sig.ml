@@ -130,7 +130,6 @@ module type S = sig
   val uninstantiable_class : Pos.t -> Pos.t -> string -> (Pos.t * string) list
     -> unit
   val abstract_const_usage: Pos.t -> Pos.t -> string -> unit
-  val typedef_constraint : Pos.t -> unit
   val add_a_typehint : Pos.t -> unit
   val local_const : Pos.t -> unit
   val illegal_constant : Pos.t -> unit

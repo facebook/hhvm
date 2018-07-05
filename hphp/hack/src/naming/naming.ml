@@ -2797,9 +2797,6 @@ module Make (GetLocals : GetLocals) = struct
     let tconstraint = Option.map tdef.t_constraint (hint env) in
     List.iter tdef.t_tparams check_constraint;
     let tparaml = type_paraml env tdef.t_tparams in
-    List.iter tparaml begin fun (_, _, constrs) ->
-          List.iter constrs (fun (_, (pos, _)) -> Errors.typedef_constraint pos)
-    end;
     let t_vis = match tdef.t_kind with
       | Ast.Alias _ -> N.Transparent
       | Ast.NewType _ -> N.Opaque

@@ -1042,10 +1042,6 @@ let abstract_const_usage usage_pos decl_pos name =
     decl_pos, "Declaration is here"
   ]
 
-let typedef_constraint pos =
-  add (Naming.err_code Naming.TypedefConstraint) pos
-    "Constraints on typedefs are not supported"
-
 let add_a_typehint pos =
   add (Naming.err_code Naming.AddATypehint) pos
     "Please add a type hint"

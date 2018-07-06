@@ -121,6 +121,10 @@ let should_be_rewritten receiver =
          (qualifier = "parent" && m <> "__construct")
       || qualifier = "static"
       || qualifier = "self"
+  | ScopeResolutionExpression {
+      scope_resolution_qualifier = e;
+      _;
+    } -> is_this e
   | _ -> false
 
 (**

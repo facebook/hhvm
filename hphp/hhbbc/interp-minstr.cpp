@@ -52,15 +52,11 @@ const StaticString s_stdClass("stdClass");
  */
 
 bool couldBeEmptyish(const Type& ty) {
-  return ty.couldBe(TNull) ||
-         ty.couldBe(sempty()) ||
-         ty.couldBe(TFalse);
+  return ty.couldBe(BNull | BFalse) || ty.couldBe(sempty());
 }
 
 bool mustBeEmptyish(const Type& ty) {
-  return ty.subtypeOf(TNull) ||
-         ty.subtypeOf(sempty()) ||
-         ty.subtypeOf(TFalse);
+  return ty.subtypeOf(BNull | BFalse) || ty.subtypeOf(sempty());
 }
 
 bool elemCouldPromoteToArr(const Type& ty) { return couldBeEmptyish(ty); }
@@ -75,13 +71,11 @@ bool propMustPromoteToObj(const Type& ty)  {
 }
 
 bool keyCouldBeWeird(const Type& key) {
-  return key.couldBe(TObj) || key.couldBe(TArr) || key.couldBe(TVec) ||
-    key.couldBe(TDict) || key.couldBe(TKeyset);
+  return key.couldBe(BObj | BArr | BVec | BDict | BKeyset);
 }
 
 bool mustBeArrLike(const Type& ty) {
-  return ty.subtypeOf(TArr)  || ty.subtypeOf(TVec) ||
-         ty.subtypeOf(TDict) || ty.subtypeOf(TKeyset);
+  return ty.subtypeOf(BArr | BVec | BDict | BKeyset);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -214,10 +208,10 @@ bool isDimBaseLoc(BaseLoc loc) {
 bool array_do_set(ISS& env, const Type& key, const Type& value) {
   auto& base = env.state.mInstrState.base.type;
   auto res = [&] () -> folly::Optional<std::pair<Type,ThrowMode>> {
-    if (base.subtypeOf(TArr))    return  array_set(std::move(base), key, value);
-    if (base.subtypeOf(TVec))    return    vec_set(std::move(base), key, value);
-    if (base.subtypeOf(TDict))   return   dict_set(std::move(base), key, value);
-    if (base.subtypeOf(TKeyset)) return keyset_set(std::move(base), key, value);
+    if (base.subtypeOf(BArr))    return  array_set(std::move(base), key, value);
+    if (base.subtypeOf(BVec))    return    vec_set(std::move(base), key, value);
+    if (base.subtypeOf(BDict))   return   dict_set(std::move(base), key, value);
+    if (base.subtypeOf(BKeyset)) return keyset_set(std::move(base), key, value);
     return folly::none;
   }();
   if (!res) return false;
@@ -250,10 +244,10 @@ folly::Optional<Type> array_do_elem(ISS& env,
                                     const Type& key) {
   auto const& base = env.state.mInstrState.base.type;
   auto res = [&] () -> folly::Optional<std::pair<Type,ThrowMode>> {
-    if (base.subtypeOf(TArr))    return  array_elem(base, key);
-    if (base.subtypeOf(TVec))    return    vec_elem(base, key);
-    if (base.subtypeOf(TDict))   return   dict_elem(base, key);
-    if (base.subtypeOf(TKeyset)) return keyset_elem(base, key);
+    if (base.subtypeOf(BArr))    return  array_elem(base, key);
+    if (base.subtypeOf(BVec))    return    vec_elem(base, key);
+    if (base.subtypeOf(BDict))   return   dict_elem(base, key);
+    if (base.subtypeOf(BKeyset)) return keyset_elem(base, key);
     return folly::none;
   }();
   if (!res) return folly::none;
@@ -292,10 +286,10 @@ folly::Optional<Type> array_do_elem(ISS& env,
 folly::Optional<Type> array_do_newelem(ISS& env, const Type& value) {
   auto& base = env.state.mInstrState.base.type;
   auto res = [&] () -> folly::Optional<std::pair<Type,Type>> {
-    if (base.subtypeOf(TArr))    return  array_newelem(std::move(base), value);
-    if (base.subtypeOf(TVec))    return    vec_newelem(std::move(base), value);
-    if (base.subtypeOf(TDict))   return   dict_newelem(std::move(base), value);
-    if (base.subtypeOf(TKeyset)) return keyset_newelem(std::move(base), value);
+    if (base.subtypeOf(BArr))    return  array_newelem(std::move(base), value);
+    if (base.subtypeOf(BVec))    return    vec_newelem(std::move(base), value);
+    if (base.subtypeOf(BDict))   return   dict_newelem(std::move(base), value);
+    if (base.subtypeOf(BKeyset)) return keyset_newelem(std::move(base), value);
     return folly::none;
   }();
   if (!res) return folly::none;
@@ -343,7 +337,7 @@ void setStackForBase(ISS& env, Type ty) {
   assert(locSlot < env.state.stack.size());
 
   auto const& oldTy = env.state.stack[locSlot].type;
-  if (oldTy.subtypeOf(TInitCell)) {
+  if (oldTy.subtypeOf(BInitCell)) {
     env.state.stack[locSlot] = StackElem {std::move(ty)};
   }
 }
@@ -359,7 +353,7 @@ void setPrivateStaticForBase(ISS& env, Type ty) {
   FTRACE(4, "      self::* |= {}\n", show(ty));
   mergeEachSelfPropRaw(
     env,
-    [&](const Type& old){ return old.subtypeOf(TInitCell) ? ty : TBottom; }
+    [&](const Type& old){ return old.subtypeOf(BInitCell) ? ty : TBottom; }
   );
 }
 
@@ -374,7 +368,7 @@ void setPropForBase(ISS& env, Type ty) {
   FTRACE(4, "      $this->* |= {}\n", show(ty));
   mergeEachThisPropRaw(
     env,
-    [&] (const Type& old) { return old.couldBe(TInitCell) ? ty : TBottom; }
+    [&] (const Type& old) { return old.couldBe(BInitCell) ? ty : TBottom; }
   );
 }
 
@@ -385,16 +379,16 @@ Type currentChainType(ISS& env, Type val) {
   auto it = env.state.mInstrState.arrayChain.end();
   while (it != env.state.mInstrState.arrayChain.begin()) {
     --it;
-    if (it->base.subtypeOf(TArr)) {
+    if (it->base.subtypeOf(BArr)) {
       val = array_set(it->base, it->key, val).first;
-    } else if (it->base.subtypeOf(TVec)) {
+    } else if (it->base.subtypeOf(BVec)) {
       val = vec_set(it->base, it->key, val).first;
       if (val == TBottom) val = TVec;
-    } else if (it->base.subtypeOf(TDict)) {
+    } else if (it->base.subtypeOf(BDict)) {
       val = dict_set(it->base, it->key, val).first;
       if (val == TBottom) val = TDict;
     } else {
-      assert(it->base.subtypeOf(TKeyset));
+      assert(it->base.subtypeOf(BKeyset));
       val = keyset_set(it->base, it->key, val).first;
       if (val == TBottom) val = TKeyset;
     }
@@ -411,17 +405,17 @@ Type resolveArrayChain(ISS& env, Type val) {
     env.state.mInstrState.arrayChain.pop_back();
     FTRACE(5, "{}  | {} := {} in {}\n", prefix,
       show(key), show(val), show(arr));
-    if (arr.subtypeOf(TVec)) {
+    if (arr.subtypeOf(BVec)) {
       val = vec_set(std::move(arr), key, val).first;
       if (val == TBottom) val = TVec;
-    } else if (arr.subtypeOf(TDict)) {
+    } else if (arr.subtypeOf(BDict)) {
       val = dict_set(std::move(arr), key, val).first;
       if (val == TBottom) val = TDict;
-    } else if (arr.subtypeOf(TKeyset)) {
+    } else if (arr.subtypeOf(BKeyset)) {
       val = keyset_set(std::move(arr), key, val).first;
       if (val == TBottom) val = TKeyset;
     } else {
-      assert(arr.subtypeOf(TArr));
+      assert(arr.subtypeOf(BArr));
       val = array_set(std::move(arr), key, val).first;
     }
   } while (!env.state.mInstrState.arrayChain.empty());
@@ -558,7 +552,7 @@ void promoteBasePropD(ISS& env, bool isNullsafe) {
   auto& ty = env.state.mInstrState.base.type;
 
   // NullSafe (Q) props do not promote an emptyish base to stdClass instance.
-  if (isNullsafe || ty.subtypeOf(TObj)) return;
+  if (isNullsafe || ty.subtypeOf(BObj)) return;
 
   if (propMustPromoteToObj(ty)) {
     ty = objExact(env.index.builtin_class(s_stdClass.get()));
@@ -585,7 +579,7 @@ void promoteBaseElemD(ISS& env) {
   // Intermediate ElemD operations on strings fatal, unless the string is empty,
   // which promotes to array. So for any string here we can assume it promoted
   // to an empty array.
-  if (ty.subtypeOf(TStr)) {
+  if (ty.subtypeOf(BStr)) {
     ty = some_aempty();
     return;
   }
@@ -796,7 +790,7 @@ Base miBaseSProp(ISS& env, Type cls, const Type& tprop) {
     }
   }
   auto indexTy = env.index.lookup_public_static(cls, tprop);
-  if (!indexTy.subtypeOf(TInitCell)) indexTy = TInitCell;
+  if (!indexTy.subtypeOf(BInitCell)) indexTy = TInitCell;
   return Base { std::move(indexTy),
                 BaseLoc::StaticProp,
                 std::move(cls),
@@ -831,12 +825,12 @@ void miProp(ISS& env, bool isNullsafe, MOpMode mode, Type key) {
   if (isUnset && couldBeThisObj(env, env.state.mInstrState.base)) {
     if (name) {
       auto const ty = thisPropRaw(env, name);
-      if (ty && ty->couldBe(TUninit)) {
+      if (ty && ty->couldBe(BUninit)) {
         mergeThisProp(env, name, TInitNull);
       }
     } else {
       mergeEachThisPropRaw(env, [&] (const Type& ty) {
-        return ty.couldBe(TUninit) ? TInitNull : TBottom;
+        return ty.couldBe(BUninit) ? TInitNull : TBottom;
       });
     }
   }
@@ -867,7 +861,7 @@ void miProp(ISS& env, bool isNullsafe, MOpMode mode, Type key) {
   }
 
   // We know for sure we're going to be in an object property.
-  if (env.state.mInstrState.base.type.subtypeOf(TObj)) {
+  if (env.state.mInstrState.base.type.subtypeOf(BObj)) {
     moveBase(env,
              Base { TInitCell,
                     BaseLoc::Prop,
@@ -930,7 +924,7 @@ void miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
     return;
   }
 
-  if (env.state.mInstrState.base.type.subtypeOf(TStr)) {
+  if (env.state.mInstrState.base.type.subtypeOf(BStr)) {
     moveBase(env, Base { TStr, BaseLoc::Elem }, update);
     return;
   }
@@ -969,8 +963,8 @@ void miFinalIssetProp(ISS& env, int32_t nDiscard, const Type& key) {
   discard(env, nDiscard);
   if (name && mustBeThisObj(env, env.state.mInstrState.base)) {
     if (auto const pt = thisPropAsCell(env, name)) {
-      if (pt->subtypeOf(TNull))  return push(env, TFalse);
-      if (!pt->couldBe(TNull))   return push(env, TTrue);
+      if (pt->subtypeOf(BNull))  return push(env, TFalse);
+      if (!pt->couldBe(BNull))   return push(env, TTrue);
     }
   }
   push(env, TBool);
@@ -1024,7 +1018,7 @@ void miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key) {
       mergeEachThisPropRaw(
         env,
         [&] (Type propTy) {
-          return propTy.couldBe(TInitCell) ? t1 : TBottom;
+          return propTy.couldBe(BInitCell) ? t1 : TBottom;
         }
       );
     } else {
@@ -1032,7 +1026,7 @@ void miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key) {
     }
   }
 
-  if (env.state.mInstrState.base.type.subtypeOf(TObj)) {
+  if (env.state.mInstrState.base.type.subtypeOf(BObj)) {
     moveBase(
       env,
       Base { t1, BaseLoc::Prop, env.state.mInstrState.base.type, name }
@@ -1185,9 +1179,9 @@ void miFinalVGetElem(ISS& env, int32_t nDiscard, const Type& key) {
   };
 
   auto const& baseTy = env.state.mInstrState.base.type;
-  if (baseTy.subtypeOf(TVec) ||
-      baseTy.subtypeOf(TDict) ||
-      baseTy.subtypeOf(TKeyset)) {
+  if (baseTy.subtypeOf(BVec) ||
+      baseTy.subtypeOf(BDict) ||
+      baseTy.subtypeOf(BKeyset)) {
     unreachable(env);
     return finish(TBottom);
   }
@@ -1216,7 +1210,7 @@ void miFinalSetElem(ISS& env,
     env.state.mInstrState.base.type = some_aempty();
   } else {
     auto& ty = env.state.mInstrState.base.type;
-    if (ty.couldBe(TStr)) {
+    if (ty.couldBe(BStr)) {
       // Note here that a string type stays a string (with a changed character,
       // and loss of staticness), unless it was the empty string, where it
       // becomes an array.  Do it conservatively for now:
@@ -1225,7 +1219,7 @@ void miFinalSetElem(ISS& env,
         some_aempty()
       );
     }
-    if (!ty.subtypeOf(TStr)) promoteBaseElemD(env);
+    if (!ty.subtypeOf(BStr)) promoteBaseElemD(env);
   }
 
   /*
@@ -1247,7 +1241,7 @@ void miFinalSetElem(ISS& env,
   if (array_do_set(env, key, t1)) {
     if (env.state.unreachable) return finish(TBottom);
     auto const maybeWeird =
-      env.state.mInstrState.base.type.subtypeOf(TArr) && keyCouldBeWeird(key);
+      env.state.mInstrState.base.type.subtypeOf(BArr) && keyCouldBeWeird(key);
     return finish(maybeWeird ? union_of(t1, TInitNull) : t1);
   }
 
@@ -1258,7 +1252,7 @@ void miFinalSetElem(ISS& env,
   auto const isWeird =
     keyCouldBeWeird(key) ||
     (!mustBeEmptyish(env.state.mInstrState.base.type) &&
-     !env.state.mInstrState.base.type.subtypeOf(TObj));
+     !env.state.mInstrState.base.type.subtypeOf(BObj));
   finish(isWeird ? TInitCell : t1);
 }
 
@@ -1272,7 +1266,7 @@ void miFinalSetOpElem(ISS& env, int32_t nDiscard,
   auto const lhsTy = [&] {
     if (auto ty = array_do_elem(env, false, key)) {
       if (env.state.unreachable) return TBottom;
-      assertx(!ty->subtypeOf(TBottom));
+      assertx(!ty->subtypeOf(BBottom));
       return std::move(*ty);
     }
     return TInitCell;
@@ -1293,7 +1287,7 @@ void miFinalIncDecElem(ISS& env, int32_t nDiscard,
   auto const postTy = [&] {
     if (auto ty = array_do_elem(env, false, key)) {
       if (env.state.unreachable) return TBottom;
-      assertx(!ty->subtypeOf(TBottom));
+      assertx(!ty->subtypeOf(BBottom));
       return std::move(*ty);
     }
     return TInitCell;
@@ -1319,9 +1313,9 @@ void miFinalBindElem(ISS& env, int32_t nDiscard, const Type& key) {
   };
 
   auto const& baseTy = env.state.mInstrState.base.type;
-  if (baseTy.subtypeOf(TVec) ||
-      baseTy.subtypeOf(TDict) ||
-      baseTy.subtypeOf(TKeyset)) {
+  if (baseTy.subtypeOf(BVec) ||
+      baseTy.subtypeOf(BDict) ||
+      baseTy.subtypeOf(BKeyset)) {
     unreachable(env);
     return finish(TBottom);
   }
@@ -1363,9 +1357,9 @@ void miFinalVGetNewElem(ISS& env, int32_t nDiscard) {
   };
 
   auto const& baseTy = env.state.mInstrState.base.type;
-  if (baseTy.subtypeOf(TVec) ||
-      baseTy.subtypeOf(TDict) ||
-      baseTy.subtypeOf(TKeyset)) {
+  if (baseTy.subtypeOf(BVec) ||
+      baseTy.subtypeOf(BDict) ||
+      baseTy.subtypeOf(BKeyset)) {
     unreachable(env);
     return finish(TBottom);
   }
@@ -1433,9 +1427,9 @@ void miFinalBindNewElem(ISS& env, int32_t nDiscard) {
   };
 
   auto const& baseTy = env.state.mInstrState.base.type;
-  if (baseTy.subtypeOf(TVec)||
-      baseTy.subtypeOf(TDict) ||
-      baseTy.subtypeOf(TKeyset)) {
+  if (baseTy.subtypeOf(BVec)||
+      baseTy.subtypeOf(BDict) ||
+      baseTy.subtypeOf(BKeyset)) {
     unreachable(env);
     return finish(TBottom);
   }
@@ -1444,9 +1438,9 @@ void miFinalBindNewElem(ISS& env, int32_t nDiscard) {
 
 void miFinalSetWithRef(ISS& env) {
   auto const& baseTy = env.state.mInstrState.base.type;
-  auto const isvec = baseTy.subtypeOf(TVec);
-  auto const isdict = baseTy.subtypeOf(TDict);
-  auto const iskeyset = baseTy.subtypeOf(TKeyset);
+  auto const isvec = baseTy.subtypeOf(BVec);
+  auto const isdict = baseTy.subtypeOf(BDict);
+  auto const iskeyset = baseTy.subtypeOf(BKeyset);
   endBase(env);
   if (!isvec && !isdict && !iskeyset) {
     killLocals(env);
@@ -1542,7 +1536,7 @@ void in(ISS& env, const bc::BaseR& op) {
   startBase(
     env,
     Base {
-      ty.subtypeOf(TInitCell) ? std::move(ty) : TInitCell,
+      ty.subtypeOf(BInitCell) ? std::move(ty) : TInitCell,
       BaseLoc::Stack,
       TBottom,
       SString{},
@@ -1614,8 +1608,8 @@ void in(ISS& env, const bc::QueryM& op) {
       case QueryMOp::Isset:
         miFinalCGetElem(env, nDiscard, *key, true,
                         [](Type t) {
-                          return t.subtypeOf(TInitNull) ? TFalse :
-                            !t.couldBe(TInitNull) ? TTrue : TBool;
+                          return t.subtypeOf(BInitNull) ? TFalse :
+                            !t.couldBe(BInitNull) ? TTrue : TBool;
                         });
         break;
       case QueryMOp::Empty:

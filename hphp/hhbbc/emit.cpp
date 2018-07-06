@@ -430,7 +430,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
         return;
 
       case Op::DefCns: {
-        if (ue.m_returnSeen || tos.subtypeOf(TBottom)) break;
+        if (ue.m_returnSeen || tos.subtypeOf(BBottom)) break;
         auto top = tv(tos);
         assertx(top);
         auto val = euState.index.lookup_persistent_constant(bc.DefCns.str1);
@@ -461,7 +461,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
         tos = TBottom;
         return;
       case Op::RetC: {
-        if (ue.m_returnSeen || tos.subtypeOf(TBottom)) break;
+        if (ue.m_returnSeen || tos.subtypeOf(BBottom)) break;
         auto top = tv(tos);
         assertx(top);
         ue.m_returnSeen = true;
@@ -1312,7 +1312,7 @@ void emit_finish_func(EmitUnitState& state,
   fe.isMemoizeWrapper = func.isMemoizeWrapper;
 
   auto const retTy = state.index.lookup_return_type_and_clear(&func);
-  if (!retTy.subtypeOf(TBottom)) {
+  if (!retTy.subtypeOf(BBottom)) {
     auto const rat = make_repo_type(*state.index.array_table_builder(), retTy);
     merge_repo_auth_type(fe.ue(), rat);
     fe.repoReturnType = rat;
@@ -1320,7 +1320,7 @@ void emit_finish_func(EmitUnitState& state,
 
   if (is_specialized_wait_handle(retTy)) {
     auto const awaitedTy = wait_handle_inner(retTy);
-    if (!awaitedTy.subtypeOf(TBottom)) {
+    if (!awaitedTy.subtypeOf(BBottom)) {
       auto const rat = make_repo_type(
         *state.index.array_table_builder(),
         awaitedTy
@@ -1469,7 +1469,7 @@ void emit_class(EmitUnitState& state,
   auto const privateStatics = state.index.lookup_private_statics(&cls, true);
   for (auto& prop : cls.properties) {
     auto const makeRat = [&] (const Type& ty) -> RepoAuthType {
-      if (ty.couldBe(TCls)) {
+      if (ty.couldBe(BCls)) {
         return RepoAuthType{};
       }
       auto const rat = make_repo_type(*state.index.array_table_builder(), ty);

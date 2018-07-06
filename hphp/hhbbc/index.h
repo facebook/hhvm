@@ -556,7 +556,7 @@ struct Index {
    * Try to resolve a class method named `name' with a given Context
    * and class type.
    *
-   * Pre: clsType.subtypeOf(TCls)
+   * Pre: clsType.subtypeOf(BCls)
    */
   res::Func resolve_method(Context, Type clsType, SString name) const;
 

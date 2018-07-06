@@ -190,7 +190,7 @@ void modifyLocalStatic(ISS& env, LocalId id, const Type& t) {
     if (is_volatile_local(env.ctx.func, lid)) return;
     if (env.state.localStaticBindings.size() <= lid) return;
     if (env.state.localStaticBindings[lid] == LocalStaticBinding::None) return;
-    if (t.subtypeOf(TUninit) && !t.subtypeOf(TBottom)) {
+    if (t.subtypeOf(BUninit) && !t.subtypeOf(BBottom)) {
       // Uninit means we are unbinding.
       env.state.localStaticBindings[lid] = id == NoLocalId ?
         LocalStaticBinding::None : LocalStaticBinding::Maybe;
@@ -199,7 +199,7 @@ void modifyLocalStatic(ISS& env, LocalId id, const Type& t) {
     if (lid >= env.collect.localStaticTypes.size()) {
       env.collect.localStaticTypes.resize(lid + 1, TBottom);
     }
-    env.collect.localStaticTypes[lid] = t.subtypeOf(TCell) ?
+    env.collect.localStaticTypes[lid] = t.subtypeOf(BCell) ?
       union_of(std::move(env.collect.localStaticTypes[lid]), t) :
       TGen;
   };
@@ -261,32 +261,32 @@ Type popT(ISS& env) {
   assert(!env.state.stack.empty());
   auto const ret = std::move(env.state.stack.back().type);
   FTRACE(2, "    pop:  {}\n", show(ret));
-  assert(ret.subtypeOf(TGen));
+  assert(ret.subtypeOf(BGen));
   env.state.stack.pop_back();
   return ret;
 }
 
 Type popC(ISS& env) {
   auto const v = popT(env);
-  assert(v.subtypeOf(TInitCell));
+  assert(v.subtypeOf(BInitCell));
   return v;
 }
 
 Type popV(ISS& env) {
   auto const v = popT(env);
-  assert(v.subtypeOf(TRef));
+  assert(v.subtypeOf(BRef));
   return v;
 }
 
 Type popU(ISS& env) {
   auto const v = popT(env);
-  assert(v.subtypeOf(TUninit));
+  assert(v.subtypeOf(BUninit));
   return v;
 }
 
 Type popCU(ISS& env) {
   auto const v = popT(env);
-  assert(v.subtypeOf(TCell));
+  assert(v.subtypeOf(BCell));
   return v;
 }
 
@@ -306,14 +306,14 @@ Type& topT(ISS& env, uint32_t idx = 0) {
 }
 
 Type& topC(ISS& env, uint32_t i = 0) {
-  assert(topT(env, i).subtypeOf(TInitCell));
+  assert(topT(env, i).subtypeOf(BInitCell));
   return topT(env, i);
 }
 
 Type& topR(ISS& env, uint32_t i = 0) { return topT(env, i); }
 
 Type& topV(ISS& env, uint32_t i = 0) {
-  assert(topT(env, i).subtypeOf(TRef));
+  assert(topT(env, i).subtypeOf(BRef));
   return topT(env, i);
 }
 
@@ -324,7 +324,7 @@ void push(ISS& env, Type t) {
 
 void push(ISS& env, Type t, LocalId l) {
   if (l != StackDupId) {
-    if (l == NoLocalId || peekLocRaw(env, l).couldBe(TRef)) {
+    if (l == NoLocalId || peekLocRaw(env, l).couldBe(BRef)) {
       return push(env, t);
     }
     assertx(!is_volatile_local(env.ctx.func, l)); // volatiles are TGen
@@ -509,7 +509,7 @@ void killAllLocEquiv(ISS& env) {
 void addLocEquiv(ISS& env,
                  LocalId from,
                  LocalId to) {
-  always_assert(peekLocRaw(env, from).subtypeOf(TCell));
+  always_assert(peekLocRaw(env, from).subtypeOf(BCell));
   always_assert(!is_volatile_local(env.ctx.func, to));
   always_assert(from != to && findLocEquiv(env, from) == NoLocalId);
 
@@ -545,7 +545,7 @@ LocalId topStkEquiv(ISS& env, uint32_t idx = 0) {
 
 void setStkLocal(ISS& env, LocalId loc, uint32_t idx = 0) {
   assertx(loc <= MaxLocalId);
-  always_assert(peekLocRaw(env, loc).subtypeOf(TCell));
+  always_assert(peekLocRaw(env, loc).subtypeOf(BCell));
   while (true) {
     auto equiv = topStkEquiv(env, idx);
     if (equiv != StackDupId) {
@@ -660,7 +660,7 @@ folly::Optional<Type> staticLocType(ISS& env, LocalId l, const Type& super) {
     auto t = env.collect.localStaticTypes[l];
     if (t.subtypeOf(super)) {
       useLocalStatic(env, l);
-      if (t.subtypeOf(TBottom)) t = TInitNull;
+      if (t.subtypeOf(BBottom)) t = TInitNull;
       return std::move(t);
     }
   }
@@ -675,8 +675,8 @@ Type locAsCell(ISS& env, LocalId l) {
     return std::move(*s);
   }
   auto t = locRaw(env, l);
-  return !t.subtypeOf(TCell) ? TInitCell :
-          t.subtypeOf(TUninit) ? TInitNull :
+  return !t.subtypeOf(BCell) ? TInitCell :
+          t.subtypeOf(BUninit) ? TInitNull :
           remove_uninit(std::move(t));
 }
 
@@ -687,16 +687,16 @@ Type derefLoc(ISS& env, LocalId l) {
     return std::move(*s);
   }
   auto v = locRaw(env, l);
-  if (v.subtypeOf(TCell)) return v;
-  return v.couldBe(TUninit) ? TCell : TInitCell;
+  if (v.subtypeOf(BCell)) return v;
+  return v.couldBe(BUninit) ? TCell : TInitCell;
 }
 
 bool locCouldBeUninit(ISS& env, LocalId l) {
-  return locRaw(env, l).couldBe(TUninit);
+  return locRaw(env, l).couldBe(BUninit);
 }
 
 bool locCouldBeRef(ISS& env, LocalId l) {
-  return locRaw(env, l).couldBe(TRef);
+  return locRaw(env, l).couldBe(BRef);
 }
 
 /*
@@ -706,24 +706,24 @@ bool locCouldBeRef(ISS& env, LocalId l) {
  */
 void refineLocHelper(ISS& env, LocalId l, Type t) {
   auto v = peekLocRaw(env, l);
-  if (v.subtypeOf(TCell)) env.state.locals[l] = std::move(t);
+  if (v.subtypeOf(BCell)) env.state.locals[l] = std::move(t);
 }
 
 template<typename F>
 bool refineLocation(ISS& env, LocalId l, F fun) {
   bool ok = true;
   auto refine = [&] (Type t) {
-    always_assert(t.subtypeOf(TCell));
+    always_assert(t.subtypeOf(BCell));
     auto r1 = fun(t);
     auto r2 = intersection_of(r1, t);
     // In unusual edge cases (mainly intersection of two unrelated
     // interfaces) the intersection may not be a subtype of its inputs.
     // In that case, always choose fun's type.
     if (r2.subtypeOf(r1)) {
-      if (r2.subtypeOf(TBottom)) ok = false;
+      if (r2.subtypeOf(BBottom)) ok = false;
       return r2;
     }
-    if (r1.subtypeOf(TBottom)) ok = false;
+    if (r1.subtypeOf(BBottom)) ok = false;
     return r1;
   };
   if (l == StackDupId) {
@@ -794,7 +794,7 @@ void loseNonRefLocalTypes(ISS& env) {
   readUnknownLocals(env);
   FTRACE(2, "    loseNonRefLocalTypes\n");
   for (auto& l : env.state.locals) {
-    if (l.subtypeOf(TCell)) l = TCell;
+    if (l.subtypeOf(BCell)) l = TCell;
   }
   killAllLocEquiv(env);
   killAllStkEquiv(env);
@@ -807,7 +807,7 @@ void boxUnknownLocal(ISS& env) {
   readUnknownLocals(env);
   FTRACE(2, "   boxUnknownLocal\n");
   for (auto& l : env.state.locals) {
-    if (!l.subtypeOf(TRef)) l = TGen;
+    if (!l.subtypeOf(BRef)) l = TGen;
   }
   killAllLocEquiv(env);
   killAllStkEquiv(env);
@@ -944,7 +944,7 @@ void specialFunctionEffects(ISS& env, ActRec ar) {
 // Read the specified class-ref slot without discarding the stored value.
 const Type& peekClsRefSlot(ISS& env, ClsRefSlotId slot) {
   assert(slot != NoClsRefSlotId);
-  always_assert_flog(env.state.clsRefSlots[slot].subtypeOf(TCls),
+  always_assert_flog(env.state.clsRefSlots[slot].subtypeOf(BCls),
                      "class-ref slot contained non-TCls");
   return env.state.clsRefSlots[slot];
 }
@@ -954,14 +954,14 @@ Type takeClsRefSlot(ISS& env, ClsRefSlotId slot) {
   assert(slot != NoClsRefSlotId);
   auto ret = std::move(env.state.clsRefSlots[slot]);
   FTRACE(2, "    read class-ref: {} -> {}\n", slot, show(ret));
-  always_assert_flog(ret.subtypeOf(TCls), "class-ref slot contained non-TCls");
+  always_assert_flog(ret.subtypeOf(BCls), "class-ref slot contained non-TCls");
   env.state.clsRefSlots[slot] = TCls;
   return ret;
 }
 
 void putClsRefSlot(ISS& env, ClsRefSlotId slot, Type ty) {
   assert(slot != NoClsRefSlotId);
-  always_assert_flog(ty.subtypeOf(TCls),
+  always_assert_flog(ty.subtypeOf(BCls),
                      "attempted to set class-ref slot to non-TCls");
   FTRACE(2, "    write class-ref: {} -> {}\n", slot, show(ty));
   env.state.clsRefSlots[slot] = std::move(ty);
@@ -1079,14 +1079,14 @@ void killThisProps(ISS& env) {
 folly::Optional<Type> thisPropAsCell(ISS& env, SString name) {
   auto const t = thisPropRaw(env, name);
   if (!t) return folly::none;
-  if (t->couldBe(TUninit)) {
+  if (t->couldBe(BUninit)) {
     auto const rthis = thisType(env);
     if (!rthis || dobj_of(*rthis).cls.couldHaveMagicGet()) {
       return TInitCell;
     }
   }
-  return !t->subtypeOf(TCell) ? TInitCell :
-          t->subtypeOf(TUninit) ? TInitNull :
+  return !t->subtypeOf(BCell) ? TInitCell :
+          t->subtypeOf(BUninit) ? TInitNull :
           remove_uninit(*t);
 }
 
@@ -1145,7 +1145,7 @@ void boxThisProp(ISS& env, SString name) {
 void loseNonRefThisPropTypes(ISS& env) {
   FTRACE(2, "    loseNonRefThisPropTypes\n");
   for (auto& kv : env.collect.props.privateProperties()) {
-    if (kv.second.subtypeOf(TCell)) kv.second = TCell;
+    if (kv.second.subtypeOf(BCell)) kv.second = TCell;
   }
 }
 
@@ -1181,8 +1181,8 @@ void killSelfProp(ISS& env, SString name) {
 folly::Optional<Type> selfPropAsCell(ISS& env, SString name) {
   auto const t = selfPropRaw(env, name);
   if (!t) return folly::none;
-  return !t->subtypeOf(TCell) ? TInitCell :
-          t->subtypeOf(TUninit) ? TInitNull :
+  return !t->subtypeOf(BCell) ? TInitCell :
+          t->subtypeOf(BUninit) ? TInitNull :
           remove_uninit(*t);
 }
 
@@ -1223,7 +1223,7 @@ void boxSelfProp(ISS& env, SString name) {
 void loseNonRefSelfPropTypes(ISS& env) {
   FTRACE(2, "    loseNonRefSelfPropTypes\n");
   for (auto& kv : env.collect.props.privateStatics()) {
-    if (kv.second.subtypeOf(TInitCell)) kv.second = TCell;
+    if (kv.second.subtypeOf(BInitCell)) kv.second = TCell;
   }
 }
 

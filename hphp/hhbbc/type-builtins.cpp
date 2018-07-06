@@ -90,7 +90,7 @@ Type native_function_return_type(borrowed_ptr<const php::Func> f,
     auto const hni = f->nativeInfo->returnType;
     return hni ? from_DataType(*hni) : TInitCell;
   }();
-  if (t.subtypeOf(TArr)) {
+  if (t.subtypeOf(BArr)) {
     if (f->retTypeConstraint.isVArray()) {
       assertx(!RuntimeOption::EvalHackArrDVArrs);
       t = TVArr;

@@ -189,13 +189,13 @@ uint32_t numPush(const Bytecode& bc) {
 // a Ref).
 bool setCouldHaveSideEffects(const Type& t) {
   return
-    t.couldBe(TRef) ||
+    t.couldBe(BRef) ||
     could_run_destructor(t);
 }
 
 // Some reads could raise warnings and run arbitrary code.
 bool readCouldHaveSideEffects(const Type& t) {
-  return t.couldBe(TUninit);
+  return t.couldBe(BUninit);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -577,7 +577,7 @@ Type topT(Env& env, uint32_t idx = 0) {
 
 Type topC(Env& env, uint32_t idx = 0) {
   auto const t = topT(env, idx);
-  assert(t.subtypeOf(TInitCell));
+  assert(t.subtypeOf(BInitCell));
   return t;
 }
 
@@ -1128,7 +1128,7 @@ void dce(Env& env, const bc::ClsRefName& op) {
 }
 
 bool clsRefGetHelper(Env& env, const Type& ty, ClsRefSlotId slot) {
-  if (!ty.subtypeOf(TObj)) {
+  if (!ty.subtypeOf(BObj)) {
     if (!ty.strictSubtypeOf(TStr)) return false;
     auto v = tv(ty);
     if (!v) return false;
@@ -1420,10 +1420,10 @@ void dce(Env& env, const bc::AddElemC& /*op*/) {
         if (allUnusedIfNotLastRef(ui)) return PushFlags::MarkUnused;
         auto v = tv(arrPost);
         CompactVector<Bytecode> bcs;
-        if (arrPost.subtypeOf(TArrN)) {
+        if (arrPost.subtypeOf(BArrN)) {
           bcs.emplace_back(bc::Array { v->m_data.parr });
         } else {
-          assert(arrPost.subtypeOf(TDictN));
+          assert(arrPost.subtypeOf(BDictN));
           bcs.emplace_back(bc::Dict { v->m_data.parr });
         }
         env.dceState.replaceMap.emplace(env.id, std::move(bcs));
@@ -1437,20 +1437,20 @@ void dce(Env& env, const bc::AddElemC& /*op*/) {
         CompactVector<Bytecode> bcs;
         if (cat.cat == Type::ArrayCat::Struct &&
             *postSize <= ArrayData::MaxElemsOnStack) {
-          if (arrPost.subtypeOf(TPArrN)) {
+          if (arrPost.subtypeOf(BPArrN)) {
             bcs.emplace_back(bc::NewStructArray { get_string_keys(arrPost) });
-          } else if (arrPost.subtypeOf(TDArrN)) {
+          } else if (arrPost.subtypeOf(BDArrN)) {
             bcs.emplace_back(bc::NewStructDArray { get_string_keys(arrPost) });
           } else {
             return PushFlags::MarkLive;
           }
         } else if (cat.cat == Type::ArrayCat::Packed &&
                    *postSize <= ArrayData::MaxElemsOnStack) {
-          if (arrPost.subtypeOf(TPArrN)) {
+          if (arrPost.subtypeOf(BPArrN)) {
             bcs.emplace_back(
               bc::NewPackedArray { static_cast<uint32_t>(*postSize) }
             );
-          } else if (arrPost.subtypeOf(TVArrN)) {
+          } else if (arrPost.subtypeOf(BVArrN)) {
             bcs.emplace_back(
               bc::NewVArray { static_cast<uint32_t>(*postSize) }
             );
@@ -1482,7 +1482,7 @@ void dce(Env& env, const bc::AddElemC& /*op*/) {
 void dce(Env& env, const bc::PopL& op) {
   auto const effects = setLocCouldHaveSideEffects(env, op.loc1);
   if (!isLocLive(env, op.loc1) && !effects) {
-    assert(!locRaw(env, op.loc1).couldBe(TRef) ||
+    assert(!locRaw(env, op.loc1).couldBe(BRef) ||
            env.stateBefore.localStaticBindings[op.loc1] ==
            LocalStaticBinding::Bound);
     discardNonDtors(env);
@@ -1490,7 +1490,7 @@ void dce(Env& env, const bc::PopL& op) {
     return;
   }
   pop(env);
-  if (effects || locRaw(env, op.loc1).couldBe(TRef)) {
+  if (effects || locRaw(env, op.loc1).couldBe(BRef)) {
     addLocGen(env, op.loc1);
   } else {
     addLocKill(env, op.loc1);
@@ -1506,7 +1506,7 @@ void dce(Env& env, const bc::InitThisLoc& op) {
 void dce(Env& env, const bc::SetL& op) {
   auto const effects = setLocCouldHaveSideEffects(env, op.loc1);
   if (!isLocLive(env, op.loc1) && !effects) {
-    assert(!locRaw(env, op.loc1).couldBe(TRef) ||
+    assert(!locRaw(env, op.loc1).couldBe(BRef) ||
            env.stateBefore.localStaticBindings[op.loc1] ==
            LocalStaticBinding::Bound);
     return markDead(env);
@@ -1520,7 +1520,7 @@ void dce(Env& env, const bc::SetL& op) {
     ui.actions[env.id] = DceAction::Replace;
     return PushFlags::MarkDead;
   });
-  if (effects || locRaw(env, op.loc1).couldBe(TRef)) {
+  if (effects || locRaw(env, op.loc1).couldBe(BRef)) {
     addLocGen(env, op.loc1);
   } else {
     addLocKill(env, op.loc1);
@@ -1529,7 +1529,7 @@ void dce(Env& env, const bc::SetL& op) {
 
 void dce(Env& env, const bc::UnsetL& op) {
   auto const oldTy   = locRaw(env, op.loc1);
-  if (oldTy.subtypeOf(TUninit)) return markDead(env);
+  if (oldTy.subtypeOf(BUninit)) return markDead(env);
 
   // Unsetting a local bound to a static never has side effects
   // because the static itself has a reference to the value.
@@ -1589,7 +1589,7 @@ bool setOpLSideEffects(const bc::SetOpL& op, const Type& lhs, const Type& rhs) {
     case SetOpOp::SlEqual:
     case SetOpOp::SrEqual:
       return RuntimeOption::EnableHipHopSyntax &&
-        (lhs.subtypeOf(TStr) || rhs.subtypeOf(TStr));
+        (lhs.subtypeOf(BStr) || rhs.subtypeOf(BStr));
   }
   not_reached();
 }

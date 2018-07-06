@@ -427,7 +427,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
    * In this case, we leave the return type as TBottom, to indicate
    * the same to callers.
    */
-  assert(ai.inferredReturn.subtypeOf(TGen));
+  assert(ai.inferredReturn.subtypeOf(BGen));
 
   // For debugging, print the final input states for each block.
   FTRACE(2, "{}", [&] {
@@ -640,7 +640,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
 
     if (!(prop.attrs & AttrStatic)) {
       auto t = (prop.attrs & AttrNoSerialize) ? cellTy : loosen_all(cellTy);
-      if (!is_closure(*ctx.cls) && t.subtypeOf(TUninit)) {
+      if (!is_closure(*ctx.cls) && t.subtypeOf(BUninit)) {
         /*
          * For non-closure classes, a property of type KindOfUninit
          * means that it has non-scalar initializer which will be set
@@ -662,7 +662,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       // though---we use instance properties for the closure
       // 86static_* properties.
       auto t = cellTy;
-      if (t.subtypeOf(TUninit)) {
+      if (t.subtypeOf(BUninit)) {
         t = TBottom;
       }
       clsAnalysis.privateStatics[prop.name] = t;
@@ -715,9 +715,9 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
   for (auto& prop : ctx.cls->properties) {
     if (!(prop.attrs & AttrPrivate)) continue;
     if (prop.attrs & AttrStatic) {
-      assert(!clsAnalysis.privateStatics[prop.name].subtypeOf(TBottom));
+      assert(!clsAnalysis.privateStatics[prop.name].subtypeOf(BBottom));
     } else {
-      assert(!clsAnalysis.privateProperties[prop.name].subtypeOf(TBottom));
+      assert(!clsAnalysis.privateProperties[prop.name].subtypeOf(BBottom));
     }
   }
 

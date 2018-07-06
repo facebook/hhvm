@@ -1807,7 +1807,7 @@ bool build_cls_info(IndexData& index, borrowed_ptr<ClassInfo> cinfo) {
      * we union things in we'll have inferred nothing much.
      */
     auto const tyRaw = from_cell(prop.val);
-    auto const ty = tyRaw.subtypeOf(TUninit) ? TBottom : tyRaw;
+    auto const ty = tyRaw.subtypeOf(BUninit) ? TBottom : tyRaw;
     cinfo->publicStaticProps[prop.name] = PublicSPropEntry { ty, ty, false };
   }
 
@@ -3102,7 +3102,7 @@ Type context_sensitive_return_type(const Index& index,
   }
 
   auto maybe_loosen_staticness = [&] (const Type& ty) {
-    return returnType.subtypeOf(TUnc) ? ty : loosen_staticness(ty);
+    return returnType.subtypeOf(BUnc) ? ty : loosen_staticness(ty);
   };
 
   if (index.frozen()) {
@@ -3266,7 +3266,7 @@ PublicSPropEntry lookup_public_static_impl(
   }
 
   always_assert_flog(
-    !knownClsPart->inferredType.subtypeOf(TBottom),
+    !knownClsPart->inferredType.subtypeOf(BBottom),
     "A public static property had type TBottom; probably "
     "was marked uninit but didn't show up in the class 86sinit."
   );
@@ -3659,28 +3659,28 @@ folly::Optional<Type> Index::resolve_class_or_type_alias(
 
   auto const res = resolve_type_name(name);
 
-  if (res.nullable && candidate.subtypeOf(TInitNull)) return TInitNull;
+  if (res.nullable && candidate.subtypeOf(BInitNull)) return TInitNull;
 
   if (res.type == AnnotType::Object) {
     auto resolve = [&] (const res::Class& rcls) -> folly::Optional<Type> {
       if (!interface_supports_non_objects(rcls.name()) ||
-          candidate.subtypeOf(TObj)) {
+          candidate.subtypeOrNull(BObj)) {
         return subObj(rcls);
       }
 
-      if (candidate.subtypeOf(TOptArr)) {
+      if (candidate.subtypeOrNull(BArr)) {
         if (interface_supports_array(rcls.name())) return TArr;
-      } else if (candidate.subtypeOf(TOptVec)) {
+      } else if (candidate.subtypeOrNull(BVec)) {
         if (interface_supports_vec(rcls.name())) return TVec;
-      } else if (candidate.subtypeOf(TOptDict)) {
+      } else if (candidate.subtypeOrNull(BDict)) {
         if (interface_supports_dict(rcls.name())) return TDict;
-      } else if (candidate.subtypeOf(TOptKeyset)) {
+      } else if (candidate.subtypeOrNull(BKeyset)) {
         if (interface_supports_keyset(rcls.name())) return TKeyset;
-      } else if (candidate.subtypeOf(TOptStr)) {
+      } else if (candidate.subtypeOrNull(BStr)) {
         if (interface_supports_string(rcls.name())) return TStr;
-      } else if (candidate.subtypeOf(TOptInt)) {
+      } else if (candidate.subtypeOrNull(BInt)) {
         if (interface_supports_int(rcls.name())) return TInt;
-      } else if (candidate.subtypeOf(TOptDbl)) {
+      } else if (candidate.subtypeOrNull(BDbl)) {
         if (interface_supports_double(rcls.name())) return TDbl;
       }
       return folly::none;
@@ -4064,7 +4064,7 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
   Context ctx, AnnotType annot, bool nullable,
   SString name, const Type& candidate) const {
 
-  if (candidate.subtypeOf(TInitNull) && nullable) {
+  if (candidate.subtypeOf(BInitNull) && nullable) {
     return TInitNull;
   }
   auto const mainType = [&]() -> const folly::Optional<Type> {
@@ -4105,8 +4105,8 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
        */
       return TGen;
     case AnnotMetaType::Nonnull:
-      if (candidate.subtypeOf(TInitNull)) return TBottom;
-      if (!candidate.couldBe(TInitNull))  return candidate;
+      if (candidate.subtypeOf(BInitNull)) return TBottom;
+      if (!candidate.couldBe(BInitNull))  return candidate;
       if (is_opt(candidate))              return unopt(candidate);
       return folly::none;
     case AnnotMetaType::This:
@@ -4123,8 +4123,8 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
     case AnnotMetaType::Number:
       return TNum;
     case AnnotMetaType::ArrayKey:
-      if (candidate.subtypeOf(TInt)) return TInt;
-      if (candidate.subtypeOf(TStr)) return TStr;
+      if (candidate.subtypeOf(BInt)) return TInt;
+      if (candidate.subtypeOf(BStr)) return TStr;
       return TArrKey;
     case AnnotMetaType::VArray:
       assertx(!RuntimeOption::EvalHackArrDVArrs);
@@ -4136,22 +4136,22 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
       assertx(!RuntimeOption::EvalHackArrDVArrs);
       return TArr;
     case AnnotMetaType::VecOrDict:
-      if (candidate.subtypeOf(TVec)) return TVec;
-      if (candidate.subtypeOf(TDict)) return TDict;
+      if (candidate.subtypeOf(BVec)) return TVec;
+      if (candidate.subtypeOf(BDict)) return TDict;
       break;
     case AnnotMetaType::ArrayLike:
-      if (candidate.subtypeOf(TVArr)) return TVArr;
-      if (candidate.subtypeOf(TDArr)) return TDArr;
-      if (candidate.subtypeOf(TArr)) return TArr;
-      if (candidate.subtypeOf(TVec)) return TVec;
-      if (candidate.subtypeOf(TDict)) return TDict;
-      if (candidate.subtypeOf(TKeyset)) return TKeyset;
+      if (candidate.subtypeOf(BVArr)) return TVArr;
+      if (candidate.subtypeOf(BDArr)) return TDArr;
+      if (candidate.subtypeOf(BArr)) return TArr;
+      if (candidate.subtypeOf(BVec)) return TVec;
+      if (candidate.subtypeOf(BDict)) return TDict;
+      if (candidate.subtypeOf(BKeyset)) return TKeyset;
       break;
     }
     return folly::none;
   }();
 
-  if (!mainType || !nullable || mainType->couldBe(TInitNull)) return mainType;
+  if (!mainType || !nullable || mainType->couldBe(BInitNull)) return mainType;
   return opt(*mainType);
 }
 
@@ -4169,11 +4169,11 @@ bool Index::satisfies_constraint(Context ctx, const Type& t,
     // optimize away the type-check (because we'll raise a notice on a d/varray
     // mismatch), so do some additional checking here to rule that out.
     if (!RuntimeOption::EvalHackArrCompatTypeHintNotices) return true;
-    if (!tcType.subtypeOf(TOptArr) || tcType.subtypeOf(TNull)) return true;
-    assertx(t.subtypeOf(TOptArr));
-    if (tcType.subtypeOf(TOptVArr)) return t.subtypeOf(TOptVArr);
-    if (tcType.subtypeOf(TOptDArr)) return t.subtypeOf(TOptDArr);
-    if (tcType.subtypeOf(TOptPArr)) return t.subtypeOf(TOptPArr);
+    if (!tcType.subtypeOrNull(BArr) || tcType.subtypeOf(BNull)) return true;
+    assertx(t.subtypeOrNull(BArr));
+    if (tcType.subtypeOrNull(BVArr)) return t.subtypeOrNull(BVArr);
+    if (tcType.subtypeOrNull(BDArr)) return t.subtypeOrNull(BDArr);
+    if (tcType.subtypeOrNull(BPArr)) return t.subtypeOrNull(BPArr);
   }
   return false;
 }
@@ -4786,7 +4786,7 @@ void Index::init_return_type(const php::Func* func) {
     tcT = vec(std::move(types));
   }
 
-  if (!tcT.subtypeOf(TCell)) {
+  if (!tcT.subtypeOf(BCell)) {
     tcT = TInitCell;
   } else {
     tcT = remove_uninit(std::move(tcT));

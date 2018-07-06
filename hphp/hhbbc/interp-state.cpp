@@ -353,7 +353,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
 
   for (auto i = size_t{0}; i < dst.clsRefSlots.size(); ++i) {
     auto newT = join(dst.clsRefSlots[i], src.clsRefSlots[i]);
-    assert(newT.subtypeOf(TCls));
+    assert(newT.subtypeOf(BCls));
     if (!equivalently_refined(dst.clsRefSlots[i], newT)) {
       changed = true;
       dst.clsRefSlots[i] = std::move(newT);

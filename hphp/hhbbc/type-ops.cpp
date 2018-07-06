@@ -36,11 +36,11 @@ folly::Optional<Type> usual_arith_conversions(Type t1, Type t2) {
    * value here (rather than bundling everything into the
    * interpreter).
    */
-  if (t1.subtypeOf(TInt) && t2.subtypeOf(TInt)) return TInt;
-  if (t1.subtypeOf(TInt) && t2.subtypeOf(TDbl)) return TDbl;
-  if (t1.subtypeOf(TDbl) && t2.subtypeOf(TInt)) return TDbl;
-  if (t1.subtypeOf(TDbl) && t2.subtypeOf(TDbl)) return TDbl;
-  if (t1.subtypeOf(TNum) && t2.subtypeOf(TNum)) return TNum;
+  if (t1.subtypeOf(BInt) && t2.subtypeOf(BInt)) return TInt;
+  if (t1.subtypeOf(BInt) && t2.subtypeOf(BDbl)) return TDbl;
+  if (t1.subtypeOf(BDbl) && t2.subtypeOf(BInt)) return TDbl;
+  if (t1.subtypeOf(BDbl) && t2.subtypeOf(BDbl)) return TDbl;
+  if (t1.subtypeOf(BNum) && t2.subtypeOf(BNum)) return TNum;
   return folly::none;
 }
 
@@ -55,8 +55,8 @@ folly::Optional<Type> eval_const(Type t1, Type t2, Fun fun) {
 template<class Fun>
 Type bitwise_impl(Type t1, Type t2, Fun op) {
   if (auto t = eval_const(t1, t2, op))          return *t;
-  if (t1.subtypeOf(TStr) && t2.subtypeOf(TStr)) return TStr;
-  if (!t1.couldBe(TStr) || !t2.couldBe(TStr))   return TInt;
+  if (t1.subtypeOf(BStr) && t2.subtypeOf(BStr)) return TStr;
+  if (!t1.couldBe(BStr) || !t2.couldBe(BStr))   return TInt;
   return TInitCell;
 }
 
@@ -74,7 +74,7 @@ Type shift_impl(Type t1, Type t2, Fun op) {
 
 Type typeToInt(Type ty) {
   if (auto const v = tv(ty)) return ival(cellToInt(*v));
-  if (ty.subtypeOf(TNull))   return ival(0);
+  if (ty.subtypeOf(BNull))   return ival(0);
   return TInt;
 }
 
@@ -83,21 +83,21 @@ Type typeToInt(Type ty) {
 Type typeAdd(Type t1, Type t2) {
   if (auto t = eval_const(t1, t2, cellAdd))           return *t;
   if (auto t = usual_arith_conversions(t1, t2))       return *t;
-  if (t1.subtypeOf(TArr) && t2.subtypeOf(TArr))       return TArr;
-  if (t1.subtypeOf(TVec) && t2.subtypeOf(TVec))       return TVec;
-  if (t1.subtypeOf(TDict) && t2.subtypeOf(TDict))     return TDict;
-  if (t1.subtypeOf(TKeyset) && t2.subtypeOf(TKeyset)) return TKeyset;
+  if (t1.subtypeOf(BArr) && t2.subtypeOf(BArr))       return TArr;
+  if (t1.subtypeOf(BVec) && t2.subtypeOf(BVec))       return TVec;
+  if (t1.subtypeOf(BDict) && t2.subtypeOf(BDict))     return TDict;
+  if (t1.subtypeOf(BKeyset) && t2.subtypeOf(BKeyset)) return TKeyset;
   return TInitCell;
 }
 
 Type typeAddO(Type t1, Type t2) {
   if (auto t = eval_const(t1, t2, cellAddO))          return *t;
-  if (t1.subtypeOf(TInt) && t2.subtypeOf(TInt))       return TNum;
+  if (t1.subtypeOf(BInt) && t2.subtypeOf(BInt))       return TNum;
   if (auto t = usual_arith_conversions(t1, t2))       return *t;
-  if (t1.subtypeOf(TArr) && t2.subtypeOf(TArr))       return TArr;
-  if (t1.subtypeOf(TVec) && t2.subtypeOf(TVec))       return TVec;
-  if (t1.subtypeOf(TDict) && t2.subtypeOf(TDict))     return TDict;
-  if (t1.subtypeOf(TKeyset) && t2.subtypeOf(TKeyset)) return TKeyset;
+  if (t1.subtypeOf(BArr) && t2.subtypeOf(BArr))       return TArr;
+  if (t1.subtypeOf(BVec) && t2.subtypeOf(BVec))       return TVec;
+  if (t1.subtypeOf(BDict) && t2.subtypeOf(BDict))     return TDict;
+  if (t1.subtypeOf(BKeyset) && t2.subtypeOf(BKeyset)) return TKeyset;
   return TInitCell;
 }
 
@@ -111,7 +111,7 @@ Type typeSubMulImpl(Type t1, Type t2, CellOp op) {
 template <class CellOp>
 Type typeSubMulImplO(Type t1, Type t2, CellOp op) {
   if (auto t = eval_const(t1, t2, op))          return *t;
-  if (t1.subtypeOf(TInt) && t2.subtypeOf(TInt)) return TNum;
+  if (t1.subtypeOf(BInt) && t2.subtypeOf(BInt)) return TNum;
   if (auto t = usual_arith_conversions(t1, t2)) return *t;
   return TInitPrim;
 }
@@ -154,15 +154,15 @@ Type typeIncDec(IncDecOp op, Type t) {
 
   if (!val) {
     // Doubles always stay doubles
-    if (t.subtypeOf(TDbl)) return TDbl;
+    if (t.subtypeOf(BDbl)) return TDbl;
 
     // Ints stay ints unless they can overflow to doubles
-    if (t.subtypeOf(TInt)) {
+    if (t.subtypeOf(BInt)) {
       return overflowToDbl ? TNum : TInt;
     }
 
     // Null goes to 1 on ++, stays null on --. Uninit is folded to init.
-    if (t.subtypeOf(TNull)) {
+    if (t.subtypeOf(BNull)) {
       return isInc(op) ? ival(1) : TInitNull;
     }
 
@@ -231,9 +231,9 @@ Type typeSame(const Type& a, const Type& b) {
 
 Type typeNSame(const Type& a, const Type& b) {
   auto const ty = typeSame(a, b);
-  assert(ty.subtypeOf(TBool));
-  return ty.subtypeOf(TFalse) ? TTrue :
-         ty.subtypeOf(TTrue) ? TFalse :
+  assert(ty.subtypeOf(BBool));
+  return ty.subtypeOf(BFalse) ? TTrue :
+         ty.subtypeOf(BTrue) ? TFalse :
          TBool;
 }
 

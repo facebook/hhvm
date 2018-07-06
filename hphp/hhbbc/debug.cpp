@@ -115,7 +115,7 @@ void dump_class_state(std::ostream& out,
     if (constant.val) {
       auto const ty = from_cell(*constant.val);
       out << c->name->data() << "::" << constant.name->data() << " :: "
-          << (ty.subtypeOf(TUninit) ? "<dynamic>" : show(ty)) << '\n';
+          << (ty.subtypeOf(BUninit) ? "<dynamic>" : show(ty)) << '\n';
     }
   }
 }
@@ -134,7 +134,7 @@ void dump_func_state(std::ostream& out,
 
   auto const localStatics = index.lookup_local_static_types(f);
   for (auto i = size_t{0}; i < localStatics.size(); ++i) {
-    if (localStatics[i].subtypeOf(TBottom)) continue;
+    if (localStatics[i].subtypeOf(BBottom)) continue;
     out << name << "::" << local_string(*f, i)
         << " :: " << show(localStatics[i]) << '\n';
   }

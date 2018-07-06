@@ -537,6 +537,8 @@ struct Type {
    */
   bool subtypeOf(const Type& o) const;
   bool strictSubtypeOf(const Type& o) const;
+  bool subtypeOf(trep bits) const { return (m_bits & bits) == m_bits; }
+  bool subtypeOrNull(trep bits) const { return subtypeOf(bits | BInitNull); }
 
   /*
    * Subtype of any of the list of types.
@@ -563,6 +565,7 @@ struct Type {
    * precise when returning false.
    */
   bool couldBe(const Type& o) const;
+  bool couldBe(trep bits) const { return m_bits & bits; }
 
   /*
    * Could-be any of the list of types.
@@ -1373,7 +1376,7 @@ Type loosen_all(Type t);
  * at least everything t contains, but doesn't contain TUninit.  Note
  * that this function will return TBottom for TUninit.
  *
- * Pre: t.subtypeOf(TCell)
+ * Pre: t.subtypeOf(BCell)
  */
 Type remove_uninit(Type t);
 
@@ -1472,8 +1475,8 @@ IterTypes iter_types(const Type&);
  * SStrings for class names.  The emit code needs to handle making
  * sure these things are merged into the appropriate unit or repo.
  *
- * Pre: !t.couldBe(TCls)
- *      !t.subtypeOf(TBottom)
+ * Pre: !t.couldBe(BCls)
+ *      !t.subtypeOf(BBottom)
  */
 RepoAuthType make_repo_type(ArrayTypeTable::Builder&, const Type& t);
 

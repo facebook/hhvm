@@ -43,7 +43,7 @@ bool builtin_get_class(ISS& env, const bc::FCallBuiltin& op) {
     // trait in the program (this is after any trait flattening has
     // taken place).
     if (!env.ctx.cls || !(env.ctx.cls->attrs & AttrNoOverride)) return false;
-    assertx(ty.subtypeOf(TUninit));
+    assertx(ty.subtypeOf(BUninit));
     reduce(env,
            bc::PopU {},
            bc::String { env.ctx.cls->name },
@@ -51,7 +51,7 @@ bool builtin_get_class(ISS& env, const bc::FCallBuiltin& op) {
     return true;
   }
 
-  if (!ty.subtypeOf(TObj)) return false;
+  if (!ty.subtypeOf(BObj)) return false;
 
   auto unknown_class = [&] {
     popT(env);
@@ -75,8 +75,8 @@ bool builtin_get_class(ISS& env, const bc::FCallBuiltin& op) {
 bool builtin_abs(ISS& env, const bc::FCallBuiltin& op) {
   if (op.arg1 != 1) return false;
   auto const ty = popC(env);
-  push(env, ty.subtypeOf(TInt) ? TInt :
-            ty.subtypeOf(TDbl) ? TDbl :
+  push(env, ty.subtypeOf(BInt) ? TInt :
+            ty.subtypeOf(BDbl) ? TDbl :
             TInitUnc);
   return true;
 }
@@ -89,7 +89,7 @@ bool builtin_abs(ISS& env, const bc::FCallBuiltin& op) {
 bool floatIfNumeric(ISS& env, const bc::FCallBuiltin& op) {
   if (op.arg1 != 1) return false;
   auto const ty = popC(env);
-  push(env, ty.subtypeOf(TNum) ? TDbl : TInitUnc);
+  push(env, ty.subtypeOf(BNum) ? TDbl : TInitUnc);
   return true;
 }
 bool builtin_ceil(ISS& env, const bc::FCallBuiltin& op) {
@@ -114,10 +114,10 @@ bool builtin_mt_rand(ISS& env, const bc::FCallBuiltin& op) {
   case 0:
     return success();
   case 1:
-    return topT(env, 0).subtypeOf(TNum) ? success() : false;
+    return topT(env, 0).subtypeOf(BNum) ? success() : false;
   case 2:
-    if (topT(env, 0).subtypeOf(TNum) &&
-        topT(env, 1).subtypeOf(TNum)) {
+    if (topT(env, 0).subtypeOf(BNum) &&
+        topT(env, 1).subtypeOf(BNum)) {
       return success();
     }
     break;
@@ -138,7 +138,7 @@ bool minmax2(ISS& env, const bc::FCallBuiltin& op) {
 
   auto const t0 = topT(env, 0);
   auto const t1 = topT(env, 1);
-  if (!t0.subtypeOf(TNum) || !t1.subtypeOf(TNum)) return false;
+  if (!t0.subtypeOf(BNum) || !t1.subtypeOf(BNum)) return false;
   popC(env);
   popC(env);
   push(env, t0 == t1 ? t0 : TNum);
@@ -181,8 +181,8 @@ bool handle_oodecl_exists(ISS& env,
                           OODeclExistsOp subop) {
   if (op.arg1 != 2) return false;
   auto const& name = topT(env, 1);
-  if (name.subtypeOf(TStr)) {
-    if (!topT(env).subtypeOf(TBool)) {
+  if (name.subtypeOf(BStr)) {
+    if (!topT(env).subtypeOf(BBool)) {
       reduce(env,
              bc::CastBool {},
              bc::OODeclExists { subop },
@@ -244,21 +244,21 @@ bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
   if (op.arg1 != 1) return false;
   auto const ty = topC(env);
 
-  if (ty.subtypeOf(TNum) || ty.subtypeOf(TBool) || ty.subtypeOf(TRes)) {
+  if (ty.subtypeOf(BNum) || ty.subtypeOf(BBool) || ty.subtypeOf(BRes)) {
     reduce(env, bc::CastInt {}, bc::RGetCNop {});
     return true;
   }
 
   auto retTy = TBottom;
-  if (ty.couldBe(TNull)) {
+  if (ty.couldBe(BNull)) {
     retTy |= sval(staticEmptyString());
   }
-  if (ty.couldBe(TNum) || ty.couldBe(TBool) || ty.couldBe(TRes)) {
+  if (ty.couldBe(BNum | BBool | BRes)) {
     retTy |= TInt;
   }
-  if (ty.couldBe(TStr)) {
+  if (ty.couldBe(BStr)) {
     retTy |= [&] {
-      if (ty.subtypeOf(TSStr)) {
+      if (ty.subtypeOf(BSStr)) {
         auto const v = tv(ty);
         if (v) {
           int64_t i;
@@ -273,9 +273,7 @@ bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
     }();
   }
 
-  if (!ty.couldBe(TObj) && !ty.couldBe(TArr) &&
-      !ty.couldBe(TVec) && !ty.couldBe(TDict) &&
-      !ty.couldBe(TKeyset)) {
+  if (!ty.couldBe(BObj | BArr | BVec | BDict | BKeyset)) {
     constprop(env);
     nothrow(env);
   }

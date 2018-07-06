@@ -497,7 +497,7 @@ std::string show(const Type& t) {
   }
 
   auto showElem = [&] (const Type& key, const Type& val) -> std::string {
-    if (t.subtypeOf(TOptKeyset)) return show(key);
+    if (t.subtypeOrNull(BKeyset)) return show(key);
     return show(key) + ":" + show(val);
   };
 

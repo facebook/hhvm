@@ -130,7 +130,7 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
     auto const realT = state.stack[state.stack.size() - idx - 1].type;
     auto const flav  = stack_flav(realT);
 
-    assert(!realT.subtypeOf(TCls));
+    assert(!realT.subtypeOf(BCls));
     if (options.FilterAssertions && !realT.strictSubtypeOf(flav)) {
       return;
     }
@@ -192,7 +192,7 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   // Generally consider CGetL obvious because if we knew the type of the local,
   // we'll assert that right before the CGetL.
   auto cgetlObvious = [&] (LocalId l, int idx) {
-    return !interp.state.locals[l].couldBe(TRef) ||
+    return !interp.state.locals[l].couldBe(BRef) ||
       !interp.state.stack[interp.state.stack.size() - idx - 1].
          type.strictSubtypeOf(TInitCell);
   };
@@ -565,7 +565,7 @@ void first_pass(const Index& index,
     SCOPE_EXIT {
       if (op.op == Op::CGetL2) {
         srcStack.emplace(srcStack.end() - 1,
-                         op.op, (state.stack.end() - 2)->type.subtypeOf(TStr));
+                         op.op, (state.stack.end() - 2)->type.subtypeOf(BStr));
       } else {
         FTRACE(2, "   srcStack: pop {} push {}\n", op.numPop(), op.numPush());
         for (int i = 0; i < op.numPop(); i++) {
@@ -573,7 +573,7 @@ void first_pass(const Index& index,
         }
         for (int i = 0; i < op.numPush(); i++) {
           srcStack.emplace_back(
-            op.op, state.stack[srcStack.size()].type.subtypeOf(TStr));
+            op.op, state.stack[srcStack.size()].type.subtypeOf(BStr));
         }
       }
     };
@@ -1192,21 +1192,21 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
     };
 
     assertx(!RuntimeOption::EvalHackArrDVArrs ||
-            (!t.subtypeOf(TVArr) && !t.subtypeOf(TDArr)));
+            (!t.subtypeOf(BVArr) && !t.subtypeOf(BDArr)));
 
-    if (t.subtypeOf(TInitNull)) return retype(AnnotType::Null);
-    if (t.subtypeOf(TBool))     return retype(AnnotType::Bool);
-    if (t.subtypeOf(TInt))      return retype(AnnotType::Int);
-    if (t.subtypeOf(TDbl))      return retype(AnnotType::Float);
-    if (t.subtypeOf(TStr))      return retype(AnnotType::String);
-    if (t.subtypeOf(TPArr))     return retype(AnnotType::Array);
-    if (t.subtypeOf(TVArr))     return retype(AnnotType::VArray);
-    if (t.subtypeOf(TDArr))     return retype(AnnotType::DArray);
-    // if (t.subtypeOf(TObj))   return retype(AnnotType::Object);
-    if (t.subtypeOf(TRes))      return retype(AnnotType::Resource);
-    if (t.subtypeOf(TDict))     return retype(AnnotType::Dict);
-    if (t.subtypeOf(TVec))      return retype(AnnotType::Vec);
-    if (t.subtypeOf(TKeyset))   return retype(AnnotType::Keyset);
+    if (t.subtypeOf(BInitNull)) return retype(AnnotType::Null);
+    if (t.subtypeOf(BBool))     return retype(AnnotType::Bool);
+    if (t.subtypeOf(BInt))      return retype(AnnotType::Int);
+    if (t.subtypeOf(BDbl))      return retype(AnnotType::Float);
+    if (t.subtypeOf(BStr))      return retype(AnnotType::String);
+    if (t.subtypeOf(BPArr))     return retype(AnnotType::Array);
+    if (t.subtypeOf(BVArr))     return retype(AnnotType::VArray);
+    if (t.subtypeOf(BDArr))     return retype(AnnotType::DArray);
+    // if (t.subtypeOf(BObj))   return retype(AnnotType::Object);
+    if (t.subtypeOf(BRes))      return retype(AnnotType::Resource);
+    if (t.subtypeOf(BDict))     return retype(AnnotType::Dict);
+    if (t.subtypeOf(BVec))      return retype(AnnotType::Vec);
+    if (t.subtypeOf(BKeyset))   return retype(AnnotType::Keyset);
   };
 
   if (RuntimeOption::EvalHardTypeHints) {

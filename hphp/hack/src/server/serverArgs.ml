@@ -32,6 +32,7 @@ type options = {
   ignore_hh_version : bool;
   file_info_on_disk : bool;
   dynamic_view      : bool;
+  gen_saved_ignore_type_errors : bool;
 }
 
 (*****************************************************************************)
@@ -84,6 +85,7 @@ module Messages = struct
   let ignore_hh_version = " ignore hh_version check when loading saved states"
   let file_info_on_disk = " [experimental] store file-info in sqlite db."
   let dynamic_view      = " start with dynamic view for IDE files on by default."
+  let gen_saved_ignore_type_errors = " generate a saved state even if there are type errors."
 end
 
 let print_json_version () =
@@ -181,7 +183,8 @@ let parse_options () =
   let watchman_debug_logging = ref false in
   let waiting_client= ref None in
   let ignore_hh     = ref false in
-  let dynamic_view  = ref false in 
+  let dynamic_view  = ref false in
+  let gen_saved_ignore_type_errors = ref false in
 
   let file_info_on_disk = ref false in
   let cdir          = fun s -> convert_dir := Some s in
@@ -220,6 +223,7 @@ let parse_options () =
      "--ignore-hh-version", Arg.Set ignore_hh  , Messages.ignore_hh_version;
      "--file-info-on-disk", Arg.Set file_info_on_disk , Messages.file_info_on_disk;
      "--dynamic-view", Arg.Set dynamic_view,     Messages.dynamic_view;
+     "--gen-saved-ignore-type-errors", Arg.Set gen_saved_ignore_type_errors, Messages.gen_saved_ignore_type_errors;
     ] in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
@@ -252,6 +256,10 @@ let parse_options () =
         else Some (ai)
     | None -> None);
   Wwwroot.assert_www_directory root_path;
+  if (!gen_saved_ignore_type_errors) && not (Option.is_some (!save)) then begin
+    Printf.eprintf "--ignore-type-errors is only valid when producing saved states\n%!";
+    exit 1
+  end;
   {
     json_mode     = !json_mode;
     ai_mode       = !ai_mode;
@@ -271,6 +279,7 @@ let parse_options () =
     ignore_hh_version = !ignore_hh;
     file_info_on_disk = !file_info_on_disk;
     dynamic_view      = !dynamic_view;
+    gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
   }
 
 (* useful in testing code *)
@@ -293,6 +302,7 @@ let default_options ~root = {
   ignore_hh_version = false;
   file_info_on_disk = false;
   dynamic_view = false;
+  gen_saved_ignore_type_errors = false;
 }
 
 (*****************************************************************************)
@@ -317,6 +327,7 @@ let watchman_debug_logging options = options.watchman_debug_logging
 let ignore_hh_version options = options.ignore_hh_version
 let file_info_on_disk options = options.file_info_on_disk
 let dynamic_view options = options.dynamic_view
+let gen_saved_ignore_type_errors options = options.gen_saved_ignore_type_errors
 
 (*****************************************************************************)
 (* Setters *)
@@ -353,6 +364,7 @@ let to_string
     ignore_hh_version;
     file_info_on_disk;
     dynamic_view;
+    gen_saved_ignore_type_errors;
   } =
     let ai_mode_str = match ai_mode with
       | None -> "<>"
@@ -389,5 +401,6 @@ let to_string
       "ignore_hh_version: "; string_of_bool ignore_hh_version; ", ";
       "file_info_on_disk: "; string_of_bool file_info_on_disk; ", ";
       "dynamic_view: "; string_of_bool dynamic_view;
+      "gen_saved_ignore_type_errors: "; string_of_bool gen_saved_ignore_type_errors;
       "})"
     ] |> String.concat "")

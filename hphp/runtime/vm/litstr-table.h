@@ -17,14 +17,11 @@
 #ifndef incl_HPHP_LITSTR_TABLE_H_
 #define incl_HPHP_LITSTR_TABLE_H_
 
-#include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/string-hash-map.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/named-entity-pair-table.h"
-#include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/mutex.h"
 
-#include <vector>
 #include <tbb/concurrent_hash_map.h>
 
 namespace HPHP {

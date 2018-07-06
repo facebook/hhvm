@@ -14,19 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_STRING_H_
-#define incl_HPHP_STRING_H_
+#ifndef incl_HPHP_TYPE_STRING_H_
+#define incl_HPHP_TYPE_STRING_H_
 
 #include "hphp/runtime/base/req-ptr.h"
-#include "hphp/runtime/base/req-hash-map.h"
-#include "hphp/runtime/base/req-hash-set.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 
 #include "hphp/util/assertions.h"
-#include "hphp/util/hash-map-typedefs.h"
-#include "hphp/util/functional.h"
 
 #include <algorithm>
 
@@ -435,78 +431,6 @@ public:
 };
 
 extern const String null_string;
-
-///////////////////////////////////////////////////////////////////////////////
-
-template <class T> using ConstStringDataMap = hphp_hash_map<
-  const StringData*,
-  T,
-  string_data_hash,
-  string_data_same
->;
-
-using ConstStringDataSet = hphp_hash_set<
-  const StringData*,
-  string_data_hash,
-  string_data_same
->;
-
-struct hphp_string_hash {
-  size_t operator()(const String& s) const {
-    return s.get()->hash();
-  }
-};
-
-struct hphp_string_same {
-  bool operator()(const String& s1, const String& s2) const {
-    return s1.get()->same(s2.get());
-  }
-};
-
-struct hphp_string_isame {
-  bool operator()(const String& s1, const String& s2) const {
-    return s1.get()->isame(s2.get());
-  }
-};
-
-struct StringDataHashCompare {
-  bool equal(const StringData *s1, const StringData *s2) const {
-    assertx(s1 && s2);
-    return s1->same(s2);
-  }
-  size_t hash(const StringData *s) const {
-    assertx(s);
-    return s->hash();
-  }
-};
-
-struct StringDataHashICompare {
-  bool equal(const StringData *s1, const StringData *s2) const {
-    assertx(s1 && s2);
-    return s1->isame(s2);
-  }
-  size_t hash(const StringData *s) const {
-    assertx(s);
-    return s->hash();
-  }
-};
-
-using StringISet = hphp_hash_set<String,hphp_string_hash,hphp_string_isame>;
-
-template<typename T>
-using StringIMap =
-  hphp_hash_map<String, T, hphp_string_hash, hphp_string_isame>;
-
-using StringSet = hphp_hash_set<String, hphp_string_hash, hphp_string_same>;
-
-template<typename T>
-using StringMap = hphp_hash_map<String, T, hphp_string_hash, hphp_string_same>;
-
-namespace req {
-using StringISet = req::hash_set<String,hphp_string_hash,hphp_string_isame>;
-template<typename T> using StringIMap =
-  req::hash_map<String, T, hphp_string_hash, hphp_string_isame>;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // StrNR

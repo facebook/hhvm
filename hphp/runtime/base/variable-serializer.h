@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_VARIABLE_SERIALIZER_H_
 #define incl_HPHP_VARIABLE_SERIALIZER_H_
 
+#include "hphp/runtime/base/req-hash-map.h"
 #include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-buffer.h"

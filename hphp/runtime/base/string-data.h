@@ -598,7 +598,7 @@ void decRefStr(StringData* s);
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Function objects the forward to the StringData member functions of
+ * Function objects that forward to the StringData member functions of
  * the same name.
  */
 struct string_data_hash;

@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/base/weakref-data.h"
 
+#include "hphp/runtime/base/string-hash-map.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/system/systemlib.h"

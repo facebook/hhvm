@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/string-hash-set.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-structure.h"

@@ -505,7 +505,7 @@ let clone_cannot_be_static node parents =
 (* Given a function declaration header, confirm that it is NOT a constructor
  * and that the header containing it has visibility modifiers in parameters
  *)
-let class_non_constructor_has_visibility_param node parents =
+let class_non_constructor_has_visibility_param node _parents =
   match node with
   | FunctionDeclarationHeader node ->
     let has_visibility node =
@@ -520,7 +520,7 @@ let class_non_constructor_has_visibility_param node parents =
   | _ -> false
 
 (* check that a constructor or a destructor is type annotated *)
-let class_constructor_destructor_has_non_void_type env node parents =
+let class_constructor_destructor_has_non_void_type env node _parents =
   if not (is_typechecker env) then false
   else
   match node with
@@ -537,7 +537,7 @@ let class_constructor_destructor_has_non_void_type env node parents =
     (is_construct label || is_destruct label) &&
     not (is_missing || is_void)
   | _ -> false
-let async_magic_method node parents =
+let async_magic_method node _parents =
   match node with
   | FunctionDeclarationHeader node ->
     let name = String.lowercase_ascii @@ text node.function_name in
@@ -550,7 +550,7 @@ let async_magic_method node parents =
   | _ -> false
 
 
-let clone_destruct_takes_no_arguments method_name node parents =
+let clone_destruct_takes_no_arguments _method_name node _parents =
   match node with
   | FunctionDeclarationHeader { function_parameter_list = l; function_name = name; _} ->
     let num_params = List.length (syntax_to_list_no_separators l) in
@@ -791,7 +791,7 @@ let rec is_immediately_in_lambda = function
 let is_in_active_class_scope parents =
   Hh_core.List.exists parents ~f:begin fun node ->
   match syntax node with
-  | ClassishDeclaration cd -> true
+  | ClassishDeclaration _ -> true
   | _ -> false
   end
 
@@ -946,7 +946,8 @@ let make_name_already_used_error node name short_name original_location
     ~child:(Some original_location_error) s e (report_error ~name ~short_name)
 
 let check_type_name_reference env name_text location names errors =
-  if not (is_hack env && Hh_autoimport.is_hh_autoimport name_text) || strmap_mem name_text names.t_classes
+  if not (is_hack env && Hh_autoimport.is_hh_autoimport name_text)
+    || strmap_mem name_text names.t_classes
   then names, errors
   else
     let def = make_first_use_or_def ~kind:Name_implicit_use location "HH" name_text in
@@ -1273,7 +1274,7 @@ let param_with_callconv_is_byref node =
     is_byref_parameter_variable parameter_name -> Some node
   | _ -> None
 
-let params_errors env params namespace_name names errors =
+let params_errors _env params _namespace_name names errors =
   let errors =
     produce_error_from_check errors ends_with_variadic_comma
     params SyntaxError.error2022 in
@@ -1423,7 +1424,7 @@ let is_foreach_in_for for_initializer =
     is_as_expression item
   | _ -> false
 
-let statement_errors env node parents errors =
+let statement_errors _env node parents errors =
   let result = match syntax node with
   | TryStatement { try_catch_clauses; try_finally_clause; _ }
     when (is_missing try_catch_clauses) && (is_missing try_finally_clause) ->
@@ -2020,7 +2021,7 @@ let check_repeated_properties namespace_name class_name (errors, p_names) prop =
             | _ -> errors, p_names
           end
   | _ -> (errors, p_names)
-let require_errors env node parents trait_use_clauses errors =
+let require_errors _env node parents trait_use_clauses errors =
   match syntax node with
   | RequireClause p ->
     let name = text p.require_name in
@@ -2070,7 +2071,7 @@ let check_type_name syntax_tree name namespace_name name_text location names err
     names, errors
   end
 
-let classish_errors env node parents namespace_name names errors =
+let classish_errors env node _parents namespace_name names errors =
   match syntax node with
   | ClassishDeclaration cd ->
     (* Given a ClassishDeclaration node, test whether or not it's a trait
@@ -2082,7 +2083,7 @@ let classish_errors env node parents namespace_name names errors =
 
     (* Given a sealed ClassishDeclaration node, test whether all the params
      * are classnames. *)
-    let classish_sealed_arg_not_classname env _ =
+    let classish_sealed_arg_not_classname _env _ =
       match cd.classish_attribute.syntax with
       | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
         let attrs = syntax_to_list_no_separators attrs in
@@ -2117,7 +2118,7 @@ let classish_errors env node parents namespace_name names errors =
       token_kind cd.classish_keyword = Some TokenKind.Class &&
         token_kind cd.classish_extends_keyword = Some TokenKind.Extends &&
         match syntax_to_list_no_separators cd.classish_extends_list with
-        | [x1] -> false
+        | [_] -> false
         | _ -> true (* General bc empty list case is already caught by error1007 *) in
     let abstract_keyword =
       Option.value (extract_keyword is_abstract node) ~default:node  in
@@ -2125,7 +2126,7 @@ let classish_errors env node parents namespace_name names errors =
       (is_classish_kind_declared_abstract env)
       node SyntaxError.error2042 abstract_keyword in
     (* Given a ClassishDeclaration node, test whether it is sealed and final. *)
-    let classish_sealed_final env _ =
+    let classish_sealed_final _env _ =
       list_contains_predicate is_final cd.classish_modifiers &&
       classish_is_sealed in
     let errors = produce_error errors (classish_invalid_extends_list env) ()
@@ -2552,12 +2553,12 @@ let check_static_in_constant_decl constant_declarator_initializer  =
     end
   | _ -> false
 
-let const_decl_errors env node parents namespace_name names errors =
+let const_decl_errors _env node parents namespace_name names errors =
   match syntax node with
   | ConstantDeclarator cd ->
     let errors =
-      produce_error_parents errors abstract_with_initializer cd.constant_declarator_initializer parents
-      SyntaxError.error2051 cd.constant_declarator_initializer in
+      produce_error_parents errors abstract_with_initializer cd.constant_declarator_initializer
+      parents SyntaxError.error2051 cd.constant_declarator_initializer in
     let errors =
       produce_error errors is_global_in_const_decl cd.constant_declarator_initializer
       SyntaxError.global_in_const_decl cd.constant_declarator_initializer in
@@ -2851,7 +2852,7 @@ let assignment_errors _env node errors =
         } when token_kind op = Some (TokenKind.Ampersand) ->
         check_lvalue loperand errors
       | Missing -> errors
-      | loperand -> check_lvalue node errors
+      | _loperand -> check_lvalue node errors
     in
       let errors = allow_ref k errors in
       let errors = allow_ref v errors in
@@ -2859,7 +2860,7 @@ let assignment_errors _env node errors =
   | _ -> errors
 
 
-let declare_errors env node parents errors =
+let declare_errors _env node parents errors =
   match syntax node with
   | DeclareDirectiveStatement { declare_directive_expression = expr; _}
   | DeclareBlockStatement { declare_block_expression = expr; _} ->

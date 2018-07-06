@@ -56,7 +56,7 @@ let expects context token_kind =
 
 let expects_here context token_kind =
   match context.expected with
-  | current :: others -> Scope.mem token_kind current
+  | current :: _others -> Scope.mem token_kind current
   | [ ] -> false
 
 let expect context token_kind_list =
@@ -81,7 +81,7 @@ let pop_scope context token_kind_list =
   | [ ] when Hh_core.List.is_empty token_kind_list ->
     with_expected context [ ]
   (* Failure conditions *)
-  | current :: others ->
+  | current :: _others ->
     let failure_str = Printf.sprintf
     ("Error: attempted to pop a list of token kinds that wasn't on top of " ^^
     "the context. Tried to pop: %sbut the first scope on the stack was " ^^

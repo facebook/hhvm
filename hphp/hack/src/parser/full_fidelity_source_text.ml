@@ -21,6 +21,7 @@
  * abstraction when we need some of them.
  *)
 
+[@@@warning "-32"] (* unused variables *)
 module OffsetMap = struct
   (* placeholder definitions to placate open source build.
    * These definitions will be mercilessly shadowed if deriving show fires
@@ -29,6 +30,7 @@ module OffsetMap = struct
   let show _ = ""
   include Line_break_map
 end
+[@@@warning "+32"]
 
 type t = {
   file_path : Relative_path.t;

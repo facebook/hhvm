@@ -26,7 +26,7 @@ module SyntaxWithToken = Full_fidelity_syntax.WithToken(Token)
 
 module Value = struct
   type t = NoValue [@@deriving show]
-  let to_json value =
+  let to_json _value =
     let open Hh_json in
     JSON_Object [ ]
 end
@@ -102,8 +102,8 @@ let is_in_body node position =
   let rec aux = function
     | [] -> false
     | h1 :: t1 when not (is_compound_statement h1) -> aux t1
-    | h1 :: [] -> false
-    | h1 :: (h2 :: _ as t1) ->
+    | _h1 :: [] -> false
+    | _h1 :: (h2 :: _ as t1) ->
       is_methodish_declaration h2 || is_function_declaration h2 || aux t1
   in
   aux (parentage node position)
@@ -155,7 +155,7 @@ let to_dot node with_labels =
 let offset _ = None
 let position _ _ = None
 
-let to_json ?with_value node =
+let to_json ?with_value:_ node =
   let version = Full_fidelity_schema.full_fidelity_schema_version_number in
   let tree = EditableSyntax.to_json node in
   Hh_json.JSON_Object [

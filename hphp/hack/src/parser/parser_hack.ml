@@ -240,7 +240,7 @@ let check_toplevel env pos =
 (*****************************************************************************)
 
 let rec check_lvalue env = function
-  | pos, Obj_get (_, (_, Id (_, name)), OG_nullsafe) ->
+  | pos, Obj_get (_, (_, Id (_, _name)), OG_nullsafe) ->
       error_at env pos "?-> syntax is not supported for lvalues"
   | pos, Obj_get (_, (_, Id (_, name)), _) when name.[0] = ':' ->
       error_at env pos "->: syntax is not supported for lvalues"
@@ -1540,7 +1540,7 @@ and xhp_format env =
       let pos = Pos.make env.file env.lb in
       ignore (expr_encapsed env pos);
       xhp_format env
-  | x ->
+  | _ ->
       xhp_format env
 
 (*****************************************************************************)
@@ -1791,7 +1791,7 @@ and xhp_attr env =
     | None ->
         begin
           let h = (match maybe_enum with
-            | Some x -> None
+            | Some _ -> None
             | None -> Some (hint env)) in
           let (pos_start, _) as ident = xhp_identifier env in
           let default = parameter_default env in
@@ -2243,7 +2243,7 @@ and statement_word env = function
       | Some expr -> expr
       | None -> statement_goto_label env x
     )
-  | x -> parse_expr env
+  | _ -> parse_expr env
 
 (*****************************************************************************)
 (* Break statement *)
@@ -2399,7 +2399,7 @@ and switch_body_word env = function
       (* Only allow fallthrough statement as the final statement at the end of a case body *)
       let rec filter_fallthroughs = function
       | [] -> []
-      | [(p, Fallthrough)] as x -> x
+      | [(_, Fallthrough)] as x -> x
       | (_, Fallthrough)::xs -> filter_fallthroughs xs
       | x::xs -> x::(filter_fallthroughs xs)
       in
@@ -3310,7 +3310,7 @@ and expr_atomic ~allow_class ~class_const env =
       expr_atomic_word ~allow_class ~class_const ~attrs env pos word
     | Tlvar ->
         let tok_value = Lexing.lexeme env.lb in
-        let dollars, var_id = strip_variablevariable 0 tok_value in
+        let _dollars, var_id = strip_variablevariable 0 tok_value in
         if peek env = Tlambda
         then pos1, lambda_single_arg ~sync:FDeclSync ~attrs env (pos, var_id)
         else lambda_expected ()
@@ -3799,7 +3799,7 @@ and expr_new env pos_start =
       | _, Class_get _
       | _, Call _ ->
         e
-      | p, _ ->
+      | _, _ ->
           error_expect env "class name";
           e
     in
@@ -3948,7 +3948,7 @@ and expr_string env start abs_start =
       start, String ""
   | _ -> assert false
 
-and expr_encapsed env start =
+and expr_encapsed env _start =
   let pos_start = Pos.make env.file env.lb in
   let el = encapsed_nested pos_start env in
   let pos_end = Pos.make env.file env.lb in
@@ -4146,7 +4146,7 @@ and heredoc_tag env =
       error_expect env "heredoc or nowdoc identifier";
       Pos.make env.file env.lb, "HEREDOC"
 
-and heredoc_body (pos, tag_value as tag) env =
+and heredoc_body (_pos, tag_value as tag) env =
   match L.heredoc_token env.lb with
   | Tnewline ->
       heredoc_end tag env
@@ -4155,7 +4155,7 @@ and heredoc_body (pos, tag_value as tag) env =
   | _ ->
       heredoc_body tag env
 
-and heredoc_end (pos, tag_value as tag) env =
+and heredoc_end (_pos, tag_value as tag) env =
   match L.heredoc_token env.lb with
   | Tword ->
       let tag2 = Lexing.lexeme env.lb in

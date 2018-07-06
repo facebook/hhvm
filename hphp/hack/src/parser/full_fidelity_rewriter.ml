@@ -79,21 +79,21 @@ module WithSyntax(Syntax: RewritableType) = struct
 
   (* The same as the above, except that f does not take parents. *)
   let aggregating_rewrite_post f node init_acc =
-    let f parents node acc = f node acc in
+    let f _parents node acc = f node acc in
     parented_aggregating_rewrite_post f node init_acc
 
   (* The same as the above, except that f does not take or return an
      accumulator. *)
   let parented_rewrite_post f node =
-    let f parents node acc = ([], f parents node) in
-    let (acc, result) = parented_aggregating_rewrite_post f node [] in
+    let f parents node _acc = ([], f parents node) in
+    let (_acc, result) = parented_aggregating_rewrite_post f node [] in
     result
 
   (* The same as the above, except that f does not take or return an
      accumulator, and f does not take parents *)
   let rewrite_post f node =
-    let f parents node acc = ([], f node) in
-    let (acc, result) = parented_aggregating_rewrite_post f node [] in
+    let f _parents node _acc = ([], f node) in
+    let (_acc, result) = parented_aggregating_rewrite_post f node [] in
     result
 
 
@@ -140,8 +140,8 @@ module WithSyntax(Syntax: RewritableType) = struct
     (* The same as the above, except that f does not take or return an
        accumulator, and f does not take parents *)
     let rewrite_pre f node =
-      let f parents node acc = ([], f node) in
-      let (acc, result) = parented_aggregating_rewrite_pre f node [] in
+      let f _parents node _acc = ([], f node) in
+      let (_acc, result) = parented_aggregating_rewrite_pre f node [] in
       result
 
     (**
@@ -185,7 +185,7 @@ module WithSyntax(Syntax: RewritableType) = struct
      * is rewritten to avoid duplicate work.
      *)
     let rewrite_pre_and_stop f node =
-      let f node acc = ([], f node) in
+      let f node _acc = ([], f node) in
       let _, result = rewrite_pre_and_stop_with_acc f node [] in
       result
 

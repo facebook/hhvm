@@ -1063,7 +1063,7 @@ let rewrite_suspends_in_statement
   in
   Rewriter.parented_aggregating_rewrite_post rewrite node ([], next_label, 1)
 
-let is_in_lambda_or_anonymous_function node ancestors =
+let is_in_lambda_or_anonymous_function _node ancestors =
   Core_list.exists ancestors
     ~f:(fun node -> is_lambda_expression node || is_anonymous_function node)
 

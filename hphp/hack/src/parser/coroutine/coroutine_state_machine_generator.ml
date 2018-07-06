@@ -627,7 +627,7 @@ let lower_body body =
   let used_locals = generated_to_be_saved_variables @ used_locals in
   let (next_loop_label, body) = rewrite_do 0 body in
   let body = rewrite_while body in
-  let (next_loop_label, body) = rewrite_for next_loop_label body in
+  let (_next_loop_label, body) = rewrite_for next_loop_label body in
   let body = rewrite_if body in
   let (next_loop_label, temp_count), body =
     SuspendRewriter.rewrite_suspends body in

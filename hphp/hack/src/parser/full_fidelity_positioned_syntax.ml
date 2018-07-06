@@ -107,15 +107,15 @@ module PositionedValueBuilder = struct
        the node are missing - this means that entire node is missing.
        NOTE: offset must match otherwise it will mean that there is a real node
        in between that should be picked instead *)
-    | (PSV.Missing { source_text; offset = o1; _} as v),
-      PSV.Missing { offset = o2; _} when o1 = o2 -> v
+    | (PSV.Missing { offset = o1; _} as v), PSV.Missing { offset = o2; _} when o1 = o2
+      -> v
 
     | _ -> assert false
 
   let width n =
     PositionedSyntaxValue.width (value n)
 
-  let value_from_children source_text offset kind nodes =
+  let value_from_children source_text offset _kind nodes =
     (**
      * We need to determine the offset, leading, middle and trailing widths of
      * the node to be constructed based on its children.  If the children are
@@ -134,7 +134,7 @@ module PositionedValueBuilder = struct
     (* We need to find the first and last nodes that are represented by tokens.
       If there are no such nodes then we can simply use the first and last nodes, period,
       since they will have an offset and source text we can use. *)
-    let f (first, first_not_zero, last_not_zero, last) node =
+    let f (first, first_not_zero, last_not_zero, _last) node =
       match first, first_not_zero, value node with
       | None, None, (PSV.TokenValue _ | PSV.TokenSpan _) ->
         (* first iteration and first node has some token representation -
@@ -310,7 +310,7 @@ let position_exclusive file node =
   let end_offset = end_offset node + 1 in
   Some (SourceText.relative_pos file source_text start_offset end_offset)
 
-let is_synthetic node = false
+let is_synthetic _node = false
 
 let leading_trivia node =
   let token = leading_token node in

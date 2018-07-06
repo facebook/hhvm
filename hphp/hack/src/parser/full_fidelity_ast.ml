@@ -841,7 +841,7 @@ let prevent_intrinsic_generic env node ty =
 
 let rec pSimpleInitializer node env =
   match syntax node with
-  | SimpleInitializer { simple_initializer_value; simple_initializer_equal } ->
+  | SimpleInitializer { simple_initializer_value; _ } ->
     pExpr simple_initializer_value env
   | _ -> missing_syntax "simple initializer" node env
 
@@ -1165,7 +1165,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       ->
       let hints =
         begin match (syntax recv) with
-          | GenericTypeSpecifier {generic_class_type; generic_argument_list} ->
+          | GenericTypeSpecifier { generic_argument_list; _ } ->
             begin match syntax generic_argument_list with
               | TypeArguments { type_arguments_types; _ }
                 -> couldMap ~f:pHint type_arguments_types env
@@ -2000,7 +2000,7 @@ and pStmt : stmt parser = fun node env ->
       | _ -> missing_syntax "static declarator" node env
     in
     pos, Static_var (couldMap ~f:pStaticDeclarator static_declarations env)
-  | ReturnStatement { return_expression; return_keyword; _ } ->
+  | ReturnStatement { return_expression; _ } ->
     let expr = match syntax return_expression with
       | Missing -> None
       | _ -> Some (pExpr ~location:RightOfReturn return_expression env)
@@ -2562,7 +2562,7 @@ and pClassElt : class_elt list parser = fun node env ->
     []
 and pXhpChild : xhp_child parser = fun node env ->
   match syntax node with
-  | Token t -> ChildName (pos_name node env)
+  | Token _ -> ChildName (pos_name node env)
   | PostfixUnaryExpression { postfix_unary_operand; postfix_unary_operator;} ->
     let operand = pXhpChild postfix_unary_operand env in
     let operator =
@@ -3026,7 +3026,7 @@ let scour_comments
              Errors.fixme_format pos;
              cmts, fm
     in
-    let rec aux (cmts, fm as acc : accumulator) (node : node) : accumulator =
+    let rec aux (_cmts, _fm as acc : accumulator) (node : node) : accumulator =
       let recurse () = List.fold_left ~f:aux ~init:acc (children node) in
       match syntax node with
       | Token t ->
@@ -3056,7 +3056,7 @@ let elaborate_toplevel_and_std_constants ast (env: env) source_text =
   match env.elaborate_namespaces, env.saw_std_constant_redefinition with
   | true, true ->
     let elaborate_std_constants nsenv def =
-      let visitor = object(self)
+      let visitor = object
         inherit [_] endo as super
         method! on_expr env expr =
           match expr with
@@ -3086,7 +3086,7 @@ let elaborate_halt_compiler ast env source_text  =
   match !(env.saw_compiler_halt_offset) with
     | Some x ->
     let elaborate_halt_compiler_const defs =
-      let visitor = object(self)
+      let visitor = object
         inherit [_] endo as super
         method! on_expr env expr =
           match expr with

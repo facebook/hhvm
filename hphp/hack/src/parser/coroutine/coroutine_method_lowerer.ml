@@ -56,7 +56,7 @@ let rewrite_function_decl_header header_node =
 
 let parameter_to_arg param =
   match syntax param with
-  | ListItem { list_item; list_separator } ->
+  | ListItem { list_item; _; } ->
     begin
     match syntax list_item with
     | ParameterDeclaration { parameter_name; _; } ->

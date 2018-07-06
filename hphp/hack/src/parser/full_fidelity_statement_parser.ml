@@ -642,7 +642,7 @@ module WithExpressionAndDeclAndTypeParser
         let parser1, opening_token = next_token parser_else in
         match Token.kind opening_token with
         | Colon ->
-          let (parser, opening_token_syntax) =
+          let (_parser, opening_token_syntax) =
             Make.token parser opening_token
           in
           let (parser_else, else_consequence) =

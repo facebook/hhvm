@@ -340,7 +340,7 @@ module WithExpressionAndStatementAndTypeParser
     | Backslash ->
       let (parser, missing) = Make.missing parser (pos parser) in
       let (parser, backslash) = Make.token parser token in
-      let (parser, name, is_backslash) =
+      let (parser, _name, is_backslash) =
         scan_qualified_name_extended parser missing backslash
       in
       is_backslash || peek_token_kind parser = LeftBrace
@@ -886,7 +886,7 @@ module WithExpressionAndStatementAndTypeParser
         left_brace
         values
         right_brace
-    | kind -> parse_type_specifier ~allow_var:true parser
+    | _kind -> parse_type_specifier ~allow_var:true parser
 
   and parse_xhp_required_opt parser =
     (* SPEC (Draft)
@@ -1341,7 +1341,7 @@ module WithExpressionAndStatementAndTypeParser
     Make.attribute parser name left items right
 
   and parse_generic_type_parameter_list_opt parser =
-    let (parser1, open_angle) = next_token parser in
+    let (_parser1, open_angle) = next_token parser in
     let kind = Token.kind open_angle in
     if kind = LessThan then
       with_type_parser parser TypeParser.parse_generic_type_parameter_list

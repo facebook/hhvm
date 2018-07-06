@@ -57,7 +57,7 @@ let old_parse_with_source source path =
   let _ = Pervasives.output_string channel source in
   let _ = close_out channel in
   let file = Relative_path.create Relative_path.Dummy path in
-  let errorl, result =
+  let errorl, _result =
     Errors.do_ begin fun () ->
       Parser_hack.from_file_with_default_popt file
     end

@@ -28,7 +28,7 @@ let empty_file_info : FileInfo.t = {
   comments = Some [];
 }
 
-let legacy_php_file_info = ref (fun fn ->
+let legacy_php_file_info = ref (fun _fn ->
   empty_file_info
 )
 

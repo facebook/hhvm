@@ -26,17 +26,17 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 
   let replace_body body saw_yield =
     match Syntax.syntax body with
-    | Syntax.CompoundStatement {compound_left_brace; compound_statements; compound_right_brace} ->
+    | Syntax.CompoundStatement {compound_left_brace; compound_right_brace; _ } ->
       let stmts = if saw_yield then yield_list else missing in
       Syntax.make_compound_statement compound_left_brace stmts compound_right_brace
     | _ -> body
 
-  let make_yield_expression a1 a2 = function
+  let make_yield_expression _a1 _a2 = function
     | _ :: _ :: t ->
       true :: t, missing
     | _ -> failwith "Invalid state"
 
-  let make_yield_from_expression a1 a2 a3 = function
+  let make_yield_from_expression _a1 _a2 _a3 = function
     | _ :: _ :: _ :: t ->
       true :: t, missing
     | _ -> failwith "Invalid state"

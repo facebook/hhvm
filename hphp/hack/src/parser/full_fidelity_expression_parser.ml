@@ -2338,7 +2338,7 @@ module WithStatementAndDeclAndTypeParser
       (parser, Some node)
     else
       let (parser', equal) = Make.token parser' token in
-      let (parser'', token, text) = next_xhp_element_token parser' in
+      let (parser'', token, _text) = next_xhp_element_token parser' in
       match (Token.kind token) with
       | XHPStringLiteral ->
         let (parser, token) = Make.token parser'' token in
@@ -2385,7 +2385,7 @@ module WithStatementAndDeclAndTypeParser
     let (parser, less_than_slash, _) = next_xhp_element_token parser in
     let (parser, less_than_slash_token) = Make.token parser less_than_slash in
     if (Token.kind less_than_slash) = LessThanSlash then
-      let (parser1, name, name_text) = next_xhp_element_token parser in
+      let (parser1, name, _name_text) = next_xhp_element_token parser in
       if (Token.kind name) = XHPElementName then
         let (parser1, name_token) = Make.token parser1 name in
         (* TODO: Check that the given and name_text are the same. *)

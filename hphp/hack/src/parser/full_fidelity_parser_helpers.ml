@@ -390,7 +390,7 @@ module WithParser(Parser : Parser_S) = struct
       (* found a name, recurse to look for backslash *)
       let (parser, token) = Make.token parser1 token in
       scan_qualified_name_worker parser (Some token) acc false
-    | Some name, _, [] ->
+    | Some _name, _, [] ->
       (* have not found anything - return [] to indicate failure *)
       parser, [], false
     | Some name, _, _ ->

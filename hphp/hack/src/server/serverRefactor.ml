@@ -11,6 +11,10 @@ open Hh_core
 open ServerEnv
 open ServerRefactorTypes
 
+let maybe_add_dollar s =
+  if s.[0] != '$' then "$" ^ s
+  else s
+
 let get_fixme_patches codes (env: env) =
   let fixmelist = Errors.get_applied_fixmes env.errorl in
   let poslist = Fixmes.get_unused_fixmes codes fixmelist env.files_info in
@@ -68,7 +72,7 @@ let go_ide (filename, line, char) new_name genv env =
           file_content;
           line;
           char;
-          new_name;
+          new_name = maybe_add_dollar new_name;
         } in
       go command genv env
     | _, _ -> [] end

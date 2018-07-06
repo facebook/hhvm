@@ -1477,6 +1477,11 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | InDoubleQuotedString, _ when env.codegen -> String (mkStr env expr unesc_dbl s)
         | InBacktickedString, _ when env.codegen ->
           String (mkStr env expr Php_escaping.unescape_backtick s)
+        | _, Some TK.OctalLiteral
+          when is_typechecker env &&
+            String_utils.fold_left ~f:(fun b c -> b || c = '8' || c = '9') ~acc:false s ->
+          raise_parsing_error env node SyntaxError.invalid_octal_integer;
+          missing_syntax "octal int" expr env (* this should never get hit *)
         | _, Some TK.DecimalLiteral
         | _, Some TK.OctalLiteral
         | _, Some TK.HexadecimalLiteral
@@ -1570,6 +1575,11 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       ; php7_anonymous_use = anonymous_use
       ; php7_anonymous_body = anonymous_body
       ; _ } ->
+        begin match syntax node with
+          | Php7AnonymousFunction _ when is_typechecker env ->
+            raise_parsing_error env node SyntaxError.php7_anonymous_function
+          | _ -> ()
+        end;
         let pArg node env =
           match syntax node with
           | PrefixUnaryExpression

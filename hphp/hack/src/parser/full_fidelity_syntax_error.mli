@@ -277,6 +277,8 @@ val invalid_class_in_collection_initializer: string
 val invalid_brace_kind_in_collection_initializer: string
 val alternate_control_flow : string
 val execution_operator : string
+val invalid_octal_integer : string
+val php7_anonymous_function : string
 val prefixed_invalid_string_kind : string
 val non_re_prefix : string
 val collection_intrinsic_generic: string

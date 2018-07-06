@@ -34,6 +34,10 @@ extern const StaticString s_Closure;
 struct ClosureHdr : HeapObject {
   explicit ClosureHdr(uint32_t size) {
     initHeader_32(HeaderKind::ClosureHdr, size);
+    // we need to set this here, because the next thing 'new Closure'
+    // will do is call the constructor, which will throw, and the
+    // destructor will examine this field.
+    ctx_bits = 0;
   }
   uint32_t& size() { return m_aux32; }
   uint32_t size() const { return m_aux32; }

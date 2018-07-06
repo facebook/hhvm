@@ -293,7 +293,7 @@ static Variant HHVM_METHOD(Closure, call,
 static ObjectData* closureInstanceCtorRepoAuth(Class* cls) {
   assertx(!(cls->attrs() & (AttrAbstract|AttrInterface|AttrTrait|AttrEnum)));
   assertx(!cls->needInitialization());
-  assertx(cls->parent() == c_Closure::classof());
+  assertx(cls->parent() == c_Closure::classof() || cls == c_Closure::classof());
   // ensure c_Closure and ClosureHdr ptrs are scanned inside other types
   (void)type_scan::getIndexForMalloc<c_Closure>();
   (void)type_scan::getIndexForMalloc<ClosureHdr>();

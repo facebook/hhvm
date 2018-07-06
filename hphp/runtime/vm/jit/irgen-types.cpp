@@ -860,8 +860,9 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_xhp: {
       if (asExpr) return false;
-      auto c = popC(env);
-      push(env, implInstanceOfD(env, c, get_ts_classname(ts)));
+      auto const c = popC(env);
+      auto const res = implInstanceOfD(env, c, get_ts_classname(ts));
+      push(env, is_nullable_ts ? check_nullable(env, res, c) : res);
       decRef(env, c);
       return true;
     }

@@ -163,29 +163,31 @@ let rewrite_ppl_method_body method_body suspension_id =
         suspension_id, Rewriter.Replace new_syntax
     (* sample(), factor(), observe(), condition() *)
     | FunctionCallExpression ({
-        function_call_receiver = {
-          syntax = Token token;
-          _;
-        };
+        function_call_receiver;
         _;
-      } as function_call_expression) when is_infer_method (Token.text token) ->
-        let new_function_call_receiver =
-          make_member_selection_expression_syntax
-            receiver_variable_syntax
-            (make_name_syntax (Token.text token)) in
-        let new_function_expression =
-          FunctionCallExpression {
-            function_call_expression with
-            function_call_receiver = new_function_call_receiver
-          } in
-        let new_node = Syntax.synthesize_from node new_function_expression in
-        let new_syntax =
-          make_syntax @@
-          PrefixUnaryExpression {
-            prefix_unary_operator = suspend_token_syntax;
-            prefix_unary_operand = new_node;
-          } in
-        suspension_id + 1, Rewriter.Replace new_syntax
+      } as function_call_expression) ->
+        let text = text function_call_receiver in
+        let text = String_utils.lstrip text "\\" in
+        if not @@ is_infer_method text
+        then suspension_id, Rewriter.Keep
+        else
+          let new_function_call_receiver =
+            make_member_selection_expression_syntax
+              receiver_variable_syntax
+              (make_name_syntax text) in
+          let new_function_expression =
+            FunctionCallExpression {
+              function_call_expression with
+              function_call_receiver = new_function_call_receiver
+            } in
+          let new_node = Syntax.synthesize_from node new_function_expression in
+          let new_syntax =
+            make_syntax @@
+            PrefixUnaryExpression {
+              prefix_unary_operator = suspend_token_syntax;
+              prefix_unary_operand = new_node;
+            } in
+          suspension_id + 1, Rewriter.Replace new_syntax
     | _ -> suspension_id, Rewriter.Keep
   in
   Rewriter.aggregating_rewrite_post rewrite method_body suspension_id

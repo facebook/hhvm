@@ -15,8 +15,6 @@ open CoroutineSyntax
 let ppl_infer_type_string = [ "PPL"; "Inference"; "Infer"; ]
 let ppl_infer_type_name_syntax =
   make_qualified_name_syntax ppl_infer_type_string ~has_leading:true
-(* If this is changed, also change
- * /src/parser/smart_constructors/coroutine_smart_constructor.ml *)
 let ppl_macro_string = Coroutine_smart_constructor.ppl_macro_string
 let receiver_string = "$__recv"
 let receiver_variable_syntax = make_variable_expression_syntax receiver_string

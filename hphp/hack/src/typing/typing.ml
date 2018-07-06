@@ -305,30 +305,12 @@ let make_param_local_ty attrs env param =
       let ty = Decl_hint.hint env.Env.decl_env x in
       let condition_type =
         Decl.condition_type_from_attributes env.Env.decl_env param.param_user_attributes in
-      let fresh_type_argument_name =
-        Option.bind condition_type
-        (Typing_reactivity.generate_fresh_name_for_target_of_condition_type env ty) in
-      begin match condition_type, fresh_type_argument_name  with
-      (* if parameter has associated condition type and we can generate
-         a name N that identifies pair (parameter type * condition type) -
-         instead of using declared type of parameter as is we create generic type
-         with name N and constrain it to declared type. Also condition type is stored in
-         env with N as as key. As a consequence later we can obtain condition type
-         using name of generic type as a key.  *)
-      | Some condition_ty, Some fresh_type_argument_name ->
-        let param_ty = Reason.none, Tabstract ((AKgeneric fresh_type_argument_name), None) in
-        (* if generic type is already registered this means we already saw
-           parameter with the same pair (declared type * condition type) so there
-           is no need to add condition type to env again  *)
-        if Env.is_generic_parameter env fresh_type_argument_name
-        then env, param_ty
-        else begin
-          let env, ty = Phase.localize ~ety_env env ty in
-          (* constraint type argument to hint *)
-          let env = Env.add_upper_bound env fresh_type_argument_name ty in
-          (* link type argument name to condition type *)
-          let env = Env.set_condition_type env fresh_type_argument_name condition_ty in
-          env, param_ty
+      begin match condition_type with
+      | Some condition_type ->
+        let env, ty = Phase.localize ~ety_env env ty in
+        begin match TR.try_substitute_type_with_condition env condition_type ty with
+        | Some r -> r
+        | None -> env, ty
         end
       | _ when Attributes.mem SN.UserAttributes.uaOnlyRxIfArgs attrs ->
         let env, ty = Phase.localize ~ety_env env ty in
@@ -5435,7 +5417,9 @@ and call_ ~expected ~method_call_info ~is_expr_statement pos env fty el uel =
     let env = wfold_left2 inout_write_back env ft.ft_params el in
     Typing_hooks.dispatch_fun_call_hooks
       ft.ft_params (List.map (el @ uel) fst) env;
-    env, tel, tuel, ft.ft_ret
+    let env, ret_ty =
+      TR.get_adjusted_return_type env method_call_info ft.ft_ret in
+    env, tel, tuel, ret_ty
   | r2, Tanon (arity, id) ->
     let env, tel, tyl = exprs ~is_func_arg:true env el in
     let expr_for_unpacked_expr_list env = function

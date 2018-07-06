@@ -347,25 +347,6 @@ let is_parameter_with_default_value param =
     not (is_missing parameter_default_value)
   | _ -> false
 
-let param_missing_default_value params =
-  (* TODO: This error is also reported in the type checker; when we switch
-  over to the FFP, we can remove the error detection from the type checker. *)
-  let rec aux seen_default params =
-    match params with
-    | [] -> None
-    | x :: t ->
-      if is_variadic_parameter_declaration x then
-        None (* Stop looking. If this happens to not be the last parameter,
-          we'll give an error in a different check. *)
-      else
-        let has_default = is_parameter_with_default_value x in
-        if seen_default && not has_default then
-          Some x (* We saw a defaulted parameter, and this one has no
-            default value. Give an error, and stop looking for more. *)
-        else
-          aux has_default t in
-  aux false (syntax_to_list_no_separators params)
-
 (* True or false: the first item in this list matches the predicate? *)
 let matches_first f items =
   match items with
@@ -619,28 +600,6 @@ let methodish_abstract_conflict_with_final node =
   let has_final = methodish_contains_final node in
   is_abstract && has_final
 
-let rec parameter_type_is_required parents =
-  match parents with
-  | h :: _ when is_function_declaration h -> true
-  | h :: _ when (is_anonymous_function h) || (is_lambda_expression h) -> false
-  | _ :: t -> parameter_type_is_required t
-  | [] -> false
-
-let rec break_is_legal parents =
-  match parents with
-  | h :: _ when is_anonymous_function h -> false
-  | h :: _ when is_switch_statement h -> true
-  | h :: _ when is_loop_statement h -> true
-  | _ :: t -> break_is_legal t
-  | [] -> false
-
-let rec continue_is_legal parents =
-  match parents with
-  | h :: _ when is_anonymous_function h -> false
-  | h :: _ when is_loop_statement h -> true
-  | _ :: t -> continue_is_legal t
-  | [] -> false
-
 let using_statement_function_scoped_is_legal parents =
   match parents with
   (* using is allowed in the toplevel, and also in toplevel async blocks *)
@@ -843,11 +802,6 @@ let extract_keyword modifier declaration_node =
 let is_abstract_declaration declaration_node =
   not (Option.is_none (extract_keyword is_abstract declaration_node))
 
-(* Wrapper function that uses above extract_keyword function to test if node
-   contains is_final keyword *)
-let is_final_declaration declaration_node =
-  not (Option.is_none (extract_keyword is_final declaration_node))
-
 (* Given a list of parents, tests if the immediate classish parent is an
  * interface. *)
 let is_inside_interface parents =
@@ -977,12 +931,6 @@ let is_abstract_and_async_method md_node parents =
     is_generalized_abstract_method md_node parents
         && not (is_missing async_node)
 
-(* Returns the visibility modifier node from a list, or None if the
- * list doesn't contain one. *)
-let extract_visibility_node modifiers_list =
-  Hh_core.List.find ~f:is_visibility (syntax_to_list_no_separators
-    modifiers_list)
-
 let extract_callconv_node node =
   match syntax node with
   | ParameterDeclaration { parameter_call_convention; _ } ->
@@ -993,46 +941,10 @@ let extract_callconv_node node =
     Some variadic_parameter_call_convention
   | _ -> None
 
-(* Tests if visibility modifiers of the node are allowed on
- * methods inside an interface. *)
-let has_valid_interface_visibility node =
-  (* If not a methodish declaration, is vacuously valid *)
-  get_modifiers_of_declaration node
-  |> Option.value_map ~default:true ~f:(fun methodish_modifiers ->
-    let visibility_kind = extract_visibility_node methodish_modifiers in
-    let is_valid_methodish_visibility kind =
-      (is_token_kind kind TokenKind.Public) in
-    (* Defaulting to 'true' allows omitting visibility in method_declarations *)
-    Option.value_map visibility_kind
-      ~f:is_valid_methodish_visibility ~default:true)
-
-(* Test if (a list_expression is the left child of a binary_expression,
- * and the operator is '=') *)
-let is_left_of_simple_assignment le_node p1 =
-  match syntax p1 with
-  | BinaryExpression { binary_left_operand; binary_operator; _ } ->
-    le_node == binary_left_operand  &&
-        is_token_kind binary_operator TokenKind.Equal
-  | _ -> false
-
 (* Test if a list_expression is the value clause of a foreach_statement *)
 let is_value_of_foreach le_node p1 =
   match syntax p1 with
   | ForeachStatement { foreach_value; _ } -> le_node == foreach_value
-  | _ -> false
-
-let is_invalid_list_expression le_node parents =
-  match parents with
-  | p1 :: _ when is_left_of_simple_assignment le_node p1 -> false
-  | p1 :: _ when is_value_of_foreach le_node p1 -> false
-  (* checking p3 is sufficient to test if le_node is a nested list_expression *)
-  | _ :: _ :: p3 :: _ when is_list_expression p3 -> false
-  | _ -> true (* All other deployments of list_expression are invalid *)
-
-(* Given a node, checks if it is a concrete ConstDeclaration *)
-let is_concrete_const declaration =
-  match syntax declaration with
-  | ConstDeclaration x -> is_missing x.const_abstract
   | _ -> false
 
 (* Given a node, checks if it is a abstract ConstDeclaration *)
@@ -1053,21 +965,6 @@ let abstract_with_initializer init parents =
   let has_initializer =
     not (is_missing init) in
   is_abstract && has_initializer
-
-(* Tests if Property contains a modifier p *)
-let property_modifier_contains_helper p node =
-  match syntax node with
-  | PropertyDeclaration syntax ->
-    let node = syntax.property_modifiers in
-    list_contains_predicate p node
-  | _ -> false
-
-(* Tests if parent class is both abstract and final *)
-let abstract_final_parent_class parents =
-  let parent = first_parent_classish_node TokenKind.Class parents in
-    match parent with
-    | None -> false
-    | Some node -> (is_abstract_declaration node) && (is_final_declaration node)
 
 (* Given a PropertyDeclaration node, tests whether parent class is abstract
   final but child variable is non-static *)

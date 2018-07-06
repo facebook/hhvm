@@ -46,6 +46,8 @@ type env = {
   defined_function_count : int;
   (* if we are immediately in using statement *)
   in_using: bool;
+  (* how many nested anonymous classes we are in *)
+  anonclass_depth: int;
 }
 
 type per_function_state = {
@@ -156,7 +158,7 @@ let initial_state =
 }
 
 let total_class_count env st =
-  List.length st.hoisted_classes + env.defined_class_count
+  List.length st.hoisted_classes + env.defined_class_count + env.anonclass_depth
 
 let set_in_using env =
   if env.in_using then env else { env with in_using = true }
@@ -295,7 +297,11 @@ let rec make_scope_name ns scope =
     | Some cd -> make_class_name cd ^ "::" ^ fname
     end
   | ScopeItem.Method md :: scope ->
-    make_scope_name ns scope ^ "::" ^ strip_id md.m_name
+    let scope_name = make_scope_name ns scope in
+    let scope_name =
+      scope_name ^
+      (if String_utils.string_ends_with scope_name "::" then "" else "::") in
+    scope_name ^ strip_id md.m_name
   | ScopeItem.Class cd :: _ ->
     let n = make_class_name cd in
     if Hhbc_string_utils.Classes.is_anonymous_class_name n then n ^ "::" else n
@@ -312,12 +318,14 @@ let env_toplevel class_count function_count defs =
       ~is_closure_body:false
       []
       defs in
-  { scope = scope;
-    pos = Pos.none;
-    variable_scopes = [{ all_vars; parameter_names = SSet.empty }];
-    defined_class_count = class_count;
-    defined_function_count = function_count;
-    in_using = false }
+  { scope = scope
+  ; pos = Pos.none
+  ; variable_scopes = [{ all_vars; parameter_names = SSet.empty }]
+  ; defined_class_count = class_count
+  ; defined_function_count = function_count
+  ; in_using = false
+  ; anonclass_depth = 0
+  }
 
 let env_with_method env md =
   env_with_function_like_
@@ -685,10 +693,20 @@ let rec convert_expr env st (p, expr_ as expr) =
     let cls = { cls with
       c_extends = List.map cls.c_extends add_ns_to_hint;
       c_implements = List.map cls.c_implements add_ns_to_hint } in
+    let prev_anonclass_depth = env.anonclass_depth in
+    let env = { env with anonclass_depth = prev_anonclass_depth + 1 } in
+    let num_hoisted_classes = List.length st.hoisted_classes in
     let st, cls = convert_class env st cls in
+    let env = { env with anonclass_depth = prev_anonclass_depth } in
+    let re_ordered_hoisted_classes =
+      let new_classes, old_classes =
+        List.split_n st.hoisted_classes
+          (List.length st.hoisted_classes - num_hoisted_classes) in
+      new_classes @ (cls :: old_classes)
+    in
     let st = { st with
       anon_cls_cnt_per_fun = st.anon_cls_cnt_per_fun + 1;
-      hoisted_classes = cls :: st.hoisted_classes } in
+      hoisted_classes = re_ordered_hoisted_classes } in
     let env = env_with_class env cls in
     let st, args = convert_exprs env st args in
     let st, varargs = convert_exprs env st varargs in

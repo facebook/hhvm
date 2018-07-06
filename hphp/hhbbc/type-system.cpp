@@ -1874,18 +1874,19 @@ bool Type::checkInvariants() const {
   // NB: Avoid copying non-trivial types in here to avoid recursive calls to
   // checkInvariants() which can cause exponential time blow-ups.
 
-  DEBUG_ONLY auto const& keyType = (m_bits & BSArrLike) == m_bits
-    ? TUncArrKey : TArrKey;
-  DEBUG_ONLY auto const& valType = (m_bits & BOptArr) == m_bits
-    ? TInitGen
-    : ((m_bits & BOptKeyset) == m_bits) ? TArrKey : TInitCell;
-  DEBUG_ONLY auto const isVArray = (m_bits & BOptVArr) == m_bits;
-  DEBUG_ONLY auto const isDArray = (m_bits & BOptDArr) == m_bits;
-  DEBUG_ONLY auto const isNotDVArray = (m_bits & BOptPArr) == m_bits;
-  DEBUG_ONLY auto const isPHPArray = (m_bits & BOptArr) == m_bits;
-  DEBUG_ONLY auto const isVector = (m_bits & BOptVec) == m_bits;
-  DEBUG_ONLY auto const isKeyset = (m_bits & BOptKeyset) == m_bits;
-  DEBUG_ONLY auto const isDict = (m_bits & BOptDict) == m_bits;
+  DEBUG_ONLY auto const isVArray = subtypeOrNull(BVArr);
+  DEBUG_ONLY auto const isDArray = subtypeOrNull(BDArr);
+  DEBUG_ONLY auto const isNotDVArray = subtypeOrNull(BPArr);
+  DEBUG_ONLY auto const isPHPArray = subtypeOrNull(BArr);
+  DEBUG_ONLY auto const isVector = subtypeOrNull(BVec);
+  DEBUG_ONLY auto const isKeyset = subtypeOrNull(BKeyset);
+  DEBUG_ONLY auto const isDict = subtypeOrNull(BDict);
+
+  DEBUG_ONLY auto const keyBits =
+    subtypeOrNull(BSArrLike) ? BUncArrKey : BArrKey;
+  DEBUG_ONLY auto const valBits = isPHPArray ?
+    BInitGen : isKeyset ? BArrKey : BInitCell;
+
   /*
    * TODO(#3696042): for static arrays, we could enforce that all
    * inner-types are also static (this may would require changes to
@@ -1921,7 +1922,7 @@ bool Type::checkInvariants() const {
     assert(!m_data.packed->elems.empty());
     DEBUG_ONLY auto idx = size_t{0};
     for (DEBUG_ONLY auto const& v : m_data.packed->elems) {
-      assert(v.subtypeOf(valType) && v != TBottom);
+      assert(v.subtypeOf(valBits) && v != TBottom);
       assert(!isKeyset || v == ival(idx++));
     }
     break;
@@ -1936,7 +1937,7 @@ bool Type::checkInvariants() const {
       assert(cellIsPlausible(kv.first));
       assert(isIntType(kv.first.m_type) ||
              kv.first.m_type == KindOfPersistentString);
-      assert(kv.second.subtypeOf(valType) && kv.second != TBottom);
+      assert(kv.second.subtypeOf(valBits) && kv.second != TBottom);
       assert(!isKeyset || from_cell(kv.first) == kv.second);
       if (packed) {
         packed = isIntType(kv.first.m_type) && kv.first.m_data.num == idx;
@@ -1949,18 +1950,18 @@ bool Type::checkInvariants() const {
     break;
   }
   case DataTag::ArrLikePackedN:
-    assert(m_data.packedn->type.subtypeOf(valType));
+    assert(m_data.packedn->type.subtypeOf(valBits));
     assert(m_data.packedn->type != TBottom);
     assert(!isKeyset || m_data.packedn->type == TInt);
     break;
   case DataTag::ArrLikeMapN:
     assert(!isVector);
     assert(!isVArray);
-    assert(m_data.mapn->key.subtypeOf(keyType));
+    assert(m_data.mapn->key.subtypeOf(keyBits));
     // MapN shouldn't have a specialized key. If it does, then that implies it
     // only contains arrays of size 1, which means it should be Map instead.
     assert(m_data.mapn->key.m_dataTag == DataTag::None);
-    assert(m_data.mapn->val.subtypeOf(valType));
+    assert(m_data.mapn->val.subtypeOf(valBits));
     assert(m_data.mapn->key != TBottom);
     assert(m_data.mapn->val != TBottom);
     assert(!isKeyset || m_data.mapn->key == m_data.mapn->val);
@@ -2677,52 +2678,52 @@ R tvImpl(const Type& t) {
     case DataTag::Str:
       return H::template make<KindOfPersistentString>(t.m_data.sval);
     case DataTag::ArrLikeVal:
-      if ((t.m_bits & BArrN) == t.m_bits) {
+      if (t.subtypeOf(BArrN)) {
         return H::template make<KindOfPersistentArray>(
           const_cast<ArrayData*>(t.m_data.aval)
         );
       }
-      if ((t.m_bits & BVecN) == t.m_bits) {
+      if (t.subtypeOf(BVecN)) {
         return H::template make<KindOfPersistentVec>(
           const_cast<ArrayData*>(t.m_data.aval)
         );
       }
-      if ((t.m_bits & BDictN) == t.m_bits) {
+      if (t.subtypeOf(BDictN)) {
         return H::template make<KindOfPersistentDict>(
           const_cast<ArrayData*>(t.m_data.aval)
         );
       }
-      if ((t.m_bits & BKeysetN) == t.m_bits) {
+      if (t.subtypeOf(BKeysetN)) {
         return H::template make<KindOfPersistentKeyset>(
           const_cast<ArrayData*>(t.m_data.aval)
         );
       }
       break;
     case DataTag::ArrLikeMap:
-      if ((t.m_bits & BDictN) == t.m_bits) {
+      if (t.subtypeOf(BDictN)) {
         return H::template fromMap<DictInit>(t.m_data.map->map);
-      } else if ((t.m_bits & BKeysetN) == t.m_bits) {
+      } else if (t.subtypeOf(BKeysetN)) {
         return H::template fromMap<KeysetInit>(t.m_data.map->map);
-      } else if ((t.m_bits & BPArrN) == t.m_bits) {
+      } else if (t.subtypeOf(BPArrN)) {
         return H::template fromMap<MixedArrayInit>(t.m_data.map->map);
-      } else if ((t.m_bits & BDArrN) == t.m_bits) {
+      } else if (t.subtypeOf(BDArrN)) {
         assertx(!RuntimeOption::EvalHackArrDVArrs);
         return H::template fromMap<DArrayInit>(t.m_data.map->map);
       }
       break;
     case DataTag::ArrLikePacked:
-      if ((t.m_bits & BVecN) == t.m_bits) {
+      if (t.subtypeOf(BVecN)) {
         return H::template fromVec<VecArrayInit>(t.m_data.packed->elems);
-      } else if ((t.m_bits & BDictN) == t.m_bits) {
+      } else if (t.subtypeOf(BDictN)) {
         return H::template fromVec<DictInit>(t.m_data.packed->elems);
-      } else if ((t.m_bits & BKeysetN) == t.m_bits) {
+      } else if (t.subtypeOf(BKeysetN)) {
         return H::template fromVec<KeysetAppendInit>(t.m_data.packed->elems);
-      } else if ((t.m_bits & BPArrN) == t.m_bits) {
+      } else if (t.subtypeOf(BPArrN)) {
         return H::template fromVec<PackedArrayInit>(t.m_data.packed->elems);
-      } else if ((t.m_bits & BVArrN) == t.m_bits) {
+      } else if (t.subtypeOf(BVArrN)) {
         assertx(!RuntimeOption::EvalHackArrDVArrs);
         return H::template fromVec<VArrayInit>(t.m_data.packed->elems);
-      } else if ((t.m_bits & BDArrN) == t.m_bits) {
+      } else if (t.subtypeOf(BDArrN)) {
         assertx(!RuntimeOption::EvalHackArrDVArrs);
         return H::template fromVec<DArrayInit>(t.m_data.packed->elems);
       }
@@ -3942,7 +3943,7 @@ std::pair<Type,bool> arr_packed_elem(const Type& pack, const ArrKey& key) {
  */
 std::pair<Type,bool> arr_packedn_elem(const Type& pack, const ArrKey& key) {
   assert(pack.m_dataTag == DataTag::ArrLikePackedN);
-  auto const isPhpArray = (pack.m_bits & BOptArr) == pack.m_bits;
+  auto const isPhpArray = pack.subtypeOrNull(BArr);
   if (key.s || !key.type.couldBe(BInt) || (key.i && *key.i < 0)) {
     return {isPhpArray ? TInitNull : TBottom, false};
   }
@@ -3967,8 +3968,8 @@ bool arr_packedn_set(Type& pack,
   assert(pack.m_dataTag == DataTag::ArrLikePackedN);
   assert(key.type.subtypeOf(BArrKey));
 
-  auto const isPhpArray = (pack.m_bits & BOptArr) == pack.m_bits;
-  auto const isVecArray = (pack.m_bits & BOptVec) == pack.m_bits;
+  auto const isPhpArray = pack.subtypeOrNull(BArr);
+  auto const isVecArray = pack.subtypeOrNull(BVec);
   auto& ty = pack.m_data.packedn.mutate()->type;
   ty |= val;
 
@@ -4119,11 +4120,11 @@ Type arr_map_newelem(Type& map, const Type& val) {
 }
 
 std::pair<Type, ThrowMode> array_like_elem(const Type& arr, const ArrKey& key) {
-  const bool maybeEmpty = arr.m_bits & BArrLikeE;
-  const bool mustBeStatic = (arr.m_bits & BSArrLike) == arr.m_bits;
+  const bool maybeEmpty = arr.couldBe(BArrLikeE);
+  const bool mustBeStatic = arr.subtypeOrNull(BSArrLike);
 
   auto const isPhpArray = arr.subtypeOrNull(BArr);
-  if (!(arr.m_bits & BArrLikeN)) {
+  if (!arr.couldBe(BArrLikeN)) {
     assert(maybeEmpty);
     return { isPhpArray ? TInitNull : TBottom, ThrowMode::MissingElement };
   }
@@ -4207,11 +4208,11 @@ array_elem(const Type& arr, const Type& undisectedKey) {
 std::pair<Type,ThrowMode> array_like_set(Type arr,
                                          const ArrKey& key,
                                          const Type& valIn) {
-  const bool maybeEmpty = arr.m_bits & BArrLikeE;
-  const bool isVector   = arr.m_bits & BOptVec;
-  const bool isPhpArray = arr.m_bits & BOptArr;
-  DEBUG_ONLY const bool isVArray   = (arr.m_bits & BOptVArr) == arr.m_bits;
-  const bool validKey   = key.type.subtypeOf(isVector ? TInt : TArrKey);
+  const bool maybeEmpty = arr.couldBe(BArrLikeE);
+  const bool isVector   = arr.couldBe(BVec);
+  const bool isPhpArray = arr.couldBe(BArr);
+  DEBUG_ONLY const bool isVArray   = arr.subtypeOrNull(BVArr);
+  const bool validKey   = key.type.subtypeOf(isVector ? BInt : BArrKey);
 
   trep bits = combine_dv_arr_like_bits(arr.m_bits, BArrLikeN);
   if (validKey) bits &= ~BArrLikeE;
@@ -4228,7 +4229,7 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
     ? key
     : []{ ArrKey key; key.type = TArrKey; key.mayThrow = true; return key; }();
 
-  if (!(arr.m_bits & BArrLikeN)) {
+  if (!arr.couldBe(BArrLikeN)) {
     assert(maybeEmpty);
     if (isVector) return { TBottom, ThrowMode::BadOperation };
     if (fixedKey.i) {
@@ -4357,20 +4358,20 @@ std::pair<Type, ThrowMode> array_set(Type arr,
 
 std::pair<Type,Type> array_like_newelem(Type arr, const Type& val) {
 
-  if (arr.m_bits & BOptKeyset) {
+  if (arr.couldBe(BKeyset)) {
     auto const key = disect_strict_key(val);
     if (key.type == TBottom) return { TBottom, TInitCell };
     return { array_like_set(std::move(arr), key, key.type).first, val };
   }
 
-  const bool maybeEmpty = arr.m_bits & BArrLikeE;
-  const bool isVector = arr.m_bits & BOptVec;
-  const bool isVArray = (arr.m_bits & BOptVArr) == arr.m_bits;
+  const bool maybeEmpty = arr.couldBe(BArrLikeE);
+  const bool isVector = arr.couldBe(BVec);
+  const bool isVArray = arr.subtypeOrNull(BVArr);
 
   trep bits = combine_dv_arr_like_bits(arr.m_bits, BArrLikeN);
   bits &= ~BArrLikeE;
 
-  if (!(arr.m_bits & BArrLikeN)) {
+  if (!arr.couldBe(BArrLikeN)) {
     assert(maybeEmpty);
     return { packed_impl(bits, { val }), ival(0) };
   }

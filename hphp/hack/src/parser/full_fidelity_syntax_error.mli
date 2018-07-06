@@ -279,3 +279,4 @@ val prefixed_invalid_string_kind : string
 val non_re_prefix : string
 val collection_intrinsic_generic: string
 val invalid_shape_field_name : string
+val incorrect_byref_assignment : string

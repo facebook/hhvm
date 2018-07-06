@@ -2805,9 +2805,40 @@ let assignment_errors _env node errors =
   | BinaryExpression
     { binary_left_operand = loperand
     ; binary_operator = op
-    ; _
+    ; binary_right_operand = roperand
     } when does_op_create_write_on_left (token_kind op) ->
-    check_lvalue loperand errors
+      let errors = check_lvalue loperand errors in
+      let errors = match syntax roperand with
+        | PrefixUnaryExpression
+          { prefix_unary_operator = op
+          ; prefix_unary_operand = operand
+          } when token_kind op = Some TokenKind.Ampersand ->
+            begin match syntax operand with
+            | FunctionCallExpression _
+            | FunctionCallWithTypeArgumentsExpression _
+            | MemberSelectionExpression _
+            | ObjectCreationExpression _
+            | SafeMemberSelectionExpression _
+            | ScopeResolutionExpression _
+            | SubscriptExpression _
+            | VariableExpression _ -> errors
+            | PrefixUnaryExpression {
+              prefix_unary_operator = { syntax = Token token; _ };
+              prefix_unary_operand = {
+                syntax = PrefixUnaryExpression { prefix_unary_operator = op; _ };
+                _
+              }
+            } when Token.kind token = TokenKind.Dollar && token_kind op = Some TokenKind.Dollar ->
+              errors
+            | PrefixUnaryExpression {
+              prefix_unary_operator = { syntax = Token token; _ };
+              prefix_unary_operand = { syntax = BracedExpression _ | VariableExpression _; _ }
+            } when Token.kind token = TokenKind.Dollar -> errors
+            | _ -> (make_error_from_node operand SyntaxError.incorrect_byref_assignment) :: errors
+            end
+        | _ -> errors
+      in
+      errors
   | ForeachStatement
     { foreach_key = k;
       foreach_value = v;

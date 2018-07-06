@@ -448,6 +448,20 @@ let memoize_on_lambda = "<<__Memoize>> attribute is not allowed on lambdas or \
 let instanceof_paren x =
   Printf.sprintf "`instanceof (%s)` is not allowed because it is ambiguous. Is `%s` a class or a constant?"
     x x
+
+let instanceof_invalid_scope_resolution = "A scope resolution (::) on the right side of an " ^
+  "instanceof operator must start with a class name, `self`, `parent`, or `static`, and end with " ^
+  "a variable"
+
+let instanceof_memberselection_inside_scoperesolution = "A scope resolution (::) on the right " ^
+  "side of an instanceof operator cannot contain a member selection (->)"
+
+let instanceof_missing_subscript_index = "A subscript expression ([]) on the right side of an " ^
+  "instanceof operator must have an index"
+
+let instanceof_unknown_node msg =
+  Printf.sprintf "Unexpected node on right hand side of instanceof: %s" msg
+
 let invalid_await_use = "Await cannot be used as an expression"
 
 let invalid_default_argument s = s ^ " expression is not permitted \

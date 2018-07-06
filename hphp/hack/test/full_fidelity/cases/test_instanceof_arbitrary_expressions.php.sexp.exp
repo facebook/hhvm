@@ -1,0 +1,570 @@
+((script 2895
+  ((list 2895
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4
+        ((() <? 2 ())
+         (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
+       (missing 0 ())))
+     (function_declaration 1717
+      ((missing 0 ())
+       (function_declaration_header 43
+        ((missing 0 ())
+         (((end_of_line 1) (delimited_comment 149) (end_of_line 1)) function
+          8 ((whitespace 1)))
+         (missing 0 ()) (() name 16 ()) (missing 0 ()) (() "(" 1 ())
+         (list 10
+          ((list_item 10
+            ((parameter_declaration 10
+              ((missing 0 ()) (missing 0 ()) (missing 0 ())
+               (simple_type_specifier 7 ((() name 7 ((whitespace 1)))))
+               (() variable 2 ()) (missing 0 ())))
+             (missing 0 ())))))
+         (() ")" 1 ()) (() : 1 ((whitespace 1)))
+         (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
+         (missing 0 ())))
+       (compound_statement 1673
+        ((() { 1 ((end_of_line 1)))
+         (list 1647
+          ((expression_statement 24
+            ((binary_expression 23
+              ((variable 2
+                ((((whitespace 2) (single_line_comment 17) (end_of_line 1)
+                   (whitespace 2))
+                  variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 18
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (qualified_name 4
+                  ((list 4
+                    ((list_item 1 ((missing 0 ()) (() "\\" 1 ())))
+                     (list_item 3 ((() name 3 ()) (missing 0 ())))))))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 17) (end_of_line 1)))))
+           (expression_statement 23
+            ((binary_expression 22
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 17
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1))) (() name 3 ())))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 17) (end_of_line 1)))))
+           (expression_statement 29
+            ((binary_expression 28
+              ((variable 2
+                ((((end_of_line 1) (whitespace 2) (single_line_comment 15)
+                   (end_of_line 1) (whitespace 2))
+                  variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 23
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (variable 9 ((() variable 9 ())))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 18) (end_of_line 1)))))
+           (expression_statement 35
+            ((binary_expression 34
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 29
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (subscript_expression 15
+                  ((member_selection_expression 12
+                    ((variable 2 ((() variable 2 ()))) (() -> 2 ())
+                     (() name 8 ())))
+                   (() [ 1 ()) (literal 1 ((() decimal_literal 1 ())))
+                   (() ] 1 ())))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 34) (end_of_line 1)))))
+           (expression_statement 42
+            ((binary_expression 41
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 36
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (subscript_expression 22
+                  ((member_selection_expression 12
+                    ((variable 2 ((() variable 2 ()))) (() -> 2 ())
+                     (() name 8 ())))
+                   (() { 1 ())
+                   (literal 8 ((() double_quoted_string_literal 8 ())))
+                   (() } 1 ())))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 30) (end_of_line 1)))))
+           (expression_statement 32
+            ((binary_expression 31
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 26
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (member_selection_expression 12
+                  ((variable 2 ((() variable 2 ()))) (() -> 2 ())
+                   (() name 8 ())))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 30) (end_of_line 1)))))
+           (expression_statement 33
+            ((binary_expression 32
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 27
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (member_selection_expression 13
+                  ((variable 2 ((() variable 2 ()))) (() -> 2 ())
+                   (() variable 9 ())))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 30) (end_of_line 1)))))
+           (expression_statement 34
+            ((binary_expression 33
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 28
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (member_selection_expression 14
+                  ((variable 2 ((() variable 2 ()))) (() -> 2 ())
+                   (braced_expression 10
+                    ((() { 1 ())
+                     (literal 8 ((() double_quoted_string_literal 8 ())))
+                     (() } 1 ())))))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 30) (end_of_line 1)))))
+           (expression_statement 35
+            ((binary_expression 34
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 29
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (scope_resolution_expression 15
+                  ((qualified_name 4
+                    ((list 4
+                      ((list_item 1 ((missing 0 ()) (() "\\" 1 ())))
+                       (list_item 3 ((() name 3 ()) (missing 0 ())))))))
+                   (() :: 2 ()) (() variable 9 ())))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 36) (end_of_line 1)))))
+           (expression_statement 34
+            ((binary_expression 33
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 28
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (scope_resolution_expression 14
+                  ((() name 3 ()) (() :: 2 ()) (() variable 9 ())))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 36) (end_of_line 1)))))
+           (expression_statement 37
+            ((binary_expression 36
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 31
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (scope_resolution_expression 17
+                  ((() static 6 ()) (() :: 2 ()) (() variable 9 ())))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 36) (end_of_line 1)))))
+           (expression_statement 35
+            ((binary_expression 34
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 29
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (scope_resolution_expression 15
+                  ((() self 4 ()) (() :: 2 ()) (() variable 9 ())))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 36) (end_of_line 1)))))
+           (expression_statement 37
+            ((binary_expression 36
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 31
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (scope_resolution_expression 17
+                  ((() parent 6 ()) (() :: 2 ()) (() variable 9 ())))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 36) (end_of_line 1)))))
+           (expression_statement 26
+            ((binary_expression 25
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 20
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (scope_resolution_expression 6
+                  ((variable 2 ((() variable 2 ()))) (() :: 2 ())
+                   (() variable 2 ())))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 34) (end_of_line 1)))))
+           (expression_statement 32
+            ((binary_expression 31
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 26
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (scope_resolution_expression 12
+                  ((scope_resolution_expression 8
+                    ((qualified_name 4
+                      ((list 4
+                        ((list_item 1 ((missing 0 ()) (() "\\" 1 ())))
+                         (list_item 3 ((() name 3 ()) (missing 0 ())))))))
+                     (() :: 2 ()) (() variable 2 ())))
+                   (() :: 2 ()) (() variable 2 ())))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 34) (end_of_line 1)))))
+           (expression_statement 31
+            ((binary_expression 30
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 25
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (scope_resolution_expression 11
+                  ((scope_resolution_expression 7
+                    ((() name 3 ()) (() :: 2 ()) (() variable 2 ())))
+                   (() :: 2 ()) (() variable 2 ())))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 34) (end_of_line 1)))))
+           (expression_statement 46
+            ((binary_expression 45
+              ((variable 2
+                ((((end_of_line 1) (whitespace 2)) variable 2
+                  ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 40
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (scope_resolution_expression 26
+                  ((subscript_expression 22
+                    ((scope_resolution_expression 8
+                      ((qualified_name 4
+                        ((list 4
+                          ((list_item 1 ((missing 0 ()) (() "\\" 1 ())))
+                           (list_item 3 ((() name 3 ()) (missing 0 ())))))))
+                       (() :: 2 ()) (() variable 2 ())))
+                     (() [ 1 ()) (variable 12 ((() variable 12 ())))
+                     (() ] 1 ())))
+                   (() :: 2 ()) (() variable 2 ())))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 34) (end_of_line 1)))))
+           (expression_statement 45
+            ((binary_expression 44
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 39
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (scope_resolution_expression 25
+                  ((subscript_expression 21
+                    ((scope_resolution_expression 7
+                      ((() name 3 ()) (() :: 2 ()) (() variable 2 ())))
+                     (() [ 1 ()) (variable 12 ((() variable 12 ())))
+                     (() ] 1 ())))
+                   (() :: 2 ()) (() variable 2 ())))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 34) (end_of_line 1)))))
+           (expression_statement 46
+            ((binary_expression 45
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 40
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (scope_resolution_expression 26
+                  ((subscript_expression 22
+                    ((scope_resolution_expression 8
+                      ((qualified_name 4
+                        ((list 4
+                          ((list_item 1 ((missing 0 ()) (() "\\" 1 ())))
+                           (list_item 3 ((() name 3 ()) (missing 0 ())))))))
+                       (() :: 2 ()) (() variable 2 ())))
+                     (() { 1 ()) (variable 12 ((() variable 12 ())))
+                     (() } 1 ())))
+                   (() :: 2 ()) (() variable 2 ())))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 32) (end_of_line 1)))))
+           (expression_statement 45
+            ((binary_expression 44
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 39
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (scope_resolution_expression 25
+                  ((subscript_expression 21
+                    ((scope_resolution_expression 7
+                      ((() name 3 ()) (() :: 2 ()) (() variable 2 ())))
+                     (() { 1 ()) (variable 12 ((() variable 12 ())))
+                     (() } 1 ())))
+                   (() :: 2 ()) (() variable 2 ())))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 32) (end_of_line 1)))))
+           (expression_statement 24
+            ((binary_expression 23
+              ((variable 2
+                ((((end_of_line 1) (whitespace 2) (single_line_comment 16)
+                   (end_of_line 1) (whitespace 2))
+                  variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 18
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (() XHP_class_name 4 ())))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 32) (end_of_line 1)))))
+           (expression_statement 34
+            ((binary_expression 33
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 28
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (scope_resolution_expression 14
+                  ((() XHP_class_name 4 ((whitespace 1)))
+                   (() :: 2 ((whitespace 1))) (() variable 6 ())))))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 36) (end_of_line 1)))))
+           (expression_statement 38
+            ((binary_expression 37
+              ((variable 2
+                ((((end_of_line 1) (whitespace 2) (single_line_comment 30)
+                   (end_of_line 1) (whitespace 2))
+                  variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 32
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (parenthesized_expression 18
+                  ((() "(" 1 ())
+                   (function_call_expression 16
+                    ((() name 9 ()) (() "(" 1 ())
+                     (list 5
+                      ((list_item 5
+                        ((literal 5 ((() double_quoted_string_literal 5 ())))
+                         (missing 0 ())))))
+                     (() ")" 1 ())))
+                   (() ")" 1 ())))))))
+             (() ";" 1 ((end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (function_declaration 259
+      ((missing 0 ())
+       (function_declaration_header 49
+        ((missing 0 ())
+         (((end_of_line 1) (end_of_line 1) (single_line_comment 77)
+           (end_of_line 1) (single_line_comment 51) (end_of_line 1)
+           (end_of_line 1) (delimited_comment 52) (end_of_line 1))
+          function 8 ((whitespace 1)))
+         (missing 0 ()) (() name 22 ()) (missing 0 ()) (() "(" 1 ())
+         (list 10
+          ((list_item 10
+            ((parameter_declaration 10
+              ((missing 0 ()) (missing 0 ()) (missing 0 ())
+               (simple_type_specifier 7 ((() name 7 ((whitespace 1)))))
+               (() variable 2 ()) (missing 0 ())))
+             (missing 0 ())))))
+         (() ")" 1 ()) (() : 1 ((whitespace 1)))
+         (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
+         (missing 0 ())))
+       (compound_statement 209
+        ((() { 1 ((end_of_line 1)))
+         (list 126
+          ((expression_statement 46
+            ((binary_expression 45
+              ((variable 2
+                ((((whitespace 2) (single_line_comment 74) (end_of_line 1)
+                   (whitespace 2))
+                  variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 40
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (scope_resolution_expression 26
+                  ((member_selection_expression 22
+                    ((scope_resolution_expression 8
+                      ((qualified_name 4
+                        ((list 4
+                          ((list_item 1 ((missing 0 ()) (() "\\" 1 ())))
+                           (list_item 3 ((() name 3 ()) (missing 0 ())))))))
+                       (() :: 2 ()) (() variable 2 ())))
+                     (() -> 2 ()) (() variable 12 ())))
+                   (() :: 2 ()) (() variable 2 ())))))))
+             (() ";" 1 ((end_of_line 1)))))
+           (expression_statement 34
+            ((binary_expression 33
+              ((variable 2
+                ((((end_of_line 1) (whitespace 2) (single_line_comment 39)
+                   (end_of_line 1) (whitespace 2))
+                  variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 28
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (subscript_expression 14
+                  ((member_selection_expression 12
+                    ((variable 2 ((() variable 2 ()))) (() -> 2 ())
+                     (() name 8 ())))
+                   (() [ 1 ()) (missing 0 ()) (() ] 1 ())))))))
+             (() ";" 1 ((end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (function_declaration 520
+      ((missing 0 ())
+       (function_declaration_header 45
+        ((missing 0 ())
+         (((end_of_line 1) (delimited_comment 43) (end_of_line 1)) function 8
+          ((whitespace 1)))
+         (missing 0 ()) (() name 18 ()) (missing 0 ()) (() "(" 1 ())
+         (list 10
+          ((list_item 10
+            ((parameter_declaration 10
+              ((missing 0 ()) (missing 0 ()) (missing 0 ())
+               (simple_type_specifier 7 ((() name 7 ((whitespace 1)))))
+               (() variable 2 ()) (missing 0 ())))
+             (missing 0 ())))))
+         (() ")" 1 ()) (() : 1 ((whitespace 1)))
+         (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
+         (missing 0 ())))
+       (compound_statement 474
+        ((() { 1 ((end_of_line 1)))
+         (list 468
+          ((expression_statement 21
+            ((binary_expression 20
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 15
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (literal 1 ((() decimal_literal 1 ())))))))
+             (() ";" 1 ((end_of_line 1)))))
+           (expression_statement 25
+            ((binary_expression 24
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 19
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (literal 5 ((() single_quoted_string_literal 5 ())))))))
+             (() ";" 1 ((end_of_line 1)))))
+           (expression_statement 28
+            ((binary_expression 27
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 22
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (parenthesized_expression 8
+                  ((() "(" 1 ())
+                   (binary_expression 6
+                    ((variable 2 ((() variable 2 ()))) (() . 1 ())
+                     (variable 3 ((() variable 3 ())))))
+                   (() ")" 1 ())))))))
+             (() ";" 1 ((end_of_line 1)))))
+           (expression_statement 30
+            ((binary_expression 29
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 24
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (scope_resolution_expression 10
+                  ((() name 3 ()) (() :: 2 ()) (() class 5 ())))))))
+             (() ";" 1 ((end_of_line 1)))))
+           (expression_statement 32
+            ((binary_expression 31
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 26
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (parenthesized_expression 12
+                  ((() "(" 1 ())
+                   (scope_resolution_expression 10
+                    ((() name 3 ()) (() :: 2 ()) (() class 5 ())))
+                   (() ")" 1 ())))))))
+             (() ";" 1 ((end_of_line 1)))))
+           (expression_statement 25
+            ((binary_expression 24
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 19
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (parenthesized_expression 5
+                  ((() "(" 1 ()) (() name 3 ()) (() ")" 1 ())))))))
+             (() ";" 1 ((end_of_line 1)))))
+           (expression_statement 27
+            ((binary_expression 26
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 21
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (function_call_expression 7
+                  ((variable 2 ((() variable 2 ()))) (() "(" 1 ())
+                   (list 3 ((list_item 3 ((() name 3 ()) (missing 0 ())))))
+                   (() ")" 1 ())))))))
+             (() ";" 1 ((end_of_line 1)))))
+           (expression_statement 39
+            ((binary_expression 38
+              ((variable 2
+                ((((end_of_line 1) (whitespace 2) (single_line_comment 78)
+                   (end_of_line 1) (whitespace 2) (single_line_comment 19)
+                   (end_of_line 1) (whitespace 2))
+                  variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 33
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (scope_resolution_expression 19
+                  ((scope_resolution_expression 8
+                    ((() name 3 ()) (() :: 2 ()) (() name 3 ())))
+                   (() :: 2 ()) (() variable 9 ())))))))
+             (() ";" 1 ((end_of_line 1)))))
+           (expression_statement 34
+            ((binary_expression 33
+              ((variable 2
+                ((((end_of_line 1) (whitespace 2)) variable 2
+                  ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 28
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (member_selection_expression 14
+                  ((() name 3 ()) (() -> 2 ()) (() variable 9 ())))))))
+             (() ";" 1 ((end_of_line 1)))))
+           (expression_statement 36
+            ((binary_expression 35
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 30
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (subscript_expression 16
+                  ((member_selection_expression 5
+                    ((() name 3 ()) (() -> 2 ()) (missing 0 ())))
+                   (() [ 1 ()) (variable 9 ((() variable 9 ()))) (() ] 1 ())))))))
+             (() ";" 1 ((end_of_line 1)))))
+           (expression_statement 36
+            ((binary_expression 35
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (instanceof_expression 30
+                ((variable 2 ((() variable 2 ((whitespace 1)))))
+                 (() instanceof 10 ((whitespace 1)))
+                 (member_selection_expression 16
+                  ((() name 3 ()) (() -> 2 ())
+                   (braced_expression 11
+                    ((() { 1 ()) (variable 9 ((() variable 9 ())))
+                     (() } 1 ())))))))))
+             (() ";" 1 ((end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

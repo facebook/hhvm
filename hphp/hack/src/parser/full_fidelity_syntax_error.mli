@@ -257,6 +257,10 @@ val sealed_final: string
 val interface_implements: string
 val memoize_on_lambda: string
 val instanceof_paren: string -> string
+val instanceof_invalid_scope_resolution: string
+val instanceof_memberselection_inside_scoperesolution: string
+val instanceof_missing_subscript_index: string
+val instanceof_unknown_node: string -> string
 val invalid_await_use: string
 val invalid_constructor_method_call: string
 val invalid_default_argument: string -> string

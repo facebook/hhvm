@@ -22,6 +22,7 @@ module SyntaxTree = SyntaxTree_.WithSmartConstructors(SCI)
 
 module Token = Syntax.Token
 module SyntaxError = Full_fidelity_syntax_error
+module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 
 module SN = Naming_special_names
@@ -1611,6 +1612,63 @@ let is_assignment node =
     Token.kind token = TokenKind.Equal
   | _ -> false
 
+let is_good_scope_resolution_qualifier node =
+  match syntax node with
+  | QualifiedName _ -> true
+  | Token token ->
+    let open TokenKind in
+    (match Token.kind token with
+    | XHPClassName | Name | Self | Parent | Static -> true
+    | _ -> false
+    )
+  | _ -> false
+
+let new_variable_errors node =
+  let rec helper node ~inside_scope_resolution =
+    match syntax node with
+    | VariableExpression _ -> []
+    | SubscriptExpression { subscript_index = { syntax = Missing; _ }; _ } ->
+      [ make_error_from_node node SyntaxError.instanceof_missing_subscript_index ]
+    | SubscriptExpression { subscript_receiver; _ } ->
+      helper subscript_receiver ~inside_scope_resolution
+    | MemberSelectionExpression { member_object; _ } ->
+      if inside_scope_resolution
+      then [
+        make_error_from_node node SyntaxError.instanceof_memberselection_inside_scoperesolution
+      ]
+      else helper member_object ~inside_scope_resolution
+    | ScopeResolutionExpression
+      {
+        scope_resolution_qualifier;
+        scope_resolution_name = { syntax = Token name; _ };
+        _
+      } when is_good_scope_resolution_qualifier scope_resolution_qualifier
+        && Token.kind name = TokenKind.Variable -> []
+    | ScopeResolutionExpression
+      {
+        scope_resolution_qualifier;
+        scope_resolution_name = { syntax = Token name; _ };
+        _
+      } when Token.kind name = TokenKind.Variable ->
+      helper scope_resolution_qualifier ~inside_scope_resolution:true
+    | ScopeResolutionExpression _ ->
+      [ make_error_from_node node SyntaxError.instanceof_invalid_scope_resolution ]
+
+    | _ ->
+      let error_msg = SyntaxError.instanceof_unknown_node (SyntaxKind.to_string @@ kind node) in
+      [ make_error_from_node node error_msg ]
+  in
+  helper node ~inside_scope_resolution:false
+
+let class_type_designator_errors node =
+  if is_good_scope_resolution_qualifier node then [] else
+  match syntax node with
+  | ParenthesizedExpression _ ->
+    (* A parenthesized expression that evaluates to a string or object is a
+       valid RHS for instanceof and new. *)
+    []
+  | _ -> new_variable_errors node
+
 let expression_errors env namespace_name node parents errors =
   let is_decimal_or_hexadecimal_literal token =
     match Token.kind token with
@@ -1631,6 +1689,12 @@ let expression_errors env namespace_name node parents errors =
     ; _ } when not env.codegen ->
     let in_paren = text in_paren in
     make_error_from_node node (SyntaxError.instanceof_paren in_paren) :: errors
+  (* We parse the right hand side of `instanceof` as a generic expression, but
+     PHP (and therefore Hack) only allow a certain subset of expressions, so
+     we should verify here that the expression we parsed is in that subset.
+     Refer: https://github.com/php/php-langspec/blob/master/spec/10-expressions.md#instanceof-operator*)
+  | InstanceofExpression { instanceof_right_operand; _ } ->
+    (class_type_designator_errors instanceof_right_operand) @ errors
   | LiteralExpression { literal_expression = {syntax = Token token; _} as e ; _}
     when env.is_hh_file && is_decimal_or_hexadecimal_literal token ->
     let text = text e in
@@ -2364,17 +2428,6 @@ let rec check_constant_expression errors node =
   let is_namey token =
     match Token.kind token with
     TokenKind.Name -> true
-    | _ -> false
-  in
-  let is_good_scope_resolution_qualifier node =
-    match syntax node with
-    | QualifiedName _ -> true
-    | Token token ->
-      let open TokenKind in
-      (match Token.kind token with
-      | XHPClassName | Name | Self | Parent | Static -> true
-      | _ -> false
-      )
     | _ -> false
   in
   let is_good_scope_resolution_name node =

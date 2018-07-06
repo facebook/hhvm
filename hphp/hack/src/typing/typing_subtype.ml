@@ -19,6 +19,85 @@ module TUtils = Typing_utils
 module SN = Naming_special_names
 module Phase = Typing_phase
 
+type reactivity_extra_info = {
+  method_info: ((* method_name *) string * (* is_static *) bool) option;
+  class_ty: phase_ty option;
+  parent_class_ty: phase_ty option
+}
+
+let empty_extra_info = {
+  method_info = None;
+  class_ty = None;
+  parent_class_ty = None
+}
+
+module ConditionTypes = struct
+  let try_get_class_for_condition_type (env: Env.env) (ty: decl ty) =
+    match TUtils.try_unwrap_class_type ty with
+    | None -> None
+    | Some (_, ((_, x) as sid), _) ->
+    begin match Env.get_class env x with
+    | None -> None
+    | Some cls -> Some (sid, cls)
+    end
+
+  let try_get_method_from_condition_type
+    (env: Env.env)
+    (ty: decl ty)
+    (is_static: bool)
+    (method_name: string) =
+    match try_get_class_for_condition_type env ty with
+    | Some (_, cls) ->
+      let m = if is_static then cls.tc_smethods else cls.tc_methods in
+      SMap.get method_name m
+    | None -> None
+
+
+  let localize_condition_type (env: Env.env) (ty: decl ty): locl ty =
+    (* if condition type is generic - we cannot specify type argument in attribute.
+       For cases when we check if containing type is a subtype of condition type
+       if condition type is generic instantiate it with TAny's *)
+    let ty =
+      match try_get_class_for_condition_type env ty with
+      | None -> ty
+      | Some (_, cls) when cls.tc_tparams = [] -> ty
+      | Some (((p, _) as sid), cls) ->
+      let params =
+        Core_list.map cls.tc_tparams
+          ~f:(fun (_, (p, x), _) -> Reason.Rwitness p, Tgeneric x) in
+      let subst =
+        Decl_instantiate.make_subst cls.tc_tparams [] in
+      let ty = Reason.Rwitness p, (Tapply (sid, params)) in
+      Decl_instantiate.instantiate subst ty in
+    let ety_env = Phase.env_with_self env in
+    let _, t = Phase.localize ~ety_env env ty in
+    t
+end
+
+let check_mutability
+  ~(is_receiver: bool)
+  (p_sub : Pos.t)
+  (mut_sub: param_mutability option)
+  (p_super : Pos.t)
+  (mut_super: param_mutability option) =
+  let str m =
+    match m with
+    | None -> "immutable"
+    | Some Param_mutable -> "mutable"
+    | Some Param_maybe_mutable -> "maybe-mutable" in
+  match mut_sub, mut_super with
+  (* immutable is not compatible with mutable *)
+  | None, Some Param_mutable
+  (* mutable is not compatible with immutable  *)
+  | Some Param_mutable, None
+  (* maybe-mutable is not compatible with immutable *)
+  | Some Param_maybe_mutable, None
+  (* maybe mutable is not compatible with immutable *)
+  | Some Param_maybe_mutable, Some Param_mutable ->
+    Errors.mutability_mismatch
+      ~is_receiver p_sub (str mut_sub) p_super (str mut_super)
+  | _ -> ()
+
 (* Given a pair of types `ty_sub` and `ty_super` attempt to apply simplifications
  * and add to the accumulated constraints in `res` any necessary and
  * sufficient [(t1,ck1,u1);...;(tn,ckn,un)] such that
@@ -485,207 +564,6 @@ and simplify_subtype_variance
       end in
     simplify_subtype_variance ~deep cid tparams childrenl superl res
 
-let decompose_subtype_add_bound
-  p
-  (env : Env.env)
-  (ty_sub : locl ty)
-  (ty_super : locl ty)
-  : Env.env =
-  let env, ty_super = Env.expand_type env ty_super in
-  let env, ty_sub = Env.expand_type env ty_sub in
-  match ty_sub, ty_super with
-  (* name_sub <: ty_super so add an upper bound on name_sub *)
-  | (_, Tabstract (AKgeneric name_sub, _)), _ when ty_sub != ty_super ->
-    Typing_log.log_types 2 p env
-      [Typing_log.Log_sub ("Typing_subtype.decompose_subtype_add_bound",
-       [Typing_log.Log_type ("ty_sub", ty_sub);
-        Typing_log.Log_type ("ty_super", ty_super)])];
-    let tys = Env.get_upper_bounds env name_sub in
-    (* Don't add the same type twice! *)
-    if Typing_set.mem ty_super tys then env
-    else Env.add_upper_bound env name_sub ty_super
-
-  (* ty_sub <: name_super so add a lower bound on name_super *)
-  | _, (_, Tabstract (AKgeneric name_super, _)) when ty_sub != ty_super ->
-    Typing_log.log_types 2 p env
-    [Typing_log.Log_sub ("Typing_subtype.decompose_subtype_add_bound",
-     [Typing_log.Log_type ("ty_sub", ty_sub);
-      Typing_log.Log_type ("ty_super", ty_super)])];
-    let tys = Env.get_lower_bounds env name_super in
-    (* Don't add the same type twice! *)
-    if Typing_set.mem ty_sub tys then env
-    else Env.add_lower_bound env name_super ty_sub
-
-  | _, _ ->
-    env
-
-(* Given two types that we know are in a subtype relationship
- *   ty_sub <: ty_super
- * add to env.tpenv any bounds on generic type parameters that must
- * hold for ty_sub <: ty_super to be valid.
- *
- * For example, suppose we know Cov<T> <: Cov<D> for a covariant class Cov.
- * Then it must be the case that T <: D so we add an upper bound D to the
- * bounds for T.
- *
- * Although some of this code is similar to that for sub_type_unwrapped, its
- * purpose is different. sub_type_unwrapped takes two types t and u and makes
- * updates to the substitution of type variables (through unification) to
- * make t <: u true.
- *
- * decompose_subtype takes two types t and u for which t <: u is *assumed* to
- * hold, and makes updates to bounds on generic parameters that *necessarily*
- * hold in order for t <: u.
- *)
-let rec decompose_subtype
-  p
-  (env : Env.env)
-  (ty_sub : locl ty)
-  (ty_super : locl ty)
-  : Env.env =
-  Typing_log.log_types 2 p env
-  [Typing_log.Log_sub ("Typing_subtype.decompose_subtype",
-   [Typing_log.Log_type ("ty_sub", ty_sub);
-    Typing_log.Log_type ("ty_super", ty_super)])];
-  let env, { constraints; _ } =
-    simplify_subtype ~deep:true ~this_ty:None ty_sub ty_super
-      (env, { constraints = []; failed_subtype = None} ) in
-  List.fold_left ~f:(fun env (ty1,ck,ty2) ->
-    match ck with
-    | Ast.Constraint_as -> decompose_subtype_add_bound p env ty1 ty2
-    | Ast.Constraint_super ->
-      failwith "subtype simplification should not produce super constraints"
-    | Ast.Constraint_eq ->
-      let env = decompose_subtype_add_bound p env ty1 ty2 in
-      decompose_subtype_add_bound p env ty2 ty1)
-    ~init:env constraints
-
-(* Decompose a general constraint *)
-and decompose_constraint
-  p
-  (env : Env.env)
-  (ck : Ast.constraint_kind)
-  (ty_sub : locl ty)
-  (ty_super : locl ty)
-  : Env.env =
-  match ck with
-  | Ast.Constraint_as ->
-    decompose_subtype p env ty_sub ty_super
-  | Ast.Constraint_super ->
-    decompose_subtype p env ty_super ty_sub
-  | Ast.Constraint_eq ->
-    let env' = decompose_subtype p env ty_sub ty_super in
-    decompose_subtype p env' ty_super ty_sub
-
-(* Given a constraint ty1 ck ty2 where ck is AS, SUPER or =,
- * add bounds to type parameters in the environment that necessarily
- * must hold in order for ty1 ck ty2.
- *
- * First, we invoke decompose_constraint to add initial bounds to
- * the environment. Then we iterate, decomposing constraints that
- * arise through transitivity across bounds.
- *
- * For example, suppose that env already contains
- *   C<T1> <: T2
- * for some covariant class C. Now suppose we add the
- * constraint "T2 as C<T3>" i.e. we end up with
- *   C<T1> <: T2 <: C<T3>
- * Then by transitivity we know that T1 <: T3 so we add this to the
- * environment also.
- *
- * We repeat this process until no further bounds are added to the
- * environment, or some limit is reached. (It's possible to construct
- * types that expand forever under inheritance.)
-*)
-let constraint_iteration_limit = 20
-let add_constraint
-  p
-  (env : Env.env)
-  (ck : Ast.constraint_kind)
-  (ty_sub : locl ty)
-  (ty_super : locl ty): Env.env =
-  Typing_log.log_types 2 p env
-    [Typing_log.Log_sub ("Typing_subtype.add_constraint",
-       [Typing_log.Log_type ("ty_sub", ty_sub);
-        Typing_log.Log_type ("ty_super", ty_super)])];
-  let oldsize = Env.get_tpenv_size env in
-  let env' = decompose_constraint p env ck ty_sub ty_super in
-  if Env.get_tpenv_size env' = oldsize
-  then env'
-  else
-  let rec iter n env =
-    if n > constraint_iteration_limit then env
-    else
-      let oldsize = Env.get_tpenv_size env in
-      let env' =
-        List.fold_left (Env.get_generic_parameters env) ~init:env
-          ~f:(fun env x ->
-            List.fold_left (Typing_set.elements (Env.get_lower_bounds env x)) ~init:env
-              ~f:(fun env ty_sub' ->
-                List.fold_left (Typing_set.elements (Env.get_upper_bounds env x)) ~init:env
-                  ~f:(fun env ty_super' ->
-                    decompose_subtype p env ty_sub' ty_super'))) in
-      if Env.get_tpenv_size env' = oldsize
-      then env'
-      else iter (n+1) env'
-  in
-    iter 0 env'
-
-type reactivity_extra_info = {
-  method_info: ((* method_name *) string * (* is_static *) bool) option;
-  class_ty: phase_ty option;
-  parent_class_ty: phase_ty option
-}
-
-let empty_extra_info = {
-  method_info = None;
-  class_ty = None;
-  parent_class_ty = None
-}
-
-module ConditionTypes = struct
-  let try_get_class_for_condition_type (env: Env.env) (ty: decl ty) =
-    match TUtils.try_unwrap_class_type ty with
-    | None -> None
-    | Some (_, ((_, x) as sid), _) ->
-    begin match Env.get_class env x with
-    | None -> None
-    | Some cls -> Some (sid, cls)
-    end
-
-  let try_get_method_from_condition_type
-    (env: Env.env)
-    (ty: decl ty)
-    (is_static: bool)
-    (method_name: string) =
-    match try_get_class_for_condition_type env ty with
-    | Some (_, cls) ->
-      let m = if is_static then cls.tc_smethods else cls.tc_methods in
-      SMap.get method_name m
-    | None -> None
-
-
-  let localize_condition_type (env: Env.env) (ty: decl ty): locl ty =
-    (* if condition type is generic - we cannot specify type argument in attribute.
-       For cases when we check if containing type is a subtype of condition type
-       if condition type is generic instantiate it with TAny's *)
-    let ty =
-      match try_get_class_for_condition_type env ty with
-      | None -> ty
-      | Some (_, cls) when cls.tc_tparams = [] -> ty
-      | Some (((p, _) as sid), cls) ->
-      let params =
-        Core_list.map cls.tc_tparams
-          ~f:(fun (_, (p, x), _) -> Reason.Rwitness p, Tgeneric x) in
-      let subst =
-        Decl_instantiate.make_subst cls.tc_tparams [] in
-      let ty = Reason.Rwitness p, (Tapply (sid, params)) in
-      Decl_instantiate.instantiate subst ty in
-    let ety_env = Phase.env_with_self env in
-    let _, t = Phase.localize ~ety_env env ty in
-    t
-end
-
 let rec subtype_params
   ?(is_method : bool = false)
   ?(check_params_reactivity = false)
@@ -994,95 +872,22 @@ and subtype_fun_params_reactivity
         SN.UserAttributes.uaOnlyRxIfImpl p_sub.fp_pos p_super.fp_pos
     end;
 
-and check_mutability
-  ~(is_receiver: bool)
-  (p_sub : Pos.t)
-  (mut_sub: param_mutability option)
-  (p_super : Pos.t)
-  (mut_super: param_mutability option) =
-  let str m =
-    match m with
-    | None -> "immutable"
-    | Some Param_mutable -> "mutable"
-    | Some Param_maybe_mutable -> "maybe-mutable" in
-  match mut_sub, mut_super with
-  (* immutable is not compatible with mutable *)
-  | None, Some Param_mutable
-  (* mutable is not compatible with immutable  *)
-  | Some Param_mutable, None
-  (* maybe-mutable is not compatible with immutable *)
-  | Some Param_maybe_mutable, None
-  (* maybe mutable is not compatible with immutable *)
-  | Some Param_maybe_mutable, Some Param_mutable ->
-    Errors.mutability_mismatch
-      ~is_receiver p_sub (str mut_sub) p_super (str mut_super)
-  | _ -> ()
-
-(* This function checks that the method ft_sub can be used to replace
- * (is a subtype of) ft_super.
- *
- * It's used for two purposes:
- * (1) checking that one method can validly override another
- * (2) checking that one function type is a subtype of another
- * For (1) there are a number of features (generics, bounds, Fvariadic)
- * that don't apply in (2)
- * For (2) we apply contravariance on function parameter types, for (1)
- * we treat them invariantly (because of runtime restrictions)
- *
- * The rules must take account of arity,
- * generic parameters and their constraints, parameter types, and return type.
- *
- * Suppose ft_super is of the form
- *    <T1 csuper1, ..., Tn csupern>(tsuper1, ..., tsuperm) : tsuper where wsuper
- * and ft_sub is of the form
- *    <T1 csub1, ..., Tn csubn>(tsub1, ..., tsubm) : tsub where wsub
- * where csuperX and csubX are constraints on type parameters and wsuper and
- * wsub are 'where' constraints. Note that all types in the superclass,
- * including constraints (so csuperX, tsuperX, tsuper and wsuper) have had
- * any class type parameters instantiated appropriately according to
- * the actual arguments of the superclass. For example, suppose we have
- *
- *   class Super<T> {
- *     function foo<Tu as A<T>>(T $x) : B<T> where T super C<T>
- *   }
- *   class Sub extends Super<D> {
- *     ...override of foo...
- *   }
- * then the actual signature in the superclass that we need to check is
- *     function foo<Tu as A<D>>(D $x) : B<D> where D super C<D>
- * Note in particular the generali form of the 'where' constraint.
- *
- * (Currently, this instantiation happens in
- *   Typing_extends.check_class_implements which in turn calls
- *   Decl_instantiate.instantiate_ce)
- *
- * Then for ft_sub to be a subtype of ft_super it must be the case that
- * (1) tsuper1 <: tsub1, ..., tsupern <: tsubn (under constraints
- *     T1 csuper1, ..., Tn csupern and wsuper).
- *
- *     This is contravariant subtyping on parameter types.
- *
- * (2) tsub <: tsuper (under constraints T1 csuper1, ..., Tn csupern and wsuper)
- *     This is covariant subtyping on result type. For constraints consider
- *       e.g. consider ft_super = <T super I>(): T
- *                 and ft_sub = <T>(): I
- *
- * (3) The constraints for ft_super entail the constraints for ft_sub, because
- *     we might be calling the function having checked that csuperX are
- *     satisfied but the definition of the function (e.g. consider an override)
- *     has been checked under csubX.
- *     More precisely, we must assume constraints T1 csuper1, ..., Tn csupern
- *     and wsuper, and check that T1 satisfies csub1, ..., Tn satisfies csubn
- *     and that wsub holds under those assumptions.
+(* Helper function for subtyping on function types: performs all checks that
+ * don't involve actual types:
+ *   <<__ReturnDisposable>> attribute
+ *   <<__MutableReturn>> attribute
+ *   <<__Rx>> attribute
+ *   <<__Mutable>> attribute
+ *   whether or not the function is a coroutine
+ *   variadic arity
  *)
-and subtype_funs_generic
-  ~(check_return : bool)
+and check_subtype_funs_attributes
   ?(extra_info: reactivity_extra_info option)
-  (env : Env.env)
+  env
   (r_sub : Reason.t)
   (ft_sub : locl fun_type)
   (r_super : Reason.t)
-  (ft_super : locl fun_type) : Env.env =
+  (ft_super : locl fun_type) =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
   if not (subtype_reactivity ?extra_info env ft_sub.ft_reactive ft_super.ft_reactive) then
@@ -1125,7 +930,6 @@ and subtype_funs_generic
        $a1 = $a->f(); // immutable alias to mutable reference *)
       Errors.return_void_to_rx_mismatch ~pos1_has_attribute:true p_sub p_super
   end;
-
   (* check mutability only for reactive functions *)
   let check_params_mutability =
     ft_super.ft_reactive <> Nonreactive &&
@@ -1135,7 +939,6 @@ and subtype_funs_generic
   then check_mutability
     ~is_receiver:true
     p_super ft_super.ft_mutability p_sub ft_sub.ft_mutability;
-
   if (arity_min ft_sub.ft_arity) > (arity_min ft_super.ft_arity)
   then Errors.fun_too_many_args p_sub p_super;
   (match ft_sub.ft_arity, ft_super.ft_arity with
@@ -1151,32 +954,91 @@ and subtype_funs_generic
       then Errors.fun_too_few_args p_sub p_super;
     | Fstandard _, _ -> Errors.fun_unexpected_nonvariadic p_sub p_super;
     | _, _ -> ()
-  );
+  )
 
-  let env  = match ft_sub.ft_arity, ft_super.ft_arity with
-    | Fvariadic (_, fp_super), Fvariadic (_, { fp_type = var_sub; _ }) ->
-      let {fp_type = var_super; _ } = fp_super in
-      sub_type env var_sub var_super
-    | _ -> env
-  in
-  (* This is (1) above *)
-  let env =
-    let variadic_subtype = match ft_sub.ft_arity with
-      | Fvariadic (_, {fp_type = var_sub; _ }) -> Some var_sub
-      | _ -> None in
-    let variadic_supertype =  match ft_super.ft_arity with
-      | Fvariadic (_, {fp_type = var_super; _ }) -> Some var_super
-      | _ -> None in
-    let is_method =
-      (Option.map extra_info (fun i -> i.method_info <> None)) = Some true in
-    subtype_params
-      ~is_method
-      ~check_params_reactivity:(should_check_fun_params_reactivity ft_super)
-      ~check_params_mutability
-      env ft_super.ft_params ft_sub.ft_params variadic_subtype variadic_supertype
-  in
+(* This function checks that the method ft_sub can be used to replace
+ * (is a subtype of) ft_super.
+ *
+ * It's used for two purposes:
+ * (1) checking that one method can validly override another
+ * (2) checking that one function type is a subtype of another
+ * For (1) there are a number of features (generics, bounds, Fvariadic)
+ * that don't apply in (2)
+ *
+ * The rules must take account of arity,
+ * generic parameters and their constraints, parameter types, and return type.
+ * Also a whole bunch of reactivity, disposable, and mutability attributes.
+ *
+ * Suppose ft_super is of the form
+ *    <T1 csuper1, ..., Tn csupern>(tsuper1, ..., tsuperm) : tsuper where wsuper
+ * and ft_sub is of the form
+ *    <T1 csub1, ..., Tn csubn>(tsub1, ..., tsubm) : tsub where wsub
+ * where csuperX and csubX are constraints on type parameters and wsuper and
+ * wsub are 'where' constraints. Note that all types in the superclass,
+ * including constraints (so csuperX, tsuperX, tsuper and wsuper) have had
+ * any class type parameters instantiated appropriately according to
+ * the actual arguments of the superclass. For example, suppose we have
+ *
+ *   class Super<T> {
+ *     function foo<Tu as A<T>>(T $x) : B<T> where T super C<T>
+ *   }
+ *   class Sub extends Super<D> {
+ *     ...override of foo...
+ *   }
+ * then the actual signature in the superclass that we need to check is
+ *     function foo<Tu as A<D>>(D $x) : B<D> where D super C<D>
+ * Note in particular the general form of the 'where' constraint.
+ *
+ * (Currently, this instantiation happens in
+ *   Typing_extends.check_class_implements which in turn calls
+ *   Decl_instantiate.instantiate_ce)
+ *
+ * Then for ft_sub to be a subtype of ft_super it must be the case that
+ * (1) tsuper1 <: tsub1, ..., tsupern <: tsubn (under constraints
+ *     T1 csuper1, ..., Tn csupern and wsuper).
+ *
+ *     This is contravariant subtyping on parameter types.
+ *
+ * (2) tsub <: tsuper (under constraints T1 csuper1, ..., Tn csupern and wsuper)
+ *     This is covariant subtyping on result type. For constraints consider
+ *       e.g. consider ft_super = <T super I>(): T
+ *                 and ft_sub = <T>(): I
+ *
+ * (3) The constraints for ft_super entail the constraints for ft_sub, because
+ *     we might be calling the function having checked that csuperX are
+ *     satisfied but the definition of the function (e.g. consider an override)
+ *     has been checked under csubX.
+ *     More precisely, we must assume constraints T1 csuper1, ..., Tn csupern
+ *     and wsuper, and check that T1 satisfies csub1, ..., Tn satisfies csubn
+ *     and that wsub holds under those assumptions.
+ *)
+and subtype_funs_generic
+  ~(check_return : bool)
+  ?(extra_info: reactivity_extra_info option)
+  (env : Env.env)
+  (r_sub : Reason.t)
+  (ft_sub : locl fun_type)
+  (r_super : Reason.t)
+  (ft_super : locl fun_type) : Env.env =
 
-  (* We check constraint entailment and invariant parameter/covariant result
+  (* First apply checks on attributes, coroutine-ness and variadic arity *)
+  check_subtype_funs_attributes ?extra_info env r_sub ft_sub r_super ft_super;
+
+  let p_sub = Reason.to_pos r_sub in
+  let check_params_mutability =
+    ft_super.ft_reactive <> Nonreactive &&
+    ft_sub.ft_reactive <> Nonreactive in
+
+  let variadic_subtype = match ft_sub.ft_arity with
+    | Fvariadic (_, {fp_type = var_sub; _ }) -> Some var_sub
+    | _ -> None in
+  let variadic_supertype =  match ft_super.ft_arity with
+    | Fvariadic (_, {fp_type = var_super; _ }) -> Some var_super
+    | _ -> None in
+  let is_method =
+    (Option.map extra_info (fun i -> i.method_info <> None)) = Some true in
+
+  (* We check constraint entailment and contravariant parameter/covariant result
    * subtyping in the context of the ft_super constraints. But we'd better
    * restore tpenv afterwards *)
   let old_tpenv = env.Env.lenv.Env.tpenv in
@@ -1185,17 +1047,37 @@ and subtype_funs_generic
       List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
         let tparam_ty = (Reason.Rwitness pos,
           Tabstract(AKgeneric name, None)) in
-        add_constraint pos env ck tparam_ty ty) in
+        Typing_utils.add_constraint pos env ck tparam_ty ty) in
     List.fold_left tparams ~f:add_bound ~init: env in
 
   let add_where_constraints env (cstrl: locl where_constraint list) =
     List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
-      add_constraint p_sub env ck ty1 ty2) in
+      Typing_utils.add_constraint p_sub env ck ty1 ty2) in
 
   let env =
     add_tparams_constraints env ft_super.ft_tparams in
   let env =
     add_where_constraints env ft_super.ft_where_constraints in
+
+  (* This is (1) above: contravariant subtyping on parameters *)
+  let env  =
+    match variadic_subtype, variadic_supertype with
+    | Some var_sub, Some var_super -> sub_type env var_super var_sub
+    | _ -> env in
+  let env =
+    subtype_params
+      ~is_method
+      ~check_params_reactivity:(should_check_fun_params_reactivity ft_super)
+      ~check_params_mutability
+      env ft_super.ft_params ft_sub.ft_params variadic_subtype variadic_supertype
+  in
+
+  (* This is (2) above: covariant subtyping on return type *)
+  let env =
+    if check_return
+    then sub_type env ft_sub.ft_ret ft_super.ft_ret
+    else env in
+
 
   (* Checking that if the return type was defined in the parent class, it
    * is defined in the subclass too (requested by Gabe Levi).
@@ -1211,12 +1093,6 @@ and subtype_funs_generic
       | _ -> ()
       );
   *)
-  (* This is (2) above *)
-  let env =
-    if check_return
-    then sub_type env ft_sub.ft_ret ft_super.ft_ret
-    else env in
-
   (* This is (3) above *)
   let check_tparams_constraints env tparams =
   let check_tparam_constraints env (_var, (p, name), cstrl) =
@@ -1243,35 +1119,6 @@ and subtype_funs_generic
     check_where_constraints env ft_sub.ft_where_constraints in
 
   Env.env_with_tpenv env old_tpenv
-
-(* Checking subtyping for methods is different than normal functions. Since
- * methods are declarations we do not want to instantiate their function type
- * parameters as unresolved, instead it should stay as a Tgeneric.
- *)
-and subtype_method
-  ~(check_return : bool)
-  ~(extra_info: reactivity_extra_info)
-  (env : Env.env)
-  (r_sub : Reason.t)
-  (ft_sub : decl fun_type)
-  (r_super : Reason.t)
-  (ft_super : decl fun_type) : Env.env =
-  if not ft_super.ft_abstract && ft_sub.ft_abstract then
-    (* It is valid for abstract class to extend a concrete class, but it cannot
-     * redefine already concrete members as abstract.
-     * See override_abstract_concrete.php test case for example. *)
-    Errors.abstract_concrete_override ft_sub.ft_pos ft_super.ft_pos `method_;
-  let ety_env =
-    Phase.env_with_self env in
-  let env, ft_super_no_tvars =
-    Phase.localize_ft ~use_pos:ft_super.ft_pos ~ety_env ~instantiate_tparams:false env ft_super in
-  let env, ft_sub_no_tvars =
-    Phase.localize_ft ~use_pos:ft_sub.ft_pos ~ety_env ~instantiate_tparams:false env ft_sub in
-  subtype_funs_generic
-    ~check_return env
-    ~extra_info
-    r_sub ft_sub_no_tvars
-    r_super ft_super_no_tvars
 
 (* unwrappedToption_super is true if we have already stripped off a Toption
  * from the supertype. *)
@@ -1806,7 +1653,7 @@ and is_sub_type
   Errors.is_hh_fixme := f;
   result
 
-and sub_string
+let rec sub_string
   (p : Pos.Map.key)
   (env : Env.env)
   (ty2 : locl ty) : Env.env =
@@ -1851,7 +1698,182 @@ and sub_string
   | _, Tobject -> env
   | _, (Tmixed | Tnonnull | Tarraykind _ | Tvar _
     | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _) ->
-      fail ()
+  fail ()
+
+(* Checking subtyping for methods is different than normal functions. Since
+ * methods are declarations we do not want to instantiate their function type
+ * parameters as unresolved, instead it should stay as a Tgeneric.
+ *)
+let subtype_method
+  ~(check_return : bool)
+  ~(extra_info: reactivity_extra_info)
+  (env : Env.env)
+  (r_sub : Reason.t)
+  (ft_sub : decl fun_type)
+  (r_super : Reason.t)
+  (ft_super : decl fun_type) : Env.env =
+  if not ft_super.ft_abstract && ft_sub.ft_abstract then
+    (* It is valid for abstract class to extend a concrete class, but it cannot
+     * redefine already concrete members as abstract.
+     * See override_abstract_concrete.php test case for example. *)
+    Errors.abstract_concrete_override ft_sub.ft_pos ft_super.ft_pos `method_;
+  let ety_env =
+    Phase.env_with_self env in
+  let env, ft_super_no_tvars =
+    Phase.localize_ft ~use_pos:ft_super.ft_pos ~ety_env ~instantiate_tparams:false env ft_super in
+  let env, ft_sub_no_tvars =
+    Phase.localize_ft ~use_pos:ft_sub.ft_pos ~ety_env ~instantiate_tparams:false env ft_sub in
+  subtype_funs_generic
+    ~check_return env
+    ~extra_info
+    r_sub ft_sub_no_tvars
+    r_super ft_super_no_tvars
+
+let decompose_subtype_add_bound
+  p
+  (env : Env.env)
+  (ty_sub : locl ty)
+  (ty_super : locl ty)
+  : Env.env =
+  let env, ty_super = Env.expand_type env ty_super in
+  let env, ty_sub = Env.expand_type env ty_sub in
+  match ty_sub, ty_super with
+  (* name_sub <: ty_super so add an upper bound on name_sub *)
+  | (_, Tabstract (AKgeneric name_sub, _)), _ when ty_sub != ty_super ->
+    Typing_log.log_types 2 p env
+      [Typing_log.Log_sub ("Typing_subtype.decompose_subtype_add_bound",
+       [Typing_log.Log_type ("ty_sub", ty_sub);
+        Typing_log.Log_type ("ty_super", ty_super)])];
+    let tys = Env.get_upper_bounds env name_sub in
+    (* Don't add the same type twice! *)
+    if Typing_set.mem ty_super tys then env
+    else Env.add_upper_bound env name_sub ty_super
+
+  (* ty_sub <: name_super so add a lower bound on name_super *)
+  | _, (_, Tabstract (AKgeneric name_super, _)) when ty_sub != ty_super ->
+    Typing_log.log_types 2 p env
+    [Typing_log.Log_sub ("Typing_subtype.decompose_subtype_add_bound",
+     [Typing_log.Log_type ("ty_sub", ty_sub);
+      Typing_log.Log_type ("ty_super", ty_super)])];
+    let tys = Env.get_lower_bounds env name_super in
+    (* Don't add the same type twice! *)
+    if Typing_set.mem ty_sub tys then env
+    else Env.add_lower_bound env name_super ty_sub
+
+  | _, _ ->
+    env
+
+(* Given two types that we know are in a subtype relationship
+ *   ty_sub <: ty_super
+ * add to env.tpenv any bounds on generic type parameters that must
+ * hold for ty_sub <: ty_super to be valid.
+ *
+ * For example, suppose we know Cov<T> <: Cov<D> for a covariant class Cov.
+ * Then it must be the case that T <: D so we add an upper bound D to the
+ * bounds for T.
+ *
+ * Although some of this code is similar to that for sub_type_unwrapped, its
+ * purpose is different. sub_type_unwrapped takes two types t and u and makes
+ * updates to the substitution of type variables (through unification) to
+ * make t <: u true.
+ *
+ * decompose_subtype takes two types t and u for which t <: u is *assumed* to
+ * hold, and makes updates to bounds on generic parameters that *necessarily*
+ * hold in order for t <: u.
+ *)
+let rec decompose_subtype
+  p
+  (env : Env.env)
+  (ty_sub : locl ty)
+  (ty_super : locl ty)
+  : Env.env =
+  Typing_log.log_types 2 p env
+  [Typing_log.Log_sub ("Typing_subtype.decompose_subtype",
+   [Typing_log.Log_type ("ty_sub", ty_sub);
+    Typing_log.Log_type ("ty_super", ty_super)])];
+  let env, { constraints; _ } =
+    simplify_subtype ~deep:true ~this_ty:None ty_sub ty_super
+      (env, { constraints = []; failed_subtype = None} ) in
+  List.fold_left ~f:(fun env (ty1,ck,ty2) ->
+    match ck with
+    | Ast.Constraint_as -> decompose_subtype_add_bound p env ty1 ty2
+    | Ast.Constraint_super ->
+      failwith "subtype simplification should not produce super constraints"
+    | Ast.Constraint_eq ->
+      let env = decompose_subtype_add_bound p env ty1 ty2 in
+      decompose_subtype_add_bound p env ty2 ty1)
+    ~init:env constraints
+
+(* Decompose a general constraint *)
+and decompose_constraint
+  p
+  (env : Env.env)
+  (ck : Ast.constraint_kind)
+  (ty_sub : locl ty)
+  (ty_super : locl ty)
+  : Env.env =
+  match ck with
+  | Ast.Constraint_as ->
+    decompose_subtype p env ty_sub ty_super
+  | Ast.Constraint_super ->
+    decompose_subtype p env ty_super ty_sub
+  | Ast.Constraint_eq ->
+    let env' = decompose_subtype p env ty_sub ty_super in
+    decompose_subtype p env' ty_super ty_sub
+
+(* Given a constraint ty1 ck ty2 where ck is AS, SUPER or =,
+ * add bounds to type parameters in the environment that necessarily
+ * must hold in order for ty1 ck ty2.
+ *
+ * First, we invoke decompose_constraint to add initial bounds to
+ * the environment. Then we iterate, decomposing constraints that
+ * arise through transitivity across bounds.
+ *
+ * For example, suppose that env already contains
+ *   C<T1> <: T2
+ * for some covariant class C. Now suppose we add the
+ * constraint "T2 as C<T3>" i.e. we end up with
+ *   C<T1> <: T2 <: C<T3>
+ * Then by transitivity we know that T1 <: T3 so we add this to the
+ * environment also.
+ *
+ * We repeat this process until no further bounds are added to the
+ * environment, or some limit is reached. (It's possible to construct
+ * types that expand forever under inheritance.)
+*)
+let constraint_iteration_limit = 20
+let add_constraint
+  p
+  (env : Env.env)
+  (ck : Ast.constraint_kind)
+  (ty_sub : locl ty)
+  (ty_super : locl ty): Env.env =
+  Typing_log.log_types 2 p env
+    [Typing_log.Log_sub ("Typing_subtype.add_constraint",
+       [Typing_log.Log_type ("ty_sub", ty_sub);
+        Typing_log.Log_type ("ty_super", ty_super)])];
+  let oldsize = Env.get_tpenv_size env in
+  let env' = decompose_constraint p env ck ty_sub ty_super in
+  if Env.get_tpenv_size env' = oldsize
+  then env'
+  else
+  let rec iter n env =
+    if n > constraint_iteration_limit then env
+    else
+      let oldsize = Env.get_tpenv_size env in
+      let env' =
+        List.fold_left (Env.get_generic_parameters env) ~init:env
+          ~f:(fun env x ->
+            List.fold_left (Typing_set.elements (Env.get_lower_bounds env x)) ~init:env
+              ~f:(fun env ty_sub' ->
+                List.fold_left (Typing_set.elements (Env.get_upper_bounds env x)) ~init:env
+                  ~f:(fun env ty_super' ->
+                    decompose_subtype p env ty_sub' ty_super'))) in
+      if Env.get_tpenv_size env' = oldsize
+      then env'
+      else iter (n+1) env'
+  in
+    iter 0 env'
 
 (* Non-side-effecting test for subtypes, using simplify_subtype.
  * Result is

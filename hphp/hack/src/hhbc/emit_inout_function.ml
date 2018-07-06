@@ -12,6 +12,7 @@ open Hh_core
 open Hhbc_ast
 
 module H = Hhbc_ast
+module SU = Hhbc_string_utils
 
 let is_last_param_variadic param_count params =
   let last_p = List.nth_exn params (param_count - 1) in
@@ -217,7 +218,8 @@ let emit_wrapper_method
       ~scope ~skipawaitable:false ~namespace ast_method.Ast.m_ret in
   let method_is_return_by_ref = ast_method.Ast.m_ret_by_ref in
   let param_count = List.length params in
-  let class_name = Hhbc_id.Class.from_ast_name @@ snd ast_class.A.c_name in
+  let class_name =
+    Hhbc_id.Class.from_ast_name @@ SU.Xhp.mangle @@ snd ast_class.A.c_name in
   let wrapper_type, original_id, renamed_id, params =
     if is_closure || has_ref_params then
       Emit_inout_helpers.RefWrapper, renamed_id, original_id,

@@ -674,10 +674,7 @@ Type locAsCell(ISS& env, LocalId l) {
   if (auto s = staticLocType(env, l, TInitCell)) {
     return std::move(*s);
   }
-  auto t = locRaw(env, l);
-  return !t.subtypeOf(BCell) ? TInitCell :
-          t.subtypeOf(BUninit) ? TInitNull :
-          remove_uninit(std::move(t));
+  return to_cell(locRaw(env, l));
 }
 
 // Read a local type, dereferencing refs, but without converting
@@ -1085,9 +1082,7 @@ folly::Optional<Type> thisPropAsCell(ISS& env, SString name) {
       return TInitCell;
     }
   }
-  return !t->subtypeOf(BCell) ? TInitCell :
-          t->subtypeOf(BUninit) ? TInitNull :
-          remove_uninit(*t);
+  return to_cell(*t);
 }
 
 /*
@@ -1181,9 +1176,7 @@ void killSelfProp(ISS& env, SString name) {
 folly::Optional<Type> selfPropAsCell(ISS& env, SString name) {
   auto const t = selfPropRaw(env, name);
   if (!t) return folly::none;
-  return !t->subtypeOf(BCell) ? TInitCell :
-          t->subtypeOf(BUninit) ? TInitNull :
-          remove_uninit(*t);
+  return to_cell(*t);
 }
 
 /*

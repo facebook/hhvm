@@ -537,8 +537,13 @@ struct Type {
    */
   bool subtypeOf(const Type& o) const;
   bool strictSubtypeOf(const Type& o) const;
+
+  /*
+   * Similar, but only check the trep (same as subtypeOf(Type{bits}),
+   * but cheaper).
+   */
   bool subtypeOf(trep bits) const { return (m_bits & bits) == m_bits; }
-  bool subtypeOrNull(trep bits) const { return subtypeOf(bits | BInitNull); }
+  bool subtypeOrNull(trep bits) const { return subtypeOf(bits | BNull); }
 
   /*
    * Subtype of any of the list of types.
@@ -616,7 +621,9 @@ private:
   friend Emptiness emptiness(const Type&);
   friend Type opt(Type);
   friend Type unopt(Type);
+  friend Type unnullish(Type);
   friend bool is_opt(const Type&);
+  friend bool is_nullish(const Type&);
   template<typename R>
   friend R tvImpl(const Type&);
   friend Type scalarize(Type t);
@@ -650,7 +657,7 @@ private:
   friend struct ArrKey disect_vec_key(const Type&);
   friend struct ArrKey disect_strict_key(const Type&);
 
-  friend Type spec_array_like_union(Type&, Type&, const Type&, const Type&);
+  friend Type spec_array_like_union(Type&, Type&, trep, trep);
   friend Type vec_val(SArray);
   friend Type dict_val(SArray);
   friend Type keyset_val(SArray);
@@ -665,6 +672,8 @@ private:
   friend Type assert_emptiness(Type);
   friend Type assert_nonemptiness(Type);
   friend Type set_trep(Type&, trep);
+  friend Type remove_uninit(Type t);
+  friend Type to_cell(Type t);
 
 private:
   union Data {
@@ -1076,6 +1085,19 @@ Type unopt(Type t);
 bool is_opt(const Type& t);
 
 /*
+ * Return t with BNull removed from its trep.
+ *
+ * Pre: is_nullish(t)
+ */
+Type unnullish(Type t);
+
+/*
+ * Returns whether a given type couldBe TNull, and would still be
+ * predefined if BNull was removed from its trep.
+ */
+bool is_nullish(const Type& t);
+
+/*
  * Improves the type `t` given the current context.  This returns the
  * intersection of the type `t` with the `context` if the `context` is a valid
  * class or object, and `t` is tagged as being the context.  If `context` is
@@ -1375,10 +1397,14 @@ Type loosen_all(Type t);
  * If t contains TUninit, returns the best type we can that contains
  * at least everything t contains, but doesn't contain TUninit.  Note
  * that this function will return TBottom for TUninit.
- *
- * Pre: t.subtypeOf(BCell)
  */
 Type remove_uninit(Type t);
+
+/*
+ * If t is not a TCell, returns TInitCell. Otherwise, if t contains
+ * TUninit, return union_of(remove_uninit(t), TInitCell).
+ */
+Type to_cell(Type t);
 
 /*
  * Add non-empty variants of the type to the type if not already

@@ -4786,18 +4786,13 @@ void Index::init_return_type(const php::Func* func) {
     tcT = vec(std::move(types));
   }
 
-  if (!tcT.subtypeOf(BCell)) {
-    tcT = TInitCell;
-  } else {
-    tcT = remove_uninit(std::move(tcT));
-
-    if (is_specialized_obj(tcT)) {
-      if (dobj_of(tcT).cls.couldBeInterfaceOrTrait()) {
-        tcT = is_opt(tcT) ? TOptObj : TObj;
-      }
-    } else {
-      tcT = loosen_all(std::move(tcT));
+  tcT = to_cell(std::move(tcT));
+  if (is_specialized_obj(tcT)) {
+    if (dobj_of(tcT).cls.couldBeInterfaceOrTrait()) {
+      tcT = is_opt(tcT) ? TOptObj : TObj;
     }
+  } else {
+    tcT = loosen_all(std::move(tcT));
   }
   FTRACE(4, "Pre-fixup return type for {}{}{}: {}\n",
          func->cls ? func->cls->name->data() : "",

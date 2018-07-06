@@ -641,62 +641,62 @@ TEST(Type, Option) {
   auto const program = make_program();
   Index index { borrow(program) };
 
-  EXPECT_TRUE(TTrue.subtypeOrNull(BTrue));
-  EXPECT_TRUE(TInitNull.subtypeOrNull(BTrue));
-  EXPECT_TRUE(!TUninit.subtypeOrNull(BTrue));
+  EXPECT_TRUE(TTrue.subtypeOf(BOptTrue));
+  EXPECT_TRUE(TInitNull.subtypeOf(BOptTrue));
+  EXPECT_TRUE(!TUninit.subtypeOf(BOptTrue));
 
-  EXPECT_TRUE(TFalse.subtypeOrNull(BFalse));
-  EXPECT_TRUE(TInitNull.subtypeOrNull(BFalse));
-  EXPECT_TRUE(!TUninit.subtypeOrNull(BFalse));
+  EXPECT_TRUE(TFalse.subtypeOf(BOptFalse));
+  EXPECT_TRUE(TInitNull.subtypeOf(BOptFalse));
+  EXPECT_TRUE(!TUninit.subtypeOf(BOptFalse));
 
-  EXPECT_TRUE(TFalse.subtypeOrNull(BBool));
-  EXPECT_TRUE(TTrue.subtypeOrNull(BBool));
-  EXPECT_TRUE(TInitNull.subtypeOrNull(BBool));
-  EXPECT_TRUE(!TUninit.subtypeOrNull(BBool));
+  EXPECT_TRUE(TFalse.subtypeOf(BOptBool));
+  EXPECT_TRUE(TTrue.subtypeOf(BOptBool));
+  EXPECT_TRUE(TInitNull.subtypeOf(BOptBool));
+  EXPECT_TRUE(!TUninit.subtypeOf(BOptBool));
 
-  EXPECT_TRUE(ival(3).subtypeOrNull(BInt));
-  EXPECT_TRUE(TInt.subtypeOrNull(BInt));
-  EXPECT_TRUE(TInitNull.subtypeOrNull(BInt));
-  EXPECT_TRUE(!TUninit.subtypeOrNull(BInt));
+  EXPECT_TRUE(ival(3).subtypeOf(BOptInt));
+  EXPECT_TRUE(TInt.subtypeOf(BOptInt));
+  EXPECT_TRUE(TInitNull.subtypeOf(BOptInt));
+  EXPECT_TRUE(!TUninit.subtypeOf(BOptInt));
 
-  EXPECT_TRUE(TDbl.subtypeOrNull(BDbl));
-  EXPECT_TRUE(TInitNull.subtypeOrNull(BDbl));
-  EXPECT_TRUE(!TUninit.subtypeOrNull(BDbl));
-  EXPECT_TRUE(dval(3.0).subtypeOrNull(BDbl));
+  EXPECT_TRUE(TDbl.subtypeOf(BOptDbl));
+  EXPECT_TRUE(TInitNull.subtypeOf(BOptDbl));
+  EXPECT_TRUE(!TUninit.subtypeOf(BOptDbl));
+  EXPECT_TRUE(dval(3.0).subtypeOf(BOptDbl));
 
-  EXPECT_TRUE(sval(s_test.get()).subtypeOrNull(BSStr));
-  EXPECT_TRUE(TSStr.subtypeOrNull(BSStr));
-  EXPECT_TRUE(TInitNull.subtypeOrNull(BSStr));
-  EXPECT_TRUE(!TUninit.subtypeOrNull(BSStr));
-  EXPECT_TRUE(!TStr.subtypeOrNull(BSStr));
+  EXPECT_TRUE(sval(s_test.get()).subtypeOf(BOptSStr));
+  EXPECT_TRUE(TSStr.subtypeOf(BOptSStr));
+  EXPECT_TRUE(TInitNull.subtypeOf(BOptSStr));
+  EXPECT_TRUE(!TUninit.subtypeOf(BOptSStr));
+  EXPECT_TRUE(!TStr.subtypeOf(BOptSStr));
   EXPECT_TRUE(TStr.couldBe(BOptSStr));
 
-  EXPECT_TRUE(TStr.subtypeOrNull(BStr));
-  EXPECT_TRUE(TSStr.subtypeOrNull(BStr));
-  EXPECT_TRUE(sval(s_test.get()).subtypeOrNull(BStr));
-  EXPECT_TRUE(TInitNull.subtypeOrNull(BStr));
-  EXPECT_TRUE(!TUninit.subtypeOrNull(BStr));
+  EXPECT_TRUE(TStr.subtypeOf(BOptStr));
+  EXPECT_TRUE(TSStr.subtypeOf(BOptStr));
+  EXPECT_TRUE(sval(s_test.get()).subtypeOf(BOptStr));
+  EXPECT_TRUE(TInitNull.subtypeOf(BOptStr));
+  EXPECT_TRUE(!TUninit.subtypeOf(BOptStr));
 
-  EXPECT_TRUE(TSArr.subtypeOrNull(BSArr));
-  EXPECT_TRUE(!TArr.subtypeOrNull(BSArr));
-  EXPECT_TRUE(TInitNull.subtypeOrNull(BSArr));
-  EXPECT_TRUE(!TUninit.subtypeOrNull(BSArr));
+  EXPECT_TRUE(TSArr.subtypeOf(BOptSArr));
+  EXPECT_TRUE(!TArr.subtypeOf(BOptSArr));
+  EXPECT_TRUE(TInitNull.subtypeOf(BOptSArr));
+  EXPECT_TRUE(!TUninit.subtypeOf(BOptSArr));
 
-  EXPECT_TRUE(TArr.subtypeOrNull(BArr));
-  EXPECT_TRUE(TInitNull.subtypeOrNull(BArr));
-  EXPECT_TRUE(!TUninit.subtypeOrNull(BArr));
+  EXPECT_TRUE(TArr.subtypeOf(BOptArr));
+  EXPECT_TRUE(TInitNull.subtypeOf(BOptArr));
+  EXPECT_TRUE(!TUninit.subtypeOf(BOptArr));
 
-  EXPECT_TRUE(TObj.subtypeOrNull(BObj));
-  EXPECT_TRUE(TInitNull.subtypeOrNull(BObj));
-  EXPECT_TRUE(!TUninit.subtypeOrNull(BObj));
+  EXPECT_TRUE(TObj.subtypeOf(BOptObj));
+  EXPECT_TRUE(TInitNull.subtypeOf(BOptObj));
+  EXPECT_TRUE(!TUninit.subtypeOf(BOptObj));
 
-  EXPECT_TRUE(TRes.subtypeOrNull(BRes));
-  EXPECT_TRUE(TInitNull.subtypeOrNull(BRes));
-  EXPECT_TRUE(!TUninit.subtypeOrNull(BRes));
+  EXPECT_TRUE(TRes.subtypeOf(BOptRes));
+  EXPECT_TRUE(TInitNull.subtypeOf(BOptRes));
+  EXPECT_TRUE(!TUninit.subtypeOf(BOptRes));
 
-  EXPECT_TRUE(TArrKey.subtypeOrNull(BArrKey));
-  EXPECT_TRUE(TInitNull.subtypeOrNull(BArrKey));
-  EXPECT_TRUE(!TUninit.subtypeOrNull(BArrKey));
+  EXPECT_TRUE(TArrKey.subtypeOf(BOptArrKey));
+  EXPECT_TRUE(TInitNull.subtypeOf(BOptArrKey));
+  EXPECT_TRUE(!TUninit.subtypeOf(BOptArrKey));
 
   for (auto& t : optionals()) EXPECT_EQ(t, opt(unopt(t)));
   for (auto& t : optionals()) EXPECT_TRUE(is_opt(t));
@@ -889,8 +889,8 @@ TEST(Type, SpecificExamples) {
   EXPECT_TRUE(ival(3).subtypeOrNull(BInt));
   EXPECT_TRUE(TInt.subtypeOrNull(BInt));
   EXPECT_TRUE(!TBool.subtypeOrNull(BInt));
-  EXPECT_TRUE(TInitNull.subtypeOrNull(BInt));
-  EXPECT_TRUE(!TNull.subtypeOrNull(BInt));
+  EXPECT_TRUE(TInitNull.subtypeOf(BOptInt));
+  EXPECT_TRUE(!TNull.subtypeOf(BOptInt));
   EXPECT_TRUE(TNull.couldBe(BOptInt));
   EXPECT_TRUE(TNull.couldBe(BOptBool));
 

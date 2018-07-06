@@ -65,6 +65,7 @@ constexpr int kTypeWidenMaxDepth = 8;
 
 // Legal to call with !isPredefined(bits)
 bool mayHaveData(trep bits) {
+  bits &= ~BUninit;
   switch (bits) {
   case BSStr:    case BObj:    case BInt:    case BDbl:
   case BOptSStr: case BOptObj: case BOptInt: case BOptDbl:
@@ -180,38 +181,9 @@ bool mayHaveData(trep bits) {
   return false;
 }
 
-/*
- * Note: currently we're limiting all represented types to predefined
- * bit patterns (instead of arbitrary unions), so this function is
- * around for assertions.
- *
- * This may be relaxed later if we think we can get more out of it,
- * but for now the thought is that the likelihood of getting
- * significantly better types from the inference algorithm might be
- * counter-balanced by the increased chance of hard-to-track
- * type-system bugs, so at least for now (at the time of this writing,
- * before shipping hhbbc) we're ruling out a bunch of edge cases.
- *
- * Aside from types like Obj<= or things like TSStr, a lot of cases
- * with arbitrary-unions may not lead to better code at JIT time
- * (unless the inference turns them back into a predefined type),
- * since we'll have to guard anyway to see which one it was.  We'll
- * try it later.
- */
-bool isPredefined(trep bits) {
-#define CASE(n) case B##n:
-  switch (bits) {
-    TYPES(CASE)
-    return true;
-    NON_TYPES(CASE)
-    break;
-  }
-#undef CASE
-  return false;
-}
-
 // Pre: isPredefined(bits)
 bool canBeOptional(trep bits) {
+  if (bits & BUninit) return false;
   switch (bits) {
   case BBottom:
     return false;
@@ -361,6 +333,41 @@ bool canBeOptional(trep bits) {
 }
 
 /*
+ * Note: currently we're limiting all represented types to predefined
+ * bit patterns (instead of arbitrary unions), so this function is
+ * around for assertions.
+ *
+ * This may be relaxed later if we think we can get more out of it,
+ * but for now the thought is that the likelihood of getting
+ * significantly better types from the inference algorithm might be
+ * counter-balanced by the increased chance of hard-to-track
+ * type-system bugs, so at least for now (at the time of this writing,
+ * before shipping hhbbc) we're ruling out a bunch of edge cases.
+ *
+ * Aside from types like Obj<= or things like TSStr, a lot of cases
+ * with arbitrary-unions may not lead to better code at JIT time
+ * (unless the inference turns them back into a predefined type),
+ * since we'll have to guard anyway to see which one it was.  We'll
+ * try it later.
+ */
+bool isPredefined(trep bits) {
+  if (bits & BUninit &&
+      isPredefined(bits & ~BNull) &&
+      canBeOptional(bits & ~BNull)) {
+    return true;
+  }
+#define CASE(n) case B##n:
+  switch (bits) {
+    TYPES(CASE)
+    return true;
+    NON_TYPES(CASE)
+    break;
+  }
+#undef CASE
+  return false;
+}
+
+/*
  * Combine array bits.  Our type system currently avoids arbitrary unions (see
  * rationale above), so we don't have predefined types like CArr|SArrN, or
  * SArrN|CArrE.  This function checks a few cases to ensure combining array
@@ -368,12 +375,12 @@ bool canBeOptional(trep bits) {
  */
 template<trep B>
 trep combine_arrish_bits(trep a, trep b) {
-  DEBUG_ONLY constexpr trep OptB = BInitNull | B;
-  auto const combined = a | b;
-  assert((combined & OptB) == combined);
+  DEBUG_ONLY constexpr trep NullishB = BNull | B;
+  auto const combined = a | (b & NullishB);
+  assertx((combined & NullishB) == combined);
   auto const arr_part = combined & B;
   if (!isPredefined(arr_part)) return combined | B;
-  assert(isPredefined(combined));
+  assertx(isPredefined(combined));
   return combined;
 }
 
@@ -384,11 +391,11 @@ trep combine_arrish_bits(trep a, trep b) {
  * and emptiness bits.
  */
 trep combine_dv_arrish_bits(trep a, trep b) {
-  auto const combined = a | b;
-  auto const nonopt = combined & ~BInitNull;
-  auto const check = [&] (trep x) { return (nonopt & x) == nonopt; };
+  auto const combined = a | (b & (BArr | BNull));
+  auto const nonnull = combined & ~BNull;
+  auto const check = [&] (trep x) { return (nonnull & x) == nonnull; };
   auto const ret = [&] (trep x) {
-    return (combined & BInitNull) ? trep(x | BInitNull) : x;
+    return x | (combined & BNull);
   };
   if (check(BSArrE)) return ret(BSArrE);
   if (check(BSArrN)) return ret(BSArrN);
@@ -437,17 +444,17 @@ trep combine_keyset_bits(trep a, trep b) {
 // Note that this allows you to combine bits representing different d/varray
 // types. They'll promote to a TArr type.
 trep combine_arr_like_bits(trep a, trep b) {
-  auto check = [] (trep a, trep x) { return (a & x) == a; };
-  assert(a && isPredefined(a) && !check(a, BInitNull));
+  auto check = [] (trep a, trep x) { return (a & (x | BNull)) == a; };
+  assert(isPredefined(a) && !check(a, BNull));
   // If both bits have the same d/varray-ness, combine them as normal.
-  if (check(a, BOptPArr) && check(b, BOptPArr)) return combine_parr_bits(a, b);
-  if (check(a, BOptVArr) && check(b, BOptVArr)) return combine_varr_bits(a, b);
-  if (check(a, BOptDArr) && check(b, BOptDArr)) return combine_darr_bits(a, b);
+  if (check(a, BPArr) && check(b, BPArr)) return combine_parr_bits(a, b);
+  if (check(a, BVArr) && check(b, BVArr)) return combine_varr_bits(a, b);
+  if (check(a, BDArr) && check(b, BDArr)) return combine_darr_bits(a, b);
   // If they're all arrays, combine them and promote it to the right TArr union.
-  if (check(a, BOptArr))    return combine_dv_arrish_bits(a, trep(b & BOptArr));
-  if (check(a, BOptVec))    return combine_vec_bits(a,    trep(b & BOptVec));
-  if (check(a, BOptDict))   return combine_dict_bits(a,   trep(b & BOptDict));
-  if (check(a, BOptKeyset)) return combine_keyset_bits(a, trep(b & BOptKeyset));
+  if (check(a, BArr))    return combine_dv_arrish_bits(a, b);
+  if (check(a, BVec))    return combine_vec_bits(a,       b);
+  if (check(a, BDict))   return combine_dict_bits(a,      b);
+  if (check(a, BKeyset)) return combine_keyset_bits(a,    b);
   not_reached();
 }
 
@@ -458,15 +465,15 @@ trep combine_arr_like_bits(trep a, trep b) {
  * TArrLikeN, but not promote a T[P,V,D]Arr to TArr.
  */
 trep combine_dv_arr_like_bits(trep a, trep b) {
-  auto check = [] (trep a, trep x) { return (a & x) == a; };
-  assert(a && isPredefined(a) && !check(a, BInitNull));
-  if (check(a, BOptPArr))   return combine_parr_bits(a,   trep(b & BOptPArr));
-  if (check(a, BOptVArr))   return combine_varr_bits(a,   trep(b & BOptVArr));
-  if (check(a, BOptDArr))   return combine_darr_bits(a,   trep(b & BOptDArr));
-  if (check(a, BOptArr))    return combine_arr_bits(a,    trep(b & BOptArr));
-  if (check(a, BOptVec))    return combine_vec_bits(a,    trep(b & BOptVec));
-  if (check(a, BOptDict))   return combine_dict_bits(a,   trep(b & BOptDict));
-  if (check(a, BOptKeyset)) return combine_keyset_bits(a, trep(b & BOptKeyset));
+  auto check = [] (trep a, trep x) { return (a & (x | BNull)) == a; };
+  assert(isPredefined(a) && !check(a, BNull));
+  if (check(a, BPArr))   return combine_parr_bits(a,   b);
+  if (check(a, BVArr))   return combine_varr_bits(a,   b);
+  if (check(a, BDArr))   return combine_darr_bits(a,   b);
+  if (check(a, BArr))    return combine_arr_bits(a,    b);
+  if (check(a, BVec))    return combine_vec_bits(a,    b);
+  if (check(a, BDict))   return combine_dict_bits(a,   b);
+  if (check(a, BKeyset)) return combine_keyset_bits(a, b);
   not_reached();
 }
 
@@ -491,7 +498,7 @@ trep promote_varray(trep a) {
   // If the array is more than just a varray, we can't just switch the bits and
   // keep the combination predefined. Just use the maybe path which will keep
   // the bits predefined.
-  if ((a & BOptVArr) != a) return maybe_promote_varray(a);
+  if ((a & (BVArr | BNull)) != a) return maybe_promote_varray(a);
   check(BSVArrE, BSDArrE);
   check(BCVArrE, BCDArrE);
   check(BSVArrN, BSDArrN);
@@ -2228,9 +2235,9 @@ Type set_trep(Type& a, trep bits) {
   // Packed or Map type. We cannot have a ArrLikeVal if the type isn't
   // specifically a subtype of TOptParr, TOptVArr, or TOptDArr.
   if (a.m_dataTag == DataTag::ArrLikeVal &&
-      ((a.subtypeOrNull(BPArr) && ((bits & BOptPArr) != bits)) ||
-       (a.subtypeOrNull(BVArr) && ((bits & BOptVArr) != bits)) ||
-       (a.subtypeOrNull(BDArr) && ((bits & BOptDArr) != bits)))) {
+      ((a.subtypeOrNull(BPArr) && ((bits & (BPArr | BNull)) != bits)) ||
+       (a.subtypeOrNull(BVArr) && ((bits & (BVArr | BNull)) != bits)) ||
+       (a.subtypeOrNull(BDArr) && ((bits & (BDArr | BNull)) != bits)))) {
     if (auto p = toDArrLikePacked(a.m_data.aval)) {
       return packed_impl(bits, std::move(p->elems));
     }
@@ -2251,23 +2258,24 @@ Type set_trep(Type& a, trep bits) {
  */
 Type spec_array_like_union(Type& spec_a,
                            Type& b,
-                           const Type& opt_e,
-                           const Type& opt) {
+                           trep opt_e,
+                           trep opt) {
   // If b isn't the same kind of array-like, we'll have to treat it as
   // a union of two separate types
-  if (!b.subtypeOf(opt)) return TBottom;
+  if (!b.subtypeOf(opt | BNull)) return TBottom;
+
   auto const bits = combine_arr_like_bits(spec_a.m_bits, b.m_bits);
+  assertx((bits & BNull) == ((spec_a.m_bits | b.m_bits) & BNull));
   if (!is_specialized_array_like(b)) {
     // We can keep a's specialization if b is an empty array-like
     // or a nullable empty array-like.
-    if (b.subtypeOf(opt_e)) return set_trep(spec_a, bits);
+    if (b.subtypeOf(opt_e | BNull)) return set_trep(spec_a, bits);
     // otherwise drop the specialized bits
     return Type { bits };
   }
 
-  DEBUG_ONLY auto const shouldBeOpt = is_opt(spec_a) || is_opt(b);
   auto const t = Type::unionArrLike(std::move(spec_a), std::move(b));
-  assert(!shouldBeOpt || is_opt(t));
+  assertx((t.m_bits & BNull) == (bits & BNull));
   return t;
 }
 
@@ -2367,9 +2375,9 @@ Type opt(Type t) {
 }
 
 Type unopt(Type t) {
-  assert(is_opt(t));
+  assertx(is_opt(t));
   t.m_bits &= ~BInitNull;
-  assert(!is_opt(t));
+  assertx(!is_opt(t));
   return t;
 }
 
@@ -2380,8 +2388,22 @@ bool is_opt(const Type& t) {
   return isPredefined(nonNullBits) && canBeOptional(nonNullBits);
 }
 
+bool is_nullish(const Type& t) {
+  if (t.subtypeOf(TNull)) return false;
+  if (!t.couldBe(TNull)) return false;
+  auto const nonNullBits = t.m_bits & ~BNull;
+  return isPredefined(nonNullBits) && canBeOptional(nonNullBits);
+}
+
+Type unnullish(Type t) {
+  assertx(is_nullish(t));
+  t.m_bits &= ~BNull;
+  assertx(!is_nullish(t));
+  return t;
+}
+
 Type return_with_context(Type t, Type context) {
-  assertx(t.subtypeOf(BGen));
+  assertx(t.subtypeOf(BInitGen));
   // We don't assert the context is a TCls of TObj because sometimes we set it
   // to TTop when handling dynamic calls.
   if (((is_specialized_obj(t) && t.m_data.dobj.isCtx) ||
@@ -2667,7 +2689,7 @@ R tvImpl(const Type& t) {
     always_assert(false);
 
   default:
-    if (is_opt(t)) {
+    if (t.couldBe(TNull)) {
       break;
     }
     switch (t.m_dataTag) {
@@ -3171,15 +3193,29 @@ Type Type::unionArrLike(Type a, Type b) {
 }
 
 Type union_of(Type a, Type b) {
-  if (a.subtypeOfImpl<true>(b)) return b;
-  if (b.subtypeOfImpl<true>(a)) return a;
-  // We need to double check that both unopt(a) is not a subtype of b, and
-  // that unopt(b) is not a subtype of a.  This is important because:
-  // unopt(a) <= b  implies that a and b <= opt(b)
-  // Most cases would be caught by the commonAncestor check below, but cases
-  // involving an interface can be missed.
-  if (is_opt(a) && !is_opt(b) && unopt(a).subtypeOfImpl<true>(b)) return opt(b);
-  if (is_opt(b) && !is_opt(a) && unopt(b).subtypeOfImpl<true>(a)) return opt(a);
+  auto const nullbits = (a.m_bits | b.m_bits) & BNull;
+
+  auto nullify = [&] (Type& dst) {
+    dst.m_bits |= nullbits;
+    assertx(isPredefined(dst.m_bits));
+    return dst;
+  };
+
+  if (is_nullish(a)) {
+    if (unnullish(a).subtypeOfImpl<true>(b)) {
+      return nullify(b);
+    }
+  } else if (a.subtypeOfImpl<true>(b)) {
+    return b;
+  }
+
+  if (is_nullish(b)) {
+    if (unnullish(b).subtypeOfImpl<true>(a)) {
+      return nullify(a);
+    }
+  } else if (b.subtypeOfImpl<true>(a)) {
+    return a;
+  }
 
   /*
    * We need to check this before specialized objects, including the case where
@@ -3189,26 +3225,29 @@ Type union_of(Type a, Type b) {
   if (is_specialized_wait_handle(a)) {
     if (is_specialized_wait_handle(b)) {
       *a.m_data.dobj.whType.mutate() |= *b.m_data.dobj.whType;
-      return is_opt(a) || !is_opt(b) ? a : opt(a);
+      return nullify(a);
     }
-    if (b == TInitNull) return opt(a);
+    if (b.subtypeOf(TNull)) {
+      return nullify(a);
+    }
   }
   if (is_specialized_wait_handle(b)) {
-    if (a == TInitNull) return opt(b);
+    if (a.subtypeOf(TNull)) {
+      return nullify(b);
+    }
   }
 
-  // When both types are strict subtypes of TObj or TOptObj or both
+  // When both types are strict subtypes of nullish TObj or both
   // are strict subtypes of TCls we look for a common ancestor if one
   // exists.
   if (is_specialized_obj(a) && is_specialized_obj(b)) {
-    auto keepOpt = is_opt(a) || is_opt(b);
     auto t = a.m_data.dobj.cls.commonAncestor(dobj_of(b).cls);
     // We need not to distinguish between Obj<=T and Obj=T, and always
     // return an Obj<=Ancestor, because that is the single type that
     // includes both children.
     auto const isCtx = a.m_data.dobj.isCtx && b.m_data.dobj.isCtx;
-    if (t) return setctx(keepOpt ? opt(subObj(*t)) : subObj(*t), isCtx);
-    return setctx(keepOpt ? TOptObj : TObj, isCtx);
+    auto ret = t ? subObj(*t) : TObj;
+    return setctx(nullify(ret), isCtx);
   }
   if (a.strictSubtypeOf(TCls) && b.strictSubtypeOf(TCls)) {
     auto t = a.m_data.dcls.cls.commonAncestor(dcls_of(b).cls);
@@ -3218,34 +3257,34 @@ Type union_of(Type a, Type b) {
   }
 
   if (is_specialized_array(a)) {
-    auto t = spec_array_like_union(a, b, TOptArrE, TOptArr);
+    auto t = spec_array_like_union(a, b, BArrE, BArr);
     if (t != TBottom) return t;
   } else if (is_specialized_array(b)) {
-    auto t = spec_array_like_union(b, a, TOptArrE, TOptArr);
+    auto t = spec_array_like_union(b, a, BArrE, BArr);
     if (t != TBottom) return t;
   }
 
   if (is_specialized_vec(a)) {
-    auto t = spec_array_like_union(a, b, TOptVecE, TOptVec);
+    auto t = spec_array_like_union(a, b, BVecE, BVec);
     if (t != TBottom) return t;
   } else if (is_specialized_vec(b)) {
-    auto t = spec_array_like_union(b, a, TOptVecE, TOptVec);
+    auto t = spec_array_like_union(b, a, BVecE, BVec);
     if (t != TBottom) return t;
   }
 
   if (is_specialized_dict(a)) {
-    auto t = spec_array_like_union(a, b, TOptDictE, TOptDict);
+    auto t = spec_array_like_union(a, b, BDictE, BDict);
     if (t != TBottom) return t;
   } else if (is_specialized_dict(b)) {
-    auto t = spec_array_like_union(b, a, TOptDictE, TOptDict);
+    auto t = spec_array_like_union(b, a, BDictE, BDict);
     if (t != TBottom) return t;
   }
 
   if (is_specialized_keyset(a)) {
-    auto t = spec_array_like_union(a, b, TOptKeysetE, TOptKeyset);
+    auto t = spec_array_like_union(a, b, BKeysetE, BKeyset);
     if (t != TBottom) return t;
   } else if (is_specialized_keyset(b)) {
-    auto t = spec_array_like_union(b, a, TOptKeysetE, TOptKeyset);
+    auto t = spec_array_like_union(b, a, BKeysetE, BKeyset);
     if (t != TBottom) return t;
   }
 
@@ -3253,122 +3292,95 @@ Type union_of(Type a, Type b) {
     return ref_to(union_of(*a.m_data.inner, *b.m_data.inner));
   }
 
-#define X(y) if (a.subtypeOf(y) && b.subtypeOf(y)) return y;
-  X(TInt)
-  X(TDbl)
-  X(TSStr)
-
-  X(TSPArr)
-  X(TPArrE)
-  X(TPArrN)
-  X(TPArr)
-
-  X(TSVArr)
-  X(TVArrE)
-  X(TVArrN)
-  X(TVArr)
-
-  X(TSDArr)
-  X(TDArrE)
-  X(TDArrN)
-  X(TDArr)
-
-  X(TSArrE)
-  X(TSArrN)
-  X(TSArr)
-  X(TArrE)
-  X(TArrN)
-  X(TArr)
-
-  X(TObj)
-  X(TCls)
-  X(TNull)
-  X(TBool)
-  X(TNum)
-  X(TStr)
-
-  X(TSVec)
-  X(TVecE)
-  X(TVecN)
-  X(TVec)
-  X(TSDict)
-  X(TDictE)
-  X(TDictN)
-  X(TDict)
-  X(TSKeyset)
-  X(TKeysetE)
-  X(TKeysetN)
-  X(TKeyset)
-
-  X(TUncArrKey)
-  X(TArrKey)
-
   /*
    * Merging option types tries to preserve subtype information where it's
    * possible.  E.g. if you union InitNull and Obj<=Foo, we want OptObj<=Foo to
    * be the result.
    */
-  if (a == TInitNull && canBeOptional(b.m_bits)) return opt(b);
-  if (b == TInitNull && canBeOptional(a.m_bits)) return opt(a);
+  if (isPredefined(a.m_bits | b.m_bits)) {
+    if (a.subtypeOf(BNull)) {
+      b.m_bits |= a.m_bits;
+      return b;
+    }
+    if (b.subtypeOf(BNull)) {
+      a.m_bits |= b.m_bits;
+      return a;
+    }
+  }
 
-  // Optional types where the non-Null part is already a union or can
-  // have a value need to be manually tried (e.g. if we are merging
-  // TOptTrue and TOptFalse, we want TOptBool, or merging TOptInt=1
-  // and TOptInt=2 should give us TOptInt).
-  X(TOptBool)
-  X(TOptInt)
-  X(TOptDbl)
-  X(TOptNum)
-  X(TOptSStr)
-  X(TOptStr)
-  X(TOptObj)
+#define X(y) if (a.subtypeOf(B ## y) && b.subtypeOf(B ## y)) return T ## y;
+#define Y(y)                                                            \
+  X(y)                                                                  \
+  if (a.subtypeOf(B ## y | BInitNull) &&                                \
+      b.subtypeOf(B ## y | BInitNull)) return TOpt ## y;                \
+  if (a.subtypeOf(B ## y | BUninit) &&                                  \
+      b.subtypeOf(B ## y | BUninit)) return Type{B ## y | BUninit};     \
+  if (a.subtypeOf(B ## y | BNull) &&                                    \
+      b.subtypeOf(B ## y | BNull)) return Type{B ## y | BNull};
 
-  X(TOptSPArr)
-  X(TOptPArrE)
-  X(TOptPArrN)
-  X(TOptPArr)
+  // non-optional types
+  X(Null)
+  X(Cls)
 
-  X(TOptSVArr)
-  X(TOptVArrE)
-  X(TOptVArrN)
-  X(TOptVArr)
+  // optional types
+  Y(Bool)
+  Y(Int)
+  Y(Dbl)
+  Y(Num)
+  Y(SStr)
+  Y(Str)
+  Y(Obj)
 
-  X(TOptSDArr)
-  X(TOptDArrE)
-  X(TOptDArrN)
-  X(TOptDArr)
+  Y(SPArr)
+  Y(PArrE)
+  Y(PArrN)
+  Y(PArr)
 
-  X(TOptSArrE)
-  X(TOptSArrN)
-  X(TOptSArr)
-  X(TOptArrE)
-  X(TOptArrN)
-  X(TOptArr)
+  Y(SVArr)
+  Y(VArrE)
+  Y(VArrN)
+  Y(VArr)
 
-  X(TOptSVec)
-  X(TOptVecE)
-  X(TOptVecN)
-  X(TOptVec)
-  X(TOptSDict)
-  X(TOptDictE)
-  X(TOptDictN)
-  X(TOptDict)
-  X(TOptSKeyset)
-  X(TOptKeysetE)
-  X(TOptKeysetN)
-  X(TOptKeyset)
+  Y(SDArr)
+  Y(DArrE)
+  Y(DArrN)
+  Y(DArr)
 
-  X(TOptUncArrKey)
-  X(TOptArrKey)
+  Y(SArrE)
+  Y(SArrN)
+  Y(SArr)
+  Y(ArrE)
+  Y(ArrN)
+  Y(Arr)
 
-  X(TInitPrim)
-  X(TPrim)
-  X(TInitUnc)
-  X(TUnc)
-  X(TInitCell)
-  X(TCell)
-  X(TInitGen)
-  X(TGen)
+  Y(SVec)
+  Y(VecE)
+  Y(VecN)
+  Y(Vec)
+  Y(SDict)
+  Y(DictE)
+  Y(DictN)
+  Y(Dict)
+  Y(SKeyset)
+  Y(KeysetE)
+  Y(KeysetN)
+  Y(Keyset)
+
+  Y(UncArrKey)
+  Y(ArrKey)
+
+  // non-optional types that contain other types above (and hence
+  // must come after them).
+  X(InitPrim)
+  X(Prim)
+  X(InitUnc)
+  X(Unc)
+  X(InitCell)
+  X(Cell)
+  X(InitGen)
+  X(Gen)
+
+#undef Y
 #undef X
 
   return TTop;
@@ -3633,13 +3645,22 @@ Type add_nonemptiness(Type t) {
 }
 
 Type remove_uninit(Type t) {
-  assert(t.subtypeOf(BCell));
+  assert(t.subtypeOf(BGen));
   if (!t.couldBe(BUninit))  return t;
-  if (t.subtypeOf(BUninit)) return TBottom;
-  if (t.subtypeOf(BNull))   return TInitNull;
-  if (t.subtypeOf(BPrim))   return TInitPrim;
-  if (t.subtypeOf(BUnc))    return TInitUnc;
-  return TInitCell;
+  if (isPredefined(t.m_bits & ~BUninit)) {
+    t.m_bits &= ~BUninit;
+    return t;
+  }
+  return t.subtypeOf(BCell) ? TInitCell : TInitGen;
+}
+
+Type to_cell(Type t) {
+  if (!t.subtypeOf(BCell)) return TInitCell;
+  if (!(t.m_bits & BUninit)) return t;
+  auto bits = (t.m_bits & ~BUninit) | BInitNull;
+  assertx(isPredefined(bits));
+  t.m_bits = bits;
+  return t;
 }
 
 Type assert_emptiness(Type t) {
@@ -3647,12 +3668,12 @@ Type assert_emptiness(Type t) {
     return TBottom;
   }
   if (!could_have_magic_bool_conversion(t) && t.subtypeOrNull(BObj)) {
-    return TInitNull;
+    return TNull;
   }
 
   auto remove = [&] (trep m, trep e) {
-    if ((t.m_bits & m) == t.m_bits) {
-      auto bits = t.m_bits & e;
+    if ((t.m_bits & (m | BNull)) == t.m_bits) {
+      auto bits = t.m_bits & (e | BNull);
       if (t.hasData() && !mayHaveData(bits)) {
         t = Type { bits };
       } else {
@@ -3663,8 +3684,8 @@ Type assert_emptiness(Type t) {
     return false;
   };
 
-  if (remove(BOptArr, BOptArrE) || remove(BOptVec, BOptVecE) ||
-      remove(BOptDict, BOptDictE) || remove(BOptKeyset, BOptKeysetE)) {
+  if (remove(BArr, BArrE) || remove(BVec, BVecE) ||
+      remove(BDict, BDictE) || remove(BKeyset, BKeysetE)) {
     return t;
   }
 
@@ -3673,15 +3694,21 @@ Type assert_emptiness(Type t) {
   if (t.subtypeOf(BDbl))     return dval(0);
   if (t.subtypeOf(BSStr))    return sempty();
 
-  if (t.subtypeOrNull(BInt))  return opt(ival(0));
-  if (t.subtypeOrNull(BBool)) return opt(TFalse);
-  if (t.subtypeOrNull(BDbl))  return opt(dval(0));
-  if (t.subtypeOrNull(BSStr)) return opt(sempty());
+  auto add_nullish = [&] (Type in) {
+    in.m_bits |= t.m_bits & BNull;
+    return in;
+  };
+
+  if (t.subtypeOrNull(BInt))  return add_nullish(ival(0));
+  if (t.subtypeOrNull(BBool)) return add_nullish(TFalse);
+  if (t.subtypeOrNull(BDbl))  return add_nullish(dval(0));
+  if (t.subtypeOrNull(BSStr)) return add_nullish(sempty());
 
   return t;
 }
 
 Type assert_nonemptiness(Type t) {
+  t = remove_uninit(std::move(t));
   if (is_opt(t)) t = unopt(std::move(t));
   if (t.subtypeOfAny(TNull, TFalse, TArrE, TVecE, TDictE, TKeysetE)) {
     return TBottom;
@@ -3689,19 +3716,19 @@ Type assert_nonemptiness(Type t) {
   if (t.subtypeOf(BBool)) return TTrue;
 
   auto remove = [&] (trep m, trep e) {
-    if ((t.m_bits & m) == t.m_bits) {
-      t.m_bits &= e;
+    if ((t.m_bits & (m | BNull)) == t.m_bits) {
+      t.m_bits &= (e | BNull);
       return true;
     }
     return false;
   };
 
-  if (remove(BOptArr, BOptArrN) || remove(BOptVec, BOptVecN) ||
-      remove(BOptDict, BOptDictN) || remove(BOptKeyset, BOptKeysetN)) {
+  if (remove(BArr, BArrN) || remove(BVec, BVecN) ||
+      remove(BDict, BDictN) || remove(BKeyset, BKeysetN)) {
     return t;
   }
 
-  return remove_uninit(std::move(t));
+  return t;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -3769,10 +3796,10 @@ ArrKey disect_array_key(const Type& keyTy) {
     // will act like the empty string.  In that case, the code uses the
     // static empty string, so if it was an OptCStr it needs to
     // incorporate SStr, but an OptSStr can stay as SStr.
-    if (keyTy.strictSubtypeOf(TOptStr) && keyTy.m_dataTag == DataTag::Str) {
+    if (keyTy.subtypeOf(BOptStr) && keyTy.m_dataTag == DataTag::Str) {
       int64_t ignore;
       if (!keyTy.m_data.sval->isStrictlyInteger(ignore)) {
-        ret.type = keyTy.strictSubtypeOf(TOptSStr) ? TSStr : TStr;
+        ret.type = keyTy.subtypeOf(BOptSStr) ? TSStr : TStr;
         ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
         return ret;
       }
@@ -4876,7 +4903,7 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
   assert(!t.subtypeOf(BBottom));
   using T = RepoAuthType::Tag;
 
-  if (t.strictSubtypeOf(TObj) || (is_opt(t) && t.strictSubtypeOf(TOptObj))) {
+  if (is_specialized_obj(t) && t.subtypeOf(TOptObj)) {
     auto const dobj = dobj_of(t);
     auto const tag =
       is_opt(t)
@@ -4885,8 +4912,8 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
     return RepoAuthType { tag, dobj.cls.name() };
   }
 
-  if (t.strictSubtypeOf(TArr) || (is_opt(t) && t.strictSubtypeOf(TOptArr)) ||
-      t.strictSubtypeOf(TVec) || (is_opt(t) && t.strictSubtypeOf(TOptVec))) {
+  if ((is_specialized_array(t) && t.subtypeOf(TOptArr)) ||
+      (is_specialized_vec(t) && t.subtypeOf(TOptVec))) {
     return make_repo_type_arr(arrTable, t);
   }
 

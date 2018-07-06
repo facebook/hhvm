@@ -455,6 +455,12 @@ std::string show(const php::Func& func, const Bytecode& bc) {
 std::string show(const Type& t) {
   std::string ret;
 
+  if (t.couldBe(TUninit) && is_nullish(t)) {
+    auto tinit = unnullish(t);
+    if (t.couldBe(TInitNull)) tinit = opt(std::move(tinit));
+    return "TUninit|" + show(tinit);
+  }
+
   assert(t.checkInvariants());
 
   if (is_specialized_wait_handle(t)) {

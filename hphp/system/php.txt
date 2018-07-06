@@ -23,6 +23,9 @@ hphp/system/php/spl/interfaces/Countable.php
 hphp/system/php/spl/interfaces/RecursiveIterator.php
 
 hphp/system/php/lang/rx/Traversable.ns.php
+
+hphp/system/php/lang/Container.ns.php
+
 hphp/system/php/lang/rx/IteratorAggregate.ns.php
 hphp/system/php/lang/rx/Iterator.ns.php
 hphp/system/php/lang/rx/KeyedIterator.ns.php

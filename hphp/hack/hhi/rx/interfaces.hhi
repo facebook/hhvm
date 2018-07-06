@@ -17,9 +17,20 @@
 namespace HH\Rx;
 
 /* See documentation for \Traversable */
+<<__Sealed(
+  namespace\KeyedTraversable::class,
+  namespace\Iterator::class,
+  namespace\IteratorAggregate::class,
+  \Container::class
+)>>
 interface Traversable<+Tv> extends \Traversable<Tv> {}
 
 /* See documentation for \KeyedTraversable */
+<<__Sealed(
+  namespace\KeyedIterable::class,
+  namespace\KeyedIterator::class,
+  \KeyedContainer::class
+)>>
 interface KeyedTraversable<+Tk, +Tv>
   extends namespace\Traversable<Tv>, \KeyedTraversable<Tk, Tv> {}
 

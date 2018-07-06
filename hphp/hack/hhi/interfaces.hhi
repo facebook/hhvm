@@ -30,6 +30,18 @@
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
+<<__Sealed(
+  ArrayObject::class,
+  DOMNodeList::class,
+  Imagick::class,
+  Iterator::class,
+  IteratorAggregate::class,
+  KeyedTraversable::class,
+  ResourceBundle::class,
+  SplHeap::class,
+  SplObjectStorage::class,
+  \HH\Rx\Traversable::class
+)>>
 interface Traversable<+Tv> {}
 
 /**
@@ -50,6 +62,17 @@ interface Traversable<+Tv> {}
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
+<<__Sealed(
+  ArrayIterator::class,
+  AsyncMysqlRowBlock::class,
+  DOMNamedNodeMap::class,
+  ImagickPixelIterator::class,
+  IntlBreakIterator::class,
+  KeyedIterable::class,
+  KeyedIterator::class,
+  MysqlRow::class,
+  \HH\Rx\KeyedTraversable::class
+)>>
 interface KeyedTraversable<+Tk, +Tv> extends Traversable<Tv> {}
 
 /**

@@ -10,9 +10,9 @@ File "hhi_lib__srcs/collections/interfaces.hhi", line 575, characters 49-50:
   via this generic Tv
 File "hhi_lib__srcs/collections/interfaces.hhi", line 300, characters 61-62:
   via this generic Tv
-File "hhi_lib__srcs/rx/interfaces.hhi", line 404, characters 36-37:
+File "hhi_lib__srcs/rx/interfaces.hhi", line 415, characters 36-37:
   via this generic Tv
-File "hhi_lib__srcs/rx/interfaces.hhi", line 24, characters 33-34:
+File "hhi_lib__srcs/rx/interfaces.hhi", line 35, characters 33-34:
   via this generic Tv
-File "hhi_lib__srcs/rx/interfaces.hhi", line 20, characters 49-50:
+File "hhi_lib__srcs/rx/interfaces.hhi", line 26, characters 49-50:
   via this generic Tv

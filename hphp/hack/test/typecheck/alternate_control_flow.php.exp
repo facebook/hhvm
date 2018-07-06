@@ -1,0 +1,2 @@
+File "alternate_control_flow.php", line 4, characters 3-99:
+Alternate control flow syntax is not allowed in Hack files (Parsing[1002])

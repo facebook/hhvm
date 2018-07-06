@@ -502,6 +502,11 @@ let invalid_class_in_collection_initializer =
 let invalid_brace_kind_in_collection_initializer =
   "Initializers of 'vec', 'dict' and 'keyset' should use '[...]' instead of '{...}'."
 
+let alternate_control_flow =
+  "Alternate control flow syntax is not allowed in Hack files"
+let execution_operator =
+  "The execution operator is not allowed in Hack files"
+
 let prefixed_invalid_string_kind = "Only double-quoted strings may be prefixed."
 
 let non_re_prefix = "Only `re`-prefixed strings allowed."

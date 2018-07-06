@@ -131,6 +131,10 @@ module SourceText = Trivia.SourceText
 
 module NS = Namespaces
 
+let is_hack (env : env) = env.is_hh_file || env.enable_hh_syntax
+let is_typechecker env =
+   is_hack env && (not env.codegen)
+
 let drop_pstr : int -> pstring -> pstring = fun cnt (pos, str) ->
   let len = String.length str in
   pos, if cnt >= len then "" else String.sub str cnt (len - cnt)
@@ -1501,11 +1505,13 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           | _       -> missing_syntax ("boolean (not: " ^ s ^ ")") expr env
           )
         | _, Some TK.ExecutionStringLiteral ->
+          if is_typechecker env then raise_parsing_error env node SyntaxError.execution_operator;
           Execution_operator [pos, String (mkStr env expr Php_escaping.unescape_backtick s)]
         | _ -> missing_syntax "literal" expr env
         )
       | SyntaxList ({ syntax = Token token; _ } :: _ as ts)
         when Token.kind token = TK.ExecutionStringLiteralHead ->
+        if is_typechecker env then raise_parsing_error env node SyntaxError.execution_operator;
         Execution_operator (pString2 InBacktickedString (prepString2 env ts) env)
       | SyntaxList ts -> String2 (pString2 InDoubleQuotedString (prepString2 env ts) env)
       | _ -> missing_syntax "literal expression" expr env
@@ -1790,6 +1796,10 @@ and pStmt : stmt parser = fun node env ->
   extract_and_push_docblock node;
   let pos = pPos node env in
   let result = match syntax node with
+  | AlternateElseClause _ | AlternateIfStatement _ | AlternateElseifClause _
+  | AlternateLoopStatement _  when is_typechecker env ->
+    raise_parsing_error env node SyntaxError.alternate_control_flow;
+    missing_syntax "alternative control flow" node env (* this should never get hit *)
   | SwitchStatement { switch_expression=expr; switch_sections=sections; _ }
   | AlternateSwitchStatement { alternate_switch_expression=expr;
     alternate_switch_sections=sections; _ } ->

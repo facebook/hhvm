@@ -1,14 +1,14 @@
 #!/bin/bash
 
-# Hacky way of disabling fbmake's pre_command.
-if [ ! -z "${FBMAKE_PRE_COMMAND_OUTDIR}" ]; then
-  exit 0
+if echo "$1" | grep -q -e 'install_dir='; then
+  # Skip --install_dir
+  shift 1
 fi
 
-if echo $1 | grep -q -e 'install_dir=' -e 'fbcode_dir=' ; then
-  # Skip --install_dir and --fbcode_dir.
-  shift 2
-fi
+# The first 3 arguments are dummy values so Buck knows we depend on certain
+# environment variables. The remaining arguments are files to hash when
+# generating BUILD_ID.
+shift 3
 
 DIR=$(pwd -P)
 
@@ -21,7 +21,7 @@ elif hg root >& /dev/null; then
   if [ -f "$root/fbcode/.projectid" ]; then
     root="$root/fbcode"
   fi
-  compiler="hg --config trusted.users='*' log -l1 -r'reverse(::.) & file(\"$root/**\")' -T'{branch}-0-g{sub(r\"^\$\",node,mirrornode(\"fbcode\",\"git\"))}\n' 2> /dev/null"
+  compiler="hg --config trusted.users='*' log -l1 -r'reverse(::.) & file(\"$root/**\")' -T'{branch}-0-g{sub(r\"^\$\",node,mirrornode(\"fbcode\",\"git\"))}\\n' 2> /dev/null"
   find_files="hg files -I hphp/"
 else
   root=$DIR/../../
@@ -35,7 +35,7 @@ fi
 ################################################################################
 
 unset CDPATH
-cd $root || exit 1
+cd "$root" || exit 1
 
 if [ -z "${COMPILER_ID}" ]; then
   COMPILER_ID=$(sh -c "$compiler")
@@ -77,9 +77,6 @@ fi
 COMPILER_FILE="${INSTALL_DIR}/generated-compiler-id.txt"
 REPO_SCHEMA_FILE="${INSTALL_DIR}/generated-repo-schema-id.txt"
 BUILD_ID_FILE="${INSTALL_DIR}/generated-build-id.txt"
-
-INPUT=$1
-OUTPUT="${INSTALL_DIR}/hhvm"
 
 echo -n "${COMPILER_ID}" > "${COMPILER_FILE}"
 echo -n "${HHVM_REPO_SCHEMA}" > "${REPO_SCHEMA_FILE}"

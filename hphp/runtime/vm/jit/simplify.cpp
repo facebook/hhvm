@@ -2469,7 +2469,7 @@ SSATmp* simplifyBoxPtr(State& /*env*/, const IRInstruction* inst) {
 
 SSATmp* simplifyCheckInit(State& env, const IRInstruction* inst) {
   auto const srcType = inst->src(0)->type();
-  assertx(!srcType.maybe(TPtrToGen));
+  assertx(!srcType.maybe(TMemToGen));
   assertx(inst->taken());
   if (!srcType.maybe(TUninit)) return gen(env, Nop);
   return mergeBranchDests(env, inst);

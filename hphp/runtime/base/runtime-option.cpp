@@ -1287,6 +1287,8 @@ void RuntimeOption::Load(
       X(Deserialize);
       X(DeserializeOrFail);
       X(DeserializeOrGenerate);
+      X(DeserializeAndExit);
+      #undef X
       return JitSerdesMode::Off;
     }();
     Config::Bind(EvalJitSerdesFile, ini, config,

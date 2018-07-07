@@ -171,6 +171,31 @@ void raise_hackarr_type_hint_impl(const Func* func,
   }
 }
 
+void raise_func_undefined(const char* prefix, const StringData* name,
+                          const Class* cls) {
+  if (LIKELY(!needsStripInOut(name))) {
+    if (cls) {
+      raise_error("%s undefined method %s::%s()", prefix, cls->name()->data(),
+                  name->data());
+    }
+    raise_error("%s undefined function %s()", prefix, name->data());
+  } else {
+    auto stripped = stripInOutSuffix(name);
+    if (cls) {
+      if (cls->lookupMethod(stripped)) {
+        raise_error("%s method %s::%s() with incorrectly annotated inout "
+                    "parameter", prefix, cls->name()->data(), stripped->data());
+      }
+      raise_error("%s undefined method %s::%s()", cls->name()->data(), prefix,
+                  stripped->data());
+    } else if (Unit::lookupFunc(stripped)) {
+      raise_error("%s function %s() with incorrectly annotated inout "
+                  "parameter", prefix, stripped->data());
+    }
+    raise_error("%s undefined function %s()", prefix, stripped->data());
+  }
+}
+
 }
 
 void raise_hackarr_type_hint_param_notice(const Func* func,
@@ -213,28 +238,12 @@ void raise_hackarr_type_hint_outparam_notice(const Func* func,
   );
 }
 
+void raise_resolve_undefined(const StringData* name, const Class* cls) {
+  raise_func_undefined("Failure to resolve", name, cls);
+}
+
 void raise_call_to_undefined(const StringData* name, const Class* cls) {
-  if (LIKELY(!needsStripInOut(name))) {
-    if (cls) {
-      raise_error("Call to undefined method %s::%s()", cls->name()->data(),
-                  name->data());
-    }
-    raise_error("Call to undefined function %s()", name->data());
-  } else {
-    auto stripped = stripInOutSuffix(name);
-    if (cls) {
-      if (cls->lookupMethod(stripped)) {
-        raise_error("Call to method %s::%s() with incorrectly annotated inout "
-                    "parameter", cls->name()->data(), stripped->data());
-      }
-      raise_error("Call to undefined method %s::%s()", cls->name()->data(),
-                  stripped->data());
-    } else if (Unit::lookupFunc(stripped)) {
-      raise_error("Call to function %s() with incorrectly annotated inout "
-                  "parameter", stripped->data());
-    }
-    raise_error("Call to undefined function %s()", stripped->data());
-  }
+  raise_func_undefined("Call to", name, cls);
 }
 
 void raise_recoverable_error(const char *fmt, ...) {

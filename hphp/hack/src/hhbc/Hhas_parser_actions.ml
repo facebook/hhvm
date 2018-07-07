@@ -932,6 +932,7 @@ let makeunaryinst s arg = match s with
    | "RetM" -> IContFlow(RetM (intofiarg arg))
    | "FCall" -> ICall(FCall (intofiarg arg))
    | "FCallUnpack" -> ICall(FCallUnpack (intofiarg arg))
+   | "ResolveFunc" -> IOp(ResolveFunc (function_id_of_iarg arg))
 
    (* instruct_base *)
    | "BaseC" -> IBase(BaseC (intofiarg arg))

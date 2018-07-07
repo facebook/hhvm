@@ -97,6 +97,15 @@ void implLdMeta(IRLS& env, const IRInstruction* inst) {
   );
 }
 
+const Func* loadUnknownFuncHelper(const StringData* name,
+                                  void (*raiser)(const StringData*,
+                                                 const Class*)) {
+  VMRegAnchor _;
+  auto const func = Unit::loadFunc(name);
+  if (UNLIKELY(!func)) raiser(name, nullptr);
+  return func;
+}
+
 }
 
 void cgDefCls(IRLS& env, const IRInstruction* inst) {
@@ -142,13 +151,12 @@ const Class* lookupKnownClass(rds::Handle cache_handle,
   return rds::handleToRef<LowPtr<Class>, rds::Mode::Normal>(cache_handle).get();
 }
 
+const Func* loadUnknownFunc(const StringData* name) {
+  return loadUnknownFuncHelper(name, raise_call_to_undefined);
+}
+
 const Func* lookupUnknownFunc(const StringData* name) {
-  VMRegAnchor _;
-  auto const func = Unit::loadFunc(name);
-  if (UNLIKELY(!func)) {
-    raise_call_to_undefined(name);
-  }
-  return func;
+  return loadUnknownFuncHelper(name, raise_resolve_undefined);
 }
 
 const Func* lookupFallbackFunc(const StringData* name,
@@ -232,6 +240,19 @@ void implLdCachedSafe(IRLS& env, const IRInstruction* inst,
   }
 }
 
+template<Opcode opc>
+void ldFuncCachedHelper(IRLS& env, const IRInstruction* inst,
+                        const CallSpec& call) {
+  auto const extra = inst->extra<opc>();
+
+  implLdCached<Func>(env, inst, extra->name, [&] (Vout& v, rds::Handle) {
+    auto const ptr = v.makeReg();
+    auto const args = argGroup(env, inst).immPtr(extra->name);
+    cgCallHelper(v, env, call, callDest(ptr), SyncOptions::Sync, args);
+    return ptr;
+  });
+}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -249,15 +270,15 @@ void cgLdClsCached(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgLdFuncCached(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<LdFuncCached>();
+  ldFuncCachedHelper<LdFuncCached>(
+    env, inst, CallSpec::direct(loadUnknownFunc)
+  );
+}
 
-  implLdCached<Func>(env, inst, extra->name, [&] (Vout& v, rds::Handle) {
-    auto const ptr = v.makeReg();
-    auto const args = argGroup(env, inst).immPtr(extra->name);
-    cgCallHelper(v, env, CallSpec::direct(lookupUnknownFunc),
-                 callDest(ptr), SyncOptions::Sync, args);
-    return ptr;
-  });
+void cgLookupFuncCached(IRLS& env, const IRInstruction* inst) {
+  ldFuncCachedHelper<LookupFuncCached>(
+    env, inst, CallSpec::direct(lookupUnknownFunc)
+  );
 }
 
 void cgLdFuncCachedU(IRLS& env, const IRInstruction* inst) {

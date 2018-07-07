@@ -202,39 +202,40 @@ enum trep : uint64_t {
   BDbl      = 1ULL << 5,
   BSStr     = 1ULL << 6,  // static string
   BCStr     = 1ULL << 7,  // counted string
+  BFunc     = 1ULL << 8,
 
-  BSPArrE   = 1ULL << 8, // static empty "plain" array
-  BCPArrE   = 1ULL << 9, // counted empty "plain" array
-  BSPArrN   = 1ULL << 10, // static non-empty "plain" array
-  BCPArrN   = 1ULL << 11ULL, // counted non-empty "plain array"
+  BSPArrE   = 1ULL << 9, // static empty "plain" array
+  BCPArrE   = 1ULL << 10, // counted empty "plain" array
+  BSPArrN   = 1ULL << 11, // static non-empty "plain" array
+  BCPArrN   = 1ULL << 12ULL, // counted non-empty "plain array"
 
-  BSVArrE   = 1ULL << 12, // static empty varray
-  BCVArrE   = 1ULL << 13, // counted empty varray
-  BSVArrN   = 1ULL << 14, // static non-empty varray
-  BCVArrN   = 1ULL << 15, // counted non-empty varray
+  BSVArrE   = 1ULL << 13, // static empty varray
+  BCVArrE   = 1ULL << 14, // counted empty varray
+  BSVArrN   = 1ULL << 15, // static non-empty varray
+  BCVArrN   = 1ULL << 16, // counted non-empty varray
 
-  BSDArrE   = 1ULL << 16, // static empty darray
-  BCDArrE   = 1ULL << 17, // counted empty darray
-  BSDArrN   = 1ULL << 18, // static non-empty darray
-  BCDArrN   = 1ULL << 19, // counted non-empty darray
+  BSDArrE   = 1ULL << 17, // static empty darray
+  BCDArrE   = 1ULL << 18, // counted empty darray
+  BSDArrN   = 1ULL << 19, // static non-empty darray
+  BCDArrN   = 1ULL << 20, // counted non-empty darray
 
-  BObj      = 1ULL << 20,
-  BRes      = 1ULL << 21,
-  BCls      = 1ULL << 22,
-  BRef      = 1ULL << 23,
+  BObj      = 1ULL << 21,
+  BRes      = 1ULL << 22,
+  BCls      = 1ULL << 23,
+  BRef      = 1ULL << 24,
 
-  BSVecE    = 1ULL << 24, // static empty vec
-  BCVecE    = 1ULL << 25, // counted empty vec
-  BSVecN    = 1ULL << 26, // static non-empty vec
-  BCVecN    = 1ULL << 27, // counted non-empty vec
-  BSDictE   = 1ULL << 28, // static empty dict
-  BCDictE   = 1ULL << 29, // counted empty dict
-  BSDictN   = 1ULL << 30, // static non-empty dict
-  BCDictN   = 1ULL << 31, // counted non-empty dict
-  BSKeysetE = 1ULL << 32, // static empty keyset
-  BCKeysetE = 1ULL << 33, // counted empty keyset
-  BSKeysetN = 1ULL << 34, // static non-empty keyset
-  BCKeysetN = 1ULL << 35, // counted non-empty keyset
+  BSVecE    = 1ULL << 25, // static empty vec
+  BCVecE    = 1ULL << 26, // counted empty vec
+  BSVecN    = 1ULL << 27, // static non-empty vec
+  BCVecN    = 1ULL << 28, // counted non-empty vec
+  BSDictE   = 1ULL << 29, // static empty dict
+  BCDictE   = 1ULL << 30, // counted empty dict
+  BSDictN   = 1ULL << 31, // static non-empty dict
+  BCDictN   = 1ULL << 32, // counted non-empty dict
+  BSKeysetE = 1ULL << 33, // static empty keyset
+  BCKeysetE = 1ULL << 34, // counted empty keyset
+  BSKeysetN = 1ULL << 35, // static non-empty keyset
+  BCKeysetN = 1ULL << 36, // counted non-empty keyset
 
   BSPArr    = BSPArrE | BSPArrN,
   BCPArr    = BCPArrE | BCPArrN,
@@ -305,6 +306,7 @@ enum trep : uint64_t {
   BOptArr      = BInitNull | BArr,       // may have value / data
   BOptObj      = BInitNull | BObj,       // may have data
   BOptRes      = BInitNull | BRes,
+  BOptFunc     = BInitNull | BFunc,
   BOptSVecE    = BInitNull | BSVecE,
   BOptCVecE    = BInitNull | BCVecE,
   BOptSVecN    = BInitNull | BSVecN,
@@ -373,7 +375,7 @@ enum trep : uint64_t {
   BInitUnc  = BInitPrim | BSStr | BSArr | BSVec | BSDict | BSKeyset,
   BUnc      = BInitUnc | BUninit,
   BInitCell = BInitNull | BBool | BInt | BDbl | BStr | BArr | BObj | BRes |
-              BVec | BDict | BKeyset,
+              BVec | BDict | BKeyset | BFunc,
   BCell     = BUninit | BInitCell,
   BInitGen  = BInitCell | BRef,
   BGen      = BUninit | BInitGen,
@@ -776,6 +778,7 @@ X(Obj)                                          \
 X(Res)                                          \
 X(Cls)                                          \
 X(Ref)                                          \
+X(Func)                                         \
 X(SVecE)                                        \
 X(SVecN)                                        \
 X(SDictE)                                       \
@@ -842,6 +845,7 @@ X(OptArrN)                                      \
 X(OptArr)                                       \
 X(OptObj)                                       \
 X(OptRes)                                       \
+X(OptFunc)                                      \
 X(OptSVecE)                                     \
 X(OptSVecN)                                     \
 X(OptSVec)                                      \

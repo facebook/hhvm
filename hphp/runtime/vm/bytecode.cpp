@@ -4706,6 +4706,14 @@ ALWAYS_INLINE std::string concat_arg_list(imm_array<uint32_t> args) {
   return ret;
 }
 
+OPTBLD_INLINE void iopResolveFunc(Id id) {
+  auto unit = vmfp()->m_func->unit();
+  auto const nep = unit->lookupNamedEntityPairId(id);
+  auto func = Unit::loadFunc(nep.second, nep.first);
+  if (func == nullptr) raise_resolve_undefined(unit->lookupLitstrId(id));
+  vmStack().pushFunc(func);
+}
+
 OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
   auto const n = args.size;
   std::string arglist;
@@ -4822,9 +4830,29 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
   }
 
   if (c1->m_type == KindOfFunc) {
-    auto func = c1->m_data.pfunc;
+    const Func* func = c1->m_data.pfunc;
     assertx(func != nullptr);
 
+    // Handle inout name mangling
+    if (UNLIKELY(n)) {
+      auto const func_name = c1->m_data.pfunc->fullDisplayName();
+      auto const v = Variant::attach(appendSuffix(func_name));
+      ObjectData* thiz = nullptr;
+      Class* cls = nullptr;
+      StringData* invName = nullptr;
+      bool dynamic = false;
+      func = vm_decode_function(
+        v,
+        vmfp(),
+        /* forwarding */ false,
+        thiz,
+        cls,
+        invName,
+        dynamic,
+        DecodeFlags::NoWarn
+      );
+      if (func == nullptr) raise_call_to_undefined(func_name);
+    }
     vmStack().discard();
     auto const ar = fPushFuncImpl(func, numArgs);
     ar->trashThis();

@@ -627,7 +627,7 @@ void fpushFuncCommon(IRGS& env,
   if (lookup.func) {
     // We know the function, but we have to ensure its unit is loaded. Use
     // LdFuncCached, ignoring the result to ensure this.
-    if (lookup.needsUnitLoad) gen(env, LdFuncCached, LdFuncCachedData { name });
+    if (lookup.needsUnitLoad) gen(env, LdFuncCached, FuncNameData { name });
     fpushActRec(env,
                 cns(env, lookup.func),
                 cns(env, TNullptr),
@@ -639,7 +639,7 @@ void fpushFuncCommon(IRGS& env,
 
   auto const ssaFunc = fallback
     ? gen(env, LdFuncCachedU, LdFuncCachedUData { name, fallback })
-    : gen(env, LdFuncCached, LdFuncCachedData { name });
+    : gen(env, LdFuncCached, FuncNameData { name });
   fpushActRec(env,
               ssaFunc,
               cns(env, TNullptr),
@@ -1001,6 +1001,18 @@ void emitFPushFunc(IRGS& env, uint32_t numParams, const ImmVector& v) {
   if (topC(env)->isA(TArr) || topC(env)->isA(TVec)) {
     return fpushFuncArr(env, numParams);
   }
+  if (topC(env)->isA(TFunc)) {
+    fpushActRec(
+      env,
+      popC(env),
+      cns(env, TNullptr),
+      numParams,
+      nullptr,
+      cns(env, false)
+    );
+    pgoPushedFunc(env);
+    return;
+  }
 
   if (!topC(env)->isA(TStr)) {
     PUNT(FPushFunc_not_Str);
@@ -1023,6 +1035,17 @@ void emitFPushFunc(IRGS& env, uint32_t numParams, const ImmVector& v) {
 
   decRef(env, funcName);
   pgoPushedFunc(env);
+}
+
+void emitResolveFunc(IRGS& env, const StringData* name) {
+  auto const lookup = lookupImmutableFunc(curUnit(env), name);
+  auto func = lookup.func;
+  if (!func) {
+    push(env, gen(env, LookupFuncCached, FuncNameData { name }));
+    return;
+  }
+  if (lookup.needsUnitLoad) gen(env, LookupFuncCached, FuncNameData { name });
+  push(env, cns(env, func));
 }
 
 void emitFPushObjMethodD(IRGS& env,

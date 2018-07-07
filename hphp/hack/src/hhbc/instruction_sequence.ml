@@ -763,6 +763,7 @@ let get_input_output_count i =
     | Print | Clone | Hhbc_ast.Exit | Abs -> (1, 1)
     | Fatal _ -> (1, 0)
     | ConcatN n -> (n, 1)
+    | ResolveFunc _ -> (0, 1)
     end
   | ICall i ->
     begin match i with

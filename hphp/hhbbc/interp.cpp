@@ -2819,6 +2819,11 @@ void in(ISS& env, const bc::FPushFuncU& op) {
   );
 }
 
+void in(ISS& env, const bc::ResolveFunc& op) {
+  // TODO (T29639296)
+  push(env, TFunc);
+}
+
 const StaticString s_nullFunc { "__SystemLib\\__86null" };
 
 void in(ISS& env, const bc::FPushObjMethodD& op) {

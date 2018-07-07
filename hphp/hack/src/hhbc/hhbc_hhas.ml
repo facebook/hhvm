@@ -190,6 +190,7 @@ let string_of_operator instruction =
     | Print -> "Print"
     | Clone -> "Clone"
     | H.Exit -> "Exit"
+    | ResolveFunc id -> sep ["ResolveFunc"; string_of_function_id id]
     | Fatal op -> sep ["Fatal"; FatalOp.to_string op]
 
 let string_of_get x =

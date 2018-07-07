@@ -419,6 +419,7 @@ static const struct {
   { OpAssertRATStk,{None,             None,         OutNone         }},
   { OpBreakTraceHint,{None,           None,         OutNone         }},
   { OpGetMemoKeyL, {Local,            Stack1,       OutUnknown      }},
+  { OpResolveFunc, {None,             Stack1,       OutFunc         }},
 
   /*** 14. Generator instructions ***/
 
@@ -998,6 +999,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FPushFuncD:
   case Op::FPushFuncU:
   case Op::FPushObjMethodD:
+  case Op::ResolveFunc:
   case Op::False:
   case Op::File:
   case Op::GetMemoKeyL:

@@ -265,6 +265,7 @@ type instruct_operator =
   | Clone
   | Exit
   | Fatal of FatalOp.t
+  | ResolveFunc of function_id
 
 type switchkind =
   | Bounded

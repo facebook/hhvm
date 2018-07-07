@@ -1408,6 +1408,13 @@ To string conversions:
   Loads the Func whose name is funcName from the RDS, invoking autoload if it
   not defined yet. Fatal if function autoloader fails to define it.
 
+| LookupFuncCached<funcName>, D(Func), NA, NF
+
+  Loads the Func whose name is given from %1, invoking autoload if it is not
+  defined yet. Fatal if the function autoload fails to define it. This
+  instruction does not assume the loaded function will be called immediately,
+  so it will raise a resolution failure error instead of a call failure error.
+
 | LdFuncCachedU<funcName,fallbackName>, D(Func), NA, NF
 
   Try to load a Func named funcName from the RDS, if it isn't defined, try to

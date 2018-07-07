@@ -837,8 +837,8 @@ struct StaticLocName : IRExtraData {
   const StringData* name;
 };
 
-struct LdFuncCachedData : IRExtraData {
-  explicit LdFuncCachedData(const StringData* name)
+struct FuncNameData : IRExtraData {
+  explicit FuncNameData(const StringData* name)
     : name(name)
   {}
 
@@ -847,7 +847,7 @@ struct LdFuncCachedData : IRExtraData {
   }
 
   size_t hash() const { return name->hash(); }
-  bool equals(const LdFuncCachedData& o) const {
+  bool equals(const FuncNameData& o) const {
     return name == o.name;
   }
 
@@ -1602,7 +1602,8 @@ X(InitClsCns,                   ClsCnsName);
 X(LdSubClsCns,                  LdSubClsCnsData);
 X(CheckSubClsCns,               LdSubClsCnsData);
 X(ProfileSubClsCns,             ProfileSubClsCnsData);
-X(LdFuncCached,                 LdFuncCachedData);
+X(LdFuncCached,                 FuncNameData);
+X(LookupFuncCached,             FuncNameData);
 X(LdFuncCachedU,                LdFuncCachedUData);
 X(LdObjMethod,                  LdObjMethodData);
 X(RaiseMissingArg,              FuncArgData);

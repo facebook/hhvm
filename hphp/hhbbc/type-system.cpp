@@ -74,7 +74,7 @@ bool mayHaveData(trep bits) {
   case BArrN:    case BSArrN:    case BCArrN:
   case BOptArr:  case BOptSArr:  case BOptCArr:
   case BOptArrN: case BOptSArrN: case BOptCArrN:
-  case BRef:
+  case BRef:     case BFunc:
   case BVec:      case BSVec:      case BCVec:
   case BVecN:     case BSVecN:     case BCVecN:
   case BOptVec:   case BOptSVec:   case BOptCVec:
@@ -171,6 +171,7 @@ bool mayHaveData(trep bits) {
   case BOptRes:
   case BOptArrKey:
   case BOptUncArrKey:
+  case BOptFunc:
   case BInitCell:
   case BCell:
   case BInitGen:
@@ -208,6 +209,7 @@ bool canBeOptional(trep bits) {
   case BSKeysetN:
   case BObj:
   case BRes:
+  case BFunc:
     return true;
 
   case BSPArrE:
@@ -311,6 +313,7 @@ bool canBeOptional(trep bits) {
   case BOptRes:
   case BOptUncArrKey:
   case BOptArrKey:
+  case BOptFunc:
     return false;
 
   case BInitPrim:
@@ -3021,7 +3024,7 @@ Type from_DataType(DataType dt) {
   case KindOfRef:      return TRef;
   case KindOfObject:   return TObj;
   case KindOfResource: return TRes;
-  // TODO(T29639296)
+  // TODO (T29639296)
   case KindOfFunc:
     always_assert(false);
     break;

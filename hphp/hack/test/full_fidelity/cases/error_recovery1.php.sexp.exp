@@ -1,0 +1,34 @@
+((script 39
+  ((list 39
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
+       (missing 0 ())))
+     (foreach_statement 34
+      ((() foreach 7 ()) (() "(" 1 ())
+       (awaitable_creation_expression 24
+        ((missing 0 ()) (() async 5 ((whitespace 1))) (missing 0 ())
+         (compound_statement 18
+          ((() { 1 ())
+           (list 17
+            ((switch_statement 17
+              ((() switch 6 ((whitespace 1))) (() "(" 1 ())
+               (literal 1 ((() decimal_literal 1 ())))
+               (() ")" 1 ((whitespace 1))) (missing 0 ())
+               (list 6
+                ((switch_section 6
+                  ((missing 0 ())
+                   (list 6
+                    ((expression_statement 6
+                      ((() name 6 ((whitespace 1))) (missing 0 ())))
+                     (missing 0 ())))
+                   (missing 0 ())))
+                 (switch_section 0
+                  ((missing 0 ()) (list 0 ((missing 0 ()))) (missing 0 ())))))
+               (missing 0 ())))
+             (missing 0 ())))
+           (missing 0 ())))))
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (() ")" 1 ((end_of_line 1)))
+       (expression_statement 0 ((() end_of_file 0 ()) (missing 0 ())))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

@@ -893,6 +893,9 @@ module WithParser(Parser : Parser_S) = struct
       | None -> (parser, acc)
       | Some item when peek_token_kind parser = TokenKind.EndOfFile ->
         parser, item :: acc
+      (* exit if parser did not make any progress *)
+      | Some item when SC.is_missing item ->
+        parser, item :: acc
       | Some item -> aux parser (item :: acc)
     in
     let (parser, items) = aux parser [] in

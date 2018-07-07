@@ -76,12 +76,12 @@ void SlabManager::init() {
     }
     constexpr auto kCacheLineSize = 64u;
     static_assert(sizeof(SlabManager) <= kCacheLineSize, "");
-    auto ptr = mallocx_on_node(kCacheLineSize, node, kCacheLineSize); // leaked
-    auto slabManager = new (ptr) SlabManager;
+    auto slabManager =
+      new (mallocx_on_node(kCacheLineSize, node, kCacheLineSize)) SlabManager;
     s_slabManagers.push_back(slabManager);
     unsigned actual1g = 0, actual2m = 0;
     for (int i = 0; i < num1GPages; ++i) {
-      auto ptr = mmap_1g(nullptr, node);
+      auto ptr = mmap_1g(nullptr, node, /* MAP_FIXED */ false);
       if (!ptr) {
         Logger::Warning("Insufficient 1G huge pages for slabs "
                         "on NUMA node %u, desired %u, actual %u",
@@ -92,7 +92,8 @@ void SlabManager::init() {
       slabManager->addRange(ptr, size1g);
     }
     for (unsigned i = 0; i < num2MPages; ++i) {
-      auto ptr = mmap_2m(nullptr, PROT_READ | PROT_WRITE, node);
+      auto ptr = mmap_2m(nullptr, PROT_READ | PROT_WRITE, node,
+                          /* MAP_SHARED */ false, /* MAP_FIXED */ false);
       if (!ptr) {
         Logger::Warning("Insufficient 2M huge pages for slabs "
                         "on NUMA node %u, desired %u, actual %u",

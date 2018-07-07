@@ -47,12 +47,11 @@ bool auto_mount_hugetlbfs();
 // will choose a proper address.  If the address range [addr, addr+1G) already
 // contains address in the process address space, nullptr is returned and the
 // mapping won't be changed.  If `node` is -1, any NUMA node is OK.
-void* mmap_1g(void* addr = nullptr, int node = -1);
+void* mmap_1g(void* addr, int node, bool map_fixed);
 
 // For 2M pages, we want more control over protection and mapping flags.  Note
 // that MAP_FIXED can overwrite the existing mapping without checking/failing.
-void* mmap_2m(void* addr, int prot, int node = -1,
-              bool map_shared = false, bool map_fixed = false);
+void* mmap_2m(void* addr, int prot, int node, bool map_shared, bool map_fixed);
 
 // When you already have the memory mapped in, remap them it to use huge pages,
 // and try to interleave across all enabled numa nodes (no guarantee).  Return

@@ -298,7 +298,7 @@ inline void* mmap_2m_impl(void* addr, int prot, bool shared, bool fixed) {
   return ret;
 }
 
-inline void* mmap_1g_impl(void* addr) {
+inline void* mmap_1g_impl(void* addr, bool map_fixed) {
   void* ret = MAP_FAILED;
   if (s_hugePath[0] != 0) {
     int fd = -1;
@@ -334,7 +334,9 @@ inline void* mmap_1g_impl(void* addr) {
       return nullptr;
     }
 
-    ret = mmap(addr, size1g, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    ret = mmap(addr, size1g, PROT_READ | PROT_WRITE,
+               MAP_SHARED | (map_fixed ? MAP_FIXED : 0),
+               fd, 0);
     if (ret == MAP_FAILED) {
       snprintf(s_errorMsg, maxErrorMsgLen,
                "mmap() for hugetlbfs file failed: ");
@@ -350,7 +352,8 @@ inline void* mmap_1g_impl(void* addr) {
 #ifndef MAP_HUGE_1GB
 #define MAP_HUGE_1GB (30 << 26)
 #endif
-      int flags = MAP_SHARED | MAP_ANONYMOUS | MAP_HUGETLB | MAP_HUGE_1GB;
+      int flags = MAP_SHARED | MAP_ANONYMOUS | MAP_HUGETLB | MAP_HUGE_1GB |
+        (map_fixed ? MAP_FIXED : 0);
       ret = mmap(addr, size1g, PROT_READ | PROT_WRITE, flags, -1, 0);
       if (ret == MAP_FAILED) {
         record_err_msg("mmap() with MAP_HUGE_1GB failed: ");
@@ -361,7 +364,7 @@ inline void* mmap_1g_impl(void* addr) {
     }
   }
 
-  // Didn't get the desired address.  Note: don't do MAP_FIXED.
+  // Didn't get the desired address.  This can happen is map_fixed is false.
   if (addr != nullptr && ret != addr) {
     snprintf(s_errorMsg, maxErrorMsgLen,
              "mmap() for huge page returned %p, desired %p", ret, addr);
@@ -483,7 +486,7 @@ size_t remap_interleaved_2m_pages(void* addr, size_t pages, int prot,
 #endif
 }
 
-void* mmap_1g(void* addr /* = nullptr */, int node /* = -1 */) {
+void* mmap_1g(void* addr, int node, bool map_fixed) {
 #ifdef __linux__
   if (s_num1GPages >= kMaxNum1GPages) return nullptr;
   if (get_huge1g_info(node).free_hugepages <= 0) return nullptr;
@@ -496,7 +499,7 @@ void* mmap_1g(void* addr /* = nullptr */, int node /* = -1 */) {
     set_mempolicy(MPOL_BIND, &singleNodeMask, sizeof(singleNodeMask));
   }
 #endif
-  void* ret = mmap_1g_impl(addr);
+  void* ret = mmap_1g_impl(addr, map_fixed);
   if (ret != nullptr) {
     s_1GPages[s_num1GPages++] = ret;
   }

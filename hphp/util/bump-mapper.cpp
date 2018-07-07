@@ -29,6 +29,31 @@
 
 namespace HPHP { namespace alloc {
 
+BumpAllocState::BumpAllocState(uintptr_t base, size_t maxCap, LockPolicy p)
+  : m_base(base)
+  , m_maxCapacity(maxCap)
+  , m_lockPolicy(p) {
+  auto ret = mmap((void*)base, maxCap, PROT_NONE,
+                  MAP_ANONYMOUS | MAP_PRIVATE | MAP_NORESERVE,
+                  -1, 0);
+  if (ret != (void*)base) {
+    char msg[128];
+    if (ret == MAP_FAILED) {
+      std::snprintf(msg, sizeof(msg),
+                    "failed to reserve address range 0x%" PRIxPTR
+                    " to 0x%" PRIxPTR ", errno = %d",
+                    base, base + maxCap, errno);
+    } else {
+      munmap(ret, maxCap);
+      std::snprintf(msg, sizeof(msg),
+                    "failed to reserve address range 0x%" PRIxPTR
+                    " to 0x%" PRIxPTR ", got 0x%p instead",
+                    base, base + maxCap, ret);
+    }
+    throw std::runtime_error{msg};
+  }
+}
+
 void BumpMapper::append(BumpMapper* m) {
   // add things one by one so that we can easily avoid loops in the chain.
   assert(!m->m_fallback);
@@ -79,7 +104,8 @@ bool Bump1GMapper::addMappingImpl(BumpAllocState& state, size_t /*newSize*/) {
         // Node not allowed, try next one.
         continue;
       }
-      if (mmap_1g(reinterpret_cast<void*>(newPageStart), currNode)) {
+      if (mmap_1g(reinterpret_cast<void*>(newPageStart),
+                  currNode, /* MAP_FIXED */true)) {
         state.m_currCapacity += size1g;
         m_failed = (++m_currNumPages >= m_maxNumPages);
         return true;
@@ -90,7 +116,8 @@ bool Bump1GMapper::addMappingImpl(BumpAllocState& state, size_t /*newSize*/) {
 #endif
   // This covers cases when HAVE_NUMA is defined, and when `m_interleaveMask` is
   // set to 0 (on single-socket machines).
-  if (mmap_1g(reinterpret_cast<void*>(newPageStart))) {
+  if (mmap_1g(reinterpret_cast<void*>(newPageStart), -1,
+              /* MAP_FIXED */ true)) {
     ++m_currNumPages;
     state.m_currCapacity += size1g;
     return true;
@@ -98,7 +125,7 @@ bool Bump1GMapper::addMappingImpl(BumpAllocState& state, size_t /*newSize*/) {
   return false;
 }
 
-constexpr size_t Bump4KMapper::kChunkSize;
+constexpr size_t kChunkSize = 4 * size2m;
 
 bool Bump4KMapper::addMappingImpl(BumpAllocState& state, size_t /*newSize*/) {
   auto const currFrontier = state.frontier();
@@ -106,7 +133,7 @@ bool Bump4KMapper::addMappingImpl(BumpAllocState& state, size_t /*newSize*/) {
   void* newPageStart = reinterpret_cast<void*>(currFrontier);
   void* newPages = mmap(newPageStart, kChunkSize,
                         PROT_READ | PROT_WRITE,
-                        MAP_ANONYMOUS | MAP_PRIVATE,
+                        MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED,
                         -1, 0);
   if (newPages == MAP_FAILED) return false;
   if (newPages != newPageStart) {
@@ -142,7 +169,7 @@ bool Bump2MMapper::addMappingImpl(BumpAllocState& state, size_t newSize) {
     return false;
   }
   auto const nHugePages =
-    std::min(static_cast<unsigned>(Bump4KMapper::kChunkSize / size2m),
+    std::min(static_cast<unsigned>(kChunkSize / size2m),
              m_maxNumPages - m_currNumPages);
   hintHuge(reinterpret_cast<void*>(newPageBase), nHugePages * size2m);
   m_currNumPages += nHugePages;

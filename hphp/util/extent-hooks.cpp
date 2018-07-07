@@ -64,10 +64,9 @@ extent_hooks_t BumpExtentAllocator::s_hooks {
 };
 
 BumpExtentAllocator::BumpExtentAllocator(uintptr_t highAddr, size_t maxCap,
-                                         bool failFast, BumpMapper* mapper)
-  : BumpAllocState{highAddr, maxCap, failFast}
-  , m_mapper{mapper}
-{
+                                         LockPolicy p, BumpMapper* mapper)
+  : BumpAllocState(highAddr, maxCap, p)
+  , m_mapper(mapper) {
   if (highAddr == 0 || maxCap == 0) return;
 
   auto constexpr mask = (1u << 21) - 1;
@@ -99,12 +98,12 @@ extent_alloc(extent_hooks_t* extent_hooks, void* addr,
       }
     } else {
       if (newSize > extAlloc->m_maxCapacity) return nullptr;
-      if (extAlloc->m_failFast) {
+      if (extAlloc->m_lockPolicy != LockPolicy::Blocking) {
         if (!extAlloc->m_mutex.try_lock()) {
           return nullptr;
         }
       } else {
-        extAlloc->m_mutex.lock();         // warning: block here
+        extAlloc->m_mutex.lock();
       }
       bool succ = extAlloc->m_mapper &&
         extAlloc->m_mapper->addMapping(*extAlloc, newSize);

@@ -23,12 +23,19 @@
 
 namespace HPHP { namespace alloc {
 
+enum class LockPolicy : uint8_t {
+  Blocking,
+  FailFast,
+};
+
 /*
  * Bump allocation policy within the fixed address range [m_base, m_base +
  * m_maxCapacity).  Lower address will be used first.
  */
 struct BumpAllocState {
-  // Number of bytes mapped in memory.
+  BumpAllocState(uintptr_t base, size_t maxCap, LockPolicy p);
+
+  // Number of bytes mapped in memory (not the reserved size)
   size_t mappedSize() const { return m_currCapacity; }
   // Number of bytes given to jemalloc.
   size_t allocatedSize() { return m_size.load(std::memory_order_relaxed); }
@@ -37,9 +44,9 @@ struct BumpAllocState {
   // Lowest mapped address.
   uintptr_t frontier() const { return m_base + m_currCapacity; }
 
-  const uintptr_t m_base{0};
-  const size_t m_maxCapacity{0};
-  const bool m_failFast{false};         // Give up if try_lock() fails
+  const uintptr_t m_base;
+  const size_t m_maxCapacity;
+  const LockPolicy m_lockPolicy;
   std::atomic_size_t m_size{0};
   size_t m_currCapacity{0};
   std::mutex m_mutex;                   // Protects m_currCapacity
@@ -103,7 +110,6 @@ struct BumpMapper {
   BumpMapper* m_fallback{nullptr};
 };
 
-// Add 1G huge pages
 struct Bump1GMapper : public BumpMapper {
   template<typename... Args>
   explicit Bump1GMapper(Args&&... args)
@@ -119,7 +125,6 @@ struct Bump4KMapper : public BumpMapper {
     : BumpMapper(0, numaMask) {}
  protected:
   bool addMappingImpl(BumpAllocState& state, size_t newSize) override;
-  static constexpr size_t kChunkSize = 8u << 20;
 };
 
 // Bump4KMapper with transparent huge pages.

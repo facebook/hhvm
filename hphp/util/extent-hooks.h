@@ -44,8 +44,8 @@ namespace HPHP { namespace alloc {
  */
 struct BumpExtentAllocator : private BumpAllocState {
   // Both highAddr and maxCap should be 2M-aligned.
-  BumpExtentAllocator(uintptr_t highAddr, size_t maxCap, bool failFast,
-                      BumpMapper* mapper);
+  BumpExtentAllocator(uintptr_t highAddr, size_t maxCap,
+                      LockPolicy p, BumpMapper* mapper);
 
   using BumpAllocState::mappedSize;
   using BumpAllocState::allocatedSize;

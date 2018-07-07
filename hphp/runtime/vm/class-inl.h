@@ -198,6 +198,10 @@ inline const Func* Class::get86sinit() const {
   return m_sinitVec.back();
 }
 
+inline const Func* Class::get86linit() const {
+  return m_linitVec.back();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Builtin classes.
 

@@ -63,6 +63,7 @@ const StaticString s_Stringish("Stringish");
 const StaticString s_XHPChild("XHPChild");
 const StaticString s_86cinit("86cinit");
 const StaticString s_86sinit("86sinit");
+const StaticString s_86linit("86linit");
 const StaticString s_86pinit("86pinit");
 const StaticString s_attr_Deprecated("__Deprecated");
 const StaticString s_class_alias("class_alias");
@@ -1262,7 +1263,9 @@ void parse_methods(ParseUnitState& puState,
       puState.constPassFuncs[borrow(f)] |= php::Program::ForAnalyze;
       cinit = std::move(f);
     } else {
-      if (f->name == s_86pinit.get() || f->name == s_86sinit.get()) {
+      if (f->name == s_86pinit.get() ||
+          f->name == s_86sinit.get() ||
+          f->name == s_86linit.get()) {
         puState.constPassFuncs[borrow(f)] |= php::Program::ForAnalyze;
       }
       ret->methods.push_back(std::move(f));

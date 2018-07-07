@@ -66,9 +66,11 @@ StaticString s_invoke("__invoke");
 StaticString s_86ctor("86ctor");
 StaticString s_86pinit("86pinit");
 StaticString s_86sinit("86sinit");
+StaticString s_86linit("86linit");
 
 constexpr uint32_t k86pinitSlot = 0x80000000u;
 constexpr uint32_t k86sinitSlot = 0x80000001u;
+constexpr uint32_t k86linitSlot = 0x80000002u;
 
 template<typename F>
 auto deserialize(ProfDataDeserializer&ser, F&& f) -> decltype(f()) {
@@ -1159,6 +1161,7 @@ void write_func(ProfDataSerializer& ser, const Func* func) {
       if (cls->getMethod(slot) != func) {
         if (func->name() == s_86pinit.get()) return k86pinitSlot;
         if (func->name() == s_86sinit.get()) return k86sinitSlot;
+        if (func->name() == s_86linit.get()) return k86linitSlot;
         cls = getOwningClassForFunc(func);
         assertx(cls->getMethod(slot) == func);
       }
@@ -1200,6 +1203,7 @@ Func* read_func(ProfDataDeserializer& ser) {
           auto const cls = read_class(ser);
           if (id == k86pinitSlot) return cls->get86pinit();
           if (id == k86sinitSlot) return cls->get86sinit();
+          if (id == k86linitSlot) return cls->get86linit();
           const Slot slot = ~id;
           return cls->getMethod(slot);
         }

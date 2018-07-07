@@ -1481,8 +1481,8 @@ To string conversions:
 
 | InitSProps<class>, ND, NA, NF
 
-  Calls the static property initializer function (86sinit) for class. May
-  throw.
+  Calls the static property initializer functions (86sinit and/or 86linit)
+  for class. May throw.
 
 | DebugBacktrace, D(Arr), S(Int), PRc
 

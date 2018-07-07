@@ -57,6 +57,7 @@ namespace HPHP {
 const StaticString s_86cinit("86cinit");
 const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
+const StaticString s_86linit("86linit");
 const StaticString s___destruct("__destruct");
 const StaticString s___OptionalDestruct("__OptionalDestruct");
 const StaticString s___MockClass("__MockClass");
@@ -215,9 +216,9 @@ struct assert_sizeof_class {
   // If this static_assert fails, the compiler error will have the real value
   // of sizeof_Class in it since it's in this struct's type.
 #ifdef DEBUG
-  static_assert(sz == (use_lowptr ? 260 : 304), "Change this only on purpose");
+  static_assert(sz == (use_lowptr ? 268 : 312), "Change this only on purpose");
 #else
-  static_assert(sz == (use_lowptr ? 252 : 296), "Change this only on purpose");
+  static_assert(sz == (use_lowptr ? 260 : 304), "Change this only on purpose");
 #endif
 };
 template struct assert_sizeof_class<sizeof_Class>;
@@ -812,7 +813,7 @@ bool Class::needsInitSProps() const {
 void Class::initSProps() const {
   assertx(needsInitSProps() || m_sPropCacheInit.isPersistent());
 
-  const bool hasNonscalarInit = !m_sinitVec.empty();
+  const bool hasNonscalarInit = !m_sinitVec.empty() || !m_linitVec.empty();
   folly::Optional<VMRegAnchor> _;
   if (hasNonscalarInit) {
     _.emplace();
@@ -832,17 +833,26 @@ void Class::initSProps() const {
   for (Slot slot = 0, n = m_staticProperties.size(); slot < n; ++slot) {
     auto const& sProp = m_staticProperties[slot];
 
-    if (sProp.cls == this && !m_sPropCache[slot].isPersistent()) {
+    if ((sProp.cls == this && !m_sPropCache[slot].isPersistent()) ||
+        sProp.attrs & AttrLSB) {
       m_sPropCache[slot]->val = sProp.val;
     }
   }
 
-  // If there are non-scalar initializers (i.e. 86sinit methods), run them now.
+  // If there are non-scalar initializers (i.e. 86sinit or 86linit methods),
+  // run them now.
   // They will override the KindOfUninit values set by scalar initialization.
   if (hasNonscalarInit) {
     for (unsigned i = 0, n = m_sinitVec.size(); i < n; i++) {
       DEBUG_ONLY auto retval = g_context->invokeFunc(
         m_sinitVec[i], init_null_variant, nullptr, const_cast<Class*>(this),
+        nullptr, nullptr, ExecutionContext::InvokeNormal, false, false
+      );
+      assertx(retval.m_type == KindOfNull);
+    }
+    for (unsigned i = 0, n = m_linitVec.size(); i < n; i++) {
+      DEBUG_ONLY auto retval = g_context->invokeFunc(
+        m_linitVec[i], init_null_variant, nullptr, const_cast<Class*>(this),
         nullptr, nullptr, ExecutionContext::InvokeNormal, false, false
       );
       assertx(retval.m_type == KindOfNull);
@@ -876,7 +886,7 @@ void Class::initSPropHandles() const {
     auto& propHandle = m_sPropCache[slot];
     auto const& sProp = m_staticProperties[slot];
 
-    if (sProp.cls == this) {
+    if (sProp.cls == this || (sProp.attrs & AttrLSB)) {
       if (usePersistentHandles && (sProp.attrs & AttrPersistent)) {
         static_assert(sizeof(StaticPropData) == sizeof(sProp.val),
                       "StaticPropData must be a simple wrapper "
@@ -1042,10 +1052,16 @@ Class::PropLookup<Slot> Class::findSProp(
   // Non-existent property.
   if (sPropInd == kInvalidSlot) return PropLookup<Slot> { kInvalidSlot, false };
 
+  auto const& sProp = m_staticProperties[sPropInd];
+  auto const sPropAttrs = sProp.attrs;
+  const Class* baseCls = this;
+  if (sPropAttrs & AttrLSB) {
+    // For an LSB static, accessibility attributes are relative to the class
+    // that originally declared it.
+    baseCls = sProp.cls;
+  }
   // Property access within this Class's context.
-  if (ctx == this) return PropLookup<Slot> { sPropInd, true };
-
-  auto const sPropAttrs = m_staticProperties[sPropInd].attrs;
+  if (ctx == baseCls) return PropLookup<Slot> { sPropInd, true };
 
   auto const accessible = [&] {
     switch (sPropAttrs & (AttrPublic | AttrProtected | AttrPrivate)) {
@@ -1056,7 +1072,8 @@ Class::PropLookup<Slot> Class::findSProp(
       // Property access is from within a parent class's method, which is
       // allowed for protected properties.
       case AttrProtected:
-        return ctx != nullptr && (classof(ctx) || ctx->classof(this));
+        return ctx != nullptr &&
+               (baseCls->classof(ctx) || ctx->classof(baseCls));
 
       // Can only access private properties via the debugger.
       case AttrPrivate:
@@ -2205,7 +2222,8 @@ void Class::setProperties() {
     }
     m_declPropInit = m_parent->m_declPropInit;
     for (auto const& parentProp : m_parent->staticProperties()) {
-      if (parentProp.attrs & AttrPrivate) continue;
+      if ((parentProp.attrs & AttrPrivate) &&
+          !(parentProp.attrs & AttrLSB)) continue;
 
       // Alias parent's static property.
       SProp sProp;
@@ -2377,6 +2395,15 @@ void Class::setProperties() {
             attrToVisibilityStr(parentSProp.attrs),
             m_parent->name()->data());
         }
+        // Prohibit overlaying LSB static properties.
+        if (parentSProp.attrs & AttrLSB) {
+          raise_error(
+            "Cannot redeclare LSB static %s::%s as %s::%s",
+            parentSProp.cls->name()->data(),
+            preProp->name()->data(),
+            m_preClass->name()->data(),
+            preProp->name()->data());
+        }
         sPropInd = it3->second;
       }
       // Create a new property, or overlay ancestor's property if one exists.
@@ -2427,6 +2454,17 @@ void Class::setProperties() {
   }
 
   importTraitProps(curIdx + 1, curPropMap, curSPropMap);
+
+  // LSB static properties that were inherited must be initialized separately.
+  for (Slot slot = 0; slot < curSPropMap.size(); ++slot) {
+    auto& sProp = curSPropMap[slot];
+    if ((sProp.attrs & AttrLSB) && sProp.cls != this) {
+      auto const& prevSProps = sProp.cls->m_staticProperties;
+      auto prevInd = prevSProps.findIndex(sProp.name);
+      assertx(prevInd != kInvalidSlot);
+      sProp.val = prevSProps[prevInd].val;
+    }
+  }
 
   m_declProperties.create(curPropMap);
   m_staticProperties.create(curSPropMap);
@@ -2530,6 +2568,10 @@ void Class::importTraitStaticProp(Class* /*trait*/, SProp& traitProp,
     // Redeclared prop, make sure it matches previous declaration
     auto& prevProp = curSPropMap[prevIt->second];
     TypedValue prevPropVal;
+    if (prevProp.attrs & AttrLSB) {
+      raise_error("trait declaration of property '%s' would redeclare "
+                  "LSB static", traitProp.name->data());
+    }
     if (prevProp.cls == this) {
       // If this static property was declared by this class, we can get the
       // initial value directly from its value.
@@ -2583,15 +2625,23 @@ void Class::importTraitProps(int idxOffset,
 }
 
 void Class::addTraitPropInitializers(std::vector<const Func*>& thisInitVec,
-                                     bool staticProps) {
+                                     Attr which) {
   if (attrs() & AttrNoExpandTrait) return;
+  auto getInitVec = [&](Class* trait) -> auto& {
+    switch (which) {
+    case AttrNone: return trait->m_pinitVec;
+    case AttrStatic: return trait->m_sinitVec;
+    case AttrLSB: return trait->m_linitVec;
+    default: always_assert(false);
+    }
+  };
   for (auto const& t : m_extra->m_usedTraits) {
     Class* trait = t.get();
-    auto& traitInitVec = staticProps ? trait->m_sinitVec : trait->m_pinitVec;
-    // Insert trait's 86[ps]init into the current class, avoiding repetitions.
+    auto& traitInitVec = getInitVec(trait);
+    // Insert trait's 86[psl]init into the current class, avoiding repetitions.
     for (unsigned m = 0; m < traitInitVec.size(); m++) {
-      // Clone 86[ps]init methods, and set the class to the current class.
-      // This allows 86[ps]init to determine the property offset for the
+      // Clone 86[psl]init methods, and set the class to the current class.
+      // This allows 86[psl]init to determine the property offset for the
       // initializer array corectly.
       Func *f = traitInitVec[m]->clone(this);
       f->setNewFuncId();
@@ -2610,16 +2660,27 @@ namespace {
 void Class::setInitializers() {
   std::vector<const Func*> pinits;
   std::vector<const Func*> sinits;
+  std::vector<const Func*> linits;
 
   if (m_parent.get() != nullptr) {
     // Copy parent's 86pinit() vector, so that the 86pinit() methods can be
     // called in reverse order without any search/recursion during
     // initialization.
     pinits.assign(m_parent->m_pinitVec.begin(), m_parent->m_pinitVec.end());
+
+    // Copy parent's 86linit into the current class, and set class to the
+    // current class.
+    for (const auto& linit : m_parent->m_linitVec) {
+      Func *f = linit->clone(this);
+      f->setNewFuncId();
+      f->setBaseCls(this);
+      f->setHasPrivateAncestor(false);
+      linits.push_back(f);
+    }
   }
 
   // Clone 86pinit methods from traits
-  addTraitPropInitializers(pinits, false);
+  addTraitPropInitializers(pinits, AttrNone);
 
   // If this class has an 86pinit method, append it last so that
   // reverse iteration of the vector runs this class's 86pinit
@@ -2632,14 +2693,21 @@ void Class::setInitializers() {
 
   // If this class has an 86sinit method, it must be the last element
   // in the vector. See get86sinit().
-  addTraitPropInitializers(sinits, true);
+  addTraitPropInitializers(sinits, AttrStatic);
   const Func* sinit = findSpecialMethod(this, s_86sinit.get());
   if (sinit) {
     sinits.push_back(sinit);
   }
 
+  addTraitPropInitializers(linits, AttrLSB);
+  const Func* meth86linit = findSpecialMethod(this, s_86linit.get());
+  if (meth86linit != nullptr) {
+    linits.push_back(meth86linit);
+  }
+
   m_pinitVec = pinits;
   m_sinitVec = sinits;
+  m_linitVec = linits;
 
   m_needInitialization = (m_pinitVec.size() > 0 ||
     m_staticProperties.size() > 0);

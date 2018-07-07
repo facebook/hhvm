@@ -1601,6 +1601,7 @@ let property_attributes p =
   let attrs = if P.is_immutable p then "is_immutable" :: attrs else attrs in
   let attrs = if P.no_serialize p then "no_serialize" :: attrs else attrs in
   let attrs = if P.is_deep_init p then "deep_init" :: attrs else attrs in
+  let attrs = if P.is_lsb p then "lsb" :: attrs else attrs in
   let attrs = if P.is_static p then "static" :: attrs else attrs in
   let attrs = if P.is_public p then "public" :: attrs else attrs in
   let attrs = if P.is_protected p then "protected" :: attrs else attrs in

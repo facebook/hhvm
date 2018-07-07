@@ -368,17 +368,17 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
   let class_requirements =
     List.filter_map class_body
       (from_class_elt_requirements namespace) in
-  let pinit_methods =
+  let make_init_methods filter ~name =
     if List.exists class_properties
       (fun p -> Option.is_some (Hhas_property.initializer_instrs p)
-                && not (Hhas_property.is_static p))
+                && filter p)
     then
       let instrs = gather @@ List.filter_map class_properties
-        (fun p -> if Hhas_property.is_static p
-                  then None else Hhas_property.initializer_instrs p) in
+        (fun p -> if filter p
+                  then Hhas_property.initializer_instrs p else None) in
       let instrs = gather [instrs; instr_null; instr_retc] in
       [make_86method
-        ~name:"86pinit"
+        ~name:name
         ~params:[]
         ~is_static:true
         ~is_private:true
@@ -387,25 +387,13 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
         instrs]
     else
       [] in
-  let sinit_methods =
-    if List.exists class_properties
-      (fun p -> Option.is_some (Hhas_property.initializer_instrs p)
-                && (Hhas_property.is_static p))
-    then
-      let instrs = gather @@ List.filter_map class_properties
-        (fun p -> if not (Hhas_property.is_static p)
-                  then None else Hhas_property.initializer_instrs p) in
-      let instrs = gather [instrs; instr_null; instr_retc] in
-      [make_86method
-        ~name:"86sinit"
-        ~params:[]
-        ~is_static:true
-        ~is_private:true
-        ~is_abstract:false
-        ~span:class_span
-        instrs]
-    else
-      [] in
+  let property_has_lsb p = Hhas_attribute.has_lsb (Hhas_property.attributes p) in
+  let pinit_filter p = not (Hhas_property.is_static p) in
+  let sinit_filter p = Hhas_property.is_static p && not (property_has_lsb p) in
+  let linit_filter p = Hhas_property.is_static p && (property_has_lsb p) in
+  let pinit_methods = make_init_methods pinit_filter ~name:"86pinit" in
+  let sinit_methods = make_init_methods sinit_filter ~name:"86sinit" in
+  let linit_methods = make_init_methods linit_filter ~name:"86linit" in
   let initialized_class_constants = List.filter_map class_constants
       (fun p -> match Hhas_constant.initializer_instrs p with
           | None -> None
@@ -454,7 +442,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
         instrs] in
   let additional_methods =
     additional_methods @
-    pinit_methods @ sinit_methods @ cinit_methods in
+    pinit_methods @ sinit_methods @ linit_methods @ cinit_methods in
   let methods = ast_methods class_body in
   let class_methods = Emit_method.from_asts ast_class methods in
   let class_methods = class_methods @ additional_methods in

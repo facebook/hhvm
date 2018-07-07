@@ -73,6 +73,7 @@ let from_ast
   let attributes = Emit_attribute.from_asts namespace cv_user_attributes in
   let is_immutable = class_is_immutable ||
     Hhas_attribute.has_const attributes in
+  let is_lsb = Hhas_attribute.has_lsb attributes in
   let is_private = Hh_core.List.mem cv_kind_list Ast.Private in
   let is_protected = Hh_core.List.mem cv_kind_list Ast.Protected in
   let is_public =
@@ -143,6 +144,7 @@ let from_ast
     is_deep_init
     false (*no_serialize*)
     is_immutable
+    is_lsb
     pid
     initial_value
     initializer_instrs

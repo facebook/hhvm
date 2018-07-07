@@ -65,6 +65,9 @@ enum Attr {
   // Is this class an interface?         //       |          |         //
   AttrInterface            = (1u <<  7), //    X  |          |         //
                                          //       |          |         //
+  // Indicates that a static property has the <<__LSB>> attribute.
+  // Such a property is implicitly redeclared in all derived classes.
+  AttrLSB                  = (1u <<  7), //       |    X     |         //
   // Is this class a trait?  On methods, or properties, this indicates that
   // the method was imported from a trait.
   AttrTrait                = (1u <<  8), //    X  |    X     |    X    //

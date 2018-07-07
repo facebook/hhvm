@@ -48,6 +48,7 @@ TRACE_SET_MOD(hhbbc);
 const StaticString s_86cinit("86cinit");
 const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
+const StaticString s_86linit("86linit");
 const StaticString s_Closure("Closure");
 
 //////////////////////////////////////////////////////////////////////
@@ -670,44 +671,33 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
   }
 
   /*
-   * For classes with non-scalar initializers, the 86pinit and 86sinit
-   * methods are guaranteed to run before any other method, and
+   * For classes with non-scalar initializers, the 86pinit, 86sinit, and
+   * 86linit methods are guaranteed to run before any other method, and
    * are never called afterwards. Thus, we can analyze these
    * methods first to determine the initial types of properties with
    * non-scalar initializers, and these need not be be run again as part
    * of the fixedpoint computation.
    */
-  if (auto f = find_method(ctx.cls, s_86pinit.get())) {
-    do_analyze(
-      index,
-      Context { ctx.unit, f, ctx.cls },
-      &clsAnalysis,
-      nullptr,
-      CollectionOpts::TrackConstantArrays
-    );
-  }
-  if (auto f = find_method(ctx.cls, s_86sinit.get())) {
-    do_analyze(
-      index,
-      Context { ctx.unit, f, ctx.cls },
-      &clsAnalysis,
-      nullptr,
-      CollectionOpts::TrackConstantArrays
-    );
-  }
+  auto analyze_86init = [&](const StaticString &name) {
+    if (auto f = find_method(ctx.cls, name.get())) {
+      do_analyze(
+        index,
+        Context { ctx.unit, f, ctx.cls },
+        &clsAnalysis,
+        nullptr,
+        CollectionOpts::TrackConstantArrays
+      );
+    }
+  };
+  analyze_86init(s_86pinit);
+  analyze_86init(s_86sinit);
+  analyze_86init(s_86linit);
+
   /*
    * The 86cinit is a little different from the other two, but
    * similarly can't play a role in the fixed point computation.
    */
-  if (auto f = find_method(ctx.cls, s_86cinit.get())) {
-    do_analyze(
-      index,
-      Context { ctx.unit, f, ctx.cls },
-      &clsAnalysis,
-      nullptr,
-      CollectionOpts::TrackConstantArrays
-    );
-  }
+  analyze_86init(s_86cinit);
 
   // Verify that none of the class properties are TBottom, i.e.
   // any property of type KindOfUninit has been initialized (by
@@ -745,6 +735,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     for (auto& f : ctx.cls->methods) {
       if (f->name->isame(s_86pinit.get()) ||
           f->name->isame(s_86sinit.get()) ||
+          f->name->isame(s_86linit.get()) ||
           f->name->isame(s_86cinit.get())) {
         continue;
       }

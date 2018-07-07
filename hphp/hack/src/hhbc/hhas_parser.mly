@@ -333,6 +333,7 @@ classproperty:
       (List.mem "deep_init" attrs)
       (List.mem "no_serialize" attrs)
       (List.mem "is_immutable" attrs)
+      (List.mem "lsb" attrs)
       (Hhbc_id.Prop.from_raw_string $5) (*name *)
       $8 (*initial value *)
       None (* initializer instructions. already been emitted elsewhere *)

@@ -1,0 +1,7 @@
+string(3) "A A"
+string(3) "A B"
+string(3) "B B"
+string(3) "A B"
+string(3) "A B"
+
+Fatal error: Invalid static property access: B::x in %s on line %d

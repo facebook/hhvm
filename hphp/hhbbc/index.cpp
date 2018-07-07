@@ -86,6 +86,7 @@ const StaticString s_invoke("__invoke");
 const StaticString s_86cinit("86cinit");
 const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
+const StaticString s_86linit("86linit");
 const StaticString s_Closure("Closure");
 const StaticString s_AsyncGenerator("HH\\AsyncGenerator");
 const StaticString s_Generator("Generator");
@@ -2118,14 +2119,31 @@ bool merge_xinits(Attr attr,
                   uint32_t& nextClass,
                   ClonedClosureMap& clonedClosures) {
   auto const cls = const_cast<php::Class*>(cinfo->cls);
-  auto const xinitName = attr == AttrStatic ? s_86sinit.get() : s_86pinit.get();
+  auto const xinitName = [&]() {
+    switch (attr) {
+    case AttrNone  : return s_86pinit.get();
+    case AttrStatic: return s_86sinit.get();
+    case AttrLSB   : return s_86linit.get();
+    default: always_assert(false);
+    }
+  }();
+
+  auto const xinitMatch = [&](Attr prop_attrs) {
+    auto mask = AttrStatic | AttrLSB;
+    switch (attr) {
+    case AttrNone: return (prop_attrs & mask) == AttrNone;
+    case AttrStatic: return (prop_attrs & mask) == AttrStatic;
+    case AttrLSB: return (prop_attrs & mask) == mask;
+    default: always_assert(false);
+    }
+  };
 
   auto const needsXinit = [&] {
     for (auto const& p : cinfo->traitProps) {
-      if ((p.attrs & AttrStatic) == attr &&
-          p.val.m_type == KindOfUninit) {
-        ITRACE(5, "merge_xinits: {}: Needs merge for {}prop `{}'\n",
-               cls->name, attr & AttrStatic ? "static " : "", p.name);
+      if (xinitMatch(p.attrs) && p.val.m_type == KindOfUninit) {
+        ITRACE(5, "merge_xinits: {}: Needs merge for {}{}prop `{}'\n",
+               cls->name, attr & AttrStatic ? "static " : "",
+               attr & AttrLSB ? "lsb " : "", p.name);
         return true;
       }
     }
@@ -2263,6 +2281,8 @@ void flatten_traits(NamingEnv& env, ClassInfo* cinfo) {
     if (!merge_xinits(AttrNone, clones, cinfo,
                       env.program->nextFuncId, nextClassId, clonedClosures) ||
         !merge_xinits(AttrStatic, clones, cinfo,
+                      env.program->nextFuncId, nextClassId, clonedClosures) ||
+        !merge_xinits(AttrLSB, clones, cinfo,
                       env.program->nextFuncId, nextClassId, clonedClosures)) {
       ITRACE(5, "Not flattening {} because we couldn't merge the 86xinits\n",
              cls->name);

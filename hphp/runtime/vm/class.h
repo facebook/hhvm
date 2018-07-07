@@ -546,6 +546,7 @@ public:
   const Func* getToString() const;
   const Func* get86pinit() const;
   const Func* get86sinit() const;
+  const Func* get86linit() const;
 
   /*
    * Look up a class' cached __invoke function.  We only cache __invoke methods
@@ -1326,7 +1327,7 @@ private:
                              const int idxOffset,
                              PropMap::Builder& curPropMap,
                              SPropMap::Builder& curSPropMap);
-  void addTraitPropInitializers(std::vector<const Func*>&, bool staticProps);
+  void addTraitPropInitializers(std::vector<const Func*>&, Attr which);
 
   void checkInterfaceMethods();
   void checkInterfaceConstraints();
@@ -1416,6 +1417,7 @@ private:
    *    - A static property of this class is accessed.
    */
   FixedVector<const Func*> m_sinitVec;
+  FixedVector<const Func*> m_linitVec;
   LowPtr<Func> m_ctor;
   LowPtr<Func> m_dtor;
   PropInitVec m_declPropInit;

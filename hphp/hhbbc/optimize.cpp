@@ -59,6 +59,7 @@ namespace {
 
 const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
+const StaticString s_86linit("86linit");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1121,7 +1122,9 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
   if (!isFinal) return;
 
   auto const func = ainfo.ctx.func;
-  if (func->name == s_86pinit.get() || func->name == s_86sinit.get()) {
+  if (func->name == s_86pinit.get() ||
+      func->name == s_86sinit.get() ||
+      func->name == s_86linit.get()) {
     auto const& blk = *func->blocks[func->mainEntry];
     if (blk.hhbcs.size() == 2 &&
         blk.hhbcs[0].op == Op::Null &&

@@ -933,6 +933,7 @@ private:
   std::deque<PostponedCtor> m_postponedCtors;
   std::deque<PostponedNonScalars> m_postponedPinits;
   std::deque<PostponedNonScalars> m_postponedSinits;
+  std::deque<PostponedNonScalars> m_postponedLinits;
   std::deque<PostponedNonScalars> m_postponedCinits;
   std::deque<PostponedClosureCtor> m_postponedClosureCtors;
   PendingIterVec m_pendingIters;
@@ -1142,6 +1143,7 @@ public:
   void postponeCtor(InterfaceStatementPtr m, FuncEmitter* fe);
   void postponePinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
   void postponeSinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
+  void postponeLinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
   void postponeCinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
   void emitPostponedMeths();
   void bindUserAttributes(MethodStatementPtr meth,
@@ -1173,9 +1175,8 @@ public:
                                 MethodStatementPtr& meth,
                                 Label& topOfBody);
   void emitPostponedCtors();
-  void emitPostponedPSinit(PostponedNonScalars& p, bool pinit);
-  void emitPostponedPinits();
-  void emitPostponedSinits();
+  void emitPostponedPSLinit(PostponedNonScalars& p);
+  void emitPostponedPSLinits(std::deque<PostponedNonScalars>& postponedInits);
   void emitPostponedCinits();
   void emitPostponedClosureCtors();
   enum CallUserFuncFlags {
@@ -4573,8 +4574,9 @@ void EmitterVisitor::visit(FileScopePtr file) {
   // Method bodies
   emitPostponedMeths();
   emitPostponedCtors();
-  emitPostponedPinits();
-  emitPostponedSinits();
+  emitPostponedPSLinits(m_postponedPinits);
+  emitPostponedPSLinits(m_postponedSinits);
+  emitPostponedPSLinits(m_postponedLinits);
   emitPostponedCinits();
 }
 
@@ -9008,6 +9010,11 @@ void EmitterVisitor::postponeSinit(InterfaceStatementPtr is, FuncEmitter* fe,
   m_postponedSinits.push_back(PostponedNonScalars(is, fe, v));
 }
 
+void EmitterVisitor::postponeLinit(InterfaceStatementPtr is, FuncEmitter* fe,
+                                   NonScalarVec* v) {
+  m_postponedLinits.push_back(PostponedNonScalars(is, fe, v));
+}
+
 void EmitterVisitor::postponeCinit(InterfaceStatementPtr is, FuncEmitter* fe,
                                    NonScalarVec* v) {
   m_postponedCinits.push_back(PostponedNonScalars(is, fe, v));
@@ -10145,8 +10152,7 @@ void EmitterVisitor::emitPostponedCtors() {
   }
 }
 
-void EmitterVisitor::emitPostponedPSinit(PostponedNonScalars& p,
-                                         bool /*pinit*/) {
+void EmitterVisitor::emitPostponedPSLinit(PostponedNonScalars& p) {
   m_curFunc = p.m_fe;
 
   Attr attrs = (Attr)(AttrPrivate | AttrStatic);
@@ -10187,21 +10193,14 @@ void EmitterVisitor::emitPostponedPSinit(PostponedNonScalars& p,
   e.RetC();
 }
 
-void EmitterVisitor::emitPostponedPinits() {
-  while (!m_postponedPinits.empty()) {
-    PostponedNonScalars& p = m_postponedPinits.front();
-    emitPostponedPSinit(p, true);
+void EmitterVisitor::emitPostponedPSLinits(
+  std::deque<PostponedNonScalars> &postponedInits
+) {
+  while (!postponedInits.empty()) {
+    PostponedNonScalars& p = postponedInits.front();
+    emitPostponedPSLinit(p);
     p.release(); // Manually trigger memory cleanup.
-    m_postponedPinits.pop_front();
-  }
-}
-
-void EmitterVisitor::emitPostponedSinits() {
-  while (!m_postponedSinits.empty()) {
-    PostponedNonScalars& p = m_postponedSinits.front();
-    emitPostponedPSinit(p, false);
-    p.release(); // Manually trigger memory cleanup.
-    m_postponedSinits.pop_front();
+    postponedInits.pop_front();
   }
 }
 
@@ -10486,6 +10485,7 @@ Id EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
 
 const StaticString s_Const("__Const");
 const StaticString s_Sealed("__Sealed");
+const StaticString s_LSB("__LSB");
 
 Id EmitterVisitor::emitClass(Emitter& e,
                              ClassScopePtr cNode,
@@ -10598,6 +10598,7 @@ Id EmitterVisitor::emitClass(Emitter& e,
   bool classHadImmutableProps = false;
   NonScalarVec* nonScalarPinitVec = nullptr;
   NonScalarVec* nonScalarSinitVec = nullptr;
+  NonScalarVec* nonScalarLinitVec = nullptr;
   NonScalarVec* nonScalarConstVec = nullptr;
   if (StatementListPtr stmts = is->getStmts()) {
     int i, n = stmts->getCount();
@@ -10619,6 +10620,9 @@ Id EmitterVisitor::emitClass(Emitter& e,
         if (classIsImmutable || propUserAttrs.count(s_Const.get())) {
           declAttrs |= AttrIsImmutable;
           classHadImmutableProps = true;
+        }
+        if (propUserAttrs.count(s_LSB.get())) {
+          declAttrs |= AttrLSB;
         }
 
         int nVars = el->getCount();
@@ -10657,6 +10661,11 @@ Id EmitterVisitor::emitClass(Emitter& e,
                   nonScalarPinitVec = new NonScalarVec();
                 }
                 nonScalarPinitVec->push_back(NonScalarPair(propName, vNode));
+              } else if (declAttrs & AttrLSB) {
+                if (nonScalarLinitVec == nullptr) {
+                  nonScalarLinitVec = new NonScalarVec();
+                }
+                nonScalarLinitVec->push_back(NonScalarPair(propName, vNode));
               } else {
                 if (nonScalarSinitVec == nullptr) {
                   nonScalarSinitVec = new NonScalarVec();
@@ -10764,6 +10773,15 @@ Id EmitterVisitor::emitClass(Emitter& e,
     FuncEmitter* fe = m_ue.newMethodEmitter(methName, pce);
     pce->addMethod(fe);
     postponeSinit(is, fe, nonScalarSinitVec);
+  }
+
+  if (nonScalarLinitVec != nullptr) {
+    // Non-scalar LSB static initializers require 86linit() for run-time
+    // initialization support.
+    static const StringData* methName = makeStaticString("86linit");
+    FuncEmitter* fe = m_ue.newMethodEmitter(methName, pce);
+    pce->addMethod(fe);
+    postponeLinit(is, fe, nonScalarLinitVec);
   }
 
   if (nonScalarConstVec != nullptr) {

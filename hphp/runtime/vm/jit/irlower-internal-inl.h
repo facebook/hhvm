@@ -65,41 +65,34 @@ inline CallDest callDest(Vreg reg0, Vreg reg1) {
 }
 
 inline CallDest callDest(IRLS& env, const IRInstruction* inst) {
-  if (!inst->numDsts()) return kVoidDest;
+  if (inst->numDsts() == 0) return kVoidDest;
+  assertx(inst->numDsts() == 1);
 
   auto const loc = dstLoc(env, inst, 0);
-  if (loc.numAllocated() == 0) return kVoidDest;
   assertx(loc.numAllocated() == 1);
 
-  return {
-    inst->dst(0)->isA(TBool) ? DestType::Byte : DestType::SSA,
-    loc.reg(0)
-  };
+  auto const dst = inst->dst();
+  auto const kind = dst->isA(TBool) ? DestType::Byte :
+                    dst->isA(TDbl) ? DestType::Dbl :
+                    DestType::SSA;
+
+  return { kind, dst->type(), loc.reg(0) };
 }
 
 inline CallDest callDestTV(IRLS& env, const IRInstruction* inst) {
-  if (!inst->numDsts()) return kVoidDest;
+  assertx(inst->numDsts() == 1);
 
   auto const loc = dstLoc(env, inst, 0);
-  if (loc.numAllocated() == 0) return kVoidDest;
+  assertx(loc.numAllocated() == 1 || loc.numAllocated() == 2);
 
   if (loc.isFullSIMD()) {
     assertx(loc.numAllocated() == 1);
-    return { DestType::SIMD, loc.reg(0) };
+    return { DestType::SIMD, TGen, loc.reg(0) };
   }
-  if (loc.numAllocated() == 2) {
-    return { DestType::TV, loc.reg(0), loc.reg(1) };
-  }
-  assertx(loc.numAllocated() == 1);
 
-  // Sometimes we statically know the type and only need the value.
-  return { DestType::TV, loc.reg(0), InvalidReg };
-}
-
-inline CallDest callDestDbl(IRLS& env, const IRInstruction* inst) {
-  if (!inst->numDsts()) return kVoidDest;
-  auto const loc = dstLoc(env, inst, 0);
-  return { DestType::Dbl, loc.reg(0) };
+  // loc.reg(1) may be InvalidReg, if the type is statically known. This is
+  // expected and handled by users of CallDest.
+  return { DestType::TV, TGen, loc.reg(0), loc.reg(1) };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

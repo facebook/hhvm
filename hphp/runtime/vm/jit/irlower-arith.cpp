@@ -177,29 +177,29 @@ void cgMod(IRLS& env, const IRInstruction* inst) {
 
 void cgSetOpCell(IRLS& env, const IRInstruction* inst) {
   auto const op = inst->extra<SetOpData>()->op;
-  auto const helper = [&] {
+  auto const target = [&] {
     switch (op) {
-      case SetOpOp::PlusEqual:   return cellAddEq;
-      case SetOpOp::MinusEqual:  return cellSubEq;
-      case SetOpOp::MulEqual:    return cellMulEq;
-      case SetOpOp::ConcatEqual: return cellConcatEq;
-      case SetOpOp::DivEqual:    return cellDivEq;
-      case SetOpOp::PowEqual:    return cellPowEq;
-      case SetOpOp::ModEqual:    return cellModEq;
-      case SetOpOp::AndEqual:    return cellBitAndEq;
-      case SetOpOp::OrEqual:     return cellBitOrEq;
-      case SetOpOp::XorEqual:    return cellBitXorEq;
-      case SetOpOp::SlEqual:     return cellShlEq;
-      case SetOpOp::SrEqual:     return cellShrEq;
-      case SetOpOp::PlusEqualO:  return cellAddEqO;
-      case SetOpOp::MinusEqualO: return cellSubEqO;
-      case SetOpOp::MulEqualO:   return cellMulEqO;
+      case SetOpOp::PlusEqual:   return CallSpec::direct(cellAddEq);
+      case SetOpOp::MinusEqual:  return CallSpec::direct(cellSubEq);
+      case SetOpOp::MulEqual:    return CallSpec::direct(cellMulEq);
+      case SetOpOp::ConcatEqual: return CallSpec::direct(cellConcatEq);
+      case SetOpOp::DivEqual:    return CallSpec::direct(cellDivEq);
+      case SetOpOp::PowEqual:    return CallSpec::direct(cellPowEq);
+      case SetOpOp::ModEqual:    return CallSpec::direct(cellModEq);
+      case SetOpOp::AndEqual:    return CallSpec::direct(cellBitAndEq);
+      case SetOpOp::OrEqual:     return CallSpec::direct(cellBitOrEq);
+      case SetOpOp::XorEqual:    return CallSpec::direct(cellBitXorEq);
+      case SetOpOp::SlEqual:     return CallSpec::direct(cellShlEq);
+      case SetOpOp::SrEqual:     return CallSpec::direct(cellShrEq);
+      case SetOpOp::PlusEqualO:  return CallSpec::direct(cellAddEqO);
+      case SetOpOp::MinusEqualO: return CallSpec::direct(cellSubEqO);
+      case SetOpOp::MulEqualO:   return CallSpec::direct(cellMulEqO);
     }
     not_reached();
   }();
 
   auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(helper), kVoidDest, SyncOptions::Sync,
+  cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync,
                argGroup(env, inst).ssa(0).typedValue(1));
 }
 

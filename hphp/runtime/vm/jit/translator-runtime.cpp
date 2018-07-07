@@ -207,24 +207,6 @@ RefData* boxValue(TypedValue tv) {
   return RefData::Make(tv);
 }
 
-int64_t reinterpretDblAsInt(double d) {
-  union {
-    int64_t intval;
-    double dblval;
-  } u;
-  u.dblval = d;
-  return u.intval;
-}
-
-inline double reinterpretIntAsDbl(int64_t i) {
-  union {
-    int64_t intval;
-    double dblval;
-  } u;
-  u.intval = i;
-  return u.dblval;
-}
-
 ArrayData* convCellToArrHelper(TypedValue tv) {
   // Note: the call sites of this function all assume that
   // no user code will run and no recoverable exceptions will
@@ -362,24 +344,24 @@ ArrayData* convObjToKeysetHelper(ObjectData* obj) {
   return a;
 }
 
-int64_t convObjToDblHelper(const ObjectData* o) {
-  return reinterpretDblAsInt(o->toDouble());
+double convObjToDblHelper(const ObjectData* o) {
+  return o->toDouble();
 }
 
-int64_t convArrToDblHelper(ArrayData* a) {
-  return reinterpretDblAsInt(a->empty() ? 0 : 1);
+double convArrToDblHelper(ArrayData* a) {
+  return a->empty() ? 0 : 1;
 }
 
-int64_t convStrToDblHelper(const StringData* s) {
-  return reinterpretDblAsInt(s->toDouble());
+double convStrToDblHelper(const StringData* s) {
+  return s->toDouble();
 }
 
-int64_t convResToDblHelper(const ResourceHdr* r) {
-  return reinterpretDblAsInt(r->getId());
+double convResToDblHelper(const ResourceHdr* r) {
+  return r->getId();
 }
 
-int64_t convCellToDblHelper(TypedValue tv) {
-  return reinterpretDblAsInt(tvCastToDouble(tv));
+double convCellToDblHelper(TypedValue tv) {
+  return tvCastToDouble(tv);
 }
 
 ObjectData* convCellToObjHelper(TypedValue tv) {
@@ -395,8 +377,7 @@ ObjectData* convCellToObjHelper(TypedValue tv) {
   return tv.m_data.pobj;
 }
 
-StringData* convDblToStrHelper(int64_t i) {
-  double d = reinterpretIntAsDbl(i);
+StringData* convDblToStrHelper(double d) {
   return buildStringData(d);
 }
 
@@ -455,7 +436,7 @@ bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func) {
   return cellToBool(tv);
 }
 
-int64_t coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func) {
+double coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func) {
   DataType type = is_numeric_string(sd->data(), sd->size(), nullptr, nullptr);
 
   if (UNLIKELY(RuntimeOption::PHP7_ScalarTypes)) {
@@ -471,10 +452,10 @@ int64_t coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func) {
 
   builtinCoercionWarningHelper(KindOfString, KindOfDouble, func, argNum);
 
-  return reinterpretDblAsInt(sd->toDouble());
+  return sd->toDouble();
 }
 
-int64_t coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
+double coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
   assertx(cellIsPlausible(tv));
 
   tvCoerceIfStrict(tv, argNum, func);
@@ -782,13 +763,8 @@ static int64_t switchBoundsCheck(T v, int64_t base, int64_t nTargets) {
   return nTargets + 1;
 }
 
-int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets) {
-  union {
-    int64_t intbits;
-    double dblval;
-  } u;
-  u.intbits = val;
-  return switchBoundsCheck(u.dblval, base, nTargets);
+int64_t switchDoubleHelper(double val, int64_t base, int64_t nTargets) {
+  return switchBoundsCheck(val, base, nTargets);
 }
 
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {

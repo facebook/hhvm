@@ -117,6 +117,7 @@ Fixup makeFixup(const BCMarker& marker, SyncOptions sync) {
 
 void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
                   SyncOptions sync, const ArgGroup& args) {
+  assertx(call.verifySignature(dstInfo, args.argTypes()));
   auto const inst = args.inst();
   jit::vector<Vreg> vIndRetArgs, vargs, vSimdArgs, vStkArgs;
 
@@ -215,9 +216,8 @@ void cgCallNative(Vout& v, IRLS& env, const IRInstruction* inst) {
         return callDestTV(env, inst);
       case DestType::SSA:
       case DestType::Byte:
-        return callDest(env, inst);
       case DestType::Dbl:
-        return callDestDbl(env, inst);
+        return callDest(env, inst);
       case DestType::SSAPair:
         always_assert(false && "SSAPair not implemented for cgCallNative");
     }

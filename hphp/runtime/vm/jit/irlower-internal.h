@@ -69,7 +69,6 @@ CallDest callDest(Vreg reg0);
 CallDest callDest(Vreg reg0, Vreg reg1);
 CallDest callDest(IRLS& env, const IRInstruction*);
 CallDest callDestTV(IRLS& env, const IRInstruction*);
-CallDest callDestDbl(IRLS& env, const IRInstruction*);
 
 ///////////////////////////////////////////////////////////////////////////////
 

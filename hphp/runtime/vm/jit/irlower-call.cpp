@@ -189,7 +189,8 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     // normal case.  In the case where an exception is thrown, the VM unwinder
     // will handle it for us.
     auto const done = v.makeBlock();
-    v << vinvoke{CallSpec::direct(builtinFuncPtr), v.makeVcallArgs({{rvmfp()}}),
+    v << vinvoke{CallSpec::direct(builtinFuncPtr, nullptr),
+                 v.makeVcallArgs({{rvmfp()}}),
                  v.makeTuple({}), {done, catchBlock}, Fixup(0, argc)};
 
     v = done;
@@ -374,7 +375,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
       // This condition indicates a MixedTV (i.e., TypedValue-by-value) arg.
       args.typedValue(srcNum);
     } else {
-      args.ssa(srcNum, pi.builtinType == KindOfDouble);
+      args.ssa(srcNum);
     }
   }
 
@@ -385,12 +386,10 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
         ? callDest(dstData) // String, Array, or Object
         : callDest(dstData, dstType); // Variant
     }
-    return funcReturnType == KindOfDouble
-      ? callDestDbl(env, inst)
-      : callDest(env, inst);
+    return callDest(env, inst);
   }();
 
-  cgCallHelper(v, env, CallSpec::direct(callee->nativeFuncPtr()),
+  cgCallHelper(v, env, CallSpec::direct(callee->nativeFuncPtr(), nullptr),
                dest, SyncOptions::Sync, args);
 
   // For primitive return types (int, bool, double) and returnByValue, the
@@ -453,7 +452,7 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
     emitEagerSyncPoint(v, func->getEntry(), rvmtl(), fp, sp);
   }
   v << vinvoke{
-    CallSpec::direct(func->builtinFuncPtr()),
+    CallSpec::direct(func->builtinFuncPtr(), nullptr),
     v.makeVcallArgs({{fp}}),
     v.makeTuple({}),
     {label(env, inst->next()), label(env, inst->taken())},

@@ -90,12 +90,12 @@ ArgGroup& ArgGroup::typedValue(int i) {
   }
   static_assert(offsetof(TypedValue, m_data) == 0, "");
   static_assert(offsetof(TypedValue, m_type) == 8, "");
-  ssa(i).type(i);
+  ssa(i, false).type(i);
   m_override = nullptr;
   return *this;
 }
 
-void ArgGroup::push_arg(const ArgDesc& arg) {
+void ArgGroup::push_arg(const ArgDesc& arg, Type t) {
   // If m_override is set, use it unconditionally. Otherwise, select
   // m_gpArgs or m_stkArgs depending on how many args we've already pushed.
   ArgVec* args = m_override;
@@ -107,9 +107,10 @@ void ArgGroup::push_arg(const ArgDesc& arg) {
     }
   }
   args->push_back(arg);
+  m_argTypes.emplace_back(t);
 }
 
-void ArgGroup::push_SIMDarg(const ArgDesc& arg) {
+void ArgGroup::push_SIMDarg(const ArgDesc& arg, Type t) {
   // See push_arg above
   ArgVec* args = m_override;
   if (!args) {
@@ -117,6 +118,7 @@ void ArgGroup::push_SIMDarg(const ArgDesc& arg) {
          ? &m_simdArgs : &m_stkArgs;
   }
   args->push_back(arg);
+  m_argTypes.emplace_back(t);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

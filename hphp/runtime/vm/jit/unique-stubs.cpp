@@ -138,7 +138,7 @@ void storeReturnRegs(Vout& v) {
 template<class F>
 Vinstr simplecall(Vout& v, F helper, Vreg arg, Vreg d) {
   return vcall{
-    CallSpec::direct(helper),
+    CallSpec::direct(helper, nullptr),
     v.makeVcallArgs({{arg}}),
     v.makeTuple({d}),
     Fixup{},
@@ -153,7 +153,7 @@ Vinstr simplecall(Vout& v, F helper, Vreg arg, Vreg d) {
 template<class F>
 Vinstr simplecall(Vout& v, F helper, Vreg arg, Vreg d1, Vreg d2) {
   return vcall{
-    CallSpec::direct(helper),
+    CallSpec::direct(helper, nullptr),
     v.makeVcallArgs({{arg}}),
     v.makeTuple({d1, d2}),
     Fixup{},

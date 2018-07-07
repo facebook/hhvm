@@ -89,8 +89,8 @@ inline tv_lval nm(Class* ctx, tv_lval base, key_type<kt> key,         \
 PROP_HELPER_TABLE(X)
 #undef X
 
-#define PROP_OBJ_HELPER_TABLE(m)                      \
-  /* name      mode                  keyType     */   \
+#define PROP_OBJ_HELPER_TABLE(m)                     \
+  /* name      mode                  keyType     */  \
   m(propCDO,   MOpMode::Define,     KeyType::Any)    \
   m(propCDOS,  MOpMode::Define,     KeyType::Str)    \
   m(propCO,    MOpMode::None,       KeyType::Any)    \
@@ -861,8 +861,8 @@ inline ArrayData* checkedSet(ArrayData*, int64_t, Cell, bool) {
 //////////////////////////////////////////////////////////////////////
 
 template<KeyType keyType, bool checkForInt, bool setRef, bool intishWarn>
-typename ShuffleReturn<setRef>::return_type
-arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) {
+auto
+arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value, TypedValue* ref) {
   static_assert(keyType != KeyType::Any,
                 "KeyType::Any is not supported in arraySetMImpl");
   assertx(cellIsPlausible(value));
@@ -870,60 +870,65 @@ arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) {
   const bool copy = a->cowCheck();
   ArrayData* ret = checkForInt ? checkedSet<intishWarn>(a, key, value, copy)
                                : a->set(key, value, copy);
-  return arrayRefShuffle<setRef, KindOfArray>(a, ret,
-                                              setRef ? ref->tv() : nullptr);
+  return arrayRefShuffle<setRef, KindOfArray>(a, ret, ref);
 }
 
-#define ARRAYSET_HELPER_TABLE(m)                                    \
-  /* name         keyType        checkForInt  setRef  intishWarn */ \
-  m(arraySetS,    KeyType::Str,   false,      false,  false)        \
-  m(arraySetSi,   KeyType::Str,    true,      false,  false)        \
-  m(arraySetI,    KeyType::Int,   false,      false,  false)        \
-  m(arraySetSR,   KeyType::Str,   false,      true,   false)        \
-  m(arraySetSiR,  KeyType::Str,    true,      true,   false)        \
-  m(arraySetIR,   KeyType::Int,   false,      true,   false)        \
-  m(arraySetSW,   KeyType::Str,   false,      false,  true)         \
-  m(arraySetSiW,  KeyType::Str,    true,      false,  true)         \
-  m(arraySetIW,   KeyType::Int,   false,      false,  true)         \
-  m(arraySetSRW,  KeyType::Str,   false,      true,   true)         \
-  m(arraySetSiRW, KeyType::Str,    true,      true,   true)         \
-  m(arraySetIRW,  KeyType::Int,   false,      true,   true)         \
+#define ARRAYSET_HELPER_TABLE(m)                        \
+  /* name         keyType     checkForInt intishWarn */ \
+  m(arraySetS,    KeyType::Str,   false,  false)        \
+  m(arraySetSi,   KeyType::Str,    true,  false)        \
+  m(arraySetI,    KeyType::Int,   false,  false)        \
+  m(arraySetSW,   KeyType::Str,   false,  true)         \
+  m(arraySetSiW,  KeyType::Str,    true,  true)         \
+  m(arraySetIW,   KeyType::Int,   false,  true)
 
-#define X(nm, keyType, checkForInt, setRef, intishWarn)                    \
-ShuffleReturn<setRef>::return_type                                         \
-inline nm(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) { \
-  return arraySetImpl<keyType, checkForInt, setRef, intishWarn>(           \
-    a, key, value, ref                                                     \
-  );                                                                       \
+#define X(nm, keyType, checkForInt, intishWarn)                         \
+inline ArrayData* nm(ArrayData* a, key_type<keyType> key, Cell value) { \
+  return arraySetImpl<keyType, checkForInt, false, intishWarn>(         \
+    a, key, value, nullptr                                              \
+  );                                                                    \
 }
 ARRAYSET_HELPER_TABLE(X)
+#undef X
+
+#define ARRAYSET_REF_HELPER_TABLE(m)                     \
+  /* name         keyType     checkForInt intishWarn */  \
+  m(arraySetSR,   KeyType::Str,   false,   false)        \
+  m(arraySetSiR,  KeyType::Str,    true,   false)        \
+  m(arraySetIR,   KeyType::Int,   false,   false)        \
+  m(arraySetSRW,  KeyType::Str,   false,   true)         \
+  m(arraySetSiRW, KeyType::Str,    true,   true)         \
+  m(arraySetIRW,  KeyType::Int,   false,   true)
+
+#define X(nm, keyType, checkForInt, intishWarn)                          \
+inline                                                                   \
+void nm(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) { \
+  arraySetImpl<keyType, checkForInt, true, intishWarn>(                  \
+    a, key, value, ref->tv()                                             \
+  );                                                                     \
+}
+ARRAYSET_REF_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
 
 template<bool setRef>
-typename ShuffleReturn<setRef>::return_type
-vecSetImpl(ArrayData* a, int64_t key, Cell value, RefData* ref) {
+auto vecSetImpl(ArrayData* a, int64_t key, Cell value, TypedValue* ref) {
   assertx(cellIsPlausible(value));
   assertx(a->isVecArray());
   const bool copy = a->cowCheck();
   ArrayData* ret = PackedArray::SetIntVec(a, key, value, copy);
-  return arrayRefShuffle<setRef, KindOfVec>(a, ret,
-                                            setRef ? ref->tv() : nullptr);
+  return arrayRefShuffle<setRef, KindOfVec>(a, ret, ref);
 }
 
-#define VECSET_HELPER_TABLE(m) \
-  /* name      setRef */       \
-  m(vecSetI,   false)          \
-  m(vecSetIR,  true)           \
-
-#define X(nm, setRef)                                                   \
-ShuffleReturn<setRef>::return_type                                      \
-inline nm(ArrayData* a, int64_t key, Cell value, RefData* ref) {        \
-  return vecSetImpl<setRef>(a, key, value, ref);                        \
+inline ArrayData* vecSetI(ArrayData* a, int64_t key, Cell value) {
+  return vecSetImpl<false>(a, key, value, nullptr);
 }
-VECSET_HELPER_TABLE(X)
-#undef X
+
+inline void vecSetIR(ArrayData* a, int64_t key, Cell value,
+                     RefData* ref) {
+  vecSetImpl<true>(a, key, value, ref->tv());
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -935,28 +940,37 @@ inline ArrayData* dictSetImplPre(ArrayData* a, StringData* s, Cell val) {
 }
 
 template<KeyType keyType, bool setRef>
-typename ShuffleReturn<setRef>::return_type
-dictSetImpl(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) {
+auto
+dictSetImpl(ArrayData* a, key_type<keyType> key, Cell value, TypedValue* ref) {
   assertx(cellIsPlausible(value));
   assertx(a->isDict());
   auto ret = dictSetImplPre(a, key, value);
-  return arrayRefShuffle<setRef, KindOfDict>(a, ret,
-                                             setRef ? ref->tv() : nullptr);
+  return arrayRefShuffle<setRef, KindOfDict>(a, ret, ref);
 }
 
-#define DICTSET_HELPER_TABLE(m) \
-  /* name       keyType        setRef */         \
-  m(dictSetI,   KeyType::Int,  false)            \
-  m(dictSetIR,  KeyType::Int,  true)             \
-  m(dictSetS,   KeyType::Str,  false)            \
-  m(dictSetSR,  KeyType::Str,  true)             \
+#define DICTSET_HELPER_TABLE(m)    \
+  /* name       keyType     */     \
+  m(dictSetI,   KeyType::Int)      \
+  m(dictSetS,   KeyType::Str)
 
-#define X(nm, keyType, setRef)                                           \
-ShuffleReturn<setRef>::return_type                                       \
-inline nm(ArrayData* a, key_type<keyType> key, Cell val, RefData* ref) { \
-  return dictSetImpl<keyType, setRef>(a, key, val, ref);                 \
+#define X(nm, keyType)                                                   \
+inline ArrayData* nm(ArrayData* a, key_type<keyType> key, Cell val) {    \
+  return dictSetImpl<keyType, false>(a, key, val, nullptr);              \
 }
 DICTSET_HELPER_TABLE(X)
+#undef X
+
+#define DICTSET_REF_HELPER_TABLE(m) \
+  /* name       keyType    */       \
+  m(dictSetIR,  KeyType::Int)       \
+  m(dictSetSR,  KeyType::Str)
+
+#define X(nm, keyType)                                                  \
+inline                                                                  \
+void nm(ArrayData* a, key_type<keyType> key, Cell val, RefData* ref) {  \
+  dictSetImpl<keyType, true>(a, key, val, ref->tv());                   \
+}
+DICTSET_REF_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////

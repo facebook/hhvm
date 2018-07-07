@@ -118,25 +118,24 @@ ArrayData* convVecToKeysetHelper(ArrayData* a);
 ArrayData* convDictToKeysetHelper(ArrayData* a);
 ArrayData* convObjToKeysetHelper(ObjectData* o);
 ArrayData* convCellToKeysetHelper(TypedValue tv);
-int64_t convObjToDblHelper(const ObjectData* o);
-int64_t convArrToDblHelper(ArrayData* a);
-int64_t convStrToDblHelper(const StringData* s);
-int64_t convResToDblHelper(const ResourceHdr* r);
-int64_t convCellToDblHelper(TypedValue tv);
+double convObjToDblHelper(const ObjectData* o);
+double convArrToDblHelper(ArrayData* a);
+double convStrToDblHelper(const StringData* s);
+double convResToDblHelper(const ResourceHdr* r);
+double convCellToDblHelper(TypedValue tv);
 ObjectData* convCellToObjHelper(TypedValue tv);
-StringData* convDblToStrHelper(int64_t i);
+StringData* convDblToStrHelper(double i);
 StringData* convIntToStrHelper(int64_t i);
 StringData* convObjToStrHelper(ObjectData* o);
 StringData* convResToStrHelper(ResourceHdr* o);
 
 
 bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func);
-int64_t coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func);
-int64_t coerceCellToDblHelper(TypedValue tv, int64_t argNum, const Func* func);
+double coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func);
+double coerceCellToDblHelper(TypedValue tv, int64_t argNum, const Func* func);
 int64_t coerceStrToIntHelper(StringData* sd, int64_t argNum, const Func* func);
 int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func);
 
-int64_t reinterpretDblAsInt(double d);
 
 void raiseUndefProp(ObjectData* base, const StringData* name);
 void raiseUndefVariable(StringData* nm);
@@ -175,7 +174,7 @@ TypedValue* getSPropOrNull(const Class* cls,
 TypedValue* getSPropOrRaise(const Class* cls,
     const StringData* name, Class* ctx);
 
-int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets);
+int64_t switchDoubleHelper(double val, int64_t base, int64_t nTargets);
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);
 int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets);
 

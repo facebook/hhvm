@@ -1471,18 +1471,15 @@ inline void SetElemObject(tv_lval base, key_type<keyType> key,
 template<bool setRef> struct ShuffleReturn {};
 
 template<> struct ShuffleReturn<true> {
-  typedef void return_type;
   static void do_return(ArrayData* /*a*/) {}
 };
 
 template<> struct ShuffleReturn<false> {
-  typedef ArrayData* return_type;
   static ArrayData* do_return(ArrayData* a) { return a; }
 };
 
 template<bool setRef, DataType dt> inline
-typename ShuffleReturn<setRef>::return_type
-arrayRefShuffle(ArrayData* oldData, ArrayData* newData, tv_lval base) {
+auto arrayRefShuffle(ArrayData* oldData, ArrayData* newData, tv_lval base) {
   if (newData == oldData) {
     return ShuffleReturn<setRef>::do_return(oldData);
   }

@@ -421,11 +421,13 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
       "Error: failed type check on operand {}\n"
       "   instruction: {}\n"
       "   was expecting: {}\n"
-      "   received: {}\n",
+      "   received: {}\n"
+      "   from: {}\n",
         curSrc,
-        inst->toString(),
+        *inst,
         expectStr,
-        inst->src(curSrc)->type().toString()
+        inst->src(curSrc)->type(),
+        *inst->src(curSrc)->inst()
       ).str()
     );
     return true;

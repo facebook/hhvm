@@ -440,7 +440,7 @@ static ArrayData* loadClsTypeCnsHelper(
 void cgLdClsTypeCns(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst).ssa(0).ssa(1);
   cgCallHelper(vmain(env), env, CallSpec::direct(loadClsTypeCnsHelper),
-               callDestTV(env, inst), SyncOptions::Sync, args);
+               callDest(env, inst), SyncOptions::Sync, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

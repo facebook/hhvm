@@ -23,6 +23,8 @@
 
 #include "hphp/util/lock-free-ptr-wrapper.h"
 
+#include <memory>
+
 namespace HPHP { namespace jit { namespace {
 
 /* The following bunch of macros and functions are used to build up tables of
@@ -61,11 +63,9 @@ inline unsigned buildBitmask(T c, Args... args) {
 }
 
 // FILL_ROW and BUILD_OPTAB* build up the static table of function pointers
-#define FILL_ROW(nm, ...) {                                      \
-    auto const dest = &optab[buildBitmask(__VA_ARGS__)];         \
-    assertx(*dest == nullptr);                                   \
-    *dest = reinterpret_cast<OpFunc>(MInstrHelpers::nm);         \
-  }
+#define FILL_ROW(nm, ...)                               \
+  new (&optab[buildBitmask(__VA_ARGS__)])               \
+    CallSpec{CallSpec::direct(MInstrHelpers::nm)};
 
 template<typename... Args>
 std::tuple<typename std::remove_const<
@@ -85,26 +85,29 @@ struct assert_same {
 #define BUILD_OPTAB(TABLE, ...)                                 \
   using columns = MAKE_TYPE_TUPLE(__VA_ARGS__);                 \
   TABLE(CHECK_TYPE_MATCH)                                       \
-  using OpFunc = void (*)();                                    \
-  static LockFreePtrWrapper<OpFunc*> optabWrapper;              \
-  auto optab = *optabWrapper.get().get();                       \
-  if (!optab) {                                                 \
-    optabWrapper.lock_for_update();                             \
-    optab = *optabWrapper.get().get();                          \
-    if (optab) {                                                \
-      optabWrapper.unlock();                                    \
-    } else {                                                    \
-      optab = static_cast<OpFunc*>(                             \
-        calloc(1 << multiBitWidth(__VA_ARGS__), sizeof(OpFunc)) \
-      );                                                        \
-      TABLE(FILL_ROW)                                           \
-      optabWrapper.update_and_unlock(std::move(optab));         \
-      optab = *optabWrapper.get().get();                        \
-    }                                                           \
-  }                                                             \
-  unsigned idx = buildBitmask(__VA_ARGS__);                     \
-  auto const opFunc = optab[idx];                               \
-  always_assert(opFunc);
+  using T =                                                     \
+    std::aligned_storage_t<sizeof(CallSpec), alignof(CallSpec)>;\
+  static auto const optabWrapper = [&] {                        \
+    auto const n = 1 << multiBitWidth(__VA_ARGS__);             \
+    auto optab = std::make_unique<T[]>(n);                      \
+    if (do_assert) memset(optab.get(), 0, n * sizeof(T));       \
+    TABLE(FILL_ROW);                                            \
+    return optab;                                               \
+  }();                                                          \
+  auto const optab =                                            \
+    reinterpret_cast<const CallSpec*>(optabWrapper.get());      \
+  auto const& target = optab[buildBitmask(__VA_ARGS__)];        \
+  assertx(target.address());
+
+#define BUILD_OPTAB2(cond, table_t, table_f, ...) \
+  auto& target = [&]() -> const CallSpec& {       \
+    if ((cond)) {                                 \
+      BUILD_OPTAB(table_t, __VA_ARGS__);          \
+      return target;                              \
+    }                                             \
+    BUILD_OPTAB(table_f, __VA_ARGS__);            \
+    return target;                                \
+  }();
 
 // getKeyType determines the KeyType to be used as a template argument
 // to helper functions.

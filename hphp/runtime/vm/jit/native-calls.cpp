@@ -37,6 +37,8 @@
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
+#include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 
@@ -57,7 +59,6 @@ constexpr irlower::SyncOptions SNone = irlower::SyncOptions::None;
 constexpr irlower::SyncOptions SSync = irlower::SyncOptions::Sync;
 
 constexpr DestType DSSA  = DestType::SSA;
-constexpr DestType DDbl  = DestType::Dbl;
 constexpr DestType DNone = DestType::None;
 
 template<class EDType, class MemberType>
@@ -560,7 +561,7 @@ static CallMap s_callMap {
     {MethodExists, methodExistsHelper, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
 
     /* microtime(true) */
-    {GetTime, TimeStamp::CurrentSecond, DDbl, SNone, {}},
+    {GetTime, TimeStamp::CurrentSecond, DSSA, SNone, {}},
     /* clock_gettime_ns($clk_id) */
     {GetTimeNs, folly::chrono::clock_gettime_ns, DSSA, SNone, {{SSA, 0}}},
 };

@@ -82,23 +82,20 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
       args.imm(0);
     }
 
-    auto const helper = [&] {
-      // MSVC gets confused if we try to directly assign the template overload,
-      // so use a temporary and let the optimizer sort it out.
+    auto const target = [&] {
       if (isWInit) {
-        return (TCA)new_iter_array_key<true, false>;
+        return CallSpec::direct(new_iter_array_key<true, false>);
       } else if (isLInit) {
-        if (isInitK) return (TCA)new_iter_array_key<false, true>;
-        return (TCA)new_iter_array<true>;
+        if (isInitK) return CallSpec::direct(new_iter_array_key<false, true>);
+        return CallSpec::direct(new_iter_array<true>);
       } else if (isInitK) {
-        return (TCA)new_iter_array_key<false, false>;
+        return CallSpec::direct(new_iter_array_key<false, false>);
       } else {
-        return (TCA)new_iter_array<false>;
+        return CallSpec::direct(new_iter_array<false>);
       }
     }();
 
-    cgCallHelper(v, env, CallSpec::direct(reinterpret_cast<void (*)()>(helper)),
-                 callDest(env, inst), SyncOptions::Sync, args);
+    cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
     return;
   }
 
@@ -191,12 +188,11 @@ void implIterNext(IRLS& env, const IRInstruction* inst) {
     return ret;
   }();
 
-  auto const helper = isWNext ? (TCA)witer_next_key :
-                      isNextK ? (TCA)iter_next_key_ind :
-                                (TCA)iter_next_ind;
+  auto const target = isWNext ? CallSpec::direct(witer_next_key) :
+                      isNextK ? CallSpec::direct(iter_next_key_ind) :
+                                CallSpec::direct(iter_next_ind);
   auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(reinterpret_cast<void (*)()>(helper)),
-               callDest(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
 void implMIterNext(IRLS& env, const IRInstruction* inst) {
@@ -235,12 +231,11 @@ void implLIterNext(IRLS& env, const IRInstruction* inst) {
     return ret;
   }();
 
-  auto const helper = isKey
-    ? (TCA)liter_next_key_ind
-    : (TCA)liter_next_ind;
+  auto const target = isKey
+    ? CallSpec::direct(liter_next_key_ind)
+    : CallSpec::direct(liter_next_ind);
   auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(reinterpret_cast<void (*)()>(helper)),
-               callDest(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
 void implIterFree(IRLS& env, const IRInstruction* inst, CallSpec meth) {

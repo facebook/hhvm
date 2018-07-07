@@ -2353,7 +2353,14 @@ SSATmp* simplifyConvCellToObj(State& /*env*/, const IRInstruction* inst) {
 
 SSATmp* simplifyDblAsBits(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  if (src->hasConstVal()) return cns(env, reinterpretDblAsInt(src->dblVal()));
+  if (src->hasConstVal()) {
+    union {
+      int64_t i;
+      double d;
+    };
+    d = src->dblVal();
+    return cns(env, i);
+  }
   return nullptr;
 }
 

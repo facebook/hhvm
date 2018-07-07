@@ -56,8 +56,17 @@ enum class DestType : uint8_t {
 const char* destTypeName(DestType);
 
 struct CallDest {
-  DestType type;
+  CallDest(DestType t, Type vt, Vreg r0 = Vreg{}, Vreg r1 = Vreg{})
+    : valueType{vt}, reg0{r0}, reg1{r1}, type{t}
+  {}
+
+  CallDest(DestType t, Vreg r0 = Vreg{}, Vreg r1 = Vreg{})
+    : CallDest(t, TTop, r0, r1)
+  {}
+
+  Type valueType;
   Vreg reg0, reg1;
+  DestType type;
 };
 UNUSED const CallDest kVoidDest { DestType::None };
 UNUSED const CallDest kIndirectDest { DestType::Indirect };
@@ -86,7 +95,7 @@ struct ArgDesc {
   }
   Immed disp() const {
     assertx(m_kind == Kind::Addr ||
-	    m_kind == Kind::IndRet);
+            m_kind == Kind::IndRet);
     return m_disp32;
   }
   bool isZeroExtend() const { return m_zeroExtend; }
@@ -153,6 +162,9 @@ struct ArgGroup {
   size_t numStackArgs() const { return m_stkArgs.size(); }
   size_t numIndRetArgs() const { return m_indRetArgs.size(); }
 
+  const std::vector<Type>& argTypes() const {
+    return m_argTypes;
+  }
   ArgDesc& gpArg(size_t i) {
     assertx(i < m_gpArgs.size());
     return m_gpArgs[i];
@@ -211,17 +223,17 @@ struct ArgGroup {
     return *this;
   }
 
-  ArgGroup& ssa(int i, bool isFP = false) {
+  ArgGroup& ssa(int i, bool allowFP = true) {
     auto s = m_inst->src(i);
     ArgDesc arg(s, m_locs[s]);
-    if (isFP) {
-      push_SIMDarg(arg);
+    if (s->isA(TDbl) && allowFP) {
+      push_SIMDarg(arg, s->type());
       if (arch() == Arch::PPC64) {
         // PPC64 ABIv2 compliant: reserve the aligned GP if FP is used
         push_arg(ArgDesc(ArgDesc::Kind::Imm, 0)); // Push a dummy parameter
       }
     } else {
-      push_arg(arg);
+      push_arg(arg, s->type());
     }
     return *this;
   }
@@ -244,8 +256,8 @@ struct ArgGroup {
   }
 
 private:
-  void push_arg(const ArgDesc& arg);
-  void push_SIMDarg(const ArgDesc& arg);
+  void push_arg(const ArgDesc& arg, Type t = TBottom);
+  void push_SIMDarg(const ArgDesc& arg, Type t = TBottom);
 
   /*
    * For passing the m_type field of a TypedValue.
@@ -272,6 +284,7 @@ private:
   ArgVec m_gpArgs; // INTEGER class args
   ArgVec m_simdArgs; // SSE class args
   ArgVec m_stkArgs; // Overflow
+  std::vector<Type> m_argTypes;
 };
 
 ArgGroup toArgGroup(const NativeCalls::CallInfo&,

@@ -130,7 +130,7 @@ struct OutOfMemoryException : Exception {
 // constants are only meaningful when use_addr_to_check_counted is true (which
 // currently depends on USE_JEMALLOC_EXTENT_HOOKS).  We make them available for
 // all modes to avoid having ifdefs everywhere.
-constexpr unsigned kUncountedMaxShift = 40;
+constexpr unsigned kUncountedMaxShift = 38;
 constexpr uintptr_t kLowArenaMinAddr = 1ull << 30;
 constexpr uintptr_t kLowArenaMaxAddr = 1ull << 32;
 constexpr uintptr_t kUncountedMaxAddr = 1ull << kUncountedMaxShift;

@@ -374,7 +374,8 @@ std::string RuntimeOption::CoreDumpReportDirectory =
 std::string RuntimeOption::StackTraceFilename;
 int RuntimeOption::StackTraceTimeout = 0; // seconds; 0 means unlimited
 std::string RuntimeOption::RemoteTraceOutputDir = "/tmp";
-std::set<std::string, stdltistr> RuntimeOption::TraceFunctions{};
+std::set<std::string, stdltistr> RuntimeOption::TraceFunctions;
+uint32_t RuntimeOption::TraceFuncId = InvalidFuncId;
 
 bool RuntimeOption::EnableStats = false;
 bool RuntimeOption::EnableAPCStats = false;
@@ -1979,6 +1980,7 @@ void RuntimeOption::Load(
                  "Debug.RemoteTraceOutputDir", "/tmp");
     Config::Bind(TraceFunctions, ini, config,
                  "Debug.TraceFunctions", TraceFunctions);
+    Config::Bind(TraceFuncId, ini, config, "Debug.TraceFuncId", TraceFuncId);
 
     {
       // Debug SimpleCounter
@@ -2240,7 +2242,7 @@ void RuntimeOption::Load(
   ExtensionRegistry::moduleLoad(ini, config);
   initialize_apc();
 
-  if (TraceFunctions.size()) {
+  if (TraceFunctions.size() || TraceFuncId != InvalidFuncId) {
     Trace::ensureInit(getTraceOutputFile());
   }
 }

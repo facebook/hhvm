@@ -379,6 +379,7 @@ struct RuntimeOption {
   static int StackTraceTimeout;
   static std::string RemoteTraceOutputDir;
   static std::set<std::string, stdltistr> TraceFunctions;
+  static uint32_t TraceFuncId;
 
   static bool EnableStats;
   static bool EnableAPCStats;

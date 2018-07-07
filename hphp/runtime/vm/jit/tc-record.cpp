@@ -319,6 +319,18 @@ void logTranslation(const TransEnv& env, const TransRange& range) {
   cols.setStr("trans_kind", !debug ? kind : kind + "_debug");
   if (context.func) {
     cols.setStr("func", context.func->fullName()->data());
+    switch (RuntimeOption::EvalJitSerdesMode) {
+    case JitSerdesMode::Off:
+    case JitSerdesMode::Serialize:
+    case JitSerdesMode::SerializeAndExit:
+      break;
+    case JitSerdesMode::Deserialize:
+    case JitSerdesMode::DeserializeOrFail:
+    case JitSerdesMode::DeserializeOrGenerate:
+    case JitSerdesMode::DeserializeAndExit:
+      cols.setInt("func_id", context.func->getFuncId());
+      break;
+    }
   }
   if (context.kind == TransKind::Optimize) {
     cols.setInt("opt_index", context.optIndex);

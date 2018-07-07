@@ -166,11 +166,20 @@ enum class Ptr : uint16_t {
 using ptr_t = std::underlying_type<Ptr>::type;
 constexpr auto kPtrRefBit = static_cast<ptr_t>(Ptr::Ref);
 
+constexpr Ptr operator~(Ptr p) {
+  return static_cast<Ptr>(~static_cast<ptr_t>(p));
+}
 constexpr Ptr operator|(Ptr a, Ptr b) {
   return static_cast<Ptr>(static_cast<ptr_t>(a) | static_cast<ptr_t>(b));
 }
+inline Ptr& operator|=(Ptr& a, Ptr b) {
+  return a = a | b;
+}
 constexpr Ptr operator&(Ptr a, Ptr b) {
   return static_cast<Ptr>(static_cast<ptr_t>(a) & static_cast<ptr_t>(b));
+}
+inline Ptr& operator&=(Ptr& a, Ptr b) {
+  return a = a & b;
 }
 constexpr Ptr operator-(Ptr a, Ptr b) {
   return static_cast<Ptr>(static_cast<ptr_t>(a) & ~static_cast<ptr_t>(b));
@@ -191,16 +200,104 @@ constexpr bool operator>(Ptr a, Ptr b) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define IRTP_FROM_PTR(ptr, ptr_bits, name)                    \
-  IRTP(PtrTo##ptr##name, ptr, k##name)                        \
+/*
+ * Mem is a lattice which supervenes on Ptr describing how to interpret a
+ * memory address.
+ *
+ * Whereas Ptr describes what we know about the memory location, Mem describes
+ * what we know about the memory address itself.
+ */
+enum class Mem : uint8_t {
+  /* Bottom: No other components of the type are compatible with Mem: TCls,
+   *         TRDSHandle, etc... */
+  Bottom = 0,
+  /* NotMem: Normal values like TInt or TGen. */
+  NotMem = 1U << 0,
+  /* Ptr: TypedValue*: TPtrToInt, TPtrToGen, etc... */
+  Ptr    = 1U << 1,
+  /* Lval: tv_lval: TLvalToInt, TLvalToGen, etc... */
+  Lval   = 1U << 2,
+  /* Mem: Either Ptr or Lval. No concrete values can have this type because
+   * there is no way to distinguish between TPtrToFoo and TLvalToFoo at
+   * runtime. */
+  Mem    = Ptr | Lval,
+  /* Top: Only used in TTop. */
+  Top    = NotMem | Mem,
+};
 
-#define IRT_BOXES_AND_PTRS(name, bits)                        \
-  IRT(name,              (bits))                              \
-  IRT(Boxed##name,       (bits) << kBoxShift)                 \
-  IRTP(PtrTo##name,      Ptr, k##name)                        \
-  IRTP(PtrToBoxed##name, Ptr, kBoxed##name)                   \
+using mem_t = std::underlying_type<Mem>::type;
+
+constexpr Mem operator~(Mem m) {
+  return static_cast<Mem>(~static_cast<mem_t>(m));
+}
+constexpr Mem operator|(Mem a, Mem b) {
+  return static_cast<Mem>(static_cast<mem_t>(a) | static_cast<mem_t>(b));
+}
+inline Mem& operator|=(Mem& a, Mem b) {
+  return a = a | b;
+}
+constexpr Mem operator&(Mem a, Mem b) {
+  return static_cast<Mem>(static_cast<mem_t>(a) & static_cast<mem_t>(b));
+}
+inline Mem& operator&=(Mem& a, Mem b) {
+  return a = a & b;
+}
+constexpr Mem operator-(Mem a, Mem b) {
+  return static_cast<Mem>(static_cast<mem_t>(a) & ~static_cast<mem_t>(b));
+}
+
+constexpr bool operator<=(Mem a, Mem b) {
+  return (a & b) == a;
+}
+constexpr bool operator>=(Mem a, Mem b) {
+  return b <= a;
+}
+constexpr bool operator<(Mem a, Mem b) {
+  return a <= b && a != b;
+}
+constexpr bool operator>(Mem a, Mem b) {
+  return a >= b && a != b;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * This section defines a number of macros used to stamp out code and data for
+ * all predefined types (types not represented here can be constructed by
+ * combining different types). It can be viewed as one big X macro, with
+ * different values of X:
+ *
+ * IRT(name, bits): A plain type, like Bool or Obj.
+ * IRTP(name, ptr, bits): A Ptr type, with Mem::Ptr and a custom Ptr.
+ * IRTL(name, ptr, bits): An Lval type, with Mem::Lval and a custom Ptr.
+ * IRTM(name, ptr, bits): A Mem type, with Mem::Mem and a custom Ptr.
+ * IRTX(name, x, bits): A custom memory type, with Mem::x and Ptr::x.
+ */
+
+#define IRTP_FROM_PTR(ptr, ptr_bits, name)                    \
+  IRTP(PtrTo##ptr##name, ptr, k##name)
+
+#define IRTL_FROM_PTR(ptr, ptr_bits, name)                    \
+  IRTL(LvalTo##ptr##name, ptr, k##name)
+
+#define IRTM_FROM_PTR(ptr, ptr_bits, name)                    \
+  IRTM(MemTo##ptr##name, ptr, k##name)
+
+#define IRT_BOXES_PTRS_LVALS(name, bits)                      \
+  IRT(name,               (bits))                             \
+  IRT(Boxed##name,        (bits) << kBoxShift)                \
+  IRTP(PtrTo##name,       Ptr, k##name)                       \
+  IRTP(PtrToBoxed##name,  Ptr, kBoxed##name)                  \
   PTR_TYPES(IRTP_FROM_PTR, PTR_R, name)                       \
-  PTR_TYPES(IRTP_FROM_PTR, PTR_NO_R, Boxed##name)
+  PTR_TYPES(IRTP_FROM_PTR, PTR_NO_R, Boxed##name)             \
+  IRTL(LvalTo##name,      Ptr, k##name)                       \
+  IRTL(LvalToBoxed##name, Ptr, kBoxed##name)                  \
+  PTR_TYPES(IRTL_FROM_PTR, PTR_R, name)                       \
+  PTR_TYPES(IRTL_FROM_PTR, PTR_NO_R, Boxed##name)             \
+  IRTM(MemTo##name,       Ptr, k##name)                       \
+  IRTM(MemToBoxed##name,  Ptr, kBoxed##name)                  \
+  PTR_TYPES(IRTM_FROM_PTR, PTR_R, name)                       \
+  PTR_TYPES(IRTM_FROM_PTR, PTR_NO_R, Boxed##name)
 
 #define IRT_PHP(c)                                                      \
   c(Uninit,          1ULL << 0)                                         \
@@ -272,38 +369,48 @@ constexpr bool operator>(Ptr a, Ptr b) {
  * because boxing them (e.g., BoxedGen, PtrToBoxedGen) would yield nonsense
  * types.
  */
-#define IRT_SPECIAL                                                     \
-  /* Bottom and Top use IRTP to specify a custom Ptr kind */            \
-  IRTP(Bottom,       Bottom, kBottom)                                   \
-  IRTP(Top,          Top,    kTop)                                      \
-  IRT(Ctx,                   kObj|kCctx)                                \
-  IRTP(AnyObj,       Top,    kAnyObj)                                   \
-  IRTP(AnyArr,       Top,    kAnyArr)                                   \
-  IRTP(AnyVec,       Top,    kAnyVec)                                   \
-  IRTP(AnyDict,      Top,    kAnyDict)                                  \
-  IRTP(AnyKeyset,    Top,    kAnyKeyset)                                \
-  IRTP(AnyArrLike,   Top,    kAnyArrLike)                               \
-  IRT(Counted,               kCountedStr|kCountedArr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kBoxedCell) \
-  IRTP(PtrToCounted, Ptr,    kCounted)                                  \
-  IRT(Gen,                   kCell|kBoxedCell)                          \
-  IRT(InitGen,               kGen & ~kUninit)                           \
-  IRTP(PtrToGen,     Ptr,    kGen)                                      \
-  IRTP(PtrToInitGen, Ptr,    kInitGen)                                  \
-  PTR_TYPES(IRTP_FROM_PTR, PTR_R, Gen)                                  \
-  PTR_TYPES(IRTP_FROM_PTR, PTR_R, InitGen)
+#define IRT_SPECIAL                                           \
+  /* Bottom and Top use IRTX to specify a custom Ptr kind */  \
+  IRTX(Bottom,       Bottom, kBottom)                         \
+  IRTX(Top,          Top,    kTop)                            \
+  IRT(Ctx,                   kObj|kCctx)                     \
+  IRTX(AnyObj,       Top,    kAnyObj)                         \
+  IRTX(AnyArr,       Top,    kAnyArr)                         \
+  IRTX(AnyVec,       Top,    kAnyVec)                         \
+  IRTX(AnyDict,      Top,    kAnyDict)                        \
+  IRTX(AnyKeyset,    Top,    kAnyKeyset)                      \
+  IRTX(AnyArrLike,   Top,    kAnyArrLike)                     \
+  IRT(Counted,                kCountedStr|kCountedArr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kBoxedCell) \
+  IRTP(PtrToCounted,  Ptr,    kCounted)                       \
+  IRTL(LvalToCounted, Ptr,    kCounted)                       \
+  IRTM(MemToCounted,  Ptr,    kCounted)                       \
+  IRT(Gen,                    kCell|kBoxedCell)               \
+  IRT(InitGen,                kGen & ~kUninit)                \
+  IRTP(PtrToGen,      Ptr,    kGen)                           \
+  IRTP(PtrToInitGen,  Ptr,    kInitGen)                       \
+  IRTL(LvalToGen,     Ptr,    kGen)                           \
+  IRTL(LvalToInitGen, Ptr,    kInitGen)                       \
+  IRTM(MemToGen,      Ptr,    kGen)                           \
+  IRTM(MemToInitGen,  Ptr,    kInitGen)                       \
+  PTR_TYPES(IRTP_FROM_PTR, PTR_R, Gen)                        \
+  PTR_TYPES(IRTP_FROM_PTR, PTR_R, InitGen)                    \
+  PTR_TYPES(IRTL_FROM_PTR, PTR_R, Gen)                        \
+  PTR_TYPES(IRTL_FROM_PTR, PTR_R, InitGen)                    \
+  PTR_TYPES(IRTM_FROM_PTR, PTR_R, Gen)                        \
+  PTR_TYPES(IRTM_FROM_PTR, PTR_R, InitGen)
 
 /*
  * All types that represent a non-union type.
  */
-#define IRT_PRIMITIVE IRT_PHP(IRT_BOXES_AND_PTRS) IRT_RUNTIME
+#define IRT_PRIMITIVE IRT_PHP(IRT_BOXES_PTRS_LVALS) IRT_RUNTIME
 
 /*
  * All types.
  */
-#define IR_TYPES                                \
-  IRT_PHP(IRT_BOXES_AND_PTRS)                   \
-  IRT_PHP_UNIONS(IRT_BOXES_AND_PTRS)            \
-  IRT_RUNTIME                                   \
+#define IR_TYPES                        \
+  IRT_PHP(IRT_BOXES_PTRS_LVALS)         \
+  IRT_PHP_UNIONS(IRT_BOXES_PTRS_LVALS)  \
+  IRT_RUNTIME                           \
   IRT_SPECIAL
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -350,9 +457,15 @@ public:
 
 #define IRT(name, bits)       k##name = (bits),
 #define IRTP(name, ptr, bits)
+#define IRTL(name, ptr, bits)
+#define IRTM(name, ptr, bits)
+#define IRTX(name, ptr, bits)
     IR_TYPES
 #undef IRT
 #undef IRTP
+#undef IRTL
+#undef IRTM
+#undef IRTX
 
     kAnyArr       = kArr | kBoxedArr,
     kAnyVec       = kVec | kBoxedVec,
@@ -374,9 +487,9 @@ public:
   Type();
 
   /*
-   * Construct from a predefined set of bits & pointer kind.
+   * Construct from a predefined set of bits, pointer kind, and mem kind.
    */
-  constexpr Type(bits_t bits, Ptr kind);
+  constexpr Type(bits_t bits, Ptr ptr, Mem mem);
 
   /*
    * Hash the Type as a bitfield.
@@ -729,8 +842,8 @@ public:
    *
    * @requires:
    *    ptr:        *this <= Gen && kind <= Ptr::Ptr
-   *    deref:      *this <= PtrToGen
-   *    derefIfPtr: *this <= (Gen | PtrToGen)
+   *    deref:      *this <= MemToGen
+   *    derefIfPtr: *this <= (Gen | MemToGen)
    */
   Type ptr(Ptr kind) const;
   Type deref() const;
@@ -742,9 +855,10 @@ public:
   Type strip() const;
 
   /*
-   * Return the pointer category of a Type.
+   * Return the pointer or memory category of a Type.
    */
   Ptr ptrKind() const;
+  Mem memKind() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -754,7 +868,7 @@ private:
   /*
    * Internal constructors.
    */
-  Type(bits_t bits, Ptr kind, uintptr_t extra);
+  Type(bits_t bits, Ptr ptr, Mem mem, uintptr_t extra);
   Type(Type t, ArraySpec arraySpec);
   Type(Type t, ClassSpec classSpec);
 
@@ -792,6 +906,7 @@ private:
     Bits m_typedBits;
   };
   Ptr m_ptr;
+  Mem m_mem;
   bool m_hasConstVal;
 
   union {

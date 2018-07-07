@@ -35,11 +35,17 @@ namespace {
 
 std::unordered_set<Type> allTypes() {
   std::unordered_set<Type> r;
-# define IRT(name, ...) r.insert(T##name);
-# define IRTP(name, ...) IRT(name)
+#define IRT(name, ...) r.insert(T##name);
+#define IRTP(name, ...) IRT(name)
+#define IRTL(name, ...) IRT(name)
+#define IRTM(name, ...) IRT(name)
+#define IRTX(name, ...) IRT(name)
   IR_TYPES
-# undef IRT
-# undef IRTP
+#undef IRT
+#undef IRTP
+#undef IRTL
+#undef IRTM
+#undef IRTX
   return r;
 }
 
@@ -47,6 +53,8 @@ std::unordered_set<Type> allTypes() {
 
 TEST(Type, Equality) {
   EXPECT_NE(TCls, TPtrToBoxedObj);
+  EXPECT_NE(TCls, TLvalToBoxedObj);
+  EXPECT_NE(TCls, TMemToBoxedObj);
 }
 
 TEST(Type, Null) {
@@ -126,17 +134,30 @@ TEST(Type, ToString) {
   EXPECT_EQ("Obj<=Iterator", sub.toString());
   EXPECT_EQ("Obj=Iterator", exact.toString());
   EXPECT_EQ("PtrToStr", TPtrToStr.toString());
+  EXPECT_EQ("LvalToStr", TLvalToStr.toString());
 
   EXPECT_EQ("PtrTo{Prop|MIS|MMisc|Other}Gen",
             (TPtrToMembGen - TPtrToElemGen).toString());
+  EXPECT_EQ("LvalTo{Prop|MIS|MMisc|Other}Gen",
+            (TLvalToMembGen - TLvalToElemGen).toString());
   EXPECT_EQ("PtrToMembGen", TPtrToMembGen.toString());
+  EXPECT_EQ("LvalToMembGen", TLvalToMembGen.toString());
   EXPECT_EQ(
     "PtrTo{ClsInit|ClsCns|Frame|Stk|Gbl|Prop|Elem|SProp|MIS|MMisc|Other}Gen",
     (TPtrToGen - TPtrToRefGen).toString()
   );
+  EXPECT_EQ(
+    "LvalTo{ClsInit|ClsCns|Frame|Stk|Gbl|Prop|Elem|SProp|MIS|MMisc|Other}Gen",
+    (TLvalToGen - TLvalToRefGen).toString()
+  );
+  EXPECT_EQ("MemToInt", TMemToInt.toString());
+  EXPECT_EQ("PtrTo{Str|Int}|LvalTo{Str|Int}",
+            (TMemToInt | TMemToStr).toString());
 
   EXPECT_EQ("PtrTo{Int|StaticStr}|{Int|StaticStr}",
             (TInt | TPtrToStaticStr).toString());
+  EXPECT_EQ("LvalTo{Int|StaticStr}|{Int|StaticStr}",
+            (TInt | TLvalToStaticStr).toString());
   EXPECT_EQ("{Obj<=Iterator|Int}", (TInt | sub).toString());
 
   EXPECT_EQ("Cls<=Iterator",
@@ -151,6 +172,7 @@ TEST(Type, ToString) {
   EXPECT_EQ("InitGen", TInitGen.toString());
   EXPECT_EQ("PtrToInitGen", TInitGen.ptr(Ptr::Ptr).toString());
   EXPECT_EQ("PtrToFrameInitGen", TPtrToFrameInitGen.toString());
+  EXPECT_EQ("LvalToFrameInitGen", TLvalToFrameInitGen.toString());
 
   auto const ptrCns = Type::cns((TypedValue*)0xba5eba11, TPtrToMembInitNull);
   EXPECT_EQ("PtrToMembInitNull<TV: 0xba5eba11>", ptrCns.toString());
@@ -171,6 +193,8 @@ TEST(Type, Boxes) {
             (TCell - TUninit).box());
 
   EXPECT_EQ(TBottom, TBoxedCell & TPtrToGen);
+  EXPECT_EQ(TBottom, TBoxedCell & TLvalToGen);
+  EXPECT_EQ(TBottom, TBoxedCell & TMemToGen);
 
   EXPECT_EQ(TInt | TDbl, (TInt | TBoxedDbl).unbox());
 
@@ -278,6 +302,85 @@ TEST(Type, Ptr) {
   EXPECT_TRUE(ptrToSubObj.isSpecialized());
   EXPECT_EQ(TPtrToObj, ptrToSubObj.unspecialize());
   EXPECT_EQ(subClassSpec, ptrToSubObj.clsSpec());
+}
+
+TEST(Type, Lval) {
+  EXPECT_TRUE(TLvalToInt <= TLvalToGen);
+  EXPECT_TRUE(TLvalToBoxedInt <= TLvalToGen);
+  EXPECT_TRUE(TLvalToBoxedCell <= TLvalToGen);
+  EXPECT_TRUE(TLvalToInt <= TLvalToCell);
+
+  EXPECT_EQ(TInt, TLvalToInt.deref());
+  EXPECT_EQ(TBoxedCell, TLvalToBoxedCell.deref());
+
+  EXPECT_EQ(TLvalToInt, TLvalToInt - TInt);
+  EXPECT_EQ(TInt, (TLvalToInt | TInt) - TLvalToInt);
+  EXPECT_EQ(TLvalToUncountedInit, TLvalToUncounted - TLvalToUninit);
+
+  auto const t = TLvalToInt | TLvalToStr | TInt | TStr;
+  EXPECT_EQ(t, t - TLvalToInt);
+  EXPECT_EQ(t, t - TInt);
+  EXPECT_EQ(TLvalToInt | TLvalToStr, t - (TInt | TStr));
+  EXPECT_EQ(TInt | TStr, t - (TLvalToInt | TLvalToStr));
+  EXPECT_EQ(TLvalToFrameGen, TLvalToRFrameGen - TLvalToRefGen);
+
+  EXPECT_EQ(TBottom, TLvalToInt & TInt);
+}
+
+TEST(Type, Mem) {
+  EXPECT_TRUE(TMemToInt <= TMemToGen);
+  EXPECT_TRUE(TMemToBoxedInt <= TMemToGen);
+  EXPECT_TRUE(TMemToBoxedCell <= TMemToGen);
+  EXPECT_TRUE(TMemToInt <= TMemToCell);
+
+  EXPECT_EQ(TInt, TMemToInt.deref());
+  EXPECT_EQ(TBoxedCell, TMemToBoxedCell.deref());
+
+  EXPECT_EQ(TMemToInt, TMemToInt - TInt);
+  EXPECT_EQ(TInt, (TMemToInt | TInt) - TMemToInt);
+  EXPECT_EQ(TMemToUncountedInit, TMemToUncounted - TMemToUninit);
+
+  auto const t = TMemToInt | TMemToStr | TInt | TStr;
+  EXPECT_EQ(t, t - TMemToInt);
+  EXPECT_EQ(t, t - TInt);
+  EXPECT_EQ(TMemToInt | TMemToStr, t - (TInt | TStr));
+  EXPECT_EQ(TInt | TStr, t - (TMemToInt | TMemToStr));
+  EXPECT_EQ(TMemToFrameGen, TMemToRFrameGen - TMemToRefGen);
+
+  EXPECT_EQ(TBottom, TMemToInt & TInt);
+}
+
+TEST(Type, MemPtrLval) {
+  EXPECT_TRUE(TPtrToInt <= TMemToGen);
+  EXPECT_TRUE(TLvalToInt <= TMemToGen);
+  EXPECT_FALSE(TInt <= TMemToGen);
+
+  EXPECT_TRUE(TPtrToBoxedInt <= TMemToGen);
+  EXPECT_TRUE(TLvalToBoxedInt <= TMemToGen);
+  EXPECT_TRUE(TPtrToBoxedCell <= TMemToGen);
+  EXPECT_TRUE(TLvalToBoxedCell <= TMemToGen);
+  EXPECT_TRUE(TPtrToInt <= TMemToCell);
+  EXPECT_TRUE(TLvalToInt <= TMemToCell);
+
+  EXPECT_EQ(TBottom, TPtrToInt & TLvalToInt);
+  EXPECT_EQ(TBottom, TPtrToGen & TLvalToGen);
+  EXPECT_EQ(TPtrToInt, TPtrToInt & TMemToGen);
+
+  EXPECT_EQ(TPtrToInt, TMemToInt - TLvalToInt);
+  EXPECT_EQ(TLvalToInt, TMemToInt - TPtrToInt);
+
+  auto const t = TInt | TPtrToInt | TLvalToInt;
+  EXPECT_EQ(TInt, t - (TPtrToInt | TLvalToInt));
+  EXPECT_EQ(TPtrToInt, t - (TInt | TLvalToInt));
+  EXPECT_EQ(TLvalToInt, t - (TInt | TPtrToInt));
+  EXPECT_EQ(TPtrToInt | TLvalToInt, t - TInt);
+  EXPECT_EQ(TInt | TLvalToInt, t - TPtrToInt);
+  EXPECT_EQ(TInt | TPtrToInt, t - TLvalToInt);
+
+  EXPECT_EQ(t | TStr | TMemToStr, t | TStr);
+  EXPECT_EQ(t | TStr | TMemToStr, (t | TStr) - TLvalToInt);
+
+  EXPECT_EQ(TLvalToUncounted, TLvalToUncounted - TPtrToUninit);
 }
 
 TEST(Type, Subtypes) {
@@ -418,7 +521,11 @@ TEST(Type, Specialized) {
   auto const subCls = Type::SubCls(SystemLib::s_IteratorClass);
   EXPECT_EQ(TCls, TCls - subCls);
   EXPECT_EQ(subCls, (subCls | TPtrToInt) - TPtrToInt);
+  EXPECT_EQ(subCls, (subCls | TLvalToInt) - TLvalToInt);
+  EXPECT_EQ(subCls, (subCls | TMemToInt) - TMemToInt);
   EXPECT_EQ(TPtrToInt, (subCls | TPtrToInt) - subCls);
+  EXPECT_EQ(TLvalToInt, (subCls | TLvalToInt) - subCls);
+  EXPECT_EQ(TMemToInt, (subCls | TMemToInt) - subCls);
 }
 
 TEST(Type, SpecializedObjects) {

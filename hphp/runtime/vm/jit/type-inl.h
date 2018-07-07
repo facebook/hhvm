@@ -31,22 +31,35 @@ namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 // Predefined Types
 
-constexpr inline Type::Type(bits_t bits, Ptr kind)
+constexpr inline Type::Type(bits_t bits, Ptr ptr, Mem mem)
   : m_bits(bits)
-  , m_ptr(kind)
+  , m_ptr(ptr)
+  , m_mem(mem)
   , m_hasConstVal(false)
   , m_extra(0)
 {}
 
-#define IRT(name, ...) constexpr Type T##name{Type::k##name, Ptr::NotPtr};
-#define IRTP(name, ptr, bits) constexpr Type T##name{Type::bits, Ptr::ptr};
-IRT_PHP(IRT_BOXES_AND_PTRS)
-IRT_PHP_UNIONS(IRT_BOXES_AND_PTRS)
+#define IRT(name, ...) \
+  constexpr Type T##name{Type::k##name, Ptr::NotPtr, Mem::NotMem};
+#define IRTP(name, ptr, bits) \
+  constexpr Type T##name{Type::bits, Ptr::ptr, Mem::Ptr};
+#define IRTL(name, ptr, bits) \
+  constexpr Type T##name{Type::bits, Ptr::ptr, Mem::Lval};
+#define IRTM(name, ptr, bits) \
+  constexpr Type T##name{Type::bits, Ptr::ptr, Mem::Mem};
+#define IRTX(name, x, bits) \
+  constexpr Type T##name{Type::bits, Ptr::x, Mem::x};
+IRT_PHP(IRT_BOXES_PTRS_LVALS)
+IRT_PHP_UNIONS(IRT_BOXES_PTRS_LVALS)
 IRT_SPECIAL
 #undef IRT
 #undef IRTP
+#undef IRTL
+#undef IRTM
+#undef IRTX
 
-#define IRT(name, ...) constexpr Type T##name{Type::k##name, Ptr::Bottom};
+#define IRT(name, ...) \
+  constexpr Type T##name{Type::k##name, Ptr::Bottom, Mem::Bottom};
 IRT_RUNTIME
 #undef IRT
 
@@ -58,9 +71,15 @@ IRT_RUNTIME
 namespace TypeNames {
 #define IRT(name, ...) UNUSED constexpr Type name = T##name;
 #define IRTP(name, ...) IRT(name)
+#define IRTL(name, ...) IRT(name)
+#define IRTM(name, ...) IRT(name)
+#define IRTX(name, ...) IRT(name)
   IR_TYPES
 #undef IRT
 #undef IRTP
+#undef IRTL
+#undef IRTM
+#undef IRTX
 };
 
 namespace type_detail {
@@ -125,6 +144,7 @@ inline Type for_const(TCA)           { return TTCA; }
 inline Type::Type()
   : m_bits(kBottom)
   , m_ptr(Ptr::Bottom)
+  , m_mem(Mem::Bottom)
   , m_hasConstVal(false)
   , m_extra(0)
 {}
@@ -132,13 +152,18 @@ inline Type::Type()
 inline Type::Type(DataType outer, DataType inner)
   : m_bits(bitsFromDataType(outer, inner))
   , m_ptr(Ptr::NotPtr)
+  , m_mem(Mem::NotMem)
   , m_hasConstVal(false)
   , m_extra(0)
 {}
 
 inline size_t Type::hash() const {
   return hash_int64_pair(
-    hash_int64_pair(m_bits, static_cast<ptr_t>(m_ptr)) ^ m_hasConstVal,
+    hash_int64_pair(
+      m_bits,
+      ((static_cast<uint64_t>(m_ptr) << sizeof(m_mem) * CHAR_BIT) |
+       static_cast<uint64_t>(m_mem)) ^ m_hasConstVal
+    ),
     m_extra
   );
 }
@@ -149,6 +174,7 @@ inline size_t Type::hash() const {
 inline bool Type::operator==(Type rhs) const {
   return m_bits == rhs.m_bits &&
     m_ptr == rhs.m_ptr &&
+    m_mem == rhs.m_mem &&
     m_hasConstVal == rhs.m_hasConstVal &&
     m_extra == rhs.m_extra;
 }
@@ -311,7 +337,7 @@ inline Type Type::dropConstVal() const {
   if (*this <= TStaticArr) {
     return Type::StaticArray(arrVal()->kind());
   }
-  return Type(m_bits, ptrKind());
+  return Type(m_bits, ptrKind(), memKind());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -445,7 +471,7 @@ inline Type Type::ExactCls(const Class* cls) {
 }
 
 inline Type Type::unspecialize() const {
-  return Type(m_bits, ptrKind());
+  return Type(m_bits, ptrKind(), memKind());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -510,12 +536,12 @@ inline Type Type::box() const {
   assertx(*this <= TCell);
   // Boxing Uninit returns InitNull but that logic doesn't belong here.
   assertx(!maybe(TUninit) || *this == TCell);
-  return Type(m_bits << kBoxShift, ptrKind()).specialize(spec());
+  return Type(m_bits << kBoxShift, ptrKind(), memKind()).specialize(spec());
 }
 
 inline Type Type::inner() const {
   assertx(*this <= TBoxedCell);
-  return Type(m_bits >> kBoxShift, ptrKind(), m_extra);
+  return Type(m_bits >> kBoxShift, ptrKind(), memKind(), m_extra);
 }
 
 inline Type Type::unbox() const {
@@ -528,20 +554,19 @@ inline Type Type::ptr(Ptr kind) const {
   assertx(kind <= Ptr::Ptr);
   // Enforce a canonical representation for Bottom.
   if (m_bits == kBottom) return TBottom;
-  return Type(m_bits, kind).specialize(spec());
+  return Type(m_bits, kind, Mem::Ptr).specialize(spec());
 }
 
 inline Type Type::deref() const {
-  assertx(*this <= TPtrToGen);
+  assertx(*this <= TMemToGen);
   if (m_bits == kBottom) return TBottom;
-  return Type(m_bits,
-              Ptr::NotPtr,
-              isSpecialized() ? m_extra : 0);
+  auto const extra = isSpecialized() ? m_extra : 0;
+  return Type(m_bits, Ptr::NotPtr, Mem::NotMem, extra);
 }
 
 inline Type Type::derefIfPtr() const {
-  assertx(*this <= (TGen | TPtrToGen));
-  return *this <= TPtrToGen ? deref() : *this;
+  assertx(*this <= (TGen | TMemToGen));
+  return *this <= TMemToGen ? deref() : *this;
 }
 
 inline Type Type::strip() const {
@@ -552,12 +577,17 @@ inline Ptr Type::ptrKind() const {
   return m_ptr;
 }
 
+inline Mem Type::memKind() const {
+  return m_mem;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Private constructors.
 
-inline Type::Type(bits_t bits, Ptr kind, uintptr_t extra)
+inline Type::Type(bits_t bits, Ptr ptr, Mem mem, uintptr_t extra)
   : m_bits(bits)
-  , m_ptr(kind)
+  , m_ptr(ptr)
+  , m_mem(mem)
   , m_hasConstVal(false)
   , m_extra(extra)
 {
@@ -567,6 +597,7 @@ inline Type::Type(bits_t bits, Ptr kind, uintptr_t extra)
 inline Type::Type(Type t, ArraySpec arraySpec)
   : m_bits(t.m_bits)
   , m_ptr(t.m_ptr)
+  , m_mem(t.m_mem)
   , m_hasConstVal(false)
   , m_arrSpec(arraySpec)
 {
@@ -577,6 +608,7 @@ inline Type::Type(Type t, ArraySpec arraySpec)
 inline Type::Type(Type t, ClassSpec classSpec)
   : m_bits(t.m_bits)
   , m_ptr(t.m_ptr)
+  , m_mem(t.m_mem)
   , m_hasConstVal(false)
   , m_clsSpec(classSpec)
 {

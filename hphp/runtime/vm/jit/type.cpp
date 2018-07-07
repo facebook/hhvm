@@ -129,12 +129,19 @@ std::string Type::constValString() const {
   if (*this <= TPtrToGen) {
     return folly::sformat("TV: {}", m_ptrVal);
   }
+  if (*this <= TLvalToGen) {
+    return folly::sformat("Lval: {}", m_ptrVal);
+  }
+  if (*this <= TMemToGen) {
+    return folly::sformat("Mem: {}", m_ptrVal);
+  }
 
   always_assert_flog(
     false,
-    "Bad type in constValString(): {:#16x}:{}:{}:{:#16x}",
+    "Bad type in constValString(): {:#16x}:{}:{}:{}:{:#16x}",
     m_bits,
     static_cast<ptr_t>(m_ptr),
+    static_cast<ptr_t>(m_mem),
     m_hasConstVal,
     m_extra
   );
@@ -165,9 +172,15 @@ static std::string show(Ptr ptr) {
 static const jit::fast_map<Type, const char*> s_typeNames{
 #define IRT(x, ...) {T##x, #x},
 #define IRTP IRT
+#define IRTL IRT
+#define IRTM IRT
+#define IRTX IRT
   IR_TYPES
 #undef IRT
 #undef IRTP
+#undef IRTL
+#undef IRTM
+#undef IRTX
 };
 
 std::string Type::toString() const {
@@ -207,12 +220,24 @@ std::string Type::toString() const {
     return ret;
   }
 
+  if (t.maybe(TLvalToGen)) {
+    assertx(!t.m_hasConstVal);
+    auto ret = "LvalTo" +
+      show(t.ptrKind() & Ptr::Ptr) +
+      (t & TLvalToGen).deref().toString();
+
+    t -= TLvalToGen;
+    if (t != TBottom) ret += "|" + t.toString();
+    return ret;
+  }
+
   assertx(t.ptrKind() <= Ptr::NotPtr);
+  assertx(t.memKind() <= Mem::NotMem);
 
   std::vector<std::string> parts;
   if (isSpecialized()) {
     if (auto clsSpec = t.clsSpec()) {
-      auto const base = Type(m_bits & kClsSpecBits, t.ptrKind());
+      auto const base = Type{m_bits & kClsSpecBits, t.ptrKind(), t.memKind()};
       auto const exact = clsSpec.exact() ? "=" : "<=";
       auto const name = clsSpec.cls()->name()->data();
       auto const partStr = folly::to<std::string>(base.toString(), exact, name);
@@ -220,7 +245,12 @@ std::string Type::toString() const {
       parts.push_back(partStr);
       t -= TAnyObj;
     } else if (auto arrSpec = t.arrSpec()) {
-      auto str = Type(m_bits & kArrSpecBits, t.ptrKind()).toString();
+      auto str = Type{
+        m_bits & kArrSpecBits,
+        t.ptrKind(),
+        t.memKind()
+      }.toString();
+
       if (auto const kind = arrSpec.kind()) {
         str += "=";
         str += ArrayData::kindToString(*kind);
@@ -241,9 +271,15 @@ std::string Type::toString() const {
     std::vector<std::pair<Type, const char*>> types{
 #define IRT(x, ...) {T##x, #x},
 #define IRTP IRT
+#define IRTL IRT
+#define IRTM IRT
+#define IRTX IRT
       IR_TYPES
 #undef IRT
 #undef IRTP
+#undef IRTL
+#undef IRTM
+#undef IRTX
     };
     std::sort(
       types.begin(), types.end(),
@@ -299,6 +335,7 @@ void Type::serialize(ProfDataSerializer& ser) const {
 
   write_raw(ser, m_bits);
   write_raw(ser, m_ptr);
+  write_raw(ser, m_mem);
 
   Type t = *this;
   if (t.maybe(TNullptr)) t = t - TNullptr;
@@ -338,6 +375,7 @@ Type Type::deserialize(ProfDataDeserializer& ser) {
 
     read_raw(ser, t.m_bits);
     read_raw(ser, t.m_ptr);
+    read_raw(ser, t.m_mem);
     auto const key = read_raw<TypeKey>(ser);
     if (key == TypeKey::Const) {
       t.m_hasConstVal = true;
@@ -404,6 +442,13 @@ bool Type::checkValid() const {
                 m_bits, m_ptrVal, m_hasConstVal, m_extra);
   }
 
+  // m_ptr and m_mem should be Bottom iff we have no kGen bits.
+  assertx(((m_bits & kGen) == 0) == (m_ptr == Ptr::Bottom));
+  assertx(((m_bits & kGen) == 0) == (m_mem == Mem::Bottom));
+
+  // Ptr::NotPtr and Mem::NotMem should imply one another.
+  assertx((m_ptr == Ptr::NotPtr) == (m_mem == Mem::NotMem));
+
   return true;
 }
 
@@ -438,7 +483,7 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
 }
 
 DataType Type::toDataType() const {
-  assertx(!maybe(TPtrToGen) || m_bits == kBottom);
+  assertx(!maybe(TMemToGen) || m_bits == kBottom);
   assertx(isKnownDataType());
 
   // Order is important here: types must progress from more specific
@@ -498,7 +543,9 @@ Type Type::modified() const {
   return t;
 }
 
-// Return true if the array satisfies requirement on the ArraySpec.
+/*
+ * Return true if the array satisfies requirement on the ArraySpec.
+ */
 static bool arrayFitsSpec(const ArrayData* arr, const ArraySpec spec) {
   if (spec == ArraySpec::Top) return true;
 
@@ -551,19 +598,20 @@ bool Type::operator<=(Type rhs) const {
     return lhs.m_hasConstVal && lhs.m_extra == rhs.m_extra;
   }
 
-  // Make sure lhs's ptr kind is a subtype of rhs's.
-  if (!(lhs.ptrKind() <= rhs.ptrKind())) {
+  // Make sure lhs's ptr and mem kinds are subtypes of rhs's.
+  if (!(lhs.ptrKind() <= rhs.ptrKind()) ||
+      !(lhs.memKind() <= rhs.memKind())) {
     return false;
   }
 
-  // If rhs isn't specialized no further checking is needed.
+  // If `rhs' isn't specialized no further checking is needed.
   if (!rhs.isSpecialized()) {
     return true;
   }
 
   if (lhs.hasConstVal(TArr)) {
-    // Arrays can be specialized in different ways, here we check if the
-    // constant array fits the kind()/type() of the specialization of rhs, if
+    // Arrays can be specialized in different ways.  Here, we check if the
+    // constant array fits the kind()/type() of the specialization of `rhs', if
     // any.
     auto const lhs_arr = lhs.arrVal();
     auto const rhs_as = rhs.arrSpec();
@@ -588,9 +636,10 @@ Type Type::operator|(Type rhs) const {
 
   auto const bits = lhs.m_bits | rhs.m_bits;
   auto const ptr = lhs.ptrKind() | rhs.ptrKind();
+  auto const mem = lhs.memKind() | rhs.memKind();
   auto const spec = lhs.spec() | rhs.spec();
 
-  return Type{bits, ptr}.specialize(spec);
+  return Type{bits, ptr, mem}.specialize(spec);
 }
 
 Type Type::operator&(Type rhs) const {
@@ -604,23 +653,39 @@ Type Type::operator&(Type rhs) const {
 
   auto bits = lhs.m_bits & rhs.m_bits;
   auto ptr = lhs.ptrKind() & rhs.ptrKind();
+  auto mem = lhs.memKind() & rhs.memKind();
   auto arrSpec = lhs.arrSpec() & rhs.arrSpec();
   auto clsSpec = lhs.clsSpec() & rhs.clsSpec();
 
-  // Filter out bits and pieces that no longer exist due to other components
-  // going to Bottom, starting with bits.
-  if (ptr == Ptr::Bottom) bits &= ~kGen;
+  // Certain component sublattices of Type are dependent on one another.  For
+  // each set of such "interfering" components, if any component goes to
+  // Bottom, we have to Bottom out the other components in the set as well.
+
+  // Gen bits depend on both Ptr and Mem.
+  if (ptr == Ptr::Bottom || mem == Mem::Bottom) bits &= ~kGen;
+
+  // Arr/Cls bits and specs.
   if (arrSpec == ArraySpec::Bottom) bits &= ~kArrSpecBits;
   if (clsSpec == ClassSpec::Bottom) bits &= ~kClsSpecBits;
-
-  // ptr
-  if ((bits & kGen) == 0) ptr = Ptr::Bottom;
-
-  // specs
   if (!supports(bits, SpecKind::Array)) arrSpec = ArraySpec::Bottom;
   if (!supports(bits, SpecKind::Class)) clsSpec = ClassSpec::Bottom;
 
-  return Type{bits, ptr}.specialize({arrSpec, clsSpec});
+  // Ptr and Mem also depend on Gen bits. This must come after all possible
+  // fixups of bits.
+  if ((bits & kGen) == 0) {
+    ptr = Ptr::Bottom;
+    mem = Mem::Bottom;
+  } else {
+    if ((ptr & Ptr::Ptr) == Ptr::Bottom)    mem &= ~Mem::Mem;
+    if ((mem & Mem::Mem) == Mem::Bottom)    ptr &= ~Ptr::Ptr;
+    if ((ptr & Ptr::NotPtr) == Ptr::Bottom) mem &= ~Mem::NotMem;
+    if ((mem & Mem::NotMem) == Mem::Bottom) ptr &= ~Ptr::NotPtr;
+
+    static_assert(Ptr::Top == (Ptr::Ptr | Ptr::NotPtr), "");
+    static_assert(Mem::Top == (Mem::Mem | Mem::NotMem), "");
+  }
+
+  return Type{bits, ptr, mem}.specialize({arrSpec, clsSpec});
 }
 
 Type Type::operator-(Type rhs) const {
@@ -660,35 +725,60 @@ Type Type::operator-(Type rhs) const {
   // original value.
   auto bits = lhs.m_bits & ~rhs.m_bits;
   auto ptr = lhs.ptrKind() - rhs.ptrKind();
+  auto mem = lhs.memKind() - rhs.memKind();
   auto arrSpec = lhs.arrSpec() - rhs.arrSpec();
   auto clsSpec = lhs.clsSpec() - rhs.clsSpec();
 
   auto const have_gen_bits = (bits & kGen) != 0;
+
+  auto const have_ptr     = (ptr & Ptr::Ptr) != Ptr::Bottom;
+  auto const have_not_ptr = (ptr & Ptr::NotPtr) != Ptr::Bottom;
+  auto const have_any_ptr = have_ptr || have_not_ptr;
+  auto const have_mem     = (mem & Mem::Mem) != Mem::Bottom;
+  auto const have_not_mem = (mem & Mem::NotMem) != Mem::Bottom;
+  auto const have_any_mem = have_mem || have_not_mem;
+  auto const have_memness = have_any_ptr || have_any_mem;
+
   auto const have_arr_bits = supports(bits, SpecKind::Array);
   auto const have_cls_bits = supports(bits, SpecKind::Class);
-  auto const have_ptr      = ptr != Ptr::Bottom;
   auto const have_arr_spec = arrSpec != ArraySpec::Bottom;
   auto const have_cls_spec = clsSpec != ClassSpec::Bottom;
 
-  // ptr can only interact with clsSpec if lhs.m_bits has at least one kGen
-  // member of kClsSpecBits.
+  // ptr and mem can only interact with clsSpec if lhs.m_bits has at least one
+  // kGen member of kClsSpecBits.
   auto const have_ptr_cls = supports(lhs.m_bits & kGen, SpecKind::Class);
 
-  // bits
-  if (have_ptr) bits |= lhs.m_bits & kGen;
+  // bits, ptr, and mem
+  if (have_any_ptr) {
+    bits |= lhs.m_bits & kGen;
+    // The Not{Ptr,Mem} and {Ptr,Mem} components of Ptr and Mem don't interfere
+    // with one another, so keep them separate.
+    if (have_ptr)     mem |= (lhs.memKind() & Mem::Mem);
+    if (have_not_ptr) mem |= (lhs.memKind() & Mem::NotMem);
+  }
+  if (have_any_mem) {
+    bits |= lhs.m_bits & kGen;
+    if (have_mem)     ptr |= (lhs.ptrKind() & Ptr::Ptr);
+    if (have_not_mem) ptr |= (lhs.ptrKind() & Ptr::NotPtr);
+  }
   if (have_arr_spec) bits |= lhs.m_bits & kArrSpecBits;
   if (have_cls_spec) bits |= lhs.m_bits & kClsSpecBits;
 
-  // ptr
+  // ptr and mem
   if (have_gen_bits || have_arr_spec || (have_cls_spec && have_ptr_cls)) {
     ptr = lhs.ptrKind();
+    mem = lhs.memKind();
   }
 
   // specs
-  if (have_ptr || have_arr_bits) arrSpec = lhs.arrSpec();
-  if ((have_ptr && have_ptr_cls) || have_cls_bits) clsSpec = lhs.clsSpec();
+  if (have_memness || have_arr_bits) {
+    arrSpec = lhs.arrSpec();
+  }
+  if ((have_memness && have_ptr_cls) || have_cls_bits) {
+    clsSpec = lhs.clsSpec();
+  }
 
-  return Type{bits, ptr}.specialize({arrSpec, clsSpec});
+  return Type{bits, ptr, mem}.specialize({arrSpec, clsSpec});
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -506,9 +506,15 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 
 #define IRT(name, ...) UNUSED static constexpr Type name = T##name;
 #define IRTP(name, ...) IRT(name)
+#define IRTL(name, ...) IRT(name)
+#define IRTM(name, ...) IRT(name)
+#define IRTX(name, ...) IRT(name)
   IR_TYPES
 #undef IRT
 #undef IRTP
+#undef IRTL
+#undef IRTM
+#undef IRTX
 
 #define NA            return checkNoArgs();
 #define S(...)        {                                   \

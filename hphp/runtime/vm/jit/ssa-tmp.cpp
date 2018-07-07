@@ -46,8 +46,15 @@ int typeNeededWords(Type t) {
     return typeNeededWords(t - TNullptr);
   }
   if (t <= TCtx || t <= TPtrToGen) {
-    // Ctx and PtrTo* may be statically unknown but always need just 1 register.
+    // Ctx and PtrTo* may be statically unknown but always need just one
+    // register.
     return 1;
+  }
+  if (t <= TLvalToGen) {
+    // If tv_val<> is ever anything other than 1 or more normal pointers, this
+    // will need to change.
+    static_assert(sizeof(tv_lval) % 8 == 0, "");
+    return sizeof(tv_lval) / 8;
   }
   if (!t.isUnion()) {
     // Not a union type and not a special case: 1 register.

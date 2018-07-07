@@ -58,6 +58,7 @@ static void readString(FILE *f, string &out) {
 // Cached process statics
 std::string Process::HostName;
 std::string Process::CurrentWorkingDirectory;
+char** Process::Argv;
 
 void Process::InitProcessStatics() {
   HostName = GetHostName();
@@ -384,6 +385,14 @@ bool Process::OOMScoreAdj(int adj) {
   }
 #endif
   return false;
+}
+
+int Process::Relaunch() {
+  if (!Argv) {
+    errno = EINVAL;
+    return -1;
+  }
+  return execvp(Argv[0], Argv);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

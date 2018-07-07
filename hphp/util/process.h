@@ -85,7 +85,12 @@ struct Process {
   // Cached process statics
   static std::string HostName;
   static std::string CurrentWorkingDirectory;
+  static char** Argv;
+
   static void InitProcessStatics();
+  static void RecordArgv(char** argv) { // only call this in main()
+    Argv = argv;
+  }
 
   /**
    * Current executable's name.
@@ -207,6 +212,11 @@ struct Process {
    * current process.  Returns whether adjustment was successful.
    */
   static bool OOMScoreAdj(int adj = 1000);
+  /*
+   * Sometimes we want to relaunch under modified environment.  It won't return
+   * upon success, and returns -1 when an error occurs (similar to exec()).
+   */
+  static int Relaunch();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

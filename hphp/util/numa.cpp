@@ -96,7 +96,7 @@ void numa_local(void* start, size_t size) {
 }
 
 void numa_bind_to(void* start, size_t size, int node) {
-  if (!use_numa) return;
+  if (node < 0 || !use_numa) return;
   numa_tonode_memory(start, size, node);
 }
 

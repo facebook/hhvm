@@ -112,14 +112,16 @@ public:
    * Constructor.
    */
   JobQueue(int maxQueueCount, int dropCacheTimeout,
-           bool dropStack, int lifoSwitchThreshold=INT_MAX,
+           bool dropStack, int lifoSwitchThreshold = INT_MAX,
            int maxJobQueuingMs = -1, int numPriorities = 1,
            IHostHealthObserver* healthStatus = nullptr)
-      : SynchronizableMulti(maxQueueCount + 1), // reaper added
-        m_dropCacheTimeout(dropCacheTimeout), m_dropStack(dropStack),
-        m_lifoSwitchThreshold(lifoSwitchThreshold),
-        m_maxJobQueuingMs(maxJobQueuingMs),
-        m_jobReaperId(maxQueueCount), m_healthStatus(healthStatus) {
+      : SynchronizableMulti(maxQueueCount + 1) // reaper added
+      , m_dropCacheTimeout(dropCacheTimeout)
+      , m_dropStack(dropStack)
+      , m_lifoSwitchThreshold(lifoSwitchThreshold)
+      , m_maxJobQueuingMs(maxJobQueuingMs)
+      , m_jobReaperId(maxQueueCount)
+      , m_healthStatus(healthStatus) {
     assertx(maxQueueCount > 0);
     m_jobQueues.resize(numPriorities);
   }
@@ -489,17 +491,20 @@ struct JobQueueDispatcher : IHostHealthObserver {
                      int lifoSwitchThreshold = INT_MAX,
                      int maxJobQueuingMs = -1, int numPriorities = 1,
                      int hugeCount = 0,
-                     int initThreadCount = -1)
-    : m_startReaperThread(maxJobQueuingMs > 0)
-    , m_context(context)
-    , m_maxThreadCount(maxThreadCount)
-    , m_maxQueueCount(std::max(maxQueueCountConfig, maxThreadCount))
-    , m_currThreadCountLimit(initThreadCount)
-    , m_hugeThreadCount(hugeCount)
-    , m_queue(m_maxQueueCount, dropCacheTimeout, dropStack,
-              lifoSwitchThreshold, maxJobQueuingMs, numPriorities,
-              this)
-  {
+                     int initThreadCount = -1,
+                     unsigned hugeStackKb = 0,
+                     unsigned extraKb = 0)
+      : m_startReaperThread(maxJobQueuingMs > 0)
+      , m_context(context)
+      , m_maxThreadCount(maxThreadCount)
+      , m_maxQueueCount(std::max(maxQueueCountConfig, maxThreadCount))
+      , m_currThreadCountLimit(initThreadCount)
+      , m_hugeThreadCount(hugeCount)
+      , m_hugeStackKb(hugeStackKb)
+      , m_tlExtraKb(extraKb)
+      , m_queue(m_maxQueueCount, dropCacheTimeout, dropStack,
+                lifoSwitchThreshold, maxJobQueuingMs, numPriorities,
+                this) {
     assertx(maxThreadCount >= 1);
     assertx(m_maxQueueCount >= maxThreadCount);
     if (maxQueueCountConfig < maxThreadCount) {
@@ -520,8 +525,6 @@ struct JobQueueDispatcher : IHostHealthObserver {
       }
     }
   }
-
-  int32_t dispatcher_id = 0;
 
   ~JobQueueDispatcher() override {
     stop();
@@ -698,8 +701,9 @@ struct JobQueueDispatcher : IHostHealthObserver {
     return m_healthStatus;
   }
 
-  void setHugeThreadCount(int count) {
+  void setHugePageConfig(int count, unsigned stackKb, unsigned rangeKb = 0) {
     m_hugeThreadCount = count;
+    m_hugeStackKb = stackKb;
   }
 
   /*
@@ -752,8 +756,10 @@ private:
   std::atomic<int> m_maxThreadCount;
   const int m_maxQueueCount;    // not including the possible reaper
   int m_currThreadCountLimit;   // initial limit can be lower than max
+  std::atomic_int m_prevNode{-1};       // the NUMA node for last worker
   int m_hugeThreadCount{0};
-  int m_queueToWorkerRatio{1};
+  unsigned m_hugeStackKb;
+  unsigned m_tlExtraKb;
   JobQueue<typename TWorker::JobType,
            TWorker::Waitable,
            typename TWorker::DropCachePolicy> m_queue;
@@ -819,8 +825,13 @@ private:
       return;
     }
     auto worker = new TWorker();
-    bool huge = m_workers.size() < m_hugeThreadCount;
-    auto func = new AsyncFunc<TWorker>(worker, &TWorker::start, huge);
+    unsigned hugeStackKb =
+      m_workers.size() < m_hugeThreadCount ? m_hugeStackKb : 0;
+    auto func = new AsyncFunc<TWorker>(worker,
+                                       &TWorker::start,
+                                       next_numa_node(m_prevNode),
+                                       hugeStackKb,
+                                       m_tlExtraKb);
     int id = m_workers.size();
     m_workers.push_back(worker);
     m_funcs.insert(func);

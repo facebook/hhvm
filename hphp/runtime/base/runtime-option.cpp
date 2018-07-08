@@ -174,6 +174,7 @@ int RuntimeOption::ServerConnectionLimit = 0;
 int RuntimeOption::ServerThreadCount = 50;
 int RuntimeOption::ServerQueueCount = 50;
 int RuntimeOption::ServerHugeThreadCount = 0;
+int RuntimeOption::ServerHugeStackKb = 384;
 int RuntimeOption::ServerWarmupThrottleRequestCount = 0;
 int RuntimeOption::ServerThreadDropCacheTimeoutSeconds = 0;
 int RuntimeOption::ServerThreadJobLIFOSwitchThreshold = INT_MAX;
@@ -1575,8 +1576,7 @@ void RuntimeOption::Load(
                  ServerThreadCount);
     Config::Bind(ServerHugeThreadCount, ini, config,
                  "Server.HugeThreadCount", 0);
-    extern unsigned s_hugeStackSizeKb;
-    Config::Bind(s_hugeStackSizeKb, ini, config, "Server.HugeStackSizeKb", 384);
+    Config::Bind(ServerHugeStackKb, ini, config, "Server.HugeStackSizeKb", 384);
     Config::Bind(ServerWarmupThrottleRequestCount, ini, config,
                  "Server.WarmupThrottleRequestCount",
                  ServerWarmupThrottleRequestCount);

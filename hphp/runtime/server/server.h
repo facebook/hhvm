@@ -323,12 +323,7 @@ struct ServerOptions {
       m_port(port),
       m_maxThreads(maxThreads),
       m_initThreads(initThreads),
-      m_maxQueue(maxQueue == -1 ? maxThreads : maxQueue),
-      m_serverFD(-1),
-      m_sslFD(-1),
-      m_takeoverFilename(),
-      m_useFileSocket(false),
-      m_hugeThreads(0) {
+      m_maxQueue(maxQueue == -1 ? maxThreads : maxQueue) {
     assertx(m_maxThreads >= 0);
     if (m_initThreads < 0 || m_initThreads > m_maxThreads) {
       m_initThreads = m_maxThreads;
@@ -340,11 +335,13 @@ struct ServerOptions {
   int m_maxThreads;
   int m_initThreads;
   int m_maxQueue;
-  int m_serverFD;
-  int m_sslFD;
+  int m_serverFD{-1};
+  int m_sslFD{-1};
   std::string m_takeoverFilename;
-  bool m_useFileSocket;
-  int m_hugeThreads;
+  bool m_useFileSocket{false};
+  int m_hugeThreads{0};
+  unsigned m_hugeStackKb{0};
+  unsigned m_extraKb{0};
 };
 
 /**

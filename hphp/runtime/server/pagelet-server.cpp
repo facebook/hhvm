@@ -378,8 +378,9 @@ void PageletServer::Restart() {
          RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds,
          RuntimeOption::PageletServerThreadDropStack,
          nullptr);
-      s_dispatcher->setHugeThreadCount(
-        RuntimeOption::PageletServerHugeThreadCount);
+      s_dispatcher->setHugePageConfig(
+        RuntimeOption::PageletServerHugeThreadCount,
+        RuntimeOption::ServerHugeStackKb);
       auto monitor = getSingleton<HostHealthMonitor>();
       monitor->subscribe(s_dispatcher);
     }

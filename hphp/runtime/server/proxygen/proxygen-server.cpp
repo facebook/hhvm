@@ -131,7 +131,9 @@ ProxygenServer::ProxygenServer(
                    RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds,
                    kNumPriorities,
                    options.m_hugeThreads,
-                   options.m_initThreads) {
+                   options.m_initThreads,
+                   options.m_hugeStackKb,
+                   options.m_extraKb) {
   SocketAddress address;
   if (options.m_address.empty()) {
     address.setFromLocalPort(options.m_port);

@@ -113,6 +113,7 @@ HttpServer::HttpServer()
   options.m_sslFD = RuntimeOption::SSLPortFd;
   options.m_takeoverFilename = RuntimeOption::TakeoverFilename;
   options.m_hugeThreads = RuntimeOption::ServerHugeThreadCount;
+  options.m_hugeStackKb = RuntimeOption::ServerHugeStackKb;
   m_pageServer = serverFactory->createServer(options);
   m_pageServer->addTakeoverListener(this);
   m_pageServer->addServerEventListener(this);

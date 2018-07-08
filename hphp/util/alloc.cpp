@@ -94,7 +94,6 @@ bool purge_all(std::string* errStr) {
 __thread uintptr_t s_stackLimit;
 __thread size_t s_stackSize;
 const size_t s_pageSize =  sysconf(_SC_PAGESIZE);
-unsigned s_hugeStackSizeKb;
 
 static NEVER_INLINE uintptr_t get_stack_top() {
   using ActRec = char;
@@ -165,8 +164,7 @@ void flush_thread_stack() {
   uintptr_t top = get_stack_top() & ~(s_pageSize - 1);
   if (s_firstSlab.ptr) {
     uintptr_t boundary =               // between hugetlb pages and normal pages
-       reinterpret_cast<uintptr_t>(s_firstSlab.ptr) - s_hugeStackSizeKb * 1024;
-    assert(boundary % size2m == 0);
+       reinterpret_cast<uintptr_t>(s_firstSlab.ptr) & ~(size2m - 1);
     if (boundary < top) top = boundary;
   }
   // s_stackLimit is already aligned
@@ -298,7 +296,7 @@ void enable_numa(bool local) {
 }
 
 void set_numa_binding(int node) {
-  if (!use_numa) return;
+  if (node < 0 || !use_numa) return;
 
   s_numaNode = node;
   numa_sched_setaffinity(0, node_to_cpu_mask[node]);

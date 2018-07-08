@@ -2817,10 +2817,6 @@ OPTBLD_INLINE void iopSelect() {
   }
 }
 
-struct IterBreakElem {
-  Id type, iter;
-};
-
 OPTBLD_INLINE
 void iopIterBreak(PC& pc, PC targetpc, const IterTable& iterTab) {
   for (auto const& ent : iterTab) {

@@ -50,8 +50,13 @@ AsyncFuncImpl::AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func,
   , m_func(func)
   , m_node(numaNode)
   , m_hugeStackKb(hugeStackKb / 4 * 4)  // align to 4K page boundary
-  , m_tlExtraKb((tlExtraKb + 3) / 4 * 4)
-{}
+  , m_tlExtraKb((tlExtraKb + 3) / 4 * 4) {
+  if (m_tlExtraKb > (128 * 1024)) {
+    // Don't include a big additional per-thread storage to avoid running out of
+    // virtual memory.
+    throw std::runtime_error{"extra per-thread storage is too big"};
+  }
+}
 
 AsyncFuncImpl::~AsyncFuncImpl() {
   assert(m_stopped || m_threadId == 0);
@@ -117,6 +122,12 @@ void AsyncFuncImpl::start() {
       rlim.rlim_cur < kStackSizeMinimum) {
     rlim.rlim_cur = kStackSizeMinimum;
   }
+  // Limit the size of the stack to something reasonable, to avoid running out
+  // of virtual memory.
+  if (rlim.rlim_cur > kStackSizeMinimum * 16) {
+    rlim.rlim_cur = kStackSizeMinimum * 16;
+  }
+
   if (m_hugeStackKb * 1024 > rlim.rlim_cur) {
 #ifndef NDEBUG
     throw std::invalid_argument{"huge stack size exceeds rlimit"};
@@ -138,7 +149,7 @@ void AsyncFuncImpl::start() {
     //                                       | for the    | ---------------
     //                                       | thread     |             ^
     //                                       | (RDS/slab) |             |
-    //                pthreads  ---> +------------+ -----  huge page
+    //                        pthreads  ---> +------------+  huge page  |
     //                                       | TCB        |   ^         |
     //                                       | TLS        | hugeStack   |
     //                                       | Stack      |   v         v
@@ -151,11 +162,6 @@ void AsyncFuncImpl::start() {
     auto const stackPartialHugeKb = m_hugeStackKb % hugePageSizeKb;
     auto const nHugePages = m_hugeStackKb / hugePageSizeKb +
       (stackPartialHugeKb != 0) /* partly stack */;
-    auto const extraHugeKb =
-      size2m * (stackPartialHugeKb != 0) - stackPartialHugeKb;
-    if (m_tlExtraKb < extraHugeKb) {
-      m_tlExtraKb = extraHugeKb;
-    }
     m_stackAllocSize = rlim.rlim_cur + m_tlExtraKb * 1024;
     auto const hugeStartOffset = rlim.rlim_cur - m_hugeStackKb * 1024;
     m_threadStack = mmap_offset_aligned(m_stackAllocSize,
@@ -174,7 +180,7 @@ void AsyncFuncImpl::start() {
         }
       }
     }
-    if (extraHugeKb) {
+    if (m_tlExtraKb) {
       m_tlExtraBase = m_threadStack + rlim.rlim_cur;
     }
   }

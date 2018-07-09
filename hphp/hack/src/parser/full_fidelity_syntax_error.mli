@@ -205,6 +205,7 @@ val yield_outside_function : string
 val coloncolonclass_on_dynamic : string
 val enum_elem_name_is_class : string
 val expected_as_or_insteadof : string
+val expected_dotdotdot : string
 val not_allowed_in_write : string -> string
 val reassign_this : string
 val strict_types_first_statement : string

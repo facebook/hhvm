@@ -331,6 +331,8 @@ let coloncolonclass_on_dynamic =
   "Dynamic class names are not allowed in compile-time ::class fetch"
 let enum_elem_name_is_class =
   "Enum element cannot be named 'class'"
+let expected_dotdotdot =
+  "'...' is expected here."
 let not_allowed_in_write what =
   what ^ " is not allowed in write context"
 let reassign_this =

@@ -64,8 +64,10 @@ module WithStatementAndDeclAndTypeParser
   include Parser
   include ParserHelper.WithParser(Parser)
 
+  [@@@warning "-32"] (* next line warning 32 unused variable pp_binary_expression_prefix_kind *)
   type binary_expression_prefix_kind =
     | Prefix_byref_assignment | Prefix_assignment | Prefix_none [@@deriving show]
+  [@@@warning "+32"]
 
   let make_and_track_prefix_unary_expression parser operator kind operand =
     let (parser, node) = Make.prefix_unary_expression parser operator operand in

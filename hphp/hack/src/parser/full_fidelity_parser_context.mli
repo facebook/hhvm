@@ -8,7 +8,7 @@
  *)
 
 module WithToken : functor (Token : Lexable_token_sig.LexableToken_S) -> sig
-type t
+type t [@@deriving show]
 val empty : t
 val expects : t -> Full_fidelity_token_kind.t -> bool
 val expects_here : t -> Full_fidelity_token_kind.t -> bool

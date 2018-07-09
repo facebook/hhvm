@@ -27,7 +27,6 @@ module Scope = struct
   let to_string scope =
     let append elt acc = acc ^ "'" ^ (TokenKind.to_string elt) ^ "', " in
     fold append scope ">> "
-  let show scope = to_string scope
   let pp _formatter scope = to_string scope
 end
 

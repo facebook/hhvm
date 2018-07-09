@@ -13,6 +13,7 @@ module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
 
 module Lexer : sig
+  [@@@warning "-32"] (* following line warning 32 unused variable "show" *)
   type t = {
     text : SourceText.t;
     (* Both start and offset are absolute offsets in the text. *)
@@ -21,6 +22,7 @@ module Lexer : sig
     errors : SyntaxError.t list;
     hacksperimental : bool
   } [@@deriving show]
+  [@@@warning "+32"]
   val make : ?hacksperimental:bool -> SourceText.t -> t
   val make_at : ?hacksperimental:bool -> SourceText.t -> int -> t
   val start : t -> int
@@ -85,7 +87,9 @@ module WithToken(Token: Lexable_token_sig.LexableToken_S) = struct
 
 module Trivia = Token.Trivia
 
+[@@@warning "-32"] (* following line warning 32 unused variable "show_lexer" *)
 type lexer = Lexer.t [@@deriving show]
+[@@@warning "+32"]
 type t = lexer [@@deriving show]
 
 let make = Lexer.make

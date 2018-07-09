@@ -26,7 +26,7 @@ class Exception implements Throwable {
    */
   <<__Rx>>
   public function __construct($message = '', $code = 0,
-                              Throwable $previous = null) {
+                              <<__MaybeMutable>> ?Throwable $previous = null) {
 
     // Child classes may just override the protected property
     // without implementing a constructor or calling parent one.

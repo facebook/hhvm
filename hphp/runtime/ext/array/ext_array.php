@@ -1376,19 +1376,19 @@ namespace __SystemLib {
 
 namespace HH {
   <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
-  function dict(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed $arr): dict;
+  function dict(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> mixed $arr): dict;
 
   <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
-  function vec(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed $arr): vec;
+  function vec(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> mixed $arr): vec;
 
   <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
-  function keyset(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed $arr): keyset;
+  function keyset(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> mixed $arr): keyset;
 
   <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
-  function varray(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed $arr): varray;
+  function varray(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> mixed $arr): varray;
 
   <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
-  function darray(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed $arr): darray;
+  function darray(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> mixed $arr): darray;
 
   /**
    * array_key_cast() can be used to convert a given value to the equivalent

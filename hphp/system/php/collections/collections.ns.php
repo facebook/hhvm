@@ -4,9 +4,9 @@ namespace {
 
 <<__Sealed(\HH\Collection::class, ConstMap::class, ConstSet::class, ConstVector::class)>>
 interface ConstCollection extends HH\Rx\Countable {
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function isEmpty();
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function count();
   <<__Rx, __MutableReturn>>
   public function items();
@@ -39,7 +39,7 @@ namespace {
 
 <<__Sealed(ConstMapAccess::class, SetAccess::class, ConstSet::class)>>
 interface ConstSetAccess {
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function contains($m);
 }
 
@@ -51,11 +51,11 @@ interface SetAccess extends ConstSetAccess {
 
 <<__Sealed(ConstMapAccess::class, IndexAccess::class, ConstVector::class)>>
 interface ConstIndexAccess {
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function at($k);
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function get($k);
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function containsKey($k);
 }
 

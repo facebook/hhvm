@@ -68,7 +68,7 @@ abstract class BuiltinEnum<T> {
    */
   <<__Rx, __OnlyRxIfArgs>>
   final public static function assertAll(
-    <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<mixed> $values,
+    <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> Traversable<mixed> $values,
   ): Container<T>;
 }
 

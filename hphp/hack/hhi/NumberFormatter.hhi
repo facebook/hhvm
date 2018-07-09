@@ -85,27 +85,27 @@ class NumberFormatter {
 
   <<__Rx>>
   public function __construct(string $locale, int $style, string $pattern = "#,##0.###");
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function formatCurrency(float $value, string $currency) : string;
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
  public function format(mixed $value, int $type = NumberFormatter::TYPE_DEFAULT) : string;
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function getAttribute(int $attr) : int;
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function getErrorCode() : int;
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function getErrorMessage() : string;
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function getLocale(int $type = Locale::ACTUAL_LOCALE) : string;
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function getPattern() : string;
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function getSymbol(int $attr) : string;
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function getTextAttribute(int $attr) : string;
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function parseCurrency(string $value, string &$currency, int &$position = 0) : float;
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function parse(string $value, int $type = NumberFormatter::TYPE_DOUBLE, int &$position = 0) : mixed;
   <<__Rx, __Mutable>>
   public function setAttribute(int $attr, int $value) : bool;

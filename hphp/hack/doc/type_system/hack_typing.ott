@@ -93,7 +93,6 @@ id :: 'id_' ::= {{ com identifiers }}
 
 sfn {{ ocaml shape_field_name }} :: 'SF' ::= {{ com shape field names }}
   | string_literal  :: :: lit {{ com literal }}
-  | N '::' f :: :: class_const {{ com class constant }}
 
 sk {{ ocaml Shape_key }} :: 'SF' ::= {{ com shape keys }}
   | sfn        :: :: requiredkey {{ com required key }}
@@ -430,26 +429,13 @@ formula :: 'formula_' ::=
 defns
 TySys :: '' ::=
 
-
-defn
-  sk : t :: ::keytype :: 'keytype_'
-  {{ com Shape key [[sk]] has type [[t]] }}
-by
-
-{{ com \subsection{Key types} }}
-
------------------ :: string
-string_literal : string
-
------------------------- :: int
-C :: f : int
-
-{{ com \section*{Inheritance and implementation} }}
-
 defn
   t1 <:: t2 :: :: derives ::'derives_'
   {{ com [[t1]] extends or implements [[t2]] }}
 by
+
+{{ com \section*{Inheritance and implementation} }}
+{{ com \addcontentsline{toc}{section}{Inheritance and implementation} }}
 
 {{ com
 We define a separate relation (`derives from') for the transitive closure of extending a class or implementing an interface.

@@ -1236,13 +1236,13 @@ and eif env ~expected ~coalesce ~in_cond p c e1 e2 =
         let env, ty = TUtils.non_null env tyc in
         env, None, ty
     | Some e1 ->
-        let env, te1, ty1 = expr ?expected env e1 in
+        let env, te1, ty1 = expr ?expected ~allow_non_awaited_awaitable_in_rx:true env e1 in
         env, Some te1, ty1
     in
   let lenv1 = env.Env.lenv in
   let env = { env with Env.lenv = parent_lenv } in
   let env = condition env false c in
-  let env, te2, ty2 = expr ?expected env e2 in
+  let env, te2, ty2 = expr ?expected ~allow_non_awaited_awaitable_in_rx:true env e2 in
   let lenv2 = env.Env.lenv in
   let fake_members = LEnv.intersect_fake lenv1 lenv2 in
   (* we restore the locals to their parent state so as not to leak the

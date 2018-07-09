@@ -1524,7 +1524,10 @@ let is_good_scope_resolution_qualifier node =
 let new_variable_errors node =
   let rec helper node ~inside_scope_resolution =
     match syntax node with
+    | SimpleTypeSpecifier _ -> []
     | VariableExpression _ -> []
+    | GenericTypeSpecifier _ -> []
+    | PipeVariableExpression _ -> []
     | SubscriptExpression { subscript_index = { syntax = Missing; _ }; _ } ->
       [ make_error_from_node node SyntaxError.instanceof_missing_subscript_index ]
     | SubscriptExpression { subscript_receiver; _ } ->
@@ -1587,12 +1590,27 @@ let expression_errors env namespace_name node parents errors =
     ; _ } when not env.codegen ->
     let in_paren = text in_paren in
     make_error_from_node node (SyntaxError.instanceof_paren in_paren) :: errors
-  (* We parse the right hand side of `instanceof` as a generic expression, but
-     PHP (and therefore Hack) only allow a certain subset of expressions, so
-     we should verify here that the expression we parsed is in that subset.
+  (* We parse the right hand side of `new` and `instanceof` as a generic
+     expression, but PHP (and therefore Hack) only allow a certain subset of
+     expressions, so we should verify here that the expression we parsed is in
+     that subset.
      Refer: https://github.com/php/php-langspec/blob/master/spec/10-expressions.md#instanceof-operator*)
-  | InstanceofExpression { instanceof_right_operand; _ } ->
-    (class_type_designator_errors instanceof_right_operand) @ errors
+  | ConstructorCall ctr_call ->
+    let typechecker_errors =
+      if is_typechecker env then
+        if is_missing ctr_call.constructor_call_left_paren ||
+            is_missing ctr_call.constructor_call_right_paren
+        then
+          let node = ctr_call.constructor_call_type in
+          let constructor_name = text ctr_call.constructor_call_type in
+          [make_error_from_node node (SyntaxError.error2038 constructor_name)]
+        else []
+      else []
+    in
+    let designator_errors = class_type_designator_errors ctr_call.constructor_call_type in
+    typechecker_errors @ designator_errors @ errors
+  | InstanceofExpression { instanceof_right_operand = operand; _ } ->
+    (class_type_designator_errors operand) @ errors
   | LiteralExpression { literal_expression = {syntax = Token token; _} as e ; _}
     when env.is_hh_file && is_decimal_or_hexadecimal_literal token ->
     let text = text e in
@@ -1636,16 +1654,6 @@ let expression_errors env namespace_name node parents errors =
     in
     let errors =
       function_call_on_xhp_name_errors function_call_receiver errors in
-    errors
-  | ConstructorCall ctr_call when (is_typechecker env) ->
-  if is_missing ctr_call.constructor_call_left_paren ||
-      is_missing ctr_call.constructor_call_right_paren
-  then
-    let node = ctr_call.constructor_call_type in
-    let constructor_name = text ctr_call.constructor_call_type in
-    make_error_from_node node
-      (SyntaxError.error2038 constructor_name) :: errors
-  else
     errors
   | ListExpression { list_members; _ }
     when is_hhvm_compat env ->

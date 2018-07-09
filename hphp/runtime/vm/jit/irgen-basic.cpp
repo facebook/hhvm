@@ -79,14 +79,39 @@ void emitCGetL(IRGS& env, int32_t id) {
 void emitCGetQuietL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
-  auto const loc = ldLocInner(
+  pushIncRef(
     env,
-    id,
-    ldrefExit,
-    ldPMExit,
-    DataTypeBoxAndCountnessInit
+    [&] {
+      auto const loc = ldLocInner(
+        env,
+        id,
+        ldrefExit,
+        ldPMExit,
+        DataTypeBoxAndCountnessInit
+      );
+
+      if (loc->type() <= TUninit) {
+        return cns(env, TInitNull);
+      }
+
+      if (loc->type().maybe(TUninit)) {
+        return cond(
+          env,
+          [&] (Block* taken) {
+            gen(env, CheckInit, taken, loc);
+          },
+          [&] { // Next: local is InitCell.
+            return loc;
+          },
+          [&] { // Taken: local is Uninit
+            return cns(env, TInitNull);
+          }
+        );
+      }
+
+      return loc;
+    }()
   );
-  pushIncRef(env, loc);
 }
 
 void emitCUGetL(IRGS& env, int32_t id) {

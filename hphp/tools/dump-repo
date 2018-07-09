@@ -11,7 +11,7 @@ repo=$1
 pattern=$2
 
 if [[ -n $DUMP_HHAS ]] ; then
-    dump_what=-vEval.DumpHhas=true
+    dump_what=-vEval.DumpHhas=1
 else
     dump_what=-vEval.DumpBytecode=1
 fi

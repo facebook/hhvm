@@ -430,7 +430,7 @@ module ServerInitCommon = struct
    *    not their dependencies since their decl are unchanged
    **)
   let type_check_dirty genv env old_fast fast dirty_files similar_files t =
-    let start_time = Unix.gettimeofday () in
+    let start_t = Unix.gettimeofday () in
     let fast = get_dirty_fast old_fast fast dirty_files in
     let names = Relative_path.Map.fold fast ~f:begin fun _k v acc ->
       FileInfo.merge_names v acc
@@ -441,10 +441,12 @@ module ServerInitCommon = struct
     let to_recheck = Relative_path.Set.union to_recheck similar_files in
     let fast = extend_fast fast env.files_info to_recheck in
     let result = type_check genv env fast t in
-    HackEventLogger.type_check_dirty start_time
-      (Relative_path.Set.cardinal dirty_files);
-    Hh_logger.log "ServerInit type_check_dirty count: %d"
-      (Relative_path.Set.cardinal dirty_files);
+    HackEventLogger.type_check_dirty ~start_t
+      ~dirty_count:(Relative_path.Set.cardinal dirty_files)
+      ~recheck_count:(Relative_path.Set.cardinal to_recheck);
+    Hh_logger.log "ServerInit type_check_dirty count: %d. recheck count: %d"
+      (Relative_path.Set.cardinal dirty_files)
+      (Relative_path.Set.cardinal to_recheck);
     result
 
   let get_build_targets env =

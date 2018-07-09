@@ -137,6 +137,23 @@ Array HHVM_FUNCTION(backtrace,
 
 static AsioExtension s_asio_extension;
 
+void AsioExtension::moduleInit() {
+  initFunctions();
+
+  initWaitHandle();
+  initResumableWaitHandle();
+  initAsyncGenerator();
+  initAwaitAllWaitHandle();
+  initConditionWaitHandle();
+  initSleepWaitHandle();
+  initRescheduleWaitHandle();
+  initExternalThreadEventWaitHandle();
+
+  loadSystemlib();
+
+  finishClasses();
+}
+
 void AsioExtension::initFunctions() {
   HHVM_FALIAS(
     HH\\asio_get_current_context_idx,

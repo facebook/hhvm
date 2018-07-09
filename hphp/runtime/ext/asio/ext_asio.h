@@ -24,23 +24,7 @@ namespace HPHP {
 
 struct AsioExtension final : Extension {
   AsioExtension() : Extension("asio", "0.1") {}
-
-  void moduleInit() override {
-    initFunctions();
-
-    initWaitHandle();
-    initResumableWaitHandle();
-    initAsyncGenerator();
-    initAwaitAllWaitHandle();
-    initConditionWaitHandle();
-    initSleepWaitHandle();
-    initRescheduleWaitHandle();
-    initExternalThreadEventWaitHandle();
-
-    loadSystemlib();
-
-    finishClasses();
-  }
+  void moduleInit() override;
 
 private:
   void initFunctions();

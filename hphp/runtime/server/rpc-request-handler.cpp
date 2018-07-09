@@ -34,7 +34,6 @@
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/server/source-root-info.h"
-#include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/treadmill.h"
 
@@ -309,10 +308,6 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     m_reset = true;
   }
   int output = transport->getIntParam("output", requestMethod);
-
-  // We don't debug RPC requests, so we need to detach the installed debugger
-  // hook (only if there is one).
-  DEBUGGER_ATTACHED_ONLY(DebuggerHook::detach());
 
   int code;
   if (!error) {

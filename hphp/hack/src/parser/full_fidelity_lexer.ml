@@ -42,8 +42,9 @@ end = struct
    * amount of null bytes, and then the rest of the source text *)
   type t = {
     text : SourceText.t;
-    start : int;  (* Both start and offset are absolute offsets in the text. *)
-    offset : int;
+    (* Both start and offset are absolute offsets in the text. *)
+    start : int; (* set once when creating the lexer. *)
+    offset : int; (* the thing that is incremented when we advance the lexer *)
     errors : SyntaxError.t list;
     hacksperimental : bool (* write-once: record updates should not update this field *)
   } [@@deriving show]
@@ -135,9 +136,6 @@ let width lexer =
 
 let current_text lexer =
   SourceText.sub (source lexer) (start lexer) (width lexer)
-
-let current_text_at lexer length relative_start =
-  SourceText.sub (source lexer) ((start lexer) + relative_start) length
 
 let at_end lexer =
   (offset lexer) >= SourceText.length (source lexer)

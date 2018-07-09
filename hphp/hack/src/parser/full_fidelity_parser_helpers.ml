@@ -157,11 +157,7 @@ module WithParser(Parser : Parser_S) = struct
     with_errors parser (error :: errors)
 
   let current_token_text parser =
-    let token = peek_token parser in
-    let token_width = Token.width token in
-    let token_str = Lexer.current_text_at
-      (lexer parser) token_width 0 in
-    token_str
+    Token.text @@ peek_token parser
 
   let skip_and_log_unexpected_token ?(generate_error=true) parser =
     let parser =

@@ -20,7 +20,6 @@ module WithToken : functor (Token : Lexable_token_sig.LexableToken_S) -> sig
   val start_offset : t -> int
   val end_offset : t -> int
   val hacksperimental : t -> bool
-  val current_text_at : t -> int -> int -> string
   val next_token : t -> t * Token.t
   val next_token_no_trailing : t -> t * Token.t
   val next_token_in_string : t -> string_literal_kind -> t * Token.t

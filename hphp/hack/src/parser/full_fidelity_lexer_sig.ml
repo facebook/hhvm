@@ -17,7 +17,6 @@ module WithToken(Token : Lexable_token_sig.LexableToken_S) = struct
     val source : t -> Full_fidelity_source_text.t
     val start_offset : t -> int
     val end_offset : t -> int
-    val current_text_at : t -> int -> int -> string
     val next_token : t -> t * Token.t
     val next_token_no_trailing : t -> t * Token.t
     val next_token_as_name : t -> t * Token.t

@@ -69,6 +69,9 @@ let has_trivia_kind token kind =
 let leading_start_offset _ =
   0 (* Not available *)
 
+let text _ =
+  "" (* Not available *)
+
 let source_text _ =
   Full_fidelity_source_text.empty (* Not available *)
 

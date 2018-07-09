@@ -21,6 +21,7 @@ module type LexableToken_S = sig
     t
   val kind: t -> Full_fidelity_token_kind.t
   val leading_start_offset: t -> int
+  val text: t -> string
   val source_text: t -> Full_fidelity_source_text.t
   val width: t -> int
   val trailing_width: t -> int

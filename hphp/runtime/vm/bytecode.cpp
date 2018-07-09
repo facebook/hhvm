@@ -4193,7 +4193,8 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
   case IsTypeOp::Int:    return is_int(tvAsCVarRef(val));
   case IsTypeOp::Dbl:    return is_double(tvAsCVarRef(val));
   case IsTypeOp::Arr:
-    if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices &&
+        !vmfp()->m_func->isBuiltin())) {
       if (isArrayType(val->m_type)) {
         if (val->m_data.parr->isVArray()) {
           raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VARR_IS_ARR);

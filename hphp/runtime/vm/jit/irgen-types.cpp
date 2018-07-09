@@ -558,7 +558,8 @@ SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
 }
 
 SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
-  if (!RuntimeOption::EvalHackArrCompatIsArrayNotices) {
+  if (!RuntimeOption::EvalHackArrCompatIsArrayNotices ||
+      curFunc(env)->isBuiltin()) {
     return gen(env, IsType, TArr, src);
   }
 

@@ -518,3 +518,6 @@ let non_re_prefix = "Only `re`-prefixed strings allowed."
 
 let collection_intrinsic_generic =
   "Cannot initialize collection builtins with type parameters"
+
+let invalid_hack_mode =
+  "Incorrect comment; possible values include strict, decl, partial, only-headers, or empty"

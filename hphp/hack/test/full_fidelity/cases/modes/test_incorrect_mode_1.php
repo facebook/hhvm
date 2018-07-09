@@ -1,0 +1,1 @@
+<?hh // stric strict

@@ -39,6 +39,12 @@ type mode =
   | Mpartial (* Don't fail if you see a function/class you don't know *)
 [@@deriving show]
 
+let parse_mode = function
+  | "strict" -> Some Mstrict
+  | "decl" | "only-headers" -> Some Mdecl
+  | "" | "partial" -> Some Mpartial
+  | _ -> None
+
 let string_of_mode = function
   | Mphp     -> "php"
   | Mdecl    -> "decl"

@@ -41,12 +41,13 @@ type t = {
   state : SCI.t;
 } [@@deriving show]
 
-let strip_comment_start s =
+let parse_mode_comment s =
+  let s = String.trim s in
   let len = String.length s in
   if len >= 2 && (String.get s 0) = '/' && (String.get s 1) = '/' then
-    String.sub s 2 (len - 2)
+    String.trim @@ String.sub s 2 (len - 2)
   else
-    s
+    ""
 
 let first_section script_declarations =
   match syntax script_declarations with
@@ -80,9 +81,7 @@ let analyze_header text script =
       let mode = SourceText.sub text (prefix_width + text_width +
         ltq_width + name_leading + name_width) name_trailing
       in
-      let mode = String.trim mode in
-      let mode = strip_comment_start mode in
-      let mode = String.trim mode in
+      let mode = parse_mode_comment mode in
       language, mode
     end
   | _ -> "php", ""

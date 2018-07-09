@@ -2804,6 +2804,15 @@ let get_namespace_name parents current_namespace_name =
     else combine_names current_namespace_name (text ns)
   | _ -> current_namespace_name
 
+let is_invalid_hack_mode env errors =
+  let mode = FileInfo.parse_mode @@ SyntaxTree.mode env.syntax_tree in
+  if Option.is_none mode then
+    let root = SyntaxTree.root env.syntax_tree in
+    let e = make_error_from_node root SyntaxError.invalid_hack_mode in
+    e::errors
+  else
+    errors
+
 let find_syntax_errors env =
   let rec folder acc node parents =
     let { errors
@@ -2812,7 +2821,6 @@ let find_syntax_errors env =
         ; namespace_name
         ; trait_require_clauses
         } = acc in
-
     let names, errors =
       parameter_errors env node parents namespace_name names errors in
     let trait_require_clauses, names, errors =
@@ -2987,8 +2995,12 @@ let find_syntax_errors env =
           namespace_name trait_require_clauses
       in
       fold_child_nodes folder node parents acc in
+  let errors =
+    if is_typechecker env then is_invalid_hack_mode env []
+    else []
+  in
   let acc = fold_child_nodes folder (SyntaxTree.root env.syntax_tree) []
-    { errors = []
+    { errors
     ; namespace_type = Unspecified
     ; names = empty_names
     ; namespace_name = global_namespace_name

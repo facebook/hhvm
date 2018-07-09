@@ -37,6 +37,7 @@ type mode =
   | Mpartial (* Don't fail if you see a function/class you don't know *)
 [@@deriving show]
 
+val parse_mode : string -> mode option
 val string_of_mode : mode -> string
 
 (*****************************************************************************)

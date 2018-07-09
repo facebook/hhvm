@@ -34,7 +34,7 @@ gen="generated"
 for FILE in tuple/tests/*.php; do
   NAME=$(basename "$FILE")
   DST_FILE="$SUITE/tests/$NAME"
-  sed "s/<?\(hh\|php\)/<?\1 \/\/ @$gen by make_suite.sh/" $FILE > $DST_FILE
+  sed "s/<?\(hh\|php\)/<?\1 \/* @$gen by make_suite.sh *\//" $FILE > $DST_FILE
   link_expect "$FILE" "$NAME" "expect"
   link_expect "$FILE" "$NAME" "expectf"
   link_expect "$FILE" "$NAME" "expectregex"

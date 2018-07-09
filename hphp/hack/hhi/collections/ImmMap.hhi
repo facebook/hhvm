@@ -49,7 +49,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *             (e.g., `array`). If `null`, then an empty `ImmMap` is created.
    */
   <<__Rx, __OnlyRxIfArgs>>
-  public function __construct(<<__OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<Tk, Tv> $it);
+  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<Tk, Tv> $it);
 
   /**
    * Returns an `array` containing the key/value pairs from the current
@@ -58,7 +58,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - an `array` containing the key and value pairs from the current
    *           `ImmMap`.
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   /* HH_IGNORE_ERROR[2082] T30260145 */
   public function toArray(): array<Tk, Tv>;
 
@@ -68,7 +68,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - an integer-indexed `array` containing the values from the
    *           current `ImmMap`.
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function toValuesArray(): varray<Tv>;
 
   /**
@@ -77,7 +77,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - an integer-indexed `array` where the values are the keys from
    *           the current `ImmMap`.
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function toKeysArray(): varray<Tk>;
 
   /**
@@ -85,7 +85,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *
    * @return - a `Vector` that contains the values of the current `ImmMap`.
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
@@ -97,7 +97,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *
    * @return - an `ImmVector` that contains the values of the current `ImmMap`.
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function toImmVector(): ImmVector<Tv>;
 
   /**
@@ -105,7 +105,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *
    * @return - a mutable `Map` that is a copy of the current `ImmMap`.
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
@@ -116,7 +116,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *
    * @return - an `ImmMap` that is a copy of the current `ImmMap`.
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function toImmMap(): ImmMap<Tk, Tv>;
 
   /**
@@ -124,7 +124,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *
    * @return - a `Set` with the current values of the current `ImmMap`.
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
@@ -136,7 +136,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *
    * @return - an `ImmSet` with the current values of the current `ImmMap`.
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function toImmSet(): ImmSet<Tv>;
 
   /**
@@ -146,7 +146,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *
    * @return - an `ImmMap` representing a copy of the current `ImmMap`.
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function immutable(): ImmMap<Tk, Tv>;
 
   /**
@@ -162,7 +162,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function lazy(): HH\Rx\KeyedIterable<Tk, Tv>;
 
   /**
@@ -172,7 +172,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *
    * @return - an ImmVector containing the values of the current `ImmMap`.
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function values(): ImmVector<Tv>;
 
   /**
@@ -181,7 +181,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - an ImmVector containing, as values, the keys of the current
    *           `ImmMap`.
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function keys(): ImmVector<Tk>;
 
   /**
@@ -202,7 +202,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public function map<Tu>(<<__OnlyRxIfRxFunc>>(function(Tv): Tu) $callback): ImmMap<Tk, Tu>;
 
   /**
@@ -222,7 +222,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - an `ImmMap` containing the values after a user-specified
    *           operation on the current `ImmMap`'s keys and values is applied.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(Tk, Tv): Tu) $callback):
     ImmMap<Tk, Tu>;
 
@@ -244,7 +244,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public function filter(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $callback): ImmMap<Tk, Tv>;
 
   /**
@@ -266,7 +266,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *           `ImmMap`.
    *
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(Tk, Tv): bool) $callback):
     ImmMap<Tk, Tv>;
 
@@ -288,8 +288,8 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - The `ImmMap` that combines the values of the current `ImmMap`
    *           with the provided `Traversable`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
-  public function zip<Tu>(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     ImmMap<Tk, Pair<Tv, Tu>>;
 
   /**
@@ -307,7 +307,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - An `ImmMap` that is a proper subset of the current `ImmMap` up
    *           to `n` elements.
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function take(int $n): ImmMap<Tk, Tv>;
 
   /**
@@ -323,7 +323,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - An `ImmMap` that is a proper subset of the current `ImmMap` up
    *           until when the callback returns `false`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public function takeWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): ImmMap<Tk, Tv>;
 
   /**
@@ -341,7 +341,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - An `ImmMap` that is a proper subset of the current `ImmMap`
    *           containing values after the specified `n`-th element.
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function skip(int $n): ImmMap<Tk, Tv>;
 
   /**
@@ -358,7 +358,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - An `ImmMap` that is a proper subset of the current `ImmMap`
    *           starting after the callback returns `true`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public function skipWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): ImmMap<Tk, Tv>;
 
   /**
@@ -380,7 +380,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *           starting at `$start` up to but not including the element
    *           `$start + $len`.
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function slice(int $start, int $len): ImmMap<Tk, Tv>;
 
   /**
@@ -396,8 +396,8 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
-  public function concat<Tu super Tv>(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function concat<Tu super Tv>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     ImmVector<Tu>;
 
   /**
@@ -406,7 +406,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - The first value in the current `ImmMap`, or `null` if the current
    *           `ImmMap` is empty.
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function firstValue(): ?Tv;
 
   /**
@@ -415,7 +415,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - The first key in the current `ImmMap`, or `null` if the current
    *           `ImmMap` is empty.
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function firstKey(): ?Tk;
 
   /**
@@ -424,7 +424,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - The last value in the current `ImmMap`, or `null` if the current
    *           `ImmMap` is empty.
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function lastValue(): ?Tv;
 
   /**
@@ -433,7 +433,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - The last key in the current `ImmMap`, or `null` if the current
    *           `ImmMap` is empty.
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function lastKey(): ?Tk;
 
   /**
@@ -441,7 +441,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *
    * @return - `true` if the current `ImmMap` is empty; `false` otherwise.
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function isEmpty(): bool;
 
   /**
@@ -449,7 +449,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *
    * @return - The number of elements in current `ImmMap`.
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function count(): int;
 
   /**
@@ -465,7 +465,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - The value at the specified key; or an exception if the key does
    *           not exist.
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function at(Tk $k): Tv;
 
   /**
@@ -479,7 +479,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - The value at the specified key; or `null` if the key does not
    *           exist.
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function get(Tk $k): ?Tv;
 
   /**
@@ -494,7 +494,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function contains<Tu super Tk>(Tu $k): bool;
 
   /**
@@ -509,7 +509,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function containsKey<Tu super Tk>(Tu $k): bool;
 
   /**
@@ -521,9 +521,9 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - An `ImmMap` containing the keys (and associated values) of the
    *           current `ImmMap` that are not in the `KeyedTraversable`.
    */
-  <<__Rx, __OnlyRxIfArgs>>
+  <<__Rx, __OnlyRxIfArgs, __MaybeMutable>>
   public function differenceByKey<Tu super Tk, Tw>(
-    <<__OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> KeyedTraversable<Tu, Tw> $traversable
+    <<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> KeyedTraversable<Tu, Tw> $traversable
   ): ImmMap<Tk, Tv>;
 
   /**
@@ -532,7 +532,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - A `KeyedIterator` that allows you to traverse the current
    *           `ImmMap`.
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function getIterator(): HH\Rx\KeyedIterator<Tk, Tv>;
 
   /**
@@ -549,8 +549,8 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - An `ImmMap` with the key/value pairs from the `Traversable`; or
    *           an empty `ImmMap` if the `Traversable` is `null`.
    */
-  <<__Rx, __OnlyRxIfArgs>>
-  public static function fromItems(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Pair<Tk, Tv>> $items):
+  <<__Rx, __OnlyRxIfArgs, __MaybeMutable>>
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Pair<Tk, Tv>> $items):
     ImmMap<Tk, Tv>;
 
   /**
@@ -558,7 +558,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *
    * @return - The `string` `"ImmMap"`.
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function __toString(): string;
 
   /**
@@ -569,11 +569,11 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    *
    * @return - The `Iterable` view of the current `ImmMap`.
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function items(): HH\Rx\Iterable<Pair<Tk, Tv>>;
 
-  <<__Rx>> /* HH_FIXME[0002] */
+  <<__Rx, __MaybeMutable>> /* HH_FIXME[0002] */
   public function toVArray(): varray<Tv>;
-  <<__Rx>> /* HH_FIXME[0001] */
+  <<__Rx, __MaybeMutable>> /* HH_FIXME[0001] */
   public function toDArray(): darray<Tk, Tv>;
 }

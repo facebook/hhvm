@@ -13,19 +13,19 @@ final class SetIterator implements HH\Rx\Iterator {
   /* Returns the current value that the iterator points to.
    * @return mixed
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function current(): mixed;
 
   /* @return mixed
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function key(): mixed;
 
   /* Returns true if the iterator points to a valid value, returns false
    * otherwise.
    * @return bool
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function valid(): bool;
 
   /* Advance this iterator forward one position.
@@ -50,24 +50,24 @@ final class Set implements \MutableSet {
    * @param mixed $iterable
    */
   <<__Native, __Rx, __OnlyRxIfArgs>>
-  public function __construct(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable = null): void;
+  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable = null): void;
 
   /* Returns true if the Set is empty, false otherwise.
    * @return bool
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function isEmpty(): bool { return !$this->count(); }
 
   /* Returns the number of values in the Set.
    * @return int
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function count(): int;
 
   /* Returns an Iterable that produces the values from this Set.
    * @return object
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function items(): \LazyIterableView {
     return new \LazyIterableView($this);
   }
@@ -76,19 +76,19 @@ final class Set implements \MutableSet {
   /* Returns a Vector built from the keys of this Set.
    * @return object
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function keys() { return $this->values(); }
 
   /* Returns a Vector built from the values of this Set.
    * @return object
    */
-  <<__Native, __Rx, __MutableReturn>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function values(): object;
 
   /* Returns a lazy iterable view of this Set.
    * @return object
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function lazy(): \LazyKeyedIterableView {
     return new \LazyKeyedIterableView($this);
   }
@@ -104,7 +104,7 @@ final class Set implements \MutableSet {
    * @param mixed $val
    * @return bool
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function contains(mixed $val): bool;
 
   /* Removes the specified value from this Set.
@@ -126,7 +126,7 @@ final class Set implements \MutableSet {
    * @return object
    */
   <<__Native, __Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
-  public function addAll(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Adds the keys of the specified KeyedContainer to this Set.
    * @param mixed $container
@@ -150,43 +150,43 @@ final class Set implements \MutableSet {
    * keys.
    * @return array
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toArray(): array;
 
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toVArray(): varray;
 
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toDArray(): darray;
 
   /* Returns a Vector built from the values of this Set.
    * @return object
    */
-  <<__Native, __Rx, __MutableReturn>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function toVector(): object;
 
   /* Returns a ImmVector built from the values of this Set.
    * @return object
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toImmVector(): object;
 
   /* Returns a Map built from the keys and values of this Set.
    * @return object
    */
-  <<__Native, __Rx, __MutableReturn>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function toMap(): object;
 
   /* Returns a ImmMap built from the keys and values of this Set.
    * @return object
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toImmMap(): object;
 
   /* Returns a copy of this Set.
    * @return object
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function toSet(): this {
     return clone $this;
   }
@@ -194,31 +194,31 @@ final class Set implements \MutableSet {
   /* Returns a ImmSet built from the values of this Set.
    * @return object
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toImmSet(): object;
 
   /* Returns an immutable version of this collection.
    * @return object
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function immutable() { return $this->toImmSet(); }
 
   /* Returns an array built from the values from this Set.
    * @return array
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toKeysArray(): array;
 
   /* Returns an array built from the values from this Set.
    * @return array
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toValuesArray(): array;
 
   /* Returns an iterator that points to beginning of this Set.
    * @return object
    */
-  <<__Native, __Rx, __MutableReturn>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function getIterator(): object;
 
   /* Returns a Set of the values produced by applying the specified callback on
@@ -226,7 +226,7 @@ final class Set implements \MutableSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public function map(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a Set of the values produced by applying the specified callback on
@@ -234,7 +234,7 @@ final class Set implements \MutableSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public function mapWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a Set of all the values from this Set for which the specified
@@ -242,7 +242,7 @@ final class Set implements \MutableSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public function filter(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a Set of all the values from this Set for which the specified
@@ -250,7 +250,7 @@ final class Set implements \MutableSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public function filterWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Ensures that this Set contains only values for which the specified callback
@@ -273,14 +273,14 @@ final class Set implements \MutableSet {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
-  public function zip(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a Set containing the first n values of this Set.
    * @param mixed $n
    * @return object
    */
-  <<__Native, __Rx, __MutableReturn>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function take(mixed $n): object;
 
   /* Returns a Set containing the values of this Set up to but not including the
@@ -288,14 +288,14 @@ final class Set implements \MutableSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public function takeWhile(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a Set containing all values except the first n of this Set.
    * @param mixed $n
    * @return object
    */
-  <<__Native, __Rx, __MutableReturn>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function skip(mixed $n): object;
 
   /* Returns a Set containing all the values of this Set excluding the first
@@ -303,7 +303,7 @@ final class Set implements \MutableSet {
    * @param mixed $fn
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public function skipWhile(<<__OnlyRxIfRxFunc>> mixed $fn): object;
 
   /* Returns a Set containing the specified range of values from this Set. The
@@ -313,7 +313,7 @@ final class Set implements \MutableSet {
    * @param mixed $len
    * @return object
    */
-  <<__Native, __Rx, __MutableReturn>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function slice(mixed $start,
                         mixed $len): object;
 
@@ -322,19 +322,19 @@ final class Set implements \MutableSet {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
-  public function concat(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns the first value from this Set, or null if this Set is empty.
    * @return mixed
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function firstValue(): mixed;
 
   /* Returns the first key from this Set, or null if this Vector is empty.
    * @return mixed
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function firstKey() {
     return $this->firstValue();
   }
@@ -342,13 +342,13 @@ final class Set implements \MutableSet {
   /* Returns the last value from this Set, or null if this Set is empty.
    * @return mixed
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function lastValue(): mixed;
 
   /* Returns the last key from this Set, or null if this Set is empty.
    * @return mixed
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function lastKey() {
     return $this->lastValue();
   }
@@ -357,7 +357,7 @@ final class Set implements \MutableSet {
    * @return object
    */
   <<__Native, __Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
-  public function removeAll(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public function removeAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* @param mixed $iterable
    * @return object
@@ -369,7 +369,7 @@ final class Set implements \MutableSet {
 
   /* @return string
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function __toString(): string { return "Set"; }
 
   /* @param mixed $name
@@ -410,14 +410,14 @@ final class Set implements \MutableSet {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
-  public static function fromItems(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a Set built from the keys of the specified container.
    * @param mixed $container
    * @return object
    */
-  <<__Native, __Rx, __MutableReturn>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public static function fromKeysOf(mixed $container): object;
 
   /* Returns a Set built from the values from the specified array.
@@ -430,7 +430,7 @@ final class Set implements \MutableSet {
   /* Returns a Set built from the values from the specified arrays.
    * @return object
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public static function fromArrays(...$argv) {
     if (!$argv) return \HH\Set {};
     $ret = \HH\Set {};
@@ -452,24 +452,24 @@ final class ImmSet implements \ConstSet {
    * @param mixed $iterable
    */
   <<__Native, __Rx, __OnlyRxIfArgs>>
-  public function __construct(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable = null): void;
+  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable = null): void;
 
   /* Returns true if the ImmSet is empty, false otherwise.
    * @return bool
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function isEmpty(): bool { return !$this->count(); }
 
   /* Returns the number of values in the ImmSet.
    * @return int
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function count(): int;
 
   /* Returns an Iterable that produces the values from this ImmSet.
    * @return object
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function items(): \LazyIterableView {
     return new \LazyIterableView($this);
   }
@@ -478,19 +478,19 @@ final class ImmSet implements \ConstSet {
   /* Returns a Vector built from the keys of this ImmSet.
    * @return object
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function keys() { return $this->values(); }
 
   /* Returns a ImmVector built from the values of this ImmSet.
    * @return object
    */
-  <<__Native, __Rx, __MutableReturn>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function values(): object;
 
   /* Returns a lazy iterable view of this ImmSet.
    * @return object
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function lazy(): \LazyKeyedIterableView {
     return new \LazyKeyedIterableView($this);
   }
@@ -500,7 +500,7 @@ final class ImmSet implements \ConstSet {
    * @param mixed $val
    * @return bool
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function contains(mixed $val): bool;
 
   /* Returns an array built from the values from this ImmSet, array(val1 =>
@@ -510,49 +510,49 @@ final class ImmSet implements \ConstSet {
    * keys.
    * @return array
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toArray(): array;
 
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toVArray(): varray;
 
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toDArray(): darray;
 
   /* Returns a Vector built from the values of this ImmSet.
    * @return object
    */
-  <<__Native, __Rx, __MutableReturn>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function toVector(): object;
 
   /* Returns a ImmVector built from the values of this ImmSet.
    * @return object
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toImmVector(): object;
 
   /* Returns a Map built from the keys and values of this ImmSet.
    * @return object
    */
-  <<__Native, __Rx, __MutableReturn>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function toMap(): object;
 
   /* Returns a ImmMap built from the keys and values of this ImmSet.
    * @return object
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toImmMap(): object;
 
   /* Returns a Set built from the values of this ImmSet.
    * @return object
    */
-  <<__Native, __Rx, __MutableReturn>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function toSet(): object;
 
   /* Returns an immutable version of this collection.
    * @return object
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function toImmSet(): this {
     return $this;
   }
@@ -560,7 +560,7 @@ final class ImmSet implements \ConstSet {
   /* Returns an immutable version of this collection.
    * @return object
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function immutable(): this {
     return $this;
   }
@@ -568,19 +568,19 @@ final class ImmSet implements \ConstSet {
   /* Returns an array built from the values from this ImmSet.
    * @return array
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toKeysArray(): array;
 
   /* Returns an array built from the values from this ImmSet.
    * @return array
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toValuesArray(): array;
 
   /* Returns an iterator that points to beginning of this ImmSet.
    * @return object
    */
-  <<__Native, __Rx, __MutableReturn>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function getIterator(): object;
 
   /* Returns a ImmSet of the values produced by applying the specified callback
@@ -588,7 +588,7 @@ final class ImmSet implements \ConstSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public function map(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a ImmSet of the values produced by applying the specified callback
@@ -596,7 +596,7 @@ final class ImmSet implements \ConstSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public function mapWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a ImmSet of all the values from this ImmSet for which the specified
@@ -604,7 +604,7 @@ final class ImmSet implements \ConstSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public function filter(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a ImmSet of all the values from this ImmSet for which the specified
@@ -612,7 +612,7 @@ final class ImmSet implements \ConstSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public function filterWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns an Iterable produced by combining the specified Iterables
@@ -620,14 +620,14 @@ final class ImmSet implements \ConstSet {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
-  public function zip(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a ImmSet containing the first n values of this ImmSet.
    * @param mixed $n
    * @return object
    */
-  <<__Native, __Rx, __MutableReturn>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function take(mixed $n): object;
 
   /* Returns a ImmSet containing the values of this ImmSet up to but not
@@ -636,14 +636,14 @@ final class ImmSet implements \ConstSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public function takeWhile(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a ImmSet containing all values except the first n of this ImmSet.
    * @param mixed $n
    * @return object
    */
-  <<__Native, __Rx, __MutableReturn>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function skip(mixed $n): object;
 
   /* Returns a ImmSet containing all the values of this ImmSet excluding the
@@ -651,7 +651,7 @@ final class ImmSet implements \ConstSet {
    * @param mixed $fn
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public function skipWhile(<<__OnlyRxIfRxFunc>> mixed $fn): object;
 
   /* Returns a ImmSet containing the specified range of values from this ImmSet.
@@ -661,7 +661,7 @@ final class ImmSet implements \ConstSet {
    * @param mixed $len
    * @return object
    */
-  <<__Native, __Rx, __MutableReturn>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function slice(mixed $start,
                         mixed $len): object;
 
@@ -670,19 +670,19 @@ final class ImmSet implements \ConstSet {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn>>
-  public function concat(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns the first value from this ImmSet, or null if this ImmSet is empty.
    * @return mixed
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function firstValue(): mixed;
 
   /* Returns the first key from this ImmSet, or null if this ImmSet is empty.
    * @return mixed
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function firstKey() {
     return $this->firstValue();
   }
@@ -690,20 +690,20 @@ final class ImmSet implements \ConstSet {
   /* Returns the last value from this ImmSet, or null if this ImmSet is empty.
    * @return mixed
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function lastValue(): mixed;
 
   /* Returns the last key from this ImmSet, or null if this ImmSet is empty.
    * @return mixed
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function lastKey() {
     return $this->lastValue();
   }
 
   /* @return string
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public function __toString(): string { return "ImmSet"; }
 
   /* @param mixed $name
@@ -744,20 +744,20 @@ final class ImmSet implements \ConstSet {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs>>
-  public static function fromItems(<<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MaybeMutable>>
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a ImmSet built from the keys of the specified container.
    * @param mixed $container
    * @return object
    */
-  <<__Native, __Rx>>
+  <<__Native, __Rx, __MaybeMutable>>
   public static function fromKeysOf(mixed $container): object;
 
   /* Returns a ImmSet built from the values from the specified arrays.
    * @return object
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public static function fromArrays(...$argv) {
     if (!$argv) return \HH\ImmSet {};
     $ret = \HH\Set {};

@@ -120,19 +120,20 @@ module ClassEltDiff = struct
     ) ~cid ~elts1 ~elts2 ~normalize =
     SMap.merge begin fun name elt1 elt2 ->
       let key = (cid, name) in
-      match elt1, elt2 with
-      | Some elt, _ | _, Some elt when elt.elt_origin = cid ->
-        begin
-          match EltHeap.get_old key, EltHeap.get key with
-          | None, _ | _, None -> Some ()
-          | Some x1, Some x2 ->
-            let ty1 = normalize x1 in
-            let ty2 = normalize x2 in
-            if ty1 = ty2
-            then None
-            else Some ()
-        end
-      | _ -> None
+      let match1 = match elt1 with Some elt -> elt.elt_origin = cid | _ -> false in
+      let match2 = match elt2 with Some elt -> elt.elt_origin = cid | _ -> false in
+      if match1 || match2 then begin
+        match EltHeap.get_old key, EltHeap.get key with
+        | None, _ | _, None -> Some ()
+        | Some x1, Some x2 ->
+          let ty1 = normalize x1 in
+          let ty2 = normalize x2 in
+          if ty1 = ty2
+          then None
+          else Some ()
+      end else begin
+        None
+      end
     end elts1 elts2
 
   let compare_props class1 class2 acc =
@@ -165,20 +166,19 @@ module ClassEltDiff = struct
 
   let compare_cstrs class1 class2 =
     let cid = class1.dc_name in
-    match class1.dc_construct, class2.dc_construct with
-    | (Some elt, _), _
-    | _, (Some elt, _) when elt.elt_origin = cid ->
-      begin
-        match Constructors.get_old cid, Constructors.get cid with
-        | None, _ | _, None -> Typing_deps.get_ideps (Dep.Cstr cid), `Changed
-        | Some ft1, Some ft2 ->
-            let ft1 = Decl_pos_utils.NormalizeSig.fun_type ft1 in
-            let ft2 = Decl_pos_utils.NormalizeSig.fun_type ft2 in
-            if ft1 = ft2
-            then DepSet.empty, `Unchanged
-            else Typing_deps.get_ideps (Dep.Cstr cid), `Changed
-      end
-    | _ -> DepSet.empty, `Unchanged
+    let match1 = match class1.dc_construct with Some elt, _ -> elt.elt_origin = cid | _ -> false in
+    let match2 = match class2.dc_construct with Some elt, _ -> elt.elt_origin = cid | _ -> false in
+    if match1 || match2 then begin
+      match Constructors.get_old cid, Constructors.get cid with
+      | None, _ | _, None -> Typing_deps.get_ideps (Dep.Cstr cid), `Changed
+      | Some ft1, Some ft2 ->
+          let ft1 = Decl_pos_utils.NormalizeSig.fun_type ft1 in
+          let ft2 = Decl_pos_utils.NormalizeSig.fun_type ft2 in
+          if ft1 = ft2
+          then DepSet.empty, `Unchanged
+          else Typing_deps.get_ideps (Dep.Cstr cid), `Changed
+    end else
+      DepSet.empty, `Unchanged
 
   let compare class1 class2 =
     compare_cstrs class1 class2

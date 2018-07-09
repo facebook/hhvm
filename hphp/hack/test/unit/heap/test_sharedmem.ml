@@ -139,6 +139,62 @@ let test_local_changes (
   test ();
   IntHeap.LocalChanges.pop_stack ()
 
+module type WithVisibleCache = sig
+  include SharedMem.WithCache
+
+  module Cache : sig
+    module L1 : SharedMem.CacheType with type key := key and type value := t
+    module L2 : SharedMem.CacheType with type key := key and type value := t
+  end
+end
+
+let test_cache_behavior (
+    module IntHeap: WithVisibleCache
+      with type t = int
+       and type key = string
+  ) () =
+  let expect_cache_size expected_l1 expected_l2 =
+    let actual_l1 = IntHeap.Cache.L1.get_size () in
+    expect
+      ~msg:(
+        Printf.sprintf "Expected L1 cacke size of %d, got %d"
+          expected_l1 actual_l1
+      )
+      (actual_l1 = expected_l1);
+    let actual_l2 = IntHeap.Cache.L2.get_size () in
+    expect
+      ~msg:(
+        Printf.sprintf "Expected L2 cacke size of %d, got %d"
+          expected_l2 actual_l2
+      )
+      (actual_l2 = expected_l2)
+  in
+
+  expect_cache_size 0 0;
+  (* Fill the L1 cache. *)
+  for i = 1 to 1000 do
+    IntHeap.add (Printf.sprintf "%d" i) i;
+    expect_cache_size i i
+  done;
+  (* Make sure the L1 cache does not grow past capacity - L2 will. *)
+  for i = 1001 to 2000 do
+    IntHeap.add (Printf.sprintf "%d" i) i;
+    expect_cache_size 1000 i
+  done;
+  (* L2 will be collected and resized. *)
+  for i = 2001 to 3000 do
+    IntHeap.add (Printf.sprintf "%d" i) i;
+    expect_cache_size 1000 (i - 1000)
+  done;
+  (* Delete entries and watch both cache sizes shrink. *)
+  for i = 3000 downto 2001 do
+    IntHeap.remove_batch (IntHeap.KeySet.singleton (Printf.sprintf "%d" i));
+    expect_cache_size (max (i - 2001) 0) (max (i - 1001) 0)
+  done
+  (* Cannot test beyond this point. The LFU cache collection, that
+     occurred when the index hit 2000, deleted half of the keys at
+     random; we don't know which ones specifically. *)
+
 module TestNoCache = SharedMem.NoCache (StringKey) (IntVal)
 module TestWithCache = SharedMem.WithCache (StringKey) (IntVal)
 
@@ -146,14 +202,15 @@ let tests () =
   let list = [
     "test_local_changes_no_cache", test_local_changes (module TestNoCache);
     "test_local_changes_with_cache", test_local_changes (module TestWithCache);
+    "test_cache_behavior", test_cache_behavior (module TestWithCache);
   ] in
   let setup_test (name, test) = name, fun () ->
   let handle = SharedMem.(
       init {
         global_size = 16;
-        heap_size = 1024;
+        heap_size = 409600;
         dep_table_pow = 2;
-        hash_table_pow = 3;
+        hash_table_pow = 12;
         shm_dirs = [];
         shm_min_avail = 0;
         log_level = 0;

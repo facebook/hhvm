@@ -115,8 +115,7 @@ let is_typechecker env =
 let global_namespace_name = "\\"
 
 let combine_names n1 n2 =
-  assert (String.length n1 > 0 && String.length n2 > 0);
-  let has_leading_slash = String.get n2 0 = '\\' in
+  let has_leading_slash = String.length n2 > 0 && String.get n2 0 = '\\' in
   let len = String.length n1 in
   let has_trailing_slash = String.get n1 (len - 1) = '\\' in
   match has_leading_slash, has_trailing_slash with

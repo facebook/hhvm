@@ -1,0 +1,40 @@
+File "dict2.php", line 12, characters 31-34:
+The type dict expects 2 type parameter(s) (Typing[4101])
+File "dict2.php", line 13, characters 31-34:
+The type dict expects 2 type parameter(s) (Typing[4101])
+File "dict2.php", line 13, characters 16-34:
+Invalid argument (Typing[4110])
+  File "dict2.php", line 23, characters 28-30:
+  This is an int
+  File "dict2.php", line 13, characters 16-26:
+  It is incompatible with a value of generic type Tk#2 from this "as" assertion
+File "dict2.php", line 16, characters 16-40:
+Invalid argument (Typing[4110])
+  File "dict2.php", line 23, characters 28-30:
+  This is an int
+  File "dict2.php", line 16, characters 16-26:
+  It is incompatible with a value of generic type Tk#4 from this "as" assertion
+File "dict2.php", line 12, characters 31-34:
+Invalid "as" expression hint (Typing[4195])
+  File "dict2.php", line 12, characters 31-34:
+  The "as" operator cannot be used with a dict (temporarily)
+File "dict2.php", line 13, characters 31-34:
+Invalid "as" expression hint (Typing[4195])
+  File "dict2.php", line 13, characters 31-34:
+  The "as" operator cannot be used with a dict (temporarily)
+File "dict2.php", line 15, characters 31-40:
+Invalid "as" expression hint (Typing[4195])
+  File "dict2.php", line 15, characters 31-40:
+  The "as" operator cannot be used with a dict (temporarily)
+File "dict2.php", line 16, characters 31-40:
+Invalid "as" expression hint (Typing[4195])
+  File "dict2.php", line 16, characters 31-40:
+  The "as" operator cannot be used with a dict (temporarily)
+File "dict2.php", line 18, characters 35-44:
+Invalid "as" expression hint (Typing[4195])
+  File "dict2.php", line 18, characters 35-44:
+  The "as" operator cannot be used with a dict (temporarily)
+File "dict2.php", line 19, characters 35-44:
+Invalid "as" expression hint (Typing[4195])
+  File "dict2.php", line 19, characters 35-44:
+  The "as" operator cannot be used with a dict (temporarily)

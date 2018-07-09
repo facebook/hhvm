@@ -2282,27 +2282,24 @@ and expr_
           (* Dont create ??hint *)
           | _ , Toption _ -> hint_ty
           | _ -> Reason.Rwitness p, Toption (hint_ty) in
-      let should_not_refine env lty rty =
-        snd rty <> Tdynamic && SubType.is_sub_type env lty rty in
-      let env, hint_ty = Env.expand_type env hint_ty in
+      let refine_type env lpos lty rty =
+        let reason = Reason.Ras lpos in
+        let env, rty = Env.expand_type env rty in
+        if snd rty <> Tdynamic && SubType.is_sub_type env lty rty
+        then env, lty
+        else safely_refine_type env p reason lpos lty rty
+      in
       let env, hint_ty =
         if is_instance_var e
         then begin
           let env, _, ivar_ty = raw_expr ~in_cond:false env e in
           let env, ((ivar_pos, _) as ivar) = get_instance_var env e in
-          let reason = Reason.Ras ivar_pos in
-          let env, hint_ty =
-            if should_not_refine env ivar_ty hint_ty
-            then env, ivar_ty
-            else safely_refine_type env p reason ivar_pos ivar_ty hint_ty
-          in
+          let env, hint_ty = refine_type env ivar_pos ivar_ty hint_ty in
           let env = set_local env ivar hint_ty in
           env, hint_ty
-        end else begin
-          if should_not_refine env expr_ty hint_ty
-          then env, expr_ty
-          else env, hint_ty
-        end in
+        end else
+          refine_type env (fst e) expr_ty hint_ty
+      in
       make_result env (T.As (te, hint, is_nullable)) hint_ty
     end
   | Efun (f, idl) ->

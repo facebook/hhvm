@@ -188,9 +188,7 @@ let elaborate_defined_id nsenv kind (p, id) =
     if update_nsenv
     then {nsenv with ns_class_uses = SMap.add id newid nsenv.ns_class_uses}
     else nsenv in
-  let translated = renamespace_if_aliased
-      (ParserOptions.auto_namespace_map nsenv.ns_popt) newid in
-  (p, translated), nsenv, update_nsenv
+  (p, newid), nsenv, update_nsenv
 
 (* Resolves an identifier in a given namespace environment. For example, if we
  * are in the namespace "N\O", the identifier "P\Q" is resolved to "\N\O\P\Q".
@@ -210,10 +208,10 @@ let elaborate_defined_id nsenv kind (p, id) =
  *)
 let elaborate_id_impl ~autoimport nsenv kind (p, id) =
   (* Go ahead and fully-qualify the name first. *)
+  if id <> "" && id.[0] = '\\'
+  then false, (p, id)
+  else
   let was_renamed, fully_qualified =
-    if id <> "" && id.[0] = '\\'
-    then false, id
-    else
     begin
       (* Expand "use" imports. *)
       let (bslash_loc, has_bslash) =
@@ -256,7 +254,7 @@ let elaborate_id_impl ~autoimport nsenv kind (p, id) =
         end
       end
     end in
-  let translated = renamespace_if_aliased
+  let translated = renamespace_if_aliased ~reverse:true
       (ParserOptions.auto_namespace_map nsenv.ns_popt) fully_qualified in
   was_renamed, (p, translated)
 

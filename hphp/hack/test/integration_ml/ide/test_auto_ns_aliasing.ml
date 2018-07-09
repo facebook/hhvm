@@ -13,7 +13,7 @@ module Test = Integration_test_base
 let foo_contents =
 "<?hh // strict
 
-namespace HH\\LongName\\EvenLonger\\ShortName;
+namespace HH\\LongName\\ShortName;
 
 function foo() : void {}
 "
@@ -38,7 +38,7 @@ let autocomplete_contents2 =
 "<?hh // strict
 
 function testTypecheck(): void {
-  HH\\LongName\\EvenLonger\\ShortName\\foAUTO332;
+  HH\\LongName\\ShortName\\foAUTO332;
 }
 "
 
@@ -46,7 +46,7 @@ let autocomplete_contents3 =
 "<?hh // strict
 
 function testTypecheck(): void {
-  \\HH\\LongName\\EvenLonger\\ShortName\\foAUTO332;
+  \\HH\\LongName\\ShortName\\foAUTO332;
 }
 "
 
@@ -56,7 +56,7 @@ let autocomplete_contents4 =
 namespace Test;
 
 function testTypecheck(): void {
-  HH\\LongName\\EvenLonger\\ShortName\\foAUTO332;
+  HH\\LongName\\ShortName\\foAUTO332;
 }
 "
 
@@ -66,7 +66,7 @@ let autocomplete_contents5 =
 namespace Test;
 
 function testTypecheck(): void {
-  \\HH\\LongName\\EvenLonger\\ShortName\\foAUTO332;
+  \\HH\\LongName\\ShortName\\foAUTO332;
 }
 "
 
@@ -102,7 +102,7 @@ let () =
     ~tco_dynamic_view: false
     ~tco_disallow_array_as_tuple: false
     ~po_auto_namespace_map:
-      [("ShortName", "HH\\LongName\\EvenLonger\\ShortName")]
+      [("ShortName", "HH\\LongName\\ShortName")]
     ~po_deregister_php_stdlib: true
     ~po_use_full_fidelity:true
     ~tco_disallow_ambiguous_lambda:false
@@ -142,8 +142,6 @@ let () =
 
   let test_ide env contents i expected =
     let path = "test" ^ (string_of_int i) ^ ".php" in
-    let alias_regexp = Str.regexp "HH\\\\LongName\\\\EvenLonger\\\\" in
-    let contents = Str.replace_first alias_regexp "" contents in
     let offset = String_utils.substring_index "AUTO332" contents in
     let position = File_content.offset_to_position contents offset in
     let line = position.File_content.line - 1 in
@@ -151,22 +149,21 @@ let () =
     let _, loop_output = Test.ide_autocomplete env (path, line, column) in
     Test.assert_ide_autocomplete loop_output expected in
 
-  test_legacy env autocomplete_contents0 ["ShortName\\foo"];
-  test_legacy env autocomplete_contents1 ["ShortName\\foo"];
-  test_legacy env autocomplete_contents2 ["ShortName\\foo"];
-  test_legacy env autocomplete_contents3 ["ShortName\\foo"];
+  test_legacy env autocomplete_contents0 ["HH\\LongName\\ShortName\\foo"];
+  test_legacy env autocomplete_contents1 [""];
+  test_legacy env autocomplete_contents2 ["HH\\LongName\\ShortName\\foo"];
+  test_legacy env autocomplete_contents3 ["HH\\LongName\\ShortName\\foo"];
   test_legacy env autocomplete_contents4 [""];
-  test_legacy env autocomplete_contents5 ["ShortName\\foo"];
+  test_legacy env autocomplete_contents5 ["HH\\LongName\\ShortName\\foo"];
   test_legacy env autocomplete_contents6 [""];
-  test_legacy env autocomplete_contents7 ["ShortName\\foo"];
+  test_legacy env autocomplete_contents7 [""];
 
-  test_ide env autocomplete_contents0 0 ["ShortName\\foo"];
-  test_ide env autocomplete_contents1 1 ["ShortName\\foo"];
-  test_ide env autocomplete_contents2 2 ["ShortName\\foo"];
-  test_ide env autocomplete_contents3 3 ["ShortName\\foo"];
+  test_ide env autocomplete_contents0 0 ["HH\\LongName\\ShortName\\foo"];
+  test_ide env autocomplete_contents1 1 [];
+  test_ide env autocomplete_contents2 2 ["HH\\LongName\\ShortName\\foo"];
+  test_ide env autocomplete_contents3 3 ["HH\\LongName\\ShortName\\foo"];
   test_ide env autocomplete_contents4 4 [];
-  test_ide env autocomplete_contents5 5 ["ShortName\\foo"];
+  test_ide env autocomplete_contents5 5 ["HH\\LongName\\ShortName\\foo"];
   test_ide env autocomplete_contents6 6 [];
-  test_ide env autocomplete_contents7 7 ["ShortName\\foo"];
-
+  test_ide env autocomplete_contents7 7 [];
   ()

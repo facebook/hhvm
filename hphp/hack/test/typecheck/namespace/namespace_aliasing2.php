@@ -5,6 +5,7 @@ namespace HH\SomethingElse\Dict {
     return 1;
   }
 }
+
 namespace {
   function main() {
     expect_int(Dict\foo()); // error

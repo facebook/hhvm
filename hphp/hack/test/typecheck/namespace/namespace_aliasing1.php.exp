@@ -1,1 +1,4 @@
-No errors
+File "namespace_aliasing1.php", line 12, characters 16-24:
+Unbound name: Dict\foo (a global function) (Naming[2049])
+File "namespace_aliasing1.php", line 12, characters 16-24:
+Unbound name: Dict\foo (a global constant) (Naming[2049])

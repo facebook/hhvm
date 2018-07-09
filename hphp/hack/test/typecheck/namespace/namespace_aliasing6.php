@@ -1,17 +1,22 @@
 <?hh
 
 namespace HH\Lib\Dict {
+  function foo(): string {
+    return 'foo';
+  }
+}
+
+namespace Some\Other\Dict {
   function foo(): int {
     return 1;
   }
 }
 
-namespace Main {
+namespace {
+  use namespace Some\Other\Dict;
+
   function main() {
     expect_int(Dict\foo()); // ok
-    expect_int(\Dict\foo()); // error
-    expect_int(HH\Lib\Dict\foo()); // error
-    expect_int(\HH\Lib\Dict\foo()); // ok
   }
 
   function expect_int(int $x): void {}

@@ -234,7 +234,11 @@ let elaborate_id_impl ~autoimport nsenv kind (p, id) =
       begin
       match SMap.get prefix uses with
         | None ->
-          if autoimport
+          let translated = renamespace_if_aliased ~reverse:true
+            (ParserOptions.auto_namespace_map nsenv.ns_popt) id in
+          if translated <> id
+          then false, ("\\" ^ translated)
+          else if autoimport
           then
             match get_autoimport_name_namespace id with
             | true, ns_name ->
@@ -254,9 +258,7 @@ let elaborate_id_impl ~autoimport nsenv kind (p, id) =
         end
       end
     end in
-  let translated = renamespace_if_aliased ~reverse:true
-      (ParserOptions.auto_namespace_map nsenv.ns_popt) fully_qualified in
-  was_renamed, (p, translated)
+  was_renamed, (p, fully_qualified)
 
 let elaborate_id ?(autoimport=true) nsenv kind id =
   let _, newid = elaborate_id_impl ~autoimport nsenv kind id in

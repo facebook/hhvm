@@ -155,7 +155,7 @@ let () =
   test_legacy env autocomplete_contents3 ["HH\\LongName\\ShortName\\foo"];
   test_legacy env autocomplete_contents4 [""];
   test_legacy env autocomplete_contents5 ["HH\\LongName\\ShortName\\foo"];
-  test_legacy env autocomplete_contents6 [""];
+  test_legacy env autocomplete_contents6 ["HH\\LongName\\ShortName\\foo"];
   test_legacy env autocomplete_contents7 [""];
 
   test_ide env autocomplete_contents0 0 ["HH\\LongName\\ShortName\\foo"];
@@ -164,6 +164,6 @@ let () =
   test_ide env autocomplete_contents3 3 ["HH\\LongName\\ShortName\\foo"];
   test_ide env autocomplete_contents4 4 [];
   test_ide env autocomplete_contents5 5 ["HH\\LongName\\ShortName\\foo"];
-  test_ide env autocomplete_contents6 6 [];
+  test_ide env autocomplete_contents6 6 ["HH\\LongName\\ShortName\\foo"];
   test_ide env autocomplete_contents7 7 [];
   ()

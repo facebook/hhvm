@@ -26,5 +26,8 @@ namespace req {
 // Set of case-insensitive Strings with iter/ref stability
 using StringISet = req::hash_set<String,hphp_string_hash,hphp_string_isame>;
 
+// Case-sensitive String keys, no ref stability but faster
+using StringFastSet = req::fast_set<String,hphp_string_hash,hphp_string_same>;
+
 }}
 #endif

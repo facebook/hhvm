@@ -113,6 +113,7 @@ t, u {{ ocaml ty }} :: 'ty_' ::=                           {{ com syntax of type
   | arraykey :: :: arraykey                 {{ com array key }}
   | bool   ::   :: bool                     {{ com boolean type }}
   | void   ::   :: void                     {{ com void return type }}
+  | dynamic :: :: dynamic                   {{ com dynamic type }}
   | T      ::   :: typeparam                {{ com generic type parameter }}
   | N inst ::   :: classish                 {{ com possibly-instantiated named type }}
   | # N inst :: :: exact                    {{ com exact named type }}
@@ -393,6 +394,7 @@ terminals :: terminals_ ::=
   | :>                         ::   :: supertype      {{ tex :> }}
   | ==                         ::   :: eqtype         {{ tex \equiv }}
   | ~>                         ::   :: leadsto        {{ tex \leadsto }}
+  | ~                          ::   :: tilde          {{ tex \sim }}
   | truthy                     ::   :: truthy         {{ tex \Downarrow }}
   | vardots                      ::   :: variadicrest   {{ tex \underline{\mathtt{...} } }}
   | __construct                ::   :: construct      {{ tex \mathtt{\_\_construct}  }}
@@ -1026,6 +1028,28 @@ by
   ------------------------------------------------------------------------- :: notype
   ( lamparam1 , .. , lamparamn) ~> ( funparam1 , .. , funparamn ) : t
 
+{{ com \\\section*{Implicit coercion} }}
+
+defn
+  t1 ~> t2 :: :: coerce :: 'coerce_'
+  {{ com Values of type [[t1]] implicitly coerce to type [[t2]] }}
+by
+
+  ------------ :: dynamic
+  t ~> dynamic
+
+  ------------ :: refl
+  t ~> t
+
+defn
+  G ; K |- e ~ t :: :: exprimplicitty :: 'expr_'
+  {{ com Expression [[e]] has implicit coercion to type [[t]] under locals [[G]] and continuations [[K]] }}
+by
+
+    G ; K |- e : t1   t1 ~> t2
+    -------------------------- :: coercion
+    G ; K |- e ~ t2
+
 {{ com \\\section*{Expression sequencing} }}
 
 {{ com It's useful to have an n-ary auxiliary form that captures the requirement
@@ -1033,7 +1057,7 @@ for sequencing of updates to the locals. \\ }}
 
 defn
   G ; K |- < e1 : t1 , ... , en : tn > :: :: exprsty :: 'exprs_'
-  {{ com expressions
+  {{ com Expressions
   can be executed in sequence under locals [[G]] and continuations [[K]] }}
 by
 
@@ -1046,13 +1070,27 @@ G' ; K |- < e1 : t1 , .. , en : tn >
 --------------------------------------- :: seq
 G ; K |- < e : t , e1 : t1 , .. , en : tn >
 
+defn
+  G ; K |- < e1 ~ t1 , ... , en ~ tn > :: :: exprsimplicitty :: 'exprsimplicit_'
+  {{ com Expressions can be executed in sequence under locals [[G]] and continuations [[K]] }}
+by
+
+G ; K |- e ~ t
+----------------------- :: expr
+G ; K |- < e ~ t >
+
+G ; K [skip := G'] |- e ~ t
+G' ; K |- < e1 ~ t1 , .. , en ~ tn >
+--------------------------------------- :: seq
+G ; K |- < e ~ t , e1 ~ t1 , .. , en ~ tn >
+
 
 {{ com \section*{Expression typing} }}
 {{ com \addcontentsline{toc}{section}{Expression typing} }}
 
 defn
   G ; K |- e : t :: :: exprty :: 'expr_'
-  {{ com expression [[e]] of type [[t]] can be executed under locals [[G]] and continuations [[K]] }}
+  {{ com Expression [[e]] of type [[t]] can be executed under locals [[G]] and continuations [[K]] }}
 by
 
 

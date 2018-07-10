@@ -521,3 +521,9 @@ let collection_intrinsic_generic =
 
 let invalid_hack_mode =
   "Incorrect comment; possible values include strict, decl, partial, only-headers, or empty"
+
+let pair_initializer_needed =
+  "Initializer needed for Pair object"
+
+let pair_initializer_arity =
+  "Pair objects must have exactly 2 elements"

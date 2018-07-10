@@ -1817,7 +1817,10 @@ let expression_errors env namespace_name node parents errors =
   | Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }
   | AwaitableCreationExpression { awaitable_attribute_spec = s; _ }
     -> no_memoize_attribute_on_lambda s errors
-  | CollectionLiteralExpression { collection_literal_name = n; _ } ->
+  | CollectionLiteralExpression
+    { collection_literal_name = n
+    ; collection_literal_initializers = initializers
+    ; _ } ->
     let is_standard_collection lc_name =
       lc_name = "pair" || lc_name = "vector" || lc_name = "map" ||
       lc_name = "set"  || lc_name = "immvector" || lc_name = "immmap" ||
@@ -1839,7 +1842,7 @@ let expression_errors env namespace_name node parents errors =
         when Token.kind t = TokenKind.Name ->
         begin match String.lowercase_ascii (text n) with
         | "dict" | "vec" | "keyset" -> `InvalidBraceKind
-        | n -> if is_standard_collection n then `Ok else `Error
+        | n -> if is_standard_collection n then `ValidClass n else `InvalidClass
         end
       (* qualified name *)
       | SimpleTypeSpecifier { simple_type_specifier = {
@@ -1852,20 +1855,33 @@ let expression_errors env namespace_name node parents errors =
         (* HH\Vector in global namespace *)
         | [l; r]
           when namespace_name = global_namespace_name &&
-          is_qualified_std_collection l r -> `Ok
+          is_qualified_std_collection l r ->
+          `ValidClass (String.lowercase_ascii (text r))
         (* \HH\Vector *)
         | [{ syntax = Missing; _}; l; r]
-          when is_qualified_std_collection l r -> `Ok
-        | _ -> `Error
+          when is_qualified_std_collection l r ->
+          `ValidClass (String.lowercase_ascii (text r))
+        | _ -> `InvalidClass
         end
-      | _ -> `Error in
+      | _ -> `InvalidClass in
+    let num_initializers =
+      List.length (syntax_to_list_no_separators initializers) in
     begin match status with
-    | `Ok -> errors
+    | `ValidClass "pair" when num_initializers <> 2 ->
+      let msg =
+        if num_initializers = 0
+        then SyntaxError.pair_initializer_needed
+        else SyntaxError.pair_initializer_arity
+      in
+      let e =
+        make_error_from_node node msg ~error_type:SyntaxError.RuntimeError in
+      e :: errors
+    | `ValidClass _ -> errors
     | `InvalidBraceKind ->
       let e =
         make_error_from_node node SyntaxError.invalid_brace_kind_in_collection_initializer in
       e :: errors
-    | `Error ->
+    | `InvalidClass ->
       let e =
         make_error_from_node node SyntaxError.invalid_class_in_collection_initializer in
       e :: errors

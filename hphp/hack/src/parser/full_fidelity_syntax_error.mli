@@ -286,3 +286,5 @@ val collection_intrinsic_generic: string
 val invalid_shape_field_name : string
 val incorrect_byref_assignment : string
 val invalid_hack_mode : string
+val pair_initializer_needed : string
+val pair_initializer_arity : string

@@ -120,9 +120,9 @@ let on_call_expr env ((p, _), x) =
 let handler = object
   inherit Tast_visitor.handler_base
 
-  method! at_expr env x =
+  method! at_expr _env x =
     match snd x with
-    | Call (_, e, _, _, _) -> on_call_expr env e
+    | Call (_, _e, _, _, _) -> () (* on_call_expr env e *)
     | _ -> ()
 
   method! at_class_ env c = check_ppl_class env c

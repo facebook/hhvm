@@ -129,12 +129,6 @@ let tco_experimental_as_expression = "as_expression"
 let tco_hacksperimental = "hacksperimental"
 
 (**
- * When overriding a class member: if the parent or child's member is typed,
- * require that the user specify a typehint for the other member.
- *)
-let tco_decl_override_require_hint = "decl_override_require_hint"
-
-(**
  * Make void the type of null.
  *)
 let tco_experimental_void_is_type_of_null = "void_is_type_of_null"
@@ -164,7 +158,6 @@ let tco_experimental_all =
      tco_experimental_is_expression;
      tco_experimental_as_expression;
      tco_hacksperimental;
-     tco_decl_override_require_hint;
      tco_experimental_void_is_type_of_null;
      tco_experimental_null_coalesce_assignment;
    ]

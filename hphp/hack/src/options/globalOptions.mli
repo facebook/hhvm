@@ -187,7 +187,6 @@ val tco_experimental_disable_optional_and_unknown_shape_fields : string
 val tco_experimental_no_trait_reuse : string
 val tco_experimental_is_expression : string
 val tco_experimental_as_expression : string
-val tco_decl_override_require_hint : string
 val tco_experimental_void_is_type_of_null : string
 val tco_experimental_null_coalesce_assignment : string
 val tco_experimental_all : SSet.t

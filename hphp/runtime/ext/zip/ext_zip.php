@@ -7,6 +7,7 @@
 class ZipArchive {
 
   private ?resource $zipDir = null;
+  public string $filename;
 
   public function __get($name) {
     switch ($name) {
@@ -16,10 +17,8 @@ class ZipArchive {
         return $this->getProperty(1);
       case "numFiles":
         return $this->getProperty(2);
-      case "filename":
-        return $this->getProperty(3);
       case "comment":
-        return $this->getProperty(4);
+        return $this->getProperty(3);
     }
     trigger_error("Undefined property: ZipArchive::\$$name");
     return;
@@ -30,7 +29,6 @@ class ZipArchive {
       case "status":
       case "statusSys":
       case "numFiles":
-      case "filename":
       case "comment":
         return true;
     }
@@ -352,14 +350,14 @@ class ZipArchive {
    * Set the compression method of an entry defined by its index.
    *
    * @param int $index - Index of the entry.
-   * @param int $comp_method - The compression method. Either 
-   *   ZipArchive::CM_DEFAULT, ZipArchive::CM_STORE or ZipArchive::CM_DEFLATE. 
+   * @param int $comp_method - The compression method. Either
+   *   ZipArchive::CM_DEFAULT, ZipArchive::CM_STORE or ZipArchive::CM_DEFLATE.
    * @param int $comp_flags - Compression flags. Currently unused.
    *
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function setCompressionIndex(int $index, int $comp_method, 
+  function setCompressionIndex(int $index, int $comp_method,
                                int $comp_flags = 0): bool;
 
   /**
@@ -367,14 +365,14 @@ class ZipArchive {
    * Set the compression method of an entry defined by its name.
    *
    * @param string $name - Name of the entry.
-   * @param int $comp_method - The compression method. Either 
+   * @param int $comp_method - The compression method. Either
    *   ZipArchive::CM_DEFAULT, ZipArchive::CM_STORE or ZipArchive::CM_DEFLATE.
    * @param int $comp_flags - Compression flags. Currently unused.
    *
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function setCompressionNAme(string $name, int $comp_method, 
+  function setCompressionNAme(string $name, int $comp_method,
                               int $comp_flags = 0): bool;
 
   /**
@@ -561,4 +559,3 @@ function zip_open(string $filename): mixed;
  */
 <<__Native>>
 function zip_read(resource $zip): mixed;
-

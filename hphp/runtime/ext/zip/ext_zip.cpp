@@ -356,7 +356,6 @@ static Variant HHVM_METHOD(ZipArchive, getProperty, int64_t property) {
       case 2:
         return 0;
       case 3:
-      case 4:
         return empty_string_variant();
       default:
         return init_null();
@@ -379,10 +378,6 @@ static Variant HHVM_METHOD(ZipArchive, getProperty, int64_t property) {
       return zip_get_num_files(zipDir->getZip());
     }
     case 3:
-    {
-      return this_->o_get("filename", true, s_ZipArchive).asCStrRef();
-    }
-    case 4:
     {
       int len;
       auto comment = zip_get_archive_comment(zipDir->getZip(), &len, 0);

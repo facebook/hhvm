@@ -265,9 +265,9 @@ module ClassMethods = struct
   let query tcopt class_name method_query =
     let open Option.Monad_infix in
     let method_query = String.lowercase_ascii method_query in
-    let matches_query str =
-      let str = String.lowercase_ascii str in
-      String_utils.string_starts_with str method_query
+    let matches_query method_name =
+      let method_name = String.lowercase_ascii method_name in
+        String_utils.is_substring method_query method_name
     in
     get_class_definition_file class_name
     >>= (fun file -> Parser_heap.find_class_in_file tcopt file class_name)

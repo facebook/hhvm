@@ -19,6 +19,8 @@ and insert_patch = {
 
 type action =
   | ClassRename of string * string (* old_name * new_name *)
+  | ClassConstRename of string * string * string
+    (* class_name * old_name * new_name *)
   | MethodRename of string * string * string
     (* class_name * old_name * new_name*)
   | FunctionRename of string * string (* old_name * new_name *)

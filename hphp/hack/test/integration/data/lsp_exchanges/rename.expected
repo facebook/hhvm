@@ -50,244 +50,381 @@
       }
     }
   },
-    {
-      "jsonrpc": "2.0",
-      "id": 2,
-      "result": {
-        "changes": {
-          "${php_file_uri}": [
-              {
-                "range": {
-                  "start": {
-                    "line": 6,
-                    "character": 9
-                  },
-                  "end": {
-                    "line": 6,
-                    "character": 17
-                  }
-                },
-                "newText": "function_b"
+  {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "result": {
+      "changes": {
+        "${php_file_uri}": [
+          {
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 8
               },
-              {
-                "range": {
-                  "start": {
-                    "line": 3,
-                    "character": 9
-                  },
-                  "end": {
-                    "line": 3,
-                    "character": 17
-                  }
-                },
-                "newText": "function_b"
+              "end": {
+                "line": 3,
+                "character": 16
               }
-            ]
-        }
-      }
-    },
-    {
-      "jsonrpc": "2.0",
-      "id": 3,
-      "result": {
-        "changes": {
-          "${php_file_uri}": [
-              {
-                "range": {
-                  "start": {
-                    "line": 10,
-                    "character": 6
-                  },
-                  "end": {
-                    "line": 10,
-                    "character": 15
-                  }
-                },
-                "newText": "AnotherClass"
+            },
+            "newText": "NEW_CONSTANT"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 20,
+                "character": 22
               },
-              {
-                "range": {
-                  "start": {
-                    "line": 19,
-                    "character": 20
-                  },
-                  "end": {
-                    "line": 19,
-                    "character": 29
-                  }
-                },
-                "newText": "AnotherClass"
+              "end": {
+                "line": 20,
+                "character": 30
               }
-            ]
-        }
-      }
-    },
-    {
-      "jsonrpc": "2.0",
-      "id": 4,
-      "result": {
-        "changes": {
-          "${php_file_uri}": [
-              {
-                "range": {
-                  "start": {
-                    "line": 13,
-                    "character": 18
-                  },
-                  "end": {
-                    "line": 13,
-                    "character": 29
-                  }
-                },
-                "newText": "some_other_method"
+            },
+            "newText": "NEW_CONSTANT"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 9,
+                "character": 38
               },
-              {
-                "range": {
-                  "start": {
-                    "line": 20,
-                    "character": 43
-                  },
-                  "end": {
-                    "line": 20,
-                    "character": 54
-                  }
-                },
-                "newText": "some_other_method"
-              },
-              {
-                "range": {
-                  "start": {
-                    "line": 20,
-                    "character": 15
-                  },
-                  "end": {
-                    "line": 20,
-                    "character": 26
-                  }
-                },
-                "newText": "some_other_method"
+              "end": {
+                "line": 9,
+                "character": 46
               }
-            ]
-        }
+            },
+            "newText": "NEW_CONSTANT"
+          }
+        ]
       }
-    },
-    {
-      "jsonrpc": "2.0",
-      "id": 5,
-      "result": {
-        "changes": {
-          "${php_file_uri}": [
-            {
-              "range": {
-                "start": {
-                  "line": 23,
-                  "character": 34
-                },
-                "end": {
-                  "line": 23,
-                  "character": 36
-                }
-              },
-              "newText": "$unicorns"
-            },
-            {
-              "range": {
-                "start": {
-                  "line": 24,
-                  "character": 2
-                },
-                "end": {
-                  "line": 24,
-                  "character": 4
-                }
-              },
-              "newText": "$unicorns"
-            },
-            {
-              "range": {
-                "start": {
-                  "line": 25,
-                  "character": 4
-                },
-                "end": {
-                  "line": 25,
-                  "character": 6
-                }
-              },
-              "newText": "$unicorns"
-            },
-            {
-              "range": {
-                "start": {
-                  "line": 25,
-                  "character": 10
-                },
-                "end": {
-                  "line": 25,
-                  "character": 12
-                }
-              },
-              "newText": "$unicorns"
-            },
-            {
-              "range": {
-                "start": {
-                  "line": 25,
-                  "character": 24
-                },
-                "end": {
-                  "line": 25,
-                  "character": 26
-                }
-              },
-              "newText": "$unicorns"
-            },
-            {
-              "range": {
-                "start": {
-                  "line": 27,
-                  "character": 20
-                },
-                "end": {
-                  "line": 27,
-                  "character": 22
-                }
-              },
-              "newText": "$unicorns"
-            },
-            {
-              "range": {
-                "start": {
-                  "line": 30,
-                  "character": 30
-                },
-                "end": {
-                  "line": 30,
-                  "character": 32
-                }
-              },
-              "newText": "$unicorns"
-            },
-            {
-              "range": {
-                "start": {
-                  "line": 31,
-                  "character": 11
-                },
-                "end": {
-                  "line": 31,
-                  "character": 13
-                }
-              },
-              "newText": "$unicorns"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "jsonrpc": "2.0",
-      "id": 999,
-      "result": null
     }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 3,
+    "result": {
+      "changes": {
+        "${php_file_uri}": [
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 6
+              },
+              "end": {
+                "line": 2,
+                "character": 15
+              }
+            },
+            "newText": "HistoryClass"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 22,
+                "character": 19
+              },
+              "end": {
+                "line": 22,
+                "character": 28
+              }
+            },
+            "newText": "HistoryClass"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 21,
+                "character": 15
+              },
+              "end": {
+                "line": 21,
+                "character": 24
+              }
+            },
+            "newText": "HistoryClass"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 20,
+                "character": 11
+              },
+              "end": {
+                "line": 20,
+                "character": 20
+              }
+            },
+            "newText": "HistoryClass"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 18,
+                "character": 20
+              },
+              "end": {
+                "line": 18,
+                "character": 29
+              }
+            },
+            "newText": "HistoryClass"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 9,
+                "character": 27
+              },
+              "end": {
+                "line": 9,
+                "character": 36
+              }
+            },
+            "newText": "HistoryClass"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 4,
+    "result": {
+      "changes": {
+        "${php_file_uri}": [
+          {
+            "range": {
+              "start": {
+                "line": 12,
+                "character": 18
+              },
+              "end": {
+                "line": 12,
+                "character": 29
+              }
+            },
+            "newText": "some_other_method"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 19,
+                "character": 43
+              },
+              "end": {
+                "line": 19,
+                "character": 54
+              }
+            },
+            "newText": "some_other_method"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 19,
+                "character": 15
+              },
+              "end": {
+                "line": 19,
+                "character": 26
+              }
+            },
+            "newText": "some_other_method"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 5,
+    "result": {
+      "changes": {
+        "${php_file_uri}": [
+          {
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 15
+              },
+              "end": {
+                "line": 4,
+                "character": 27
+              }
+            },
+            "newText": "ANOTHER_STR_CONSTANT"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 21,
+                "character": 26
+              },
+              "end": {
+                "line": 21,
+                "character": 38
+              }
+            },
+            "newText": "ANOTHER_STR_CONSTANT"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 6,
+    "result": {
+      "changes": {
+        "${php_file_uri}": [
+          {
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 17
+              },
+              "end": {
+                "line": 5,
+                "character": 33
+              }
+            },
+            "newText": "AVOGADRO_CONSTANT"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 22,
+                "character": 30
+              },
+              "end": {
+                "line": 22,
+                "character": 46
+              }
+            },
+            "newText": "AVOGADRO_CONSTANT"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 7,
+    "result": {
+      "changes": {
+        "${php_file_uri}": [
+          {
+            "range": {
+              "start": {
+                "line": 25,
+                "character": 34
+              },
+              "end": {
+                "line": 25,
+                "character": 40
+              }
+            },
+            "newText": "$kittens_and_rainbows"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 26,
+                "character": 2
+              },
+              "end": {
+                "line": 26,
+                "character": 8
+              }
+            },
+            "newText": "$kittens_and_rainbows"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 27,
+                "character": 4
+              },
+              "end": {
+                "line": 27,
+                "character": 10
+              }
+            },
+            "newText": "$kittens_and_rainbows"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 27,
+                "character": 14
+              },
+              "end": {
+                "line": 27,
+                "character": 20
+              }
+            },
+            "newText": "$kittens_and_rainbows"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 27,
+                "character": 32
+              },
+              "end": {
+                "line": 27,
+                "character": 38
+              }
+            },
+            "newText": "$kittens_and_rainbows"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 29,
+                "character": 20
+              },
+              "end": {
+                "line": 29,
+                "character": 26
+              }
+            },
+            "newText": "$kittens_and_rainbows"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 32,
+                "character": 30
+              },
+              "end": {
+                "line": 32,
+                "character": 36
+              }
+            },
+            "newText": "$kittens_and_rainbows"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 33,
+                "character": 11
+              },
+              "end": {
+                "line": 33,
+                "character": 17
+              }
+            },
+            "newText": "$kittens_and_rainbows"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 999,
+    "result": null
+  }
 ]

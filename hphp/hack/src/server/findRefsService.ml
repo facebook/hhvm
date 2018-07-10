@@ -214,6 +214,20 @@ let get_definitions tcopt = function
         acc
       | None -> acc
     end
+  | IMember (Class_set classes, Class_const class_const_name) ->
+    SSet.fold classes ~init:[] ~f:begin fun class_name acc ->
+      match Typing_lazy_heap.get_class tcopt class_name with
+      | Some class_ ->
+        let add_class_const class_consts acc = match SMap.get class_consts class_const_name with
+          | Some class_const when class_const.cc_origin = class_.tc_name ->
+            let pos = class_const.cc_pos in
+            (class_const_name, pos) :: acc
+          | _ -> acc
+        in
+        let acc = add_class_const class_.tc_consts acc in
+        acc
+      | None -> acc
+    end
   | IClass class_name ->
     Option.value ~default:[] begin Naming_heap.TypeIdHeap.get class_name >>=
     function (_, `Class) -> Typing_lazy_heap.get_class tcopt class_name >>=
@@ -228,7 +242,7 @@ let get_definitions tcopt = function
     end
   | IGConst _
   | IMember (Subclasses_of _, _)
-  | IMember (_, (Property _ | Class_const _ | Typeconst _)) ->
+  | IMember (_, (Property _ | Typeconst _)) ->
     (* this code path is used only in ServerRefactor, we can update it at some
        later time *)
     []

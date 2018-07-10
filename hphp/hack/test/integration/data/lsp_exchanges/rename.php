@@ -1,33 +1,35 @@
-<?hh  //strict
-// comment
-function a_rename(): int {
-  return b_rename();
-}
-
-function b_rename(): int {
-  return 42;
-}
+<?hh //strict
 
 class TestClass {
-  public function __construct(int $i) {}
+  const CONSTANT = 5;
+  const string STR_CONSTANT = "hello";
+  const vec<int> VEC_INT_CONSTANT = vec [1, 2, 3, 4];
+  public int $property;
+
+  public function __construct(int $i) {
+    $this->property = $i + TestClass::CONSTANT; // 1. Rename
+  }
 
   public function test_method(): int {
-    return 1;
+    return $this->property;
   }
 }
 
-function test_rename_class_method(): void {
-  $test_class = new TestClass(1);
-  $test_class->test_method(); $test_class->test_method();
+function test_rename(): void {
+  $test_class = new TestClass(1); // 2. Rename
+  $test_class->test_method(); $test_class->test_method(); // 3. Rename first
+  $const = TestClass::CONSTANT;
+  $str_const = TestClass::STR_CONSTANT; // 4. Rename
+  $vec_int_const = TestClass::VEC_INT_CONSTANT; // 5. Rename
 }
 
-function test_rename_localvar(int $x): void { //  Should match
-  $x = 3;                                     //  Should match
-  j($x) + $x + h("\$x = $x");                 //  1st, 2nd, and 4th should match
-  $lambda1 = $x ==> $x + 1;                   //  Should not match
-  $lambda2 = $a ==> $x + $a; // Renaming this $x    //  Should match
-  $lambda3 = function($x) {                   //  Should not match
-    return $x + 1; };                         //  Should not match
-  $lambda4 = function($b) use($x) {           //  Should match
-    return $x + $b; };                        //  Should match
+function test_rename_localvar(int $local): void {      //  Should match
+  $local = 3;                                           //  Should match
+  j($local) + $local + h("\$x = $local");     //  1st, 2nd, and 4th should match
+  $lambda1 = $x ==> $x + 1;                         //  Should not match
+  $lambda2 = $a ==> $local + $a; // 6. Renaming this $local    //  Should match
+  $lambda3 = function($x) {                         //  Should not match
+    return $x + 1; };                               //  Should not match
+  $lambda4 = function($b) use($local) {                 //  Should match
+    return $local + $b; };                              //  Should match
 }

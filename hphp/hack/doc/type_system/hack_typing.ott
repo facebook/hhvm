@@ -1295,16 +1295,18 @@ arguments with matching types. When combined with rule \ottdrulename{sub\_functi
 it supports application of variadic functions to a known number of arguments.
  }}
 
-G ; K |- < e : function(t1,..,tn):t , e1 : t1 , .. , en : tn >
---------------------------------------------------------------- :: apply
+G ; K[skip := G'] |- e : function(t1,..,tn):t
+G' ; K |- <e1 ~ t1 , .. , en ~ tn >
+----------------------------------- :: apply
 G ; K |- e ( e1 , .. , en ) : t
 
 {{ com
 If there is a splat argument with unbounded length, then we require that the
 function type is variadic. }}
 
-G ; K |- < e : function(t1,..,tn,t0 vardots ):t , e1 : t1 , .. , en : tn , e' : `Traversable`<t0> >
------------------------------------------------------------------------------------------------ :: apply_splat
+G ; K[skip := G'] |- e : function(t1,..,tn,t0 vardots ):t
+G' ; K |- <e1 ~ t1 , .. , en ~ tn , e' ~ `Traversable`<t0> >
+------------------------------------------------------------ :: apply_splat
 G ; K |- e ( e1 , .. , en , vardots e' ) : t
 
 {{ com
@@ -1312,9 +1314,30 @@ Finally, splat can be used on an expression with known tuple type,
 as if the components of the tuple are additional arguments. Again, this can be combined
 with rule \ottdrulename{sub\_function\_variadic}. }}
 
-G ; K |- < e : function(t1,..,tn,t1',..,tm'):t , e1 : t1 , .. , en : tn , e' : (t1', .. , tm') >
------------------------------------------------------------------------------------------------ :: apply_splat_tuple
+G ; K[skip := G'] |- e : function(t1,..,tn,t1',..,tm'):t
+G' ; K |- < e1 ~ t1 , .. , en ~ tn , e' ~ (t1', .. , tm') >
+----------------------------------------------------------- :: apply_splat_tuple
 G ; K |- e ( e1 , .. , en , vardots e' ) : t
+
+{{ com
+We are also allowed to use an expression of dynamic type as a function. We don't care about the types of the arguments,
+but do need to check that the splat argument is a traversable or a tuple.
+}}
+
+G ; K[skip := G'] |- e : dynamic
+G' ; K |- < e1 : t1 , .. , en : tn >
+------------------------------------ :: apply_dynamic
+G ; K |- e ( e1 , .. , en) : dynamic
+
+G ; K[skip := G'] |- e : dynamic
+G' ; K |- < e1 : t1 , .. , en : tn , e' : `Traversable`<t0> >
+------------------------------------------------------------- :: apply_dynamic_splat
+G ; K |- e ( e1 , .. , en , vardots e') : dynamic
+
+G ; K[skip := G'] |- e : dynamic
+G' ; K |- < e1 : t1 , .. , en : tn , e' : (t1', .. , tm') >
+----------------------------------------------------------- :: apply_dynamic_splat_tuple
+G ; K |- e ( e1 , .. , en , vardots e') : dynamic
 
 {{ com \subsection{Await} }}
 

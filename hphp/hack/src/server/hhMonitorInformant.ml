@@ -217,8 +217,8 @@ module Revision_map = struct
         match query, !prefetcher with
         | query, Some prefetcher -> begin
           match Future.check_status prefetcher with
-          | Future.In_progress age when age > 30.0 ->
-            (** If prefetcher has taken longer than 30 seconds, we consider
+          | Future.In_progress age when age > 90.0 ->
+            (** If prefetcher has taken longer than 90 seconds, we consider
              * this as having no saved states. *)
             let () = HackEventLogger.informant_prefetcher_timed_out (Future.start_t prefetcher) in
             no_good_xdb_result ~is_tiny

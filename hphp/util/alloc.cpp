@@ -161,20 +161,13 @@ void init_stack_limits(pthread_attr_t* attr) {
 }
 
 void flush_thread_stack() {
-  uintptr_t top = get_stack_top() & ~(s_pageSize - 1);
-  if (s_firstSlab.ptr) {
-    uintptr_t boundary =               // between hugetlb pages and normal pages
-       reinterpret_cast<uintptr_t>(s_firstSlab.ptr) & ~(size2m - 1);
-    if (boundary < top) top = boundary;
-  }
-  // s_stackLimit is already aligned
-  assert(top >= s_stackLimit);
+  uintptr_t top = get_stack_top() & ~(size2m - 1ull);
+  if (top <= s_stackLimit) return;
   size_t len = top - s_stackLimit;
   assert((len & (s_pageSize - 1)) == 0);
   if (madvise((void*)s_stackLimit, len, MADV_DONTNEED) != 0 &&
       errno != EAGAIN) {
     fprintf(stderr, "%s failed to madvise with error %d\n", __func__, errno);
-    abort();
   }
 }
 

@@ -527,3 +527,5 @@ let pair_initializer_needed =
 
 let pair_initializer_arity =
   "Pair objects must have exactly 2 elements"
+
+let nested_unary_reference = "References cannot be followed by unary operators"

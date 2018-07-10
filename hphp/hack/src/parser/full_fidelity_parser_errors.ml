@@ -1785,6 +1785,9 @@ let expression_errors env namespace_name node parents errors =
         when token_kind scope_resolution_name = Some TokenKind.Name ->
         make_error_from_node node
           SyntaxError.reference_to_static_scope_resolution :: errors
+      | PrefixUnaryExpression { prefix_unary_operator; _ }
+        when token_kind prefix_unary_operator <> Some TokenKind.Dollar ->
+        make_error_from_node node SyntaxError.nested_unary_reference :: errors
       | _ -> errors
     end
   (* TODO(T21285960): Remove this bug-port, stemming from T22184312 *)

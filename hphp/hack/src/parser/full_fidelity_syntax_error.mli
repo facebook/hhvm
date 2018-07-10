@@ -288,3 +288,4 @@ val incorrect_byref_assignment : string
 val invalid_hack_mode : string
 val pair_initializer_needed : string
 val pair_initializer_arity : string
+val nested_unary_reference : string

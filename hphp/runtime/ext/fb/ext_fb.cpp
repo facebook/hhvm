@@ -1077,12 +1077,20 @@ void HHVM_FUNCTION(fb_enable_code_coverage) {
   throw VMSwitchModeBuiltin();
 }
 
-Variant HHVM_FUNCTION(fb_disable_code_coverage) {
+Variant disable_code_coverage_helper(bool report_frequency) {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
   ti->m_reqInjectionData.setCoverage(false);
-  Array ret = ti->m_coverage->Report();
+  Array ret = ti->m_coverage->Report(report_frequency);
   ti->m_coverage->Reset();
   return ret;
+}
+
+Variant HHVM_FUNCTION(fb_disable_code_coverage) {
+  return disable_code_coverage_helper(/* report frequency */ false);
+}
+
+Variant HHVM_FUNCTION(HH_disable_code_coverage_with_frequency) {
+  return disable_code_coverage_helper(/* report frequency */ true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1185,6 +1193,9 @@ struct FBExtension : Extension {
     HHVM_FE(fb_get_last_flush_size);
     HHVM_FE(fb_lazy_lstat);
     HHVM_FE(fb_lazy_realpath);
+
+    HHVM_FALIAS(HH\\disable_code_coverage_with_frequency,
+                HH_disable_code_coverage_with_frequency);
 
     loadSystemlib();
   }

@@ -33,13 +33,17 @@ struct CodeCoverage {
   void Record(const char* filename, int line0, int line1);
 
   /*
-   * Returns an array in this format,
+   * If report_frequency is passed, returns an array in this format,
+   *
+   * array('filename' => covered_line_count, ....)
+   *
+   * Otherwise, returns an array in this format,
    *
    *  array('filename' => array( line => count, ...))
    *
    * If sys is passed as false, systemlib files are not included.
    */
-  Array Report(bool sys = true);
+  Array Report(bool report_frequency = false, bool sys = true);
 
   /*
    * Write JSON format into the file.

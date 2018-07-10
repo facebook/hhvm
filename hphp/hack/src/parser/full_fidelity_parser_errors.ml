@@ -952,18 +952,33 @@ let is_abstract_const declaration =
   | ConstDeclaration x -> not (is_missing x.const_abstract)
   | _ -> false
 
-
 (* Given a ConstDeclarator node, test whether it is abstract, but has an
    initializer. *)
-let abstract_with_initializer init parents =
+let constant_abstract_with_initializer init parents =
   let is_abstract =
     match parents with
-    | _ :: _ :: p3 :: _ when is_abstract_const p3 -> true
+    | _p_list_item :: _p_syntax_list :: p_const_declaration :: _
+      when is_abstract_const p_const_declaration -> true
     | _ -> false
     in
   let has_initializer =
     not (is_missing init) in
   is_abstract && has_initializer
+
+(* Given a node, checks if it is a concrete ConstDeclaration *)
+let is_concrete_const declaration =
+  match syntax declaration with
+  | ConstDeclaration x -> is_missing x.const_abstract
+  | _ -> false
+
+(* Given a ConstDeclarator node, test whether it is concrete, but has no
+   initializer. *)
+let constant_concrete_without_initializer init parents =
+  let is_concrete = match parents with
+    | _p_list_item :: _p_syntax_list :: p_const_declaration :: _ ->
+      is_concrete_const p_const_declaration
+    | _ -> false in
+  is_concrete && is_missing init
 
 (* Given a PropertyDeclaration node, tests whether parent class is abstract
   final but child variable is non-static *)
@@ -2477,8 +2492,13 @@ let const_decl_errors _env node parents namespace_name names errors =
   match syntax node with
   | ConstantDeclarator cd ->
     let errors =
-      produce_error_parents errors abstract_with_initializer cd.constant_declarator_initializer
-      parents SyntaxError.error2051 cd.constant_declarator_initializer in
+      produce_error_parents errors constant_abstract_with_initializer
+      cd.constant_declarator_initializer parents
+      SyntaxError.error2051 cd.constant_declarator_initializer in
+    let errors =
+      produce_error_parents errors constant_concrete_without_initializer
+      cd.constant_declarator_initializer parents SyntaxError.error2050
+      cd.constant_declarator_initializer in
     let errors =
       produce_error errors is_global_in_const_decl cd.constant_declarator_initializer
       SyntaxError.global_in_const_decl cd.constant_declarator_initializer in

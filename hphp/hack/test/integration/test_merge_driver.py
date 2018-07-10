@@ -37,7 +37,7 @@ use_mini_state = true
 use_watchman = true
 lazy_decl = true
 lazy_parse = true
-lazy_init = true
+lazy_init2 = true
 enable_fuzzy_search = false
 use_dummy_informant = false
 """

@@ -1,6 +1,6 @@
 string(13) "X::__destruct"
 string(7) "complex"
-object(Exception)#1 (7) {
+object(Exception)#1 (8) {
   ["message":protected]=>
   string(6) "simple"
   ["string":"Exception":private]=>
@@ -15,5 +15,7 @@ object(Exception)#1 (7) {
   array(0) {
   }
   ["previous":"Exception":private]=>
+  NULL
+  ["userMetadata":protected]=>
   NULL
 }

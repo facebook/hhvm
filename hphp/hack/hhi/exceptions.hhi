@@ -70,6 +70,7 @@ class Exception implements Throwable {
   protected int $line;
   /* HH_FIXME[2082] T30662901 */
   protected array $trace;
+  protected mixed $userMetadata;
 
   <<__Rx>>
   public function __construct (

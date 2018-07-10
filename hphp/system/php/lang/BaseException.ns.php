@@ -21,6 +21,7 @@ trait BaseException {
   protected int $line;            // source line of exception
   private $trace = array();       // full stacktrace
   private ?Exception $previous = null;
+  protected $userMetadata = null;
 
   /*
    * There is no constructor in this trait-- It should be possible to extend
@@ -161,6 +162,20 @@ trait BaseException {
     }
     $s .= "#$i {main}";
     return $s;
+  }
+
+  /**
+   * Set metadata property on this exception
+   */
+  final public function setUserMetadata(mixed $user_metadata): void {
+    $this->userMetadata = $user_metadata;
+  }
+
+  /**
+   * Get metadata from this exception
+   */
+  final public function getUserMetadata(): mixed {
+    return $this->userMetadata;
   }
 
   /* Overrideable */

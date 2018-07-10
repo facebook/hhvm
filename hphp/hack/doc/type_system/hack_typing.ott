@@ -1483,10 +1483,17 @@ F ; G ; K , break : G |- break ;
 -------------------------------- :: continue
 F ; G ; K, continue : G |- continue ;
 
+{{ com A return statement without expression is allowed only if the explicit return type of the enclosing
+function is void.
+}}
+
 --------------------------------------------------------------------- :: return_void
 funparams : void ; G ; K, return : G |- return ;
 
-G ; K |- e : t
+{{ com If there is an expression, its type must coerce to the explicit return type of the enclosing function.
+}}
+
+G ; K |- e ~ t
 --------------------------------------------- :: return
 funparams : t ; G; K, return : G |- return e ;
 

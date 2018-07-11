@@ -1,6 +1,6 @@
 File "bad_inout_hint_call6.php", line 7, characters 5-30:
 Invalid argument (Typing[4110])
-File "bad_inout_hint_call6.php", line 7, characters 12-14:
-This is a num (int/float)
 File "bad_inout_hint_call6.php", line 3, characters 30-32:
-It is incompatible with an int
+This is an int
+File "bad_inout_hint_call6.php", line 7, characters 12-14:
+It is incompatible with a num (int/float)

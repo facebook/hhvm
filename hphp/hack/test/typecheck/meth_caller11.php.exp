@@ -1,8 +1,8 @@
 File "meth_caller11.php", line 31, characters 17-23:
 Invalid argument (Typing[4110])
-File "meth_caller11.php", line 24, characters 49-49:
-This is an object of type C
 File "meth_caller11.php", line 17, characters 15-15:
-It is incompatible with an int
+This is an int
 File "meth_caller11.php", line 24, characters 34-45:
 It was implicitly typed as an int during this operation
+File "meth_caller11.php", line 24, characters 49-49:
+It is incompatible with an object of type C

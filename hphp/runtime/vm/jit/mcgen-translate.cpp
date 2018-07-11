@@ -654,6 +654,10 @@ bool pendingRetranslateAllScheduled() {
     !s_retranslateAllComplete.load(std::memory_order_acquire);
 }
 
+bool retranslateAllComplete() {
+  return s_retranslateAllComplete.load(std::memory_order_acquire);
+}
+
 int getActiveWorker() {
   if (s_retranslateAllComplete.load(std::memory_order_relaxed)) {
     return 0;

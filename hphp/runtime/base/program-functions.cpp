@@ -2457,10 +2457,11 @@ void hphp_process_init() {
         }
         BootStats::mark("jit::deserializeProfData");
         StructuredLog::log("", {});
-        RuntimeOption::EvalNumSingleJitRequests=0;
-        RuntimeOption::EvalJitProfileInterpRequests=0;
-        RuntimeOption::EvalJitProfileRequests=0;
-        RuntimeOption::EvalJitWorkerThreads=numWorkers;
+        RuntimeOption::EvalNumSingleJitRequests = 0;
+        RuntimeOption::EvalJitProfileInterpRequests = 0;
+        RuntimeOption::EvalJitProfileRequests = 0;
+        RuntimeOption::EvalJitWorkerThreads = numWorkers;
+        RuntimeOption::ServerWarmupThrottleRequestCount /= 4;
 
         jit::mcgen::checkRetranslateAll(true);
         BootStats::mark("mcgen::retranslateAll");

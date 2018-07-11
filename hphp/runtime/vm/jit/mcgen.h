@@ -160,6 +160,11 @@ bool retranslateAllPending();
 bool pendingRetranslateAllScheduled();
 
 /*
+ * Is retranslateAll() finished.
+ */
+bool retranslateAllComplete();
+
+/*
  * How many JIT worker threads are active.
  */
 int getActiveWorker();

@@ -46,6 +46,8 @@ metavar string_literal ::=
   {{ coq string }} {{ com string literal }} {{ lex Alphanum }} {{ ocaml string }}
 metavar integer_literal ::=
   {{ coq nat }} {{ com integer literal }} {{ lex numeral }} {{ ocaml int }}
+metavar sfn ::=
+  {{ coq string }} {{ com shape field name }} {{ lex Alphanum }} {{ ocaml string }}
 metavar f {{ ocaml field_id }} ::= {{ coq string }} {{ com field identifier }} {{ ocaml string }}
 metavar x {{ ocaml lvar_id }} ::= {{ coq string }} {{ com local variable identifier }} {{ ocaml string }}
 metavar typeid ::=
@@ -90,9 +92,6 @@ id :: 'id_' ::= {{ com identifiers }}
 %% Keys
 
 {{ com \subhead{Syntax of keys} }}
-
-sfn {{ ocaml shape_field_name }} :: 'SF' ::= {{ com shape field names }}
-  | string_literal  :: :: lit {{ com literal }}
 
 sk {{ ocaml Shape_key }} :: 'SF' ::= {{ com shape keys }}
   | sfn        :: :: requiredkey {{ com required key }}
@@ -266,6 +265,7 @@ e {{ ocaml expr }} :: 'e_' ::= {{ com expressions }}
   | false                      ::   :: false          {{ com false value }}
   | string_literal             ::   :: string         {{ com string literal }}
   | integer_literal            ::   :: int            {{ com integer literal }}
+  | sfn                        ::   :: sfn            {{ com shape field name }}
   | $this                      ::   :: this           {{ com this value }} {{ tex \mathtt{\$this} }}
   | lvar                       ::   :: lvar           {{ com local variable }}
   | id                         ::   :: id             {{ com top-level function }}
@@ -1363,6 +1363,20 @@ G ; K[skip := G'] |- e : dynamic
 G' ; K |- < e1 : t1 , .. , en : tn , e' : (t1', .. , tm') >
 ----------------------------------------------------------- :: apply_dynamic_splat_tuple
 G ; K |- e ( e1 , .. , en , vardots e') : dynamic
+
+{{ com \subsection{Special function application} }}
+
+G ; K |- e : shape ( sfn => t , vardots )
+-------------------------------------------------- :: shapes_idx_required
+G ; K |- `Shapes` :: `idx` ( e , sfn ) : t
+
+G ; K |- e : shape ( ?sfn => t , vardots )
+-------------------------------------------------- :: shapes_idx_optional
+G ; K |- `Shapes` :: `idx` ( e , sfn ) : ? t
+
+G ; K |- < e1 : shape ( ?sfn => t , vardots) , e2 : t >
+-------------------------------------------------- :: shapes_idx_default
+G ; K |- `Shapes` :: `idx` ( e1 , sfn , e2 ) : t
 
 {{ com \subsection{Await} }}
 

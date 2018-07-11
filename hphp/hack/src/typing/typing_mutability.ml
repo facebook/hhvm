@@ -131,6 +131,7 @@ let check_function_return_value
 let expr_is_mutable
   (env : Typing_env.env) (e : T.expr) : bool =
  match snd e with
+ | T.Callconv (Ast.Pinout, (_, T.Lvar id))
  | T.Lvar id ->
     Env.is_mutable env (snd id)
  | T.This when Env.function_is_mutable env -> true

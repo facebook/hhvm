@@ -39,7 +39,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/conv-10.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/process.h"
 #include "hphp/util/thread-local.h"

@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_EVAL_CODE_COVERAGE_H_
 #define incl_HPHP_EVAL_CODE_COVERAGE_H_
 
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 
 #include <string>
 #include <vector>
@@ -60,7 +60,7 @@ struct CodeCoverage {
   void Reset();
 
 private:
-  typedef hphp_const_char_map<std::vector<int>> CodeCoverageMap;
+  using CodeCoverageMap = hphp_const_char_map<std::vector<int>>;
   CodeCoverageMap m_hits;
 };
 

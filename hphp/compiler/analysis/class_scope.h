@@ -28,7 +28,7 @@
 #include "hphp/compiler/statement/trait_prec_statement.h"
 
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/util/text-util.h"
 
 #include <list>

@@ -29,7 +29,7 @@
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/either.h"
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-set.h"
 
 namespace HPHP {
 

@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/types.h"
 
 #include "hphp/util/assertions.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-set.h"
 
 namespace HPHP { namespace jit {
 

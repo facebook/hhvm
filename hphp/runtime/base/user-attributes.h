@@ -22,7 +22,6 @@
 
 #include "hphp/util/copy-ptr.h"
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
 
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"

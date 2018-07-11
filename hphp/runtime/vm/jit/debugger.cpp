@@ -30,7 +30,7 @@
 
 #include "hphp/runtime/base/req-optional.h"
 
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-set.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/trace.h"

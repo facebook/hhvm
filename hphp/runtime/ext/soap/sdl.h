@@ -18,13 +18,12 @@
 #ifndef incl_HPHP_PHP_SDL_H
 #define incl_HPHP_PHP_SDL_H
 
-#include <unordered_map>
+#include "hphp/runtime/ext/soap/encoding.h"
+#include "hphp/runtime/base/http-client.h"
+#include "hphp/util/hash-map.h"
+
 #include <vector>
 #include <memory>
-
-#include "hphp/runtime/ext/soap/encoding.h"
-#include "hphp/util/hash-map-typedefs.h"
-#include "hphp/runtime/base/http-client.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // defines

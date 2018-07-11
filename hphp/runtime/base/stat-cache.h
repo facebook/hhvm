@@ -26,7 +26,7 @@
 
 #include <tbb/concurrent_hash_map.h>
 
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/util/lock.h"
 #include "hphp/runtime/base/atomic-shared-ptr.h"
 #include "hphp/runtime/base/atomic-countable.h"
@@ -41,11 +41,11 @@ struct StatCache {
   typedef AtomicSharedPtr<Node> NodePtr;
   typedef tbb::concurrent_hash_map<std::string, NodePtr,
                                    stringHashCompare> NameNodeMap;
-  typedef hphp_hash_map<int, NodePtr, int64_hash> WatchNodeMap;
+  using WatchNodeMap = hphp_hash_map<int, NodePtr, int64_hash>;
 
   struct Node : AtomicCountable {
-    typedef hphp_hash_map<std::string, NodePtr, string_hash> NameNodeMap;
-    typedef hphp_hash_map<std::string, void*, string_hash> NameMap;
+    using NameNodeMap = hphp_hash_map<std::string, NodePtr, string_hash>;
+    using NameMap = hphp_hash_map<std::string, void*, string_hash>;
 
     explicit Node(StatCache& statCache, int wd=-1);
     void atomicRelease();

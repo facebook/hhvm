@@ -17,14 +17,14 @@
 #ifndef incl_HPHP_JSON_H_
 #define incl_HPHP_JSON_H_
 
+#include "hphp/util/hash-map.h"
+
 #include <cassert>
 #include <map>
 #include <memory>
 #include <ostream>
 #include <set>
 #include <vector>
-
-#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP { namespace JSON {
 ///////////////////////////////////////////////////////////////////////////////

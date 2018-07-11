@@ -25,8 +25,6 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 
-#include "hphp/util/hash-map-typedefs.h"
-
 #include <folly/portability/Constexpr.h>
 
 namespace HPHP {

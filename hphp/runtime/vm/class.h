@@ -33,7 +33,7 @@
 
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/default-ptr.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 
 #include <folly/Hash.h>
 #include <folly/Range.h>
@@ -43,7 +43,6 @@
 #include <list>
 #include <memory>
 #include <type_traits>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 

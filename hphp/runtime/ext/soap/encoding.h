@@ -19,9 +19,9 @@
 #define PHP_ENCODING_H
 
 #include "hphp/runtime/ext/soap/xml.h"
-#include <memory>
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
+#include <memory>
 
 ///////////////////////////////////////////////////////////////////////////////
 // defines

@@ -13,54 +13,36 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_HASH_MAP_TYPEDEFS_H_
-#define incl_HPHP_HASH_MAP_TYPEDEFS_H_
+#ifndef incl_HPHP_HASH_SET_H_
+#define incl_HPHP_HASH_SET_H_
 
+#include "hphp/util/functional.h"
+#include "folly/container/F14Set.h"
 #include <functional>
 #include <string>
 
-#include "hphp/util/functional.h"
-
-#include "folly/container/F14Map.h"
-#include "folly/container/F14Set.h"
-
 namespace HPHP {
 
-//////////////////////////////////////////////////////////////////////
-
-template <class T, class U, class V=std::hash<T>, class W=std::equal_to<T>>
-using hphp_hash_map = folly::F14NodeMap<T,U,V,W>;
+// Similar ref/iter stability as std::unordered_set, and allocates each
+// instance of T separately, never moving.
 template <class T, class V=std::hash<T>, class W=std::equal_to<T>>
 using hphp_hash_set = folly::F14NodeSet<T,V,W>;
 
-// Dense variants move values on insert/rehash/erase. will use F14ValueMap
-// or F14VectorMap depending on value size.
-template <class T, class U, class V=std::hash<T>, class W=std::equal_to<T>>
-using hphp_fast_map = folly::F14FastMap<T,U,V,W>;
+// Fast sets do not have ref/iter stability on rehash, but allocate space
+// for values in bulk. Will use F14ValueSet or F14VectorSet depending on
+// sizeof(T).
 template <class T, class V=std::hash<T>, class W=std::equal_to<T>>
 using hphp_fast_set = folly::F14FastSet<T,V,W>;
 
 //////////////////////////////////////////////////////////////////////
 
 // std::string keyed tables, stable entries do not move on rehash.
-template<typename T>
-using hphp_string_map = hphp_hash_map<std::string, T, string_hash>;
 using hphp_string_set = hphp_hash_set<std::string, string_hash>;
-template<typename T>
-using hphp_string_imap =
-  hphp_hash_map<std::string, T, string_hashi, string_eqstri>;
 using hphp_string_iset =
   hphp_hash_set<std::string, string_hashi, string_eqstri>;
 
-// c_str-keyed tables, entries do not move on rehash
-template<typename T>
-using hphp_const_char_imap = hphp_hash_map<const char *, T, hashi, eqstri>;
+// c_str-keyed tables, entries do not move on rehash.
 using hphp_const_char_iset = hphp_hash_set<const char *, hashi, eqstri>;
-template<class T>
-using hphp_const_char_map = hphp_hash_map<const char*, T, cstr_hash, eqstr>;
-
-//////////////////////////////////////////////////////////////////////
 
 }
-
 #endif

@@ -18,7 +18,6 @@
 #define incl_HPHP_PROF_TRANS_DATA_H_
 
 #include "hphp/util/atomic-vector.h"
-#include "hphp/util/hash-map-typedefs.h"
 
 #include "hphp/runtime/base/rds.h"
 

@@ -22,7 +22,7 @@
 #include <list>
 
 #include "hphp/util/hphp-raw-ptr.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 
 //////////////////////////////////////////////////////////////////////
 

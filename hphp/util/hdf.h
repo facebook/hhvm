@@ -29,7 +29,7 @@
 
 #include "hphp/util/exception.h"
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

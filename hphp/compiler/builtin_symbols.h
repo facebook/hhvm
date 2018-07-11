@@ -17,10 +17,11 @@
 #ifndef incl_HPHP_BUILTIN_SYMBOLS_H_
 #define incl_HPHP_BUILTIN_SYMBOLS_H_
 
-#include <set>
-#include <string>
 
 #include "hphp/compiler/hphp.h"
+#include "hphp/util/hash-set.h"
+#include <set>
+#include <string>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

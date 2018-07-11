@@ -21,16 +21,17 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef hphp_hash_map<const StringData*, AnnotType, string_data_hash,
-  string_data_isame> HhvmStrToTypeMap;
+using HhvmStrToTypeMap = hphp_hash_map<
+  const StringData*, AnnotType, string_data_hash, string_data_isame
+>;
 
-typedef hphp_string_imap<AnnotType> StdStrToTypeMap;
+using StdStrToTypeMap = hphp_string_imap<AnnotType>;
 
 const StaticString
   s_HH_Traversable("HH\\Traversable"),

@@ -35,7 +35,8 @@
 #include "hphp/runtime/vm/unit.h"
 
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
+#include "hphp/util/hash-set.h"
 #include "hphp/util/md5.h"
 
 namespace HPHP {

@@ -15,12 +15,9 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/ext/soap/packet.h"
-
-#include <memory>
 #include "hphp/runtime/ext/soap/ext_soap.h"
-#include "hphp/util/hash-map-typedefs.h"
-
 #include "hphp/system/systemlib.h"
+#include <memory>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -28,7 +28,6 @@
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/typed-value.h"
 
-#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/type-scan.h"
 
 namespace HPHP {

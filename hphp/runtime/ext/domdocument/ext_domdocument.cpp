@@ -34,7 +34,7 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-set.h"
 #include "hphp/util/string-vsnprintf.h"
 
 #define DOM_XMLNS_NAMESPACE                             \

@@ -21,8 +21,6 @@
 
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include "hphp/util/hash-map-typedefs.h"
-
 namespace HPHP {
 struct Func;
 

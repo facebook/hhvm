@@ -31,7 +31,7 @@
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/util/lock-free-ptr-wrapper.h"
 #include "hphp/util/md5.h"
 #include "hphp/util/mutex.h"

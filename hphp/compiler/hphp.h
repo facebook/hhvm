@@ -19,7 +19,7 @@
 
 #include "hphp/util/deprecated/declare-boost-types.h"
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

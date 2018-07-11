@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/string-data.h"
 
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 
 namespace HPHP {
 

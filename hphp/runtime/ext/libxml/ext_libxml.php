@@ -1,6 +1,12 @@
 <?hh
 
 class LibXMLError {
+  public $level;
+  public $code;
+  public $column;
+  public $message;
+  public $file;
+  public $line;
 }
 
 /* Retrieve array of errors.

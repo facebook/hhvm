@@ -13,8 +13,8 @@
           ([3:46-48], (function(int): int));
           param_hint =
           (Some ([3:24-45],
-                 (Hfun (false, false, [([3:35-38], (Hprim Tint))], [None],
-                    Hnon_variadic, ([3:41-44], (Hprim Tint))))));
+                 (Hfun (FNonreactive, false, [([3:35-38], (Hprim Tint))],
+                    [None], Hnon_variadic, ([3:41-44], (Hprim Tint))))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [3:46-48]; param_name = "$f"; param_expr = None;
           param_callconv = None; param_user_attributes = [] }

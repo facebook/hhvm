@@ -8,8 +8,8 @@
          ([4:25-27], (function(int): bool));
          param_hint =
          (Some ([4:3-24],
-                (Hfun (false, false, [([4:13-16], (Hprim Tint))], [None],
-                   Hnon_variadic, ([4:19-23], (Hprim Tbool))))));
+                (Hfun (FNonreactive, false, [([4:13-16], (Hprim Tint))],
+                   [None], Hnon_variadic, ([4:19-23], (Hprim Tbool))))));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [4:25-27]; param_name = "$f"; param_expr = None;
          param_callconv = None; param_user_attributes = [] };
@@ -17,7 +17,7 @@
           ([5:33-35], (function(int, string): bool));
           param_hint =
           (Some ([5:3-32],
-                 (Hfun (false, false,
+                 (Hfun (FNonreactive, false,
                     [([5:13-16], (Hprim Tint)); ([5:18-24], (Hprim Tstring))],
                     [None; None], Hnon_variadic, ([5:27-31], (Hprim Tbool))))));
           param_is_reference = false; param_is_variadic = false;
@@ -27,7 +27,7 @@
           ([6:48-50], (function(int, string, num): Container<int>));
           param_hint =
           (Some ([6:3-47],
-                 (Hfun (false, false,
+                 (Hfun (FNonreactive, false,
                     [([6:13-16], (Hprim Tint)); ([6:18-24], (Hprim Tstring));
                       ([6:26-29], (Hprim Tnum))],
                     [None; None; None], Hnon_variadic,
@@ -42,8 +42,8 @@
           ([7:25-27], (function(num): bool));
           param_hint =
           (Some ([7:3-24],
-                 (Hfun (false, false, [([7:13-16], (Hprim Tnum))], [None],
-                    Hnon_variadic, ([7:19-23], (Hprim Tbool))))));
+                 (Hfun (FNonreactive, false, [([7:13-16], (Hprim Tnum))],
+                    [None], Hnon_variadic, ([7:19-23], (Hprim Tbool))))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [7:25-27]; param_name = "$i"; param_expr = None;
           param_callconv = None; param_user_attributes = [] };

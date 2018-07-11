@@ -36,7 +36,7 @@ class type ['a] hint_visitor_type = object
   method on_option : 'a -> Nast.hint -> 'a
   method on_param_kind : 'a -> Ast.param_kind -> 'a
   method on_fun    : 'a ->
-                     bool ->
+                     Nast.func_reactive ->
                      bool ->
                      Nast.hint list ->
                      Ast.param_kind option list ->

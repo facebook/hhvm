@@ -2,7 +2,7 @@
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret =
       (Some ([3:18-20],
-             (Hfun (true, false, [([3:32-35], (Hprim Tint))], [None],
+             (Hfun (FReactive, false, [([3:32-35], (Hprim Tint))], [None],
                 Hnon_variadic, ([3:39-43], (Hprim Tvoid))))));
       f_name = ([3:10-13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];

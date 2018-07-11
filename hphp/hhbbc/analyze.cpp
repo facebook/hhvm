@@ -95,11 +95,12 @@ State entry_state(const Index& index, Context const ctx,
       if (locId < knownArgs->size()) {
         if (ctx.func->params[locId].isVariadic) {
           std::vector<Type> pack(knownArgs->begin() + locId, knownArgs->end());
+          for (auto& p : pack) p = unctx(std::move(p));
           ret.locals[locId] = RuntimeOption::EvalHackArrDVArrs
             ? vec(std::move(pack))
             : arr_packed_varray(std::move(pack));
         } else {
-          ret.locals[locId] = (*knownArgs)[locId];
+          ret.locals[locId] = unctx((*knownArgs)[locId]);
         }
       } else {
         ret.locals[locId] = ctx.func->params[locId].isVariadic

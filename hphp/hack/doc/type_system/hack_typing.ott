@@ -234,8 +234,10 @@ contkind :: 'Cont_' ::=
 
 %%% Elements of class definitions
 member :: 'member_' ::= {{ com property or method definition }}
-  | function id F block :: :: instance {{ com instance method }}
-  | static function id F block :: :: static {{ com static method }}
+  | t $ x ; :: :: instance_property {{ com instance property }} {{ tex [[t]]\;\$[[x]]; }}
+  | static t $ x ; :: :: static_property {{ com static property }} {{ tex [[static]]\;[[t]]\;\$[[x]]; }}
+  | function id F block :: :: instance_method {{ com instance method }}
+  | static function id F block :: :: static_method {{ com static method }}
 
 members :: 'members_' ::= {{ com non-constructor members of a class }}
   | member1 .. membern :: :: list
@@ -267,8 +269,10 @@ e {{ ocaml expr }} :: 'e_' ::= {{ com expressions }}
   | $this                      ::   :: this           {{ com this value }} {{ tex \mathtt{\$this} }}
   | lvar                       ::   :: lvar           {{ com local variable }}
   | id                         ::   :: id             {{ com top-level function }}
-  | e1 -> e2                   ::   :: obj_get        {{ com method or property access }}
-  | e1 ?-> e2                  ::   :: nullsafe_obj_get {{ com nullsafe access }}
+  | e -> x                     ::   :: obj_get        {{ com property access }}
+  | e -> id ( args )           ::   :: method_call    {{ com method call }}
+  | e ?-> x                    ::   :: nullsafe_obj_get {{ com nullsafe property access }}
+  | e ?-> id ( args )          ::   :: nullsafe_method_call {{ com nullsafe method call }}
   | e1 [ e2 ]                  ::   :: array_get      {{ com array indexing }}
   | e []                       ::   :: array_append   {{ com array appending }}
   | tuple ( e1 , ... , en )    ::   :: tuple          {{ com tuple }}
@@ -1283,6 +1287,18 @@ class C < var1 T1 constraint1, .. , varm Tm constraintm > cextends cimpls { func
 --------------------------------------------------------------- :: new
 G ; K |- new C ( e1 , .. , en ) : # C < t1 , .. , tm >
 
+{{ com \subsection{Property access} }}
+
+G ; K |- e : u
+G |- u -> x : t
+------------------- :: property_access
+G ; K |- e -> x : t
+
+G ; K |- e : ? u
+G |- u -> x : t
+---------------------- :: nullsafe_property_access
+G ; K |- e ?-> x : ? t
+
 {{ com \subsection{Function application} }}
 
 {{ com Function application is complicated by the possibility of
@@ -1365,6 +1381,25 @@ t1 awaits t1'
 t2 awaits t2'
 ------------------------------- :: union
 t1 | t2 awaits t1' | t2'
+
+{{ com \section*{Types with properties} }}
+{{ com \addcontentsline{toc}{section}{Types with properties} }}
+
+defn
+  G |- u -> x : t :: :: property :: 'property_'
+  {{ com under locals [[G]], type [[u]] has property [[x]] of type [[t]] }}
+by
+
+class C < var1 T1 constraint1 , .. , varm Tm constraintm > cextends cimpls { constructor t $ x ; member1 .. membern }
+----------------------------------------------------------- :: exact_class
+G |- # C < t1 , .. , tm > -> x : { t1 / T1 , .. , tm / Tm } { # C < t1 , .. , tm > / this } t
+
+G |- u1 -> x : t1
+G |- u2 -> x : t2
+------------------------------- :: union
+G |- ( u1 | u2 ) -> x : t1 | t2
+
+{{ com TODO: use of $[[this]]$ type in the type of a property }}
 
 {{ com \section*{Expression refinement} }}
 {{ com \addcontentsline{toc}{section}{Expression refinement} }}

@@ -1366,6 +1366,14 @@ G ; K |- e ( e1 , .. , en , vardots e') : dynamic
 
 {{ com \subsection{Special function application} }}
 
+G ; K |- < e1 : ? `KeyedContainer` < t , u > , e2 : ? t >
+-------------------------------------------------- :: idx
+G ; K |- `idx` ( e1 , e2 ) : ? u
+
+G ; K |- < e1 : ? `KeyedContainer` < t , u > , e2 : ? t , e3 : u >
+-------------------------------------------------- :: idx_default
+G ; K |- `idx` ( e1 , e2 , e3 ) : u
+
 G ; K |- e : shape ( sfn => t , vardots )
 -------------------------------------------------- :: shapes_idx_required
 G ; K |- `Shapes` :: `idx` ( e , sfn ) : t

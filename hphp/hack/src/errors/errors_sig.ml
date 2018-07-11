@@ -574,4 +574,5 @@ module type S = sig
   val immutable_call_on_mutable: Pos.t -> Pos.t -> unit
   val invalid_call_on_maybe_mutable: fun_is_mutable:bool -> Pos.t -> Pos.t -> unit
   val mutability_mismatch: is_receiver: bool -> Pos.t -> string -> Pos.t -> string -> unit
+  val invalid_traversable_in_rx: Pos.t -> unit
 end

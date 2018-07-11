@@ -855,6 +855,7 @@ and stmt env = function
       else f() in
     (* It's safe to do foreach over a disposable, as no leaking is possible *)
     let env, te1, ty1 = expr ~accept_using_var:true env e1 in
+    TR.check_foreach_collection env (fst e1) ty1;
     let env, (te1, te2, tb) = LEnv.stash_and_do env [C.Continue; C.Break]
       (fun env ->
         let env = LEnv.save_and_merge_next_in_cont env C.Continue in

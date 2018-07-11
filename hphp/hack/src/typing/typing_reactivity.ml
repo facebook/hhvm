@@ -279,6 +279,32 @@ let disallow_static_or_global_in_reactive_context ~is_static env el =
       else Errors.global_in_reactive_context p name)
   end
 
+let rxTraversableType =
+  Reason.none,
+  Tclass ((Pos.none, Naming_special_names.Rx.cTraversable), [(Reason.Rnone, Tany)])
+
+let check_foreach_collection env p t =
+  (* do nothing if unsafe_rx is set *)
+  if TypecheckerOptions.unsafe_rx (Env.get_options env) then ()
+  else
+  match Env.env_reactivity env with
+  | Nonreactive | Local _ -> ()
+  | _ ->
+  let rec check t =
+    let env, t = Env.expand_type env t in
+    match t with
+    | _, Tunresolved l -> Core_list.for_all l ~f:check
+    | t ->
+      (* collection type should be subtype or conditioned to Rx\Traversable *)
+      if not (SubType.is_sub_type env t rxTraversableType ||
+              condition_type_matches ~is_self:false env t rxTraversableType)
+      then begin
+        Errors.invalid_traversable_in_rx p;
+        false
+      end
+      else true in
+  ignore (check t)
+
 let disallow_onlyrx_if_rxfunc_on_non_functions env param param_ty =
   let module UA = Naming_special_names.UserAttributes in
   if Attributes.mem UA.uaOnlyRxIfRxFunc param.Nast.param_user_attributes

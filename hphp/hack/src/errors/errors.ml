@@ -3238,6 +3238,11 @@ let type_test_in_lambda pos op =
     cleaned up automatically."
   )
 
+let invalid_traversable_in_rx pos =
+  add (Typing.err_code Typing.InvalidTraversableInRx) pos (
+    "Cannot traverse over non-reactive traversable in reactive code."
+  )
+
 let forward_compatibility_not_current pos value =
   let current = ForwardCompatibilityLevel.current in
   add (Init.err_code Init.ForwardCompatibilityNotCurrent)

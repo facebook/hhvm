@@ -35,6 +35,7 @@ type env =
   ; stats                    : Stats_container.t option
   ; hacksperimental          : bool
   ; top_level_statements     : bool (* Whether we are (still) considering TLSs*)
+  ; inside_declare           : bool (* Whether we're inside a declare directive. *)
   (* Changing parts; should disappear in future. `mutable` saves allocations. *)
   ; mutable ignore_pos       : bool
   ; mutable max_depth        : int    (* Filthy hack around OCaml bug *)
@@ -96,6 +97,7 @@ let make_env
     ; stats
     ; hacksperimental
     ; top_level_statements = true
+    ; inside_declare = false
     ; ignore_pos
     ; max_depth = 42
     ; saw_yield = false
@@ -184,12 +186,18 @@ let pPos : Pos.t parser = fun node env ->
   then Pos.none
   else Option.value ~default:Pos.none (position_exclusive env.file node)
 
-let raise_parsing_error env node msg =
+let raise_parsing_error env node_or_pos msg =
   if not env.quick_mode && env.keep_errors then
-    let p = pPos node env in
+    let p = match node_or_pos with
+      | `Pos pos -> pos
+      | `Node node -> pPos node env
+    in
     Errors.parsing_error (p, msg)
   else if env.codegen && not env.lower_coroutines then
-    let p = (Option.value (position env.file node) ~default:Pos.none) in
+    let p = match node_or_pos with
+      | `Pos pos -> pos
+      | `Node node -> (Option.value (position env.file node) ~default:Pos.none)
+    in
     let (s, e) = Pos.info_raw p in
     let e = SyntaxError.make ~error_type:SyntaxError.ParseError s e msg in
     raise @@ SyntaxError.ParserFatal (e, p)
@@ -372,13 +380,13 @@ let pBop : (expr -> expr -> expr_) parser = fun node env lhs rhs ->
   | Some TK.Minus                       -> Binop (Minus,             lhs, rhs)
   | Some TK.Star                        -> Binop (Star,              lhs, rhs)
   | Some TK.Or                          ->
-    if not env.codegen then raise_parsing_error env node SyntaxError.do_not_use_or;
+    if not env.codegen then raise_parsing_error env (`Node node) SyntaxError.do_not_use_or;
     Binop (BArbar,            lhs, rhs)
   | Some TK.And                         ->
-    if not env.codegen then raise_parsing_error env node SyntaxError.do_not_use_and;
+    if not env.codegen then raise_parsing_error env (`Node node) SyntaxError.do_not_use_and;
     Binop (AMpamp,            lhs, rhs)
   | Some TK.Xor                         ->
-    if not env.codegen then raise_parsing_error env node SyntaxError.do_not_use_xor;
+    if not env.codegen then raise_parsing_error env (`Node node) SyntaxError.do_not_use_xor;
     Binop (LogXor,            lhs, rhs)
   | Some TK.Carat                       -> Binop (Xor,               lhs, rhs)
   | Some TK.Slash                       -> Binop (Slash,             lhs, rhs)
@@ -492,7 +500,7 @@ let prepString2 env : node list -> node list =
         let s = make_token (trimRight ~n:1 t) in
         if width s > 0 then [s] else []
       | x :: xs -> x :: unwind xs
-      | _ -> raise_parsing_error env node "Malformed String2 SyntaxList"; []
+      | _ -> raise_parsing_error env (`Node node) "Malformed String2 SyntaxList"; []
     in
     (* Trim the starting b and double quote *)
     let left_trim = if (Token.text t).[0] = 'b' then 2 else 1 in
@@ -508,7 +516,7 @@ let prepString2 env : node list -> node list =
         let s = make_token (trimRight ~n t) in
         if width s > 0 then [s] else []
       | x :: xs -> x :: unwind xs
-      | _ -> raise_parsing_error env node "Malformed String2 SyntaxList"; []
+      | _ -> raise_parsing_error env (`Node node) "Malformed String2 SyntaxList"; []
     in
     let content = Token.text t in
     let n = (String.index content '\n') + 1 in
@@ -549,7 +557,7 @@ let mkStr env node : (string -> string) -> string -> string = fun unescaper cont
   try unescaper no_quotes with
   | Php_escaping.Invalid_string _ ->
     raise_parsing_error env
-      node (Printf.sprintf "Malformed string literal <<%s>>" no_quotes);
+      (`Node node) (Printf.sprintf "Malformed string literal <<%s>>" no_quotes);
     ""
 
 let unempty_str = function
@@ -577,7 +585,7 @@ let mk_suspension_kind_ node env has_async has_coroutine =
   | true, false -> SKAsync
   | false, true -> SKCoroutine
   | true, true ->
-    raise_parsing_error env node "Coroutine functions may not be async";
+    raise_parsing_error env (`Node node) "Coroutine functions may not be async";
     SKCoroutine
 
 let mk_suspension_kind node env is_async is_coroutine =
@@ -637,7 +645,7 @@ let pShapeFieldName : shape_field_name parser = fun name env ->
            Token.kind t = TK.DoubleQuotedStringLiteral ->
     let p, n = pos_name name env in SFlit (p, mkStr env name unesc_dbl n)
   | _ ->
-    raise_parsing_error env name SyntaxError.invalid_shape_field_name;
+    raise_parsing_error env (`Node name) SyntaxError.invalid_shape_field_name;
     missing_syntax "shape field name" name env
 
 let mpShapeExpressionField : ('a, (shape_field_name * 'a)) metaparser =
@@ -709,7 +717,7 @@ let rec pHint : hint parser = fun node env ->
       (* if last element lacks a separator and ellipsis is present, error *)
       Option.iter (List.last (syntax_to_list true shape_type_fields)) (fun last ->
         if is_missing last && si_allows_unknown_fields then
-        raise_parsing_error env node SyntaxError.shape_type_ellipsis_without_trailing_comma
+        raise_parsing_error env (`Node node) SyntaxError.shape_type_ellipsis_without_trailing_comma
       );
       let si_shape_field_list =
         couldMap ~f:(mpShapeField pHint) shape_type_fields env in
@@ -837,7 +845,7 @@ let empty_fun_hdr =
 
 let prevent_intrinsic_generic env node ty =
   if not (is_missing ty) && not env.codegen then
-    raise_parsing_error env node SyntaxError.collection_intrinsic_generic
+    raise_parsing_error env (`Node node) SyntaxError.collection_intrinsic_generic
 
 let rec pSimpleInitializer node env =
   match syntax node with
@@ -850,13 +858,13 @@ and pFunParamDefaultValue node env =
   | SimpleInitializer { simple_initializer_value; _ } ->
     begin match syntax simple_initializer_value with
     | ListExpression _ ->
-      raise_parsing_error env node (SyntaxError.invalid_default_argument "A list destructuring")
+      raise_parsing_error env (`Node node) (SyntaxError.invalid_default_argument "A list destructuring")
     | YieldExpression _
     | YieldFromExpression _ ->
-      raise_parsing_error env node (SyntaxError.invalid_default_argument "A yield")
+      raise_parsing_error env (`Node node) (SyntaxError.invalid_default_argument "A yield")
     | PrefixUnaryExpression {
       prefix_unary_operator = { syntax = Token t; _ }; _ } when Token.kind t = TK.Await ->
-      raise_parsing_error env node (SyntaxError.invalid_default_argument "An await")
+      raise_parsing_error env (`Node node) (SyntaxError.invalid_default_argument "An await")
     | _ -> () end;
     mpOptional pExpr simple_initializer_value env
   | _ -> None
@@ -1288,7 +1296,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           | p, Int s
           | p, Float s when location <> InGlobalVar ->
             if not env.codegen
-            then raise_parsing_error env operator SyntaxError.invalid_variable_name;
+            then raise_parsing_error env (`Node operator) SyntaxError.invalid_variable_name;
             Lvar (p, "$" ^ s)
           | _ -> Dollar expr
           )
@@ -1298,12 +1306,20 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
     | BinaryExpression
       { binary_left_operand; binary_operator; binary_right_operand }
       ->
-        let rlocation =
-          if location = AsStatement && token_kind binary_operator = Some TK.Equal
-          then RightOfAssignment else TopLevel in
-        pBop binary_operator env
-          (pExpr binary_left_operand  env)
-          (pExpr binary_right_operand ~location:rlocation env)
+        let bop_ast_node =
+          let rlocation =
+            if location = AsStatement && token_kind binary_operator = Some TK.Equal
+            then RightOfAssignment else TopLevel in
+          pBop binary_operator env
+            (pExpr binary_left_operand  env)
+            (pExpr binary_right_operand ~location:rlocation env)
+        in
+        begin match env.inside_declare, bop_ast_node with
+        | false, Binop (Eq _, lhs, _) ->
+          Ast_check.check_lvalue (fun pos error -> raise_parsing_error env (`Pos pos) error) lhs
+        | _ -> ()
+        end;
+        bop_ast_node
 
     | Token t ->
       (match location, Token.kind t with
@@ -1325,7 +1341,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
     | YieldExpression { yield_operand; _ } ->
       env.saw_yield <- true;
       if location <> AsStatement && location <> RightOfAssignment
-      then raise_parsing_error env node SyntaxError.invalid_yield;
+      then raise_parsing_error env (`Node node) SyntaxError.invalid_yield;
       if text yield_operand = "break"
       then Yield_break
       else
@@ -1336,7 +1352,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
     | YieldFromExpression { yield_from_operand; _ } ->
       env.saw_yield <- true;
       if location <> AsStatement && location <> RightOfAssignment && location <> RightOfReturn
-      then raise_parsing_error env node SyntaxError.invalid_yield_from;
+      then raise_parsing_error env (`Node node) SyntaxError.invalid_yield_from;
       Yield_from (pExpr yield_from_operand env)
 
     | DefineExpression { define_keyword; define_argument_list; _ } -> Call
@@ -1480,7 +1496,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | _, Some TK.OctalLiteral
           when is_typechecker env &&
             String_utils.fold_left ~f:(fun b c -> b || c = '8' || c = '9') ~acc:false s ->
-          raise_parsing_error env node SyntaxError.invalid_octal_integer;
+          raise_parsing_error env (`Node node) SyntaxError.invalid_octal_integer;
           missing_syntax "octal int" expr env (* this should never get hit *)
         | _, Some TK.DecimalLiteral
         | _, Some TK.OctalLiteral
@@ -1510,13 +1526,15 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           | _       -> missing_syntax ("boolean (not: " ^ s ^ ")") expr env
           )
         | _, Some TK.ExecutionStringLiteral ->
-          if is_typechecker env then raise_parsing_error env node SyntaxError.execution_operator;
+          if is_typechecker env then
+            raise_parsing_error env (`Node node) SyntaxError.execution_operator;
           Execution_operator [pos, String (mkStr env expr Php_escaping.unescape_backtick s)]
         | _ -> missing_syntax "literal" expr env
         )
       | SyntaxList ({ syntax = Token token; _ } :: _ as ts)
         when Token.kind token = TK.ExecutionStringLiteralHead ->
-        if is_typechecker env then raise_parsing_error env node SyntaxError.execution_operator;
+        if is_typechecker env then
+          raise_parsing_error env (`Node node) SyntaxError.execution_operator;
         Execution_operator (pString2 InBacktickedString (prepString2 env ts) env)
       | SyntaxList ts -> String2 (pString2 InDoubleQuotedString (prepString2 env ts) env)
       | _ -> missing_syntax "literal expression" expr env
@@ -1527,7 +1545,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         (* Temporarily allow only`re`- prefixed strings *)
         let name_text = text name in
         if name_text <> "re"
-        then raise_parsing_error env node SyntaxError.non_re_prefix;
+        then raise_parsing_error env (`Node node) SyntaxError.non_re_prefix;
         PrefixedString (text name, pExpr str env)
     | InstanceofExpression
       { instanceof_left_operand; instanceof_right_operand; _ } ->
@@ -1577,7 +1595,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       ; _ } ->
         begin match syntax node with
           | Php7AnonymousFunction _ when is_typechecker env ->
-            raise_parsing_error env node SyntaxError.php7_anonymous_function
+            raise_parsing_error env (`Node node) SyntaxError.php7_anonymous_function
           | _ -> ()
         end;
         let pArg node env =
@@ -1808,7 +1826,7 @@ and pStmt : stmt parser = fun node env ->
   let result = match syntax node with
   | AlternateElseClause _ | AlternateIfStatement _ | AlternateElseifClause _
   | AlternateLoopStatement _  when is_typechecker env ->
-    raise_parsing_error env node SyntaxError.alternate_control_flow;
+    raise_parsing_error env (`Node node) SyntaxError.alternate_control_flow;
     missing_syntax "alternative control flow" node env (* this should never get hit *)
   | SwitchStatement { switch_expression=expr; switch_sections=sections; _ }
   | AlternateSwitchStatement { alternate_switch_expression=expr;
@@ -1830,7 +1848,7 @@ and pStmt : stmt parser = fun node env ->
         let rec null_out cont = function
           | [x] -> [x cont]
           | (x::xs) -> x [] :: null_out cont xs
-          | _ -> raise_parsing_error env node "Malformed block result"; []
+          | _ -> raise_parsing_error env (`Node node) "Malformed block result"; []
         in
         let blk = List.concat @@
           couldMap ~f:pStmtUnsafe switch_section_statements env in
@@ -1907,8 +1925,9 @@ and pStmt : stmt parser = fun node env ->
   | WhileStatement { while_condition; while_body; _ } ->
     pos, While (pExpr while_condition env, unwrap_extra_block @@ pStmtUnsafe while_body env)
   | DeclareDirectiveStatement { declare_directive_expression; _ } ->
-    pos, Declare (false, pExpr declare_directive_expression env, [])
+    pos, Declare (false, pExpr declare_directive_expression { env with inside_declare = true }, [])
   | DeclareBlockStatement { declare_block_expression; declare_block_body; _ } ->
+    let env = { env with inside_declare = true } in
     pos, Declare (true, pExpr declare_block_expression env,
              unwrap_extra_block @@ pStmtUnsafe declare_block_body env)
   | UsingStatementBlockScoped
@@ -2084,9 +2103,9 @@ and pMarkup node env =
     if env.is_hh_file then
       if (is_missing markup_prefix) &&
       (width markup_text) > 0 && not (is_hashbang markup_text) then
-        raise_parsing_error env node SyntaxError.error1001
+        raise_parsing_error env (`Node node) SyntaxError.error1001
       else if (token_kind markup_prefix) = Some TK.QuestionGreaterThan then
-        raise_parsing_error env node SyntaxError.error2067;
+        raise_parsing_error env (`Node node) SyntaxError.error2067;
     let expr =
       match syntax markup_expression with
       | Missing -> None
@@ -2155,7 +2174,7 @@ and pFunHdr check_modifier : fun_hdr parser = fun node env ->
           = Naming_special_names.SpecialFunctions.autoload in
       let num_params = List.length (syntax_to_list_no_separators function_parameter_list) in
       if is_autoload && num_params > 1 then
-        raise_parsing_error env node SyntaxError.autoload_takes_one_argument;
+        raise_parsing_error env (`Node node) SyntaxError.autoload_takes_one_argument;
       let modifiers = pModifiers check_modifier function_modifiers env in
       let fh_parameters = couldMap ~f:pFunParam function_parameter_list env in
       let fh_return_type = mpOptional pHint function_type env in
@@ -2364,8 +2383,7 @@ and pClassElt : class_elt list parser = fun node env ->
       let doc_comment_opt = extract_docblock node in
       let check_modifier node =
         if is_final node
-        then raise_parsing_error env node SyntaxError.final_property in
-
+        then raise_parsing_error env (`Node node) SyntaxError.final_property in
       [ ClassVars
         { cv_kinds = pKinds check_modifier property_modifiers env
         ; cv_hint = mpOptional pHint property_type env
@@ -2492,7 +2510,7 @@ and pClassElt : class_elt list parser = fun node env ->
           match modifier with
           | Public | Private | Protected | Final ->  ();
           | _ ->
-            raise_parsing_error env node
+            raise_parsing_error env (`Node node)
               SyntaxError.trait_alias_rule_allows_only_final_and_visibility_modifiers
         );
         let is_visibility = function
@@ -2641,7 +2659,7 @@ and pDef : def list parser = fun node env ->
     { function_attribute_spec; function_declaration_header; function_body } ->
       let env = non_tls env in
       let check_modifier node =
-        raise_parsing_error env node (SyntaxError.function_modifier (text node)) in
+        raise_parsing_error env (`Node node) (SyntaxError.function_modifier (text node)) in
       let hdr = pFunHdr check_modifier function_declaration_header env in
       let block, yield =
         if is_semicolon function_body then [], false else

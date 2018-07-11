@@ -1,2 +1,2 @@
 File "immutable_catch_mutation.php", line 7, characters 5-5:
-Let variables are immutable. Using let variable e in write context is not allowed. (Typing[4244])
+Invalid lvalue (Parsing[1002])

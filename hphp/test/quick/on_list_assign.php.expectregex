@@ -1,0 +1,2 @@
+
+Fatal error\: (Can't use return value in write context|Invalid lvalue) in [^\r\n]+\/test\/quick\/on_list_assign\.php on line 12

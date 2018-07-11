@@ -605,6 +605,7 @@ let _ =
        it breaks the testsuite where the output is compared to the
        expected one (i.e. in given file without CRLF). *)
       set_binary_mode_out stdout true;
+    let _handle = SharedMem.init GlobalConfig.default_sharedmem_config in
     let options = parse_options () in
     main_hack options
   with exc ->

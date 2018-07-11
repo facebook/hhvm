@@ -1,2 +1,2 @@
 File "let_assign.php", line 5, characters 3-3:
-Let variables are immutable. Using let variable x in write context is not allowed. (Typing[4244])
+Invalid lvalue (Parsing[1002])

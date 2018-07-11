@@ -28,7 +28,10 @@ struct vector final : std::vector<T, ConservativeAllocator<T>> {
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
-    for (const auto& v : *this) scanner.scan(v);
+    // std::vector guarantees the values are contiguous
+    if (auto n = Base::size()) {
+      scanner.scan(*Base::data(), n * sizeof(T));
+    }
   }
 };
 

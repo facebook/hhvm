@@ -273,6 +273,8 @@ e {{ ocaml expr }} :: 'e_' ::= {{ com expressions }}
   | e -> id ( args )           ::   :: method_call    {{ com method call }}
   | e ?-> x                    ::   :: nullsafe_obj_get {{ com nullsafe property access }}
   | e ?-> id ( args )          ::   :: nullsafe_method_call {{ com nullsafe method call }}
+  | N '::' x                   ::   :: class_get      {{ com static property access }}
+  | N '::' id ( args )         ::   :: static_method_call {{ com static method call }}
   | e1 [ e2 ]                  ::   :: array_get      {{ com array indexing }}
   | e []                       ::   :: array_append   {{ com array appending }}
   | tuple ( e1 , ... , en )    ::   :: tuple          {{ com tuple }}
@@ -1298,6 +1300,13 @@ G ; K |- e : ? u
 G |- u -> x : t
 ---------------------- :: nullsafe_property_access
 G ; K |- e ?-> x : ? t
+
+{{ com \subsection{Static property access} }}
+
+C' inst' <:: C inst
+class C typarams cextends cimpls { constructor static t $ x ; member1 .. membern }
+---------------------------------------------------------------------------------- :: static_property_access
+G ; K |- C' :: x : t
 
 {{ com \subsection{Function application} }}
 

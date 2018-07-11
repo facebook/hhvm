@@ -317,7 +317,8 @@ void analyze_iteratively(Index& index, php::Program& program,
 
     auto update_func = [&] (const FuncAnalysisResult& fa) {
       index.refine_effect_free(fa.ctx.func, fa.effectFree);
-      index.refine_return_type(fa.ctx.func, fa.inferredReturn, deps);
+      index.refine_return_type(fa.ctx.func, fa.inferredReturn,
+                               fa.retParam, deps);
       index.refine_constants(fa, deps);
       index.refine_local_static_types(fa.ctx.func, fa.localStaticTypes);
       if (fa.resolvedConstants.size()) {

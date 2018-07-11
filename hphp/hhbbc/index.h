@@ -821,7 +821,8 @@ struct Index {
    * Merges the set of Contexts that depended on the return type of
    * this php::Func into deps.
    */
-  void refine_return_type(borrowed_ptr<const php::Func>, Type,
+  void refine_return_type(borrowed_ptr<const php::Func>,
+                          Type, LocalId,
                           DependencyContextSet& deps);
 
   /*

@@ -1587,7 +1587,11 @@ void in(ISS& env, const bc::SSwitch& op) {
 }
 
 void in(ISS& env, const bc::RetC& /*op*/) {
+  auto const locEquiv = topStkLocal(env);
   doRet(env, popC(env), false);
+  if (locEquiv != NoLocalId && locEquiv < env.ctx.func->params.size()) {
+    env.flags.retParam = locEquiv;
+  }
 }
 void in(ISS& env, const bc::RetV& /*op*/) {
   doRet(env, popV(env), false);
@@ -4653,6 +4657,11 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
       FTRACE(2, "  returned {}\n", show(*flags.returned));
       always_assert(iter == stop);
       always_assert(interp.blk->fallthrough == NoBlockId);
+      if (!ret.returned) {
+        ret.retParam = flags.retParam;
+      } else if (ret.retParam != flags.retParam) {
+        ret.retParam = NoLocalId;
+      }
       ret.returned = flags.returned;
       return ret;
     }

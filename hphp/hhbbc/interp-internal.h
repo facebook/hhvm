@@ -235,6 +235,7 @@ void bindLocalStatic(ISS& env, LocalId id, const Type& t) {
 void doRet(ISS& env, Type t, bool hasEffects) {
   readAllLocals(env);
   assert(env.state.stack.empty());
+  env.flags.retParam = NoLocalId;
   env.flags.returned = t;
   if (hasEffects) return;
   nothrow(env);

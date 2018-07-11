@@ -382,6 +382,15 @@ FuncAnalysis do_analyze_collect(const Index& index,
 
       if (flags.returned) {
         ai.inferredReturn |= std::move(*flags.returned);
+        if (flags.retParam == NoLocalId) {
+          ai.retParam = NoLocalId;
+        } else if (ai.retParam != flags.retParam) {
+          if (ai.retParam != MaxLocalId) {
+            ai.retParam = NoLocalId;
+          } else {
+            ai.retParam = flags.retParam;
+          }
+        }
       }
     }
 

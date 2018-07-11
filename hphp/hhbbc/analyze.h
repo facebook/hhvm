@@ -59,12 +59,6 @@ struct FuncAnalysisResult {
   Context ctx;
 
   /*
-   * The inferred function return type.  May be TBottom if the
-   * function never returns.
-   */
-  Type inferredReturn;
-
-  /*
    * If this function allocates closures, this maps each of those
    * closure classes to the types of its used variables, in their
    * declared order.
@@ -76,6 +70,19 @@ struct FuncAnalysisResult {
    * function could define.
    */
   ConstantMap cnsMap;
+
+  /*
+   * The inferred function return type.  May be TBottom if the
+   * function never returns.
+   */
+  Type inferredReturn;
+
+  /*
+   * If the function returns one of its parameters, the index of that
+   * parameter. MaxLocalId and above indicate that it doesn't return a
+   * parameter.
+   */
+  LocalId retParam{MaxLocalId};
 
   /*
    * Reads a constant thats not in the index (yet - this can only

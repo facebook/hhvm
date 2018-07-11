@@ -295,6 +295,12 @@ struct res::Func::FuncInfo {
   Type returnTy = TInitGen;
 
   /*
+   * If the function always returns the same parameter, this will be
+   * set to its id; otherwise it will be NoLocalId.
+   */
+  LocalId retParam{NoLocalId};
+
+  /*
    * The number of times we've refined returnTy.
    */
   uint32_t returnRefinments{0};
@@ -3086,33 +3092,45 @@ Type context_sensitive_return_type(const Index& index,
 
   auto const returnType = return_with_context(finfo->returnTy, callCtx.context);
 
+  auto checkParam = [&] (int i) {
+    if (RuntimeOption::EvalHardTypeHints) {
+      auto const constraint = finfo->func->params[i].typeConstraint;
+      if (constraint.hasConstraint() &&
+          !constraint.isTypeVar() &&
+          !constraint.isTypeConstant()) {
+        auto ctx = Context {
+          finfo->func->unit,
+          const_cast<php::Func*>(finfo->func),
+          finfo->func->cls
+        };
+        auto t = loosen_dvarrayness(index.lookup_constraint(ctx, constraint));
+        if (!callCtx.args[i].moreRefined(t)) return true;
+        if (!callCtx.args[i].equivalentlyRefined(t)) return true;
+        return false;
+      }
+    }
+    return callCtx.args[i].strictSubtypeOf(TInitCell);
+  };
+
   // TODO(#3788877): more heuristics here would be useful.
   bool const tryContextSensitive = [&] {
-    if (!options.ContextSensitiveInterp ||
-        finfo->func->params.empty() ||
+    if (finfo->func->params.empty() ||
         interp_nesting_level + 1 >= max_interp_nexting_level ||
         returnType == TBottom) {
       return false;
     }
 
+    if (finfo->retParam != NoLocalId &&
+        callCtx.args.size() > finfo->retParam &&
+        checkParam(finfo->retParam)) {
+      return true;
+    }
+
+    if (!options.ContextSensitiveInterp) return false;
+
     if (callCtx.args.size() < finfo->func->params.size()) return true;
-    auto ctx = Context {
-      finfo->func->unit,
-      const_cast<php::Func*>(finfo->func),
-      finfo->func->cls
-    };
     for (auto i = 0; i < finfo->func->params.size(); i++) {
-      if (RuntimeOption::EvalHardTypeHints) {
-        auto const constraint = finfo->func->params[i].typeConstraint;
-        if (constraint.hasConstraint() && !constraint.isTypeVar() &&
-            !constraint.isTypeConstant()) {
-          auto t = loosen_dvarrayness(index.lookup_constraint(ctx, constraint));
-          if (!callCtx.args[i].moreRefined(t)) return true;
-          if (!callCtx.args[i].equivalentlyRefined(t)) return true;
-          continue;
-        }
-      }
-      if (callCtx.args[i].strictSubtypeOf(TInitCell)) return true;
+      if (checkParam(i)) return true;
     }
     return false;
   }();
@@ -4826,7 +4844,8 @@ void Index::init_return_type(const php::Func* func) {
   finfo->returnTy = std::move(tcT);
 }
 
-void Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t,
+void Index::refine_return_type(borrowed_ptr<const php::Func> func,
+                               Type t, LocalId param,
                                DependencyContextSet& deps) {
   auto const finfo = create_func_info(*m_data, func);
 
@@ -4842,6 +4861,16 @@ void Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t,
     show(finfo->returnTy)
   );
 
+  always_assert_flog(
+      param != NoLocalId || finfo->retParam == NoLocalId,
+      "Index retParam went from {} to unset in {} {}{}.\n",
+      func->unit->filename->data(),
+      func->cls ? folly::to<std::string>(func->cls->name->data(), "::")
+                : std::string{},
+      func->name->data()
+  );
+
+  finfo->retParam = param;
   if (!t.strictlyMoreRefined(finfo->returnTy)) return;
   if (finfo->returnRefinments + 1 < options.returnTypeRefineLimit) {
     finfo->returnTy = t;

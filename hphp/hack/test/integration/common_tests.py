@@ -20,7 +20,7 @@ class CommonTestDriver(object):
     # This needs to be overridden in child classes. The files in this
     # directory will be used to set up the initial environment for each
     # test.
-    template_repo = None
+    template_repo: str = None
 
     @classmethod
     def setUpClass(cls):

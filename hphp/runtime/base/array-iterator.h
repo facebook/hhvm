@@ -669,6 +669,11 @@ bool IterateV(const ArrayData* adata, ArrFn arrFn) {
   return true;
 }
 
+template <typename ArrFn>
+ALWAYS_INLINE bool IterateVNoInc(const ArrayData* adata, ArrFn arrFn) {
+  return IterateV<ArrFn, false>(adata, std::move(arrFn));
+}
+
 template <typename PreArrFn, typename ArrFn, typename PreCollFn, typename ObjFn>
 bool IterateV(const TypedValue& it,
               PreArrFn preArrFn,
@@ -755,6 +760,11 @@ bool IterateKV(const ArrayData* adata, ArrFn arrFn) {
     }
   }
   return true;
+}
+
+template <typename ArrFn>
+ALWAYS_INLINE bool IterateKVNoInc(const ArrayData* adata, ArrFn arrFn) {
+  return IterateKV<ArrFn, false>(adata, std::move(arrFn));
 }
 
 template <typename PreArrFn, typename ArrFn, typename PreCollFn, typename ObjFn>

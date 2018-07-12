@@ -75,7 +75,7 @@ ArrayData* ArrayCommon::ToVec(ArrayData* a, bool) {
   auto const size = a->size();
   if (!size) return staticEmptyVecArray();
   VecArrayInit init{size};
-  IterateV(
+  IterateVNoInc(
     a,
     [&](TypedValue v) {
       if (UNLIKELY(isRefType(v.m_type))) {
@@ -93,7 +93,7 @@ ArrayData* ArrayCommon::ToDict(ArrayData* a, bool) {
   auto const size = a->size();
   if (!size) return staticEmptyDictArray();
   DictInit init{size};
-  IterateKV(
+  IterateKVNoInc(
     a,
     [&](Cell k, TypedValue v) {
       if (UNLIKELY(isRefType(v.m_type))) {
@@ -111,7 +111,7 @@ ArrayData* ArrayCommon::ToKeyset(ArrayData* a, bool) {
   auto const size = a->size();
   if (!size) return staticEmptyKeysetArray();
   KeysetInit init{size};
-  IterateV(
+  IterateVNoInc(
     a,
     [&](TypedValue v) {
       if (UNLIKELY(isRefType(v.m_type))) {
@@ -139,7 +139,7 @@ ArrayData* ArrayCommon::ToVArray(ArrayData* a, bool) {
   auto const size = a->size();
   if (!size) return staticEmptyVArray();
   VArrayInit init{size};
-  IterateV(a, [&](TypedValue v) { init.appendWithRef(v); });
+  IterateVNoInc(a, [&](TypedValue v) { init.appendWithRef(v); });
   return init.create();
 }
 
@@ -160,7 +160,7 @@ ArrayData* ArrayCommon::ToDArray(ArrayData* a, bool) {
 ArrayCommon::RefCheckResult
 ArrayCommon::CheckForRefs(const ArrayData* ad) {
   auto result = RefCheckResult::Pass;
-  IterateV(
+  IterateVNoInc(
     ad,
     [&](TypedValue v) {
       if (UNLIKELY(isRefType(v.m_type))) {

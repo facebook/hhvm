@@ -91,7 +91,7 @@ class DatePeriod implements Iterator {
   }
 
   function current() {
-    return $this->current;
+    return clone $this->current;
   }
 
   function rewind() {
@@ -110,8 +110,8 @@ class DatePeriod implements Iterator {
 
   function next() {
     if ($this->valid()) {
-      // Assign in case it's a DateTimeImmutable
-      $this->current = $this->current->add($this->interval);
+      $current = clone $this->current;
+      $this->current = $current->add($this->interval);
       $this->iterKey++;
     }
   }

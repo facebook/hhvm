@@ -718,4 +718,4 @@ function main(array &$argv): void {
   }
 }
 
-main($argv);
+main(&$argv);

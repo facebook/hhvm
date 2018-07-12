@@ -371,4 +371,19 @@ void daemonize(const char* stdoutFile /* = "/dev/null" */,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+static std::atomic<int> s_forkEnabledInDebugger(0);
+
+EnableForkInDebuggerGuard::EnableForkInDebuggerGuard() {
+  ++s_forkEnabledInDebugger;
+}
+
+EnableForkInDebuggerGuard::~EnableForkInDebuggerGuard() {
+  --s_forkEnabledInDebugger;
+}
+
+bool EnableForkInDebuggerGuard::isForkEnabledInDebugger() {
+  return s_forkEnabledInDebugger;
+}
+
 }}

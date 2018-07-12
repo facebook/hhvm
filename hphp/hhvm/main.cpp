@@ -28,6 +28,7 @@
 #include "hphp/util/embedded-vfs.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
+#include "hphp/util/process-exec.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/text-util.h"
@@ -172,7 +173,9 @@ static FUNC_PTR forking_wrapper(FUNC_PTR* real_func, const char* func_name) {
     logForkAttempt(func_name);
   }
 
-  if (!s_forkDisabledInMainProcess || getpid() != s_mainPid) {
+  if (!s_forkDisabledInMainProcess ||
+      getpid() != s_mainPid ||
+      HPHP::proc::EnableForkInDebuggerGuard::isForkEnabledInDebugger()) {
     if (*real_func) {
       return *real_func;
     } else {

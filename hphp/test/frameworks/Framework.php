@@ -753,7 +753,7 @@ class Framework {
     if (!file_exists($this->tests_file) ||
         !file_exists($this->test_files_file)) {
       $first_time = true;
-      $find_tests_command = get_runtime_build()." TestFinder.php ";
+      $find_tests_command = get_runtime_build()." ".__DIR__."/TestFinder.php ";
       $find_tests_command .= " --framework-name ".$this->name;
       $find_tests_command .= " --tests-file ".$this->tests_file;
       $find_tests_command .= " --test-files-file ".$this->test_files_file;
@@ -773,7 +773,7 @@ class Framework {
       $pipes = array();
       verbose("Command used to find the test files and tests for ".$this->name.
               ": ".$find_tests_command."\n");
-      $proc = proc_open($find_tests_command, $descriptorspec, &$pipes, __DIR__);
+      $proc = proc_open($find_tests_command, $descriptorspec, &$pipes);
       if (is_resource($proc)) {
         $pid = proc_get_status($proc)["pid"];
         $child_status = null;

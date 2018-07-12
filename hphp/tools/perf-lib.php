@@ -11,7 +11,7 @@ function filter_func(string $func): string {
   static $cache = Map {};
 
   if (strncmp($func, '_Z', 2) === 0) {
-    if (preg_match('/^(.+)\.isra\.\d+$/', $func, $matches) === 1) {
+    if (preg_match('/^(.+)\.isra\.\d+$/', $func, &$matches) === 1) {
       $func = $matches[1];
     }
     if (!isset($cache[$func])) {
@@ -46,7 +46,7 @@ function read_perf_samples($file, $desired_binary_prefix = 'hhvmworker') {
       continue;
     }
 
-    if (preg_match('/^[a-f0-9]+ (.+)$/', $line, $matches) === 1) {
+    if (preg_match('/^[a-f0-9]+ (.+)$/', $line, &$matches) === 1) {
       if (!$stack) $stack = Vector {};
       $stack[] = filter_func($matches[1]);
     } else {

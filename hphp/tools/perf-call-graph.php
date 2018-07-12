@@ -58,7 +58,7 @@ class Node {
       return;
     }
 
-    usort($items, ($a, $b) ==> $b[1]->count - $a[1]->count);
+    usort(&$items, ($a, $b) ==> $b[1]->count - $a[1]->count);
     foreach ($items as $pair) {
       $pair[1]->show($total_count, $indent);
     }

@@ -71,7 +71,7 @@ void freeLocalsAndThis(IRGS& env) {
     // side-exit in the middle of the sequence of LdLocPseudoMains.
     if (curFunc(env)->isPseudoMain()) return false;
     // We don't want to specialize on arg types for builtins
-    if (curFunc(env)->builtinFuncPtr()) return false;
+    if (curFunc(env)->arFuncPtr()) return false;
 
     if (localCount > RuntimeOption::EvalHHIRInliningMaxReturnLocals) {
       return false;

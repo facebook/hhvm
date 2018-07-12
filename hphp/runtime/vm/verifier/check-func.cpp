@@ -185,10 +185,10 @@ bool checkNativeFunc(const Func* func, ErrorMode mode) {
   auto const funcname = func->displayName();
   auto const pc = func->preClass();
   auto const clsname = pc ? pc->name() : nullptr;
-  auto const& info = Native::GetBuiltinFunction(funcname, clsname,
-                                                func->isStatic());
+  auto const& info = Native::getNativeFunction(funcname, clsname,
+                                               func->isStatic());
 
-  if (func->builtinFuncPtr() == Native::unimplementedWrapper) return true;
+  if (func->arFuncPtr() == Native::unimplementedWrapper) return true;
 
   if (func->isAsync()) {
     verify_error(func->unit(), func, mode == kThrow,

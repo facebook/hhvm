@@ -9590,13 +9590,14 @@ Attr EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
   FunctionScopePtr funcScope = meth->getFunctionScope();
   const char *funcname  = funcScope->getScopeName().c_str();
   const char *classname = pce ? pce->name()->data() : nullptr;
-  auto const& info = Native::GetBuiltinFunction(funcname, classname,
-                                                modifiers->isStatic());
+  auto const& info = Native::getNativeFunction(funcname, classname,
+                                               modifiers->isStatic());
 
   int nativeAttrs = fe->parseNativeAttributes(attributes);
-  BuiltinFunction bif = nullptr, nif = nullptr;
-  Native::getFunctionPointers(info, nativeAttrs, bif, nif);
-  if (nif) {
+  ArFunction arf = nullptr;
+  NativeFunction nf = nullptr;
+  Native::getFunctionPointers(info, nativeAttrs, arf, nf);
+  if (nf) {
     if (retType) {
       fe->retTypeConstraint =
         determine_type_constraint_from_annot(retType, true, false);

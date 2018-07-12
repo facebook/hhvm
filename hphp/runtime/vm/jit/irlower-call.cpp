@@ -145,7 +145,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   }
 
   auto const isNativeImplCall = callee &&
-                                callee->builtinFuncPtr() &&
+                                callee->arFuncPtr() &&
                                 !callee->nativeFuncPtr() &&
                                 argc == callee->numParams();
   if (isNativeImplCall) {
@@ -173,9 +173,9 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
 
     emitCheckSurpriseFlagsEnter(v, vc, fp, Fixup(0, argc), catchBlock);
 
-    auto const builtinFuncPtr = callee->builtinFuncPtr();
+    auto const arFuncPtr = callee->arFuncPtr();
     TRACE(2, "Calling builtin preClass %p func %p\n",
-          callee->preClass(), builtinFuncPtr);
+          callee->preClass(), arFuncPtr);
 
     // We sometimes call this while curFunc() isn't really the builtin, so make
     // sure to record the sync point as if we are inside the builtin.
@@ -185,11 +185,11 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
       emitEagerSyncPoint(v, callee->getEntry(), rvmtl(), rvmfp(), syncSP);
     }
 
-    // Call the native implementation.  This will free the locals for us in the
-    // normal case.  In the case where an exception is thrown, the VM unwinder
+    // Call the ArFunction. This will free the locals for us in the
+    // normal case. In the case where an exception is thrown, the VM unwinder
     // will handle it for us.
     auto const done = v.makeBlock();
-    v << vinvoke{CallSpec::direct(builtinFuncPtr, nullptr),
+    v << vinvoke{CallSpec::direct(arFuncPtr, nullptr),
                  v.makeVcallArgs({{rvmfp()}}),
                  v.makeTuple({}), {done, catchBlock}, Fixup(0, argc)};
 
@@ -452,7 +452,7 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
     emitEagerSyncPoint(v, func->getEntry(), rvmtl(), fp, sp);
   }
   v << vinvoke{
-    CallSpec::direct(func->builtinFuncPtr(), nullptr),
+    CallSpec::direct(func->arFuncPtr(), nullptr),
     v.makeVcallArgs({{fp}}),
     v.makeTuple({}),
     {label(env, inst->next()), label(env, inst->taken())},

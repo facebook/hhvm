@@ -222,7 +222,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   if (auto const ex = f->extShared()) {
     ex->m_hasExtendedSharedData = true;
-    ex->m_builtinFuncPtr = nullptr;
+    ex->m_arFuncPtr = nullptr;
     ex->m_nativeFuncPtr = nullptr;
     ex->m_line2 = line2;
     ex->m_past = past;
@@ -275,7 +275,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
     ex->m_hniReturnType = hniReturnType;
 
-    auto const& info = Native::GetBuiltinFunction(
+    auto const& info = Native::getNativeFunction(
       name,
       m_pce ? m_pce->name() : nullptr,
       f->isStatic()
@@ -286,7 +286,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     Native::getFunctionPointers(
       info,
       nativeAttributes,
-      ex->m_builtinFuncPtr,
+      ex->m_arFuncPtr,
       ex->m_nativeFuncPtr
     );
     ex->m_takesNumArgs = !!(nativeAttributes & Native::AttrTakesNumArgs);

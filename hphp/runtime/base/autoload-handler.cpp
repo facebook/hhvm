@@ -165,7 +165,7 @@ struct FuncExistsChecker {
     }
     auto f = m_ne->getCachedFunc();
     return (f != nullptr) &&
-           (f->builtinFuncPtr() != Native::unimplementedWrapper);
+           (f->arFuncPtr() != Native::unimplementedWrapper);
   }
 };
 struct ClassExistsChecker {

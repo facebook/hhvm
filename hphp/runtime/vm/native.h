@@ -79,10 +79,10 @@ struct Object;
  *   virtual moduleLoad(const IniSetting::Map& ini, Hdf config) {
  *     HHVM_NAME_FE(sum, my_sum_function)
  *   }
- * Or an explicit call to registerBuildinFunction()
+ * Or an explicit call to registerBuiltinNativeFunc()
  *   static const StaticString s_sum("sum");
  *   virtual moduleLoad(const IniSetting::Map& ini, Hdf config) {
- *     Native::registerBuiltinFunction(s_sum, (void*)my_sum_function);
+ *     Native::registerBuiltinNativeFunc(s_sum, (void*)my_sum_function);
  *   }
  *
  ****************************************************************************
@@ -102,7 +102,7 @@ struct Object;
           /* local 'this' at the call site. */ \
           String name{makeStaticString(fn)}; \
           registerExtensionFunction(name); \
-          Native::registerBuiltinFunction(name, fimpl); \
+          Native::registerBuiltinNativeFunc(name, fimpl); \
         } while(0)
 #define HHVM_NAMED_FE(fn, fimpl) HHVM_NAMED_FE_STR(#fn, fimpl)
 #define HHVM_FE(fn) HHVM_NAMED_FE_STR(#fn, HHVM_FN(fn))
@@ -121,7 +121,7 @@ struct Object;
 #define HHVM_METHOD(cn, fn, ...) \
         HHVM_MN(cn,fn)(ObjectData* const this_, ##__VA_ARGS__)
 #define HHVM_NAMED_ME(cn,fn,mimpl) \
-        Native::registerBuiltinFunction(#cn "->" #fn, mimpl)
+        Native::registerBuiltinNativeFunc(#cn "->" #fn, mimpl)
 #define HHVM_ME(cn,fn) HHVM_NAMED_ME(cn,fn, HHVM_MN(cn,fn))
 #define HHVM_MALIAS(cn,fn,calias,falias) \
   HHVM_NAMED_ME(cn,fn,HHVM_MN(calias,falias))
@@ -139,7 +139,7 @@ struct Object;
 #define HHVM_STATIC_METHOD(cn, fn, ...) \
         HHVM_STATIC_MN(cn,fn)(const Class *self_, ##__VA_ARGS__)
 #define HHVM_NAMED_STATIC_ME(cn,fn,mimpl) \
-        Native::registerBuiltinFunction(#cn "::" #fn, mimpl)
+        Native::registerBuiltinNativeFunc(#cn "::" #fn, mimpl)
 #define HHVM_STATIC_ME(cn,fn) HHVM_NAMED_STATIC_ME(cn,fn,HHVM_STATIC_MN(cn,fn))
 #define HHVM_STATIC_MALIAS(cn,fn,calias,falias) \
   HHVM_NAMED_STATIC_ME(cn,fn,HHVM_STATIC_MN(calias,falias))
@@ -382,21 +382,27 @@ NativeSig::NativeSig(Ret (*/*ptr*/)(Args...))
 
 #undef NATIVE_TYPES
 
-struct BuiltinFunctionInfo {
-  BuiltinFunctionInfo() : ptr(nullptr) {}
+// NativeFunctionInfo carries around a NativeSig describing the real signature,
+// and a type-erased NativeFunction ptr.
+struct NativeFunctionInfo {
+  NativeFunctionInfo() : ptr(nullptr) {}
 
+  // generate the signature using template magic
   template<typename Func>
-  explicit BuiltinFunctionInfo(Func f)
+  explicit NativeFunctionInfo(Func f)
     : sig(f)
-    , ptr((BuiltinFunction)f)
+    , ptr(reinterpret_cast<NativeFunction>(f))
   {}
 
-  BuiltinFunctionInfo(NativeSig _sig, BuiltinFunction _ptr)
-      : sig(_sig), ptr(_ptr) {
-  }
+  // trust the given signature
+  template<typename Func>
+  NativeFunctionInfo(NativeSig sig, Func f)
+    : sig(sig)
+    , ptr(reinterpret_cast<NativeFunction>(f))
+  {}
 
   NativeSig sig;
-  BuiltinFunction ptr;
+  NativeFunction ptr;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -415,10 +421,10 @@ struct BuiltinFunctionInfo {
  * ret c_class_ni_method(ObjectData* this_, type arg1, type arg2, ...)
  * ret c_class_ns_method(Class* self_, type arg1, type arg2, ...)
  */
-void getFunctionPointers(const BuiltinFunctionInfo& info,
+void getFunctionPointers(const NativeFunctionInfo& info,
                          int nativeAttrs,
-                         BuiltinFunction& bif,
-                         BuiltinFunction& nif);
+                         ArFunction& bif,
+                         NativeFunction& nif);
 
 /**
  * Fallback method bound to declared methods with no matching
@@ -429,21 +435,20 @@ TypedValue* unimplementedWrapper(ActRec* ar);
 /////////////////////////////////////////////////////////////////////////////
 
 /**
- * Case insensitive map of "name" to function pointer
+ * registerBuiltinNativeFunc() and getNativeFunction() provide access to a
+ * case insensitive map of "name" to function pointer.
  *
- * Extensions should generally add items to this map using
- * the HHVM_FE/ME macros above. The function name (key) must
- * be a static string because this table is shared and outlives
- * individual requests.
+ * Extensions should generally add items to this map using the HHVM_FE/ME
+ * macros above. The function name (key) must be a static string because
+ * the underlying table is shared and outlives individual requests.
  */
-typedef hphp_hash_map<const StringData*, BuiltinFunctionInfo,
-                      string_data_hash, string_data_isame> BuiltinFunctionMap;
 
-extern BuiltinFunctionMap s_builtinFunctions;
+void registerBuiltinNativeFunc(const StringData*, const NativeFunctionInfo&);
 
+// Helper accepting a C-string name
 template <class Fun> typename
   std::enable_if<!std::is_member_function_pointer<Fun>::value, void>::type
-registerBuiltinFunction(const char* name, Fun func) {
+registerBuiltinNativeFunc(const char* name, Fun func) {
   static_assert(
     std::is_pointer<Fun>::value &&
     std::is_function<typename std::remove_pointer<Fun>::type>::value,
@@ -453,12 +458,13 @@ registerBuiltinFunction(const char* name, Fun func) {
     detail::understandable_sig<Fun>::value,
     "Arguments on builtin function were not understood types"
   );
-  s_builtinFunctions[makeStaticString(name)] = BuiltinFunctionInfo(func);
+  registerBuiltinNativeFunc(makeStaticString(name), NativeFunctionInfo(func));
 }
 
+// Helper accepting a possibly nonstatic HPHP::String name
 template <class Fun> typename
   std::enable_if<!std::is_member_function_pointer<Fun>::value, void>::type
-registerBuiltinFunction(const String& name, Fun func) {
+registerBuiltinNativeFunc(const String& name, Fun func) {
   static_assert(
     std::is_pointer<Fun>::value &&
     std::is_function<typename std::remove_pointer<Fun>::type>::value,
@@ -468,42 +474,44 @@ registerBuiltinFunction(const String& name, Fun func) {
     detail::understandable_sig<Fun>::value,
     "Arguments on builtin function were not understood types"
   );
-  s_builtinFunctions[makeStaticString(name)] = BuiltinFunctionInfo(func);
+  registerBuiltinNativeFunc(makeStaticString(name), NativeFunctionInfo(func));
 }
 
-// Specializations of registerBuiltinFunction for taking
-// Pointers to Member Functions and making them look like HNI wrapper funcs
+// Specializations of registerBuiltinNativeFunc for taking pointers to member
+// functions and making them look like HNI wrapper funcs.
 //
-// This allows invoking object method calls directly,
-// but ONLY for specialized subclasses of ObjectData.
+// This allows invoking object method calls directly, but ONLY for specialized
+// subclasses of ObjectData.
 //
-// This API is limited to: Closure, Asio, and Collections
-// Do not use it if you are not implementing one of these
+// This API is limited to: Closure, Asio, and Collections. Do not use it if
+// you are not implementing one of these
 template<class Ret, class Cls> typename
   std::enable_if<std::is_base_of<ObjectData, Cls>::value, void>::type
-registerBuiltinFunction(const char* name, Ret (Cls::*func)()) {
-  registerBuiltinFunction(name,
-                          (Ret (*)(ObjectData*))getMethodPtr(func));
+registerBuiltinNativeFunc(const char* name, Ret (Cls::*func)()) {
+  registerBuiltinNativeFunc(name, (Ret (*)(ObjectData*))getMethodPtr(func));
 }
 
 template<class Ret, class Cls, class... Args> typename
   std::enable_if<std::is_base_of<ObjectData, Cls>::value, void>::type
-registerBuiltinFunction(const char* name, Ret (Cls::*func)(Args...)) {
-  registerBuiltinFunction(name,
-                          (Ret (*)(ObjectData*, Args...))getMethodPtr(func));
+registerBuiltinNativeFunc(const char* name, Ret (Cls::*func)(Args...)) {
+  registerBuiltinNativeFunc(
+      name, (Ret (*)(ObjectData*, Args...))getMethodPtr(func)
+  );
 }
 
 template<class Ret, class Cls> typename
   std::enable_if<std::is_base_of<ObjectData, Cls>::value, void>::type
-registerBuiltinFunction(const char* name, Ret (Cls::*func)() const) {
-  registerBuiltinFunction(name,
-                          (Ret (*)(ObjectData*))getMethodPtr(func));
+registerBuiltinNativeFunc(const char* name, Ret (Cls::*func)() const) {
+  registerBuiltinNativeFunc(name, (Ret (*)(ObjectData*))getMethodPtr(func));
 }
+
 template<class Ret, class Cls, class... Args> typename
   std::enable_if<std::is_base_of<ObjectData, Cls>::value, void>::type
-registerBuiltinFunction(const char* name, Ret (Cls::*func)(Args...) const) {
-  registerBuiltinFunction(name,
-                          (Ret (*)(ObjectData*, Args...))getMethodPtr(func));
+registerBuiltinNativeFunc(const char* name,
+                          Ret (Cls::*func)(Args...) const) {
+  registerBuiltinNativeFunc(
+      name, (Ret (*)(ObjectData*, Args...))getMethodPtr(func)
+  );
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -512,23 +520,13 @@ const char* checkTypeFunc(const NativeSig& sig,
                           const TypeConstraint& retType,
                           const Func* func);
 
-inline BuiltinFunctionInfo GetBuiltinFunction(const StringData* fname,
-                                              const StringData* cname = nullptr,
-                                              bool isStatic = false) {
-  auto it = s_builtinFunctions.find((cname == nullptr) ? fname :
-                    (String(const_cast<StringData*>(cname)) +
-                    (isStatic ? "::" : "->") +
-                     String(const_cast<StringData*>(fname))).get());
-  return (it == s_builtinFunctions.end()) ? BuiltinFunctionInfo() : it->second;
-}
+NativeFunctionInfo getNativeFunction(const StringData* fname,
+                                     const StringData* cname = nullptr,
+                                     bool isStatic = false);
 
-inline BuiltinFunctionInfo GetBuiltinFunction(const char* fname,
-                                              const char* cname = nullptr,
-                                              bool isStatic = false) {
-  return GetBuiltinFunction(makeStaticString(fname),
-                    cname ? makeStaticString(cname) : nullptr,
-                    isStatic);
-}
+NativeFunctionInfo getNativeFunction(const char* fname,
+                                      const char* cname = nullptr,
+                                      bool isStatic = false);
 
 //////////////////////////////////////////////////////////////////////////////
 // Global constants

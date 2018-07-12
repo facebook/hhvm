@@ -25,6 +25,10 @@
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
 
+using BuiltinFunctionMap = hphp_hash_map<
+  const StringData*, NativeFunctionInfo, string_data_hash, string_data_isame
+>;
+
 BuiltinFunctionMap s_builtinFunctions;
 ConstantMap s_constant_map;
 ClassConstantMapMap s_class_constant_map;
@@ -93,10 +97,9 @@ static void populateArgs(const Func* func,
       if (SIMD_count < kNumSIMDRegs) {
         SIMD_args[SIMD_count++] = args[-i].m_data.dbl;
 #if defined(__powerpc64__)
-      // According with ABI, the GP index must be incremented after
-      // a floating point function argument
-      if (GP_count < numGP)
-        GP_args[GP_count++] = 0;
+        // According with ABI, the GP index must be incremented after
+        // a floating point function argument
+        if (GP_count < numGP) GP_args[GP_count++] = 0;
 #endif
       } else if (GP_count < numGP) {
         // We have enough double args to hit the stack
@@ -190,7 +193,7 @@ void callFunc(const Func* func, void *ctx,
     populateArgsNoDoubles(func, args, numArgs, GP_args, GP_count);
   }
 
-  BuiltinFunction f = func->nativeFuncPtr();
+  auto const f = func->nativeFuncPtr();
 
   if (!retType) {
     // A folly::none return signifies Variant.
@@ -530,17 +533,16 @@ TypedValue* unimplementedWrapper(ActRec* ar) {
   return ar->retSlot();
 }
 
-void getFunctionPointers(const BuiltinFunctionInfo& info,
-                         int nativeAttrs,
-                         BuiltinFunction& bif,
-                         BuiltinFunction& nif) {
+void getFunctionPointers(const NativeFunctionInfo& info, int nativeAttrs,
+                         ArFunction& bif, NativeFunction& nif) {
   nif = info.ptr;
   if (!nif) {
     bif = unimplementedWrapper;
     return;
   }
   if (nativeAttrs & AttrActRec) {
-    bif = nif;
+    // NativeFunction with the ArFunction signature
+    bif = reinterpret_cast<ArFunction>(nif);
     nif = nullptr;
     return;
   }
@@ -683,6 +685,27 @@ const char* checkTypeFunc(const NativeSig& sig,
   }
 
   return argIt == endIt ? nullptr : kInvalidArgCountMessage;
+}
+
+NativeFunctionInfo getNativeFunction(const StringData* fname,
+                                     const StringData* cname, bool isStatic) {
+  auto const it = s_builtinFunctions.find((cname == nullptr) ? fname :
+                    (String(const_cast<StringData*>(cname)) +
+                    (isStatic ? "::" : "->") +
+                     String(const_cast<StringData*>(fname))).get());
+  return (it == s_builtinFunctions.end()) ? NativeFunctionInfo() : it->second;
+}
+
+NativeFunctionInfo getNativeFunction(const char* fname, const char* cname,
+                                     bool isStatic) {
+  return getNativeFunction(makeStaticString(fname),
+                           cname ? makeStaticString(cname) : nullptr, isStatic);
+}
+
+void registerBuiltinNativeFunc(const StringData* name,
+                               const NativeFunctionInfo& info) {
+  assert(name->isStatic());
+  s_builtinFunctions[name] = info;
 }
 
 static std::string nativeTypeString(NativeSig::Type ty) {

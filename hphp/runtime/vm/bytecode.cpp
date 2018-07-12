@@ -6057,8 +6057,7 @@ OPTBLD_INLINE void iopVerifyRetNonNullC() {
 
 OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {
   auto const jitReturn = jitReturnPre(vmfp());
-
-  BuiltinFunction func = vmfp()->func()->builtinFuncPtr();
+  auto const func = vmfp()->func()->arFuncPtr();
   assertx(func);
   // Actually call the native implementation. This will handle freeing the
   // locals in the normal case. In the case of an exception, the VM unwinder

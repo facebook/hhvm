@@ -443,7 +443,7 @@ inline bool Func::isBuiltin() const {
 
 inline bool Func::isCPPBuiltin() const {
   auto const ex = extShared();
-  return UNLIKELY(!!ex) && ex->m_builtinFuncPtr;
+  return UNLIKELY(!!ex) && ex->m_arFuncPtr;
 }
 
 inline bool Func::readsCallerFrame() const {
@@ -462,12 +462,12 @@ inline bool Func::takesNumArgs() const {
   return shared()->m_takesNumArgs;
 }
 
-inline BuiltinFunction Func::builtinFuncPtr() const {
-  if (auto const ex = extShared()) return ex->m_builtinFuncPtr;
+inline ArFunction Func::arFuncPtr() const {
+  if (auto const ex = extShared()) return ex->m_arFuncPtr;
   return nullptr;
 }
 
-inline BuiltinFunction Func::nativeFuncPtr() const {
+inline NativeFunction Func::nativeFuncPtr() const {
   if (auto const ex = extShared()) return ex->m_nativeFuncPtr;
   return nullptr;
 }

@@ -277,7 +277,8 @@ bool HHVM_FUNCTION(trigger_error, const String& error_msg,
 
   ActRec* fp = g_context->getStackFrame();
 
-  if (fp->m_func->nativeFuncPtr() == (BuiltinFunction)HHVM_FN(trigger_error)) {
+  if (fp->m_func->nativeFuncPtr() ==
+      reinterpret_cast<NativeFunction>(HHVM_FN(trigger_error))) {
     fp = g_context->getOuterVMFrame(fp);
   }
   if (fp && fp->m_func->isBuiltin()) {

@@ -189,7 +189,7 @@ struct Func {
   const SVInfoVec& staticVars() const;
   void setStaticVars(const SVInfoVec&);
 
-  BuiltinFunction builtinFuncPtr() const;
+  ArFunction arFuncPtr() const;
 
   static constexpr ptrdiff_t sharedBaseOff();
 };

@@ -47,7 +47,7 @@ fwrite($fp, "static_assert(kNumSIMDRegs == " . NUM_SIMD_ARGS.
 function go($name, $ret) {
   global $fp;
 
-  $callerArgs = 'BuiltinFunction f, int64_t* GP, int GP_count, '.
+  $callerArgs = 'NativeFunction f, int64_t* GP, int GP_count, '.
                 'double* SIMD, int SIMD_count';
 
   fwrite($fp, "${ret} callFunc{$name}Impl({$callerArgs}) {\n");

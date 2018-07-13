@@ -119,6 +119,11 @@
 #include <boost/program_options/variables_map.hpp>
 #include <boost/filesystem.hpp>
 
+#ifndef FACEBOOK
+// Needed on libevent2
+#include <event2/thread.h>
+#endif
+
 #include <oniguruma.h>
 // Onigurama defines UChar to unsigned char, but ICU4C defines it to signed
 // 16-bit int. This is supposed to be resolved by ONIG_ESCAPE_UCHAR_COLLISION,
@@ -1743,8 +1748,13 @@ static int execute_program_impl(int argc, char** argv) {
     RuntimeOption::VSDebuggerNoWait = po.vsDebugNoWait;
   }
 
-  // we need to initialize pcre cache table very early
+  // we need to to initialize these very early
   pcre_init();
+  // this is needed for libevent2 to be thread-safe, which backs Hack ASIO.
+  #ifndef FACEBOOK
+  // FB uses a custom libevent 1
+  evthread_use_pthreads();
+  #endif
 
   tl_heap.getCheck();
   if (RuntimeOption::ServerExecutionMode()) {

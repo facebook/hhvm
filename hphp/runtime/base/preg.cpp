@@ -1720,7 +1720,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
   }
 
   if (callable || !replace.isArray()) {
-    Array arr = regex.toArray();
+    Array arr = regex.toDArray();
     for (ArrayIter iterRegex(arr); iterRegex; ++iterRegex) {
       String regex_entry = iterRegex.second().toString();
       Variant ret = php_pcre_replace(regex_entry, subject, replace,
@@ -1740,8 +1740,8 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
     return subject;
   }
 
-  Array arrReplace = replace.toArray();
-  Array arrRegex = regex.toArray();
+  Array arrReplace = replace.toDArray();
+  Array arrRegex = regex.toDArray();
   ArrayIter iterReplace(arrReplace);
   for (ArrayIter iterRegex(arrRegex); iterRegex; ++iterRegex) {
     String regex_entry = iterRegex.second().toString();
@@ -1798,8 +1798,8 @@ Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
     return ret;
   }
 
-  Array return_value = Array::Create();
-  Array arrSubject = subject.toArray();
+  Array return_value = Array::CreateDArray();
+  Array arrSubject = subject.toDArray();
   for (ArrayIter iter(arrSubject); iter; ++iter) {
     auto old_replace_count = replace_count;
     String subject_entry = iter.second().toString();

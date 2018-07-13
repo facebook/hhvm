@@ -160,17 +160,14 @@ let rec translate_id ~reverse ns_map id =
       then target ^ (String_utils.lstrip id source)
       else translate_id ~reverse rest id
 
-(* Runs the autonamespace translation for both fully qualified and non qualified
- * names *)
-let renamespace_if_aliased ?(reverse = false) ns_map id =
-  try
-    let has_bslash = id.[0] = '\\' in
-    let len = String.length id in
-    let id = if has_bslash then String.sub id 1 (len - 1) else id in
-    let translation = translate_id ~reverse ns_map id in
-    if has_bslash then "\\" ^ translation else translation
-  (* If there is some matching problem, that means we are not aliasing *)
-  with _ -> id
+let aliased_to_fully_qualified_id alias_map id =
+  translate_id ~reverse:true alias_map id
+
+let fully_qualified_to_aliased_id alias_map id =
+  let has_bslash = id <> "" && id.[0] = '\\' in
+  let len = String.length id in
+  let id = if has_bslash then String.sub id 1 (len - 1) else id in
+  translate_id ~reverse:false alias_map id
 
 type elaborate_kind =
   | ElaborateFun
@@ -234,10 +231,10 @@ let elaborate_id_impl ~autoimport nsenv kind (p, id) =
       begin
       match SMap.get prefix uses with
         | None ->
-          let translated = renamespace_if_aliased ~reverse:true
+          let unaliased_id = aliased_to_fully_qualified_id
             (ParserOptions.auto_namespace_map nsenv.ns_popt) id in
-          if translated <> id
-          then false, ("\\" ^ translated)
+          if unaliased_id <> id
+          then false, ("\\" ^ unaliased_id)
           else if autoimport
           then
             match get_autoimport_name_namespace id with

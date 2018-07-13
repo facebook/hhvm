@@ -6,9 +6,7 @@ namespace HH\Lib\Dict {
   }
 }
 
-namespace {
-  HH\Lib\Dict\foo(); // ok
+namespace Main {
   \HH\Lib\Dict\foo(); // ok
-  Dict\foo(); // ok
-  \Dict\foo(); // error
+  HH\Lib\Dict\foo(); // error
 }

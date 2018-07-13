@@ -39,7 +39,5 @@ val elaborate_def:
   Ast.def ->
   Namespace_env.env * Ast.def list
 
-val renamespace_if_aliased : ?reverse:bool ->
-                             (string * string) list ->
-                             string ->
-                             string
+val aliased_to_fully_qualified_id : (string * string) list -> string -> string
+val fully_qualified_to_aliased_id : (string * string) list -> string -> string

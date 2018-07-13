@@ -8,7 +8,5 @@ namespace HH\Lib\Dict {
 
 namespace Main {
   Dict\foo(); // ok
-  \Dict\foo(); // ok TODO(T22617428) should be error
-  \HH\Lib\Dict\foo(); // ok
-  HH\Lib\Dict\foo(); // error
+  \Dict\foo(); // error
 }

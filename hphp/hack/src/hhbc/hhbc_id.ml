@@ -48,8 +48,7 @@ let elaborate_id ~should_alias ns kind id =
     then false else Emit_env.is_hh_syntax_enabled () in
 
   let aliased_id =
-    Namespaces.renamespace_if_aliased
-      ~reverse:true (auto_namespace_map ()) (snd id) in
+    Namespaces.aliased_to_fully_qualified_id (auto_namespace_map ()) (snd id) in
   let was_renamed, fully_qualified_id =
     if should_alias && should_alias_name ns (snd id) aliased_id
     then false, aliased_id

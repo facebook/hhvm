@@ -2438,6 +2438,11 @@ module WithStatementAndDeclAndTypeParser
     let (parser1, token, _) = next_xhp_element_token ~no_trailing:true parser in
     match (Token.kind token) with
     | SlashGreaterThan ->
+      (* We have determined that this is a self-closing XHP tag, so
+         `consume_trailing_trivia` needs to be propagated down. *)
+      let (parser1, token, _) =
+        next_xhp_element_token ~no_trailing:(not consume_trailing_trivia) parser
+      in
       let (parser1, token) = Make.token parser1 token in
       let (parser1, xhp_open) =
         Make.xhp_open parser1 left_angle name attrs token
@@ -2447,6 +2452,10 @@ module WithStatementAndDeclAndTypeParser
       let (parser, missing2) = Make.missing parser pos in
       Make.xhp_expression parser xhp_open missing1 missing2
     | GreaterThan ->
+      (* This is not a self-closing tag, so we are now in an XHP body context.
+         We can use the GreaterThan token as-is (i.e., lexed above with
+         ~no_trailing:true), since we don't want to lex trailing trivia inside
+         XHP bodies. *)
       let (parser, token) = Make.token parser1 token in
       let (parser, xhp_open) =
         Make.xhp_open parser left_angle name attrs token

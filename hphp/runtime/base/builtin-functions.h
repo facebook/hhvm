@@ -265,7 +265,8 @@ String resolve_include(const String& file, const char* currentDir,
                        bool (*tryFile)(const String& file, void* ctx),
                        void* ctx);
 Variant include_impl_invoke(const String& file, bool once = false,
-                            const char *currentDir = "");
+                            const char *currentDir = "",
+                            bool callByHPHPInvoke = false);
 Variant require(const String& file, bool once, const char* currentDir,
                 bool raiseNotice);
 

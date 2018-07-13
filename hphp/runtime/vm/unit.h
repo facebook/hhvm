@@ -491,6 +491,8 @@ public:
    */
   Func* getMain(Class* cls) const;
 
+  // Return the cached EntryPoint
+  Func* getCachedEntryPoint() const;
   /*
    * The first hoistable Func in the Unit.
    *
@@ -910,6 +912,11 @@ private:
   TypedValue m_mainReturn;
   CompactVector<PreClassPtr> m_preClasses;
   FixedVector<TypeAlias> m_typeAliases;
+  /*
+   * Cached the EntryPoint for an unit, since compactMergeInfo() inside of
+   * mergeImpl will drop the original EP.
+   */
+  Func* m_cachedEntryPoint{nullptr};
 
   /*
    * The remaining fields are cold, and arbitrarily ordered.

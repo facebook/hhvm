@@ -945,12 +945,13 @@ String concat4(const String& s1, const String& s2, const String& s3,
 }
 
 static bool invoke_file_impl(Variant& res, const String& path, bool once,
-                             const char *currentDir) {
+                             const char *currentDir,
+                             bool callByHPHPInvoke) {
   bool initial;
   auto const u = lookupUnit(path.get(), currentDir, &initial);
   if (u == nullptr) return false;
   if (!once || initial) {
-    *res.asTypedValue() = g_context->invokeUnit(u);
+    *res.asTypedValue() = g_context->invokeUnit(u, callByHPHPInvoke);
   }
   return true;
 }
@@ -961,20 +962,21 @@ static NEVER_INLINE Variant throw_missing_file(const char* file) {
 
 static Variant invoke_file(const String& s,
                            bool once,
-                           const char *currentDir) {
+                           const char *currentDir,
+                           bool callByHPHPInvoke) {
   Variant r;
-  if (invoke_file_impl(r, s, once, currentDir)) {
+  if (invoke_file_impl(r, s, once, currentDir, callByHPHPInvoke)) {
     return r;
   }
   return throw_missing_file(s.c_str());
 }
 
 Variant include_impl_invoke(const String& file, bool once,
-                            const char *currentDir) {
+                            const char *currentDir, bool callByHPHPInvoke) {
   if (FileUtil::isAbsolutePath(file.toCppString())) {
     if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
       try {
-        return invoke_file(file, once, currentDir);
+        return invoke_file(file, once, currentDir, callByHPHPInvoke);
       } catch(PhpFileDoesNotExistException& e) {}
     }
 
@@ -983,13 +985,13 @@ Variant include_impl_invoke(const String& file, bool once,
                                            string(file.data())));
 
       // Don't try/catch - We want the exception to be passed along
-      return invoke_file(rel_path, once, currentDir);
+      return invoke_file(rel_path, once, currentDir, callByHPHPInvoke);
     } catch(PhpFileDoesNotExistException& e) {
       throw PhpFileDoesNotExistException(file.c_str());
     }
   } else {
     // Don't try/catch - We want the exception to be passed along
-    return invoke_file(file, once, currentDir);
+    return invoke_file(file, once, currentDir, callByHPHPInvoke);
   }
 }
 

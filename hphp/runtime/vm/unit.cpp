@@ -621,6 +621,10 @@ Func* Unit::getMain(Class* cls /* = nullptr */) const {
   return f;
 }
 
+Func* Unit::getCachedEntryPoint() const {
+  return m_cachedEntryPoint;
+}
+
 void Unit::renameFunc(const StringData* oldName, const StringData* newName) {
   // We do a linear scan over all the functions in the unit searching for the
   // func with a given name; in practice this is okay because the units created
@@ -1346,6 +1350,34 @@ void setGlobal(StringData* name, TypedValue *value) {
   g_context->m_globalVarEnv->set(name, value);
 }
 
+/*
+ * count the number of the EntryPoint in a file, and return a iterator
+ * 1) there is not EntryPoint, return the begin()
+ * 2) there are multiple EntryPoints, return the end()
+ * 3) there is exact one EntryPoint, return that iterator points to the location
+ */
+Func* findEntryPoint(const Unit* unit) {
+  auto it = unit->funcs().begin();
+  auto retIt = it;
+  bool found = false;
+  auto EntryPointTag = makeStaticString("__EntryPoint");
+  for (; it != unit->funcs().end(); it++) {
+    if ((*it)->userAttributes().count(EntryPointTag)) {
+      if (found) {
+        raise_fatal_error(
+          folly::sformat("There are multiple entryPoint in {}",
+                         unit->filepath()->data()).c_str()
+        );
+      }
+      found = true;
+      retIt = it;
+    }
+  }
+  if (found)  return *retIt;
+
+  return nullptr;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 
@@ -1354,6 +1386,8 @@ void Unit::initialMerge() {
   if (m_mergeState.load(std::memory_order_relaxed) != MergeState::Unmerged) {
     return;
   }
+
+  this->m_cachedEntryPoint = findEntryPoint(this);
 
   if (RuntimeOption::EvalEnableReverseDataMap) {
     data_map::register_start(this);

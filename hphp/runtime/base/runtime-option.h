@@ -577,6 +577,16 @@ struct RuntimeOption {
   F(bool, LogThreadCreateBacktraces,   false)                           \
   F(bool, FailJitPrologs,              false)                           \
   F(bool, UseHHBBC,                    !getenv("HHVM_DISABLE_HHBBC"))   \
+  /* Generate warning of side effect of the pseudomain is called by     \
+     top-level code.*/                                                  \
+  F(bool, WarnOnRealPseudomain, false)                                  \
+  /* Generate warnings of side effect on top-level code that is not     \
+   * called by pseudomain directly (include from other file)            \
+   * 0 - Nothing                                                        \
+   * 1 - Raise Warning                                                  \
+   * 2 - Throw exception                                                \
+   */                                                                   \
+  F(int32_t, WarnOnUncalledPseudomain, 0)                               \
   /* The following option enables the runtime checks for `this` typehints.
    * There are 4 possible options:
    * 0 - No checking of `this` typehints.

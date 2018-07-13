@@ -1,0 +1,3 @@
+Hello world
+
+Warning: The top-level code has side effects in %s/test/slow/pseudomain_warn_side_effect1.php which is called by top level code

@@ -2694,7 +2694,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
         funcRet.assignIfRef(invoke(cmd.c_str(), funcParams));
       } else {
         if (isServer) hphp_chdir_file(cmd);
-        include_impl_invoke(cmd.c_str(), once);
+        include_impl_invoke(cmd.c_str(), once, "", true);
       }
       if (!RuntimeOption::AutoAppendFile.empty() &&
           RuntimeOption::AutoAppendFile != "none") {

@@ -373,7 +373,7 @@ public:
   int getLine();
   Array getCallerInfo();
   bool evalUnit(Unit* unit, PC& pc, int funcType);
-  TypedValue invokeUnit(const Unit* unit);
+  TypedValue invokeUnit(const Unit* unit, bool callByHPHPInvoke = false);
   Unit* compileEvalString(StringData* code,
                                 const char* evalFilename = nullptr);
   StrNR createFunction(const String& args, const String& code);

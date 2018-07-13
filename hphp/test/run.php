@@ -2363,8 +2363,9 @@ function get_hhvm_ini_values($test, $options) {
   $get_ini_file = tempnam(dirname($test), "get_ini");
   $tmp_file = tempnam(sys_get_temp_dir(), "output");
   file_put_contents($get_ini_file, "<?php echo json_encode(ini_get_all());");
+  $extra = ' -vEval.WarnOnRealPseudomain=0 -vEval.WarnOnUncalledPseudomain=0';
   list($hhvm_get_ini_cmd, $_) = hhvm_cmd($options, $test, $get_ini_file, true);
-  return exec("$hhvm_get_ini_cmd 2> /dev/null");
+  return exec("$hhvm_get_ini_cmd $extra 2> /dev/null");
 }
 
 function get_hhvm_compiler_frontend($options, $test) {

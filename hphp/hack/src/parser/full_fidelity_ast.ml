@@ -3002,6 +3002,8 @@ type accumulator = scoured_comments * fixmes
 let scour_comments
   (path        : Relative_path.t)
   (source_text : SourceText.t)
+  ~(collect_fixmes: bool)
+  ~(include_line_comments: bool)
   (tree        : node)
   (env         : env)
   : accumulator =
@@ -3028,6 +3030,8 @@ let scour_comments
         let t = String.sub (Trivia.text t) 2 len in
         (p, CmtBlock t) :: cmts, fm
       | TriviaKind.SingleLineComment ->
+        if not include_line_comments then cmts, fm
+        else
         let text = SourceText.text (Trivia.source_text t) in
         let start = Trivia.start_offset t in
         let start = start + if text.[start] = '#' then 1 else 2 in
@@ -3038,7 +3042,9 @@ let scour_comments
         (p, CmtLine (t ^ "\n")) :: cmts, fm
       | TriviaKind.FixMe
       | TriviaKind.IgnoreError
-        -> let open Str in
+        -> if not collect_fixmes then cmts, fm
+           else
+           let open Str in
            let pos = pPos node env in
            let line = Pos.line pos in
            let ignores = try IMap.find line fm with Not_found -> IMap.empty in
@@ -3059,9 +3065,10 @@ let scour_comments
       match syntax node with
       | Token t ->
         if Token.has_trivia_kind t TriviaKind.DelimitedComment
-        || Token.has_trivia_kind t TriviaKind.SingleLineComment
-        || Token.has_trivia_kind t TriviaKind.FixMe
-        || Token.has_trivia_kind t TriviaKind.IgnoreError
+        || (include_line_comments && Token.has_trivia_kind t TriviaKind.SingleLineComment)
+        || (collect_fixmes && (
+            Token.has_trivia_kind t TriviaKind.FixMe ||
+            Token.has_trivia_kind t TriviaKind.IgnoreError))
         then
           let f = go node in
           let trivia = Token.leading t in
@@ -3196,14 +3203,16 @@ let parse_text
 
 let scour_comments_and_add_fixmes (env : env) source_text script =
   let comments, fixmes =
-    FromPositionedSyntax.scour_comments env.file source_text script env in
+    FromPositionedSyntax.scour_comments env.file source_text script env
+      ~collect_fixmes:env.keep_errors
+      ~include_line_comments:env.include_line_comments
+      in
   let () = if env.keep_errors then
     if env.quick_mode then
       Fixmes.DECL_HH_FIXMES.add env.file fixmes
     else
       Fixmes.HH_FIXMES.add env.file fixmes in
-  if env.include_line_comments then comments else
-    List.filter ~f:(fun (_,c) -> not (Prim_defs.is_line_comment c)) comments
+  comments
 
 let lower_tree
   (env : env)

@@ -160,7 +160,7 @@ void CollectionsExtension::initPair() {
   HHVM_NAMED_ME(HH\\Pair, toArray,        &c_Pair::toArrayImpl);
   HHVM_NAMED_ME(HH\\Pair, toVArray,       &c_Pair::toVArrayImpl);
   HHVM_NAMED_ME(HH\\Pair, toDArray,       &c_Pair::toDArrayImpl);
-  HHVM_NAMED_ME(HH\\Pair, toValuesArray,  &c_Pair::toArrayImpl);
+  HHVM_NAMED_ME(HH\\Pair, toValuesArray,  &c_Pair::toVArrayImpl);
   HHVM_NAMED_ME(HH\\Pair, getIterator,    &c_Pair::getIterator);
 
   HHVM_NAMED_ME(HH\\Pair, toVector,       materialize<c_Vector>);

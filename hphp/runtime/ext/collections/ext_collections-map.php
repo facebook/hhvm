@@ -260,13 +260,13 @@ final class Map implements \MutableMap {
    * @return array
    */
   <<__Native, __Rx, __MaybeMutable>>
-  public function toKeysArray(): array;
+  public function toKeysArray(): varray;
 
   /* Returns an array built from the values from this Map.
    * @return array
    */
   <<__Native, __Rx, __MaybeMutable>>
-  public function toValuesArray(): array;
+  public function toValuesArray(): varray;
 
   /* @param mixed $it
    * @return object
@@ -898,14 +898,15 @@ final class ImmMap implements \ConstMap {
   /* Returns an array built from the keys from this ImmMap.
    * @return array
    */
+
   <<__Native, __Rx, __MaybeMutable>>
-  public function toKeysArray(): array;
+  public function toKeysArray(): varray;
 
   /* Returns an array built from the values from this ImmMap.
    * @return array
    */
   <<__Native, __Rx, __MaybeMutable>>
-  public function toValuesArray(): array;
+  public function toValuesArray(): varray;
 
   /* @param mixed $it
    * @return object

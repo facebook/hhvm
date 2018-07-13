@@ -207,13 +207,13 @@ final class Set implements \MutableSet {
    * @return array
    */
   <<__Native, __Rx, __MaybeMutable>>
-  public function toKeysArray(): array;
+  public function toKeysArray(): varray;
 
   /* Returns an array built from the values from this Set.
    * @return array
    */
   <<__Native, __Rx, __MaybeMutable>>
-  public function toValuesArray(): array;
+  public function toValuesArray(): varray;
 
   /* Returns an iterator that points to beginning of this Set.
    * @return object
@@ -569,13 +569,13 @@ final class ImmSet implements \ConstSet {
    * @return array
    */
   <<__Native, __Rx, __MaybeMutable>>
-  public function toKeysArray(): array;
+  public function toKeysArray(): varray;
 
   /* Returns an array built from the values from this ImmSet.
    * @return array
    */
   <<__Native, __Rx, __MaybeMutable>>
-  public function toValuesArray(): array;
+  public function toValuesArray(): varray;
 
   /* Returns an iterator that points to beginning of this ImmSet.
    * @return object

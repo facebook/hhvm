@@ -125,7 +125,7 @@ Array HashCollection::toDArray() {
 }
 
 Array HashCollection::toKeysArray() {
-  PackedArrayInit ai(m_size);
+  VArrayInit ai(m_size);
   auto* eLimit = elmLimit();
   for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
     if (e->hasIntKey()) {
@@ -139,12 +139,7 @@ Array HashCollection::toKeysArray() {
 }
 
 Array HashCollection::toValuesArray() {
-  PackedArrayInit ai(m_size);
-  auto* eLimit = elmLimit();
-  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
-    ai.append(tvAsCVarRef(&e->data));
-  }
-  return ai.toArray();
+  return toVArray();
 }
 
 void HashCollection::remove(int64_t key) {

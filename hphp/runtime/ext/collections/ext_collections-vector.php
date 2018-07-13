@@ -294,17 +294,17 @@ final class Vector implements \MutableVector {
    * @return array
    */
   <<__Rx, __MaybeMutable>>
-  public function toKeysArray(): array {
+  public function toKeysArray(): varray {
     $count = $this->count();
-    return $count ? range(0, $count - 1) : array();
+    return $count ? varray(range(0, $count - 1)) : varray[];
   }
 
   /* Returns an array built from the values from this Vector.
    * @return array
    */
   <<__Rx, __MaybeMutable>>
-  public function toValuesArray(): array {
-    return $this->toArray();
+  public function toValuesArray(): varray {
+    return $this->toVArray();
   }
 
   /* Returns an iterator that points to beginning of this Vector.
@@ -854,18 +854,18 @@ final class ImmVector implements \ConstVector {
   /* Returns an array built from the keys from this ImmVector.
    * @return array
    */
-  <<__Rx, __MaybeMutable>>
-  public function toKeysArray(): array {
+  <<__Rx>>
+  public function toKeysArray(): varray {
     $count = $this->count();
-    return $count ? range(0, $count - 1) : array();
+    return $count ? varray(range(0, $count - 1)) : varray[];
   }
 
   /* Returns an array built from the values from this ImmVector.
    * @return array
    */
   <<__Rx, __MaybeMutable>>
-  public function toValuesArray(): array {
-    return $this->toArray();
+  public function toValuesArray(): varray {
+    return $this->toVArray();
   }
 
   /* Returns index of the specified value if it is present, -1 otherwise.

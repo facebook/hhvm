@@ -249,7 +249,7 @@ final class Pair implements \ConstVector {
    * @return - an `array` with the integer keys from the current `Pair`.
    */
   <<__Rx, __MaybeMutable>>
-  public function toKeysArray(): array { return array(0, 1); }
+  public function toKeysArray(): varray { return varray[0, 1]; }
 
   /**
    * Returns an `array` containing the values from the current `Pair`.
@@ -259,7 +259,7 @@ final class Pair implements \ConstVector {
    * @return - an `array` containing the values from the current `Pair`.
    */
   <<__Native, __Rx, __MaybeMutable>>
-  public function toValuesArray(): array;
+  public function toValuesArray(): varray;
 
   /**
    * Returns an iterator that points to beginning of the current `Pair`.

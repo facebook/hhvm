@@ -93,6 +93,8 @@ let rec is_option env ty =
       List.exists tyl (is_option env)
   | _ -> false
 
+let ensure_option env r ty = if is_option env ty then ty else (r, Toption ty)
+
 let rec is_option_non_mixed env ty =
   let _, ety = Env.expand_type env ty in
   match snd ety with

@@ -82,105 +82,85 @@ let experiment_enabled env experiment =
     (Env.get_options env)
     experiment
 
-(* Create a temporary "fake" type shape(?field_name: res, ...), which
-   will be used as the supertype of the first argument passed to
-   Shapes::idx (arg_ty). *)
-let make_idx_fake_super_shape _env p (_, arg_ty) field_name res =
-  let fake_shape_field = {
-    sft_optional = true;
-    sft_ty = Reason.Rnone, Toption res;
+let make_idx_fake_super_shape field_name field_ty =
+  Reason.Rnone,
+  Tshape
+    (FieldsPartiallyKnown Nast.ShapeMap.empty,
+     Nast.ShapeMap.singleton field_name field_ty)
+
+(* Is a given field required in a given shape?
+ *
+ * sfn is a required field of shape t iff t is a subtype of
+ * shape(sfn => mixed, ...) (or shape(sfn => nonnull, ...) if
+ * disable_optional_and_unknonw_shape_fields is enabled, as
+ * in that case an option-typed field is considered optional).
+ *
+ * Note that unlike doing a case analysis on the shape type,
+ * expressing this check using subtyping successfully deals
+ * with the cases where the shape is unresolved or is abstract
+ * (e.g., hidden behind a newtype or given by a constrained
+ * generic parameter or type constant).
+ *)
+let is_shape_field_required env field_name shape_ty =
+  let field_ty = {
+    sft_optional = false;
+    sft_ty =
+      Reason.Rnone,
+      if experiment_enabled env
+           TypecheckerOptions.experimental_disable_optional_and_unknown_shape_fields
+      then Tnonnull
+      else TUtils.desugar_mixed Reason.Rnone
   } in
-  begin match arg_ty with
-  | Tshape (FieldsPartiallyKnown unset_fields, fdm)
-      when not (ShapeMap.mem field_name fdm
-                || ShapeMap.mem field_name unset_fields) ->
-    (* This is dangerous because the shape may later be instantiated with a
-      field that conflicts with the return type of Shapes::idx. Programmers
-      should instead use direct accessing (i.e. shape[field]) when possible to
-      get stricter behavior. *)
-    Lint.shape_idx_access_unknown_field
-      p
-      (Env.get_shape_field_name field_name)
-  | _ -> ()
-  end;
-  Nast.ShapeMap.singleton field_name fake_shape_field
+  Typing_subtype.is_sub_type env
+    shape_ty
+    (make_idx_fake_super_shape field_name field_ty)
 
-let apply_on_field ~f ~default field_name (_, ty) =
-  match ty with
-  | Tshape (_, fdm) ->
-    begin match ShapeMap.get field_name fdm with
-    | Some field -> f field
-    | None -> default
-    end
-  | _ ->  default
-
-let has_non_optional_field env =
-  apply_on_field
-    ~f:(fun field_ty -> not (TUtils.is_shape_field_optional env field_ty))
-    ~default: false
-
-let field_has_nullable_type env =
-  apply_on_field
-    ~f:(fun field_ty -> TUtils.is_option env field_ty.sft_ty)
-    ~default: false
-
-(* Typing rule for Shapes::idx($s, field, [default])
-
-  Shapes::idx has type res (or Toption res, if res is not already Toption _ and
-  default is not provided), where res is the inferred type of field (provided by
-  $s, or else Tmixed). If default is provided, then res must be a subtype of
-  Tunresolved[default].
-
-  Ensures that $s is a shape. $s must be a subtype of:
-  shape(...) -- if $s does not contain field and does not unset field; i.e. it
-                is possible for an instance of $s to provide the field with an
-                arbitrary type. (This will emit a lint warning)
-  shape(field => ?Tmixed, ...)
-    if tco_experimental_disable_optional_and_unknown_shape_fields
-  shape(?field => Tmixed, ...)
-    otherwise
-*)
-let idx env p fty shape_ty field default =
+(* Typing rules for Shapes::idx
+ *
+ *     e : shape(sfn => t, ...)
+ *     ----------------------------
+ *     Shapes::idx(e, sfn) : t       if stronger_shape_idx_return is enabled
+ *
+ *     e : shape(?sfn => t, ...)
+ *     ----------------------------
+ *     Shapes::idx(e, sfn) : ?t
+ *
+ *     e1 : shape(?sfn => t, ...)
+ *     e2 : t
+ *     ----------------------------
+ *     Shapes::idx(e1, sfn, e2) : t
+ *
+ *)
+let idx env _p fty shape_ty field default =
   let env, shape_ty = Env.expand_type env shape_ty in
   let env, res = Env.fresh_unresolved_type env in
   match TUtils.shape_field_name env field with
   | None -> env, (Reason.Rwitness (fst field), TUtils.tany env)
   | Some field_name ->
-    let fake_shape = (
-      (* Rnone because we don't want the fake shape to show up in messages about
-       * field non existing. *)
-      Reason.Rnone,
-      Tshape (
-        FieldsPartiallyKnown Nast.ShapeMap.empty,
-        make_idx_fake_super_shape env p shape_ty field_name res
-      )
-    ) in
-    let env =
-      Type.sub_type (fst field) Reason.URparam env shape_ty fake_shape in
-    let stronger_shape_idx_ret = experiment_enabled env
-      TypecheckerOptions.experimental_stronger_shape_idx_ret in
+    let fake_super_shape_ty =
+      make_idx_fake_super_shape
+        field_name
+        {sft_optional = true; sft_ty = res} in
     match default with
-      | None when TUtils.is_option env res -> env, res
-      | None when stronger_shape_idx_ret
-          && has_non_optional_field env field_name shape_ty ->
-          Lint.shape_idx_access_required_field (fst field)
-            (Env.get_shape_field_name field_name);
-          let res =
-            if field_has_nullable_type env field_name shape_ty
-            then (fst fty, Toption res)
-            else res in
-          env, res
-      | None ->
-        (* no default and we can't guarantee that the shape contains field:
-         * result is nullable, point to Shapes::idx definition as reason *)
-        env, (fst fty, Toption res)
-      | Some (default_pos, default_ty) ->
-        let env = Type.sub_type default_pos Reason.URparam env default_ty res in
-        let res =
-          if field_has_nullable_type env field_name shape_ty
-          then (fst fty, Toption res)
-          else res in
-        env, res
+    | None ->
+      Type.sub_type (fst field) Reason.URparam env
+        shape_ty
+        fake_super_shape_ty,
+      if experiment_enabled env
+           TypecheckerOptions.experimental_stronger_shape_idx_ret &&
+         is_shape_field_required env field_name shape_ty
+      then res
+      else TUtils.ensure_option env (fst fty) res
+    | Some (default_pos, default_ty) ->
+      let env =
+        Type.sub_type (fst field) Reason.URparam env
+          shape_ty
+          fake_super_shape_ty in
+      let env =
+        Type.sub_type default_pos Reason.URparam env
+          default_ty
+          res in
+      env, res
 
 let remove_key p env shape_ty field  =
   match TUtils.shape_field_name env field with

@@ -32,7 +32,6 @@ val internal_error : Pos.t -> string -> unit
 val lowercase_constant : Pos.t -> string -> unit
 val use_collection_literal : Pos.t -> string -> unit
 val static_string : ?no_consts:bool -> Pos.t -> unit
-val shape_idx_access_unknown_field : Pos.t -> string -> unit
 val shape_idx_access_required_field : Pos.t -> string -> unit
 
 val do_ : (unit -> 'a) -> Relative_path.t t list * 'a

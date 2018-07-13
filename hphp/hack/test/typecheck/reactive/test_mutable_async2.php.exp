@@ -1,6 +1,1 @@
-File "test_mutable_async2.php", line 8, characters 38-39:
-Mutable parameters are not allowed on async functions (NastCheck[3051])
-File "test_mutable_async2.php", line 8, characters 38-39:
-This parameter $x is marked mutable.
-File "test_mutable_async2.php", line 8, characters 16-18:
-The function foo is marked async.
+No errors

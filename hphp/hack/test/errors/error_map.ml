@@ -482,4 +482,6 @@ InvalidPPLCall = 4264
 InvalidPPLStaticCall = 4265
 TypeTestInLambda = 4266
 InvalidTraversableInRx = 4267
+ReassignMutableThis = 4268
+MutableExpressionAsMultipleMutableArguments = 4269
   |}]

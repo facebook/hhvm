@@ -1052,9 +1052,6 @@ and fun_param env (pos, name) f_type byref param =
   maybe expr env param.param_expr;
   let is_mutable = param_is_mutable param in
   let is_maybe_mutable = param_is_maybe_mutable param in
-  if is_mutable && f_type <> Ast.FSync then
-    Errors.mutable_params_outside_of_sync
-      param.param_pos pos param.param_name name;
   if not env.is_reactive then begin
     if is_mutable
     then Errors.mutable_methods_must_be_reactive param.param_pos name;

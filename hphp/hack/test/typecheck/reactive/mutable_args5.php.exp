@@ -1,0 +1,2 @@
+File "mutable_args5.php", line 7, characters 5-6:
+$this here is mutable. You cannot create a new reference to it. (Typing[4268])

@@ -2373,6 +2373,17 @@ let reassign_mutable_var pos1 =
   add (Typing.err_code Typing.ReassignMutableVar) pos1
   ("This variable is mutable. You cannot create a new reference to it.")
 
+let reassign_mutable_this pos1 =
+  add (Typing.err_code Typing.ReassignMutableThis) pos1
+  ("$this here is mutable. You cannot create a new reference to it.")
+
+let mutable_expression_as_multiple_mutable_arguments pos param_kind prev_pos prev_param_kind =
+  add_list (Typing.err_code Typing.MutableExpressionAsMultipleMutableArguments) [
+    pos, "A mutable expression may not be passed as multiple arguments where \
+    at least one matching parameter is mutable. Matching parameter here is " ^ param_kind;
+    prev_pos, "This is where it was used before, being passed as " ^ prev_param_kind
+  ]
+
 let reassign_maybe_mutable_var pos1 =
   add (Typing.err_code Typing.ReassignMaybeMutableVar) pos1
   ("This variable is maybe mutable. You cannot create a new reference to it.")

@@ -5,4 +5,4 @@ class Test {
 }
 
 <<__Rx>>
-async function foo(<<__Mutable>>Test $x, int $y): void {}
+async function foo(<<__Mutable>>Test $x, int $y): Awaitable<void> {}

@@ -576,4 +576,6 @@ module type S = sig
   val mutability_mismatch: is_receiver: bool -> Pos.t -> string -> Pos.t -> string -> unit
   val invalid_traversable_in_rx: Pos.t -> unit
   val reference_in_rx: Pos.t -> unit
+  val reassign_mutable_this: Pos.t -> unit
+  val mutable_expression_as_multiple_mutable_arguments: Pos.t -> string -> Pos.t -> string -> unit
 end

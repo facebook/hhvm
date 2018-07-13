@@ -13,6 +13,15 @@ module Env = Typing_env
 module LMap = Local_id.Map
 open Typing_defs
 
+type borrowable_args = Arg_this | Arg_local of Local_id.S.t
+
+module Borrowable_args = Map.Make(struct
+  type t = borrowable_args
+  let compare (a: t) (b: t) = compare a b
+end)
+
+type args_mut_map = (Pos.t * param_mutability option) Borrowable_args.t
+
 let fun_returns_mutable (env : Typing_env.env) (id : Nast.sid) =
   match Env.get_fun env (snd id) with
   | None -> false
@@ -182,14 +191,50 @@ let freeze_local (p : Pos.t) (env : Typing_env.env) (tel : T.expr list)
     Errors.invalid_freeze_use p;
     env
 
+let with_mutable_value env e ~default ~f =
+  match snd e with
+  (* invoke f only for mutable values *)
+  | T.This when Env.function_is_mutable env -> f Arg_this
+  | T.Callconv (Ast.Pinout, (_, T.Lvar (_, id)))
+  | T.Lvar (_, id) when Env.is_mutable env id -> f (Arg_local id)
+  | _ -> default
+
+let check_borrowing
+  (env : Typing_env.env)
+  (p: 'a fun_param)
+  (mut_args : args_mut_map)
+  (e: T.expr): args_mut_map =
+  let mut_to_string m =
+    match m with
+    | None -> "immutable"
+    | Some Param_mutable -> "mutable"
+    | Some Param_maybe_mutable -> "maybe mutable" in
+  let check key =
+    (* only check mutable expressions *)
+    match Borrowable_args.find_opt key mut_args, p.fp_mutability with
+    (* first time we see the parameter - just record it *)
+    | None, _ -> Borrowable_args.add key (T.get_position e, p.fp_mutability) mut_args
+    (* error case 1, expression was already passed as mutable parameter *)
+    (* error case 2, expression was passed a maybe mutable parameter before and
+       now is passed again as mutable *)
+    | Some (pos, (Some Param_mutable as mut)), _
+    | Some (pos, (Some Param_maybe_mutable as mut)), Some Param_mutable ->
+      Errors.mutable_expression_as_multiple_mutable_arguments
+        (T.get_position e)(mut_to_string p.fp_mutability) pos (mut_to_string mut);
+      mut_args
+    | _ -> mut_args in
+
+  with_mutable_value env e ~default:mut_args ~f:check
+
 (* Checks that each parameter that is marked mutable is mutable *)
 (* There's no List.iter2_shortest so I'm stuck with this *)
 (* Return the remaining expressions to check against the variadic argument *)
 let rec check_param_mutability (env : Typing_env.env)
-  (params : 'a fun_params ) (el : T.expr list) : T.expr list  =
+  (mut_args : args_mut_map)
+  (params : 'a fun_params ) (el : T.expr list): args_mut_map * T.expr list  =
   match params, el with
   | [], _
-  | _, [] -> el
+  | _, [] -> mut_args, el
   | param::ps, e::es ->
     (* maybe mutable parameters allow anything *)
     if param.fp_mutability <> Some Param_maybe_mutable
@@ -215,15 +260,16 @@ let rec check_param_mutability (env : Typing_env.env)
       | _ -> ()
       end
     end;
+    let mut_args = check_borrowing env param mut_args e in
     (* Check the rest *)
-    check_param_mutability env ps es
+    check_param_mutability env mut_args ps es
 
-let check_mutability_fun_params env fty el =
+let check_mutability_fun_params env mut_args fty el =
   (* exit early if when calling non-reactive function *)
   if fty.ft_reactive = Nonreactive then ()
   else
   let params = fty.ft_params in
-  let remaining_exprs = check_param_mutability env params el in
+  let mut_args, remaining_exprs = check_param_mutability env mut_args params el in
   let rec error_on_first_mismatched_argument ~needs_mutable param es =
     match es with
     | [] -> ()
@@ -248,6 +294,12 @@ let check_mutability_fun_params env fty el =
     | Fvariadic (_, ({ fp_mutability = None; _ } as param)) ->
       error_on_first_mismatched_argument ~needs_mutable:false param remaining_exprs
     | _ -> ()
+    end;
+    begin match fty.ft_arity with
+    | Fvariadic (_, p) ->
+      Core_list.fold_left ~init:mut_args ~f:(check_borrowing env p) remaining_exprs
+      |> ignore
+    | _ -> ()
     end
   end
 
@@ -258,17 +310,17 @@ let enforce_mutable_call (env : Typing_env.env) (te : T.expr) =
   | T.Call (_, (_, T.Fun_id id), _, el, _) ->
     begin match Env.get_fun env (snd id) with
     | Some fty ->
-      check_mutability_fun_params env fty el
+      check_mutability_fun_params env Borrowable_args.empty fty el
     | None -> ()
     end
   (* static methods *)
   | T.Call (_, ((_, (_, Tfun fty)), T.Class_const _), _, el, _) ->
-    check_mutability_fun_params env fty el
+    check_mutability_fun_params env Borrowable_args.empty fty el
   (* $x->method() where method is mutable *)
   | T.Call (_, ((pos, (r, Tfun fty)), T.Obj_get (expr, _, _)), _, el, _) ->
     (* do not check receiver mutability when calling non-reactive function *)
     if fty.ft_reactive <> Nonreactive
-    then Env.error_if_reactive_context env @@ begin fun () ->
+    then begin Env.error_if_reactive_context env @@ begin fun () ->
       let fpos = Reason.to_pos r in
       match fty.ft_mutability with
       (* mutable-or-immutable function - ok *)
@@ -288,7 +340,12 @@ let enforce_mutable_call (env : Typing_env.env) (te : T.expr) =
       (* anything else - ok *)
       | _ -> ()
     end;
-    check_mutability_fun_params env fty el
+    (* record mutability for the receiver *)
+    let mut_args =
+      with_mutable_value env expr ~default:Borrowable_args.empty
+      ~f:(fun k -> Borrowable_args.singleton k (T.get_position expr, fty.ft_mutability)) in
+    check_mutability_fun_params env mut_args fty el
+    end
   (* TAny, T.Calls that don't have types, etc *)
   | _ -> ()
 
@@ -346,6 +403,11 @@ let handle_assignment_mutability
      match LMap.find id2 mut_env with
      | _, MaybeMutable -> Errors.reassign_maybe_mutable_var p
      | _ -> Errors.reassign_mutable_var p
+   end;
+   mut_env
+ | _, T.This when Env.function_is_mutable env ->
+   Env.error_if_reactive_context env @@ begin fun () ->
+     Errors.reassign_mutable_this (T.get_position te1)
    end;
    mut_env
  (* var = mutable(v) - add the var to the env since it points to a owned mutable value *)

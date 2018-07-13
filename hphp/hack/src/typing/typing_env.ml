@@ -320,7 +320,6 @@ let empty tcopt file ~droot = {
   in_loop = false;
   in_try  = false;
   in_case  = false;
-  in_lambda = false;
   inside_constructor = false;
   inside_ppl_class = false;
   decl_env = {
@@ -444,7 +443,6 @@ let fresh_tenv env f =
       in_loop = false;
       in_try = false;
       in_case = false;
-      in_lambda = false;
     }
 
 let get_enum env x =
@@ -943,12 +941,6 @@ let in_case env f =
   let env = { env with in_case = true } in
   let env, result = f env in
   { env with in_case = old_in_case }, result
-
-let in_lambda env f =
-  let old_in_lambda = env.in_lambda in
-  let env = { env with in_lambda = true } in
-  let env, a, b = f env in
-  { env with in_lambda = old_in_lambda }, a, b
 
 (* Return the subset of env which is saved in the Typed AST's EnvAnnotation. *)
 let save local_tpenv env =

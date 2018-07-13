@@ -14,27 +14,3 @@ Invalid argument (Typing[4110])
   This is a string
   File "vec2.php", line 16, characters 15-25:
   It is incompatible with a value of generic type T#4 from this "as" assertion
-File "vec2.php", line 12, characters 30-32:
-Invalid "as" expression hint (Typing[4195])
-  File "vec2.php", line 12, characters 30-32:
-  The "as" operator cannot be used with a vec (temporarily)
-File "vec2.php", line 13, characters 30-32:
-Invalid "as" expression hint (Typing[4195])
-  File "vec2.php", line 13, characters 30-32:
-  The "as" operator cannot be used with a vec (temporarily)
-File "vec2.php", line 15, characters 30-35:
-Invalid "as" expression hint (Typing[4195])
-  File "vec2.php", line 15, characters 30-35:
-  The "as" operator cannot be used with a vec (temporarily)
-File "vec2.php", line 16, characters 30-35:
-Invalid "as" expression hint (Typing[4195])
-  File "vec2.php", line 16, characters 30-35:
-  The "as" operator cannot be used with a vec (temporarily)
-File "vec2.php", line 18, characters 34-39:
-Invalid "as" expression hint (Typing[4195])
-  File "vec2.php", line 18, characters 34-39:
-  The "as" operator cannot be used with a vec (temporarily)
-File "vec2.php", line 19, characters 34-39:
-Invalid "as" expression hint (Typing[4195])
-  File "vec2.php", line 19, characters 34-39:
-  The "as" operator cannot be used with a vec (temporarily)

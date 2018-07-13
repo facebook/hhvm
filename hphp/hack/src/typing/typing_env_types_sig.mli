@@ -64,7 +64,6 @@
    in_loop : bool       ;
    in_try  : bool       ;
    in_case : bool       ;
-   in_lambda: bool;
    inside_constructor: bool;
    inside_ppl_class: bool;
    (* A set of constraints that are global to a given method *)

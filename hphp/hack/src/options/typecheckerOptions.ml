@@ -47,8 +47,6 @@ let experimental_disallow_static_memoized =
 let experimental_disable_optional_and_unknown_shape_fields =
   GlobalOptions.tco_experimental_disable_optional_and_unknown_shape_fields
 let experimental_no_trait_reuse = GlobalOptions.tco_experimental_no_trait_reuse
-let experimental_is_expression = GlobalOptions.tco_experimental_is_expression
-let experimental_as_expression = GlobalOptions.tco_experimental_as_expression
 let experimental_void_is_type_of_null =
   GlobalOptions.tco_experimental_void_is_type_of_null
 

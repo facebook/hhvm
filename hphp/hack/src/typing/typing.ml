@@ -2255,54 +2255,38 @@ and expr_
       let env, te2, _class = instantiable_cid p env cid in
       make_result env (T.InstanceOf (te, te2)) (Reason.Rwitness p, Tprim Tbool)
   | Is (e, hint) ->
-      if not (TypecheckerOptions.experimental_feature_enabled
-        (Env.get_options env)
-        TypecheckerOptions.experimental_is_expression)
-      then begin
-        Errors.experimental_feature p "is expression";
-        expr_error env p (Reason.Rwitness p)
-      end else begin
-        if env.Env.in_lambda then Errors.type_test_in_lambda p "is";
-        let env, te, _ = expr env e in
-        make_result env (T.Is (te, hint)) (Reason.Rwitness p, Tprim Tbool)
-      end
+      if env.Env.in_lambda then Errors.type_test_in_lambda p "is";
+      let env, te, _ = expr env e in
+      make_result env (T.Is (te, hint)) (Reason.Rwitness p, Tprim Tbool)
   | As (e, hint, is_nullable) ->
-    if not (TypecheckerOptions.experimental_feature_enabled
-      (Env.get_options env)
-      TypecheckerOptions.experimental_as_expression)
-    then begin
-      Errors.experimental_feature p "as expression";
-      expr_error env p (Reason.Rnone)
-    end else begin
-      if env.Env.in_lambda then Errors.type_test_in_lambda p "as";
-      let env, te, expr_ty = expr env e in
-      let env, hint_ty = Phase.hint_locl env hint in
-      let hint_ty =
-        if not is_nullable then hint_ty else
-          match hint_ty with
-          (* Dont create ??hint *)
-          | _ , Toption _ -> hint_ty
-          | _ -> Reason.Rwitness p, Toption (hint_ty) in
-      let refine_type env lpos lty rty =
-        let reason = Reason.Ras lpos in
-        let env, rty = Env.expand_type env rty in
-        if snd rty <> Tdynamic && SubType.is_sub_type env lty rty
-        then env, lty
-        else safely_refine_type env p reason lpos lty rty
-      in
-      let env, hint_ty =
-        if is_instance_var e
-        then begin
-          let env, _, ivar_ty = raw_expr ~in_cond:false env e in
-          let env, ((ivar_pos, _) as ivar) = get_instance_var env e in
-          let env, hint_ty = refine_type env ivar_pos ivar_ty hint_ty in
-          let env = set_local env ivar hint_ty in
-          env, hint_ty
-        end else
-          refine_type env (fst e) expr_ty hint_ty
-      in
-      make_result env (T.As (te, hint, is_nullable)) hint_ty
-    end
+    if env.Env.in_lambda then Errors.type_test_in_lambda p "as";
+    let env, te, expr_ty = expr env e in
+    let env, hint_ty = Phase.hint_locl env hint in
+    let hint_ty =
+      if not is_nullable then hint_ty else
+        match hint_ty with
+        (* Dont create ??hint *)
+        | _ , Toption _ -> hint_ty
+        | _ -> Reason.Rwitness p, Toption (hint_ty) in
+    let refine_type env lpos lty rty =
+      let reason = Reason.Ras lpos in
+      let env, rty = Env.expand_type env rty in
+      if snd rty <> Tdynamic && SubType.is_sub_type env lty rty
+      then env, lty
+      else safely_refine_type env p reason lpos lty rty
+    in
+    let env, hint_ty =
+      if is_instance_var e
+      then begin
+        let env, _, ivar_ty = raw_expr ~in_cond:false env e in
+        let env, ((ivar_pos, _) as ivar) = get_instance_var env e in
+        let env, hint_ty = refine_type env ivar_pos ivar_ty hint_ty in
+        let env = set_local env ivar hint_ty in
+        env, hint_ty
+      end else
+        refine_type env (fst e) expr_ty hint_ty
+    in
+    make_result env (T.As (te, hint, is_nullable)) hint_ty
   | Efun (f, idl) ->
     Env.in_lambda env begin fun env ->
       (* This is the function type as declared on the lambda itself.

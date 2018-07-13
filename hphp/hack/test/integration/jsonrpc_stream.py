@@ -5,12 +5,13 @@ from __future__ import unicode_literals
 import json
 from threading import Thread
 from queue import Queue, Empty
+from typing import Any
 
 
 class JsonRpcStreamReader:
     def __init__(self, stream):
         self.stream = stream
-        self.queue = Queue()
+        self.queue: Queue[Any] = Queue()
         # daemon ensures the reading thread will get cleaned up when
         # the main program exits.  no need to explicitly manage it.
         self.read_thread = Thread(target=self._async_read_loop, daemon=True)
@@ -33,8 +34,7 @@ class JsonRpcStreamReader:
 
     def _read(self, timeout_seconds):
         try:
-            return self.queue.get(block=True,
-                                  timeout=timeout_seconds)
+            return self.queue.get(block=True, timeout=timeout_seconds)
         except Empty:
             return None
 

@@ -2,16 +2,33 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-from typing import Any, Iterator, Mapping, Optional, Sequence, Type, TypeVar
+from typing import (
+    Any,
+    Callable,
+    Iterator,
+    Mapping,
+    NamedTuple,
+    Optional,
+    Sequence,
+    Type,
+    TypeVar,
+)
 import contextlib
 import subprocess
 import uuid
-import time
 from hh_paths import hh_client
 from jsonrpc_stream import JsonRpcStreamReader, JsonRpcStreamWriter
 
+
 Json = Mapping[str, Any]
-Transcript = Mapping[str, Mapping[str, Optional[Json]]]
+
+
+class TranscriptEntry(NamedTuple):
+    sent: Json
+    received: Optional[Json]
+
+
+Transcript = Mapping[str, TranscriptEntry]
 
 
 class LspCommandProcessor:
@@ -54,7 +71,10 @@ class LspCommandProcessor:
     # from the server that aren't caused by a request.  these could
     # be errors or server notifications.
     def communicate(
-        self, json_commands: Sequence[Json], request_timeout=30, notify_timeout=1
+        self,
+        json_commands: Sequence[Json],
+        request_timeout: float = 30,
+        notify_timeout: float = 1,
     ) -> Transcript:
         transcript = self._send_commands({}, json_commands)
 
@@ -67,7 +87,9 @@ class LspCommandProcessor:
         # because it's possible the server sent us notifications
         # along with responses we need to try to keep reading
         # from the stream to get anything that might be left.
-        return self._read_extra_responses(transcript, notify_timeout)
+        dummy_id = LspCommandProcessor.dummy_request_id()
+        transcript = self._read_extra_responses(transcript, notify_timeout)
+        return {k: v for k, v in transcript.items() if k != dummy_id}
 
     def _send_commands(
         self, transcript: Transcript, commands: Sequence[Json]
@@ -78,16 +100,56 @@ class LspCommandProcessor:
             # Hack: HackLSP server only connects to hh_server asynchronously.
             # We want to delay until after it's connected before testing more.
             if command["method"] == "initialize":
-                time.sleep(5)
+                transcript = self._wait_for_initialized(transcript)
 
         return transcript
+
+    def _wait_for_initialized(self, transcript: Transcript) -> Transcript:
+        dummy_command = {
+            "jsonrpc": "2.0",
+            "method": "workspace/symbol",
+            "id": -1,
+            "params": {"query": "my test query"},
+        }
+        id = self._request_id(dummy_command)
+
+        def has_error_message(entry: TranscriptEntry, message: str) -> bool:
+            if (
+                entry.received is None
+                or entry.received.get("error") is None
+                or entry.received["error"].get("message") is None
+            ):
+                return False
+            else:
+                return message in entry.received["error"]["message"]
+
+        while True:
+            transcript = self._send_commands(transcript, [dummy_command])
+            transcript = self._read_request_responses(
+                transcript, [dummy_command], timeout_seconds=5
+            )
+
+            if (
+                not any(
+                    has_error_message(entry, "Server busy")
+                    for entry in transcript.values()
+                )
+                and not any(
+                    has_error_message(entry, "hh_server initializing")
+                    for entry in transcript.values()
+                )
+                and id in transcript
+                and transcript[id].received is not None
+            ):
+                return transcript
 
     def _read_request_responses(
         self, transcript: Transcript, commands: Sequence[Json], timeout_seconds: float
     ) -> Transcript:
         for _ in self._requests_in(commands):
             response = self._try_read_logged(timeout_seconds)
-            transcript = self._scribe(transcript, sent=None, received=response)
+            if response:
+                transcript = self._scribe(transcript, sent=None, received=response)
         return transcript
 
     def _read_extra_responses(
@@ -105,20 +167,22 @@ class LspCommandProcessor:
     ) -> Transcript:
         transcript = dict(transcript)
         id = self._transcript_id(sent, received)
+        existing_entry = transcript.get(id)
+        if existing_entry:
+            if not sent:
+                sent = existing_entry.sent
+            if not received:
+                received = existing_entry.received
+        else:
+            assert sent is not None
 
-        if sent and not received:
-            received = transcript[id]["received"] if id in transcript else None
-
-        if received and not sent:
-            sent = transcript[id]["sent"] if id in transcript else None
-
-        transcript[id] = {"sent": sent, "received": received}
+        transcript[id] = TranscriptEntry(sent=sent, received=received)
         return transcript
 
     def _transcript_id(self, sent: Optional[Json], received: Optional[Json]) -> str:
         assert sent is not None or received is not None
 
-        def make_id(json, idgen):
+        def make_id(json: Json, idgen: Callable[[], str]) -> str:
             if LspCommandProcessor._has_id(json):
                 return LspCommandProcessor._request_id(json)
             else:
@@ -126,8 +190,10 @@ class LspCommandProcessor:
 
         if sent:
             return make_id(sent, LspCommandProcessor._client_notify_id)
-        else:
+        elif received:
             return make_id(received, LspCommandProcessor._server_notify_id)
+        else:
+            raise Exception("This should have failed up above in the assert")
 
     def _requests_in(self, commands: Sequence[Json]) -> Sequence[Json]:
         return [c for c in commands if LspCommandProcessor._has_id(c)]
@@ -159,3 +225,7 @@ class LspCommandProcessor:
     @staticmethod
     def request_id(id: str) -> str:
         return "REQUEST_" + str(id)
+
+    @staticmethod
+    def dummy_request_id() -> str:
+        return LspCommandProcessor._request_id({"id": -1})

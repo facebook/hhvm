@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
+from typing import Any, Iterable, Mapping
 import common_tests
 import copy
 import json
@@ -9,7 +10,7 @@ import os
 import unittest
 import urllib.parse
 import re
-from lspcommand import LspCommandProcessor
+from lspcommand import LspCommandProcessor, Transcript
 
 
 class LspTestDriver(common_tests.CommonTestDriver):
@@ -105,9 +106,11 @@ class TestLsp(LspTestDriver, unittest.TestCase):
 
     # generates received responses from an LSP communication transcript
     # ignoring the non-deterministic ones "progress" and "actionRequired"
-    def get_important_received_items(self, transcript):
+    def get_important_received_items(
+        self, transcript: Transcript
+    ) -> Iterable[Mapping[str, Any]]:
         for entry in transcript.values():
-            received = entry.get("received") or None
+            received = entry.received or None
             if received is None:
                 continue
             method = received.get("method") or ""

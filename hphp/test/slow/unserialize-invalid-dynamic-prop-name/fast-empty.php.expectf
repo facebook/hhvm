@@ -1,0 +1,1 @@
+Fatal error: Cannot access empty property in %s/hphp/test/slow/unserialize-invalid-dynamic-prop-name/fast-empty.php on line 6

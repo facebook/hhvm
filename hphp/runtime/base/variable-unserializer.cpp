@@ -1067,6 +1067,22 @@ void VariableUnserializer::unserializeVariant(
                                            remainingProps--);
                   hasSerializedNativeData = true;
                 } else {
+                  auto kdata = key.data();
+                  if (kdata[0] == '\0') {
+                    auto ksize = key.size();
+                    if (UNLIKELY(ksize == 0)) {
+                      raise_error("Cannot access empty property");
+                    }
+                    // private or protected
+                    auto subLen = strlen(kdata + 1) + 2;
+                    if (UNLIKELY(subLen >= ksize)) {
+                      if (subLen == ksize) {
+                        raise_error("Cannot access empty property");
+                      } else {
+                        throwMangledPrivateProperty();
+                      }
+                    }
+                  }
                   if (RuntimeOption::EvalNoticeOnCreateDynamicProp) {
                     obj->raiseCreateDynamicProp(key.get());
                   }

@@ -20,13 +20,16 @@ let strip_global_ns s =
   if String.length s > 0 || s.[0] = '\\'
   then String_utils.lstrip s "\\"
   else s
-let strip_ns s =
+let strip_ns =
+  let rx = Str.regexp {|.*\\|} in
   (* strip zero or more chars followed by a backslash *)
-  Str.replace_first (Str.regexp {|.*\\|}) "" s
-let has_ns s =
-  Str.string_match (Str.regexp {|.+\\.+|}) s 0
-let strip_type_list s =
-  Str.global_replace (Str.regexp {|<.*>|}) "" s
+  fun s -> Str.replace_first rx "" s
+let has_ns =
+  let rx = Str.regexp {|.+\\.+|} in
+  fun s -> Str.string_match rx s 0
+let strip_type_list =
+  let rx = Str.regexp {|<.*>|} in
+  fun s -> Str.global_replace rx "" s
 
 let cmp ?(case_sensitive=true) ?(ignore_ns=false) s1 s2 =
   let s1, s2 =
@@ -156,14 +159,16 @@ module Closures = struct
    *   ix ::=
    *     # <digits>
    *)
-  let unmangle_closure s =
-    if is_closure_name s
-    then
-      let suffix = String_utils.lstrip s "Closure$" in
-      match Str.split_delim (Str.regexp "#") suffix with
-      | [prefix; _] -> Some prefix
-      | _ -> Some suffix
-    else None
+  let unmangle_closure =
+    let rx = Str.regexp "#" in
+    fun s ->
+      if is_closure_name s
+      then
+        let suffix = String_utils.lstrip s "Closure$" in
+        match Str.split_delim rx suffix with
+        | [prefix; _] -> Some prefix
+        | _ -> Some suffix
+      else None
 
   let mangle_closure scope ix =
     Classes.mangle_class "Closure" scope ix
@@ -181,44 +186,54 @@ module Xhp = struct
     Classes.is_anonymous_class_name s || Closures.is_closure_name s
 
   (* Mangle an unqualified ID *)
-  let mangle_id_worker s =
-    if ignore_id s then s
-    else
-    let need_prefix = is_xhp s in
-    let s = if need_prefix then (strip_colon s) else s in
-    let s =
-      s
-      |> Str.global_replace (Str.regexp ":") "__"
-      |> Str.global_replace (Str.regexp "-") "_" in
-    if need_prefix then "xhp_" ^ s else s
+  let mangle_id_worker =
+    let rx_colon = Str.regexp ":" in
+    let rx_dash = Str.regexp "-" in
+    fun s ->
+      if ignore_id s then s
+      else
+      let need_prefix = is_xhp s in
+      let s = if need_prefix then (strip_colon s) else s in
+      let s =
+        s
+        |> Str.global_replace rx_colon "__"
+        |> Str.global_replace rx_dash "_" in
+      if need_prefix then "xhp_" ^ s else s
 
   let mangle_id s =
     if ignore_id s then s else mangle_id_worker s
 
   (* Mangle a possibly-qualified ID *)
-  let mangle s =
-    if ignore_id s then s
-    else
-    match List.rev (Str.split_delim (Str.regexp "\\") s) with
-    | [] -> ""
-    | id::rest ->
-      String.concat "\\" (List.rev (mangle_id_worker id :: rest))
+  let mangle =
+    let rx = Str.regexp "\\" in
+    fun s ->
+      if ignore_id s then s
+      else
+      match List.rev (Str.split_delim rx s) with
+      | [] -> ""
+      | id::rest ->
+        String.concat "\\" (List.rev (mangle_id_worker id :: rest))
 
-  let unmangle_id_worker s =
-    let has_prefix = String_utils.string_starts_with s "xhp_" in
-    let s = if has_prefix then String_utils.lstrip s "xhp_" else s in
-    let s =
-      s
-      |> Str.global_replace (Str.regexp "__") ":"
-      |>Str.global_replace (Str.regexp "_") "-" in
-    if has_prefix then ":" ^ s else s
+  let unmangle_id_worker =
+    let rx_dunder = Str.regexp "__" in
+    let rx_under = Str.regexp "_" in
+    fun s ->
+      let has_prefix = String_utils.string_starts_with s "xhp_" in
+      let s = if has_prefix then String_utils.lstrip s "xhp_" else s in
+      let s =
+        s
+        |> Str.global_replace rx_dunder ":"
+        |>Str.global_replace rx_under "-" in
+      if has_prefix then ":" ^ s else s
 
-  let unmangle s =
-    if ignore_id s then s
-    else
-    match List.rev (Str.split_delim (Str.regexp "\\") s) with
-    | [] -> ""
-    | id::rest ->
-      String.concat "\\" (List.rev (unmangle_id_worker id :: rest))
+  let unmangle =
+    let rx = Str.regexp "\\" in
+    fun s ->
+      if ignore_id s then s
+      else
+      match List.rev (Str.split_delim rx s) with
+      | [] -> ""
+      | id::rest ->
+        String.concat "\\" (List.rev (unmangle_id_worker id :: rest))
 
 end

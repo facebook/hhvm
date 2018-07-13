@@ -451,11 +451,10 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
    */
   Array& reserveProperties(int nProp = 2);
 
-  Slot declPropInd(tv_rval prop) const;
   [[noreturn]] NEVER_INLINE
-  void throwMutateImmutable(tv_rval prop) const;
+  void throwMutateImmutable(Slot prop) const;
   [[noreturn]] NEVER_INLINE
-  void throwBindImmutable(tv_rval prop) const;
+  void throwBindImmutable(Slot prop) const;
 
  public:
   // never box the lval returned from getPropLval; use propB or vGetProp instead
@@ -468,6 +467,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
  private:
   struct PropLookup {
     tv_lval prop;
+    Slot slot;
     bool accessible;
     bool immutable;
   };

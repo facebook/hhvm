@@ -442,7 +442,7 @@ void ObjectData::o_set(const String& propName, const Variant& v,
   if (prop && lookup.accessible) {
     if (!useSet || type(prop) != KindOfUninit) {
       if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
-        throwMutateImmutable(prop);
+        throwMutateImmutable(lookup.slot);
       }
       tvSet(tvToInitCell(*v.asTypedValue()), prop);
       return;
@@ -1095,34 +1095,19 @@ Object ObjectData::FromArray(ArrayData* properties) {
   return retval;
 }
 
-Slot ObjectData::declPropInd(tv_rval rval) const {
-  // Do an address range check to determine whether prop physically resides in
-  // propVec. This will have to change if propVec() ever stops being a
-  // TypedValue[].
-  auto const vec = reinterpret_cast<const char*>(&propVec()->m_data);
-  auto const prop = reinterpret_cast<const char*>(&val(rval));
-  if (prop >= vec &&
-      prop < (vec + m_cls->numDeclProperties() * sizeof(TypedValue))) {
-    return (prop - vec) / sizeof(TypedValue);
-  }
-  return kInvalidSlot;
-}
-
 NEVER_INLINE
-void ObjectData::throwMutateImmutable(tv_rval prop) const {
-  auto const propIdx = declPropInd(prop);
+void ObjectData::throwMutateImmutable(Slot prop) const {
   throw_cannot_modify_immutable_prop(
     getClassName().data(),
-    m_cls->declProperties()[propIdx].name->data()
+    m_cls->declProperties()[prop].name->data()
   );
 }
 
 NEVER_INLINE
-void ObjectData::throwBindImmutable(tv_rval prop) const {
-  auto const propIdx = declPropInd(prop);
+void ObjectData::throwBindImmutable(Slot prop) const {
   throw_cannot_bind_immutable_prop(
     getClassName().data(),
-    m_cls->declProperties()[propIdx].name->data()
+    m_cls->declProperties()[prop].name->data()
   );
 }
 
@@ -1149,6 +1134,7 @@ ObjectData::PropLookup ObjectData::getPropImpl(
 
     return {
      const_cast<TypedValue*>(prop),
+     propIdx,
      lookup.accessible,
      // we always return true in the !forWrite case; this way the compiler
      // may optimize away this value, and if a caller intends to write but
@@ -1169,19 +1155,19 @@ ObjectData::PropLookup ObjectData::getPropImpl(
       // the property we need to allow the array to escalate.
       if (forWrite) {
         auto const lval = arr.lvalAt(StrNR(key), AccessFlags::Key);
-        return { lval, true, false };
+        return { lval, kInvalidSlot, true, false };
       }
-      return { rval.as_lval(), true, true };
+      return { rval.as_lval(), kInvalidSlot, true, true };
     }
   }
 
-  return { nullptr, false, forWrite ? false : true };
+  return { nullptr, kInvalidSlot, false, forWrite ? false : true };
 }
 
 tv_lval ObjectData::getPropLval(const Class* ctx, const StringData* key) {
   auto const lookup = getPropImpl<true>(ctx, key);
   if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
-    throwMutateImmutable(lookup.prop);
+    throwMutateImmutable(lookup.slot);
   }
   return lookup.prop && lookup.accessible ? lookup.prop : nullptr;
 }
@@ -1195,7 +1181,7 @@ tv_rval ObjectData::getProp(const Class* ctx, const StringData* key) const {
 tv_lval ObjectData::vGetProp(const Class* ctx, const StringData* key) {
   auto const lookup = getPropImpl<true>(ctx, key);
   auto prop = lookup.prop;
-  if (UNLIKELY(lookup.immutable)) throwBindImmutable(prop);
+  if (UNLIKELY(lookup.immutable)) throwBindImmutable(lookup.slot);
   if (lookup.accessible && prop && type(prop) != KindOfUninit) {
     tvBoxIfNeeded(prop);
     return prop;
@@ -1206,7 +1192,7 @@ tv_lval ObjectData::vGetProp(const Class* ctx, const StringData* key) {
 tv_lval ObjectData::vGetPropIgnoreAccessibility(const StringData* key) {
   auto const lookup = getPropImpl<true>(nullptr, key);
   auto prop = lookup.prop;
-  if (UNLIKELY(lookup.immutable)) throwBindImmutable(prop);
+  if (UNLIKELY(lookup.immutable)) throwBindImmutable(lookup.slot);
   if (prop && type(prop) != KindOfUninit) {
     tvBoxIfNeeded(prop);
     return prop;
@@ -1412,11 +1398,11 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
     if (lookup.accessible) {
       auto const checkImmutable = [&]() {
         if (mode == PropMode::Bind) {
-          if (UNLIKELY(lookup.immutable)) throwBindImmutable(prop);
+          if (UNLIKELY(lookup.immutable)) throwBindImmutable(lookup.slot);
         }
         if (mode == PropMode::DimForWrite) {
           if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
-            throwMutateImmutable(prop);
+            throwMutateImmutable(lookup.slot);
           }
         }
         return prop;
@@ -1593,7 +1579,7 @@ void ObjectData::setProp(Class* ctx, const StringData* key, Cell val) {
         !m_cls->rtAttribute(Class::UseSet) ||
         !invokeSet(key, val)) {
       if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
-        throwMutateImmutable(prop);
+        throwMutateImmutable(lookup.slot);
       }
       tvSet(val, prop);
     }
@@ -1647,14 +1633,14 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
           tvRef.m_type = KindOfUninit;
         }
         if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
-          throwMutateImmutable(prop);
+          throwMutateImmutable(lookup.slot);
         }
         cellDup(tvAssertCell(r.val), prop);
         return prop;
       }
     }
     if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
-      throwMutateImmutable(prop);
+      throwMutateImmutable(lookup.slot);
     }
     prop = tvToCell(prop);
     setopBody(prop, op, val);
@@ -1739,7 +1725,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
           return dest;
         }
         if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
-          throwMutateImmutable(prop);
+          throwMutateImmutable(lookup.slot);
         }
         cellCopy(tvAssertCell(r.val), prop);
         tvWriteNull(r.val); // suppress decref
@@ -1747,7 +1733,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
       }
     }
     if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
-      throwMutateImmutable(prop);
+      throwMutateImmutable(lookup.slot);
     }
     if (type(prop) == KindOfUninit) {
       tvWriteNull(prop);
@@ -1816,10 +1802,10 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
   auto const prop = lookup.prop;
 
   if (prop && lookup.accessible && type(prop) != KindOfUninit) {
-    if (declPropInd(prop) != kInvalidSlot) {
+    if (lookup.slot != kInvalidSlot) {
       // Declared property.
       if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
-        throwMutateImmutable(prop);
+        throwMutateImmutable(lookup.slot);
       }
       tvSetIgnoreRef(*uninit_variant.asTypedValue(), prop);
     } else {

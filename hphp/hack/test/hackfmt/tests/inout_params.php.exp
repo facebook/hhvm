@@ -67,6 +67,6 @@ function test(): void {
     inout $d[$derp()],
     inout $b,
     $v[0],
-    ...$v,
+    ...$v
   );
 }

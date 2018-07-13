@@ -2666,6 +2666,26 @@ and transform_argish_with_return_type env left_p params right_p colon ret_type =
 and transform_argish env
     ?(allow_trailing=true) ?(force_newlines=false) ?(spaces=false)
     left_p arg_list right_p =
+  (* It is a syntax error to follow a splat argument with a trailing comma, so
+     suppress trailing commas in that case. *)
+  let allow_trailing =
+    match Syntax.syntax arg_list with
+    | Syntax.SyntaxList args ->
+      let last_arg =
+        match Syntax.syntax (List.last_exn args) with
+        | Syntax.ListItem { list_item; _ } -> list_item
+        | _ -> failwith "Expected ListItem"
+      in
+      begin match Syntax.syntax last_arg with
+      | Syntax.(DecoratedExpression {
+          decorated_expression_decorator = {
+            syntax = Token { Token.kind = TokenKind.DotDotDot; _ }; _
+          }; _
+        }) -> false
+      | _ -> allow_trailing
+      end
+    | _ -> allow_trailing
+  in
   (* When there is only one argument, with no surrounding whitespace in the
    * original source, allow that style to be preserved even when there are
    * line breaks within the argument (normally these would force the splits

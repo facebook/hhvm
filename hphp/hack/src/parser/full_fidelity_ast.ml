@@ -1825,7 +1825,7 @@ and pStmt : stmt parser = fun node env ->
   let pos = pPos node env in
   let result = match syntax node with
   | AlternateElseClause _ | AlternateIfStatement _ | AlternateElseifClause _
-  | AlternateLoopStatement _  when is_typechecker env ->
+  | AlternateLoopStatement _  | AlternateSwitchStatement _ when is_typechecker env ->
     raise_parsing_error env (`Node node) SyntaxError.alternate_control_flow;
     missing_syntax "alternative control flow" node env (* this should never get hit *)
   | SwitchStatement { switch_expression=expr; switch_sections=sections; _ }

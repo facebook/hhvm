@@ -5560,6 +5560,10 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
       let env, ty = check_arithmetic env ty in
       make_result env te ty
   | Ast.Uref ->
+      if Env.env_local_reactive env
+         && not (TypecheckerOptions.unsafe_rx (Env.get_options env))
+      then Errors.reference_in_rx p;
+
       if forbid_uref
       then Errors.binding_ref_in_array p
       else if is_func_arg then

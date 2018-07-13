@@ -1242,9 +1242,6 @@ and expr_ env p = function
       ()
   | Unop (Ast.Uref, e) ->
     expr env e;
-    if env.is_reactive
-       && not (TypecheckerOptions.unsafe_rx (Env.get_options env.tenv))
-    then Errors.reference_in_rx p;
     begin match snd e with
       | This ->
         Errors.illegal_by_ref_expr p SN.SpecialIdents.this

@@ -773,6 +773,10 @@ let method_name_already_bound pos name =
   "Method name already bound: "^name
  )
 
+let reference_in_rx pos =
+  add (Naming.err_code Naming.ReferenceInRx) pos (
+    "References are not allowed in reactive code."
+  )
 let error_name_already_bound name name_prev p p_prev =
   let name = Utils.strip_ns name in
   let name_prev = Utils.strip_ns name_prev in

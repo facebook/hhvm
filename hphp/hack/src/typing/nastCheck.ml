@@ -459,6 +459,9 @@ and func env f named_body =
   error_if_has_onlyrx_if_rxfunc_attribute f.f_user_attributes;
   check_maybe_rx_attributes_on_params env f.f_user_attributes f.f_params;
 
+  if f.f_ret_by_ref && env.is_reactive
+  then Errors.reference_in_rx p;
+
   List.iter f.f_tparams (tparam env);
   let byref = List.find f.f_params ~f:(fun x -> x.param_is_reference) in
   List.iter f.f_params (fun_param env f.f_name f.f_fun_kind byref);
@@ -1058,6 +1061,10 @@ and fun_param env (pos, name) f_type byref param =
     if is_maybe_mutable
     then Errors.maybe_mutable_methods_must_be_reactive param.param_pos name;
   end;
+
+  if env.is_reactive && param.param_is_reference
+  then Errors.reference_in_rx pos;
+
   if is_mutable && is_maybe_mutable
   then Errors.conflicting_mutable_and_maybe_mutable_attributes pos;
 
@@ -1234,6 +1241,7 @@ and expr_ env p = function
       ()
   | Unop (Ast.Uref, e) ->
     expr env e;
+    if env.is_reactive then Errors.reference_in_rx p;
     begin match snd e with
       | This ->
         Errors.illegal_by_ref_expr p SN.SpecialIdents.this

@@ -91,9 +91,9 @@ function strtok($str, $token = null);
  */
 <<__PHPStdLib>>
 function str_getcsv(?string $input, string $delimiter = ",", string $enclosure = "\"", string $escape = "\\"): array<?string>;
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib>>
 function str_replace($search, $replace, $subject, &$count = null);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib>>
 function str_ireplace($search, $replace, $subject, &$count = null);
 <<__PHPStdLib, __Rx>>
 function substr_replace($str, $replacement, $start, $length = 0x7FFFFFFF);
@@ -205,7 +205,7 @@ function count_chars($str, $mode = 0);
 function str_word_count($str, $format = 0, $charlist = "");
 <<__PHPStdLib, __Rx>>
 function levenshtein($str1, $str2, $cost_ins = 1, $cost_rep = 1, $cost_del = 1);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib>>
 function similar_text($first, $second, &$percent = null);
 <<__PHPStdLib, __Rx>>
 function soundex($str);

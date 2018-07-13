@@ -103,9 +103,7 @@ class NumberFormatter {
   public function getSymbol(int $attr) : string;
   <<__Rx, __MaybeMutable>>
   public function getTextAttribute(int $attr) : string;
-  <<__Rx, __MaybeMutable>>
   public function parseCurrency(string $value, string &$currency, int &$position = 0) : float;
-  <<__Rx, __MaybeMutable>>
   public function parse(string $value, int $type = NumberFormatter::TYPE_DOUBLE, int &$position = 0) : mixed;
   <<__Rx, __Mutable>>
   public function setAttribute(int $attr, int $value) : bool;

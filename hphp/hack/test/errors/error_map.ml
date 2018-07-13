@@ -139,6 +139,7 @@ WildcardDisallowed = 2084
 AttributeClassNameConflict = 2085
 MethodNeedsVisibility = 2086
 ReferenceInStrictMode = 2087
+ReferenceInRx = 2088
 
 NastCheck Errors:
 AbstractBody = 3001

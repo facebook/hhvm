@@ -35,7 +35,9 @@ using StdStrToTypeMap = hphp_string_imap<AnnotType>;
 
 const StaticString
   s_HH_Traversable("HH\\Traversable"),
+  s_HH_RX_Traversable("HH\\Rx\\Traversable"),
   s_HH_KeyedTraversable("HH\\KeyedTraversable"),
+  s_HH_RX_KeyedTraversable("HH\\Rx\\KeyedTraversable"),
   s_HH_Container("HH\\Container"),
   s_HH_KeyedContainer("HH\\KeyedContainer"),
   s_Indexish("Indexish"),
@@ -124,6 +126,8 @@ const AnnotType* nameToAnnotType(const std::string& typeName) {
 bool interface_supports_non_objects(const StringData* s) {
   return (s->isame(s_HH_Traversable.get()) ||
           s->isame(s_HH_KeyedTraversable.get()) ||
+          s->isame(s_HH_RX_Traversable.get()) ||
+          s->isame(s_HH_RX_KeyedTraversable.get()) ||
           s->isame(s_HH_Container.get()) ||
           s->isame(s_HH_KeyedContainer.get()) ||
           s->isame(s_Indexish.get()) ||
@@ -134,6 +138,8 @@ bool interface_supports_non_objects(const StringData* s) {
 bool interface_supports_array(const StringData* s) {
   return (s->isame(s_HH_Traversable.get()) ||
           s->isame(s_HH_KeyedTraversable.get()) ||
+          s->isame(s_HH_RX_Traversable.get()) ||
+          s->isame(s_HH_RX_KeyedTraversable.get()) ||
           s->isame(s_HH_Container.get()) ||
           s->isame(s_HH_KeyedContainer.get()) ||
           s->isame(s_Indexish.get()) ||
@@ -144,6 +150,8 @@ bool interface_supports_array(const std::string& n) {
   const char* s = n.c_str();
   return ((n.size() == 14 && !strcasecmp(s, "HH\\Traversable")) ||
           (n.size() == 19 && !strcasecmp(s, "HH\\KeyedTraversable")) ||
+          (n.size() == 17 && !strcasecmp(s, "HH\\Rx\\Traversable")) ||
+          (n.size() == 22 && !strcasecmp(s, "HH\\Rx\\KeyedTraversable")) ||
           (n.size() == 12 && !strcasecmp(s, "HH\\Container")) ||
           (n.size() == 17 && !strcasecmp(s, "HH\\KeyedContainer")) ||
           (n.size() == 8 && !strcasecmp(s, "Indexish")) ||
@@ -153,6 +161,8 @@ bool interface_supports_array(const std::string& n) {
 bool interface_supports_vec(const StringData* s) {
   return (s->isame(s_HH_Traversable.get()) ||
           s->isame(s_HH_KeyedTraversable.get()) ||
+          s->isame(s_HH_RX_Traversable.get()) ||
+          s->isame(s_HH_RX_KeyedTraversable.get()) ||
           s->isame(s_HH_Container.get()) ||
           s->isame(s_HH_KeyedContainer.get()) ||
           s->isame(s_Indexish.get()) ||
@@ -163,6 +173,8 @@ bool interface_supports_vec(const std::string& n) {
   const char* s = n.c_str();
   return ((n.size() == 14 && !strcasecmp(s, "HH\\Traversable")) ||
           (n.size() == 19 && !strcasecmp(s, "HH\\KeyedTraversable")) ||
+          (n.size() == 17 && !strcasecmp(s, "HH\\Rx\\Traversable")) ||
+          (n.size() == 22 && !strcasecmp(s, "HH\\Rx\\KeyedTraversable")) ||
           (n.size() == 12 && !strcasecmp(s, "HH\\Container")) ||
           (n.size() == 17 && !strcasecmp(s, "HH\\KeyedContainer")) ||
           (n.size() == 8 && !strcasecmp(s, "Indexish")) ||
@@ -172,6 +184,8 @@ bool interface_supports_vec(const std::string& n) {
 bool interface_supports_dict(const StringData* s) {
   return (s->isame(s_HH_Traversable.get()) ||
           s->isame(s_HH_KeyedTraversable.get()) ||
+          s->isame(s_HH_RX_Traversable.get()) ||
+          s->isame(s_HH_RX_KeyedTraversable.get()) ||
           s->isame(s_HH_Container.get()) ||
           s->isame(s_HH_KeyedContainer.get()) ||
           s->isame(s_Indexish.get()) ||
@@ -182,6 +196,8 @@ bool interface_supports_dict(const std::string& n) {
   const char* s = n.c_str();
   return ((n.size() == 14 && !strcasecmp(s, "HH\\Traversable")) ||
           (n.size() == 19 && !strcasecmp(s, "HH\\KeyedTraversable")) ||
+          (n.size() == 17 && !strcasecmp(s, "HH\\Rx\\Traversable")) ||
+          (n.size() == 22 && !strcasecmp(s, "HH\\Rx\\KeyedTraversable")) ||
           (n.size() == 12 && !strcasecmp(s, "HH\\Container")) ||
           (n.size() == 17 && !strcasecmp(s, "HH\\KeyedContainer")) ||
           (n.size() == 8 && !strcasecmp(s, "Indexish")) ||
@@ -191,6 +207,8 @@ bool interface_supports_dict(const std::string& n) {
 bool interface_supports_keyset(const StringData* s) {
   return (s->isame(s_HH_Traversable.get()) ||
           s->isame(s_HH_KeyedTraversable.get()) ||
+          s->isame(s_HH_RX_Traversable.get()) ||
+          s->isame(s_HH_RX_KeyedTraversable.get()) ||
           s->isame(s_HH_Container.get()) ||
           s->isame(s_HH_KeyedContainer.get()) ||
           s->isame(s_Indexish.get()) ||
@@ -201,6 +219,8 @@ bool interface_supports_keyset(const std::string& n) {
   const char* s = n.c_str();
   return ((n.size() == 14 && !strcasecmp(s, "HH\\Traversable")) ||
           (n.size() == 19 && !strcasecmp(s, "HH\\KeyedTraversable")) ||
+          (n.size() == 17 && !strcasecmp(s, "HH\\Rx\\Traversable")) ||
+          (n.size() == 22 && !strcasecmp(s, "HH\\Rx\\KeyedTraversable")) ||
           (n.size() == 12 && !strcasecmp(s, "HH\\Container")) ||
           (n.size() == 17 && !strcasecmp(s, "HH\\KeyedContainer")) ||
           (n.size() == 8 && !strcasecmp(s, "Indexish")) ||

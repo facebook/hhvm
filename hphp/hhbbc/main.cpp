@@ -78,7 +78,7 @@ MethodMap make_method_map(SinglePassReadableRange& range) {
 template<class SinglePassReadableRange>
 OpcodeSet make_bytecode_map(SinglePassReadableRange& bcs) {
   if (bcs.empty()) return {};
-  std::map<std::string,Op> bcmap;
+  hphp_fast_map<std::string,Op> bcmap;
   for (auto i = 0; i < Op_count; i++) {
     auto const op = static_cast<Op>(i);
     bcmap[opcodeToName(op)] = op;
@@ -215,8 +215,8 @@ void parse_options(int argc, char** argv) {
     setrlimit(RLIMIT_CORE, &rl);
   }
 
-  options.TraceFunctions         = make_method_map(trace_fns);
-  options.TraceBytecodes         = make_bytecode_map(trace_bcs);
+  options.TraceFunctions = make_method_map(trace_fns);
+  options.TraceBytecodes = make_bytecode_map(trace_bcs);
 
   logging = !no_logging;
 }

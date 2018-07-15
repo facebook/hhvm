@@ -18,24 +18,24 @@
 
 #include <string>
 #include <utility>
-#include <map>
-#include <set>
 
-#include "hphp/util/functional.h"
+#include "hphp/util/hash-map.h"
+#include "hphp/util/hash-set.h"
+#include "hphp/util/hash.h"
 
 namespace HPHP {
 
 enum class Op : uint16_t;
+struct OpHash {
+  size_t operator()(Op op) const {
+    return hash_int64(static_cast<uint16_t>(op));
+  }
+};
 
 namespace HHBBC {
 
-using MethodMap = std::map<
-  std::string,
-  std::set<std::string,stdltistr>,
-  stdltistr
->;
-
-using OpcodeSet = std::set<Op>;
+using MethodMap = hphp_fast_string_imap<hphp_fast_string_iset>;
+using OpcodeSet = hphp_fast_set<Op,OpHash>;
 
 //////////////////////////////////////////////////////////////////////
 

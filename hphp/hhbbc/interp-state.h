@@ -359,7 +359,7 @@ private:
  * Map from closure classes to types for each of their used vars.
  * Shows up in a few different interpreter structures.
  */
-using ClosureUseVarMap = std::map<
+using ClosureUseVarMap = hphp_hash_map<
   borrowed_ptr<php::Class>,
   std::vector<Type>
 >;

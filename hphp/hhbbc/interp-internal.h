@@ -445,7 +445,8 @@ void fpiNotFoldable(ISS& env) {
 void useLocalStatic(ISS& env, LocalId l) {
   assert(env.collect.localStaticTypes.size() > l);
   if (!env.flags.usedLocalStatics) {
-    env.flags.usedLocalStatics = std::make_shared<std::map<LocalId,Type>>();
+    env.flags.usedLocalStatics =
+      std::make_shared<hphp_fast_map<LocalId,Type>>();
   }
   // Ignore the return value, since we only want the first type used,
   // as that will be the narrowest.

@@ -81,7 +81,7 @@ bool DEBUG_ONLY checkBlock(const php::Block& b) {
   }
 
   // The exit lists contains unique elements.
-  std::set<BlockId> exitSet;
+  hphp_fast_set<BlockId> exitSet;
   std::copy(begin(b.throwExits), end(b.throwExits),
             std::inserter(exitSet, begin(exitSet)));
   assert(exitSet.size() == b.throwExits.size());

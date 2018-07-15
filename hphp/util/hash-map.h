@@ -41,13 +41,19 @@ using hphp_fast_map = folly::F14FastMap<T,U,V,W>;
 // std::string keyed tables, stable entries do not move on rehash.
 template<typename T>
 using hphp_string_map = hphp_hash_map<std::string, T, string_hash>;
+
 template<typename T>
 using hphp_string_imap =
   hphp_hash_map<std::string, T, string_hashi, string_eqstri>;
 
+template<typename T>
+using hphp_fast_string_imap =
+  hphp_fast_map<std::string, T, string_hashi, string_eqstri>;
+
 // c_str-keyed tables, entries do not move on rehash
 template<typename T>
 using hphp_const_char_imap = hphp_hash_map<const char *, T, hashi, eqstri>;
+
 template<class T>
 using hphp_const_char_map = hphp_hash_map<const char*, T, cstr_hash, eqstr>;
 

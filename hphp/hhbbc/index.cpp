@@ -929,7 +929,7 @@ struct Index::IndexData {
 
   hphp_hash_map<
     borrowed_ptr<const php::Class>,
-    std::set<borrowed_ptr<php::Func>>
+    hphp_fast_set<borrowed_ptr<php::Func>>
   > classExtraMethodMap;
 
   // Map from every interface to the list of instantiable classes which can
@@ -2245,7 +2245,7 @@ void flatten_traits(NamingEnv& env, ClassInfo* cinfo) {
 
   auto const it = env.index.classExtraMethodMap.find(cinfo->cls);
 
-  if (methodsToAdd.size()) {
+  if (!methodsToAdd.empty()) {
     assertx(it != env.index.classExtraMethodMap.end());
     std::sort(begin(methodsToAdd), end(methodsToAdd),
               [] (const MethTabEntryPair* a, const MethTabEntryPair* b) {
@@ -3532,7 +3532,7 @@ Index::lookup_closures(borrowed_ptr<const php::Class> cls) const {
   return nullptr;
 }
 
-const std::set<borrowed_ptr<php::Func>>*
+const hphp_fast_set<borrowed_ptr<php::Func>>*
 Index::lookup_extra_methods(borrowed_ptr<const php::Class> cls) const {
   if (cls->attrs & AttrNoExpandTrait) return nullptr;
   auto const it = m_data->classExtraMethodMap.find(cls);

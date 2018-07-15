@@ -68,7 +68,7 @@ struct RunFlags {
    * to the type that was used.  This is used to force re-analysis of
    * the corresponding blocks when the type of the static changes.
    */
-  std::shared_ptr<std::map<LocalId,Type>> usedLocalStatics;
+  std::shared_ptr<hphp_fast_map<LocalId,Type>> usedLocalStatics;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -161,7 +161,7 @@ struct StepFlags {
    * re-analysis of the corresponding blocks when the type of the
    * static changes.
    */
-  std::shared_ptr<std::map<LocalId,Type>> usedLocalStatics;
+  std::shared_ptr<hphp_fast_map<LocalId,Type>> usedLocalStatics;
 };
 
 //////////////////////////////////////////////////////////////////////

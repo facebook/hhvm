@@ -444,7 +444,7 @@ struct Index {
    * Find all the extra methods associated with a class from its
    * traits.
    */
-  const std::set<borrowed_ptr<php::Func>>*
+  const hphp_fast_set<borrowed_ptr<php::Func>>*
     lookup_extra_methods(borrowed_ptr<const php::Class>) const;
 
   /*

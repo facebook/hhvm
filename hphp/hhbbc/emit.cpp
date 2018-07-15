@@ -1065,7 +1065,7 @@ size_t shared_prefix(ForwardRange1& r1, ForwardRange2& r2) {
  */
 void emit_ehent_tree(FuncEmitter& fe, const php::Func& /*func*/,
                      const EmitBcInfo& info) {
-  std::map<
+  hphp_fast_map<
     borrowed_ptr<const php::ExnNode>,
     std::vector<std::unique_ptr<EHRegion>>
   > exnMap;
@@ -1185,7 +1185,7 @@ void emit_ehent_tree(FuncEmitter& fe, const php::Func& /*func*/,
     }
   );
 
-  std::map<borrowed_ptr<const EHRegion>,uint32_t> parentIndexMap;
+  hphp_fast_map<borrowed_ptr<const EHRegion>,uint32_t> parentIndexMap;
   for (auto& r : regions) {
     emit_eh_region(fe, r, info.blockInfo, parentIndexMap);
   }

@@ -278,6 +278,20 @@ bool operator<(const LocationId& i1, const LocationId& i2) {
   return i2.isSlot && !i1.isSlot;
 }
 
+struct LocationIdHash {
+  size_t operator()(const LocationId& l) const {
+    return folly::hash::hash_combine(hash_int64_pair(l.blk, l.id), l.isSlot);
+  }
+};
+
+bool operator==(const LocationId& i1, const LocationId& i2) {
+  return i1.blk == i2.blk &&
+         i1.id == i2.id &&
+         i1.isSlot == i2.isSlot;
+}
+
+using LocationIdSet = hphp_fast_set<LocationId,LocationIdHash>;
+
 struct DceAction {
   enum Action {
     Kill,
@@ -333,9 +347,9 @@ struct DceState {
   const FuncAnalysis& ainfo;
   /*
    * Used to accumulate a set of blk/stack-slot pairs that
-   * should be marked used
+   * should be marked used.
    */
-  std::set<LocationId> forcedLiveLocations;
+  LocationIdSet forcedLiveLocations;
 
   /*
    * Eval stack use information.  Stacks slots are marked as being
@@ -775,7 +789,7 @@ void discardNonDtors(Env& env) {
  * forcedLiveLocations to prevent inconsistencies in the global state
  * (see markUisLive).
  */
-void use(std::set<LocationId>& forcedLive,
+void use(LocationIdSet& forcedLive,
          std::vector<UseInfo>& uis, uint32_t i) {
   while (true) {
     auto& ui = uis[i];
@@ -2022,7 +2036,7 @@ struct DceAnalysis {
   std::bitset<kMaxTrackedClsRefSlots> slotLiveIn;
   std::vector<UseInfo>                stack;
   std::vector<UseInfo>                slotUsage;
-  std::set<LocationId>                forcedLiveLocations;
+  LocationIdSet                       forcedLiveLocations;
 };
 
 DceAnalysis analyze_dce(const Index& index,
@@ -2346,13 +2360,13 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
    * can't be killed, we add it to this set (via markUisLive, and the
    * DceAnalysis), and schedule its block for re-analysis.
    */
-  std::set<LocationId> forcedLiveLocations;
+  LocationIdSet forcedLiveLocations;
 
   /*
    * Temporary set used to collect locations that were forced live by
    * block merging/linked locations etc.
    */
-  std::set<LocationId> forcedLiveTemp;
+  LocationIdSet forcedLiveTemp;
 
   auto checkLive = [&] (std::vector<UseInfo>& uis, uint32_t i,
                         LocationId location) {
@@ -2431,7 +2445,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
    * Also, merge the entries into our global forcedLiveLocations, to
    * make sure they always get marked Used.
    */
-  auto processForcedLive = [&] (const std::set<LocationId>& forcedLive) {
+  auto processForcedLive = [&] (const LocationIdSet& forcedLive) {
     for (auto const& id : forcedLive) {
       if (forcedLiveLocations.insert(id).second) {
         // This is slightly inefficient; we know exactly how this will

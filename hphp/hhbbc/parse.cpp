@@ -230,7 +230,7 @@ struct ExnTreeInfo {
    * Map from EHEnt to the ExnNode that will represent exception
    * behavior in that region.
    */
-  std::map<const EHEntEmitter*,borrowed_ptr<php::ExnNode>> ehMap;
+  hphp_fast_map<const EHEntEmitter*,borrowed_ptr<php::ExnNode>> ehMap;
 
   /*
    * Keep track of the start offsets for all fault funclets.  This is

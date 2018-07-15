@@ -264,7 +264,7 @@ Bytecode buildIntSwitch(SwitchInfo& switchInfo) {
 }
 
 Bytecode buildStringSwitch(SwitchInfo& switchInfo) {
-  std::set<SString> seen;
+  hphp_fast_set<SString> seen;
   SSwitchTab sswitchTab;
   for (auto& c : switchInfo.cases) {
     if (seen.insert(c.first.s).second) {
@@ -334,11 +334,11 @@ bool buildSwitches(php::Func& func,
 
 bool strip_exn_tree(const php::Func& func,
                     CompactVector<std::unique_ptr<php::ExnNode>>& nodes,
-                    const std::set<borrowed_ptr<php::ExnNode>> &seenExnNodes,
+                    const hphp_fast_set<borrowed_ptr<php::ExnNode>>& seenNodes,
                     uint32_t& nextId) {
   auto it = std::remove_if(nodes.begin(), nodes.end(),
                            [&] (const std::unique_ptr<php::ExnNode>& node) {
-                             if (seenExnNodes.count(borrow(node))) return false;
+                             if (seenNodes.count(borrow(node))) return false;
                              FTRACE(2, "Stripping ExnNode {}\n", node->id);
                              return true;
                            });
@@ -349,7 +349,7 @@ bool strip_exn_tree(const php::Func& func,
   }
   for (auto& n : nodes) {
     n->id = nextId++;
-    if (strip_exn_tree(func, n->children, seenExnNodes, nextId)) {
+    if (strip_exn_tree(func, n->children, seenNodes, nextId)) {
       ret = true;
     }
   }
@@ -371,7 +371,7 @@ bool rebuild_exn_tree(const FuncAnalysis& ainfo) {
     auto const& state = ainfo.bdata[id].stateIn;
     return state.initialized && !state.unreachable;
   };
-  std::set<borrowed_ptr<php::ExnNode>> seenExnNodes;
+  hphp_fast_set<borrowed_ptr<php::ExnNode>> seenNodes;
 
   for (auto const& blk : ainfo.rpoBlocks) {
     if (!reachable(blk->id)) {
@@ -380,13 +380,13 @@ bool rebuild_exn_tree(const FuncAnalysis& ainfo) {
     }
     if (auto node = blk->exnNode) {
       do {
-        if (!seenExnNodes.insert(node).second) break;
+        if (!seenNodes.insert(node).second) break;
       } while ((node = node->parent) != nullptr);
     }
   }
 
   uint32_t nextId = 0;
-  if (!strip_exn_tree(func, func.exnNodes, seenExnNodes, nextId)) {
+  if (!strip_exn_tree(func, func.exnNodes, seenNodes, nextId)) {
     return false;
   }
 

@@ -214,27 +214,27 @@ namespace HH {
 
   /* Finds whether the given variable is a vec.
    */
-  <<__Native, __ParamCoerceModeFalse, __IsFoldable>>
-  function is_vec(mixed $var): bool;
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  function is_vec(<<__MaybeMutable>> mixed $var): bool;
 
   /* Finds whether the given variable is a dict.
    */
-  <<__Native, __ParamCoerceModeFalse, __IsFoldable>>
-  function is_dict(mixed $var): bool;
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  function is_dict(<<__MaybeMutable>> mixed $var): bool;
 
   /* Finds whether the given variable is a keyset.
    */
-  <<__Native, __ParamCoerceModeFalse, __IsFoldable>>
-  function is_keyset(mixed $var): bool;
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  function is_keyset(<<__MaybeMutable>> mixed $var): bool;
 
-  <<__Native, __ParamCoerceModeFalse, __IsFoldable>>
-  function is_varray(mixed $var): bool;
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  function is_varray(<<__MaybeMutable>> mixed $var): bool;
 
-  <<__Native, __ParamCoerceModeFalse, __IsFoldable>>
-  function is_darray(mixed $var): bool;
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  function is_darray(<<__MaybeMutable>> mixed $var): bool;
 
-  <<__Native, __ParamCoerceModeFalse, __IsFoldable>>
-  function is_any_array(mixed $var): bool;
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  function is_any_array(<<__MaybeMutable>> mixed $var): bool;
 
  /*
   * Behaves like serialize() but takes an optional set of options.

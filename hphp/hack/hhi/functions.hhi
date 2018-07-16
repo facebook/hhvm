@@ -17,10 +17,9 @@
 // isset, empty, and unset only look like functions to static analysis, but
 // in fact act as special expression subtypes within the runtime
 <<__Rx>>
-function isset($x): bool;
+function isset(<<__MaybeMutable>> $x): bool;
 <<__Rx>>
-function empty($x): bool;
-<<__Rx>>
+function empty(<<__MaybeMutable>> $x): bool;
 function unset($x): void;
 //
 <<__PHPStdLib, __Rx>>
@@ -39,13 +38,13 @@ function implode(string $glue, $pieces): string; // could be Container<Stringish
 <<__PHPStdLib, __Rx>>
 function explode(string $delimiter, ?Stringish $str, int $limit = 0x7FFFFFFF): array; // : array<string> & false for '' delimiter
 <<__Rx>>
-function is_array(mixed $arg): bool;
+function is_array(<<__MaybeMutable>> mixed $arg): bool;
 <<__Rx>>
-function is_vec(mixed $arg): bool;
+function is_vec(<<__MaybeMutable>> mixed $arg): bool;
 <<__Rx>>
-function is_dict(mixed $arg): bool;
+function is_dict(<<__MaybeMutable>> mixed $arg): bool;
 <<__Rx>>
-function is_keyset(mixed $arg): bool;
+function is_keyset(<<__MaybeMutable>> mixed $arg): bool;
 <<__PHPStdLib, __Rx>>
 function ord(string $string): int;
 <<__PHPStdLib>>

@@ -83,7 +83,7 @@ void *AsyncFuncImpl::ThreadFunc(void *obj) {
 //
 // All input should be multiples of 16.
 static char* mmap_offset_aligned(size_t size, size_t alignOffset,
-                              size_t alignment) {
+                                 size_t alignment) {
   assertx(size % 16 == 0 && alignOffset % 16 == 0 && alignment % 16 == 0);
   assertx(alignOffset <= size);
   assertx(folly::isPowTwo(alignment));
@@ -158,12 +158,16 @@ void AsyncFuncImpl::start() {
     //                    m_threadStack ---> +------------+
     //
     assertx(m_hugeStackKb % 4 == 0);
+    auto const hugeStartOffset = rlim.rlim_cur - m_hugeStackKb * 1024;
+
     constexpr unsigned hugePageSizeKb = 2048u;
     auto const stackPartialHugeKb = m_hugeStackKb % hugePageSizeKb;
     auto const nHugePages = m_hugeStackKb / hugePageSizeKb +
       (stackPartialHugeKb != 0) /* partly stack */;
-    m_stackAllocSize = rlim.rlim_cur + m_tlExtraKb * 1024;
-    auto const hugeStartOffset = rlim.rlim_cur - m_hugeStackKb * 1024;
+    m_stackAllocSize = std::max(
+      rlim.rlim_cur + m_tlExtraKb * 1024,
+      hugeStartOffset + size2m * nHugePages
+    );
     m_threadStack = mmap_offset_aligned(m_stackAllocSize,
                                         hugeStartOffset,
                                         nHugePages ? size2m : size4k);

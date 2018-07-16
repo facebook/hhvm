@@ -448,7 +448,6 @@ struct RuntimeOption {
   static bool LookForTypechecker;
   static bool AutoTypecheck;
   static bool AutoprimeGenerators;
-  static bool EnableHackcOnlyFeature;
   static bool EnableIsExprPrimitiveMigration;
   static bool EnableCoroutines;
   static bool Hacksperimental;

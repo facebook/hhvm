@@ -660,45 +660,38 @@ and emit_instanceof env pos e1 e2 =
       instr_instanceof ]
 
 and emit_as env pos e h is_nullable =
-  if not @@ Hhbc_options.enable_hackc_only_feature !Hhbc_options.compiler_options
-  then Emit_fatal.raise_fatal_runtime pos "As expression is not allowed"
-  else
-    if is_nullable then begin
-      Local.scope @@ fun () ->
-        let local = Local.get_unnamed_local () in
-        let true_label = Label.next_regular () in
-        let done_label = Label.next_regular () in
-        gather [
-          emit_expr ~need_ref:false env e;
-          instr_setl local;
-          (* (e is h) ? e : null *)
-          emit_is env pos h;
-          instr_jmpnz true_label;
-          instr_null;
-          instr_unsetl local;
-          instr_jmp done_label;
-          instr_label true_label;
-          instr_pushl local;
-          instr_label done_label;
-        ]
-    end else begin
-      let namespace = Emit_env.get_namespace env in
-      let tv = Emit_type_constant.hint_to_type_constant
-        ~tparams:[] ~namespace h in
+  if is_nullable then begin
+    Local.scope @@ fun () ->
+      let local = Local.get_unnamed_local () in
+      let true_label = Label.next_regular () in
+      let done_label = Label.next_regular () in
       gather [
         emit_expr ~need_ref:false env e;
-        instr_astypestruct @@ Emit_adata.get_array_identifier tv
-      ] end
-
-and emit_is ?(skip_check=false) env pos h =
-  if not skip_check &&
-    not @@ Hhbc_options.enable_hackc_only_feature !Hhbc_options.compiler_options
-  then Emit_fatal.raise_fatal_runtime pos "Is expression is not allowed"
-  else
+        instr_setl local;
+        (* (e is h) ? e : null *)
+        emit_is env pos h;
+        instr_jmpnz true_label;
+        instr_null;
+        instr_unsetl local;
+        instr_jmp done_label;
+        instr_label true_label;
+        instr_pushl local;
+        instr_label done_label;
+      ]
+  end else begin
     let namespace = Emit_env.get_namespace env in
-    let ts = Emit_type_constant.hint_to_type_constant
+    let tv = Emit_type_constant.hint_to_type_constant
       ~tparams:[] ~namespace h in
-    instr_istypestruct @@ Emit_adata.get_array_identifier ts
+    gather [
+      emit_expr ~need_ref:false env e;
+      instr_astypestruct @@ Emit_adata.get_array_identifier tv
+    ] end
+
+and emit_is env _pos h =
+  let namespace = Emit_env.get_namespace env in
+  let ts = Emit_type_constant.hint_to_type_constant
+    ~tparams:[] ~namespace h in
+  instr_istypestruct @@ Emit_adata.get_array_identifier ts
 
 and emit_cast env pos hint expr =
   let op =
@@ -3279,7 +3272,7 @@ and emit_special_function env pos id args uargs default =
        * Using this as a migration from is_{int,bool,etc} to is expressions *)
       Some (gather [
         emit_expr ~need_ref:false env arg_expr;
-        emit_is ~skip_check:true env pos h
+        emit_is env pos h
       ], Flavor.Cell)
     | [(_, A.Lvar (_, arg_str as arg_id))], Some i, _
       when SN.Superglobals.is_superglobal arg_str ->

@@ -109,7 +109,6 @@ bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::IntsOverflowToInts = false;
 bool RuntimeOption::AutoprimeGenerators = true;
-bool RuntimeOption::EnableHackcOnlyFeature = false;
 bool RuntimeOption::EnableIsExprPrimitiveMigration = true;
 bool RuntimeOption::Hacksperimental = false;
 bool RuntimeOption::CheckParamTypeInvariance = true;
@@ -1499,9 +1498,6 @@ void RuntimeOption::Load(
     Config::Bind(AutoprimeGenerators, ini, config,
                  "Hack.Lang.AutoprimeGenerators",
                  true);
-    Config::Bind(EnableHackcOnlyFeature, ini, config,
-                 "Hack.Lang.EnableHackcOnlyFeature",
-                 false);
     Config::Bind(EnableIsExprPrimitiveMigration, ini, config,
                  "Hack.Lang.EnableIsExprPrimitiveMigration",
                  true);

@@ -2874,8 +2874,8 @@ and pDef : def list parser = fun node env ->
   | _ when env.fi_mode = FileInfo.Mdecl || env.fi_mode = FileInfo.Mphp
         && not env.codegen -> []
   | _ -> [ Stmt (pStmt node env) ]
-let pProgram : program parser = fun node env ->
-  let rec post_process program =
+let pProgram : program parser = fun node env  ->
+  let rec post_process program acc =
     let span (p : 'a -> bool) =
       let rec go yes = function
       | (x::xs) when p x -> go (x::yes) xs
@@ -2887,13 +2887,14 @@ let pProgram : program parser = fun node env ->
     | _ -> true
     in
     match program with
-    | [] -> []
+    | [] -> List.rev acc
     | (Namespace (n, [])::el) ->
       let body, remainder = span not_namespace el in
-      Namespace (n, body) :: post_process remainder
+       post_process remainder (Namespace (n, body) :: acc)
     | (Namespace (n, il)::el) ->
-      Namespace (n, post_process il) :: post_process el
-    | (Stmt (_, Noop) :: el) -> post_process el
+      let result = post_process il [] in
+      post_process el (Namespace (n, result) :: acc)
+    | (Stmt (_, Noop) :: el) -> post_process el acc
     | ((Stmt (_, Expr (pos, (Call
         ( (_, (Id (_, "define")))
         , []
@@ -2902,7 +2903,8 @@ let pProgram : program parser = fun node env ->
           ]
         , []
         )
-      )))) :: el) -> Constant
+      )))) :: el) ->
+      let const = Constant
         { cst_mode      = mode_annotation env.fi_mode
         ; cst_kind      = Cst_define
         ; cst_name      = pos, name
@@ -2910,8 +2912,20 @@ let pProgram : program parser = fun node env ->
         ; cst_value     = value
         ; cst_namespace = Namespace_env.empty env.parser_options
         ; cst_span      = pos
-        } :: post_process el
-    | (e::el) -> e :: post_process el
+        } in
+      post_process el (const :: acc)
+    | (Stmt (_, Markup _) as e)::el
+    | (Stmt (_, Expr (_, Import _)) as e)::el ->
+      post_process el (e :: acc)
+    (* Toplevel statements not allowed in strict mode *)
+    | (Stmt (p, _) as e)::el
+        when (env.keep_errors) && (not env.codegen) && env.fi_mode = FileInfo.Mstrict ->
+      (* We've already lowered at this point, so raise_parsing_error doesn't
+        really fit. This is only a typechecker error anyway, so just add it
+        directly *)
+      Errors.parsing_error (p, SyntaxError.toplevel_statements);
+      post_process el (e :: acc)
+    | (e::el) -> post_process el (e :: acc)
   in
 
   (* The list of top-level things in a file is somewhat special. *)
@@ -2978,7 +2992,7 @@ let pProgram : program parser = fun node env ->
   in
   let nodes = as_list node in
   let nodes = aux env [] nodes in
-  post_process nodes
+  post_process nodes []
 
 let pScript node env =
   match syntax node with

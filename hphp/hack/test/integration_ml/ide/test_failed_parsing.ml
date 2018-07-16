@@ -32,7 +32,7 @@ function bar() : void {
 }"
 
 let parse_error =
-"<?hh // strict
+"<?hh
 
 {"
 

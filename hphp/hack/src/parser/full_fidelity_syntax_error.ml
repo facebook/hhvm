@@ -529,3 +529,6 @@ let pair_initializer_arity =
   "Pair objects must have exactly 2 elements"
 
 let nested_unary_reference = "References cannot be followed by unary operators"
+
+let toplevel_statements =
+  "Toplevel statements besides requires are not allowed in strict files"

@@ -44,7 +44,7 @@ It is incompatible with an int
 "
 
 let foo_ide_contents =
-"<?hh // strict
+"<?hh
 
 {
 "

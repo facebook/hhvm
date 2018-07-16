@@ -17,5 +17,5 @@ class Meh {
     print "Hello, ${Meh::$six}"; // hphp output: Hello, uh oh
   }
 }
-
+/* HH_FIXME[1002] */
 Meh::foo();

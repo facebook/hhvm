@@ -27,5 +27,9 @@ namespace req {
 template<typename T>
 using StringIMap = req::hash_map<String,T,hphp_string_hash,hphp_string_isame>;
 
+// Fast, case-sensitive String keys, no ref/iter stability
+template<typename T>
+using StringFastMap = req::fast_map<String,T,hphp_string_hash,hphp_string_same>;
+
 }}
 #endif

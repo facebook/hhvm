@@ -20,14 +20,14 @@
 #include "hphp/runtime/base/glob-stream-wrapper.h"
 #include "hphp/runtime/base/http-stream-wrapper.h"
 #include "hphp/runtime/base/php-stream-wrapper.h"
-#include "hphp/runtime/base/req-map.h"
 #include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/string-hash-set.h"
+#include "hphp/runtime/base/string-hash-map.h"
 #include "hphp/runtime/ext/string/ext_string.h"
-#include <algorithm>
+#include "hphp/util/hash-map.h"
 
 namespace HPHP { namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,7 +40,7 @@ struct RequestWrappers final : RequestEventHandler {
   }
 
   using DisabledSet = req::StringFastSet;
-  using WrapperMap = req::map<String,req::unique_ptr<Wrapper>>;
+  using WrapperMap = req::StringFastMap<req::unique_ptr<Wrapper>>;
 
   DisabledSet& disabled() {
     if (!m_disabled) m_disabled.emplace();
@@ -57,14 +57,14 @@ private:
 };
 
 // Global registry for wrappers
-static std::map<std::string,Wrapper*> s_wrappers;
+static hphp_string_map<Wrapper*> s_wrappers;
 static __thread Wrapper* tl_fileHandler;
 
 // Request local registry for user defined wrappers and disabled builtins
 IMPLEMENT_STATIC_REQUEST_LOCAL(RequestWrappers, s_request_wrappers);
 
 bool registerWrapper(const std::string &scheme, Wrapper *wrapper) {
-  assertx(s_wrappers.find(scheme) == s_wrappers.end());
+  assertx(!s_wrappers.count(scheme));
   s_wrappers[scheme] = wrapper;
   return true;
 }
@@ -76,17 +76,13 @@ const StaticString
 
 bool disableWrapper(const String& scheme) {
   String lscheme = HHVM_FN(strtolower)(scheme);
-  bool ret = false;
 
-  // Unregister request-specific wrappers entirely
-  auto& wrappers = s_request_wrappers->wrappers();
-  if (wrappers.find(lscheme) != wrappers.end()) {
-    wrappers.erase(lscheme);
-    ret = true;
-  }
+  // Unregister request-specific wrappers entirely.
+  // ret = true if request-specific wrapper existed already
+  auto ret = s_request_wrappers->wrappers().erase(lscheme) > 0;
 
   // Disable builtin wrapper if it exists
-  if (s_wrappers.find(lscheme.data()) == s_wrappers.end()) {
+  if (!s_wrappers.count(lscheme.data())) {
     // No builtin to disable
     return ret;
   }
@@ -104,9 +100,7 @@ bool restoreWrapper(const String& scheme) {
   bool ret = false;
 
   // Unregister request-specific wrapper
-  auto& wrappers = s_request_wrappers->wrappers();
-  if (wrappers.find(lscheme) != wrappers.end()) {
-    wrappers.erase(lscheme);
+  if (s_request_wrappers->wrappers().erase(lscheme) > 0) {
     ret = true;
   }
 
@@ -124,19 +118,16 @@ bool registerRequestWrapper(const String& scheme,
   String lscheme = HHVM_FN(strtolower)(scheme);
 
   // Global, non-disabled wrapper
-  if ((s_wrappers.find(lscheme.data()) != s_wrappers.end()) &&
+  if (s_wrappers.count(lscheme.data()) &&
       !s_request_wrappers->disabled().count(lscheme)) {
     return false;
   }
 
-  // A wrapper has already been registered for that scheme
-  auto& wrappers = s_request_wrappers->wrappers();
-  if (wrappers.find(lscheme) != wrappers.end()) {
-    return false;
-  }
-
-  wrappers[lscheme] = std::move(wrapper);
-  return true;
+  // Try to insert, return true if it happend, or false if a wrapper has
+  // already been registered for that scheme
+  return s_request_wrappers->wrappers().insert(
+      std::make_pair(std::move(lscheme), std::move(wrapper))
+  ).second;
 }
 
 Array enumWrappers() {

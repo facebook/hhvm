@@ -2381,9 +2381,13 @@ and pClassElt : class_elt list parser = fun node env ->
        * the middle of the declaration, to be associated with individual
        * properties, right now we don't handle this *)
       let doc_comment_opt = extract_docblock node in
+      let typecheck = is_typechecker env in (* so we don't capture the env in the closure *)
       let check_modifier node =
         if is_final node
-        then raise_parsing_error env (`Node node) SyntaxError.final_property in
+        then raise_parsing_error env (`Node node) SyntaxError.final_property;
+        if typecheck && is_var node
+        then raise_parsing_error env (`Node node) SyntaxError.var_property in
+
       [ ClassVars
         { cv_kinds = pKinds check_modifier property_modifiers env
         ; cv_hint = mpOptional pHint property_type env
@@ -2716,11 +2720,6 @@ and pDef : def list parser = fun node env ->
         let rec aux acc ns =
           match ns with
           | [] -> acc
-          | { syntax = PropertyDeclaration { property_modifiers; _ }; _ } :: _
-            when not env.codegen &&
-              List.exists ~f:Syntax.is_var (as_list property_modifiers) ->
-                (* Break off remaining class body parse; legacy compliance *)
-                acc
           | n :: ns ->
             let elt = pClassElt n env in
             aux (elt :: acc) ns

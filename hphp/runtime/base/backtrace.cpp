@@ -153,13 +153,13 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     return createCompactBacktrace()->extract();
   }
 
-  auto bt = Array::Create();
+  auto bt = Array::CreateVArray();
   folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
 
   // If there is a parser frame, put it at the beginning of the backtrace.
   if (btArgs.m_parserFrame) {
     bt.append(
-      make_map_array(
+      make_darray(
         s_file, btArgs.m_parserFrame->filename,
         s_line, btArgs.m_parserFrame->lineNumber
       )
@@ -214,7 +214,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       assertx(unit);
       auto const filename = curFp->func()->filename();
 
-      ArrayInit frame(btArgs.m_parserFrame ? 4 : 2, ArrayInit::Map{});
+      DArrayInit frame(btArgs.m_parserFrame ? 4 : 2);
       frame.set(s_file, Variant{const_cast<StringData*>(filename)});
       frame.set(s_line, unit->getLineNumber(curPc));
       if (btArgs.m_parserFrame) {
@@ -235,7 +235,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     // Do not capture frame for HPHP only functions.
     if (fp->func()->isNoInjection()) continue;
 
-    ArrayInit frame(8, ArrayInit::Map{});
+    DArrayInit frame(8);
 
     auto const curUnit = fp->func()->unit();
     auto const curOp = curUnit->getOp(pc);
@@ -319,7 +319,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     } else if (isReturning) {
       frame.set(s_args, empty_array());
     } else {
-      auto args = Array::Create();
+      auto args = Array::CreateVArray();
       auto const nparams = fp->func()->numNonVariadicParams();
       auto const nargs = fp->numArgs();
       auto const nformals = std::min<int>(nparams, nargs);
@@ -546,10 +546,10 @@ void CompactTrace::Key::insert(const ActRec* fp, int32_t prevPc) {
 }
 
 Array CompactTrace::Key::extract() const {
-  PackedArrayInit aInit(m_frames.size(), CheckAllocation{});
+  VArrayInit aInit(m_frames.size());
   for (int idx = 0; idx < m_frames.size(); ++idx) {
     auto const prev = idx < m_frames.size() - 1 ? &m_frames[idx + 1] : nullptr;
-    ArrayInit frame(6, ArrayInit::Map{});
+    DArrayInit frame(6);
     if (prev && !prev->func->isBuiltin()) {
       auto const prevUnit = prev->func->unit();
       auto prevFile = prevUnit->filepath();

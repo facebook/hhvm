@@ -360,8 +360,10 @@ and gconst = {
   cst_is_define: bool;
 }
 
+and fun_def = fun_
+
 and def =
-  | Fun of fun_
+  | Fun of fun_def
   | Class of class_
   | Typedef of typedef
   | Constant of gconst

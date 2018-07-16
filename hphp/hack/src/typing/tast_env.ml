@@ -63,6 +63,8 @@ let save = Typing_env.save SMap.empty
 let forward_compat_ge = Typing_env.forward_compat_ge
 let error_if_forward_compat_ge = Typing_env.error_if_forward_compat_ge
 
+let get_file = Typing_env.get_file
+
 let fully_expand = Typing_expand.fully_expand
 
 let get_class_ids = Typing_utils.get_class_ids

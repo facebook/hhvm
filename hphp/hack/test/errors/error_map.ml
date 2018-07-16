@@ -486,4 +486,5 @@ InvalidTraversableInRx = 4267
 ReassignMutableThis = 4268
 MutableExpressionAsMultipleMutableArguments = 4269
 InvalidUnsetTargetInRx = 4270
+CoroutineOutsideExperimental = 4271
   |}]

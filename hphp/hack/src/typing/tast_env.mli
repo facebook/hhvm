@@ -64,6 +64,9 @@ val forward_compat_ge : env -> int -> bool
 val error_if_forward_compat_ge : env -> int -> (unit -> unit) -> unit
 (** Call the func if the forward compatibility level is new enough *)
 
+val get_file : env -> Relative_path.t
+(* Return the {!Relative_path.t} of the file the env is from *)
+
 val expand_type : env -> Tast.ty -> env * Tast.ty
 (** Expand a type variable ({!Typing_defs.Tvar}) to the type it refers to. *)
 

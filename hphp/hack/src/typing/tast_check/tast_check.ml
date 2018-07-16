@@ -13,6 +13,7 @@ let visitor = Tast_visitor.iter_with [
   Tautology_check.handler;
   Type_test_hint_check.handler;
   Ppl_check.handler;
+  Coroutine_check.handler;
 ]
 
 let program = visitor#go

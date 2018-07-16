@@ -3743,17 +3743,27 @@ and emit_lval_op_nonlist_steps env outer_pos op (pos, expr_) rhs_instrs rhs_stac
     begin match snd prop with
     | A.Dollar (_, A.Lvar _ as e) ->
       let final_instr = emit_final_static_op cid prop op in
-      let instrs, under_top = emit_first_expr env e in
-      if under_top
-      then
-        emit_load_class_ref env pos cexpr,
-        rhs_instrs,
-        gather [instrs; final_instr]
-      else
-        gather [instrs; emit_load_class_ref env pos cexpr],
-        rhs_instrs,
-        final_instr
-    | _ ->
+      begin match op with
+      | LValOp.IncDec _ ->
+         emit_load_class_ref env pos cexpr,
+         rhs_instrs,
+         gather [
+           emit_expr ~need_ref:false env e;
+           final_instr
+         ]
+      | _ ->
+         let instrs, under_top = emit_first_expr env e in
+         if under_top
+         then
+           emit_load_class_ref env pos cexpr,
+           rhs_instrs,
+           gather [instrs; final_instr]
+         else
+           gather [instrs; emit_load_class_ref env pos cexpr],
+           rhs_instrs,
+           final_instr
+      end
+      | _ ->
       let final_instr =
         emit_pos_then pos @@
         emit_final_static_op cid prop op in

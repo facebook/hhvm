@@ -1083,10 +1083,10 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       ; _ } ->
       let collection_name =
         match syntax collection_name with
-        | SimpleTypeSpecifier { simple_type_specifier = class_type }
-        (* TODO: currently type arguments are dropped on the floor,
-           though they should be properly propagated to the typechecker *)
+        | SimpleTypeSpecifier { simple_type_specifier = class_type } ->
+          pos_name class_type env
         | GenericTypeSpecifier { generic_class_type = class_type; _ } ->
+          prevent_intrinsic_generic env node class_type;
           pos_name class_type env
         | _ -> pos_name collection_name env in
       Collection (collection_name, couldMap ~f:pAField members env)

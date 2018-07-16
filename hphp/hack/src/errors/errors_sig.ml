@@ -578,4 +578,5 @@ module type S = sig
   val reference_in_rx: Pos.t -> unit
   val reassign_mutable_this: Pos.t -> unit
   val mutable_expression_as_multiple_mutable_arguments: Pos.t -> string -> Pos.t -> string -> unit
+  val invalid_unset_target_rx: Pos.t -> unit
 end

@@ -375,27 +375,33 @@ let rec is_valid_mutable_subscript_expression_target env v =
     (is_valid_mutable_subscript_expression_target env e || expr_is_mutable env e)
   | _ -> false
 
+let check_assignment_or_unset_target
+  (env : Typing_env.env) (te1 : T.expr) err =
+  Env.error_if_reactive_context env @@ begin fun () ->
+    (* Check for modifying immutable objects *)
+    match snd te1 with
+     (* Setting mutable locals is okay *)
+    | T.Obj_get (e1, _, _) when expr_is_mutable env e1 -> ()
+    | T.Array_get (e1, _)
+      when expr_is_mutable env e1 ||
+           is_valid_mutable_subscript_expression_target env e1 -> ()
+    | T.Class_get _
+    | T.Obj_get _
+    | T.Array_get _ -> err (T.get_position te1)
+    | _ -> ()
+  end
+
+let check_unset_target
+  (env : Typing_env.env) (te : T.expr): unit =
+  check_assignment_or_unset_target env te Errors.invalid_unset_target_rx
+
 (* Checks for assignment errors as a pass on the TAST *)
 let handle_assignment_mutability
  (env : Typing_env.env) (te1 : T.expr) (te2 : T.expr)
  : Typing_env.env =
+ check_assignment_or_unset_target env te1 Errors.obj_set_reactive;
  (* If e2 is a mutable expression, then e1 is added to the mutability env *)
  let mut_env = Env.get_env_mutability env in
- (* Check for modifying immutable objects *)
- (match snd te1 with
-  (* Setting mutable locals is okay *)
- | T.Obj_get (e1, _, _) when expr_is_mutable env e1 -> ()
- | T.Array_get (e1, _)
-   when expr_is_mutable env e1 ||
-        is_valid_mutable_subscript_expression_target env e1 -> ()
- | T.Class_get _
- | T.Obj_get _
- | T.Array_get _ ->
-    Env.error_if_reactive_context env @@ begin fun () ->
-      let pos = T.get_position te1 in
-      Errors.obj_set_reactive pos
-    end
- | _ -> ());
  let mut_env = match snd te1, snd te2 with
  | _, T.Lvar(p, id2) when LMap.mem id2 mut_env ->
    Env.error_if_reactive_context env @@ begin fun () ->

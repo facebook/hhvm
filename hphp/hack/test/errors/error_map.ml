@@ -484,4 +484,5 @@ TypeTestInLambda = 4266
 InvalidTraversableInRx = 4267
 ReassignMutableThis = 4268
 MutableExpressionAsMultipleMutableArguments = 4269
+InvalidUnsetTargetInRx = 4270
   |}]

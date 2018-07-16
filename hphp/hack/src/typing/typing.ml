@@ -3533,6 +3533,7 @@ and is_abstract_ft fty = match fty with
   | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.unset ->
     check_function_in_suspend SN.PseudoFunctions.unset;
      let env, tel, _ = exprs env el in
+     Core_list.iter tel ~f:(Typing_mutability.check_unset_target env);
      if uel <> [] then
        Errors.unpacking_disallowed_builtin_function p pseudo_func;
      let env = if Env.is_strict env then

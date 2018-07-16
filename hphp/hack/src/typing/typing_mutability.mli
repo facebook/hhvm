@@ -19,3 +19,4 @@ val check_function_return_value:
   Pos.t ->
   T.expr ->
   unit
+val check_unset_target: Typing_env.env -> T.expr -> unit

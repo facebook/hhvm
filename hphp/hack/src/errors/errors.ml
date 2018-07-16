@@ -3106,6 +3106,11 @@ let obj_set_reactive pos =
   "\nYou cannot set non-mutable object properties in reactive functions") in
   add (Typing.err_code Typing.ObjSetReactive) pos msg
 
+let invalid_unset_target_rx pos =
+  add (Typing.err_code Typing.InvalidUnsetTargetInRx) pos (
+    "Non-mutable argument for 'unset' is not allowed in reactive functions."
+  )
+
 let inout_argument_bad_type pos msgl =
   let msg =
     "Expected argument marked inout to be contained in a local or " ^

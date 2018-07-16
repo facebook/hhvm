@@ -142,6 +142,7 @@ void emitFuncPrologueInternal(Func* func, int argc, TransKind kind,
 
     // Otherwise, fall back to code.main and retry.
     code().disableHot();
+    info.meta.clear();
     try {
       emitFuncPrologueImpl(func, argc, kind, info);
     } catch (const DataBlockFull& dbStillFull) {

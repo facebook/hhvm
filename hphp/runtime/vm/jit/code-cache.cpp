@@ -54,8 +54,9 @@ uint32_t CodeCache::AutoTCShift = 0;
 uint32_t CodeCache::TCNumHugeHotMB = 0;
 uint32_t CodeCache::TCNumHugeColdMB = 0;
 
-static size_t ru(size_t sz) { return sz + (-sz & (kRoundUp - 1)); };
-static size_t rd(size_t sz) { return sz & ~(kRoundUp - 1); };
+static size_t ru(size_t sz) { return sz + (-sz & (kRoundUp - 1)); }
+
+static size_t rd(size_t sz) { return sz & ~(kRoundUp - 1); }
 
 CodeCache::CodeCache()
   : m_useHot{RuntimeOption::RepoAuthoritative && CodeCache::AHotSize > 0}
@@ -71,15 +72,16 @@ CodeCache::CodeCache()
     RuntimeOption::EvalThreadTCDataBufferSize
   );
 
-  auto const kAHotSize    = ru(CodeCache::AHotSize);
+  auto const kAHotSize = RuntimeOption::EvalJitAHotSizeRoundUp ?
+    ru(CodeCache::AHotSize) : CodeCache::AHotSize;
   auto const kASize       = ru(CodeCache::ASize);
   auto const kAProfSize   = ru(CodeCache::AProfSize);
   auto const kAColdSize   = ru(CodeCache::AColdSize);
   auto const kAFrozenSize = ru(CodeCache::AFrozenSize);
 
   auto kGDataSize = ru(CodeCache::GlobalDataSize);
-  m_totalSize = kAHotSize + kASize + kAColdSize + kAProfSize +
-                kAFrozenSize + kGDataSize + thread_local_size;
+  m_totalSize = ru(kAHotSize + kASize + kAColdSize + kAProfSize +
+                   kAFrozenSize + kGDataSize + thread_local_size);
   m_codeSize = m_totalSize - kGDataSize;
 
   if ((kASize < (10 << 20)) ||
@@ -215,7 +217,7 @@ CodeCache::CodeCache()
   numa_interleave(base, m_totalSize);
 
   if (kAHotSize) {
-    TRACE(1, "init ahot @%p\n", base);
+    FTRACE(1, "init ahot @{}, size = {}\n", base, kAHotSize);
     m_hot.init(base, kAHotSize, "hot");
     enhugen(base, kAHotSize >> 20);
     base += kAHotSize;

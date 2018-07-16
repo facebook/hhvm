@@ -1,5 +1,5 @@
-((script 74
-  ((list 74
+((script 105
+  ((list 105
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
@@ -27,6 +27,21 @@
             ((() name 10 ()) (() "(" 1 ())
              (list 1 ((list_item 1 ((() name 1 ()) (missing 0 ())))))
              (() ")" 1 ())))
+           (() ")" 1 ())))))
+       (() ")" 1 ((whitespace 1)))
+       (compound_statement 4
+        ((() { 1 ((end_of_line 1))) (missing 0 ())
+         (((end_of_line 1)) } 1 ((end_of_line 1)))))
+       (missing 0 ()) (missing 0 ())))
+     (if_statement 29
+      ((((end_of_line 1)) if 2 ((whitespace 1))) (() "(" 1 ())
+       (instanceof_expression 19
+        ((variable 2 ((() variable 2 ((whitespace 1)))))
+         (() instanceof 10 ((whitespace 1)))
+         (parenthesized_expression 5
+          ((() "(" 1 ())
+           (prefix_unary_expression 3
+            ((() & 1 ()) (variable 2 ((() variable 2 ())))))
            (() ")" 1 ())))))
        (() ")" 1 ((whitespace 1)))
        (compound_statement 4

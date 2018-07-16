@@ -465,6 +465,8 @@ let instanceof_missing_subscript_index = "A subscript expression ([]) on the rig
 let instanceof_unknown_node msg =
   Printf.sprintf "Unexpected node on right hand side of instanceof: %s" msg
 
+let instanceof_reference = "References are not allowed on the right side of an instanceof operation"
+
 let invalid_await_use = "Await cannot be used as an expression"
 
 let invalid_default_argument s = s ^ " expression is not permitted \

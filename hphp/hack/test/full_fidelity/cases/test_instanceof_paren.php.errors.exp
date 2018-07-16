@@ -1,1 +1,2 @@
 (3,5)-(3,21) `instanceof (A)` is not allowed because it is ambiguous. Is `A` a class or a constant?
+(11,19)-(11,23) References are not allowed on the right side of an instanceof operation

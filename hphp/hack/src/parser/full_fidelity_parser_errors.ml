@@ -1578,6 +1578,16 @@ let new_variable_errors node =
 let class_type_designator_errors node =
   if is_good_scope_resolution_qualifier node then [] else
   match syntax node with
+  | ParenthesizedExpression
+    {
+      parenthesized_expression_expression = {
+        syntax = PrefixUnaryExpression { prefix_unary_operator = { syntax = Token token; _ }; _ };
+        _
+      };
+      _
+    }
+    when Token.kind token = TokenKind.Ampersand ->
+    [make_error_from_node node SyntaxError.instanceof_reference]
   | ParenthesizedExpression _ ->
     (* A parenthesized expression that evaluates to a string or object is a
        valid RHS for instanceof and new. *)

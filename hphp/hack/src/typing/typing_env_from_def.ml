@@ -53,11 +53,11 @@ module EnvFromDef(ASTAnnotations: Aast.ASTAnnotationTypes) = struct
       | Ast.Cnormal -> Typing_phase.localize_with_self env self in
     let env = Env.set_self env self in
     (* Set the ppl env flag *)
-    (* let is_ppl =
+    let is_ppl =
       List.exists
         c.c_user_attributes
-        (fun { ua_name; _ } -> SN.UserAttributes.uaProbabilisticModel = snd ua_name) in *)
-    (* let env = Env.set_inside_ppl_class env is_ppl in*) 
+        (fun { ua_name; _ } -> SN.UserAttributes.uaProbabilisticModel = snd ua_name) in
+    let env = Env.set_inside_ppl_class env is_ppl in
     env
 
   let typedef_env tcopt t =

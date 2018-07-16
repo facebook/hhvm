@@ -250,6 +250,7 @@ module type Errors_modes = sig
 
   val get_sorted_error_list: error files_t * applied_fixme files_t -> error list
   val sort: error list -> error list
+  val currently_has_errors : unit -> bool
 
 end
 
@@ -348,6 +349,8 @@ module NonTracingErrors: Errors_modes = struct
       | Some _ ->
         Common.lazy_decl_error_logging msg error_map to_absolute to_string
       | None -> assert_false_log_backtrace (Some msg)
+  let currently_has_errors () =
+    Common.get_current_list !error_map <> []
 
 end
 
@@ -443,7 +446,8 @@ module TracingErrors: Errors_modes = struct
 
   let sort = Common.sort get_pos
   let get_sorted_error_list = Common.get_sorted_error_list get_pos
-
+  let currently_has_errors () =
+    Common.get_current_list !error_map <> []
 end
 
 (** The Errors functor which produces the Errors module.
@@ -3348,6 +3352,9 @@ let try_when f ~when_ ~do_ =
     else add_error error;
     result
   end
+
+(* Whether we've found at least one error *)
+let currently_has_errors = M.currently_has_errors
 
 (* Runs the first function that is expected to produce an error. If it doesn't
  * then we run the second function we are given

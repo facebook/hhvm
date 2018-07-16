@@ -568,9 +568,7 @@ let parse_name_and_decl popt files_contents tcopt parser =
             let hacksperimental =
               GlobalOptions.tco_experimental_feature_enabled tcopt GlobalOptions.tco_hacksperimental
             in
-            let env = Full_fidelity_ast.make_env
-              ~hacksperimental ~parser_options:popt fn in
-            Full_fidelity_ast.from_text_with_legacy env contents
+            Full_fidelity_ast.defensive_program ~hacksperimental popt fn contents
         end
       end
     in

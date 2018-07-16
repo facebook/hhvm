@@ -3355,6 +3355,7 @@ let from_file_with_legacy env = legacy (from_file env)
 )******************************************************************************)
 
 let defensive_program
+  ?(hacksperimental=false)
   ?(quick=false)
   ?(fail_open=false)
   ?(elaborate_namespaces=true)
@@ -3368,6 +3369,7 @@ let defensive_program
       ~elaborate_namespaces
       ~keep_errors:(not fail_open)
       ~parser_options
+      ~hacksperimental
       fn
     in
     legacy @@ from_text env source
@@ -3381,9 +3383,10 @@ let defensive_program
     with _ -> None in
     let err = Printexc.to_string e in
     let fn = Relative_path.suffix fn in
-    let () =
-      Hh_logger.log "!! FAILED FOR %s\n  - error: %s\n" fn err
-    in
+    (* If we've already found a parsing error, it's okay for lowering to fail *)
+    if not (Errors.currently_has_errors ()) then
+      Hh_logger.log "Warning, lowering failed for %s\n  - error: %s\n" fn err;
+
     { Parser_return.file_mode = mode
     ; Parser_return.comments = []
     ; Parser_return.ast = []
@@ -3399,11 +3402,13 @@ let defensive_from_file_with_default_popt ?quick fn =
   defensive_from_file ?quick ParserOptions.default fn
 
 let defensive_program_with_default_popt
+  ?hacksperimental
   ?quick
   ?fail_open
   ?elaborate_namespaces
   fn content =
   defensive_program
+    ?hacksperimental
     ?quick
     ?fail_open
     ?elaborate_namespaces

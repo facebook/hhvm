@@ -579,4 +579,5 @@ module type S = sig
   val reassign_mutable_this: Pos.t -> unit
   val mutable_expression_as_multiple_mutable_arguments: Pos.t -> string -> Pos.t -> string -> unit
   val invalid_unset_target_rx: Pos.t -> unit
+  val declare_statement_in_hack : Pos.t -> unit
 end

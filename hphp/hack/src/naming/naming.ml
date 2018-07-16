@@ -1957,6 +1957,7 @@ module Make (GetLocals : GetLocals) = struct
     N.While (e, block env b)
 
   and declare_stmt _env _is_block e _b =
+    Errors.declare_statement_in_hack (fst e);
     N.Expr (fst e, N.Any)
 
   (* Scoping is essentially that of do: block is always executed *)

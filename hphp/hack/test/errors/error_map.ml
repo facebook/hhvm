@@ -140,6 +140,7 @@ AttributeClassNameConflict = 2085
 MethodNeedsVisibility = 2086
 ReferenceInStrictMode = 2087
 ReferenceInRx = 2088
+DeclareStatement = 2089
 
 NastCheck Errors:
 AbstractBody = 3001

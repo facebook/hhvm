@@ -35,7 +35,11 @@ enum TypeStructureKind : int {
   OF_DICT = 0;
   OF_VEC = 0;
   OF_KEYSET = 0;
+  OF_VEC_OR_DICT = 0;
   OF_NONNULL = 0;
+  OF_DARRAY = 0;
+  OF_VARRAY = 0;
+  OF_VARRAY_OR_DARRAY = 0;
   OF_UNRESOLVED = 0;
 }
 

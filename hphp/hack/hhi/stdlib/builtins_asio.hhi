@@ -7,11 +7,11 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
-
-function asio_get_current_context_idx();
-function asio_get_running_in_context($ctx_idx);
-function asio_get_running();
-
+namespace {
+  function asio_get_current_context_idx();
+  function asio_get_running_in_context($ctx_idx);
+  function asio_get_running();
+}
 namespace HH\Asio {
   function join<T>(Awaitable<T> $awaitable): T;
   function result<T>(Awaitable<T> $awaitable): T;

@@ -105,16 +105,24 @@ final class Generator<+Tk, +Tv, -Ts> implements KeyedIterator<Tk, Tv> {
   public function rewind(): void {}
 }
 
+abstract class WaitableWaitHandle<+T> extends Awaitable<T> {
+}
+final class StaticWaitHandle<+T> extends Awaitable<T> {
+}
+
+
+final class AsyncFunctionWaitHandle<+T> extends ResumableWaitHandle<T> {
+}
+
+final class AsyncGeneratorWaitHandle<Tk, +Tv>
+  extends ResumableWaitHandle<?(Tk, Tv)> {
+}
+
+
 abstract class Awaitable<+T> {
   public static function setOnIOWaitEnterCallback(?(function(): void) $callback) {}
   public static function setOnIOWaitExitCallback(?(function(): void) $callback) {}
   public static function setOnJoinCallback(?(function(WaitableWaitHandle<mixed>): void) $callback) {}
-}
-
-final class StaticWaitHandle<+T> extends Awaitable<T> {
-}
-
-abstract class WaitableWaitHandle<+T> extends Awaitable<T> {
 }
 
 abstract class ResumableWaitHandle<+T> extends WaitableWaitHandle<T> {
@@ -122,13 +130,6 @@ abstract class ResumableWaitHandle<+T> extends WaitableWaitHandle<T> {
   public static function setOnAwaitCallback(?(function(AsyncFunctionWaitHandle<mixed>, WaitableWaitHandle<mixed>): void) $callback) {}
   public static function setOnSuccessCallback(?(function(AsyncFunctionWaitHandle<mixed>, mixed): void) $callback) {}
   public static function setOnFailCallback(?(function(AsyncFunctionWaitHandle<mixed>, Exception): void) $callback) {}
-}
-
-final class AsyncFunctionWaitHandle<+T> extends ResumableWaitHandle<T> {
-}
-
-final class AsyncGeneratorWaitHandle<Tk, +Tv>
-  extends ResumableWaitHandle<?(Tk, Tv)> {
 }
 
 final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {

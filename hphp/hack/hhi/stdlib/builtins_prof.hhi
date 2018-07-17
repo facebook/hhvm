@@ -10,7 +10,7 @@
 
 //////////////////////////////////////////////////////////////////
 // Objprof
-
+namespace {
 const int OBJPROF_FLAGS_DEFAULT = 1;
 const int OBJPROF_FLAGS_USER_TYPES_ONLY = 2;
 const int OBJPROF_FLAGS_PER_PROPERTY = 4;
@@ -36,10 +36,6 @@ type ObjprofStringStats = shape(
 function thread_memory_stats(): darray<string, int>; // auto-imported from HH namespace
 
 function thread_mark_stack(): void; // auto-imported from HH namespace
-
-namespace HH {
-  function set_mem_threshold_callback(int $threshold, mixed $callback): void;
-}
 
 function objprof_get_data(
   int $flags = OBJPROF_FLAGS_DEFAULT,
@@ -71,3 +67,9 @@ function heapgraph_node(resource $heapgraph, int $index): darray<string, mixed>;
 function heapgraph_edge(resource $heapgraph, int $index): darray<string, mixed>; // auto-imported from HH namespace
 function heapgraph_node_in_edges(resource $heapgraph, int $index): varray<darray<string, mixed>>; // auto-imported from HH namespace
 function heapgraph_node_out_edges(resource $heapgraph, int $index): varray<darray<string, mixed>>; // auto-imported from HH namespace
+}
+
+
+namespace HH {
+  function set_mem_threshold_callback(int $threshold, mixed $callback): void;
+}

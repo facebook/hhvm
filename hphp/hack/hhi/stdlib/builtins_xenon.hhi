@@ -7,7 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
-
+namespace {
 type XenonSample = shape(
   'time' => int,
   /* HH_IGNORE_ERROR[2071] */
@@ -31,6 +31,7 @@ type XenonSample = shape(
  * It is possible for the output of this function to change in the future.
  */
 function xenon_get_data(): varray<XenonSample>; // auto-imported from HH namespace
+}
 namespace HH {
   /**
    * TODO: this will replace xenon_get_data()

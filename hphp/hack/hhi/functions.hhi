@@ -16,6 +16,7 @@
 
 // isset, empty, and unset only look like functions to static analysis, but
 // in fact act as special expression subtypes within the runtime
+namespace {
 <<__Rx>>
 function isset(<<__MaybeMutable>> $x): bool;
 <<__Rx>>
@@ -69,7 +70,7 @@ function get_class_constants($class_name): array;
 // do **not** use this in your code, call newv() instead
 <<__PHPStdLib>>
 function hphp_create_object<T>(string $class_name, array $argv): T;
-
+}
 namespace HH {
   // autoload-map
   function could_include($file): bool;

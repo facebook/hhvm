@@ -7,7 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
-
+namespace {
 const int NOT_NULL_FLAG = 0;
 const int PRI_KEY_FLAG = 0;
 const int UNIQUE_KEY_FLAG = 0;
@@ -272,7 +272,7 @@ class AsyncMysqlException extends Exception {
 }
 class AsyncMysqlConnectException extends AsyncMysqlException {}
 class AsyncMysqlQueryException extends AsyncMysqlException {}
-
+}
 namespace HH {
   interface SQLFormatter extends SQLScalarFormatter {
     public function format_0x25(): string; // %%

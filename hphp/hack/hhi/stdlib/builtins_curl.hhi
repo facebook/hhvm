@@ -7,7 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
-
+namespace {
 const int CURLAUTH_ANY = 0;
 const int CURLAUTH_ANYSAFE = 0;
 const int CURLAUTH_BASIC = 0;
@@ -553,10 +553,6 @@ function curl_share_close($sh);
 <<__PHPStdLib>>
 function curl_share_setopt($sh, $option, $value);
 
-namespace HH\Asio {
-  function curl_exec(mixed $url_or_handle): Awaitable<string>;
-}
-
 class CURLFile {
   public string $name = '';
   public string $mime = '';
@@ -581,3 +577,8 @@ function curl_file_create(
   string $mime = '',
   string $postname = '',
 ): CURLFile;
+}
+
+namespace HH\Asio {
+  function curl_exec(mixed $url_or_handle): Awaitable<string>;
+}

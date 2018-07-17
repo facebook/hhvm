@@ -12,6 +12,7 @@ namespace HH {
 function server_warmup_status(): string;
 function execution_context(): string;
 }
+namespace {
 const INF = 0.0;
 const NAN = 0.0;
 <<__PHPStdLib>>
@@ -60,3 +61,4 @@ function sys_getloadavg();
 function hphp_process_abort($magic);
 <<__PHPStdLib, __Rx>>
 function hphp_to_string($v);
+}

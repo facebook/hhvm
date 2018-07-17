@@ -86,12 +86,14 @@ type env =
   ; is_hh_file           : bool
   ; is_strict            : bool
   ; codegen              : bool
+  ; hhi_mode             : bool
   }
 
 let make_env
   ?(level                = Typical         )
   ?(hhvm_compat_mode     = NoCompat        )
   ?(enable_hh_syntax     = false           )
+  ?(hhi_mode             = false           )
   (syntax_tree : SyntaxTree.t)
   ~(codegen : bool)
   : env
@@ -102,6 +104,7 @@ let make_env
     ; is_hh_file = SyntaxTree.is_hack syntax_tree
     ; is_strict = SyntaxTree.is_strict syntax_tree
     ; codegen
+    ; hhi_mode
     }
 
 and is_hhvm_compat env = env.hhvm_compat_mode <> NoCompat
@@ -578,12 +581,13 @@ let methodish_inside_interface parents =
 (* Test whether node is a non-abstract method without a body and not native.
  * Here node is the methodish node
  * And methods inside interfaces are inherently considered abstract *)
-let methodish_non_abstract_without_body_not_native node parents =
+let methodish_non_abstract_without_body_not_native env node parents =
   let non_abstract = not (methodish_contains_abstract node
       || methodish_inside_interface parents) in
   let not_has_body = not (methodish_has_body node) in
   let not_native = not (methodish_is_native node) in
-  non_abstract && not_has_body && not_native
+  let not_hhi  = not (env.hhi_mode) in
+  not_hhi && non_abstract && not_has_body && not_native
 
 (* Test whether node is a method that is both abstract and private
  *)
@@ -1087,7 +1091,7 @@ let methodish_errors env node parents errors =
     let fun_semicolon = md.methodish_semicolon in
     let errors =
       produce_error errors
-      (methodish_non_abstract_without_body_not_native node) parents
+      (methodish_non_abstract_without_body_not_native env node) parents
       (SyntaxError.error2015 class_name method_name) fun_semicolon in
     let errors =
       produce_error errors

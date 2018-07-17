@@ -3278,12 +3278,13 @@ let lower_tree
         String_utils.string_ends_with Relative_path.(suffix env.file) "hhi"
       in
       match PositionedSyntaxTree.errors tree with
-      | [] when env.quick_mode || is_hhi -> ()
+      | [] when env.quick_mode -> ()
       | [] ->
         let error_env = ParserErrors.make_env tree
           ~hhvm_compat_mode:ParserErrors.HHVMCompat
           ~enable_hh_syntax:env.enable_hh_syntax
           ~codegen:env.codegen
+          ~hhi_mode:is_hhi
         in
         let errors = ParserErrors.parse_errors error_env in
         let f e = Errors.parsing_error (pos_and_message_of e) in

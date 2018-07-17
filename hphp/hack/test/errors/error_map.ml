@@ -141,6 +141,8 @@ MethodNeedsVisibility = 2086
 ReferenceInStrictMode = 2087
 ReferenceInRx = 2088
 DeclareStatement = 2089
+MisplacedRxOfScope = 2090
+RxOfScopeAndExplicitRx = 2091
 
 NastCheck Errors:
 AbstractBody = 3001

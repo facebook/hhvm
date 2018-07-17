@@ -581,4 +581,6 @@ module type S = sig
   val mutable_expression_as_multiple_mutable_arguments: Pos.t -> string -> Pos.t -> string -> unit
   val invalid_unset_target_rx: Pos.t -> unit
   val declare_statement_in_hack : Pos.t -> unit
+  val misplaced_rx_of_scope: Pos.t -> unit
+  val rx_of_scope_and_explicit_rx: Pos.t -> unit
 end

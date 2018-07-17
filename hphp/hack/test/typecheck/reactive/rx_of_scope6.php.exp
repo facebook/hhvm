@@ -1,0 +1,2 @@
+File "rx_of_scope6.php", line 7, characters 18-28:
+<<__RxOfScope>> attribute cannot be used with explicit reactivity annotations. (Naming[2091])

@@ -2307,7 +2307,12 @@ and expr_
       end;
       (* Is the return type declared? *)
       let is_explicit_ret = Option.is_some f.f_ret in
-      let reactivity = fun_reactivity env.Env.decl_env f.f_user_attributes in
+      let has_rx_of_scope = Attributes.mem SN.UserAttributes.uaRxOfScope f.f_user_attributes in
+      let reactivity =
+        (* if lambda is annotated with <<__RxOfScope>> use reactivity of enclosing
+          function as reactivity of lambda *)
+        if has_rx_of_scope then TR.strip_conditional_reactivity (Env.env_reactivity env)
+        else fun_reactivity env.Env.decl_env f.f_user_attributes in
       let check_body_under_known_params ?ret_ty ft =
         let old_reactivity = Env.env_reactivity env in
         let env = Env.set_env_reactive env reactivity in

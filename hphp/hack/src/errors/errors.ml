@@ -878,6 +878,14 @@ let duplicate_user_attribute (pos, name) existing_attr_pos =
     existing_attr_pos, name^" was already used here";
   ]
 
+let misplaced_rx_of_scope pos =
+  add (Naming.err_code Naming.MisplacedRxOfScope) pos (
+    "<<__RxOfScope>> attribute is only allowed on lambdas."
+  )
+let rx_of_scope_and_explicit_rx pos =
+  add (Naming.err_code Naming.RxOfScopeAndExplicitRx) pos (
+    "<<__RxOfScope>> attribute cannot be used with explicit reactivity annotations."
+  )
 let unbound_attribute_name pos name =
   let reason = if (string_starts_with name "__")
     then "starts with __ but is not a standard attribute"

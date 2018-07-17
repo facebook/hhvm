@@ -41,6 +41,7 @@ const char* show(RoundDirection rd) {
 #ifdef HAVE_LIBXED
   static XedInit xi;
   constexpr xed_state_t XedAssembler::kXedState;
+  constexpr RIPRelativeRef XedAssembler::nullrip;
 #endif
 
 namespace x64 {

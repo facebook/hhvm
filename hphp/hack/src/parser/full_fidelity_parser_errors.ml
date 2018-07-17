@@ -1800,6 +1800,22 @@ let expression_errors env namespace_name node parents errors =
         make_error_from_node node SyntaxError.nested_unary_reference :: errors
       | _ -> errors
     end
+  | PrefixUnaryExpression { prefix_unary_operator; prefix_unary_operand }
+    when token_kind prefix_unary_operator = Some TokenKind.Dollar ->
+    let original_node = node in
+    let rec check_prefix_unary_dollar node =
+      match syntax node with
+      | PrefixUnaryExpression { prefix_unary_operator; prefix_unary_operand }
+        when token_kind prefix_unary_operator = Some TokenKind.Dollar ->
+        check_prefix_unary_dollar prefix_unary_operand
+      | BracedExpression _
+      | SubscriptExpression _
+      | VariableExpression _ -> errors (* these ones are valid *)
+      | LiteralExpression _
+      | PipeVariableExpression _ -> errors (* these ones get caught later *)
+      | _ -> make_error_from_node original_node SyntaxError.dollar_unary :: errors
+    in
+    check_prefix_unary_dollar prefix_unary_operand
   (* TODO(T21285960): Remove this bug-port, stemming from T22184312 *)
   | LambdaExpression { lambda_async; lambda_coroutine; lambda_signature; _ }
     when is_hhvm_compat env

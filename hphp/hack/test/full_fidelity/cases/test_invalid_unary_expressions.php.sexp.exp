@@ -1,0 +1,24 @@
+((script 31
+  ((list 31
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4
+        ((() <? 2 ())
+         (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
+       (missing 0 ())))
+     (expression_statement 5
+      ((prefix_unary_expression 4
+        ((((end_of_line 1)) $ 1 ())
+         (prefix_unary_expression 3
+          ((() - 1 ()) (variable 2 ((() variable 2 ())))))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 9
+      ((prefix_unary_expression 8
+        ((() $ 1 ())
+         (parenthesized_expression 7
+          ((() "(" 1 ())
+           (function_call_expression 5
+            ((() name 3 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))
+           (() ")" 1 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

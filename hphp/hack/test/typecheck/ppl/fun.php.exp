@@ -1,0 +1,2 @@
+File "fun.php", line 26, characters 10-12:
+fun(sample) cannot be used with a <<__PPL>> class (Typing[4272])

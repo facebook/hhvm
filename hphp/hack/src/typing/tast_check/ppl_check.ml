@@ -20,6 +20,12 @@ let has_ppl_attribute c =
     c.c_user_attributes
     (fun { ua_name; _ } -> SN.UserAttributes.uaProbabilisticModel = snd ua_name)
 
+(* If an object's type is wrapped in a Tabstract, recurse until we've hit the base *)
+let rec base_type ty =
+  match snd ty with
+  | Tabstract(_, Some ty) -> base_type ty
+  | _ -> ty
+
 (**
  * Given a class, check the class's direct ancestors to verify that if
  * one member is annotated with the <<__PPL>> attribute, then all of them are.
@@ -53,10 +59,6 @@ let check_ppl_class c =
  * This limits the ability to call it in a way that we are unable to rewrite.
  *)
 let check_ppl_obj_get env ((p, ty), e) =
-  let rec base_type ty =
-    match snd ty with
-    | Tabstract(_, Some ty) -> base_type ty
-    | _ -> ty in
   let check_type ty =
     match snd (base_type ty) with
     | Tclass ((_, name), _) ->
@@ -109,6 +111,24 @@ let check_ppl_class_const env p e =
     end
   | CIexpr e -> check_ppl_obj_get env e
 
+let check_ppl_meth_pointers p classname special_name =
+  match Decl_heap.Classes.get classname with
+  | Some ({ dc_ppl = true; _ }) -> Errors.ppl_meth_pointer p special_name
+  | _ -> ()
+
+let check_ppl_inst_meth env ((p, ty), _) =
+  let check_type ty =
+    match snd (base_type ty) with
+    | Tclass ((_, name), _) ->
+      begin
+        match Decl_heap.Classes.get name with
+        | Some ({ dc_ppl = true; _ }) -> Errors.ppl_meth_pointer p "inst_meth"
+        | _ -> ()
+      end
+    | _ -> () in
+  let _, type_list = Env.get_concrete_supertypes env ty in
+  List.iter type_list check_type
+
 let on_call_expr env ((p, _), x) =
   match x with
   | Obj_get (e, (_, _), _) -> check_ppl_obj_get env e
@@ -120,9 +140,15 @@ let on_call_expr env ((p, _), x) =
 let handler = object
   inherit Tast_visitor.handler_base
 
-  method! at_expr env x =
-    match snd x with
+  method! at_expr env ((p, _), x) =
+    match x with
     | Call (_, e, _, _, _) -> on_call_expr env e
+    (* class_meth *)
+    | Smethod_id ((_, classname), _) -> check_ppl_meth_pointers p classname "class_meth"
+    (* meth_caller *)
+    | Method_caller ((_, classname), _) -> check_ppl_meth_pointers p classname "meth_caller"
+    (* inst_meth *)
+    | Method_id (instance, _) -> check_ppl_inst_meth env instance
     | _ -> ()
 
   method! at_class_ _env c = check_ppl_class c

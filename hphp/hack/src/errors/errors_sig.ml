@@ -472,6 +472,7 @@ module type S = sig
   val coroutinness_mismatch : bool -> Pos.t -> Pos.t -> unit
   val invalid_ppl_call : Pos.t -> string -> unit
   val invalid_ppl_static_call : Pos.t -> string -> unit
+  val ppl_meth_pointer : Pos.t -> string -> unit
   val coroutine_outside_experimental : Pos.t -> unit
   val return_disposable_mismatch : bool -> Pos.t -> Pos.t -> unit
   val fun_reactivity_mismatch : Pos.t -> string -> Pos.t -> string -> unit

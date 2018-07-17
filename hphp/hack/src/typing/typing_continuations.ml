@@ -13,6 +13,7 @@ module Continuations = struct
     | Continue
     | Break
     | Catch
+    | Do
     | Exit
     | Fallthrough
     | Finally [@@deriving show, enum]
@@ -36,6 +37,7 @@ module Continuations = struct
     | Continue -> "Continue"
     | Break -> "Break"
     | Catch -> "Catch"
+    | Do -> "Do"
     | Exit -> "Exit"
     | Fallthrough -> "Fallthrough"
     | Finally -> "Finally"

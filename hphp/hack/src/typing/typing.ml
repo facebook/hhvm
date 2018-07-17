@@ -756,27 +756,30 @@ and stmt env = function
     (* NOTE: leaks scope as currently implemented; this matches
        the behavior in naming (cf. `do_stmt` in naming/naming.ml).
      *)
-    let env, (tb, te) = LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
-      let env, _ = block env b in
-      let env, te, _ = if_next_expr env e in
-      (* saving the locals in continue here even if there is no continue
-       * statement because they must be merged at the end of the loop, in
-       * case there is no iteration *)
-      let env = LEnv.save_and_merge_next_in_cont env C.Continue in
-      let alias_depth =
-        if env.Env.in_loop then 1 else Typing_alias.get_depth st in
-      let env, tb = Env.in_loop env begin
-        iter_n_acc alias_depth begin fun env ->
-          let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
-          (* Reset let variables *)
-          let env = if_next_condition env true e in
-          let env, tb = block env b in
-          env, tb
-        end end in
-      let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
-      let env = if_next_condition env false e in
-      let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
-      env, (tb, te)) in
+    let env, (tb, te) = LEnv.stash_and_do env [C.Continue; C.Break; C.Do]
+      (fun env ->
+        let env = LEnv.save_and_merge_next_in_cont env C.Do in
+        let env, _ = block env b in
+        let env, te, _ = if_next_expr env e in
+        (* saving the locals in continue here even if there is no continue
+         * statement because they must be merged at the end of the loop, in
+         * case there is no iteration *)
+        let env = LEnv.save_and_merge_next_in_cont env C.Continue in
+        let alias_depth =
+          if env.Env.in_loop then 1 else Typing_alias.get_depth st in
+        let env, tb = Env.in_loop env begin
+          iter_n_acc alias_depth begin fun env ->
+            let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
+            (* Reset let variables *)
+            let env = if_next_condition env true e in
+            let env = LEnv.update_next_from_conts env [C.Do; C.Next] in
+            let env, tb = block env b in
+            env, tb
+          end end in
+        let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
+        let env = if_next_condition env false e in
+        let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
+        env, (tb, te)) in
     env, T.Do(tb, te)
   | While (e, b) as st ->
     let env, te, _ = expr env e in

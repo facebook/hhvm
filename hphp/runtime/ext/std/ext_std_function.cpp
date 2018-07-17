@@ -165,7 +165,7 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset) {
     ar = g_context->getPrevVMState(ar);
   }
   if (ar == nullptr) {
-    return Array();
+    return Array::CreateVArray();
   }
   int numParams = ar->func()->numNonVariadicParams();
   int numArgs = ar->numArgs();
@@ -183,7 +183,7 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset) {
     }
   }
   local -= offset;
-  PackedArrayInit retInit(std::max(numArgs - offset, 0));
+  VArrayInit retInit(std::max(numArgs - offset, 0));
   for (int i = offset; i < numArgs; ++i) {
     if (i < numParams) {
       // This corresponds to one of the function's formal parameters, so it's

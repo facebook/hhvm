@@ -1,2 +1,2 @@
-File "using_bad_async.php", line 15, characters 9-38:
+File "using_bad_async.php", line 15, characters 15-38:
 await can only be used inside async functions (NastCheck[3003])

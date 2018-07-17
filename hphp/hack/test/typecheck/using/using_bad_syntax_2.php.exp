@@ -1,2 +1,2 @@
-File "using_bad_syntax_2.php", line 15, characters 5-31:
-Parse error: function-scoped 'using' statement not supported in a block scope (Parsing[1002])
+File "using_bad_syntax_2.php", line 15, characters 5-27:
+Using statement in function scoped form may only be used at the top level of a function or a method (Parsing[1002])

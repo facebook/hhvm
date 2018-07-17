@@ -1,6 +1,6 @@
 File "mayberx15.php", line 20, characters 3-55:
 Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
-File "mayberx15.php", line 20, characters 16-16:
+File "mayberx15.php", line 20, characters 16-54:
 Argument type is must be reactive function, non-reactive given.
 File "mayberx15.php", line 9, characters 19-19:
 This is the function declaration

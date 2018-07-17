@@ -390,3 +390,15 @@ module Superglobals = struct
     List.iter all_superglobals (HashSet.add h);
     fun x -> HashSet.mem h x
 end
+
+module PPLFunctions = struct
+  let all_reserved =
+    [ "sample"; "\\sample"; "factor"; "\\factor";
+      "observe"; "\\observe"; "condition"; "\\condition"
+    ]
+
+  let is_reserved =
+    let h = HashSet.create 23 in
+    List.iter all_reserved (HashSet.add h);
+    fun name -> HashSet.mem h name
+end

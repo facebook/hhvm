@@ -1,0 +1,6 @@
+File "special_functions_namespaced_incorrect.php--PPL.php", line 16, characters 18-18:
+Invalid argument (Typing[4110])
+File "special_functions_namespaced_incorrect.php--Infer.php", line 4, characters 26-31:
+This is a string
+File "special_functions_namespaced_incorrect.php--PPL.php", line 16, characters 18-18:
+It is incompatible with an int

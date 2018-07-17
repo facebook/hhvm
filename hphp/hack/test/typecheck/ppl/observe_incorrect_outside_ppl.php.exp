@@ -1,0 +1,6 @@
+File "observe_incorrect_outside_ppl.php", line 25, characters 13-13:
+Invalid argument (Typing[4110])
+File "observe_incorrect_outside_ppl.php", line 4, characters 18-23:
+This is a string
+File "observe_incorrect_outside_ppl.php", line 25, characters 13-13:
+It is incompatible with an int

@@ -1,0 +1,2 @@
+File "lambda_this.php", line 9, characters 7-11:
+Cannot call a method on an object of a <<__PPL>> class from a different class (Typing[4264])

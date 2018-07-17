@@ -26,6 +26,7 @@ class virtual iter = object (self)
   method! on_static_var env = super#on_static_var (Env.set_static env)
   method! on_static_method env = super#on_static_method (Env.set_static env)
 
+  method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
   method! on_Do env = super#on_Do (Env.set_in_loop env)
   method! on_While env = super#on_While (Env.set_in_loop env)
   method! on_For env = super#on_For (Env.set_in_loop env)
@@ -47,6 +48,7 @@ class virtual ['a] reduce = object (self)
   method! on_static_var env = super#on_static_var (Env.set_static env)
   method! on_static_method env = super#on_static_method (Env.set_static env)
 
+  method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
   method! on_Do env = super#on_Do (Env.set_in_loop env)
   method! on_While env = super#on_While (Env.set_in_loop env)
   method! on_For env = super#on_For (Env.set_in_loop env)
@@ -68,6 +70,7 @@ class virtual map = object (self)
   method! on_static_var env = super#on_static_var (Env.set_static env)
   method! on_static_method env = super#on_static_method (Env.set_static env)
 
+  method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
   method! on_Do env = super#on_Do (Env.set_in_loop env)
   method! on_While env = super#on_While (Env.set_in_loop env)
   method! on_For env = super#on_For (Env.set_in_loop env)
@@ -89,6 +92,7 @@ class virtual endo = object (self)
   method! on_static_var env = super#on_static_var (Env.set_static env)
   method! on_static_method env = super#on_static_method (Env.set_static env)
 
+  method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
   method! on_Do env = super#on_Do (Env.set_in_loop env)
   method! on_While env = super#on_While (Env.set_in_loop env)
   method! on_For env = super#on_For (Env.set_in_loop env)

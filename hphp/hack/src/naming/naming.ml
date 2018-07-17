@@ -51,6 +51,9 @@ type genv = {
   (* are we in the body of a finally statement? *)
   in_finally: bool;
 
+  (* are we in a __PPL attributed class *)
+  in_ppl: bool;
+
   (* In function foo<T1, ..., Tn> or class<T1, ..., Tn>, the field
    * type_params knows T1 .. Tn. It is able to find out about the
    * constraint on these parameters. *)
@@ -91,7 +94,7 @@ module Env : sig
     TypecheckerOptions.t ->
     type_constraint SMap.t ->
     FileInfo.mode ->
-    Ast.id * Ast.class_kind -> Namespace_env.env -> genv
+    Ast.id * Ast.class_kind -> Namespace_env.env -> bool -> genv
   val make_class_env :
     TypecheckerOptions.t ->
     type_constraint SMap.t -> Ast.class_ -> genv * lenv
@@ -109,6 +112,9 @@ module Env : sig
 
   val has_unsafe : genv * lenv -> bool
   val set_unsafe : genv * lenv -> bool -> unit
+
+  val in_ppl : genv * lenv -> bool
+  val set_ppl : genv * lenv -> bool -> genv * lenv
 
   val add_lvar : genv * lenv -> Ast.id -> positioned_ident -> unit
   val add_param : genv * lenv -> N.fun_param -> genv * lenv
@@ -138,7 +144,6 @@ module Env : sig
   val extend_all_locals : genv * lenv -> all_locals -> unit
   val remove_locals : genv * lenv -> Ast.id list -> unit
   val pipe_scope : genv * lenv -> (genv * lenv -> N.expr) -> Local_id.t * N.expr
-
 end = struct
 
   type map = positioned_ident SMap.t
@@ -223,19 +228,20 @@ end = struct
     goto_targets = ref SMap.empty;
   }
 
-  let make_class_genv tcopt tparams mode (cid, ckind) namespace = {
-    in_mode       =
-      (if !Autocomplete.auto_complete then FileInfo.Mpartial else mode);
-    tcopt;
-    in_try        = false;
-    in_finally    = false;
-    type_params   = tparams;
-    current_cls   = Some (cid, ckind);
-    class_consts = Hashtbl.create 0;
-    class_props = Hashtbl.create 0;
-    droot         = Typing_deps.Dep.Class (snd cid);
-    namespace;
-  }
+  let make_class_genv tcopt tparams mode (cid, ckind) namespace is_ppl =
+    { in_mode       =
+        (if !Autocomplete.auto_complete then FileInfo.Mpartial else mode);
+      tcopt;
+      in_try        = false;
+      in_finally    = false;
+      in_ppl        = is_ppl;
+      type_params   = tparams;
+      current_cls   = Some (cid, ckind);
+      class_consts  = Hashtbl.create 0;
+      class_props   = Hashtbl.create 0;
+      droot         = Typing_deps.Dep.Class (snd cid);
+      namespace;
+    }
 
   let unbound_name_error genv pos name kind =
     (* Naming pretends to be local and not dependent on other files, so it
@@ -256,8 +262,11 @@ end = struct
     Errors.unbound_name pos name kind
 
   let make_class_env tcopt tparams c =
+    let is_ppl = List.exists
+      c.c_user_attributes
+      (fun { ua_name; _ } -> snd ua_name = SN.UserAttributes.uaProbabilisticModel) in
     let genv = make_class_genv tcopt tparams c.c_mode
-      (c.c_name, c.c_kind) c.c_namespace in
+      (c.c_name, c.c_kind) c.c_namespace is_ppl in
     let lenv = empty_local UBMErr in
     let env  = genv, lenv in
     env
@@ -267,6 +276,7 @@ end = struct
     tcopt;
     in_try        = false;
     in_finally    = false;
+    in_ppl        = false;
     type_params   = cstrs;
     current_cls   = None;
     class_consts = Hashtbl.create 0;
@@ -286,6 +296,7 @@ end = struct
     tcopt;
     in_try        = false;
     in_finally    = false;
+    in_ppl        = false;
     type_params   = params;
     current_cls   = None;
     class_consts = Hashtbl.create 0;
@@ -302,6 +313,7 @@ end = struct
     tcopt;
     in_try        = false;
     in_finally    = false;
+    in_ppl        = false;
     type_params   = SMap.empty;
     current_cls   = None;
     class_consts = Hashtbl.create 0;
@@ -319,6 +331,12 @@ end = struct
   let has_unsafe (_genv, lenv) = !(lenv.has_unsafe)
   let set_unsafe (_genv, lenv) x =
     lenv.has_unsafe := x
+
+  let in_ppl (genv, _lenv) = genv.in_ppl
+
+  let set_ppl (genv, lenv) in_ppl =
+    let genv = { genv with in_ppl } in
+    (genv, lenv)
 
   let lookup genv (env : string -> FileInfo.pos option) (p, x) =
     let v = env x in
@@ -693,7 +711,6 @@ end = struct
       lenv.locals := restored_locals;
       end);
     pipe_var_ident, e2
-
 end
 
 (*****************************************************************************)
@@ -2341,6 +2358,12 @@ module Make (GetLocals : GetLocals) = struct
         | [] -> Errors.naming_too_few_arguments p; N.Any
         | el -> N.List (exprl env el)
         )
+    (* sample, factor, observe, condition *)
+    | Call ((p1, Id (p2, cn)), hl, el, uel)
+      when Env.in_ppl env && SN.PPLFunctions.is_reserved cn ->
+        let n_expr = N.Id (p2, cn) in
+        N.Call (N.Cnormal, (p1, n_expr),
+                hintl_funcall env hl, exprl env el, exprl env uel)
     | Call ((p, Id f), hl, el, uel) ->
       begin match Env.let_local env f with
       | Some x ->
@@ -2607,6 +2630,7 @@ module Make (GetLocals : GetLocals) = struct
       N.Callconv (kind, expr env e)
 
   and expr_lambda env f =
+    let env = Env.set_ppl env false in
     let h = Option.map f.f_ret (hint ~allow_retonly:true env) in
     let previous_unsafe = Env.has_unsafe env in
     (* save unsafe and yield state *)
@@ -2777,6 +2801,7 @@ module Make (GetLocals : GetLocals) = struct
     let genv  = Env.make_class_genv nenv cstrs
       nc.N.c_mode (nc.N.c_name, nc.N.c_kind)
       Namespace_env.empty_with_default_popt
+      (Attributes.mem SN.UserAttributes.uaProbabilisticModel nc.N.c_user_attributes)
     in
     let inst_meths = List.map nc.N.c_methods (meth_body genv) in
     let opt_constructor = match nc.N.c_constructor with

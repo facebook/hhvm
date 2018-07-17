@@ -1,8 +1,8 @@
 # -*- mode: python -*-
 
-import os
-
+load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@fbcode_macros//build_defs:compiler.bzl", "compiler")
+
 include_defs("//hphp/DEFS.bzl")
 
 def verify_unittest(suite, repo, dir, mode='interp,jit',
@@ -86,6 +86,7 @@ def verify_unittest(suite, repo, dir, mode='interp,jit',
     '//hphp/hhvm:symlinks',
     '//hphp/runtime:runtime_core',
     '//hphp/facebook/extensions:facebook_extensions',
+    '//hphp/test:run-php',
     ('' if dir.startswith('//') else '//hphp/test:') + dir,
   ]
 
@@ -99,9 +100,10 @@ def verify_unittest(suite, repo, dir, mode='interp,jit',
       blacklist = 'hphp/test/hackc_failing_tests_' + suite
       deplist.append('//hphp/hack/src:hh_single_compile')
 
-  if blacklist is not None:
+  if blacklist != None:
       command.extend(['-x', blacklist])
-      head, tail = os.path.split(blacklist)
+      head = paths.dirname(blacklist)
+      tail = paths.basename(blacklist)
       deplist.append('//' + head + ':' + tail)
 
   if hhcodegen == True:

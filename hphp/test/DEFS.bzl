@@ -9,7 +9,7 @@ def verify_unittest(suite, repo, dir, mode='interp,jit',
                     relocate=0, recycle_tc=0,
                     retranslate_all=0,
                     jit_serialize=0,
-                    cli_server=0, hhcodegen=False, use_hackc=False,
+                    cli_server=0, hhcodegen=False,
                     hhas_roundtrip=False, target_suffix='',
                     extra_args=[], blacklist=None,
                     noop_rule=False):
@@ -31,7 +31,6 @@ def verify_unittest(suite, repo, dir, mode='interp,jit',
        ('_recycle-tc' if recycle_tc else '') + \
        ('_cli-server' if cli_server else '') + \
        ('_hhcodegen-compare' if hhcodegen else '') + \
-       ('_hackc' if use_hackc else '') + \
        ('_hhas_roundtrip' if hhas_roundtrip else '') + \
        target_suffix
 
@@ -96,9 +95,6 @@ def verify_unittest(suite, repo, dir, mode='interp,jit',
         '//hphp/hack/src:hh_single_compile',
         '//hphp/hack/src/hhbc/semdiff:semdiff',
     ])
-  elif use_hackc == True:
-      blacklist = 'hphp/test/hackc_failing_tests_' + suite
-      deplist.append('//hphp/hack/src:hh_single_compile')
 
   if blacklist != None:
       command.extend(['-x', blacklist])
@@ -108,8 +104,6 @@ def verify_unittest(suite, repo, dir, mode='interp,jit',
 
   if hhcodegen == True:
     command.extend(['--compare-hh-codegen'])
-  elif use_hackc == True:
-    command.extend(['--hackc', '--exclude-pattern', '=/debugger|ext_vsdebug/='])
   if noop_rule:
     custom_unittest(
       name=target_name,

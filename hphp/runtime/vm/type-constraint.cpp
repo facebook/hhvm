@@ -188,7 +188,8 @@ bool TypeConstraint::compat(const TypeConstraint& other) const {
     const Class* cls = Unit::lookupClass(m_typeName);
     const Class* otherCls = Unit::lookupClass(other.m_typeName);
 
-    return cls && otherCls && cls == otherCls;
+    return cls && otherCls && (isHHType() ? otherCls->classof(cls)
+                                          : cls == otherCls);
   }
 
   return false;

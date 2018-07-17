@@ -970,10 +970,13 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
   TranslateRetryContext retry;
   auto result = TranslateResult::Retry;
   auto caller = ctx.srcKey().func();
+  auto const entryBID = region.entry()->id();
 
   while (result == TranslateResult::Retry) {
     unit = std::make_unique<IRUnit>(ctx);
     irgen::IRGS irgs{*unit, &region};
+    if (hasTransID(entryBID)) irgs.profTransID = getTransID(entryBID);
+
     auto& irb = *irgs.irb;
     InliningDecider inl{caller};
     auto const& argTypes = region.inlineInputTypes();
@@ -985,6 +988,10 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
 
     auto const entry = irb.unit().entry();
     auto returnBlock = irb.unit().defBlock();
+
+    // Set the profCount of the entry and return blocks we just created.
+    entry->setProfCount(curProfCount(irgs));
+    returnBlock->setProfCount(curProfCount(irgs));
 
     SCOPE_ASSERT_DETAIL("Inline-IRUnit") { return show(*unit); };
     irb.startBlock(entry, false /* hasUnprocPred */);

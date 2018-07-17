@@ -527,7 +527,6 @@ function get_options($argv) {
     'args:' => 'a:',
     'log' => 'l',
     'failure-file:' => '',
-    'arm' => '',
     'wholecfg' => '',
     'hhas-round-trip' => '',
     'color' => 'c',
@@ -933,7 +932,6 @@ function hhvm_cmd_impl() {
       '-vEval.EnableArgsInBacktraces=true',
       '-vEval.EnableIntrinsicsExtension=true',
       $mode,
-      isset($options['arm']) ? '-vEval.SimulateARM=1' : '',
       isset($options['wholecfg']) ? '-vEval.JitPGORegionSelector=wholecfg' : '',
 
       // load/store counters don't work on Ivy Bridge so disable for tests

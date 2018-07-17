@@ -174,8 +174,8 @@ string OfflineCode::getSymbolName(TCA addr) {
 }
 
 size_t OfflineCode::printBCMapping(BCMappingInfo bcMappingInfo,
-                                      size_t currBC,
-                                      TCA ip) {
+                                   size_t currBC,
+                                   TCA ip) {
 
   TransBCMapping curr, next;
   TCA tcaStart, tcaStop;
@@ -217,18 +217,19 @@ size_t OfflineCode::printBCMapping(BCMappingInfo bcMappingInfo,
   }
 
   if (currBC < mappingSize && tcaStart == ip) {
+    std::stringstream lineInfo;
     if (auto currUnit = g_repo->getUnit(curr.md5)) {
       auto bcPast = curr.bcStart + instrLen(currUnit->at(curr.bcStart));
 
-      currUnit->prettyPrint(std::cout,
+      currUnit->prettyPrint(lineInfo,
                             Unit::PrintOpts().range(curr.bcStart,
                                                     bcPast));
     } else {
-      std::cout << folly::format(
+      lineInfo << folly::format(
         "<<< couldn't find unit {} to print bytecode at offset {} >>>\n",
         curr.md5, curr.bcStart);
     }
-
+    g_logger->printLine(lineInfo.str());
     currBC++;
   }
 

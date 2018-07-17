@@ -169,17 +169,17 @@ void OfflineCode::disasm(FILE* file,
     // Annotate the x86 with its bytecode.
     currBC = printBCMapping(bcMappingInfo, currBC, (TCA)ip);
 
-    if (printAddr) printf("%14p: ", ip);
+    if (printAddr) g_logger->printAsm("%14p: ", ip);
 
     uint32_t instrLen = xed_decoded_inst_get_length(&xedd);
 
     if (printBinary) {
       uint32_t i;
       for (i=0; i < instrLen; i++) {
-        printf("%02X", frontier[i]);
+        g_logger->printAsm("%02X", frontier[i]);
       }
       for (; i < 16; i++) {
-        printf("  ");
+        g_logger->printAsm("  ");
       }
     }
 
@@ -230,9 +230,9 @@ void OfflineCode::disasm(FILE* file,
     if (!perfEvents.empty()) {
       printEventStats((TCA)ip, instrLen, perfEvents);
     } else {
-      printf("%48s", "");
+      g_logger->printAsm("%48s", "");
     }
-    printf("%s%s\n", codeStr, callDest.c_str());
+    g_logger->printAsm("%s%s\n", codeStr, callDest.c_str());
 
     frontier += instrLen;
     ip       += instrLen;

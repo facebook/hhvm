@@ -14,26 +14,23 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TCPRINT_H_
-#define incl_HPHP_TCPRINT_H_
+#ifndef incl_HPHP_STD_TCP_LOGGER_H_
+#define incl_HPHP_STD_TCP_LOGGER_H_
 
-#include "hphp/tools/tc-print/offline-trans-data.h"
-#include "hphp/tools/tc-print/repo-wrapper.h"
 #include "hphp/tools/tc-print/tc-print-logger.h"
-
-#include <folly/Format.h>
-
 #include <iostream>
-#include <string>
+#include <stdio.h>
 
-template<typename... Args>
-[[noreturn]] void error(Args&&... args) {
-  std::cerr << "Error: " << folly::format(std::forward<Args>(args)...) << '\n';
-  exit(1);
-}
+namespace HPHP {
 
-extern HPHP::jit::RepoWrapper* g_repo;
-extern HPHP::jit::OfflineTransData* g_transData;
-extern HPHP::TCPrintLogger* g_logger;
+struct StdLogger : TCPrintLogger {
+  void printGeneric(const char* format, ...) override;
+  void printBytecode(std::string byteInfo) override;
+  void printLine(std::string lineInfo) override;
+  void printAsm(const char* format, ...) override;
+  bool flushTranslation(std::string) override;
+};
+
+} // namespace HPHP
 
 #endif

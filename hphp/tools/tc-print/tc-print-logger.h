@@ -14,26 +14,25 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TCPRINT_H_
-#define incl_HPHP_TCPRINT_H_
-
-#include "hphp/tools/tc-print/offline-trans-data.h"
-#include "hphp/tools/tc-print/repo-wrapper.h"
-#include "hphp/tools/tc-print/tc-print-logger.h"
-
-#include <folly/Format.h>
-
+#ifndef incl_HPHP_TCPRINT_LOGGER_H_
+#define incl_HPHP_TCPRINT_LOGGER_H_
 #include <iostream>
-#include <string>
 
-template<typename... Args>
-[[noreturn]] void error(Args&&... args) {
-  std::cerr << "Error: " << folly::format(std::forward<Args>(args)...) << '\n';
-  exit(1);
-}
+namespace HPHP {
 
-extern HPHP::jit::RepoWrapper* g_repo;
-extern HPHP::jit::OfflineTransData* g_transData;
-extern HPHP::TCPrintLogger* g_logger;
+struct TCPrintLogger {
+  // Standard printing (usually to std::cout).
+  virtual void printGeneric(const char* format, ...) = 0;
+  // Printing of the collected bytecode at the start of translations.
+  virtual void printBytecode(std::string byteInfo) = 0;
+  // Printing of line information (and assoc bytecode).
+  virtual void printLine(std::string lineInfo) = 0;
+  // Printing of generated assembly.
+  virtual void printAsm(const char* format, ...) = 0;
+  // If relevant, pushing formatted output to database.
+  virtual bool flushTranslation(std::string) = 0;
+};
+
+} // namespace HPHP
 
 #endif

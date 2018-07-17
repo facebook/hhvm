@@ -35,6 +35,8 @@
 #include "hphp/tools/tc-print/offline-code.h"
 #include "hphp/tools/tc-print/mappers.h"
 #include "hphp/tools/tc-print/repo-wrapper.h"
+#include "hphp/tools/tc-print/std-logger.h"
+#include "hphp/tools/tc-print/tc-print-logger.h"
 
 using namespace HPHP;
 using namespace HPHP::jit;
@@ -72,6 +74,7 @@ OfflineCode*   transCode;
 
 char errMsgBuff[MAX_SYM_LEN];
 const char* kListKeyword = "list";
+TCPrintLogger* g_logger;
 
 PerfEventsMap<TCA>     tcaPerfEvents;
 PerfEventsMap<TransID> transPerfEvents;
@@ -99,63 +102,64 @@ std::string toString(T value) {
 
 void usage() {
   printf("Usage: tc-print [OPTIONS]\n"
-         "  Options:\n"
-         "    -c <FILE>       : uses the given config file\n"
-         "    -D              : used along with -t, this option sorts the top "
-         "translations by density (count / size) of the selected perf event\n"
-         "    -d <DIRECTORY>  : looks for dump file in <DIRECTORY> "
-         "(default: /tmp)\n"
-         "    -f <FUNC_ID>    : prints the translations for the given "
-         "<FUNC_ID>, sorted by start offset\n"
-         "    -g <FUNC_ID>    : prints the CFG among the translations for the "
-         "given <FUNC_ID>\n"
-         "    -p <FILE>       : uses raw profile data from <FILE>\n"
-         "    -s              : prints all translations sorted by creation "
-         "order\n"
-         "    -u <MD5>        : prints all translations from the specified "
-         "unit\n"
-         "    -t <NUMBER>     : prints top <NUMBER> translations according to "
-         "profiling info\n"
-         "    -k <TRANS_KIND> : used with -t, filters only translations of the "
-         "given kind, e.g. TransLive (default: all)\n"
-         "    -a <ADDR>       : used with -t, filters only events at addresses "
-         ">= <ADDR>\n"
-         "    -A <ADDR>       : used with -t, filters only events at addresses "
-         "<= <ADDR>\n"
-         "    -T <NUMBER>     : prints top <NUMBER> functions according to "
-         "profiling info\n"
-         "    -e <EVENT_TYPE> : sorts by the specified perf event. Pass '%s' "
-         "to get a list of valid event types.\n"
-         "    -b              : prints bytecode stats\n"
-         "    -B <OPCODE>     : used in conjunction with -e, prints the top "
-         "bytecode translationc event type. Pass '%s' to get a "
-         "list of valid opcodes.\n"
-         "    -i              : reports inclusive stats by including helpers "
-         "(perf data must include call graph information)\n"
-         "    -n <level>      : level of verbosity for annotations. Use 0 for "
-         "no annotations, 1 - for inline, 2 - to print all annotations "
-         "including from a file (default: 2).\n"
-         "    -o              : print host opcodes\n"
-         "    -v <PERCENTAGE> : sets the minimum percentage to <PERCENTAGE> "
-         "when printing the top helpers (implies -i). The lower the percentage,"
-         " the more helpers that will show up.\n"
-         "    -h              : prints help message\n",
-         kListKeyword,
-         kListKeyword);
+    "  Options:\n"
+    "    -c <FILE>       : uses the given config file\n"
+    "    -D              : used along with -t, this option sorts the top "
+    "translations by density (count / size) of the selected perf event\n"
+    "    -d <DIRECTORY>  : looks for dump file in <DIRECTORY> "
+    "(default: /tmp)\n"
+    "    -f <FUNC_ID>    : prints the translations for the given "
+    "<FUNC_ID>, sorted by start offset\n"
+    "    -g <FUNC_ID>    : prints the CFG among the translations for the "
+    "given <FUNC_ID>\n"
+    "    -p <FILE>       : uses raw profile data from <FILE>\n"
+    "    -s              : prints all translations sorted by creation "
+    "order\n"
+    "    -u <MD5>        : prints all translations from the specified "
+    "unit\n"
+    "    -t <NUMBER>     : prints top <NUMBER> translations according to "
+    "profiling info\n"
+    "    -k <TRANS_KIND> : used with -t, filters only translations of the "
+    "given kind, e.g. TransLive (default: all)\n"
+    "    -a <ADDR>       : used with -t, filters only events at addresses "
+    ">= <ADDR>\n"
+    "    -A <ADDR>       : used with -t, filters only events at addresses "
+    "<= <ADDR>\n"
+    "    -T <NUMBER>     : prints top <NUMBER> functions according to "
+    "profiling info\n"
+    "    -e <EVENT_TYPE> : sorts by the specified perf event. Pass '%s' "
+    "to get a list of valid event types.\n"
+    "    -b              : prints bytecode stats\n"
+    "    -B <OPCODE>     : used in conjunction with -e, prints the top "
+    "bytecode translationc event type. Pass '%s' to get a "
+    "list of valid opcodes.\n"
+    "    -i              : reports inclusive stats by including helpers "
+    "(perf data must include call graph information)\n"
+    "    -n <level>      : level of verbosity for annotations. Use 0 for "
+    "no annotations, 1 - for inline, 2 - to print all annotations "
+    "including from a file (default: 2).\n"
+    "    -o              : print host opcodes\n"
+    "    -v <PERCENTAGE> : sets the minimum percentage to <PERCENTAGE> "
+    "when printing the top helpers (implies -i). The lower the percentage,"
+    " the more helpers that will show up.\n"
+    "    -h              : prints help message\n",
+    kListKeyword,
+    kListKeyword);
 }
 
 void printValidBytecodes() {
-  printf("<OPCODE>:\n");
+  g_logger->printGeneric("<OPCODE>:\n");
   auto validOpcodes = getValidOpcodeNames();
   for (size_t i = 0; i < validOpcodes.size(); i++) {
-    printf("  * %s\n", validOpcodes[i].first.c_str());
+    g_logger->printGeneric("  * %s\n", validOpcodes[i].first.c_str());
   }
 }
 
 void printValidEventTypes() {
-  printf("<EVENT_TYPE>:\n");
+  g_logger->printGeneric("<EVENT_TYPE>:\n");
   for (size_t i = 0; i < NUM_EVENT_TYPES; i++) {
-    printf("  * %s\n", eventTypeToCommandLineArgument((PerfEventType)i));
+    g_logger->printGeneric("  * %s\n",
+                           eventTypeToCommandLineArgument((PerfEventType)i));
   }
 }
 
@@ -393,7 +397,7 @@ void loadPerfEvents() {
             // Append the address to disambiguate.
             entries[i].second += std::string("@")
                               +  toString((void*)entries[i].first);
-         }
+          }
 
           stackTrace.push_back(entries[i].second);
         }
@@ -408,48 +412,52 @@ void loadPerfEvents() {
   AddrToTransMapper transMapper(g_transData);
   transPerfEvents = tcaPerfEvents.mapTo(transMapper);
 
-  printf("# Number of hhvm samples read (%% in TC) from file %s\n",
-         profFileName.c_str());
+  g_logger->printGeneric("# Number of hhvm samples read "
+                         "(%% in TC) from file %s\n",
+                         profFileName.c_str());
 
   for (size_t i = 0; i < NUM_EVENT_TYPES; i++) {
     if (!hhvmSamples[i]) continue;
 
-    printf("#  %-19s TOTAL: %10u (%u in TC = %5.2lf%%)\n",
-           eventTypeToCommandLineArgument((PerfEventType)i),
-           hhvmSamples[i],
-           tcSamples[i],
-           100.0 * tcSamples[i] / hhvmSamples[i]);
+    g_logger->printGeneric("#  %-19s TOTAL: %10u (%u in TC = %5.2lf%%)\n",
+                           eventTypeToCommandLineArgument((PerfEventType)i),
+                           hhvmSamples[i],
+                           tcSamples[i],
+                           100.0 * tcSamples[i] / hhvmSamples[i]);
 
     for (size_t j = 0; j < NumTransKinds; ++j) {
       auto ct = samplesPerKind[i][j];
       if (!ct) continue;
       std::string kind = show(static_cast<TransKind>(j));
-      printf("# %26s:             %-8u (%5.2lf%%)\n",
-             kind.c_str(), ct, 100.0 * ct / tcSamples[i]);
+      g_logger->printGeneric("# %26s:             %-8u (%5.2lf%%)\n",
+                             kind.c_str(), ct, 100.0 * ct / tcSamples[i]);
     }
-    printf("#\n");
+    g_logger->printGeneric("#\n");
   }
-  printf("\n");
+  g_logger->printGeneric("\n");
 
   // print per-TCRegion information
 
   // header
-  printf("# TCRegion ");
+  g_logger->printGeneric("# TCRegion ");
   for (size_t i = 0; i < NUM_EVENT_TYPES; i++) {
-    printf("%17s ", eventTypeToCommandLineArgument((PerfEventType)i));
+    g_logger->printGeneric("%17s ",
+                           eventTypeToCommandLineArgument((PerfEventType)i));
   }
-  printf("\n");
+  g_logger->printGeneric("\n");
 
   // HW events for each region
-  for (size_t i = 0 ; i < TCRCount ; i++) {
-    printf("# %8s ", tcRegionToString(static_cast<TCRegion>(i)).c_str());
+  for (size_t i = 0; i < TCRCount; i++) {
+    g_logger->printGeneric("# %8s ",
+                           tcRegionToString(static_cast<TCRegion>(i)).c_str());
     for (size_t j = 0; j < NUM_EVENT_TYPES; j++) {
       auto ct = samplesPerTCRegion[j][i];
-      printf("%8u (%5.2lf%%) ", ct, ct ? (100.0 * ct / tcSamples[j]) : 0);
+      g_logger->printGeneric("%8u (%5.2lf%%) ", ct,
+                             ct ? (100.0 * ct / tcSamples[j]) : 0);
     }
-    printf("\n");
+    g_logger->printGeneric("\n");
   }
-  printf("#\n\n");
+  g_logger->printGeneric("#\n\n");
 
   fclose(profFile);
 }
@@ -464,19 +472,20 @@ void loadProfData() {
 void printTrans(TransID transId) {
   always_assert(transId < NTRANS);
 
-  printf("\n====================\n");
+  g_logger->printGeneric("\n====================\n");
   g_transData->printTransRec(transId, transPerfEvents);
 
   const TransRec* tRec = TREC(transId);
   if (!tRec->isValid()) return;
 
   if (!tRec->blocks.empty()) {
-    printf("----------\nbytecode:\n----------\n");
+    g_logger->printGeneric("----------\nbytecode:\n----------\n");
     const Func* curFunc = nullptr;
     for (auto& block : tRec->blocks) {
+      std::stringstream byteInfo;
       auto unit = g_repo->getUnit(block.md5);
       if (!unit) {
-        std::cout << folly::format(
+        byteInfo << folly::format(
           "<<< couldn't find unit {} to print bytecode range [{},{}) >>>\n",
           block.md5, block.bcStart, block.bcPast);
         continue;
@@ -485,34 +494,38 @@ void printTrans(TransID transId) {
       auto newFunc = unit->getFunc(block.bcStart);
       always_assert(newFunc);
       if (newFunc != curFunc) {
-        std::cout << '\n';
-        newFunc->prettyPrint(std::cout, Func::PrintOpts().noFpi().noMetadata());
+        byteInfo << '\n';
+        newFunc->prettyPrint(byteInfo, Func::PrintOpts().noFpi().noMetadata());
       }
       curFunc = newFunc;
 
       unit->prettyPrint(
-        std::cout, Unit::PrintOpts().range(block.bcStart, block.bcPast)
-                               .noFuncs());
+        byteInfo,
+        Unit::PrintOpts().range(block.bcStart, block.bcPast).noFuncs());
+        g_logger->printBytecode(byteInfo.str());
     }
   }
 
-  printf("----------\n%s: main\n----------\n", transCode->getArchName());
-  transCode->printDisasm(tRec->aStart, tRec->aLen,
-                         tRec->bcMapping, tcaPerfEvents, hostOpcodes);
+  g_logger->printGeneric("----------\n%s: main\n----------\n",
+                         transCode->getArchName());
+  transCode->printDisasm(tRec->aStart, tRec->aLen, tRec->bcMapping,
+                         tcaPerfEvents, hostOpcodes);
 
-  printf("----------\n%s: cold\n----------\n", transCode->getArchName());
+  g_logger->printGeneric("----------\n%s: cold\n----------\n",
+                         transCode->getArchName());
   // Sometimes acoldStart is the same as afrozenStart.  Avoid printing the code
   // twice in such cases.
   if (tRec->acoldStart != tRec->afrozenStart) {
-    transCode->printDisasm(tRec->acoldStart, tRec->acoldLen,
-                           tRec->bcMapping, tcaPerfEvents, hostOpcodes);
+    transCode->printDisasm(tRec->acoldStart, tRec->acoldLen, tRec->bcMapping,
+                           tcaPerfEvents, hostOpcodes);
   }
 
-  printf("----------\n%s: frozen\n----------\n", transCode->getArchName());
-  transCode->printDisasm(tRec->afrozenStart, tRec->afrozenLen,
-                         tRec->bcMapping, tcaPerfEvents, hostOpcodes);
+  g_logger->printGeneric("----------\n%s: frozen\n----------\n",
+                         transCode->getArchName());
+  transCode->printDisasm(tRec->afrozenStart, tRec->afrozenLen, tRec->bcMapping,
+                         tcaPerfEvents, hostOpcodes);
 
-  printf("----------\n");
+  g_logger->printGeneric("----------\n");
 }
 
 
@@ -541,7 +554,8 @@ void printCFGOutArcs(TransID transId) {
       } else {
         color = "green4";
       }
-      printf("t%u -> t%u [color=%s] ;\n", transId, targetId, color);
+      g_logger->printGeneric("t%u -> t%u [color=%s] ;\n", transId, targetId,
+                             color);
     }
   }
 }
@@ -550,7 +564,7 @@ void printCFGOutArcs(TransID transId) {
 void printCFG() {
   std::vector<TransID> inodes;
 
-  printf("digraph CFG {\n");
+  g_logger->printGeneric("digraph CFG {\n");
 
   g_transData->findFuncTrans(selectedFuncId, &inodes);
 
@@ -571,9 +585,9 @@ void printCFG() {
       case TransKind::OptPrologue : shape = "invtrapezium"; break;
       default:                      shape = "box";
     }
-    printf("t%u [shape=%s,label=\"T: %u\\nbc: [0x%x-0x%x)\","
-           "style=filled%s];\n", tid, shape, tid, bcStart, bcStop,
-           (isPrologue ? ",color=blue" : ""));
+    g_logger->printGeneric("t%u [shape=%s,label=\"T: %u\\nbc: [0x%x-0x%x)\","
+                           "style=filled%s];\n", tid, shape, tid, bcStart,
+                           bcStop, (isPrologue ? ",color=blue" : ""));
   }
 
   // Print arcs
@@ -582,7 +596,7 @@ void printCFG() {
     printCFGOutArcs(tid);
   }
 
-  printf("}\n");
+  g_logger->printGeneric("}\n");
 }
 
 void printTopFuncs() {
@@ -615,21 +629,21 @@ void printTopFuncsBySize() {
   }
   std::sort(funcIds.begin(), funcIds.end(),
             [&](FuncId fid1, FuncId fid2) {
-              return funcSize[fid1] > funcSize[fid2];
-            });
-  printf("FuncID:   \tSize (total aLen in bytes):\n");
+    return funcSize[fid1] > funcSize[fid2];
+  });
+  g_logger->printGeneric("FuncID:   \tSize (total aLen in bytes):\n");
   for (size_t i = 0; i < nTopFuncs; i++) {
     const auto fid = funcIds[i];
-    printf("%10u\t%10lu\n", fid, funcSize[funcIds[i]]);
+    g_logger->printGeneric("%10u\t%10lu\n", fid, funcSize[funcIds[i]]);
   }
 }
 
 struct CompTrans {
-private:
+  private:
   const PerfEventsMap<TransID>& transPerfEvents;
   const PerfEventType           etype;
 
-public:
+  public:
   CompTrans(const PerfEventsMap<TransID>& _transPerfEvents,
             PerfEventType _etype) :
     transPerfEvents(_transPerfEvents), etype(_etype) {}
@@ -737,33 +751,36 @@ void printTopBytecodes(const OfflineTransData* tdata,
     Unit* unit = g_repo->getUnit(trec->md5);
     always_assert(unit);
 
-    printf("\n====================\n");
-    printf("{\n");
-    printf("  FuncID  = %u\n", trec->src.funcID());
-    printf("  TransID = %u\n", tfrag.tid);
+    g_logger->printGeneric("\n====================\n");
+    g_logger->printGeneric("{\n");
+    g_logger->printGeneric("  FuncID  = %u\n", trec->src.funcID());
+    g_logger->printGeneric("  TransID = %u\n", tfrag.tid);
     tfragPerfEvents.printEventsHeader(tfrag);
-    printf("}\n\n");
+    g_logger->printGeneric("}\n\n");
 
-    printf("----------\n%s: main\n----------\n", olCode->getArchName());
+    g_logger->printGeneric("----------\n%s: main\n----------\n",
+                           olCode->getArchName());
     olCode->printDisasm(tfrag.aStart,
-                         tfrag.aLen,
-                         trec->bcMapping,
-                         samples,
-                         hostOpcodes);
+                        tfrag.aLen,
+                        trec->bcMapping,
+                        samples,
+                        hostOpcodes);
 
-    printf("----------\n%s: cold\n----------\n", olCode->getArchName());
+    g_logger->printGeneric("----------\n%s: cold\n----------\n",
+                           olCode->getArchName());
     olCode->printDisasm(tfrag.acoldStart,
-                         tfrag.acoldLen,
-                         trec->bcMapping,
-                         samples,
-                         hostOpcodes);
+                        tfrag.acoldLen,
+                        trec->bcMapping,
+                        samples,
+                        hostOpcodes);
 
-    printf("----------\n%s: frozen\n----------\n", olCode->getArchName());
+    g_logger->printGeneric("----------\n%s: frozen\n----------\n",
+                           olCode->getArchName());
     olCode->printDisasm(tfrag.afrozenStart,
-                         tfrag.afrozenLen,
-                         trec->bcMapping,
-                         samples,
-                         hostOpcodes);
+                        tfrag.afrozenLen,
+                        trec->bcMapping,
+                        samples,
+                        hostOpcodes);
   }
 }
 
@@ -774,6 +791,8 @@ int main(int argc, char *argv[]) {
 
   parseOptions(argc, argv);
 
+  StdLogger stdoutlogger{};
+  g_logger = &stdoutlogger;
   g_transData = new OfflineTransData(dumpDir);
   transCode = new OfflineCode(dumpDir,
                                  g_transData->getHotBase(),
@@ -829,6 +848,7 @@ int main(int argc, char *argv[]) {
       if (md5Filter && tRec->md5 != *md5Filter) continue;
 
       printTrans(t);
+      g_logger->flushTranslation(tRec->funcName);
     }
   }
 

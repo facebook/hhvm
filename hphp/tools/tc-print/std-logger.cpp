@@ -14,26 +14,36 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TCPRINT_H_
-#define incl_HPHP_TCPRINT_H_
+#include "hphp/tools/tc-print/std-logger.h"
+#include <stdarg.h>
+#include <sstream>
 
-#include "hphp/tools/tc-print/offline-trans-data.h"
-#include "hphp/tools/tc-print/repo-wrapper.h"
-#include "hphp/tools/tc-print/tc-print-logger.h"
+namespace HPHP {
 
-#include <folly/Format.h>
-
-#include <iostream>
-#include <string>
-
-template<typename... Args>
-[[noreturn]] void error(Args&&... args) {
-  std::cerr << "Error: " << folly::format(std::forward<Args>(args)...) << '\n';
-  exit(1);
+void StdLogger::printGeneric(const char* format, ...) {
+  va_list args;
+  va_start(args, format);
+  vprintf(format, args);
+  va_end(args);
 }
 
-extern HPHP::jit::RepoWrapper* g_repo;
-extern HPHP::jit::OfflineTransData* g_transData;
-extern HPHP::TCPrintLogger* g_logger;
+void StdLogger::printBytecode(std::string byteInfo){
+  std::cout<< byteInfo;
+}
 
-#endif
+void StdLogger::printLine(std::string lineInfo) {
+  std::cout << lineInfo;
+}
+
+void StdLogger::printAsm(const char* format, ...) {
+  va_list args;
+  va_start(args, format);
+  vprintf(format, args);
+  va_end(args);
+}
+
+bool StdLogger::flushTranslation(std::string) {
+  return true;
+}
+
+} // namespace HPHP

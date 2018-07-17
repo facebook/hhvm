@@ -507,53 +507,55 @@ function rel_path($to) {
 }
 
 function get_options($argv) {
+  # Options marked * affect test behavior, and need to be reported by list_tests
   $parameters = array(
-    'env:' => '',
+    '*env:' => '',
     'exclude:' => 'e:',
     'exclude-pattern:' => 'E:',
     'exclude-recorded-failures:' => 'x:',
     'include:' => 'i:',
     'include-pattern:' => 'I:',
-    'repo' => 'r',
-    'hhbbc2' => '',
-    'mode:' => 'm:',
-    'server' => 's',
-    'cli-server' => 'S',
+    '*repo' => 'r',
+    '*hhbbc2' => '',
+    '*mode:' => 'm:',
+    '*server' => 's',
+    '*cli-server' => 'S',
     'shuffle' => '',
     'help' => 'h',
     'verbose' => 'v',
     'testpilot' => '',
     'threads:' => '',
-    'args:' => 'a:',
+    '*args:' => 'a:',
     'log' => 'l',
     'failure-file:' => '',
-    'wholecfg' => '',
-    'hhas-round-trip' => '',
+    '*wholecfg' => '',
+    '*hhas-round-trip' => '',
     'color' => 'c',
     'no-fun' => '',
     'cores' => '',
     'no-clean' => '',
     'list-tests' => '',
-    'relocate:' => '',
-    'recycle-tc:' => '',
-    'retranslate-all:' => '',
-    'jit-serialize:' => '',
-    'hhvm-binary-path:' => 'b:',
-    'typechecker' => '',
-    'vendor:' => '',
-    'hhserver-binary-path:' => '',
-    'compare-hh-codegen' => '',
-    'no-semdiff' => '',
+    '*relocate:' => '',
+    '*recycle-tc:' => '',
+    '*retranslate-all:' => '',
+    '*jit-serialize:' => '',
+    '*hhvm-binary-path:' => 'b:',
+    '*typechecker' => '',
+    '*vendor:' => '',
+    '*hhserver-binary-path:' => '',
+    '*compare-hh-codegen' => '',
+    '*no-semdiff' => '',
     'record-failures:' => '',
-    'hackc' => '',
-    'srcloc' => '',
-    'hack-only' => '',
-    'ignore-oids' => '',
-    'hphpc' => '',
+    '*hackc' => '',
+    '*srcloc' => '',
+    '*hack-only' => '',
+    '*ignore-oids' => '',
+    '*hphpc' => '',
     'jitsample:' => ''
   );
   $options = array();
   $files = array();
+  $recorded = array();
 
   /*
    * '-' argument causes all future arguments to be treated as filenames, even
@@ -576,13 +578,16 @@ function get_options($argv) {
 
       foreach ($parameters as $long => $short) {
         if ($arg == '-'.str_replace(':', '', $short) ||
-            $arg == '--'.str_replace(':', '', $long)) {
+            $arg == '--'.str_replace(array(':', '*'), array('', ''), $long)) {
+          $record = substr($long, 0, 1) === '*';
+          if ($record) $recorded[] = $arg;
           if (substr($long, -1, 1) == ':') {
             $value = $argv[++$i];
+            if ($record) $recorded[] = $value;
           } else {
             $value = true;
           }
-          $options[str_replace(':', '', $long)] = $value;
+          $options[str_replace(array(':', '*'), array('', ''), $long)] = $value;
           $found = true;
           break;
         }
@@ -595,6 +600,8 @@ function get_options($argv) {
       $files[] = $arg;
     }
   }
+
+  $GLOBALS['recorded_options'] = $recorded;
 
   if (isset($options['jit-serialize'])) {
     if (!isset($options['repo'])) {
@@ -807,36 +814,11 @@ function find_tests($files, array $options = null) {
 }
 
 function list_tests($files, $options) {
-  $args = array();
-  $mode = idx($options, 'mode', '');
-  switch ($mode) {
-    case '':
-      break;
-    case 'jit':
-    case 'interp':
-    case 'interp,jit':
-      $args[] = '-m ' . $mode;
-      break;
-    default:
-      throw new Exception("Unsupported mode for listing tests: ".$mode);
-  }
-
-  if (isset($options['hhbbc2'])) {
-    $args[] = '--hhbbc2';
-  } else if (isset($options['repo'])) {
-    $args[] = '-r';
-  }
-
-  foreach (multi_request_modes() as $option) {
-    if (isset($options[$option])) {
-      $args[] = '--' . $option;
-      $args[] = $options[$option];
-    }
-  }
+  $args = implode(' ', $GLOBALS['recorded_options']);
 
   foreach (find_tests($files, $options) as $test) {
     print Status::jsonEncode(array(
-      'args' => implode(' ', $args),
+      'args' => $args,
       'name' => $test,
     ))."\n";
   }
@@ -3065,29 +3047,11 @@ function print_failure($argv, $results, $options) {
 
     print_commands($failed, $options);
 
-    $rerun = make_header("Re-run just the failing tests:") .
-      str_replace("run.php", "run", $argv[0]);
-    foreach ($options as $option => $value) {
-      if ($option === "servers") continue;
-      if ($option === "threads") {
-        // e.g., For a small number of failed tests, we don't need max threads.
-        $rerun .= " --" . $option . ' ' . get_num_threads($options, $failed);
-      } else if ($option === "typechecker" ||
-                 $option === "verbose" ||
-                 $option === "repo" ||
-                 $option === "server" ||
-                 $option === "cli-server" ||
-                 $option === "compare-hh-codegen" ||
-                 $option === "no-semdiff") {
-        // The escapeshellarg($value) of these is 1, but there is no real value
-        // associated with these options.
-        $rerun .= " --" . $option;
-      } else {
-        $rerun .= " --" . $option . ' ' . escapeshellarg($value);
-      }
-    }
-    $rerun .= sprintf(' $(cat %s)%s', $failing_tests_file, "\n");
-    print $rerun;
+    print
+      make_header("Re-run just the failing tests:") .
+      str_replace("run.php", "run", $argv[0]) . ' ' .
+      implode(' ', $GLOBALS['recorded_options']) .
+      sprintf(' $(cat %s)%s', $failing_tests_file, "\n");
   }
 }
 

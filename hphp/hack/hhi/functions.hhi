@@ -20,7 +20,8 @@
 function isset(<<__MaybeMutable>> $x): bool;
 <<__Rx>>
 function empty(<<__MaybeMutable>> $x): bool;
-function unset($x): void;
+<<__Rx>>
+function unset(<<__MaybeMutable>> $x): void;
 //
 <<__PHPStdLib, __Rx>>
 function array_fill<T>(int $start_index, int $num, T $value): array<T>;

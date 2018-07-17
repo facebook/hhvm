@@ -165,7 +165,7 @@ private:
 public:
   // can remove later in a diff that explicitly changes all uses of
   // IniSetting::Map to IniSettingMap
-  typedef IniSettingMap Map;
+  using Map = IniSettingMap;
   static const Extension* CORE;
   enum ScannerMode {
     NormalScanner,

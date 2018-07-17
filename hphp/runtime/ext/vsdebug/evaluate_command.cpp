@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
-#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/runtime-compiler.h"
 
 namespace HPHP {
 namespace VSDEBUG {

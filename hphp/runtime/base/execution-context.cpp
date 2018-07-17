@@ -65,14 +65,15 @@
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/act-rec-defs.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/event-hook.h"
-#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/hh-utils.h"
-#include "hphp/runtime/vm/unwind.h"
-#include "hphp/runtime/vm/treadmill.h"
-#include "hphp/runtime/vm/act-rec-defs.h"
 #include "hphp/runtime/vm/interp-helpers.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/runtime-compiler.h"
+#include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/unwind.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -35,8 +35,6 @@ namespace HPHP {
 
 TRACE_SET_MOD(runtime);
 
-CompileStringFn g_hphp_compiler_parse;
-
 /**
  * print_string will decRef the string
  */
@@ -149,32 +147,6 @@ StringData* concat_s4(StringData* v1, StringData* v2,
     v1->release();
   }
   return ret;
-}
-
-Unit* compile_file(const char* s, size_t sz, const MD5& md5,
-                   const char* fname, Unit** releaseUnit) {
-  return g_hphp_compiler_parse(s, sz, md5, fname, releaseUnit);
-}
-
-Unit* compile_string(const char* s,
-                     size_t sz,
-                     const char* fname,
-                     Unit** releaseUnit) {
-  auto const md5 = MD5{mangleUnitMd5(string_md5(folly::StringPiece{s, sz}))};
-  if (auto u = Repo::get().loadUnit(fname ? fname : "", md5).release()) {
-    return u;
-  }
-  // NB: fname needs to be long-lived if generating a bytecode repo because it
-  // can be cached via a Location ultimately contained by ErrorInfo for printing
-  // code errors.
-  return g_hphp_compiler_parse(s, sz, md5, fname, releaseUnit);
-}
-
-Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname) {
-  assertx(fname[0] == '/' && fname[1] == ':');
-  if (auto u = lookupSyslibUnit(makeStaticString(fname))) return u;
-
-  return compile_string(s, sz, fname);
 }
 
 int init_closure(ActRec* ar, TypedValue* sp) {

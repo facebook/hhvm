@@ -445,6 +445,14 @@ TypedValue* unimplementedWrapper(ActRec* ar);
 
 void registerBuiltinNativeFunc(const StringData*, const NativeFunctionInfo&);
 
+// Extensions can register a resolver at moduleInit() time, that is called
+// to get called to lookup non-builtin native functions. The resolver
+// must be thread-safe.
+using NativeFuncResolver = std::function<
+  folly::Optional<NativeFunctionInfo> (const String& name)
+>;
+extern std::vector<NativeFuncResolver> s_nativeFuncResolvers;
+
 // Helper accepting a C-string name
 template <class Fun> typename
   std::enable_if<!std::is_member_function_pointer<Fun>::value, void>::type

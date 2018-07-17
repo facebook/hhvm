@@ -33,6 +33,7 @@
 #include <folly/String.h>
 #include <folly/portability/Unistd.h>
 
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/hhvm/process-init.h"
 #include "hphp/runtime/vm/repo.h"

@@ -183,18 +183,6 @@ frame_free_args(TypedValue* args, int count) {
   for (auto i = count; i--; ) tvDecRefGen(*(args - i));
 }
 
-// If set, releaseUnit will contain a pointer to any extraneous unit created due
-// to race-conditions while compiling
-Unit* compile_file(const char* s, size_t sz, const MD5& md5, const char* fname,
-                   Unit** releaseUnit = nullptr);
-Unit* compile_string(const char* s, size_t sz, const char* fname = nullptr,
-                     Unit** releaseUnit = nullptr);
-Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname);
-Unit* build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
-                                 ssize_t numBuiltinFuncs);
-Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
-                                  ssize_t numBuiltinClasses);
-
 // Create a new class instance, and register it in the live object table if
 // necessary. The initial ref-count of the instance will be greater than zero.
 inline ObjectData*
@@ -210,21 +198,6 @@ newInstance(Class* cls) {
   }
   return inst;
 }
-
-/*
- * A few functions are exposed by libhphp_analysis and used in
- * VM-specific parts of the runtime.
- *
- * Currently we handle this by using these global pointers, which must
- * be set up before you use those parts of the runtime.
- */
-
-typedef Unit* (*CompileStringFn)(const char*, int, const MD5&, const char*,
-                                 Unit**);
-typedef Unit* (*BuildNativeFuncUnitFn)(const HhbcExtFuncInfo*, ssize_t);
-typedef Unit* (*BuildNativeClassUnitFn)(const HhbcExtClassInfo*, ssize_t);
-
-extern CompileStringFn g_hphp_compiler_parse;
 
 // returns the number of things it put on sp
 int init_closure(ActRec* ar, TypedValue* sp);

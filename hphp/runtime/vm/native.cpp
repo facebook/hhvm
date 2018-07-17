@@ -30,6 +30,7 @@ using BuiltinFunctionMap = hphp_hash_map<
 >;
 
 BuiltinFunctionMap s_builtinFunctions;
+std::vector<NativeFuncResolver> s_nativeFuncResolvers;
 ConstantMap s_constant_map;
 ClassConstantMapMap s_class_constant_map;
 
@@ -689,11 +690,24 @@ const char* checkTypeFunc(const NativeSig& sig,
 
 NativeFunctionInfo getNativeFunction(const StringData* fname,
                                      const StringData* cname, bool isStatic) {
-  auto const it = s_builtinFunctions.find((cname == nullptr) ? fname :
-                    (String(const_cast<StringData*>(cname)) +
-                    (isStatic ? "::" : "->") +
-                     String(const_cast<StringData*>(fname))).get());
-  return (it == s_builtinFunctions.end()) ? NativeFunctionInfo() : it->second;
+  const String name{
+    cname == nullptr
+      ? String{const_cast<StringData*>(fname)}
+      : (String{const_cast<StringData*>(cname)} + (isStatic ? "::" : "->") +
+         String{const_cast<StringData*>(fname)})
+  };
+  auto const it = s_builtinFunctions.find(name.get());
+  if (it != s_builtinFunctions.end()) return it->second;
+
+  // didn't find builtin native function, query each resolver
+  for (const auto& resolver : s_nativeFuncResolvers) {
+    if (auto info = resolver(name)) {
+      return *info;
+    }
+  }
+
+  // not found
+  return NativeFunctionInfo();
 }
 
 NativeFunctionInfo getNativeFunction(const char* fname, const char* cname,

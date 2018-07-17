@@ -26,7 +26,7 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/config.h"
-#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/system/systemlib.h"
 

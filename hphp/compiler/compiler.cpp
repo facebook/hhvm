@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/version.h"
 #include "hphp/system/systemlib.h"
 
 #include "hphp/util/async-func.h"

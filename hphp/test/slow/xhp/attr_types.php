@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class :base {
   protected static function __xhpAttributeDeclaration() {

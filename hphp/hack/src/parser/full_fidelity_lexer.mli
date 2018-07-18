@@ -7,6 +7,10 @@
  *
  *)
 
+module Env : sig
+  val set : force_hh:bool -> enable_xhp:bool -> unit
+end
+
 module WithToken : functor (Token : Lexable_token_sig.LexableToken_S) -> sig
   type t [@@deriving show]
   type string_literal_kind =

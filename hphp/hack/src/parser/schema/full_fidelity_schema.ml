@@ -46,7 +46,9 @@ type trivia_node = {
 
 type token_node = {
     token_kind : string;
-    token_text : string
+    token_text : string;
+    hack_only : bool;
+    is_xhp : bool;
 }
 
 type transformation =
@@ -85,10 +87,38 @@ type template_file =
   aggregate_transformations : aggregate_transformation list;
 }
 
+module Language_flags = struct
+  let php_and_hack = "php_and_hack"
+  let hack_only = "hack_only"
+
+  let is_hack_only : string -> bool = function
+    | "php_and_hack" -> false
+    | "hack_only" -> true
+    | f -> failwith ("Unknown language flag " ^ f ^ " for token.")
+end
+module LF = Language_flags
+
+module Optional_flags = struct
+  let xhp = "xhp"
+
+  let is_recognized : string -> bool = function
+    | "xhp" -> true
+    | _ -> false
+
+  let is_xhp : string list -> bool = fun flags ->
+    List.mem xhp flags
+end
+module OF = Optional_flags
+
 let token_node_from_list l =
   match l with
-  | [ token_kind; token_text ] ->
-    { token_kind; token_text }
+  | token_kind :: token_text :: language :: optional_flags ->
+    assert (List.for_all OF.is_recognized optional_flags);
+    { token_kind;
+      token_text;
+      hack_only = LF.is_hack_only language;
+      is_xhp = OF.is_xhp optional_flags;
+    }
   | _ -> failwith "bad token schema"
 
 let trivia_node_from_list l =
@@ -98,223 +128,223 @@ let trivia_node_from_list l =
   | _ -> failwith "bad trivia schema"
 
 let variable_text_tokens = List.map token_node_from_list [
-  [ "ErrorToken"; "error_token" ];
-  [ "Name"; "name" ];
-  [ "Variable"; "variable" ];
-  [ "DecimalLiteral"; "decimal_literal" ];
-  [ "OctalLiteral"; "octal_literal" ];
-  [ "HexadecimalLiteral"; "hexadecimal_literal" ];
-  [ "BinaryLiteral"; "binary_literal" ];
-  [ "FloatingLiteral"; "floating_literal" ];
-  [ "ExecutionStringLiteral"; "execution_string_literal" ];
-  [ "ExecutionStringLiteralHead"; "execution_string_literal_head" ];
-  [ "ExecutionStringLiteralTail"; "execution_string_literal_tail" ];
-  [ "SingleQuotedStringLiteral"; "single_quoted_string_literal" ];
-  [ "DoubleQuotedStringLiteral"; "double_quoted_string_literal" ];
-  [ "DoubleQuotedStringLiteralHead"; "double_quoted_string_literal_head" ];
-  [ "StringLiteralBody"; "string_literal_body" ];
-  [ "DoubleQuotedStringLiteralTail"; "double_quoted_string_literal_tail" ];
-  [ "HeredocStringLiteral"; "heredoc_string_literal" ];
-  [ "HeredocStringLiteralHead"; "heredoc_string_literal_head" ];
-  [ "HeredocStringLiteralTail"; "heredoc_string_literal_tail" ];
-  [ "NowdocStringLiteral"; "nowdoc_string_literal" ];
-  [ "BooleanLiteral"; "boolean_literal" ];
-  [ "XHPCategoryName"; "XHP_category_name" ];
-  [ "XHPElementName"; "XHP_element_name" ];
-  [ "XHPClassName"; "XHP_class_name" ];
-  [ "XHPStringLiteral"; "XHP_string_literal" ];
-  [ "XHPBody"; "XHP_body" ];
-  [ "XHPComment"; "XHP_comment" ];
-  [ "Markup"; "markup" ]]
+  [ "ErrorToken"; "error_token"; LF.php_and_hack ];
+  [ "Name"; "name"; LF.php_and_hack ];
+  [ "Variable"; "variable"; LF.php_and_hack ];
+  [ "DecimalLiteral"; "decimal_literal"; LF.php_and_hack ];
+  [ "OctalLiteral"; "octal_literal"; LF.php_and_hack ];
+  [ "HexadecimalLiteral"; "hexadecimal_literal"; LF.php_and_hack ];
+  [ "BinaryLiteral"; "binary_literal"; LF.php_and_hack ];
+  [ "FloatingLiteral"; "floating_literal"; LF.php_and_hack ];
+  [ "ExecutionStringLiteral"; "execution_string_literal"; LF.php_and_hack ];
+  [ "ExecutionStringLiteralHead"; "execution_string_literal_head"; LF.php_and_hack ];
+  [ "ExecutionStringLiteralTail"; "execution_string_literal_tail"; LF.php_and_hack ];
+  [ "SingleQuotedStringLiteral"; "single_quoted_string_literal"; LF.php_and_hack ];
+  [ "DoubleQuotedStringLiteral"; "double_quoted_string_literal"; LF.php_and_hack ];
+  [ "DoubleQuotedStringLiteralHead"; "double_quoted_string_literal_head"; LF.php_and_hack ];
+  [ "StringLiteralBody"; "string_literal_body"; LF.php_and_hack ];
+  [ "DoubleQuotedStringLiteralTail"; "double_quoted_string_literal_tail"; LF.php_and_hack ];
+  [ "HeredocStringLiteral"; "heredoc_string_literal"; LF.php_and_hack ];
+  [ "HeredocStringLiteralHead"; "heredoc_string_literal_head"; LF.php_and_hack ];
+  [ "HeredocStringLiteralTail"; "heredoc_string_literal_tail"; LF.php_and_hack ];
+  [ "NowdocStringLiteral"; "nowdoc_string_literal"; LF.php_and_hack ];
+  [ "BooleanLiteral"; "boolean_literal"; LF.php_and_hack ];
+  [ "XHPCategoryName"; "XHP_category_name"; LF.php_and_hack ];
+  [ "XHPElementName"; "XHP_element_name"; LF.php_and_hack ];
+  [ "XHPClassName"; "XHP_class_name"; LF.php_and_hack ];
+  [ "XHPStringLiteral"; "XHP_string_literal"; LF.php_and_hack ];
+  [ "XHPBody"; "XHP_body"; LF.php_and_hack ];
+  [ "XHPComment"; "XHP_comment"; LF.php_and_hack ];
+  [ "Markup"; "markup"; LF.php_and_hack ]]
 
 let no_text_tokens = List.map token_node_from_list [
-  [ "EndOfFile"; "end_of_file" ]]
+  [ "EndOfFile"; "end_of_file"; LF.php_and_hack ]]
 
 let given_text_tokens = List.map token_node_from_list [
-  [ "Abstract"; "abstract" ];
-  [ "And"; "and" ];
-  [ "Array"; "array" ];
-  [ "Arraykey"; "arraykey" ];
-  [ "As"; "as" ];
-  [ "Async"; "async" ];
-  [ "Attribute"; "attribute" ];
-  [ "Await"; "await" ];
-  [ "Backslash"; "\\" ];
-  [ "Binary"; "binary" ];
-  [ "Bool"; "bool" ];
-  [ "Boolean"; "boolean" ];
-  [ "Break"; "break" ];
-  [ "Case"; "case" ];
-  [ "Catch"; "catch" ];
-  [ "Category"; "category" ];
-  [ "Children"; "children" ];
-  [ "Class"; "class" ];
-  [ "Classname"; "classname" ];
-  [ "Clone"; "clone" ];
-  [ "Const"; "const" ];
-  [ "Construct"; "__construct" ];
-  [ "Continue"; "continue" ];
-  [ "Coroutine"; "coroutine" ];
-  [ "Darray"; "darray" ];
-  [ "Declare"; "declare"];
-  [ "Default"; "default" ];
-  [ "Define"; "define"];
-  [ "Destruct"; "__destruct" ];
-  [ "Dict"; "dict" ];
-  [ "Do"; "do" ];
-  [ "Double"; "double" ];
-  [ "Echo"; "echo" ];
-  [ "Else"; "else" ];
-  [ "Elseif"; "elseif" ];
-  [ "Empty"; "empty" ];
-  [ "Endfor"; "endfor" ];
-  [ "Endforeach"; "endforeach" ];
-  [ "Enddeclare"; "enddeclare" ];
-  [ "Endif"; "endif" ];
-  [ "Endswitch" ; "endswitch" ];
-  [ "Endwhile"; "endwhile" ];
-  [ "Enum"; "enum" ];
-  [ "Eval"; "eval" ];
-  [ "Extends"; "extends" ];
-  [ "Fallthrough"; "fallthrough" ];
-  [ "Float"; "float" ];
-  [ "Final"; "final" ];
-  [ "Finally"; "finally" ];
-  [ "For"; "for" ];
-  [ "Foreach"; "foreach" ];
-  [ "From"; "from"];
-  [ "Function"; "function" ];
-  [ "Global"; "global" ];
-  [ "Goto"; "goto" ];
-  [ "If"; "if" ];
-  [ "Implements"; "implements" ];
-  [ "Include"; "include" ];
-  [ "Include_once"; "include_once" ];
-  [ "Inout"; "inout" ];
-  [ "Instanceof"; "instanceof" ];
-  [ "Insteadof"; "insteadof" ];
-  [ "Int"; "int" ];
-  [ "Integer"; "integer" ];
-  [ "Interface"; "interface" ];
-  [ "Is"; "is"];
-  [ "Isset"; "isset" ];
-  [ "Keyset"; "keyset" ];
-  [ "Let"; "let" ];
-  [ "List"; "list" ];
-  [ "Mixed"; "mixed" ];
-  [ "Namespace"; "namespace" ];
-  [ "New"; "new" ];
-  [ "Newtype"; "newtype" ];
-  [ "Noreturn"; "noreturn" ];
-  [ "Num"; "num" ];
-  [ "Object"; "object" ];
-  [ "Or"; "or" ];
-  [ "Parent"; "parent" ];
-  [ "Print"; "print" ];
-  [ "Private"; "private" ];
-  [ "Protected"; "protected" ];
-  [ "Public"; "public" ];
-  [ "Real"; "real" ];
-  [ "Require"; "require" ];
-  [ "Require_once"; "require_once" ];
-  [ "Required"; "required" ];
-  [ "Resource"; "resource" ];
-  [ "Return"; "return" ];
-  [ "Self"; "self" ];
-  [ "Shape"; "shape" ];
-  [ "Static"; "static" ];
-  [ "String"; "string" ];
-  [ "Super"; "super" ];
-  [ "Suspend"; "suspend" ];
-  [ "Switch"; "switch" ];
-  [ "This"; "this" ];
-  [ "Throw"; "throw" ];
-  [ "Trait"; "trait" ];
-  [ "Try"; "try" ];
-  [ "Tuple"; "tuple" ];
-  [ "Type"; "type" ];
-  [ "Unset"; "unset" ];
-  [ "Use"; "use" ];
-  [ "Using"; "using" ];
-  [ "Var"; "var" ];
-  [ "Varray"; "varray" ];
-  [ "Vec"; "vec" ];
-  [ "Void"; "void" ];
-  [ "Where"; "where" ];
-  [ "While"; "while" ];
-  [ "Xor"; "xor" ];
-  [ "Yield"; "yield" ];
-  [ "LeftBracket"; "[" ];
-  [ "RightBracket"; "]" ];
-  [ "LeftParen"; "(" ];
-  [ "RightParen"; ")" ];
-  [ "LeftBrace"; "{" ];
-  [ "RightBrace"; "}" ];
-  [ "Dot"; "." ];
-  [ "MinusGreaterThan"; "->" ];
-  [ "PlusPlus"; "++" ];
-  [ "MinusMinus"; "--" ];
-  [ "StarStar"; "**" ];
-  [ "Star"; "*" ];
-  [ "Plus"; "+" ];
-  [ "Minus"; "-" ];
-  [ "Tilde"; "~" ];
-  [ "Exclamation"; "!" ];
-  [ "Dollar"; "$" ];
-  [ "Slash"; "/" ];
-  [ "Percent"; "%" ];
-  [ "LessThanGreaterThan"; "<>"];
-  [ "LessThanEqualGreaterThan"; "<=>"];
-  [ "LessThanLessThan"; "<<" ];
-  [ "GreaterThanGreaterThan"; ">>" ];
-  [ "LessThan"; "<" ];
-  [ "GreaterThan"; ">" ];
-  [ "LessThanEqual"; "<=" ];
-  [ "GreaterThanEqual"; ">=" ];
-  [ "EqualEqual"; "==" ];
-  [ "EqualEqualEqual"; "===" ];
-  [ "ExclamationEqual"; "!=" ];
-  [ "ExclamationEqualEqual"; "!==" ];
-  [ "Carat"; "^" ];
-  [ "Bar"; "|" ];
-  [ "Ampersand"; "&" ];
-  [ "AmpersandAmpersand"; "&&" ];
-  [ "BarBar"; "||" ];
-  [ "Question"; "?" ];
-  [ "QuestionAs"; "?as" ];
-  [ "QuestionColon"; "?:" ];
-  [ "QuestionQuestion"; "??" ];
-  [ "QuestionQuestionEqual"; "??=" ];
-  [ "Colon"; ":" ];
-  [ "Semicolon"; ";" ];
-  [ "Equal"; "=" ];
-  [ "StarStarEqual"; "**=" ];
-  [ "StarEqual"; "*=" ];
-  [ "SlashEqual"; "/=" ];
-  [ "PercentEqual"; "%=" ];
-  [ "PlusEqual"; "+=" ];
-  [ "MinusEqual"; "-=" ];
-  [ "DotEqual"; ".=" ];
-  [ "LessThanLessThanEqual"; "<<=" ];
-  [ "GreaterThanGreaterThanEqual"; ">>=" ];
-  [ "AmpersandEqual"; "&=" ];
-  [ "CaratEqual"; "^=" ];
-  [ "BarEqual"; "|=" ];
-  [ "Comma"; "," ];
-  [ "At"; "@" ];
-  [ "ColonColon"; "::" ];
-  [ "EqualGreaterThan"; "=>" ];
-  [ "EqualEqualGreaterThan"; "==>" ];
-  [ "QuestionMinusGreaterThan"; "?->" ];
-  [ "DotDotDot"; "..." ];
-  [ "DollarDollar"; "$$" ];
-  [ "BarGreaterThan"; "|>" ];
-  [ "NullLiteral"; "null" ];
-  [ "SlashGreaterThan"; "/>" ];
-  [ "LessThanSlash"; "</" ];
-  [ "LessThanQuestion";"<?" ];
-  [ "QuestionGreaterThan"; "?>" ];
-  [ "HaltCompiler"; "__halt_compiler" ]]
+  [ "Abstract"; "abstract"; LF.php_and_hack ];
+  [ "And"; "and"; LF.php_and_hack ];
+  [ "Array"; "array"; LF.php_and_hack ];
+  [ "Arraykey"; "arraykey"; LF.hack_only ];
+  [ "As"; "as"; LF.php_and_hack ];
+  [ "Async"; "async"; LF.hack_only ];
+  [ "Attribute"; "attribute"; LF.hack_only; OF.xhp ];
+  [ "Await"; "await"; LF.hack_only ];
+  [ "Backslash"; "\\"; LF.php_and_hack ];
+  [ "Binary"; "binary"; LF.php_and_hack ];
+  [ "Bool"; "bool"; LF.php_and_hack ];
+  [ "Boolean"; "boolean"; LF.php_and_hack ];
+  [ "Break"; "break"; LF.php_and_hack ];
+  [ "Case"; "case"; LF.php_and_hack ];
+  [ "Catch"; "catch"; LF.php_and_hack ];
+  [ "Category"; "category"; LF.hack_only; OF.xhp ];
+  [ "Children"; "children"; LF.hack_only; OF.xhp ];
+  [ "Class"; "class"; LF.php_and_hack ];
+  [ "Classname"; "classname"; LF.hack_only ];
+  [ "Clone"; "clone"; LF.php_and_hack ];
+  [ "Const"; "const"; LF.php_and_hack ];
+  [ "Construct"; "__construct"; LF.php_and_hack ];
+  [ "Continue"; "continue"; LF.php_and_hack ];
+  [ "Coroutine"; "coroutine"; LF.hack_only ];
+  [ "Darray"; "darray"; LF.hack_only ];
+  [ "Declare"; "declare"; LF.php_and_hack ];
+  [ "Default"; "default"; LF.php_and_hack ];
+  [ "Define"; "define"; LF.php_and_hack ];
+  [ "Destruct"; "__destruct"; LF.php_and_hack ];
+  [ "Dict"; "dict"; LF.php_and_hack ];
+  [ "Do"; "do"; LF.php_and_hack ];
+  [ "Double"; "double"; LF.php_and_hack ];
+  [ "Echo"; "echo"; LF.php_and_hack ];
+  [ "Else"; "else"; LF.php_and_hack ];
+  [ "Elseif"; "elseif"; LF.php_and_hack ];
+  [ "Empty"; "empty"; LF.php_and_hack ];
+  [ "Endfor"; "endfor"; LF.php_and_hack ];
+  [ "Endforeach"; "endforeach"; LF.php_and_hack ];
+  [ "Enddeclare"; "enddeclare"; LF.php_and_hack ];
+  [ "Endif"; "endif"; LF.php_and_hack ];
+  [ "Endswitch" ; "endswitch"; LF.php_and_hack ];
+  [ "Endwhile"; "endwhile"; LF.php_and_hack ];
+  [ "Enum"; "enum"; LF.hack_only; OF.xhp ];
+  [ "Eval"; "eval"; LF.php_and_hack ];
+  [ "Extends"; "extends"; LF.php_and_hack ];
+  [ "Fallthrough"; "fallthrough"; LF.hack_only ];
+  [ "Float"; "float"; LF.php_and_hack ];
+  [ "Final"; "final"; LF.php_and_hack ];
+  [ "Finally"; "finally"; LF.php_and_hack ];
+  [ "For"; "for"; LF.php_and_hack ];
+  [ "Foreach"; "foreach"; LF.php_and_hack ];
+  [ "From"; "from"; LF.php_and_hack ];
+  [ "Function"; "function"; LF.php_and_hack ];
+  [ "Global"; "global"; LF.php_and_hack ];
+  [ "Goto"; "goto"; LF.php_and_hack ];
+  [ "If"; "if"; LF.php_and_hack ];
+  [ "Implements"; "implements"; LF.php_and_hack ];
+  [ "Include"; "include"; LF.php_and_hack ];
+  [ "Include_once"; "include_once"; LF.php_and_hack ];
+  [ "Inout"; "inout"; LF.hack_only ];
+  [ "Instanceof"; "instanceof"; LF.php_and_hack ];
+  [ "Insteadof"; "insteadof"; LF.php_and_hack ];
+  [ "Int"; "int"; LF.php_and_hack ];
+  [ "Integer"; "integer"; LF.php_and_hack ];
+  [ "Interface"; "interface"; LF.php_and_hack ];
+  [ "Is"; "is"; LF.hack_only ];
+  [ "Isset"; "isset"; LF.php_and_hack ];
+  [ "Keyset"; "keyset"; LF.php_and_hack ];
+  [ "Let"; "let"; LF.hack_only ];
+  [ "List"; "list"; LF.php_and_hack ];
+  [ "Mixed"; "mixed"; LF.hack_only ];
+  [ "Namespace"; "namespace"; LF.php_and_hack ];
+  [ "New"; "new"; LF.php_and_hack ];
+  [ "Newtype"; "newtype"; LF.hack_only ];
+  [ "Noreturn"; "noreturn"; LF.hack_only ];
+  [ "Num"; "num"; LF.hack_only ];
+  [ "Object"; "object"; LF.php_and_hack ];
+  [ "Or"; "or"; LF.php_and_hack ];
+  [ "Parent"; "parent"; LF.php_and_hack ];
+  [ "Print"; "print"; LF.php_and_hack ];
+  [ "Private"; "private"; LF.php_and_hack ];
+  [ "Protected"; "protected"; LF.php_and_hack ];
+  [ "Public"; "public"; LF.php_and_hack ];
+  [ "Real"; "real"; LF.php_and_hack ];
+  [ "Require"; "require"; LF.php_and_hack ];
+  [ "Require_once"; "require_once"; LF.php_and_hack ];
+  [ "Required"; "required"; LF.hack_only; OF.xhp ];
+  [ "Resource"; "resource"; LF.php_and_hack ];
+  [ "Return"; "return"; LF.php_and_hack ];
+  [ "Self"; "self"; LF.php_and_hack ];
+  [ "Shape"; "shape"; LF.hack_only ];
+  [ "Static"; "static"; LF.php_and_hack ];
+  [ "String"; "string"; LF.php_and_hack ];
+  [ "Super"; "super"; LF.php_and_hack ];
+  [ "Suspend"; "suspend"; LF.hack_only ];
+  [ "Switch"; "switch"; LF.php_and_hack ];
+  [ "This"; "this"; LF.hack_only ];
+  [ "Throw"; "throw"; LF.php_and_hack ];
+  [ "Trait"; "trait"; LF.php_and_hack ];
+  [ "Try"; "try"; LF.php_and_hack ];
+  [ "Tuple"; "tuple"; LF.hack_only ];
+  [ "Type"; "type"; LF.hack_only ];
+  [ "Unset"; "unset"; LF.php_and_hack ];
+  [ "Use"; "use"; LF.php_and_hack ];
+  [ "Using"; "using"; LF.hack_only ];
+  [ "Var"; "var"; LF.php_and_hack ];
+  [ "Varray"; "varray"; LF.hack_only ];
+  [ "Vec"; "vec"; LF.php_and_hack ];
+  [ "Void"; "void"; LF.php_and_hack ];
+  [ "Where"; "where"; LF.hack_only ];
+  [ "While"; "while"; LF.php_and_hack ];
+  [ "Xor"; "xor"; LF.php_and_hack ];
+  [ "Yield"; "yield"; LF.php_and_hack ];
+  [ "LeftBracket"; "["; LF.php_and_hack ];
+  [ "RightBracket"; "]"; LF.php_and_hack ];
+  [ "LeftParen"; "("; LF.php_and_hack ];
+  [ "RightParen"; ")"; LF.php_and_hack ];
+  [ "LeftBrace"; "{"; LF.php_and_hack ];
+  [ "RightBrace"; "}"; LF.php_and_hack ];
+  [ "Dot"; "."; LF.php_and_hack ];
+  [ "MinusGreaterThan"; "->"; LF.php_and_hack ];
+  [ "PlusPlus"; "++"; LF.php_and_hack ];
+  [ "MinusMinus"; "--"; LF.php_and_hack ];
+  [ "StarStar"; "**"; LF.php_and_hack ];
+  [ "Star"; "*"; LF.php_and_hack ];
+  [ "Plus"; "+"; LF.php_and_hack ];
+  [ "Minus"; "-"; LF.php_and_hack ];
+  [ "Tilde"; "~"; LF.php_and_hack ];
+  [ "Exclamation"; "!"; LF.php_and_hack ];
+  [ "Dollar"; "$"; LF.php_and_hack ];
+  [ "Slash"; "/"; LF.php_and_hack ];
+  [ "Percent"; "%"; LF.php_and_hack ];
+  [ "LessThanGreaterThan"; "<>"; LF.php_and_hack ];
+  [ "LessThanEqualGreaterThan"; "<=>"; LF.php_and_hack ];
+  [ "LessThanLessThan"; "<<"; LF.php_and_hack ];
+  [ "GreaterThanGreaterThan"; ">>"; LF.php_and_hack ];
+  [ "LessThan"; "<"; LF.php_and_hack ];
+  [ "GreaterThan"; ">"; LF.php_and_hack ];
+  [ "LessThanEqual"; "<="; LF.php_and_hack ];
+  [ "GreaterThanEqual"; ">="; LF.php_and_hack ];
+  [ "EqualEqual"; "=="; LF.php_and_hack ];
+  [ "EqualEqualEqual"; "==="; LF.php_and_hack ];
+  [ "ExclamationEqual"; "!="; LF.php_and_hack ];
+  [ "ExclamationEqualEqual"; "!=="; LF.php_and_hack ];
+  [ "Carat"; "^"; LF.php_and_hack ];
+  [ "Bar"; "|"; LF.php_and_hack ];
+  [ "Ampersand"; "&"; LF.php_and_hack ];
+  [ "AmpersandAmpersand"; "&&"; LF.php_and_hack ];
+  [ "BarBar"; "||"; LF.php_and_hack ];
+  [ "Question"; "?"; LF.php_and_hack ];
+  [ "QuestionAs"; "?as"; LF.php_and_hack ];
+  [ "QuestionColon"; "?:"; LF.php_and_hack ];
+  [ "QuestionQuestion"; "??"; LF.php_and_hack ];
+  [ "QuestionQuestionEqual"; "??="; LF.php_and_hack ];
+  [ "Colon"; ":"; LF.php_and_hack ];
+  [ "Semicolon"; ";"; LF.php_and_hack ];
+  [ "Equal"; "="; LF.php_and_hack ];
+  [ "StarStarEqual"; "**="; LF.php_and_hack ];
+  [ "StarEqual"; "*="; LF.php_and_hack ];
+  [ "SlashEqual"; "/="; LF.php_and_hack ];
+  [ "PercentEqual"; "%="; LF.php_and_hack ];
+  [ "PlusEqual"; "+="; LF.php_and_hack ];
+  [ "MinusEqual"; "-="; LF.php_and_hack ];
+  [ "DotEqual"; ".="; LF.php_and_hack ];
+  [ "LessThanLessThanEqual"; "<<="; LF.php_and_hack ];
+  [ "GreaterThanGreaterThanEqual"; ">>="; LF.php_and_hack ];
+  [ "AmpersandEqual"; "&="; LF.php_and_hack ];
+  [ "CaratEqual"; "^="; LF.php_and_hack ];
+  [ "BarEqual"; "|="; LF.php_and_hack ];
+  [ "Comma"; ","; LF.php_and_hack ];
+  [ "At"; "@"; LF.php_and_hack ];
+  [ "ColonColon"; "::"; LF.php_and_hack ];
+  [ "EqualGreaterThan"; "=>"; LF.php_and_hack ];
+  [ "EqualEqualGreaterThan"; "==>"; LF.php_and_hack ];
+  [ "QuestionMinusGreaterThan"; "?->"; LF.php_and_hack ];
+  [ "DotDotDot"; "..."; LF.php_and_hack ];
+  [ "DollarDollar"; "$$"; LF.php_and_hack ];
+  [ "BarGreaterThan"; "|>"; LF.php_and_hack ];
+  [ "NullLiteral"; "null"; LF.php_and_hack ];
+  [ "SlashGreaterThan"; "/>"; LF.php_and_hack ];
+  [ "LessThanSlash"; "</"; LF.php_and_hack ];
+  [ "LessThanQuestion";"<?"; LF.php_and_hack ];
+  [ "QuestionGreaterThan"; "?>"; LF.php_and_hack ];
+  [ "HaltCompiler"; "__halt_compiler"; LF.php_and_hack ]]
 
 let trivia_kinds = List.map trivia_node_from_list [
   [ "WhiteSpace"; "whitespace" ];

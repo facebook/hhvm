@@ -40,7 +40,8 @@ module HackGrammarHelper = struct
 
   let is_keyword text =
     let text = String.lowercase_ascii text in
-    match Full_fidelity_token_kind.from_string text with
+    match Full_fidelity_token_kind.from_string text ~is_hack:true
+      ~allow_xhp:true with
     | Some _ -> true
     | _ -> false
 

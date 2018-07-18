@@ -1,1 +1,1 @@
-((Fatal error\: syntax error, unexpected ',', expecting '\]' in [^\r\n]+\/hh\-only2\.php on line 4)|(Fatal error\: varray and darray are only allowed in Hack files in [^\r\n]+\/dv_array\/hh\-only2\.php on line 4))
+((Fatal error\: syntax error, unexpected ',', expecting '\]' in [^\r\n]+\/hh\-only2\.php on line 4)|(Fatal error\: A closing square bracket \('\]'\) is expected here\. in [^\r\n]+\/dv_array\/hh\-only2\.php on line 4))

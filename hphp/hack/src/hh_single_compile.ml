@@ -13,6 +13,7 @@ open Sys_utils
 module P = Printf
 module SyntaxError = Full_fidelity_syntax_error
 module SourceText = Full_fidelity_source_text
+module Lex = Full_fidelity_lexer
 module Logger = HackcEventLogger
 
 (*****************************************************************************)
@@ -277,11 +278,14 @@ let parse_text compiler_options popt fn text =
       not (Hhbc_options.source_mapping !Hhbc_options.compiler_options) in
     let enable_hh_syntax =
       Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
+    let enable_xhp =
+      Hhbc_options.enable_xhp !Hhbc_options.compiler_options in
     let php5_compat_mode =
       not (Hhbc_options.enable_uniform_variable_syntax !Hhbc_options.compiler_options) in
     let hacksperimental =
       Hhbc_options.hacksperimental !Hhbc_options.compiler_options in
     let systemlib_compat_mode = Emit_env.is_systemlib () in
+    Lex.Env.set ~force_hh:enable_hh_syntax ~enable_xhp;
     let env = Full_fidelity_ast.make_env
       ~parser_options:popt
       ~ignore_pos

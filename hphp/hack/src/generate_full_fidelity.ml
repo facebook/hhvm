@@ -2151,11 +2151,37 @@ module GenerateFFTokenKind = struct
   let to_kind_declaration x =
     sprintf "  | %s\n" x.token_kind
 
+  let add_guard_or_pad :
+  cond:(bool * string) -> ?else_cond:(bool * string) -> string -> string =
+  fun ~cond:(cond, guard) ?else_cond guards ->
+    let pad str = String.make (String.length str) ' ' in
+    let is_only_spaces str = (str = (pad str)) in
+    let make_same_length str1 str2 =
+      let blanks n = try String.make n ' ' with Invalid_argument _ -> "" in
+      let (len1, len2) = (String.length str1, String.length str2) in
+      let str1 = str1 ^ (blanks (len2 - len1)) in
+      let str2 = str2 ^ (blanks (len1 - len2)) in
+      (str1, str2) in
+    let (else_cond, else_guard) = match else_cond with
+      | Some (cond, guard) -> cond, guard
+      | None -> false, "" in
+    let prefix = if cond || else_cond
+      then if is_only_spaces guards then "when " else "&&   "
+      else "     " in
+    let (guard, else_guard) = make_same_length guard else_guard in
+    let guard = if cond then guard
+      else if else_cond then else_guard
+      else pad guard in
+    guards ^ prefix ^ guard ^ " "
+
   let to_from_string x =
     let token_text = escape_token_text x.token_text in
     let spacer_width = given_text_width - String.length token_text in
     let spacer = String.make spacer_width ' ' in
-    sprintf "  | \"%s\"%s -> Some %s\n" token_text spacer x.token_kind
+    let guards = add_guard_or_pad ""
+      ~cond:(x.is_xhp, "(is_hack || allow_xhp)")
+      ~else_cond:(x.hack_only, "is_hack") in
+    sprintf "  | \"%s\"%s %s-> Some %s\n" token_text spacer guards x.token_kind
 
   let to_to_string x =
     let token_text = escape_token_text x.token_text in
@@ -2174,7 +2200,7 @@ KIND_DECLARATIONS_GIVEN_TEXT  (* Variable text tokens *)
 KIND_DECLARATIONS_VARIABLE_TEXT
   [@@deriving show]
 
-let from_string keyword =
+let from_string keyword ~is_hack ~allow_xhp =
   match keyword with
   | \"true\"         -> Some BooleanLiteral
   | \"false\"        -> Some BooleanLiteral

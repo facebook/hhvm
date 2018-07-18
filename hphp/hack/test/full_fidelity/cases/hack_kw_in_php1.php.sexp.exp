@@ -1,0 +1,86 @@
+((script 198
+  ((list 198
+    ((markup_section 5
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 5 ((() <? 2 ()) (() name 3 ((end_of_line 1)))))
+       (missing 0 ())))
+     (classish_declaration 14
+      ((missing 0 ()) (missing 0 ())
+       (((end_of_line 1)) class 5 ((whitespace 1)))
+       (() name 5 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 47
+      ((missing 0 ())
+       (function_declaration_header 21
+        ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
+         (missing 0 ()) (() name 3 ()) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ()) (() : 1 ((whitespace 1)))
+         (simple_type_specifier 5 ((() name 5 ((whitespace 1)))))
+         (missing 0 ())))
+       (compound_statement 25
+        ((() { 1 ((end_of_line 1)))
+         (list 19
+          ((return_statement 19
+            ((((whitespace 2)) return 6 ((whitespace 1)))
+             (object_creation_expression 11
+              ((() new 3 ((whitespace 1)))
+               (constructor_call 7
+                ((simple_type_specifier 5 ((() name 5 ()))) (() "(" 1 ())
+                 (missing 0 ()) (() ")" 1 ())))))
+             (() ";" 1 ((end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 26
+      ((missing 0 ()) (missing 0 ())
+       (((end_of_line 1)) class 5 ((whitespace 1)))
+       (() name 3 ((whitespace 1))) (missing 0 ())
+       (() extends 7 ((whitespace 1)))
+       (list 5
+        ((list_item 5
+          ((simple_type_specifier 5 ((() name 5 ((whitespace 1)))))
+           (missing 0 ())))))
+       (missing 0 ()) (missing 0 ())
+       (classish_body 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 16
+      ((missing 0 ()) (missing 0 ())
+       (((end_of_line 1) (end_of_line 1) (end_of_line 1) (end_of_line 1))
+        class 5 ((whitespace 1)))
+       (() name 7 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 49
+      ((missing 0 ())
+       (function_declaration_header 21
+        ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
+         (missing 0 ()) (() name 1 ()) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ()) (() : 1 ((whitespace 1)))
+         (simple_type_specifier 7 ((() name 7 ((whitespace 1)))))
+         (missing 0 ())))
+       (compound_statement 27
+        ((() { 1 ((end_of_line 1)))
+         (list 21
+          ((return_statement 21
+            ((((whitespace 2)) return 6 ((whitespace 1)))
+             (object_creation_expression 13
+              ((() new 3 ((whitespace 1)))
+               (constructor_call 9
+                ((simple_type_specifier 7 ((() name 7 ()))) (() "(" 1 ())
+                 (missing 0 ()) (() ")" 1 ())))))
+             (() ";" 1 ((end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 26
+      ((missing 0 ()) (missing 0 ())
+       (((end_of_line 1)) class 5 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ())
+       (() extends 7 ((whitespace 1)))
+       (list 7
+        ((list_item 7
+          ((simple_type_specifier 7 ((() name 7 ((whitespace 1)))))
+           (missing 0 ())))))
+       (missing 0 ()) (missing 0 ())
+       (classish_body 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

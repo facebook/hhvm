@@ -12,13 +12,29 @@ module TokenKind = Full_fidelity_token_kind
 module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
 
+module Env = struct
+
+  let force_hh_opt = ref false
+  let enable_xhp_opt = ref false
+  let is_hh_file = ref true
+
+  let set_is_hh_file b = is_hh_file := b
+  let set ~force_hh ~enable_xhp =
+    force_hh_opt := force_hh;
+    enable_xhp_opt := enable_xhp
+
+  let is_hh () = !is_hh_file || !force_hh_opt
+  let enable_xhp () = is_hh () || !enable_xhp_opt
+
+end
+
 module Lexer : sig
   type t = {
     text : SourceText.t;
     start : int;  (* Both start and offset are absolute offsets in the text. *)
     offset : int;
     errors : SyntaxError.t list;
-    hacksperimental : bool
+    hacksperimental : bool;
   } [@@deriving show]
   val make : ?hacksperimental:bool -> SourceText.t -> t
   val make_at : ?hacksperimental:bool -> SourceText.t -> int -> t
@@ -44,7 +60,7 @@ end = struct
     start : int;  (* Both start and offset are absolute offsets in the text. *)
     offset : int;
     errors : SyntaxError.t list;
-    hacksperimental : bool (* write-once: record updates should not update this field *)
+    hacksperimental : bool; (* write-once: record updates should not update this field *)
   } [@@deriving show]
 
   let make ?(hacksperimental = false) text =
@@ -1397,25 +1413,26 @@ let as_case_insensitive_keyword text =
   non-lower versions in our codebase. *)
   let lower = String.lowercase_ascii text in
   match lower with
-  | "__halt_compiler" | "abstract" | "and" | "array" | "as" | "bool"  | "boolean" | "break"
+  | "__halt_compiler" | "abstract" | "and" | "array" | "as" | "bool" | "boolean" | "break"
   | "callable"
   | "case" | "catch" | "class" | "clone" | "const" | "continue" | "declare" | "default"
   | "die" | "do" | "echo" | "else" | "elseif" | "empty" | "enddeclare" | "endfor"
   | "endforeach" | "endif" | "endswitch" | "endwhile" | "eval" | "exit" | "extends" | "false"
   | "final" | "finally" | "for" | "foreach" | "function" | "global" | "goto" | "if"
-  | "implements" | "include" | "include_once" | "inout" | "instanceof" | "insteadof" | "int"
-  | "integer"
+  | "implements" | "include" | "include_once" | "instanceof" | "insteadof" | "int" | "integer"
   | "interface" | "isset" | "list" | "namespace" | "new" | "null" | "or" | "parent"
   | "print" | "private" | "protected" | "public" | "require" | "require_once"
   | "return" | "self" | "static" | "string" | "switch" | "throw" | "trait"
-  | "try" | "true" | "unset" | "use" | "using" | "var" | "void" | "while"
+  | "try" | "true" | "unset" | "use" | "var" | "void" | "while"
   | "xor" | "yield" -> lower
+  | "inout" | "using" when Env.is_hh () -> lower
   | _ -> text
 
 let as_keyword kind lexer =
   if kind = TokenKind.Name then
     let text = as_case_insensitive_keyword (current_text lexer) in
-    match TokenKind.from_string text with
+    let is_hack = Env.is_hh () and allow_xhp = Env.enable_xhp () in
+    match TokenKind.from_string text ~is_hack ~allow_xhp with
     | Some TokenKind.Let when (not (hacksperimental lexer)) -> TokenKind.Name
     | Some keyword -> keyword
     | _ -> TokenKind.Name
@@ -1608,8 +1625,12 @@ let skip_to_end_of_markup lexer ~is_leading_section =
     let ch1 = peek_char lexer 1 in
     let ch2 = peek_char lexer 2 in
     match ch0, ch1, ch2 with
-    | ('H' | 'h'), ('H' | 'h'), _ -> make_long_tag lexer 2
-    | ('P' | 'p'), ('H' | 'h'), ('P' | 'p') -> make_long_tag lexer 3
+    | ('H' | 'h'), ('H' | 'h'), _ ->
+      Env.set_is_hh_file true;
+      make_long_tag lexer 2
+    | ('P' | 'p'), ('H' | 'h'), ('P' | 'p') ->
+      Env.set_is_hh_file false;
+      make_long_tag lexer 3
     | '=', _, _ ->
       begin
         (* skip = *)

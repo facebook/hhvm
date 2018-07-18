@@ -3228,22 +3228,22 @@ void in(ISS& env, const bc::FThrowOnRefMismatch& op) {
 
 void in(ISS& /*env*/, const bc::FHandleRefMismatch& /*op*/) {}
 
-constexpr int32_t kNoUnpack = -1;
+constexpr int32_t kRegularRet = -1;
 
-void pushCallReturnType(ISS& env, Type&& ty, int32_t unpack = kNoUnpack) {
+void pushCallReturnType(ISS& env, Type&& ty, int32_t numRets = kRegularRet) {
   if (ty == TBottom) {
     // The callee function never returns.  It might throw, or loop forever.
     unreachable(env);
   }
-  if (unpack != kNoUnpack) {
-    for (auto i = uint32_t{0}; i < unpack - 1; ++i) popU(env);
+  if (numRets != kRegularRet) {
+    for (auto i = uint32_t{0}; i < numRets - 1; ++i) popU(env);
     if (is_specialized_vec(ty)) {
-      for (int32_t i = 1; i < unpack; i++) {
+      for (int32_t i = 1; i < numRets; i++) {
         push(env, vec_elem(ty, ival(i)).first);
       }
       push(env, vec_elem(ty, ival(0)).first);
     } else {
-      for (int32_t i = 0; i < unpack; i++) push(env, TInitCell);
+      for (int32_t i = 0; i < numRets; i++) push(env, TInitCell);
     }
     return;
   }
@@ -3253,12 +3253,12 @@ void pushCallReturnType(ISS& env, Type&& ty, int32_t unpack = kNoUnpack) {
 const StaticString s_defined { "defined" };
 const StaticString s_function_exists { "function_exists" };
 
-void fcallKnownImpl(ISS& env, uint32_t numArgs, int32_t unpack = kNoUnpack) {
+void fcallKnownImpl(ISS& env, uint32_t numArgs, int32_t numRets = kRegularRet) {
   auto const ar = fpiTop(env);
   always_assert(ar.func.hasValue());
 
   if (options.ConstantFoldBuiltins && ar.foldable) {
-    if (unpack == kNoUnpack) {
+    if (numRets == kRegularRet) {
       auto ty = [&] () {
         auto const func = ar.func->exactFunc();
         assertx(func);
@@ -3287,8 +3287,8 @@ void fcallKnownImpl(ISS& env, uint32_t numArgs, int32_t unpack = kNoUnpack) {
     fpiNotFoldable(env);
     fpiPop(env);
     discard(env, numArgs);
-    if (unpack != kNoUnpack) {
-      while (unpack--) push(env, TBottom);
+    if (numRets != kRegularRet) {
+      while (numRets--) push(env, TBottom);
       return;
     }
     return push(env, TBottom);
@@ -3327,14 +3327,14 @@ void fcallKnownImpl(ISS& env, uint32_t numArgs, int32_t unpack = kNoUnpack) {
     ty = union_of(std::move(ty), TInitNull);
   }
   if (!ar.fallbackFunc) {
-    pushCallReturnType(env, std::move(ty), unpack);
+    pushCallReturnType(env, std::move(ty), numRets);
     return;
   }
   auto ty2 = env.index.lookup_return_type(
     CallContext { env.ctx, args, ar.context },
     *ar.fallbackFunc
   );
-  pushCallReturnType(env, union_of(std::move(ty), std::move(ty2)), unpack);
+  pushCallReturnType(env, union_of(std::move(ty), std::move(ty2)), numRets);
 }
 
 void in(ISS& env, const bc::FCall& op) {
@@ -3432,10 +3432,10 @@ void in(ISS& env, const bc::FCallAwait& op) {
        bc::Await {});
 }
 
-void fcallUnpackImpl(ISS& env, int arg, int32_t unpack = kNoUnpack) {
+void fcallUnpackImpl(ISS& env, int arg, int32_t numRets = kRegularRet) {
   auto const ar = fpiTop(env);
   if (ar.kind == FPIKind::Builtin) {
-    always_assert(unpack == kNoUnpack);
+    always_assert(numRets == kRegularRet);
     return finish_builtin(env, ar.func->exactFunc(), arg, true);
   }
   if (ar.foldable) {
@@ -3450,16 +3450,16 @@ void fcallUnpackImpl(ISS& env, int arg, int32_t unpack = kNoUnpack) {
   if (ar.func) {
     auto ty = env.index.lookup_return_type(env.ctx, *ar.func);
     if (!ar.fallbackFunc) {
-      pushCallReturnType(env, std::move(ty), unpack);
+      pushCallReturnType(env, std::move(ty), numRets);
       return;
     }
     auto ty2 = env.index.lookup_return_type(env.ctx, *ar.fallbackFunc);
-    pushCallReturnType(env, union_of(std::move(ty), std::move(ty2)), unpack);
+    pushCallReturnType(env, union_of(std::move(ty), std::move(ty2)), numRets);
     return;
   }
-  if (unpack != kNoUnpack) {
-    for (int i = 0; i < unpack - 1; i++) popU(env);
-    while (unpack--) push(env, TInitCell);
+  if (numRets != kRegularRet) {
+    for (int i = 0; i < numRets - 1; i++) popU(env);
+    while (numRets--) push(env, TInitCell);
     return;
   }
   return push(env, TInitGen);

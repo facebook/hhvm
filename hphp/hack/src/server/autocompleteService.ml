@@ -243,51 +243,7 @@ let compute_complete_global
     ()
   else begin
 
-    (* Objective: given "fo|", we should suggest functions in both the current *)
-    (* namespace and also in the global namespace. We'll use gname_gns to      *)
-    (* indicate what prefix to look for (if any) in the global namespace...    *)
-
-    (* "$z = S|"      => gname = "S",      gname_gns = Some "S"   *)
-    (* "$z = Str|"    => gname = "Str",    gname_gns = Some "Str" *)
-    (* "$z = Str\\|"  => gname = "Str\\",  gname_gns = None       *)
-    (* "$z = Str\\s|" => gname = "Str\\s", gname_gns = None       *)
-    (* "$z = \\s|"    => gname = "\\s",    gname_gns = None       *)
-    (* "...; |"       => gname = "",       gname_gns = Some ""    *)
-    let gname_gns = if should_complete_fun completion_type then
-      (* Disgusting hack alert!
-       *
-       * In PHP/Hack, namespaced function lookup falls back into the global
-       * namespace if no function in the current namespace exists. The
-       * typechecker knows everything that exists, and resolves all of this
-       * during naming -- meaning that by the time that we get to typing, not
-       * only has "gname" been fully qualified, but we've lost whatever it
-       * might have looked like originally. This makes it tough to do the full
-       * namespace fallback behavior here -- we'd like to know if whatever
-       * "gname" corresponds to in the source code has a '\' to qualify it, but
-       * since it's already fully qualified here, we can't know.
-       *
-       *   [NOTE(ljw): is this really even true? if user wrote "foo|" then name
-       *   lookup of "fooAUTO332" is guaranteed to fail in the current namespace,
-       *   and guaranteed to fail in the global namespace, so how would the
-       *   typechecker fully qualify it? to what? Experimentally I've only
-       *   ever seen gname to be the exact string that the user typed.]
-       *
-       * Except, we can kinda reverse engineer and figure it out. We have the
-       * positional information, which we can use to figure out how long the
-       * original source code token was, and then figure out what portion of
-       * "gname" that corresponds to, and see if it has a '\'. Since fully
-       * qualifying a name will always prepend, this all works.
-       *)
-      match !autocomplete_identifier with
-        | None -> None
-        | Some (p, _) ->
-            let len = (Pos.length p) - suffix_len in
-            let start = String.length gname - len in
-            if start < 0 || String.contains_from gname start '\\'
-            then None else Some (strip_all_ns gname)
-      else None in
-
-    let does_fully_qualified_name_match_prefix ?(funky_gns_rules=false) name =
+    let does_fully_qualified_name_match_prefix name =
       let stripped_name = strip_ns name in
       if delimit_on_namespaces then
         (* name must match gname, and have no additional namespace slashes, e.g. *)
@@ -296,10 +252,7 @@ let compute_complete_global
         string_starts_with stripped_name gname &&
           not (String.contains_from stripped_name (String.length gname) '\\')
       else
-        match gname_gns with
-        | _ when string_starts_with stripped_name gname -> true
-        | Some gns when funky_gns_rules -> string_starts_with stripped_name gns
-        | _ -> false
+        string_starts_with stripped_name gname
     in
 
     let string_to_replace_prefix name =
@@ -352,7 +305,7 @@ let compute_complete_global
       if autocomplete_context.is_xhp_classname then None else
       if SSet.mem seen name then None else
       if not (should_complete_fun completion_type) then None else
-      if not (does_fully_qualified_name_match_prefix ~funky_gns_rules:true name) then None else
+      if not (does_fully_qualified_name_match_prefix name) then None else
       Option.map (Typing_lazy_heap.get_fun tcopt name) ~f:(fun fun_ ->
         incr result_count;
         let ty = Typing_reason.Rwitness fun_.Typing_defs.ft_pos, Typing_defs.Tfun fun_ in
@@ -444,18 +397,6 @@ let compute_complete_global
     autocomplete_is_complete :=
       !autocomplete_is_complete && gname_results.With_complete_flag.is_complete;
     List.iter gname_results.With_complete_flag.value add_res;
-
-    (* Compute global namespace fallback results for functions, if applicable *)
-    match gname_gns with
-    | Some gname_gns when gname <> gname_gns ->
-      let gname_gns_results = search_funs_and_classes gname_gns ~limit:(Some 100)
-        ~on_class:(fun _ -> None)
-        ~on_function:(on_function ~seen:content_funs)
-      in
-      autocomplete_is_complete :=
-        !autocomplete_is_complete && gname_gns_results.With_complete_flag.is_complete;
-      List.iter gname_gns_results.With_complete_flag.value add_res;
-    | _ -> ()
   end
 
 (* Here we turn partial_autocomplete_results into complete_autocomplete_results *)

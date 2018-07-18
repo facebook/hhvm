@@ -1,2 +1,0 @@
-This file can be deleted once hphpc is gone; we only need to disable
---compare-hh-codegen mode, not the other hhas using modes.

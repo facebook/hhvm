@@ -370,52 +370,33 @@ bool Package::parseImpl(const std::string* fileName) {
     }
   };
 
-  if (hackc_mode() != HackcMode::kNever) {
-    std::ifstream s(fullPath);
-    std::string content {
-      std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>() };
-    MD5 md5{string_md5(content)};
+  std::ifstream s(fullPath);
+  std::string content {
+    std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>() };
+  MD5 md5{string_md5(content)};
 
-    // If we're set up to use an external compiler, invoke it now. If we
-    // successfully obtain an external compiler but it fails to compile the file
-    // at hand, we don't fall back on the internal compiler but log an error and
-    // skip the file.
-    if (auto uc = UnitCompiler::create(
-          content.data(), content.size(), fileName->c_str(), md5)) {
-      try {
-        auto ue = uc->compile(m_ar->getParseOnDemandCallBacks());
-        if (ue && !ue->m_ICE) {
-          m_ar->lock()->addHhasFile(std::move(ue));
-          report(0);
-          return true;
-        } else {
-          Logger::Error(
-            "Unable to compile using %s compiler: %s",
-            uc->getName(),
-            fullPath.c_str());
-          return false;
-        }
-      } catch (const BadCompilerException& exc) {
-        Logger::Error("Bad external compiler: %s", exc.what());
-        return false;
-      }
-    }
-  }
-
-  int lines = 0;
+  // Invoke external compiler. If it fails to compile the file we log an
+  // error and and skip it.
+  auto uc = UnitCompiler::create(
+    content.data(), content.size(), fileName->c_str(), md5);
+  assertx(uc);
   try {
-    Logger::Verbose("parsing %s ...", fullPath.c_str());
-    Scanner scanner(fullPath, Option::GetScannerType(), true);
-    Compiler::Parser parser(scanner, fileName->c_str(), m_ar, sb.st_size);
-    parser.parse();
-    lines = parser.line1();
-  } catch (FileOpenException& e) {
-    Logger::Error(e.getMessage());
+    auto ue = uc->compile(m_ar->getParseOnDemandCallBacks());
+    if (ue && !ue->m_ICE) {
+      m_ar->lock()->addHhasFile(std::move(ue));
+      report(0);
+      return true;
+    } else {
+      Logger::Error(
+        "Unable to compile using %s compiler: %s",
+        uc->getName(),
+        fullPath.c_str());
+      return false;
+    }
+  } catch (const BadCompilerException& exc) {
+    Logger::Error("Bad external compiler: %s", exc.what());
     return false;
   }
-
-  report(lines);
-  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

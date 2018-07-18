@@ -69,15 +69,6 @@ function usage() {
   return "usage: $argv[0] [-m jit|interp] [-r] <test/directories>";
 }
 
-function suppress_opts_for_codegen_test($test) {
-  $opts_file = $test . ".opts";
-  if (!file_exists($opts_file)) {
-    return true;
-  }
-  $content = file_get_contents($opts_file);
-  return preg_match("/Eval\.DisableHphpcOpts=0/i", $content) !== 1;
-}
-
 function help() {
   global $argv;
   $ztestexample = 'test/zend/good/*/*z*.php'; // sep. for syntax highlighting.
@@ -214,13 +205,6 @@ function hh_codegen_binary_routes() {
   );
 }
 
-function hh_semdiff_binary_routes() {
-  return array(
-    "buck"    => "/buck-out/bin/hphp/hack/src/hhbc/semdiff/semdiff",
-    "cmake"   => "/hphp/hack/bin"
-  );
-}
-
 // For Facebook: We have several build systems, and we can use any of them in
 // the same code repo.  If multiple binaries exist, we want the onus to be on
 // the user to specify a particular one because before we chose the buck one
@@ -296,30 +280,13 @@ function hhvm_path() {
   return rel_path($file);
 }
 
-function hh_codegen_cmd($options, $config_file = null, $disable_hphpc_opts = true) {
+function hh_codegen_cmd($options) {
   $cmd = hh_codegen_path();
-  if (isset($config_file)) {
-    $cmd .= ' -c '.escapeshellarg($config_file);
-  }
   $cmd .= ' -v Hack.Compiler.SourceMapping=1 ';
-  if (isset($options['compare-hh-codegen'])) {
-    if ($disable_hphpc_opts) {
-      $cmd .= ' -v Eval.DisableHphpcOpts=1 ';
-    }
-    $cmd .= ' -v Hack.Lang.EnableIsExprPrimitiveMigration=0 ';
-  }
   if (isset($options['hackc'])) {
     $cmd .= ' --daemon';
   }
 
-  return $cmd;
-}
-
-function hh_semdiff_cmd($options) {
-  $cmd = hh_semdiff_path();
-  if (isset($options['hackc'])) $cmd .= ' --daemon';
-  if (isset($options['srcloc'])) $cmd .= ' --srcloc';
-  $cmd .= ' --verbose 1';
   return $cmd;
 }
 
@@ -395,42 +362,10 @@ function hh_codegen_path() {
   return rel_path($file);
 }
 
-function hh_semdiff_path() {
-  $file = "";
-  if (getenv("HH_SEMDIFF_BIN") !== false) {
-    $file = realpath(getenv("HH_SEMDIFF_BIN"));
-  } else {
-    $file = hh_semdiff_bin_root().'/semdiff.opt';
-  }
-  if (!is_file($file)) {
-    error("$file doesn't exist. Did you forget to build first?");
-  }
-  return rel_path($file);
-}
-
 function hh_codegen_bin_root() {
   $home = hphp_home();
   $env_tool = getenv("FBCODE_BUILD_TOOL");
   $routes = hh_codegen_binary_routes();
-
-  if ($env_tool !== false) {
-    return $home . $routes[$env_tool];
-  }
-
-  foreach ($routes as $_ => $path) {
-    $dir = $home . $path;
-    if (is_dir($dir)) {
-      return $dir;
-    }
-  }
-
-  return $home . $routes["cmake"];
-}
-
-function hh_semdiff_bin_root() {
-  $home = hphp_home();
-  $env_tool = getenv("FBCODE_BUILD_TOOL");
-  $routes = hh_semdiff_binary_routes();
 
   if ($env_tool !== false) {
     return $home . $routes[$env_tool];
@@ -543,14 +478,11 @@ function get_options($argv) {
     '*typechecker' => '',
     '*vendor:' => '',
     '*hhserver-binary-path:' => '',
-    '*compare-hh-codegen' => '',
-    '*no-semdiff' => '',
     'record-failures:' => '',
     '*hackc' => '',
     '*srcloc' => '',
     '*hack-only' => '',
     '*ignore-oids' => '',
-    '*hphpc' => '',
     'jitsample:' => ''
   );
   $options = array();
@@ -756,10 +688,6 @@ function find_tests($files, array $options = null) {
                 file_exists($test . '.hhconfig');
       }
     );
-  } else if (isset($options['compare-hh-codegen'])) {
-    $tests = explode("\n", shell_exec(
-      "find $files -name '*.php'"
-    ));
   } else {
     $tests = explode("\n", shell_exec(
       "find $files '(' " .
@@ -767,8 +695,7 @@ function find_tests($files, array $options = null) {
           "-o -name '*.php.type-errors' " .
           "-o -name '*.hhas' " .
         "')' " .
-        "-not -regex '.*round_trip[.]hhas' " .
-        "-not -regex '.*hhcodegen_output[.]hhas'"
+        "-not -regex '.*round_trip[.]hhas'"
     ));
   }
   if (!$tests) {
@@ -901,7 +828,6 @@ function extra_args($options): string {
 function hhvm_cmd_impl() {
   $args = func_get_args();
   $options = array_shift(&$args);
-  $disable_hphpc_opts = array_shift(&$args);
   $config = array_shift(&$args);
   $extra_args = $args;
   $modes = (array)mode_cmd($options);
@@ -928,12 +854,7 @@ function hhvm_cmd_impl() {
 
     if (isset($options['hackc'])) {
       $args[] = '-vEval.HackCompilerCommand="'.hh_codegen_cmd($options).'"';
-      $args[] = '-vEval.HackCompilerDefault=true';
       $args[] = '-vEval.HackCompilerUseEmbedded=false';
-    }
-
-    if (isset($options['hphpc'])) {
-      $args[] = '-vEval.HackCompilerDefault=false';
     }
 
     if (isset($options['relocate'])) {
@@ -969,25 +890,6 @@ function hhvm_cmd_impl() {
       $args[] = '-vEval.LoadFilepathFromUnitCache=1';
     }
 
-    if (isset($options['compare-hh-codegen'])) {
-      if ($disable_hphpc_opts) {
-        $args[] = '-vEval.DisableHphpcOpts=1';
-      }
-      $args[] = '-vEval.DisassemblerSourceMapping=1';
-      $args[] = '-vEval.CreateInOutWrapperFunctions=1';
-      $args[] = '-vEval.ReffinessInvariance=1';
-      $args[] = '-vEval.HackCompilerDefault=false';
-      $args[] = '-vEval.HackCompilerUseEmbedded=false';
-
-      // T29079834: Is Expr Migration
-      $args[] = '-vHack.Lang.EnableIsExprPrimitiveMigration=0';
-
-      // TODO(paulbiss): support these
-      $args[] = '-vEval.DisassemblerPropDocComments=0';
-      $args[] = '-vEval.JitEnableRenameFunction=0';
-      $args[] = '-vEval.DisassemblerDocComments=0';
-    }
-
     if (!isset($options['cores'])) {
       $args[] = '-vResourceLimit.CoreFileSize=0';
     }
@@ -1008,10 +910,8 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
   $hdf = file_exists($test.$hdf_suffix)
        ? '-c ' . $test . $hdf_suffix
        : "";
-  $disable_hphpc_opts = suppress_opts_for_codegen_test($test);
   $cmds = hhvm_cmd_impl(
     $options,
-    $disable_hphpc_opts,
     find_test_ext($test, 'ini'),
     $hdf,
     find_debug_config($test, 'hphpd.ini'),
@@ -1135,27 +1035,10 @@ function hphp_cmd($options, $test, $program) {
   if (isset($options['hackc'])) {
     $hh_single_compile = hh_codegen_path();
     $compiler_args = implode(" ", array(
-      "-vRuntime.Eval.HackCompilerDefault=true",
       '-vRuntime.Eval.HackCompilerUseEmbedded=false',
       "-vRuntime.Eval.HackCompilerInheritConfig=true",
       "-vRuntime.Eval.HackCompilerCommand=\"${hh_single_compile} -v Hack.Compiler.SourceMapping=1 --daemon --dump-symbol-refs\""
     ));
-  }
-  if (isset($options['hphpc'])) {
-    $compiler_args = '-vRuntime.Eval.HackCompilerDefault=false';
-  }
-  if (isset($options['compare-hh-codegen'])) {
-    // If we want to compare hphpc to hackc codegen, we have to force the
-    // compiler in both directions, because the default is uncertain - it
-    // depends on whether HHVM_NO_DEFAULT_HACKC was defined at build time
-    if ($program === 'hackc') {
-      $compiler_args = implode(' ', array(
-        '-vRuntime.Eval.HackCompilerDefault=true',
-        '-vRuntime.Eval.HackCompilerUseEmbedded=true',
-      ));
-    } else {
-      $compiler_args = '-vRuntime.Eval.HackCompilerDefault=false';
-    }
   }
 
   return implode(" ", array(
@@ -1716,15 +1599,8 @@ function clean_intermediate_files($test, $options) {
     'diff',
     // repo mode tests
     'repo',
-    // tests in --hhas-round-trip or --compare-hh-codegen mode
+    // tests in --hhas-round-trip mode
     'round_trip.hhas',
-    // tests in --compare-hh-codegen mode
-    'hhcodegen_output.hhas',
-    'hhcodegen_messages',
-    'hhcodegen_config.json',
-    'hhcodegen_output.hhas.round_trip.hhas',
-    'semdiff',
-    'semdiff_messages',
     // tests in --hhbbc2 mode
     'before.round_trip.hhas',
     'after.round_trip.hhas',
@@ -1982,26 +1858,8 @@ function generate_diff($wanted, $wanted_re, $output)
   return implode("\r\n", $diff);
 }
 
-function dump_repo_to_hhas_file($test, $program, $hhas_target) {
-  $repo = "$test.repo/$program.hhbbc";
-  $dump_cmd = implode(" ", array(
-    hhvm_path(),
-    '-vRepo.Authoritative=true',
-    '-vRepo.Commit=false',
-    '-vEval.HackCompilerExtractPath='.bin_root().'/hackc_%{schema}',
-    '-vRepo.Central.Path=' . escapeshellarg($repo),
-    '-vEval.DumpHhas=1',
-    '-vEval.DumpHhasToFile=' . escapeshellarg($hhas_target),
-    '--file',
-    escapeshellarg($test),
-  ));
-  system("$dump_cmd &> /dev/null", &$ret);
-  return $ret === 0 ? $hhas_target : false;
-}
-
 function dump_hhas_cmd($hhvm_cmd, $test, $hhas_file) {
   $dump_flags = implode(' ', array(
-    '-vEval.HackCompilerDefault=false',
     '-vEval.AllowHhas=true',
     '-vEval.DumpHhas=1',
     '-vEval.DumpHhasToFile='.escapeshellarg($hhas_file),
@@ -2017,102 +1875,6 @@ function dump_hhas_to_temp($hhvm_cmd, $test) {
   $cmd = dump_hhas_cmd($hhvm_cmd, $test, $temp_file);
   system("$cmd &> /dev/null", &$ret);
   return $ret === 0 ? $temp_file : false;
-}
-
-function dump_hh_codegen($options, $test, $test_config) {
-  $temp_file = $test.'.hhcodegen_output.hhas';
-  $disable_hphpc_opts = suppress_opts_for_codegen_test($test);
-  $msgs_file = $test.'.hhcodegen_messages';
-  if ($test_config) {
-    $test_config_file = $test.'.hhcodegen_config.json';
-    file_put_contents($test_config_file, $test_config);
-    $cmd = hh_codegen_cmd($options, $test_config_file, $disable_hphpc_opts);
-  }
-  else {
-    $cmd = hh_codegen_cmd($options, null, $disable_hphpc_opts);
-  }
-  system(
-    implode(' ', array(
-      "/usr/bin/timeout",
-      TIMEOUT_SECONDS,
-      $cmd,
-      escapeshellarg($test),
-      ">",
-      escapeshellarg($temp_file),
-      "2>",
-      escapeshellarg($msgs_file),
-    )),
-    &$ret
-  );
-  return $ret === 0 ? $temp_file : false;
-}
-
-function semdiff_output($options, $test) {
-  $temp_file = $test.'.diff';
-  $msgs_file = $test.'.semdiff_messages';
-  $hhcodegen_output = $test.'.hhcodegen_output.hhas';
-  $hhvm_output = $test.'.round_trip.hhas';
-  $cmd = hh_semdiff_cmd($options);
-  $ret = false;
-  system(
-    implode(' ', array(
-      "/usr/bin/timeout",
-      TIMEOUT_SECONDS,
-      $cmd,
-      escapeshellarg($hhcodegen_output),
-      escapeshellarg($hhvm_output),
-      ">",
-      escapeshellarg($temp_file),
-      "2>",
-      escapeshellarg($msgs_file),
-    )),
-    &$ret
-  );
-  return array($ret, $temp_file);
-}
-
-function strip_hhas_file($file) {
-  $h = fopen($file, "r");
-  $buf = "";
-  while (($s = fgets($h)) !== false) {
-    if (strpos($s, "HackCNYI") !== false) {
-      fclose($h);
-      return false;
-    }
-    if ($s === "" || $s[0] === "#" || substr($s, 0, 10) === ".filepath ") {
-      continue;
-    }
-    // We have separate tests for srclocs, skip over them here
-    if (substr(trim($s), 0, 7) === '.srcloc') continue;
-    $buf .= $s;
-  }
-  fclose($h);
-  file_put_contents($file, $buf);
-}
-
-function contains_nyi_line($file) {
-  $h = fopen($file, "r");
-  while (($s = fgets($h)) !== false) {
-    if (strpos($s, "HackCNYI") !== false) {
-      fclose($h);
-      return true;
-    }
-  }
-  fclose($h);
-  return false;
-}
-
-const ASM_ERROR = "  String \"Assembler Error: ";
-function is_assembler_fail($file) {
-  $h = fopen($file, "r");
-  while (($s = fgets($h)) !== false) {
-    if (substr($s, 0, strlen(ASM_ERROR)) === ASM_ERROR) {
-      fclose($h);
-      return true;
-    }
-  }
-  fclose($h);
-  return false;
 }
 
 const HHAS_EXT = '.hhas';
@@ -2468,53 +2230,9 @@ function run_typechecker_test($options, $test) {
   return $result;
 }
 
-function get_hhvm_ini_values($test, $options) {
-  // prepare script to setting values from HHVM
-  $get_ini_file = tempnam(dirname($test), "get_ini");
-  $tmp_file = tempnam(sys_get_temp_dir(), "output");
-  file_put_contents($get_ini_file, "<?php echo json_encode(ini_get_all());");
-  $extra = ' -vEval.WarnOnRealPseudomain=0 -vEval.WarnOnUncalledPseudomain=0';
-  list($hhvm_get_ini_cmd, $_) = hhvm_cmd($options, $test, $get_ini_file, true);
-  return exec("$hhvm_get_ini_cmd $extra 2> /dev/null");
-}
-
-function get_hhvm_compiler_frontend($options, $test) {
-  // run the check in non-repo mode to avoid having to build a repo for it
-  $options_without_repo = $options;
-  unset($options_without_repo['repo']);
-
-  $get_fe_script = tempnam(sys_get_temp_dir(), "get_frontend");
-  file_put_contents(
-    $get_fe_script,
-    '<?php echo __COMPILER_FRONTEND__, "\n";'
-  );
-  list ($hhvm, $_) = hhvm_cmd(
-    $options_without_repo,
-    $test,
-    $get_fe_script,
-    true
-  );
-  if (is_array($hhvm)) $hhvm = $hhvm[0];
-  $res = exec($hhvm);
-  @unlink($get_fe_script);
-  return $res;
-}
-
 function run_test($options, $test) {
   $skip_reason = skip_test($options, $test);
   if ($skip_reason !== false) return $skip_reason;
-
-  // Skip any tests that would require HPHPC for HackC-only features
-  // If the test_name.onlyhackc exists or the folder has .onlyhackc
-  $only_hackc_tag = '.onlyhackc';
-  $only_hackc = file_exists($test.$only_hackc_tag) ||
-                file_exists(dirname($test).'/'.$only_hackc_tag);
-  if ($only_hackc) {
-    if (isset($options['compare-hh-codegen']) ||
-        get_hhvm_compiler_frontend($options, $test) !== 'hackc') {
-      return 'skip-onlyhackc';
-    }
-  }
 
   // Skip tests that don't make sense in modes where we dump/compare hhas
   $no_hhas_tag = '.nodumphhas';
@@ -2522,8 +2240,7 @@ function run_test($options, $test) {
              file_exists(dirname($test).'/'.$no_hhas_tag);
   if ($no_hhas && (
     isset($options['hhbbc2']) ||
-    isset($options['hhas-round-trip']) ||
-    isset($options['compare-hh-codegen'])
+    isset($options['hhas-round-trip'])
   )) {
     return 'skip-nodumphhas';
   }
@@ -2558,58 +2275,51 @@ function run_test($options, $test) {
     $hhbbc_hackc_repo = "$test.repo/hackc.hhbbc";
     shell_exec("rm -f \"$hphp_hhvm_repo\" \"$hhbbc_hhvm_repo\" \"$hphp_hackc_repo\" \"$hhbbc_hackc_repo\" ");
 
-    if (isset($options['compare-hh-codegen'])) {
-      if (!repo_mode_compile($options, $test, 'hhvm') ||
-          !repo_mode_compile($options, $test, 'hackc')) {
-        return false;
-      }
-    } else {
-      $program = isset($options['hackc']) ? "hackc" : "hhvm";
-      if (!repo_mode_compile($options, $test, $program)) {
-        return false;
-      }
-
-      if (isset($options['hhbbc2'])) {
-        $hhas_temp1 = dump_hhas_to_temp($hhvm, "$test.before");
-        if ($hhas_temp1 === false) {
-          file_put_contents(
-            "$test.diff",
-            "dumping hhas after first hhbbc pass failed"
-          );
-          return false;
-        }
-        shell_exec("mv $test.repo/$program.hhbbc $test.repo/$program.hhbc");
-        $hhbbc = hhbbc_cmd($options, $test, $program);
-        $result = exec_with_stack($hhbbc);
-        if ($result !== true) {
-          file_put_contents("$test.diff", $result);
-          return false;
-        }
-        $hhas_temp2 = dump_hhas_to_temp($hhvm, "$test.after");
-        if ($hhas_temp2 === false) {
-          file_put_contents(
-            "$test.diff",
-            "dumping hhas after second hhbbc pass failed"
-          );
-          return false;
-        }
-        $diff = shell_exec("diff $hhas_temp1 $hhas_temp2 | wc -l");
-        if (trim($diff) != '0') {
-          shell_exec("diff $hhas_temp1 $hhas_temp2 > $test.diff");
-          return false;
-        }
-      }
-
-      if (isset($options['jit-serialize'])) {
-        $cmd = timeout_prefix() .
-          jit_serialize_option($hhvm, $test, $options, true);
-        $outputs = run_config_cli($options, $test, $cmd, $hhvm_env);
-        if ($outputs === false) return false;
-        $hhvm = jit_serialize_option($hhvm, $test, $options, false);
-      }
-
-      return run_one_config($options, $test, $hhvm, $hhvm_env);
+    $program = isset($options['hackc']) ? "hackc" : "hhvm";
+    if (!repo_mode_compile($options, $test, $program)) {
+      return false;
     }
+
+    if (isset($options['hhbbc2'])) {
+      $hhas_temp1 = dump_hhas_to_temp($hhvm, "$test.before");
+      if ($hhas_temp1 === false) {
+        file_put_contents(
+          "$test.diff",
+          "dumping hhas after first hhbbc pass failed"
+        );
+        return false;
+      }
+      shell_exec("mv $test.repo/$program.hhbbc $test.repo/$program.hhbc");
+      $hhbbc = hhbbc_cmd($options, $test, $program);
+      $result = exec_with_stack($hhbbc);
+      if ($result !== true) {
+        file_put_contents("$test.diff", $result);
+        return false;
+      }
+      $hhas_temp2 = dump_hhas_to_temp($hhvm, "$test.after");
+      if ($hhas_temp2 === false) {
+        file_put_contents(
+          "$test.diff",
+          "dumping hhas after second hhbbc pass failed"
+        );
+        return false;
+      }
+      $diff = shell_exec("diff $hhas_temp1 $hhas_temp2 | wc -l");
+      if (trim($diff) != '0') {
+        shell_exec("diff $hhas_temp1 $hhas_temp2 > $test.diff");
+        return false;
+      }
+    }
+
+    if (isset($options['jit-serialize'])) {
+      $cmd = timeout_prefix() .
+        jit_serialize_option($hhvm, $test, $options, true);
+      $outputs = run_config_cli($options, $test, $cmd, $hhvm_env);
+      if ($outputs === false) return false;
+      $hhvm = jit_serialize_option($hhvm, $test, $options, false);
+    }
+
+    return run_one_config($options, $test, $hhvm, $hhvm_env);
   }
 
   if (file_exists($test.'.onlyrepo')) {
@@ -2627,121 +2337,6 @@ function run_test($options, $test) {
       return false;
     }
     list($hhvm, $hhvm_env) = hhvm_cmd($options, $test, $hhas_temp);
-  }
-
-  // Compare the output of Hack code gen with that of HHVM
-  if (isset($options['compare-hh-codegen'])) {
-    if (substr($test, -5) === ".hhas") return 'skip-hhas';
-
-    $diff = $test.'.diff';
-
-    if (isset($options['repo'])) {
-      $hhas = dump_repo_to_hhas_file(
-        $test,
-        'hhvm',
-        "$test.round_trip.hhas"
-      );
-      if ($hhas === false) {
-        file_put_contents($diff, "HPHPC REPO DUMP FAILED");
-        return false;
-      }
-
-      $hhcg = dump_repo_to_hhas_file(
-        $test,
-        'hackc',
-        "$test.hhcodegen_output.hhas"
-      );
-      if ($hhcg === false) {
-        file_put_contents($diff, "HACK REPO DUMP FAILED");
-        return false;
-      }
-    } else {
-      $hhas = dump_hhas_to_temp($hhvm, $test);
-      if ($hhas === false) {
-        file_put_contents($diff, "HPHPC CODEGEN FAILED");
-        return false;
-      }
-
-      $test_config = get_hhvm_ini_values($test, $options);
-      $hhcg = dump_hh_codegen($options, $test, $test_config);
-      if (!$hhcg || file_get_contents($hhcg) === "") {
-        file_put_contents($diff, "HACK CODEGEN FAILED");
-        return false;
-      }
-      if (contains_nyi_line($hhcg) === true) {
-        file_put_contents($test.'.diff', "CODEGEN FAILED: NYI");
-        return false;
-      }
-    }
-
-    if (!isset($options['no-semdiff'])) {
-      if (file_exists($test.'.nosemdiff')) {
-        return 'skip-nosemdiff';
-      }
-      // Run semantic diff on outputs first
-      list($rc, $out_file) = semdiff_output($options, $test);
-      if ($rc === 0) {
-        unlink($out_file);
-        unlink($test . '.semdiff_messages');
-        return true;
-      } else if ($rc === 1) {
-        return false;
-      }
-      rename($out_file, $test.".semdiff"); // preserve the output as it may be useful?
-    }
-    // so either semdiff went wrong, or we have no-semdiff set. So we try ordinary diffing
-    strip_hhas_file($hhas);
-    strip_hhas_file($hhcg);
-
-    system(
-      implode(' ', array(
-        "diff",
-        "-B",
-        escapeshellarg($hhcg),
-        escapeshellarg($hhas),
-        ">",
-        escapeshellarg($diff),
-      )),
-      &$ret
-    );
-
-    // If identical, don't bother dropping through to roundtrip stage
-    if ($ret === 0) {
-      unlink($diff);
-      return true;
-    }
-
-    // If it failed, do a round-trip through HHVM and try again
-    list($hhvm2, $hhvm2_env) = hhvm_cmd($options, $test, $hhcg);
-    $hhcg2 = dump_hhas_to_temp($hhvm2, $hhcg);
-    $rv = true;
-    if (
-      !$hhcg2 ||
-      file_get_contents($hhcg2) === "" ||
-      is_assembler_fail($hhcg2)
-    ) {
-      $rv = false;
-      $hhcg2 = $hhcg;
-    }
-
-    strip_hhas_file($hhcg2);
-
-    system(
-      implode(' ', array(
-        "diff",
-        escapeshellarg($hhcg2),
-        escapeshellarg($hhas),
-        ">",
-        escapeshellarg($diff),
-      )),
-      &$ret
-    );
-
-    if ($ret === 0) {
-      if ($rv) unlink($diff);
-      return $rv;
-    }
-    return false;
   }
 
   if ($outputs = run_config_server($options, $test)) {
@@ -3096,7 +2691,6 @@ function start_server_proc($options, $config, $port) {
     : '-vServer.ThreadCount='.$threads;
   $command = hhvm_cmd_impl(
     $options,
-    true, /*$disable_hphpc_opts*/
     $config,
     '-m', 'server',
     "-vServer.Port=$port",
@@ -3250,10 +2844,6 @@ function main($argv) {
 
   if (isset($options['repo']) && isset($options['typechecker'])) {
     error("Repo mode and typechecker mode are not compatible");
-  }
-
-  if (isset($options['hhbbc2']) && isset($options['compare-hh-codegen'])) {
-    error("hhbbc2 mode and compare-hh-codegen mode are not compatible");
   }
 
   if (isset($options['hhvm-binary-path']) &&

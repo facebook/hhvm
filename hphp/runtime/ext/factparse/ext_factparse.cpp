@@ -316,71 +316,6 @@ void buildOneResult(
   outResArr.set(path, resArr);
 }
 
-struct HHVMFactsExtractor {
-  using result_type = Facts::ParseResult;
-  using state_type = void*;
-
-  static int get_workers_count() {
-    return Process::GetCPUCount();
-  }
-
-  static state_type init_state() {
-    return nullptr;
-  }
-
-  static void parse_stream(
-    std::istream& stream,
-    const std::string& path,
-    bool allowHipHopSyntax,
-    result_type& res) {
-    if (!stream.good()) {
-      return;
-    }
-    Scanner scanner(
-      stream,
-      allowHipHopSyntax ? Scanner::Type::AllowHipHopSyntax : 0,
-      path.c_str(),
-      true);
-    Facts::Parser parser(scanner, path.c_str(), res);
-    try {
-      parser.parse();
-    } catch (ParseTimeFatalException& e) {
-      FTRACE(1, "Parse fatal @{}: {}\n", e.m_line, e.getMessage());
-    }
-  }
-
-  static void parse_file_impl(
-    const std::string& path,
-    bool allowHipHopSyntax,
-    const char* code,
-    int len,
-    result_type& res,
-    const state_type&
-  ) {
-    if (len == 0) {
-      std::ifstream stream(path);
-      parse_stream(stream, path, allowHipHopSyntax, res);
-    }
-    else {
-      std::string content(code, len);
-      std::istringstream stream(content);
-      parse_stream(stream, path, allowHipHopSyntax, res);
-    }
-  };
-
-  static void mark_failed(result_type& workerResult) {
-    workerResult.error = true;
-  }
-
-  static void merge_result(
-    result_type& workerResult,
-    ArrayInit& outResArr,
-    const HPHP::String& path
-  )  {
-    buildOneResult(workerResult, outResArr, path);
-  };
-};
-
 struct HackCFactsExtractor {
   using result_type = folly::Optional<FactsJSONString>;
   using state_type = std::unique_ptr<FactsParser>;
@@ -457,25 +392,12 @@ Array HHVM_FUNCTION(
   ArrayInit outResArr(pathList->size(), ArrayInit::Map{});
 
   if (!pathList.isNull() && pathList->size()) {
-    auto useHackc = hackc_mode() != HackcMode::kNever;
     if (useThreads) {
-      if (useHackc) {
-        facts_parse_threaded<HackCFactsExtractor>(root, pathList,
-          outResArr, allowHipHopSyntax);
-      }
-      else {
-        facts_parse_threaded<HHVMFactsExtractor>(root, pathList,
-          outResArr, allowHipHopSyntax);
-      }
+      facts_parse_threaded<HackCFactsExtractor>(root, pathList,
+        outResArr, allowHipHopSyntax);
     } else {
-      if (useHackc) {
-        facts_parse_sequential<HackCFactsExtractor>(root, pathList,
-          outResArr, allowHipHopSyntax);
-      }
-      else {
-        facts_parse_sequential<HHVMFactsExtractor>(root, pathList,
-          outResArr, allowHipHopSyntax);
-      }
+      facts_parse_sequential<HackCFactsExtractor>(root, pathList,
+        outResArr, allowHipHopSyntax);
     }
   }
 

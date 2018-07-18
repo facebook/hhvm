@@ -25,14 +25,6 @@ namespace HPHP {
 
 struct MD5;
 
-enum class HackcMode {
-  kNever,
-  kFallback,
-  kFatal
-};
-
-HackcMode hackc_mode();
-
 struct BadCompilerException : Exception {
   explicit BadCompilerException(const std::string& what) : Exception(what) {}
   template<class... A>
@@ -110,18 +102,12 @@ struct HackcUnitCompiler : public UnitCompiler {
   HackcUnitCompiler(const char* code,
                     int codeLen,
                     const char* filename,
-                    const MD5& md5,
-                    HackcMode hackcMode)
-      : UnitCompiler(code, codeLen, filename, md5),
-        m_hackcMode(hackcMode)
-    {}
+                    const MD5& md5)
+      : UnitCompiler(code, codeLen, filename, md5) {}
 
   virtual std::unique_ptr<UnitEmitter> compile(
     AsmCallbacks* callbacks = nullptr) const override;
   virtual const char* getName() const override { return "HackC"; }
-
- private:
-  const HackcMode m_hackcMode;
 };
 
 }

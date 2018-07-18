@@ -1445,57 +1445,6 @@ std::string get_right_option_name(const basic_parsed_options<char>& opts,
 }
 #endif
 
-namespace {
-
-std::string get_username() {
-  auto const pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
-  if (pwbuflen < 1) return {};
-  passwd pwd;
-  passwd* retpwptr = nullptr;
-  std::unique_ptr<char[]> pwbuf(new char[pwbuflen]);
-  if (!getpwuid_r(getuid(), &pwd, pwbuf.get(), pwbuflen, &retpwptr)) {
-    return pwd.pw_name;
-  }
-  return {};
-}
-
-struct HphpInvokeInfo {
-  std::string cmd;
-  std::string mode;
-  std::string file;
-};
-
-HphpInvokeInfo s_invoke_info;
-std::atomic<bool> s_logged_hphpc{false};
-
-}
-
-void log_hphpc_invoke(const char* target) {
-  if (!facebook || s_logged_hphpc.exchange(true, std::memory_order_relaxed)) {
-    return;
-  }
-
-  // We know that there are hphpc tests that run on diffs, don't bother logging
-  // them, they can be disabled when hphpc is removed.
-#ifdef HHVM_NO_DEFAULT_HACKC
-  return;
-#endif
-
-  auto const username = get_username();
-
-  StructuredLogEntry ent;
-  ent.setStr("target", target);
-  ent.setStr("user", username);
-  ent.setStr("cmdline", s_invoke_info.cmd);
-  ent.setStr("mode", s_invoke_info.mode);
-  ent.setStr("file", s_invoke_info.file);
-
-  // Ensure that logs are generated even for scripts
-  ent.force_init = true;
-
-  StructuredLog::log("hhvm_hphpc_invoke", ent);
-}
-
 static int execute_program_impl(int argc, char** argv) {
   std::string usage = "Usage:\n\n   ";
   usage += argv[0];
@@ -1784,10 +1733,6 @@ static int execute_program_impl(int argc, char** argv) {
       !po.file.empty() ? po.file :
       !po.args.empty() ? po.args[0] :
       std::string("");
-
-    s_invoke_info.cmd = folly::join(" ", &argv[0], &argv[argc]);
-    s_invoke_info.file = scriptFilePath;
-    s_invoke_info.mode = po.mode;
 
     // Now, take care of CLI options and then officially load and bind things
     s_ini_strings = po.iniStrings;

@@ -9,7 +9,7 @@ def verify_unittest(suite, repo, dir, mode='interp,jit',
                     relocate=0, recycle_tc=0,
                     retranslate_all=0,
                     jit_serialize=0,
-                    cli_server=0, hhcodegen=False,
+                    cli_server=0,
                     hhas_roundtrip=False, target_suffix='',
                     extra_args=[], blacklist=None,
                     noop_rule=False):
@@ -30,7 +30,6 @@ def verify_unittest(suite, repo, dir, mode='interp,jit',
        ('_jit-serialize' if jit_serialize else '') + \
        ('_recycle-tc' if recycle_tc else '') + \
        ('_cli-server' if cli_server else '') + \
-       ('_hhcodegen-compare' if hhcodegen else '') + \
        ('_hhas_roundtrip' if hhas_roundtrip else '') + \
        target_suffix
 
@@ -89,21 +88,12 @@ def verify_unittest(suite, repo, dir, mode='interp,jit',
     ('' if dir.startswith('//') else '//hphp/test:') + dir,
   ]
 
-  if hhcodegen == True:
-    blacklist = 'hphp/test/hhcodegen_failing_tests_' + suite
-    deplist.extend([
-        '//hphp/hack/src:hh_single_compile',
-        '//hphp/hack/src/hhbc/semdiff:semdiff',
-    ])
-
   if blacklist != None:
       command.extend(['-x', blacklist])
       head = paths.dirname(blacklist)
       tail = paths.basename(blacklist)
       deplist.append('//' + head + ':' + tail)
 
-  if hhcodegen == True:
-    command.extend(['--compare-hh-codegen'])
   if noop_rule:
     custom_unittest(
       name=target_name,

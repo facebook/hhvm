@@ -238,10 +238,6 @@ struct ExternCompiler {
     folly::StringPiece code,
     AsmCallbacks* callbacks
   ) {
-    if (RuntimeOption::EvalHackCompilerReset &&
-        m_compilations > RuntimeOption::EvalHackCompilerReset) {
-      stop();
-    }
     if (!isRunning()) {
       start();
     }
@@ -712,7 +708,6 @@ struct CompilerManager final {
   void ensure_started();
   void shutdown();
   void detach_after_fork();
-  bool hackc_enabled() { return (bool)m_hackc_pool; }
   CompilerPool& get_hackc_pool();
 private:
   void stop(bool detach_compilers);
@@ -910,19 +905,6 @@ void ExternCompiler::start() {
   writeConfigs();
 }
 
-folly::Optional<CompilerOptions> hackcConfiguration() {
-  if (hackc_mode() == HackcMode::kNever) {
-    return folly::none;
-  }
-
-  return CompilerOptions{
-    RuntimeOption::EvalHackCompilerVerboseErrors,
-    RuntimeOption::EvalHackCompilerMaxRetries,
-    RuntimeOption::EvalHackCompilerWorkers,
-    RuntimeOption::EvalHackCompilerInheritConfig,
-  };
-}
-
 CompilerResult hackc_compile(
   const char* code,
   int len,
@@ -939,20 +921,6 @@ CompilerResult hackc_compile(
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-HackcMode hackc_mode() {
-  if (!RuntimeOption::EvalHackCompilerDefault) {
-    return HackcMode::kNever;
-  }
-
-  if (hackcCommand() == "" || !RuntimeOption::EvalHackCompilerWorkers) {
-    return HackcMode::kNever;
-  }
-
-  if (RuntimeOption::EvalHackCompilerFallback) return HackcMode::kFallback;
-
-  return HackcMode::kFatal;
-}
-
 void CompilerManager::ensure_started() {
   if (m_started.load(std::memory_order_acquire)) {
     return;
@@ -961,22 +929,21 @@ void CompilerManager::ensure_started() {
   if (m_started.load(std::memory_order_relaxed)) {
     return;
   }
-  auto hackConfig = hackcConfiguration();
 
-  if (hackConfig) {
-    m_delegate = LightProcess::createDelegate();
-  }
-
-  if (hackConfig) {
-    m_hackc_pool = std::make_unique<CompilerPool>(std::move(*hackConfig));
-  }
-
+  m_delegate = LightProcess::createDelegate();
   if (m_delegate != kInvalidPid && m_username) {
     std::unique_lock<std::mutex> lock(m_delegateLock);
     LightProcess::ChangeUser(m_delegate, m_username.value());
   }
 
-  if (m_hackc_pool) m_hackc_pool->start();
+  CompilerOptions hackcConfig {
+    RuntimeOption::EvalHackCompilerVerboseErrors,
+    RuntimeOption::EvalHackCompilerMaxRetries,
+    RuntimeOption::EvalHackCompilerWorkers,
+    RuntimeOption::EvalHackCompilerInheritConfig,
+  };
+  m_hackc_pool = std::make_unique<CompilerPool>(std::move(hackcConfig));
+  m_hackc_pool->start();
 
   m_started.store(true, std::memory_order_release);
 }
@@ -1093,15 +1060,7 @@ std::unique_ptr<UnitCompiler> UnitCompiler::create(const char* code,
                                                    const MD5& md5
 ) {
   s_manager.ensure_started();
-  if (SystemLib::s_inited || RuntimeOption::EvalUseExternCompilerForSystemLib) {
-    auto const hcMode = hackc_mode();
-    if (hcMode != HackcMode::kNever && s_manager.hackc_enabled()) {
-      return std::make_unique<HackcUnitCompiler>(
-        code, codeLen, filename, md5, hcMode);
-    }
-  }
-
-  return nullptr;
+  return std::make_unique<HackcUnitCompiler>(code, codeLen, filename, md5);
 }
 
 std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
@@ -1120,13 +1079,11 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
       unitEmitter = std::move(ue);
     },
     [&] (std::string& err) {
-      if (m_hackcMode != HackcMode::kFallback) {
-        unitEmitter = createFatalUnit(
-          makeStaticString(m_filename),
-          m_md5,
-          FatalOp::Runtime,
-          makeStaticString(err));
-      }
+      unitEmitter = createFatalUnit(
+        makeStaticString(m_filename),
+        m_md5,
+        FatalOp::Runtime,
+        makeStaticString(err));
     }
   );
 

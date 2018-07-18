@@ -135,9 +135,6 @@ std::string get_systemlib(std::string* hhas = nullptr,
 // Helper function for stats tracking with exceptions.
 void bump_counter_and_rethrow(bool isPsp);
 
-// Log an invocation of hphpc
-void log_hphpc_invoke(const char* target);
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

@@ -540,8 +540,6 @@ struct RuntimeOption {
   F(string, HackCompilerFallbackPath,  "/tmp/hackc_%{schema}_XXXXXX")   \
   /* Arguments to run embedded hackc binary with */                     \
   F(string, HackCompilerArgs,          hackCompilerArgsDefault())       \
-  /* Whether to use hh_single_compile by default if available. */       \
-  F(bool, HackCompilerDefault,         hackCompilerEnableDefault())     \
   /* The command to invoke to spawn hh_single_compile in server mode. */\
   F(string, HackCompilerCommand,       hackCompilerCommandDefault())    \
   /* The number of hh_single_compile daemons to keep alive. */          \
@@ -549,16 +547,8 @@ struct RuntimeOption {
   /* The number of times to retry after an infra failure communicating
      with a compiler process. */                                        \
   F(uint64_t, HackCompilerMaxRetries,  0)                               \
-  /* The number of times to reuse a single hh_single_compile daemons
-     before forcing a restart */                                        \
-  F(uint32_t, HackCompilerReset,       0)                               \
-  /* Whether to use an extern compiler to build systemlib */            \
-  F(bool, UseExternCompilerForSystemLib, true)                          \
   /* Whether to log extern compiler performance */                      \
   F(bool, LogExternCompilerPerf,       false)                           \
-  /* Whether or not to fallback to hphpc if hh_single_compile fails for
-     any reason. */                                                     \
-  F(bool, HackCompilerFallback,        false)                           \
   /* Whether to write verbose log messages to the error log and include
      the hhas from failing units in the fatal error messages produced by
      bad hh_single_compile units. */                                    \

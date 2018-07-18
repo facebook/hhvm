@@ -504,14 +504,6 @@ static inline bool eagerGcDefault() {
 #endif
 }
 
-static inline bool hackCompilerEnableDefault() {
-#ifndef HHVM_NO_DEFAULT_HACKC
-  return true;
-#else
-  return false;
-#endif
-}
-
 static inline std::string hackCompilerArgsDefault() {
   return RuntimeOption::RepoAuthoritative
     ? "-v Hack.Compiler.SourceMapping=1 --daemon --dump-symbol-refs"

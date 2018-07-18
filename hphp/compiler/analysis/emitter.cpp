@@ -12496,50 +12496,23 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       }
     }
 
-    // If ue != nullptr then we were assembled it above, so don't feed it into
+    // If ue != nullptr then we assembled it above, so don't feed it into
     // the extern compiler
     if (!ue) {
-      if (auto uc = UnitCompiler::create(code, codeLen, filename, md5)) {
-        try {
+      auto uc = UnitCompiler::create(code, codeLen, filename, md5);
+      assertx(uc);
+      try {
+        ue = uc->compile();
+        if (BuiltinSymbols::s_systemAr) {
+          assertx(ue->m_filepath->data()[0] == '/' &&
+                  ue->m_filepath->data()[1] == ':');
+          BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
           ue = uc->compile();
-          if (BuiltinSymbols::s_systemAr) {
-            assertx(ue->m_filepath->data()[0] == '/' &&
-                    ue->m_filepath->data()[1] == ':');
-            BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
-            ue = uc->compile();
-          }
-        } catch (const BadCompilerException& exc) {
-          Logger::Error("Bad external compiler: %s", exc.what());
-          return nullptr;
         }
+      } catch (const BadCompilerException& exc) {
+        Logger::Error("Bad external compiler: %s", exc.what());
+        return nullptr;
       }
-    }
-
-    // !ue should only happen for HackC at this point if
-    // !RuntimeOption::EvalHackCompilerFallback. (Otherwise ue should be a fatal
-    // unit.)
-    if (!ue) {
-      log_hphpc_invoke(filename);
-      auto parseit = [=] (AnalysisResultPtr ar) {
-        Scanner scanner(code, codeLen,
-                        RuntimeOption::GetScannerType(), filename);
-        Parser parser(scanner, filename, ar, codeLen);
-        parser.parse();
-        return parser.getFileScope();
-      };
-
-      if (BuiltinSymbols::s_systemAr) {
-        parseit(BuiltinSymbols::s_systemAr)->setMd5(md5);
-      }
-
-      auto ar = std::make_shared<AnalysisResult>();
-      FileScopePtr fsp = parseit(ar);
-      fsp->setOuterScope(ar);
-
-      ar->setPhase(AnalysisResult::AnalyzeAll);
-      fsp->analyzeProgram(ar);
-
-      ue.reset(emitHHBCUnitEmitter(ar, fsp, md5));
     }
 
     // NOTE: Repo errors are ignored!

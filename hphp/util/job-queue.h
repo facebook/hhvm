@@ -427,7 +427,7 @@ struct JobQueueWorker {
   void start() {
     assertx(m_queue);
     onThreadEnter();
-    bool highPri = (s_firstSlab.ptr != nullptr);
+    bool highPri = (s_tlSpace.ptr != nullptr);
     while (!m_stopped) {
       try {
         bool expired = false;

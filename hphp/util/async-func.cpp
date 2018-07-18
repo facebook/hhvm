@@ -66,8 +66,8 @@ AsyncFuncImpl::~AsyncFuncImpl() {
 void *AsyncFuncImpl::ThreadFunc(void *obj) {
   auto self = static_cast<AsyncFuncImpl*>(obj);
   init_stack_limits(self->getThreadAttr());
-  s_firstSlab = MemBlock{self->m_tlExtraBase, self->m_tlExtraKb * 1024};
-  assertx(!s_firstSlab.ptr || s_firstSlab.size);
+  s_tlSpace = MemBlock{self->m_tlExtraBase, self->m_tlExtraKb * 1024};
+  assertx(!s_tlSpace.ptr || s_tlSpace.size);
   set_numa_binding(self->m_node);
   self->setThreadName();
   self->threadFuncImpl();

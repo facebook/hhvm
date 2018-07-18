@@ -53,10 +53,6 @@ namespace HPHP {
 
 using HdrBlock = MemRange<HeapObject*>;
 
-// The first slab may be smaller than the normal size when it is
-// preallocated. The heap scanner needs to know about it.
-extern __thread MemBlock s_firstSlab;
-
 /*
  * Struct Slab encapsulates the header attached to each large block of memory
  * used for allocating smaller blocks. The header contains a start-bit map,
@@ -102,8 +98,7 @@ struct alignas(kSmallSizeAlign) Slab : HeapObject {
   }
 
   size_t size() const {
-    assertx(s_firstSlab.size <= kSlabSize);
-    return (this == s_firstSlab.ptr) ? s_firstSlab.size : kSlabSize;
+    return kSlabSize;
   }
 
   static Slab* fromPtr(const void* p) {

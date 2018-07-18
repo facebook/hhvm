@@ -311,9 +311,9 @@ extern const size_t s_pageSize;
  */
 extern __thread int32_t s_numaNode;
 /*
- * The optional preallocated first slab
+ * The optional preallocated space collocated with thread stack.
  */
-extern __thread MemBlock s_firstSlab;
+extern __thread MemBlock s_tlSpace;
 /*
  * enable the numa support in hhvm,
  * and determine whether threads should default to using

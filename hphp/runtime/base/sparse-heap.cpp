@@ -52,8 +52,6 @@ void SparseHeap::reset() {
   TaggedSlabList pooledSlabs;
   void* pooledSlabTail = nullptr;
   for (auto& slab : m_pooled_slabs) {
-    // The first slab contains the php stack, so only unmap it when the worker
-    // thread dies.
     if (!pooledSlabTail) pooledSlabTail = slab.ptr;
     pooledSlabs.push_front<true>(slab.ptr, slab.version);
     m_bigs.erase(slab.ptr);
@@ -64,7 +62,6 @@ void SparseHeap::reset() {
   m_pooled_slabs.clear();
   m_hugeBytes = 0;
   m_bigs.iterate([&](HeapObject* h, size_t size) {
-    if (h == s_firstSlab.ptr) return; // continue iterating
     do_free(h, size);
   });
   m_bigs.clear();
@@ -92,16 +89,6 @@ HeapObject* SparseHeap::allocSlab(MemoryUsageStats& stats) {
     return static_cast<HeapObject*>(p);
   };
 
-  // If we have a pre-allocated slab, and it's slab-aligned, use it first.
-  if (m_hugeBytes == 0 && s_firstSlab.size >= kMaxSmallSize &&
-      reinterpret_cast<uintptr_t>(s_firstSlab.ptr) % kSlabAlign == 0) {
-    stats.mmap_volume += s_firstSlab.size;
-    stats.mmap_cap += s_firstSlab.size;
-    stats.peakCap = std::max(stats.peakCap, stats.capacity());
-    m_bigs.insert((HeapObject*)s_firstSlab.ptr, s_firstSlab.size);
-    m_hugeBytes += s_firstSlab.size;
-    return finish(s_firstSlab.ptr);
-  }
   if (m_slabManager && m_hugeBytes < RuntimeOption::RequestHugeMaxBytes) {
     if (auto slab = m_slabManager->tryAlloc()) {
       stats.mmap_volume += kSlabSize;

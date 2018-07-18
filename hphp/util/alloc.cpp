@@ -172,7 +172,7 @@ void flush_thread_stack() {
 }
 
 __thread int32_t s_numaNode;
-__thread MemBlock s_firstSlab;
+__thread MemBlock s_tlSpace;
 
 #if !defined USE_JEMALLOC || !defined HAVE_NUMA
 void enable_numa(bool local) {}

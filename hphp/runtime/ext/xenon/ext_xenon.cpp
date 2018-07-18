@@ -106,17 +106,14 @@ const StaticString
 namespace {
 
 Array parsePhpStack(const Array& bt) {
-  PackedArrayInit stack(bt->size());
+  VArrayInit stack(bt->size());
   for (ArrayIter it(bt); it; ++it) {
     const auto& frame = it.second().toArray();
     if (frame.exists(s_function)) {
       bool fileline = frame.exists(s_file) && frame.exists(s_line);
       bool metadata = frame.exists(s_metadata);
 
-      ArrayInit element(
-        1 + (fileline ? 2 : 0) + (metadata ? 1 : 0),
-        ArrayInit::Map{}
-      );
+      DArrayInit element(1 + (fileline ? 2 : 0) + (metadata ? 1 : 0));
 
       if (frame.exists(s_class)) {
         auto func = folly::to<std::string>(
@@ -279,10 +276,10 @@ XenonRequestLocalData::~XenonRequestLocalData() {
 // builds the data into the format neeeded.
 Array XenonRequestLocalData::createResponse() {
   assertx(m_inRequest);
-  PackedArrayInit stacks(m_stackSnapshots.size());
+  VArrayInit stacks(m_stackSnapshots.size());
   for (ArrayIter it(m_stackSnapshots); it; ++it) {
     const auto& frame = it.second().toArray();
-    stacks.append(make_map_array(
+    stacks.append(make_darray(
       s_time, frame[s_time],
       s_stack, frame[s_stack].toArray(),
       s_phpStack, parsePhpStack(frame[s_stack].toArray()),
@@ -315,7 +312,7 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
     addBacktraceToStructLog(bt, cols);
     StructuredLog::log(logDest, cols);
   } else {
-    m_stackSnapshots.append(make_map_array(
+    m_stackSnapshots.append(make_darray(
       s_time, now,
       s_stack, bt,
       s_isWait, !Xenon::isCPUTime(t),
@@ -359,7 +356,7 @@ Array HHVM_FUNCTION(xenon_get_data, void) {
     TRACE(1, "xenon_get_data\n");
     return s_xenonData->createResponse();
   }
-  return empty_array();
+  return Array::CreateVArray();
 }
 
 Array HHVM_FUNCTION(xenon_get_and_clear_samples, void) {
@@ -370,7 +367,7 @@ Array HHVM_FUNCTION(xenon_get_and_clear_samples, void) {
     s_xenonData->m_stackSnapshots.reset();
     return ret;
   }
-  return empty_array();
+  return Array::CreateVArray();
 }
 
 int64_t HHVM_FUNCTION(xenon_get_and_clear_missed_sample_count, void) {

@@ -4,8 +4,8 @@ namespace HH {
 
 type XenonSample = shape(
   'time' => int,
-  'stack' => array,
-  'phpStack' => array,
+  'stack' => varray,
+  'phpStack' => varray,
   'ioWaitSample' => bool,
 );
 
@@ -22,14 +22,14 @@ type XenonSample = shape(
  *  It is possible for the output of this function to change in the future.
  */
 <<__Native>>
-function xenon_get_data(): array<XenonSample>;
+function xenon_get_data(): varray<XenonSample>;
 /**
  * TODO: this will replace xenon_get_data()
  * this function is same as xenon_get_data() except that it deletes the stack
  * traces that are returned
  */
 <<__Native>>
-function xenon_get_and_clear_samples(): array<XenonSample>;
+function xenon_get_and_clear_samples(): varray<XenonSample>;
 
 /**
  * Returns the number of xenon samples lost so far.

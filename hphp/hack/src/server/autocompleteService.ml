@@ -246,6 +246,9 @@ let compute_complete_global
     | Some (pos, _) -> Pos.length pos > suffix_len in
   if autocomplete_context.is_after_single_colon && not have_user_prefix then
     ()
+  else if autocomplete_context.is_after_double_right_angle_bracket then
+    (* <<__Override>>AUTO332 *)
+    ()
   else begin
 
     let does_fully_qualified_name_match_prefix name =

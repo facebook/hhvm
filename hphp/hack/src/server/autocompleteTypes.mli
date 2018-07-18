@@ -80,4 +80,5 @@ type legacy_autocomplete_context = {
   is_xhp_classname : bool;
   is_instance_member : bool;
   is_after_single_colon : bool;
+  is_after_double_right_angle_bracket : bool;
 }

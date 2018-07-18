@@ -98,7 +98,7 @@ and gconst = {
   cst_span: pos;
 }
 
-and tparam = variance * id * (constraint_kind * hint) list
+and tparam = variance * id * (constraint_kind * hint) list * reified
 
 and tconstraint = hint option
 

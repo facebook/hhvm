@@ -213,7 +213,7 @@ let add_lower_bound env name ty =
 (* Add type parameters to environment, initially with no bounds.
  * Existing type parameters with the same name will be overridden. *)
 let add_generic_parameters env tparaml =
-  let add_empty_bounds tpenv (_, (_, name), _) =
+  let add_empty_bounds tpenv (_, (_, name), _, _) =
     SMap.add name {lower_bounds = empty_bounds;
                    upper_bounds = empty_bounds} tpenv in
   env_with_tpenv env

@@ -32,7 +32,7 @@ module EnvFromDef(ASTAnnotations: Aast.ASTAnnotationTypes) = struct
   (* Given a class definition construct a type consisting of the
    * class instantiated at its generic parameters. *)
   let get_self_from_c c =
-    let tparams = List.map (fst c.c_tparams) begin fun (_, (p, s), _) ->
+    let tparams = List.map (fst c.c_tparams) begin fun (_, (p, s), _, _) ->
       Reason.Rwitness p, Tgeneric s
     end in
     Reason.Rwitness (fst c.c_name), Tapply (c.c_name, tparams)

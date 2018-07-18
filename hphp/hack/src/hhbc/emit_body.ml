@@ -36,7 +36,7 @@ let emit_method_prolog ~pos ~params ~should_emit_init_this =
 
 
 let tparams_to_strings tparams =
-  List.map tparams (fun (_, (_, s), _) -> s)
+  List.map tparams (fun (_, (_, s), _, _) -> s)
 
 let rec emit_def env def =
   match def with
@@ -218,7 +218,7 @@ let prepare_inline_hhas_blocks decl_vars params hhas_blocks =
 
 let emit_return_type_info ~scope ~skipawaitable ~namespace ret =
   let tparams =
-    List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _) -> s) in
+    List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _, _) -> s) in
   match ret with
   | None ->
     Hhas_type_info.make (Some "") (Hhas_type_constraint.make None [])
@@ -344,7 +344,7 @@ let emit_body
       end;
   end;
   let tparams =
-    List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _) -> s) in
+    List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _, _) -> s) in
   Label.reset_label ();
   Iterator.reset_iterator ();
   let return_type_info =

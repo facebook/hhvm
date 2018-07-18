@@ -23,13 +23,13 @@
   (Typedef
      { Aast.AnnotatedAST.t_annotation = ();
        t_name = ([9:6-23], "\\Serialized_contra");
-       t_tparams = [(Contravariant, ([9:25-26], "T"), [])];
+       t_tparams = [(Contravariant, ([9:25-26], "T"), [], false)];
        t_constraint = None; t_kind = ([9:30-36], (Hprim Tstring));
        t_user_attributes = []; t_mode = <opaque>; t_vis = Transparent });
   (Typedef
      { Aast.AnnotatedAST.t_annotation = ();
        t_name = ([10:6-19], "\\Serialized_co");
-       t_tparams = [(Covariant, ([10:21-22], "T"), [])]; t_constraint = None;
-       t_kind = ([10:26-32], (Hprim Tstring)); t_user_attributes = [];
-       t_mode = <opaque>; t_vis = Transparent })
+       t_tparams = [(Covariant, ([10:21-22], "T"), [], false)];
+       t_constraint = None; t_kind = ([10:26-32], (Hprim Tstring));
+       t_user_attributes = []; t_mode = <opaque>; t_vis = Transparent })
   ]

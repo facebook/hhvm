@@ -729,7 +729,7 @@ end
 *)
 let is_alok_type_name (_, x) = String.length x <= 2 && x.[0] = 'T'
 
-let check_constraint (_, (pos, name), _) =
+let check_constraint (_, (pos, name), _, _) =
   (* TODO refactor this in a separate module for errors *)
   if String.lowercase_ascii name = "this"
   then Errors.this_reserved pos
@@ -1127,7 +1127,7 @@ module Make (GetLocals : GetLocals) = struct
   (**************************************************************************)
 
   let check_method_tparams class_tparam_names { N.m_tparams = tparams; _ } =
-    List.iter tparams begin fun (_, (p,x),_) ->
+    List.iter tparams begin fun (_, (p,x), _, _) ->
       List.iter class_tparam_names
         (fun (pc,xc) -> if (x = xc) then Errors.shadowed_type_param p pc x)
     end
@@ -1199,7 +1199,7 @@ module Make (GetLocals : GetLocals) = struct
     let constructor = List.fold_left ~f:(constructor env) ~init:None c.c_body in
     let constructor, methods, smethods =
       interface c constructor methods smethods in
-    let class_tparam_names = List.map c.c_tparams (fun (_, x,_) -> x) in
+    let class_tparam_names = List.map c.c_tparams (fun (_, x, _, _) -> x) in
     let enum = Option.map c.c_enum (enum_ env) in
     check_tparams_constructor class_tparam_names constructor;
     check_name_collision methods;
@@ -1309,7 +1309,7 @@ module Make (GetLocals : GetLocals) = struct
 
   and type_paraml ?(forbid_this = false) env tparams =
     let _, ret = List.fold_left tparams ~init:(SMap.empty, [])
-      ~f:(fun (seen, tparaml) ((_, (p, name), _) as tparam) ->
+      ~f:(fun (seen, tparaml) ((_, (p, name), _, _) as tparam) ->
         match SMap.get name seen with
         | None ->
           SMap.add name p seen, (type_param ~forbid_this env tparam)::tparaml
@@ -1320,10 +1320,11 @@ module Make (GetLocals : GetLocals) = struct
     in
     List.rev ret
 
-  and type_param ~forbid_this env (variance, param_name, cstr_list) =
+  and type_param ~forbid_this env (variance, param_name, cstr_list, reified) =
     variance,
     param_name,
-    List.map cstr_list (constraint_ ~forbid_this env)
+    List.map cstr_list (constraint_ ~forbid_this env),
+    reified
 
   and type_where_constraints env locl_cstrl =
     List.map locl_cstrl (fun (h1, ck, h2) ->
@@ -1804,13 +1805,13 @@ module Make (GetLocals : GetLocals) = struct
 
   and make_constraints paraml =
     List.fold_right paraml ~init:SMap.empty
-      ~f:begin fun (_, (_, x), cstr_list) acc ->
+      ~f:begin fun (_, (_, x), cstr_list, _) acc ->
         SMap.add x cstr_list acc
       end
 
   and extend_params genv paraml =
     let params = List.fold_right paraml ~init:genv.type_params
-      ~f:begin fun (_, (_, x), cstr_list) acc ->
+      ~f:begin fun (_, (_, x), cstr_list, _) acc ->
         SMap.add x cstr_list acc
       end in
     { genv with type_params = params }

@@ -523,7 +523,7 @@ and typedef_type = {
 }
 
 and 'phase tparam =
-  Ast.variance * Ast.id * (Ast.constraint_kind * 'phase ty) list
+  Ast.variance * Ast.id * (Ast.constraint_kind * 'phase ty) list * Ast.reified
 
 and 'phase where_constraint =
   'phase ty * Ast.constraint_kind * 'phase ty

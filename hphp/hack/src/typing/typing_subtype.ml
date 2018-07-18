@@ -64,7 +64,7 @@ module ConditionTypes = struct
       | Some (((p, _) as sid), cls) ->
       let params =
         Core_list.map cls.tc_tparams
-          ~f:(fun (_, (p, x), _) -> Reason.Rwitness p, Tgeneric x) in
+          ~f:(fun (_, (p, x), _, _) -> Reason.Rwitness p, Tgeneric x) in
       let subst =
         Decl_instantiate.make_subst cls.tc_tparams [] in
       let ty = Reason.Rwitness p, (Tapply (sid, params)) in
@@ -579,7 +579,7 @@ and simplify_subtype_variance
   | [], _, _
   | _, [], _
   | _, _, [] -> res
-  | (variance,_,_) :: tparams, child :: childrenl, super :: superl ->
+  | (variance,_,_,_) :: tparams, child :: childrenl, super :: superl ->
     let res =
       begin match variance with
       | Ast.Covariant ->
@@ -1700,7 +1700,7 @@ let subtype_method
    * subtyping in the context of the ft_super constraints. But we'd better
    * restore tpenv afterwards *)
   let add_tparams_constraints env (tparams: locl tparam list) =
-    let add_bound env (_, (pos, name), cstrl) =
+    let add_bound env (_, (pos, name), cstrl, _) =
       List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
         let tparam_ty = (Reason.Rwitness pos,
           Tabstract(AKgeneric name, None)) in
@@ -1731,7 +1731,7 @@ let subtype_method
 
   (* This is (3) above *)
   let check_tparams_constraints env tparams =
-  let check_tparam_constraints env (_var, (p, name), cstrl) =
+  let check_tparam_constraints env (_var, (p, name), cstrl, _) =
     List.fold_left cstrl ~init:env ~f:begin fun env (ck, cstr_ty) ->
       let tgeneric = (Reason.Rwitness p, Tabstract (AKgeneric name, None)) in
       Typing_generic_constraint.check_constraint env ck cstr_ty tgeneric

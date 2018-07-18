@@ -66,7 +66,7 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     fun acc _ {ft_params; ft_tparams; ft_ret; _} ->
     let acc = List.fold_left ~f:this#on_type ~init:acc
       (List.map ft_params (fun x -> x.fp_type)) in
-    let tparams = List.map ft_tparams (fun (_, _, x) -> List.map x snd) in
+    let tparams = List.map ft_tparams (fun (_, _, x, _) -> List.map x snd) in
     let acc = List.fold_left tparams ~f:(fun acc tp ->
       List.fold ~f:this#on_type ~init:acc tp) ~init:acc in
     this#on_type acc ft_ret

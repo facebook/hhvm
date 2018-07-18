@@ -557,7 +557,7 @@ let in_var env ty =
   let env = Env.add env x ty in
   env, (fst ty, Tvar x)
 
-let unresolved_tparam env (_, (pos, _), _) =
+let unresolved_tparam env (_, (pos, _), _, _) =
   let reason = Reason.Rwitness pos in
   in_var env (reason, Tunresolved [])
 
@@ -638,8 +638,8 @@ let class_is_final_and_not_contravariant class_ty =
     List.for_all
       class_ty.tc_tparams
       ~f:(begin function
-          (Ast.Invariant | Ast.Covariant), _, _ -> true
-          | _, _, _ -> false
+          (Ast.Invariant | Ast.Covariant), _, _, _ -> true
+          | _, _, _, _ -> false
           end)
 
 (*****************************************************************************)

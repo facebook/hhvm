@@ -2158,6 +2158,7 @@ and pTParaml : tparam list parser = fun node env ->
         )
       , pos_name type_name env
       , couldMap ~f:pTConstraint type_constraints env
+      , false (* reified *)
       )
     | _ -> missing_syntax "type parameter" node env
   in

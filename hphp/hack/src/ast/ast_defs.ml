@@ -31,6 +31,8 @@ and constraint_kind =
   | Constraint_eq
   | Constraint_super
 
+and reified = bool
+
 and class_kind =
   | Cabstract
   | Cnormal

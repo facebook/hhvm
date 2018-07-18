@@ -68,7 +68,7 @@ and instantiate_ subst x =
       | _ -> Toption ty
       )
   | Tfun ft ->
-      let subst = List.fold_left ~f:begin fun subst (_, (_, x), _) ->
+      let subst = List.fold_left ~f:begin fun subst (_, (_, x), _, _) ->
         SMap.remove x subst
       end ~init:subst ft.ft_tparams in
       let params = List.map ft.ft_params begin fun param ->
@@ -82,9 +82,9 @@ and instantiate_ subst x =
         | Fellipsis _ | Fstandard _ as x -> x
       in
       let ret = instantiate subst ft.ft_ret in
-      let tparams = List.map ft.ft_tparams begin fun (var, name, cstrl) ->
+      let tparams = List.map ft.ft_tparams begin fun (var, name, cstrl, reified) ->
         (var, name, List.map cstrl
-           (fun (ck, ty) -> (ck, instantiate subst ty))) end in
+           (fun (ck, ty) -> (ck, instantiate subst ty)), reified) end in
       let where_constraints = List.map ft.ft_where_constraints
           begin (fun (ty1, ck, ty2) ->
             (instantiate subst ty1, ck, instantiate subst ty2)) end in

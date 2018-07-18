@@ -202,7 +202,7 @@ let check_params_instantiable (env:Env.env) (params:Nast.fun_param list)=
   List.iter params ~f:(check_param_instantiable env)
 
 let check_tparams_instantiable (env:Env.env) (tparams:Nast.tparam list) =
-  List.iter tparams ~f:begin fun (_variance, _sid, cstrl) ->
+  List.iter tparams ~f:begin fun (_variance, _sid, cstrl, _) ->
     List.iter cstrl ~f:begin fun (_ck, h) -> check_instantiable env h end
   end
 

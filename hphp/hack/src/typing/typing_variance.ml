@@ -265,7 +265,7 @@ let flip reason = function
 (* Given a type parameter, returns the variance inferred. *)
 (*****************************************************************************)
 
-let get_tparam_variance env (_, (_, tparam_name), _) =
+let get_tparam_variance env (_, (_, tparam_name), _, _) =
   match SMap.get tparam_name env with
   | None -> Vboth
   | Some x -> x
@@ -274,7 +274,7 @@ let get_tparam_variance env (_, (_, tparam_name), _) =
 (* Given a type parameter, returns the variance declared. *)
 (*****************************************************************************)
 
-let make_tparam_variance (variance, (pos, _), _) =
+let make_tparam_variance (variance, (pos, _), _, _) =
   make_variance Rtype_parameter pos variance
 
 (*****************************************************************************)
@@ -308,7 +308,7 @@ let check_variance env tparam =
 let check_final_this_pos_variance env_variance rpos class_ty =
   if class_ty.tc_final then
     List.iter class_ty.tc_tparams
-      begin fun (typar_variance, id, _) ->
+      begin fun (typar_variance, id, _, _) ->
         match env_variance, typar_variance with
         | Vcontravariant(_), (Ast.Covariant | Ast.Contravariant)  ->
            (Errors.contravariant_this
@@ -404,7 +404,7 @@ and class_method tcopt root static _method_name method_ env =
       match method_.ce_type with
       | lazy (_, Tfun { ft_tparams; ft_params; ft_ret; _ }) ->
           let env = List.fold_left ft_tparams
-            ~f:begin fun env (_, (_, tparam_name), _) ->
+            ~f:begin fun env (_, (_, tparam_name), _, _) ->
               SMap.remove tparam_name env
             end ~init:env in
           let env = List.fold_left
@@ -421,7 +421,7 @@ and fun_param tcopt root static env { fp_type = (reason, _ as ty); _ } =
   let variance = Vcontravariant [reason_contravariant] in
   type_ tcopt root variance env ty
 
-and fun_tparam tcopt root env (_, _, cstrl) =
+and fun_tparam tcopt root env (_, _, cstrl, _) =
   List.fold_left ~f:(constraint_ tcopt root) ~init:env cstrl
 
 and fun_ret tcopt root static env (reason, _ as ty) =

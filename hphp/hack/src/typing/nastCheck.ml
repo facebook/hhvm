@@ -508,7 +508,7 @@ and func ~is_efun env f named_body =
     env
     named_body.fnb_nast
 
-and tparam env (_, _, cstrl) =
+and tparam env (_, _, cstrl, _) =
   List.iter cstrl (fun (_, h) -> hint env h)
 
 and hint env (p, h) =
@@ -579,16 +579,16 @@ and check_happly unchecked_tparams env h =
   let env = { env with Env.pos = (fst h) } in
   let decl_ty = Decl_hint.hint env.Env.decl_env h in
   let unchecked_tparams =
-    List.map unchecked_tparams begin fun (v, sid, cstrl) ->
+    List.map unchecked_tparams begin fun (v, sid, cstrl, reified) ->
       let cstrl = List.map cstrl (fun (ck, cstr) ->
             let cstr = Decl_hint.hint env.Env.decl_env cstr in
             (ck, cstr)) in
-      (v, sid, cstrl)
+      (v, sid, cstrl, reified)
     end in
   let tyl =
     List.map
       unchecked_tparams
-      (fun (_, (p, _), _) -> Reason.Rwitness p, Tany) in
+      (fun (_, (p, _), _, _) -> Reason.Rwitness p, Tany) in
   let subst = Inst.make_subst unchecked_tparams tyl in
   let decl_ty = Inst.instantiate subst decl_ty in
   match decl_ty with
@@ -608,7 +608,7 @@ and check_happly unchecked_tparams env h =
                   { (Phase.env_with_self env) with
                     substs = Subst.make tc_tparams tyl;
                   } in
-                iter2_shortest begin fun (_, (p, x), cstrl) ty ->
+                iter2_shortest begin fun (_, (p, x), cstrl, _) ty ->
                   List.iter cstrl (fun (ck, cstr_ty) ->
                       let r = Reason.Rwitness p in
                       let env, cstr_ty = Phase.localize ~ety_env env cstr_ty in
@@ -872,7 +872,7 @@ and check_no_class_tparams class_tparams (pos, ty)  =
   let check_tparams = check_no_class_tparams class_tparams in
   let maybe_check_tparams = maybe check_no_class_tparams class_tparams in
   let matches_class_tparam tp_name =
-    List.iter class_tparams begin fun (_, (c_tp_pos, c_tp_name), _) ->
+    List.iter class_tparams begin fun (_, (c_tp_pos, c_tp_name), _, _) ->
       if c_tp_name = tp_name
       then Errors.typeconst_depends_on_external_tparam pos c_tp_pos c_tp_name
     end in

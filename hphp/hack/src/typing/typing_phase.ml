@@ -208,7 +208,7 @@ and localize_tparams ~ety_env env pos tyl tparams =
   let tyl, tparams = List.take tyl length, List.take tparams length in
   List.map2_env env tyl tparams (localize_tparam ~ety_env pos)
 
-and localize_tparam ~ety_env pos env ty (_, (_, name), cstrl) =
+and localize_tparam ~ety_env pos env ty (_, (_, name), cstrl, _) =
   match ty with
     | r, Tapply ((_, x), _argl) when x = SN.Typehints.wildcard ->
       let env, name = Env.add_fresh_generic_parameter env name in
@@ -271,7 +271,7 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
       let ft_subst = Subst.make ft.ft_tparams tvarl in
       env, SMap.union ft_subst ety_env.substs
     else
-      env, List.fold_left ft.ft_tparams ~f:begin fun subst (_, (_, x), _) ->
+      env, List.fold_left ft.ft_tparams ~f:begin fun subst (_, (_, x), _, _) ->
         SMap.remove x subst
       end ~init:ety_env.substs
   in
@@ -282,7 +282,7 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
   end in
 
   (* Localize the constraints for a type parameter declaration *)
-  let localize_tparam env (var, name, cstrl) =
+  let localize_tparam env (var, name, cstrl, reified) =
     let env, cstrl = List.map_env env cstrl begin fun env (ck, ty) ->
       let env, ty = localize ~ety_env env ty in
       let name_str = snd name in
@@ -300,7 +300,7 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
         Env.add_upper_bound (Env.add_lower_bound env name_str ty) name_str ty in
       env, (ck, ty)
     end in
-    env, (var, name, cstrl)
+    env, (var, name, cstrl, reified)
   in
 
   let localize_where_constraint env (ty1, ck, ty2) =
@@ -373,7 +373,7 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
  * function's body.
  *)
 and check_tparams_constraints ~use_pos ~ety_env env tparams =
-  let check_tparam_constraints env (_variance, id, cstrl) =
+  let check_tparam_constraints env (_variance, id, cstrl, _) =
     List.fold_left cstrl ~init:env ~f:begin fun env (ck, ty) ->
       let env, ty = localize ~ety_env env ty in
       match SMap.get (snd id) ety_env.substs with
@@ -442,7 +442,7 @@ and hint_locl env h =
 let localize_generic_parameters_with_bounds
     ~ety_env (env:Env.env) (tparams:Nast.tparam list) =
   let env = Env.add_generic_parameters env tparams in
-  let localize_bound env ((_var, (pos,name), cstrl): Nast.tparam) =
+  let localize_bound env ((_var, (pos,name), cstrl, _): Nast.tparam) =
     let tparam_ty = (Reason.Rwitness pos, Tabstract(AKgeneric name, None)) in
     List.map_env env cstrl (fun env (ck, h) ->
       let env, ty = localize env (Decl_hint.hint env.Env.decl_env h) ~ety_env in

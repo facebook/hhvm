@@ -184,8 +184,8 @@ let rec ty (p, x) =
       ttc_origin = tc.ttc_origin;
     }
 
-  and type_param (variance, sid, x) =
-    variance, string_id sid, constraint_ x
+  and type_param (variance, sid, x, reified) =
+    variance, string_id sid, constraint_ x, reified
 
   and class_type dc =
     { dc_final                 = dc.dc_final                          ;

@@ -30,7 +30,7 @@ let make tparams tyl =
   (* We tolerate missing types in silent_mode. When that happens, we bind
    * all the parameters we can, and bind the remaining ones to "Tany".
    *)
-  let make_subst_tparam subst tyl (_, (_, tparam_name), _) =
+  let make_subst_tparam subst tyl (_, (_, tparam_name), _, _) =
     let ty =
       match !tyl with
       | [] -> Reason.Rnone, Tany

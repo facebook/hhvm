@@ -96,8 +96,8 @@ let expand_ty env ty =
     | AKnewtype(n, tyl) -> AKnewtype(n, exp_tys tyl)
     | AKenum _ | AKgeneric _ | AKdependent _ -> ak
 
-  and exp_tparam (var, id, cstrs) =
-    (var, id, List.map (fun (ck, ty) -> (ck, exp_ty ty)) cstrs)
+  and exp_tparam (var, id, cstrs, reified) =
+    (var, id, List.map (fun (ck, ty) -> (ck, exp_ty ty)) cstrs, reified)
 
   and exp_where_constraint (ty1, ck, ty2) = (exp_ty ty1, ck, exp_ty ty2) in
   exp_ty ty

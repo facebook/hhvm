@@ -135,7 +135,7 @@ let from_ast_wrapper : bool -> _ ->
       let tparam_names =
         List.fold_left ast_method.Ast.m_tparams
           ~init:SSet.empty
-          ~f:(fun acc (_, (_, n), _) -> SSet.add n acc) in
+          ~f:(fun acc (_, (_, n), _, _) -> SSet.add n acc) in
       List.iter ast_method.Ast.m_params (fun p ->
         if List.length (
           List.filter ast_class.Ast.c_body

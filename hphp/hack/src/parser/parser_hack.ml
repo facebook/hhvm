@@ -1018,24 +1018,24 @@ and class_param env =
       then class_param_error env
       else
         let parameter_name, parameter_constraint = class_param_name env in
-        Covariant, parameter_name, parameter_constraint
+        Covariant, parameter_name, parameter_constraint, false
   | Tminus ->
       if L.token env.file env.lb <> Tword
       then class_param_error env
       else
         let parameter_name, parameter_constraint = class_param_name env in
-        Contravariant, parameter_name, parameter_constraint
+        Contravariant, parameter_name, parameter_constraint, false
   | Tword ->
       let parameter_name, parameter_constraint = class_param_name env in
       let variance = Invariant in
-      variance, parameter_name, parameter_constraint
+      variance, parameter_name, parameter_constraint, false
   | _ ->
       class_param_error env
 
 and class_param_error env =
   error_expect env "type parameter";
   let parameter_name = Pos.make env.file env.lb, "T*unknown*" in
-  Invariant, parameter_name, []
+  Invariant, parameter_name, [], false
 
 and class_param_name env =
   let parameter_name = Pos.make env.file env.lb, Lexing.lexeme env.lb in

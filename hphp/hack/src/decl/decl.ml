@@ -342,8 +342,8 @@ and fun_decl_in_env env f =
   } in
   ft
 
-and type_param env (variance, x, cstrl) =
-  variance, x, List.map cstrl (fun (ck, h) -> (ck, Decl_hint.hint env h))
+and type_param env (variance, x, cstrl, reified) =
+  variance, x, List.map cstrl (fun (ck, h) -> (ck, Decl_hint.hint env h)), reified
 
 and where_constraint env (ty1, ck, ty2) =
   (Decl_hint.hint env ty1, ck, Decl_hint.hint env ty2)

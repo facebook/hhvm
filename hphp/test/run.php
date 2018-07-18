@@ -1319,6 +1319,7 @@ class Status {
 
   private static $use_color = false;
 
+  public static $nofork = false;
   private static $queue = null;
   private static $killed = false;
   public static $key;
@@ -1327,6 +1328,11 @@ class Status {
   private static $overall_end_time = 0;
 
   private static $tempdir = "";
+
+  public static $passed = 0;
+  public static $skipped = 0;
+  public static $skip_reasons = array();
+  public static $failed = 0;
 
   const MODE_NORMAL = 0;
   const MODE_VERBOSE = 1;
@@ -1465,8 +1471,132 @@ class Status {
     self::send(self::MSG_TEST_FAIL, array($test, $time, $stime, $etime));
   }
 
+  public static function handle_message($type, $message) {
+    switch ($type) {
+      case Status::MSG_STARTED:
+        break;
+
+      case Status::MSG_FINISHED:
+        return false;
+
+      case Status::MSG_SERVER_RESTARTED:
+        switch (Status::getMode()) {
+          case Status::MODE_NORMAL:
+            if (!Status::hasCursorControl()) {
+              Status::sayColor(Status::RED, 'x');
+            }
+            break;
+
+          case Status::MODE_VERBOSE:
+            Status::sayColor("$test ", Status::YELLOW, "failed",
+                             " to talk to server\n");
+            break;
+
+          case Status::MODE_TESTPILOT:
+            break;
+
+          case Status::MODE_RECORD_FAILURES:
+            break;
+        }
+
+      case Status::MSG_TEST_PASS:
+        self::$passed++;
+        list($test, $how, $time, $stime, $etime) = $message;
+        switch (Status::getMode()) {
+          case Status::MODE_NORMAL:
+            if (!Status::hasCursorControl()) {
+              if ($how == Status::SKIP_SERVER) {
+                Status::sayColor(Status::RED, '.');
+              } else {
+                Status::sayColor(Status::GREEN,
+                                 $how == Status::PASS_SERVER ? ',' : '.');
+              }
+            }
+            break;
+
+          case Status::MODE_VERBOSE:
+            Status::sayColor("$test ", Status::GREEN,
+                             sprintf("passed (%.2fs)\n", $time));
+            break;
+
+          case Status::MODE_TESTPILOT:
+            Status::sayTestpilot($test, 'passed', $stime, $etime);
+            break;
+
+          case Status::MODE_RECORD_FAILURES:
+            break;
+        }
+        break;
+
+      case Status::MSG_TEST_SKIP:
+        self::$skipped++;
+        list($test, $reason, $time, $stime, $etime) = $message;
+        self::$skip_reasons[$reason]++;
+
+        switch (Status::getMode()) {
+          case Status::MODE_NORMAL:
+            if (!Status::hasCursorControl()) {
+              Status::sayColor(Status::YELLOW, 's');
+            }
+            break;
+
+          case Status::MODE_VERBOSE:
+            Status::sayColor("$test ", Status::YELLOW, "skipped");
+
+            if ($reason !== null) {
+              Status::sayColor(" - $reason");
+            }
+            Status::sayColor(sprintf(" (%.2fs)\n", $time));
+            break;
+
+          case Status::MODE_TESTPILOT:
+            Status::sayTestpilot($test, 'not_relevant', $stime, $etime);
+            break;
+
+          case Status::MODE_RECORD_FAILURES:
+            break;
+        }
+        break;
+
+      case Status::MSG_TEST_FAIL:
+        self::$failed++;
+        list($test, $time, $stime, $etime) = $message;
+        switch (Status::getMode()) {
+          case Status::MODE_NORMAL:
+            if (Status::hasCursorControl()) {
+              print "\033[2K\033[1G";
+            }
+            $diff = (string)@file_get_contents($test.'.diff');
+            Status::sayColor(Status::RED, "\nFAILED",
+                             ": $test\n$diff\n");
+            break;
+
+          case Status::MODE_VERBOSE:
+            Status::sayColor("$test ", Status::RED,
+                             sprintf("FAILED (%.2fs)\n", $time));
+            break;
+
+          case Status::MODE_TESTPILOT:
+            Status::sayTestpilot($test, 'failed', $stime, $etime);
+            break;
+
+          case Status::MODE_RECORD_FAILURES:
+            break;
+        }
+        break;
+
+      default:
+        error("Unknown message $type");
+    }
+    return true;
+  }
+
   private static function send($type, $msg) {
     if (self::$killed) {
+      return;
+    }
+    if (self::$nofork) {
+      self::handle_message($type, $msg);
       return;
     }
     msg_send(self::getQueue(), $type, $msg);
@@ -2690,11 +2820,6 @@ function print_commands($tests, $options) {
 }
 
 function msg_loop($num_tests, $queue) {
-  $passed = 0;
-  $skipped = 0;
-  $skip_reasons = array();
-  $failed = 0;
-
   $do_progress =
     (
       Status::getMode() === Status::MODE_NORMAL ||
@@ -2721,130 +2846,15 @@ function msg_loop($num_tests, $queue) {
       error("msg_receive failed");
     }
 
-    switch ($type) {
-      case Status::MSG_STARTED:
-        break;
-
-      case Status::MSG_FINISHED:
-        break 2;
-
-      case Status::MSG_SERVER_RESTARTED:
-        switch (Status::getMode()) {
-          case Status::MODE_NORMAL:
-            if (!Status::hasCursorControl()) {
-              Status::sayColor(Status::RED, 'x');
-            }
-            break;
-
-          case Status::MODE_VERBOSE:
-            Status::sayColor("$test ", Status::YELLOW, "failed",
-                             " to talk to server\n");
-            break;
-
-          case Status::MODE_TESTPILOT:
-            break;
-
-          case Status::MODE_RECORD_FAILURES:
-            break;
-        }
-
-      case Status::MSG_TEST_PASS:
-        $passed++;
-        list($test, $how, $time, $stime, $etime) = $message;
-        switch (Status::getMode()) {
-          case Status::MODE_NORMAL:
-            if (!Status::hasCursorControl()) {
-              if ($how == Status::SKIP_SERVER) {
-                Status::sayColor(Status::RED, '.');
-              } else {
-                Status::sayColor(Status::GREEN,
-                                 $how == Status::PASS_SERVER ? ',' : '.');
-              }
-            }
-            break;
-
-          case Status::MODE_VERBOSE:
-            Status::sayColor("$test ", Status::GREEN,
-                             sprintf("passed (%.2fs)\n", $time));
-            break;
-
-          case Status::MODE_TESTPILOT:
-            Status::sayTestpilot($test, 'passed', $stime, $etime);
-            break;
-
-          case Status::MODE_RECORD_FAILURES:
-            break;
-        }
-        break;
-
-      case Status::MSG_TEST_SKIP:
-        $skipped++;
-        list($test, $reason, $time, $stime, $etime) = $message;
-        $skip_reasons[$reason]++;
-
-        switch (Status::getMode()) {
-          case Status::MODE_NORMAL:
-            if (!Status::hasCursorControl()) {
-              Status::sayColor(Status::YELLOW, 's');
-            }
-            break;
-
-          case Status::MODE_VERBOSE:
-            Status::sayColor("$test ", Status::YELLOW, "skipped");
-
-            if ($reason !== null) {
-              Status::sayColor(" - $reason");
-            }
-            Status::sayColor(sprintf(" (%.2fs)\n", $time));
-            break;
-
-          case Status::MODE_TESTPILOT:
-            Status::sayTestpilot($test, 'not_relevant', $stime, $etime);
-            break;
-
-          case Status::MODE_RECORD_FAILURES:
-            break;
-        }
-        break;
-
-      case Status::MSG_TEST_FAIL:
-        $failed++;
-        list($test, $time, $stime, $etime) = $message;
-        switch (Status::getMode()) {
-          case Status::MODE_NORMAL:
-            if (Status::hasCursorControl()) {
-              print "\033[2K\033[1G";
-            }
-            $diff = (string)@file_get_contents($test.'.diff');
-            Status::sayColor(Status::RED, "\nFAILED",
-                             ": $test\n$diff\n");
-            break;
-
-          case Status::MODE_VERBOSE:
-            Status::sayColor("$test ", Status::RED,
-                             sprintf("FAILED (%.2fs)\n", $time));
-            break;
-
-          case Status::MODE_TESTPILOT:
-            Status::sayTestpilot($test, 'failed', $stime, $etime);
-            break;
-
-          case Status::MODE_RECORD_FAILURES:
-            break;
-        }
-        break;
-
-      default:
-        error("Unknown message $type");
-    }
+    if (!Status::handle_message($type, $message)) break;
 
     if ($do_progress) {
-      $total_run = ($skipped + $failed + $passed);
+      $total_run = (Status::$skipped + Status::$failed + Status::$passed);
       $bar_cols = ($cols - 45);
 
-      $passed_ticks  = round($bar_cols * ($passed  / $num_tests));
-      $skipped_ticks = round($bar_cols * ($skipped / $num_tests));
-      $failed_ticks  = round($bar_cols * ($failed  / $num_tests));
+      $passed_ticks  = round($bar_cols * (Status::$passed  / $num_tests));
+      $skipped_ticks = round($bar_cols * (Status::$skipped / $num_tests));
+      $failed_ticks  = round($bar_cols * (Status::$failed  / $num_tests));
 
       $fill = $bar_cols - ($passed_ticks + $skipped_ticks + $failed_ticks);
       if ($fill < 0) $fill = 0;
@@ -2855,21 +2865,22 @@ function msg_loop($num_tests, $queue) {
       $skipped_ticks = str_repeat('#', $skipped_ticks);
       $failed_ticks = str_repeat('#',  $failed_ticks);
 
-      print "\033[2K\033[1G[".
-        "\033[0;32m$passed_ticks".
-        "\033[33m$skipped_ticks".
-        "\033[31m$failed_ticks".
-        "\033[0m$fill] ($total_run/$num_tests) ".
-        "($skipped skipped, $failed failed)";
+      echo
+        "\033[2K\033[1G[",
+        "\033[0;32m$passed_ticks",
+        "\033[33m$skipped_ticks",
+        "\033[31m$failed_ticks",
+        "\033[0m$fill] ($total_run/$num_tests) ",
+        "(", Status::$skipped, " skipped,", Status::$failed, " failed)";
     }
   }
 
   if ($do_progress) {
     print "\033[2K\033[1G";
-    if ($skipped > 0) {
-      print "$skipped tests \033[1;33mskipped\033[0m\n";
-      arsort(&$skip_reasons);
-      foreach ($skip_reasons as $reason => $count) {
+    if (Status::$skipped > 0) {
+      print Status::$skipped ." tests \033[1;33mskipped\033[0m\n";
+      arsort(&Status::$skip_reasons);
+      foreach (Status::$skip_reasons as $reason => $count) {
         printf("%12s: %d\n", $reason, $count);
       }
     }
@@ -3406,71 +3417,80 @@ function main($argv) {
   Status::setUseColor(isset($options['color']) ? true : posix_isatty(STDOUT));
 
   Status::$key = rand();
-  $queue = Status::getQueue();
-  drain_queue($queue);
+  Status::$nofork = count($tests) == 1 && !$servers;
+  if (!Status::$nofork) {
+    $queue = Status::getQueue();
+    drain_queue($queue);
+  }
 
   Status::started();
   // Spawn off worker threads.
   $children = array();
   // A poor man's shared memory.
   $bad_test_files = array();
-  for ($i = 0; $i < $options['threads']; $i++) {
+  if (Status::$nofork) {
     $bad_test_file = tempnam('/tmp', 'test-run-');
     $bad_test_files[] = $bad_test_file;
-    $pid = pcntl_fork();
-    if ($pid == -1) {
-      error('could not fork');
-    } else if ($pid) {
-      $children[$pid] = $pid;
-    } else {
-      exit(run($options, $test_buckets[$i], $bad_test_file));
-    }
-  }
-
-  // Fork off a child to receive messages and print status, and have the parent
-  // wait for all children to exit.
-  $printer_pid = pcntl_fork();
-  if ($printer_pid == -1) {
-    error("failed to fork");
-  } else if ($printer_pid == 0) {
-    msg_loop(count($tests), $queue);
-    return 0;
-  }
-
-  // In case we exit in a crazy way, have the parent blow up the queue.
-  // Do this here so no children inherit this.
-  $kill_queue = function() { Status::killQueue(); };
-  register_shutdown_function($kill_queue);
-  pcntl_signal(SIGTERM, $kill_queue);
-  pcntl_signal(SIGINT, $kill_queue);
-
-  $return_value = 0;
-  while (count($children) && $printer_pid != 0) {
-    $pid = pcntl_wait(&$status);
-    if (!pcntl_wifexited($status) && !pcntl_wifsignaled($status)) {
-      error("Unexpected exit status from child");
-    }
-
-    if ($pid == $printer_pid) {
-      // We should be finishing up soon.
-      $printer_pid = 0;
-    } else if (isset($servers['pids'][$pid])) {
-      // A server crashed. Restart it.
-      if (getenv('HHVM_TEST_SERVER_LOG')) {
-        echo "\nServer $pid crashed. Restarting.\n";
+    $return_value = run($options, $test_buckets[$i], $bad_test_file);
+  } else {
+    for ($i = 0; $i < $options['threads']; $i++) {
+      $bad_test_file = tempnam('/tmp', 'test-run-');
+      $bad_test_files[] = $bad_test_file;
+      $pid = pcntl_fork();
+      if ($pid == -1) {
+        error('could not fork');
+      } else if ($pid) {
+        $children[$pid] = $pid;
+      } else {
+        exit(run($options, $test_buckets[$i], $bad_test_file));
       }
-      Status::serverRestarted();
-      $server =& $servers['pids'][$pid];
-      $server = start_server_proc($options, $server['config'], $server['port']);
+    }
 
-      // Unset the old $pid entry and insert the new one.
-      unset($servers['pids'][$pid]);
-      $servers['pids'][$server['pid']] =& $server;
-      unset($server);
-    } elseif (isset($children[$pid])) {
-      unset($children[$pid]);
-      $return_value |= pcntl_wexitstatus($status);
-    } // Else, ignorable signal
+    // Fork off a child to receive messages and print status, and have the parent
+    // wait for all children to exit.
+    $printer_pid = pcntl_fork();
+    if ($printer_pid == -1) {
+      error("failed to fork");
+    } else if ($printer_pid == 0) {
+      msg_loop(count($tests), $queue);
+      return 0;
+    }
+
+    // In case we exit in a crazy way, have the parent blow up the queue.
+    // Do this here so no children inherit this.
+    $kill_queue = function() { Status::killQueue(); };
+    register_shutdown_function($kill_queue);
+    pcntl_signal(SIGTERM, $kill_queue);
+    pcntl_signal(SIGINT, $kill_queue);
+
+    $return_value = 0;
+    while (count($children) && $printer_pid != 0) {
+      $pid = pcntl_wait(&$status);
+      if (!pcntl_wifexited($status) && !pcntl_wifsignaled($status)) {
+        error("Unexpected exit status from child");
+      }
+
+      if ($pid == $printer_pid) {
+        // We should be finishing up soon.
+        $printer_pid = 0;
+      } else if (isset($servers['pids'][$pid])) {
+        // A server crashed. Restart it.
+        if (getenv('HHVM_TEST_SERVER_LOG')) {
+          echo "\nServer $pid crashed. Restarting.\n";
+        }
+        Status::serverRestarted();
+        $server =& $servers['pids'][$pid];
+        $server = start_server_proc($options, $server['config'], $server['port']);
+
+        // Unset the old $pid entry and insert the new one.
+        unset($servers['pids'][$pid]);
+        $servers['pids'][$server['pid']] =& $server;
+        unset($server);
+      } elseif (isset($children[$pid])) {
+        unset($children[$pid]);
+        $return_value |= pcntl_wexitstatus($status);
+      } // Else, ignorable signal
+    }
   }
 
   Status::finished();
@@ -3529,6 +3549,7 @@ function main($argv) {
     file_put_contents($fail_file, implode("\n", $failed_tests));
   } else if (isset($options['testpilot'])) {
     Status::say(array('op' => 'all_done', 'results' => $results));
+    return $return_value;
   } else if (!$return_value) {
     print_success($tests, $results, $options);
   } else {

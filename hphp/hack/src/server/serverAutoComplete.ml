@@ -43,7 +43,8 @@ let auto_complete
 
 let context_xhp_classname_regex = Str.regexp ".*<[a-zA-Z_0-9:]*$"
 let context_xhp_member_regex = Str.regexp ".*->[a-zA-Z_0-9:]*$"
-let context_after_single_colon_regex = Str.regexp ".*[a-zA-Z_0-9]:$"
+(* For identifying case statements from text context *)
+let context_after_single_colon_regex = Str.regexp ".*[a-zA-Z_0-9\"']:$"
 
 let get_autocomplete_context
     (content:string)

@@ -700,14 +700,17 @@ let handle_mode
   match mode with
   | Ai _ -> ()
   | Autocomplete ->
+      let token = "AUTO332" in
+      let token_len = String.length token in
       let file = cat (Relative_path.to_absolute filename) in
-      let autocomplete_context = { AutocompleteTypes.
-        is_xhp_classname = false;
-        is_instance_member = false;
-        is_after_single_colon = false;
-      } in (* feature not implemented here; it only works for LSP *)
-      let result = ServerAutoComplete.auto_complete
-        ~tcopt ~delimit_on_namespaces:false ~autocomplete_context file in
+      (* Search backwards: there should only be one /real/ case. If there's multiple, *)
+      (* guess that the others are preceding explanation comments *)
+      let offset = Str.search_backward (Str.regexp token) file (String.length file) in
+      let pos = File_content.offset_to_position file offset in
+      let file = (Str.string_before file offset) ^ (Str.string_after file (offset + token_len)) in
+
+      let result = ServerAutoComplete.auto_complete_at_position
+        ~tcopt ~pos ~delimit_on_namespaces:false ~file_content:file in
       List.iter ~f: begin fun r ->
         let open AutocompleteTypes in
         Printf.printf "%s %s\n" r.res_name r.res_ty

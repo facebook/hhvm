@@ -969,10 +969,6 @@ and method_ (env, is_static) m =
 
   error_if_has_rx_on_scope env m.m_user_attributes;
 
-  (* Mutable async methods are not allowed *)
-  if m.m_fun_kind <> Ast.FSync && is_mutable then
-    Errors.mutable_async_method p;
-
   (* Mutable methods must be reactive *)
   if not env.is_reactive then begin
     if is_mutable

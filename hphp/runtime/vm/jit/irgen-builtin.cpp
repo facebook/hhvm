@@ -2239,6 +2239,31 @@ void emitMemoGet(IRGS& env, Offset relOffset, LocalRange keys) {
       );
     }
 
+    if (func->isMemoizeWrapperLSB()) {
+      /* For LSB memoization, we need the LSB class */
+      auto const lsbCls = gen(env, LdClsCtx, ldCtx(env));
+      if (keys.count > 0) {
+        return gen(
+          env,
+          MemoGetLSBCache,
+          MemoCacheStaticData { func, keys, types.data() },
+          taken,
+          retTy,
+          fp(env),
+          lsbCls
+        );
+      }
+      return gen(
+        env,
+        MemoGetLSBValue,
+        MemoValueStaticData { func },
+        taken,
+        retTy,
+        lsbCls
+      );
+    }
+
+    /* Static (non-LSB) Memoization */
     if (keys.count > 0) {
       return gen(
         env,
@@ -2323,6 +2348,30 @@ void emitMemoSet(IRGS& env, LocalRange keys) {
       ldVal(DataTypeGeneric)
     );
     return;
+  }
+
+  if (func->isMemoizeWrapperLSB()) {
+    /* For LSB memoization, we need the LSB class */
+    auto const lsbCls = gen(env, LdClsCtx, ldCtx(env));
+    if (keys.count > 0) {
+      gen(
+        env,
+        MemoSetLSBCache,
+        MemoCacheStaticData { func, keys, types.data() },
+        fp(env),
+        lsbCls,
+        ldVal(DataTypeGeneric)
+      );
+      return;
+    }
+
+    gen(
+      env,
+      MemoSetLSBValue,
+      MemoValueStaticData { func },
+      ldVal(DataTypeCountness),
+      lsbCls
+    );
   }
 
   if (keys.count > 0) {

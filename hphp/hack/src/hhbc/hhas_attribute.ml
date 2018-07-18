@@ -23,7 +23,7 @@ let arguments a = a.attribute_arguments
 let is_ s attr = (name attr) = s
 let has_ f attrs = List.exists attrs f
 
-let is_memoized = is_ "__Memoize"
+let is_memoized = (fun attr -> is_ "__Memoize" attr || is_ "__MemoizeLSB" attr)
 let is_native   = is_ "__Native"
 let is_foldable = is_ "__IsFoldable"
 let is_dynamically_callable = is_ "__DynamicallyCallable"

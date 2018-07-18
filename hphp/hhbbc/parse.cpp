@@ -1156,13 +1156,14 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->retTypeConstraint  = fe.retTypeConstraint;
   ret->originalFilename   = fe.originalFilename;
 
-  ret->top                = fe.top;
-  ret->isClosureBody      = fe.isClosureBody;
-  ret->isAsync            = fe.isAsync;
-  ret->isGenerator        = fe.isGenerator;
-  ret->isPairGenerator    = fe.isPairGenerator;
-  ret->isMemoizeWrapper   = fe.isMemoizeWrapper;
-  ret->isMemoizeImpl      = Func::isMemoizeImplName(fe.name);
+  ret->top                 = fe.top;
+  ret->isClosureBody       = fe.isClosureBody;
+  ret->isAsync             = fe.isAsync;
+  ret->isGenerator         = fe.isGenerator;
+  ret->isPairGenerator     = fe.isPairGenerator;
+  ret->isMemoizeWrapper    = fe.isMemoizeWrapper;
+  ret->isMemoizeWrapperLSB = fe.isMemoizeWrapperLSB;
+  ret->isMemoizeImpl       = Func::isMemoizeImplName(fe.name);
 
   add_frame_variables(*ret, fe);
 

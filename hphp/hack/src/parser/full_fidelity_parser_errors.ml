@@ -1001,6 +1001,50 @@ let is_param_by_ref node =
     is_byref_parameter_variable parameter_name
   | _ -> false
 
+let attribute_specification_contains node name =
+  match syntax node with
+  | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
+    Hh_core.List.exists (syntax_node_to_list attrs) ~f:begin fun n ->
+      match syntax n with
+      | ListItem {
+          list_item = { syntax = Attribute { attribute_name; _ }; _ }; _
+        } ->
+        begin match Syntax.extract_text attribute_name with
+        | Some n when n = name -> true
+        | _ -> false
+        end
+      | _ -> false
+    end
+  | _ -> false
+
+let methodish_contains_memoize_lsb node =
+  match syntax node with
+  | MethodishDeclaration { methodish_attribute = attr_spec; _ } ->
+    attribute_specification_contains attr_spec SN.UserAttributes.uaMemoizeLSB
+  | _ -> false
+
+let methodish_memoize_lsb_on_non_static node errors =
+  if methodish_contains_memoize_lsb node &&
+     not (methodish_contains_static node)
+  then
+    let e = make_error_from_node node SyntaxError.memoize_lsb_on_non_static
+    in e :: errors
+  else errors
+
+let function_declaration_contains_memoize_lsb node =
+  match syntax node with
+  | FunctionDeclaration { function_attribute_spec = attr_spec; _ } ->
+    attribute_specification_contains attr_spec SN.UserAttributes.uaMemoizeLSB
+  | _ -> false
+
+let function_declaration_header_memoize_lsb parents errors =
+  let node = List.hd parents in
+  if function_declaration_contains_memoize_lsb node
+  then
+    let e = make_error_from_node node SyntaxError.memoize_lsb_on_non_method
+    in e :: errors
+  else errors
+
 let special_method_param_errors node parents errors =
   match syntax node with
   | FunctionDeclarationHeader {function_name; function_parameter_list; _}
@@ -1055,6 +1099,8 @@ let methodish_errors env node parents errors =
      let errors =
        produce_error_for_header errors class_non_constructor_has_visibility_param
        node parents SyntaxError.error2010 function_parameter_list in
+     let errors =
+       function_declaration_header_memoize_lsb parents errors in
     errors
   | MethodishDeclaration md ->
     let header_node = md.methodish_function_decl_header in
@@ -1101,6 +1147,8 @@ let methodish_errors env node parents errors =
       produce_error errors
       methodish_abstract_conflict_with_final
       node (SyntaxError.error2019 class_name method_name) modifiers in
+    let errors =
+      methodish_memoize_lsb_on_non_static node errors in
     let errors =
       let async_annotation = Option.value (extract_async_node node)
         ~default:node in
@@ -1250,8 +1298,11 @@ let parameter_errors env node parents namespace_name names errors =
           make_error_from_node ~error_type:SyntaxError.RuntimeError
             node SyntaxError.inout_param_in_construct :: errors
           else errors in
-        let errors = if first_parent_function_attributes_contains
-              parents SN.UserAttributes.uaMemoize &&
+        let inMemoize = first_parent_function_attributes_contains
+          parents SN.UserAttributes.uaMemoize in
+        let inMemoizeLSB = first_parent_function_attributes_contains
+          parents SN.UserAttributes.uaMemoizeLSB in
+        let errors = if (inMemoize || inMemoizeLSB) &&
               not @@ is_immediately_in_lambda parents then
           make_error_from_node ~error_type:SyntaxError.RuntimeError
             node SyntaxError.memoize_with_inout :: errors
@@ -1513,6 +1564,10 @@ let no_memoize_attribute_on_lambda node errors =
         } ->
         begin match Syntax.extract_text attribute_name with
         | Some n when n = SN.UserAttributes.uaMemoize ->
+          let e =
+            make_error_from_node attr SyntaxError.memoize_on_lambda in
+          e::errors
+        | Some n when n = SN.UserAttributes.uaMemoizeLSB ->
           let e =
             make_error_from_node attr SyntaxError.memoize_on_lambda in
           e::errors

@@ -227,6 +227,17 @@ struct SPropCache { LowPtr<const Class> cls;
 struct StaticMemoValue { FuncId funcId; };
 struct StaticMemoCache { FuncId funcId; };
 
+struct LSBMemoValue {
+  LowPtr<const Class> cls;
+  FuncId funcId;
+};
+
+struct LSBMemoCache {
+  LowPtr<const Class> cls;
+  FuncId funcId;
+};
+
+
 using Symbol = boost::variant< StaticLocal
                              , ClsConstant
                              , StaticMethod
@@ -244,6 +255,8 @@ using Symbol = boost::variant< StaticLocal
                              , SPropCache
                              , StaticMemoValue
                              , StaticMemoCache
+                             , LSBMemoValue
+                             , LSBMemoCache
                              >;
 
 //////////////////////////////////////////////////////////////////////

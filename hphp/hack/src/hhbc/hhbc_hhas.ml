@@ -1405,6 +1405,8 @@ let add_body buf indent body =
   add_doc buf indent (Hhas_body.doc_comment body);
   if Hhas_body.is_memoize_wrapper body
   then add_indented_line buf indent ".ismemoizewrapper;";
+  if Hhas_body.is_memoize_wrapper_lsb body
+  then add_indented_line buf indent ".ismemoizewrapperlsb;";
   add_num_iters buf indent (Hhas_body.num_iters body);
   add_num_cls_ref_slots buf indent (Hhas_body.num_cls_ref_slots body);
   add_decl_vars buf indent (Hhas_body.decl_vars body);

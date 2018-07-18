@@ -490,7 +490,8 @@ and func ~is_efun env f named_body =
     fun x -> x.param_callconv = Some Ast.Pinout) in
   (match inout with
     | Some param ->
-      if Attributes.mem SN.UserAttributes.uaMemoize f.f_user_attributes
+      if Attributes.mem SN.UserAttributes.uaMemoize f.f_user_attributes ||
+         Attributes.mem SN.UserAttributes.uaMemoizeLSB f.f_user_attributes
       then Errors.inout_params_memoize p param.param_pos;
       if f.f_ret_by_ref then Errors.inout_params_ret_by_ref p param.param_pos;
       ()
@@ -935,7 +936,8 @@ and add_constraints pos tenv (cstrs: locl where_constraint list) =
   List.fold_left cstrs ~init:tenv ~f:(add_constraint pos)
 
 and check_static_memoized_function m =
-  if Attributes.mem SN.UserAttributes.uaMemoize m.m_user_attributes then
+  if Attributes.mem SN.UserAttributes.uaMemoize m.m_user_attributes ||
+     Attributes.mem SN.UserAttributes.uaMemoizeLSB m.m_user_attributes then
     Errors.static_memoized_function (fst m.m_name);
   ()
 
@@ -1000,7 +1002,8 @@ and method_ (env, is_static) m =
     fun x -> x.param_callconv = Some Ast.Pinout) in
   (match inout with
     | Some param ->
-      if Attributes.mem SN.UserAttributes.uaMemoize m.m_user_attributes
+      if Attributes.mem SN.UserAttributes.uaMemoize m.m_user_attributes ||
+         Attributes.mem SN.UserAttributes.uaMemoizeLSB m.m_user_attributes
       then Errors.inout_params_memoize p param.param_pos;
       if m.m_ret_by_ref then Errors.inout_params_ret_by_ref p param.param_pos;
       ()

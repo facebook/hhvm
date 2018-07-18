@@ -348,8 +348,10 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
             IterFree,
             GenericRetDecRefs,
             MemoSetStaticCache,
+            MemoSetLSBCache,
             MemoSetInstanceCache,
             MemoSetStaticValue,
+            MemoSetLSBValue,
             MemoSetInstanceValue);
   always_assert_flog(
     may_reenter_is_ok,
@@ -1181,18 +1183,22 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
 
   case MemoGetStaticValue:
+  case MemoGetLSBValue:
   case MemoGetInstanceValue:
     // Only reads the memo value (which isn't modeled here).
     return may_load_store(AEmpty, AEmpty);
 
   case MemoSetStaticValue:
+  case MemoSetLSBValue:
   case MemoSetInstanceValue:
     // Writes to the memo value (which isn't modeled), but can re-enter to run
     // a destructor.
     return may_reenter(inst, may_load_store(AEmpty, AEmpty));
 
   case MemoGetStaticCache:
-  case MemoSetStaticCache: {
+  case MemoGetLSBCache:
+  case MemoSetStaticCache:
+  case MemoSetLSBCache: {
     // Reads some (non-zero) set of locals for keys, and reads/writes from the
     // memo cache (which isn't modeled). The set can re-enter to run a
     // destructor.

@@ -255,7 +255,7 @@ void MethodStatement::onParseRecur(AnalysisResultConstRawPtr ar,
     }
     if (m_modifiers->isAbstract()) {
       if (!Option::WholeProgram &&
-          funcScope->userAttributes().count("__Memoize")) {
+          funcScope->hasMemoize()) {
         m_modifiers->parseTimeFatal(
           fileScope,
           "Abstract method %s::%s cannot be memoized",

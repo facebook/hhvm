@@ -737,6 +737,11 @@ struct Func final {
   bool isMemoizeWrapper() const;
 
   /*
+   * Is this func a memoization wrapper with LSB parameter set?
+   */
+  bool isMemoizeWrapperLSB() const;
+
+  /*
    * Is this string the name of a memoize implementation.
    */
   static bool isMemoizeImplName(const StringData*);
@@ -1249,6 +1254,7 @@ private:
     bool m_hasExtendedSharedData : 1;
     bool m_returnByValue : 1; // only for builtins
     bool m_isMemoizeWrapper : 1;
+    bool m_isMemoizeWrapperLSB : 1;
     bool m_isPhpLeafFn : 1;
     bool m_takesNumArgs : 1;
     // Needing more than 2 class ref slots basically doesn't happen, so just use

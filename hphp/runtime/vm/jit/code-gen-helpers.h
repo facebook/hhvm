@@ -265,6 +265,7 @@ void emitIncStat(Vout& v, Stats::StatCounter stat);
  * @requires: rds::isNormalHandle(ch)
  */
 Vreg checkRDSHandleInitialized(Vout& v, rds::Handle ch);
+Vreg checkRDSHandleInitialized(Vout& v, Vreg ch);
 
 /*
  * Update the generation number for `ch' to the current generation.
@@ -272,6 +273,7 @@ Vreg checkRDSHandleInitialized(Vout& v, rds::Handle ch);
  * @requires: rds::isNormalHandle(ch)
  */
 void markRDSHandleInitialized(Vout& v, rds::Handle ch);
+void markRDSHandleInitialized(Vout& v, Vreg ch);
 
 }}
 

@@ -698,10 +698,14 @@ bool canDCE(IRInstruction* inst) {
   case ProfileInstanceCheck:
   case MemoGetStaticValue:
   case MemoGetStaticCache:
+  case MemoGetLSBValue:
+  case MemoGetLSBCache:
   case MemoGetInstanceValue:
   case MemoGetInstanceCache:
   case MemoSetStaticValue:
   case MemoSetStaticCache:
+  case MemoSetLSBValue:
+  case MemoSetLSBCache:
   case MemoSetInstanceValue:
   case MemoSetInstanceCache:
   case KillClsRef:
@@ -1141,6 +1145,7 @@ void performActRecFixups(const BlockList& blocks,
        */
       case DecRef:
       case MemoSetStaticValue:
+      case MemoSetLSBValue:
       case MemoSetInstanceValue:
         if (inst.marker().func() != outerFunc) {
           ITRACE(3, "pushing stack depth of {} to {}\n", safeDepth, inst);

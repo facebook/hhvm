@@ -208,36 +208,83 @@ static void memoSetDecRefImpl(Cell newVal, Cell* oldVal) {
   cellSet(newVal, *oldVal);
 }
 
-void cgMemoGetStaticValue(IRLS& env, const IRInstruction* inst) {
+namespace {
+
+/* Get the Handle for the LSB memo value/cache for cls & func */
+Vreg getLSBMemoHandle(
+  IRLS& env,
+  const IRInstruction* inst,
+  Vreg cls,
+  const Func* func,
+  bool forValue
+) {
   auto& v = vmain(env);
-  auto const f = inst->extra<MemoGetStaticValue>()->func;
-  auto const cache = rds::bindStaticMemoValue(f);
-  auto const sf = checkRDSHandleInitialized(v, cache.handle());
-  fwdJcc(v, env, CC_NE, sf, inst->taken());
-  loadTV(v, inst->dst(), dstLoc(env, inst, 0), rvmtl()[cache.handle()]);
+
+  // Grab cls->m_lsbMemoExtra
+  auto const extra = v.makeReg();
+  v << load{cls[Class::extraOffset()], extra};
+
+  /* Load m_handles */
+  auto const handles = v.makeReg();
+  v << load{extra[Class::lsbMemoExtraHandlesOffset()], handles};
+
+  /* Pre-compute the slot */
+  auto const slot = func->baseCls()->lsbMemoSlot(func, forValue);
+
+  // Grab the handle
+  auto const handle = v.makeReg();
+  v << loadzlq{handles[sizeof(rds::Handle) * slot], handle};
+
+  return handle;
 }
 
-void cgMemoSetStaticValue(IRLS& env, const IRInstruction* inst) {
+Vptr getHandleAddr(rds::Handle handle) {
+  return rvmtl()[handle];
+}
+
+Vptr getHandleAddr(Vreg handle) {
+  return handle[rvmtl()];
+}
+
+/* HandleT may be either rds::Handle or VReg */
+template<typename HandleT>
+void doMemoGetValue(
+  IRLS& env,
+  const IRInstruction* inst,
+  HandleT handle
+) {
   auto& v = vmain(env);
-  auto const f = inst->extra<MemoSetStaticValue>()->func;
-  auto const val = inst->src(0);
-  auto const valLoc = srcLoc(env, inst, 0);
-  auto const cache = rds::bindStaticMemoValue(f);
+  auto const sf = checkRDSHandleInitialized(v, handle);
+  fwdJcc(v, env, CC_NE, sf, inst->taken());
+  loadTV(v, inst->dst(), dstLoc(env, inst, 0), getHandleAddr(handle));
+}
+
+template<typename HandleT>
+void doMemoSetValue(
+  IRLS& env,
+  const IRInstruction* inst,
+  HandleT handle,
+  Type memoTy,
+  uint32_t valIndex
+) {
+  auto& v = vmain(env);
+  auto const val = inst->src(valIndex);
+  auto const valLoc = srcLoc(env, inst, valIndex);
 
   // Store the value (overwriting any previous value)
-
-  auto const memoTy = typeFromRAT(f->repoReturnType(), f->cls()) & TInitCell;
   if (!memoTy.maybe(TCounted)) {
     assertx(!val->type().maybe(TCounted));
-    storeTV(v, rvmtl()[cache.handle()], valLoc, val);
-    markRDSHandleInitialized(v, cache.handle());
+    storeTV(v, getHandleAddr(handle), valLoc, val);
+    markRDSHandleInitialized(v, handle);
     return;
   }
 
-  auto const sf = checkRDSHandleInitialized(v, cache.handle());
+  auto const sf = checkRDSHandleInitialized(v, handle);
   unlikelyIfThenElse(
     v, vcold(env), CC_E, sf,
     [&](Vout& v) {
+      auto const handleAddr = v.makeReg();
+      v << lea{getHandleAddr(handle), handleAddr};
       cgCallHelper(
         v,
         env,
@@ -246,31 +293,36 @@ void cgMemoSetStaticValue(IRLS& env, const IRInstruction* inst) {
         SyncOptions::Sync,
         argGroup(env, inst)
           .typedValue(0)
-          .addr(rvmtl(), safe_cast<int32_t>(cache.handle()))
+          .reg(handleAddr)
       );
     },
     [&](Vout& v) {
       emitIncRefWork(v, valLoc, val->type(), TRAP_REASON);
-      storeTV(v, rvmtl()[cache.handle()], valLoc, val);
-      markRDSHandleInitialized(v, cache.handle());
+      storeTV(v, getHandleAddr(handle), valLoc, val);
+      markRDSHandleInitialized(v, handle);
     }
   );
 }
 
-void cgMemoGetStaticCache(IRLS& env, const IRInstruction* inst) {
+template<typename HandleT>
+void doMemoGetCache(
+  IRLS& env,
+  const IRInstruction* inst,
+  const MemoCacheStaticData *extra,
+  Vreg fp,
+  HandleT handle
+) {
   auto& v = vmain(env);
-  auto const fp = srcLoc(env, inst, 0).reg();
-  auto const extra = inst->extra<MemoGetStaticCache>();
+
   // We need some keys, or this would be GetStaticValue.
   assertx(extra->keys.count > 0);
 
   // If the RDS entry isn't initialized, there can't be a value.
-  auto const cache = rds::bindStaticMemoCache(extra->func);
-  auto const sf = checkRDSHandleInitialized(v, cache.handle());
+  auto const sf = checkRDSHandleInitialized(v, handle);
   fwdJcc(v, env, CC_NE, sf, inst->taken());
 
   auto const cachePtr = v.makeReg();
-  v << load{rvmtl()[cache.handle()], cachePtr};
+  v << load{getHandleAddr(handle), cachePtr};
 
   // Lookup the proper getter function and call it with the pointer to the
   // cache. The pointer to the cache may be null, but the getter function can
@@ -311,32 +363,40 @@ void cgMemoGetStaticCache(IRLS& env, const IRInstruction* inst) {
   loadTV(v, inst->dst(), dstLoc(env, inst, 0), *valPtr);
 }
 
-void cgMemoSetStaticCache(IRLS& env, const IRInstruction* inst) {
+template<typename HandleT>
+void doMemoSetCache(
+  IRLS& env,
+  const IRInstruction* inst,
+  const MemoCacheStaticData *extra,
+  Vreg fp,
+  HandleT handle,
+  uint32_t valIndex
+) {
   auto& v = vmain(env);
-  auto const fp = srcLoc(env, inst, 0).reg();
-  auto const extra = inst->extra<MemoSetStaticCache>();
   assertx(extra->keys.count > 0);
 
   // If the RDS entry isn't initialized, mark it as initialized and store a null
   // pointer in it. The setter will allocate the cache and update the pointer.
-  auto const cache = rds::bindStaticMemoCache(extra->func);
-  auto const sf = checkRDSHandleInitialized(v, cache.handle());
+  auto const sf = checkRDSHandleInitialized(v, handle);
   ifThen(
     v, CC_NE, sf,
     [&](Vout& v) {
-      v << storeqi{0, rvmtl()[cache.handle()]};
-      markRDSHandleInitialized(v, cache.handle());
+      v << storeqi{0, getHandleAddr(handle)};
+      markRDSHandleInitialized(v, handle);
     }
   );
+
+  auto const handleAddr = v.makeReg();
+  v << lea{getHandleAddr(handle), handleAddr};
 
   // Lookup the setter and call it with the address of the cache pointer. The
   // setter will create the cache as needed and update the pointer.
   if (auto const setter =
       memoCacheSetForKeyTypes(extra->types, extra->keys.count)) {
     auto const args = argGroup(env, inst)
-      .addr(rvmtl(), safe_cast<int32_t>(cache.handle()))
+      .reg(handleAddr)
       .addr(fp, localOffset(extra->keys.first + extra->keys.count - 1))
-      .typedValue(1);
+      .typedValue(valIndex);
     cgCallHelper(
       v,
       env,
@@ -347,10 +407,10 @@ void cgMemoSetStaticCache(IRLS& env, const IRInstruction* inst) {
     );
   } else {
     auto const args = argGroup(env, inst)
-      .addr(rvmtl(), safe_cast<int32_t>(cache.handle()))
+      .reg(handleAddr)
       .imm(GenericMemoId{extra->func->getFuncId(), extra->keys.count}.asParam())
       .addr(fp, localOffset(extra->keys.first + extra->keys.count - 1))
-      .typedValue(1);
+      .typedValue(valIndex);
     cgCallHelper(
       v,
       env,
@@ -360,6 +420,70 @@ void cgMemoSetStaticCache(IRLS& env, const IRInstruction* inst) {
       args
     );
   }
+}
+
+} // end anonymous namespace
+
+void cgMemoGetStaticValue(IRLS& env, const IRInstruction* inst) {
+  auto const f = inst->extra<MemoGetStaticValue>()->func;
+  auto const cache = rds::bindStaticMemoValue(f);
+  doMemoGetValue(env, inst, cache.handle());
+}
+
+void cgMemoGetLSBValue(IRLS& env, const IRInstruction* inst) {
+  auto const f = inst->extra<MemoGetLSBValue>()->func;
+  auto const lsbCls = srcLoc(env, inst, 0).reg();
+  auto const handle =
+    getLSBMemoHandle(env, inst, lsbCls, f, true);
+  doMemoGetValue(env, inst, handle);
+}
+
+void cgMemoSetStaticValue(IRLS& env, const IRInstruction* inst) {
+  auto const f = inst->extra<MemoSetStaticValue>()->func;
+  auto const cache = rds::bindStaticMemoValue(f);
+  auto const memoTy = typeFromRAT(f->repoReturnType(), f->cls()) & TInitCell;
+  doMemoSetValue(env, inst, cache.handle(), memoTy, 0);
+}
+
+void cgMemoSetLSBValue(IRLS& env, const IRInstruction* inst) {
+  auto const lsbCls = srcLoc(env, inst, 1).reg();
+  auto const f = inst->extra<MemoSetLSBValue>()->func;
+  auto const handle =
+    getLSBMemoHandle(env, inst, lsbCls, f, true);
+  auto const memoTy = typeFromRAT(f->repoReturnType(), f->cls()) & TInitCell;
+  doMemoSetValue(env, inst, handle, memoTy, 0);
+}
+
+void cgMemoGetStaticCache(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const extra = inst->extra<MemoGetStaticCache>();
+  auto const cache = rds::bindStaticMemoCache(extra->func);
+  doMemoGetCache(env, inst, extra, fp, cache.handle());
+}
+
+void cgMemoGetLSBCache(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const extra = inst->extra<MemoGetLSBCache>();
+  auto const lsbCls = srcLoc(env, inst, 1).reg();
+  auto const handle =
+    getLSBMemoHandle(env, inst, lsbCls, extra->func, false);
+  doMemoGetCache(env, inst, extra, fp, handle);
+}
+
+void cgMemoSetStaticCache(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const extra = inst->extra<MemoSetStaticCache>();
+  auto const cache = rds::bindStaticMemoCache(extra->func);
+  doMemoSetCache(env, inst, extra, fp, cache.handle(), 1);
+}
+
+void cgMemoSetLSBCache(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const extra = inst->extra<MemoSetLSBCache>();
+  auto const lsbCls = srcLoc(env, inst, 1).reg();
+  auto const handle =
+    getLSBMemoHandle(env, inst, lsbCls, extra->func, false);
+  doMemoSetCache(env, inst, extra, fp, handle, 2);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

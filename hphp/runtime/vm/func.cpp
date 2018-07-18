@@ -640,6 +640,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     print_attrs(out, m_attrs);
     if (isPhpLeafFn()) out << " (leaf)";
     if (isMemoizeWrapper()) out << " (memoize_wrapper)";
+    if (isMemoizeWrapperLSB()) out << " (memoize_wrapper_lsb)";
     if (isHot()) out << " (hot)";
     if (cls() != nullptr) {
       out << ' ' << fullName()->data();
@@ -651,6 +652,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     print_attrs(out, m_attrs);
     if (isPhpLeafFn()) out << " (leaf)";
     if (isMemoizeWrapper()) out << " (memoize_wrapper)";
+    if (isMemoizeWrapperLSB()) out << " (memoize_wrapper_lsb)";
     if (isHot()) out << " (hot)";
     out << ' ' << m_name->data();
   }
@@ -761,6 +763,7 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
   , m_hasExtendedSharedData(false)
   , m_returnByValue(false)
   , m_isMemoizeWrapper(false)
+  , m_isMemoizeWrapperLSB(false)
   , m_isPhpLeafFn(isPhpLeafFn)
   , m_takesNumArgs(false)
   , m_numClsRefSlots(0)
@@ -1154,6 +1157,7 @@ void logFunc(const Func* func, StructuredLogEntry& ent) {
   std::set<folly::StringPiece> attrSet(attrs.begin(), attrs.end());
 
   if (func->isMemoizeWrapper()) attrSet.emplace("memoize_wrapper");
+  if (func->isMemoizeWrapperLSB()) attrSet.emplace("memoize_wrapper_lsb");
   if (func->isMemoizeImpl()) attrSet.emplace("memoize_impl");
   if (func->isAsync()) attrSet.emplace("async");
   if (func->isGenerator()) attrSet.emplace("generator");

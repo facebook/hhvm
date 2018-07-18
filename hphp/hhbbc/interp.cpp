@@ -1273,8 +1273,12 @@ std::pair<Type, bool> memoizeImplRetType(ISS& env) {
   auto const ctxType = [&]() -> Type {
     if (env.ctx.func->cls) {
       if (env.ctx.func->attrs & AttrStatic) {
-        // The class context for static methods will be the method's class.
-        auto const clsTy = selfClsExact(env);
+        // The class context for static methods is the method's class,
+        // if LSB is not specified.
+        auto const clsTy =
+          env.ctx.func->isMemoizeWrapperLSB ?
+          selfCls(env) :
+          selfClsExact(env);
         return clsTy ? *clsTy : TCls;
       } else {
         auto const s = thisType(env);

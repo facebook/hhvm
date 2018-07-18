@@ -71,6 +71,8 @@ struct SymbolKind : boost::static_visitor<std::string> {
   std::string operator()(SPropCache /*k*/) const { return "SPropCache"; }
   std::string operator()(StaticMemoValue) const { return "StaticMemoValue"; }
   std::string operator()(StaticMemoCache) const { return "StaticMemoCache"; }
+  std::string operator()(LSBMemoValue) const { return "LSBMemoValue"; }
+  std::string operator()(LSBMemoCache) const { return "LSBMemoCache"; }
 };
 
 struct SymbolRep : boost::static_visitor<std::string> {
@@ -115,6 +117,17 @@ struct SymbolRep : boost::static_visitor<std::string> {
   std::string operator()(StaticMemoCache k) const {
     auto const func = Func::fromFuncId(k.funcId);
     return func->fullName()->toCppString();
+  }
+
+  std::string operator()(LSBMemoValue k) const {
+    auto const clsName = k.cls->name()->toCppString();
+    auto const funcName = Func::fromFuncId(k.funcId)->fullName()->toCppString();
+    return clsName + "::" + funcName;
+  }
+  std::string operator()(LSBMemoCache k) const {
+    auto const clsName = k.cls->name()->toCppString();
+    auto const funcName = Func::fromFuncId(k.funcId)->fullName()->toCppString();
+    return clsName + "::" + funcName;
   }
 };
 
@@ -166,6 +179,14 @@ struct SymbolEq : boost::static_visitor<bool> {
   bool operator()(StaticMemoCache k1, StaticMemoCache k2) const {
     return k1.funcId == k2.funcId;
   }
+
+  bool operator()(LSBMemoValue k1, LSBMemoValue k2) const {
+    return k1.cls == k2.cls && k1.funcId == k2.funcId;
+  }
+
+  bool operator()(LSBMemoCache k1, LSBMemoCache k2) const {
+    return k1.cls == k2.cls && k1.funcId == k2.funcId;
+  }
 };
 
 struct SymbolHash : boost::static_visitor<size_t> {
@@ -206,6 +227,17 @@ struct SymbolHash : boost::static_visitor<size_t> {
   }
   size_t operator()(StaticMemoCache k) const {
     return std::hash<FuncId>()(k.funcId);
+  }
+
+  size_t operator()(LSBMemoValue k) const {
+    return folly::hash::hash_combine(
+      k.cls.get(), std::hash<FuncId>()(k.funcId)
+    );
+  }
+  size_t operator()(LSBMemoCache k) const {
+    return folly::hash::hash_combine(
+      k.cls.get(), std::hash<FuncId>()(k.funcId)
+    );
   }
 };
 

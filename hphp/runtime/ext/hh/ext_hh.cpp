@@ -348,22 +348,32 @@ TypedValue HHVM_FUNCTION(serialize_memoize_param, TypedValue param) {
   return tvReturn(sb.detach());
 }
 
-bool HHVM_FUNCTION(clear_static_memoization,
-                   TypedValue clsStr, TypedValue funcStr) {
-  auto clear = [] (const Func* func) {
-    if (!func->isMemoizeWrapper()) return false;
-    auto valLink = rds::attachStaticMemoValue(func);
-    if (valLink.bound() && valLink.isInit()) {
-      auto oldVal = *valLink;
-      valLink.markUninit();
-      tvDecRefGen(oldVal);
-    }
-    auto cacheLink = rds::attachStaticMemoCache(func);
+namespace {
+
+void clearValueLink(rds::Link<Cell, rds::Mode::Normal> valLink) {
+  if (valLink.bound() && valLink.isInit()) {
+    auto oldVal = *valLink;
+    valLink.markUninit();
+    tvDecRefGen(oldVal);
+  }
+}
+
+void clearCacheLink(rds::Link<MemoCacheBase*, rds::Mode::Normal> cacheLink) {
     if (cacheLink.bound() && cacheLink.isInit()) {
       auto oldCache = *cacheLink;
       cacheLink.markUninit();
       if (oldCache) req::destroy_raw(oldCache);
     }
+}
+
+} // end anonymous namespace
+
+bool HHVM_FUNCTION(clear_static_memoization,
+                   TypedValue clsStr, TypedValue funcStr) {
+  auto clear = [] (const Func* func) {
+    if (!func->isMemoizeWrapper()) return false;
+    clearValueLink(rds::attachStaticMemoValue(func));
+    clearCacheLink(rds::attachStaticMemoCache(func));
     return true;
   };
 
@@ -372,7 +382,7 @@ bool HHVM_FUNCTION(clear_static_memoization,
     if (!cls) return false;
     if (isStringType(funcStr.m_type)) {
       auto const func = cls->lookupMethod(funcStr.m_data.pstr);
-      return clear(func);
+      return func && clear(func);
     }
     auto ret = false;
     for (auto i = cls->numMethods(); i--; ) {
@@ -390,6 +400,32 @@ bool HHVM_FUNCTION(clear_static_memoization,
   }
 
   return false;
+}
+
+bool HHVM_FUNCTION(clear_lsb_memoization,
+                   const String& clsStr, TypedValue funcStr) {
+  auto const clear = [](const Class* cls, const Func* func) {
+    if (!func->isStatic()) return false;
+    if (!func->isMemoizeWrapperLSB()) return false;
+    clearValueLink(rds::attachLSBMemoValue(cls, func));
+    clearCacheLink(rds::attachLSBMemoCache(cls, func));
+    return true;
+  };
+
+  auto const cls = Unit::loadClass(clsStr.get());
+  if (!cls) return false;
+
+  if (isStringType(funcStr.m_type)) {
+    auto const func = cls->lookupMethod(funcStr.m_data.pstr);
+    return func && clear(cls, func);
+  }
+
+  auto ret = false;
+  for (auto i = cls->numMethods(); i--; ) {
+    auto const func = cls->getMethod(i);
+    if (clear(cls, func)) ret = true;
+  }
+  return ret;
 }
 
 bool HHVM_FUNCTION(clear_instance_memoization, const Object& obj) {
@@ -448,6 +484,8 @@ static struct HHExtension final : Extension {
                   HHVM_FN(serialize_memoize_param));
     HHVM_NAMED_FE(HH\\clear_static_memoization,
                   HHVM_FN(clear_static_memoization));
+    HHVM_NAMED_FE(HH\\clear_lsb_memoization,
+                  HHVM_FN(clear_lsb_memoization));
     HHVM_NAMED_FE(HH\\clear_instance_memoization,
                   HHVM_FN(clear_instance_memoization));
     HHVM_NAMED_FE(HH\\set_frame_metadata, HHVM_FN(set_frame_metadata));

@@ -495,20 +495,45 @@ void emitIncStat(Vout& v, Stats::StatCounter stat) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Vreg checkRDSHandleInitialized(Vout& v, rds::Handle ch) {
-  assertx(rds::isNormalHandle(ch));
+static Vptr getRDSHandleGenNumberAddr(rds::Handle handle) {
+  return rvmtl()[rds::genNumberHandleFrom(handle)];
+}
+
+static Vptr getRDSHandleGenNumberAddr(Vreg handle) {
+  return handle[DispReg(rvmtl(), -sizeof(rds::GenNumber))];
+}
+
+template<typename HandleT>
+Vreg doCheckRDSHandleInitialized(Vout& v, HandleT ch) {
   auto const gen = v.makeReg();
   auto const sf = v.makeReg();
-  v << loadb{rvmtl()[rds::genNumberHandleFrom(ch)], gen};
+  v << loadb{getRDSHandleGenNumberAddr(ch), gen};
   v << cmpbm{gen, rvmtl()[rds::currentGenNumberHandle()], sf};
   return sf;
 }
 
-void markRDSHandleInitialized(Vout& v, rds::Handle ch) {
+Vreg checkRDSHandleInitialized(Vout& v, rds::Handle ch) {
   assertx(rds::isNormalHandle(ch));
+  return doCheckRDSHandleInitialized(v, ch);
+}
+Vreg checkRDSHandleInitialized(Vout& v, Vreg ch) {
+  return doCheckRDSHandleInitialized(v, ch);
+}
+
+template<typename HandleT>
+void doMarkRDSHandleInitialized(Vout &v, HandleT ch) {
   auto const gen = v.makeReg();
   v << loadb{rvmtl()[rds::currentGenNumberHandle()], gen};
-  v << storeb{gen, rvmtl()[rds::genNumberHandleFrom(ch)]};
+  v << storeb{gen, getRDSHandleGenNumberAddr(ch)};
+}
+
+void markRDSHandleInitialized(Vout& v, rds::Handle ch) {
+  assertx(rds::isNormalHandle(ch));
+  doMarkRDSHandleInitialized(v, ch);
+}
+
+void markRDSHandleInitialized(Vout& v, Vreg ch) {
+  doMarkRDSHandleInitialized(v, ch);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

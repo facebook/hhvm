@@ -118,6 +118,7 @@ module UserAttributes = struct
   let uaUnsafeConstruct     = "__UNSAFE_Construct"
   let uaDeprecated          = "__Deprecated"
   let uaMemoize             = "__Memoize"
+  let uaMemoizeLSB          = "__MemoizeLSB"
   let uaPHPStdLib           = "__PHPStdLib"
   let uaHipHopSpecific      = "__HipHopSpecific"
   let uaAcceptDisposable    = "__AcceptDisposable"
@@ -145,6 +146,7 @@ module UserAttributes = struct
       uaUnsafeConstruct;
       uaDeprecated;
       uaMemoize;
+      uaMemoizeLSB;
       uaPHPStdLib;
       uaHipHopSpecific;
       uaAcceptDisposable;

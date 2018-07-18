@@ -146,7 +146,8 @@ let deduplicate l =
   |> List.fold_left ~init:Unique_list_string.empty ~f:Unique_list_string.add
   |> Unique_list_string.items
 
-let make_body_ function_directives_opt body_instrs decl_vars is_memoize_wrapper
+let make_body_ function_directives_opt body_instrs decl_vars
+              is_memoize_wrapper is_memoize_wrapper_lsb
               params return_type_info static_inits doc_comment
               env =
   let body_instrs = rewrite_user_labels body_instrs in
@@ -172,15 +173,16 @@ let make_body_ function_directives_opt body_instrs decl_vars is_memoize_wrapper
     num_iters
     num_cls_ref_slots
     is_memoize_wrapper
+    is_memoize_wrapper_lsb
     params
     return_type_info
     static_inits
     doc_comment
     env
 
-let make_body body_instrs decl_vars is_memoize_wrapper params
+let make_body body_instrs decl_vars is_memoize_wrapper is_memoize_wrapper_lsb params
               return_type_info static_inits doc_comment env =
-  make_body_ None body_instrs decl_vars is_memoize_wrapper params
+  make_body_ None body_instrs decl_vars is_memoize_wrapper is_memoize_wrapper_lsb params
              return_type_info static_inits doc_comment env
 
 let prepare_inline_hhas_blocks decl_vars params hhas_blocks =
@@ -535,6 +537,7 @@ let emit_body
     body_instrs
     decl_vars
     false (*is_memoize_wrapper*)
+    false (*is_memoize_wrapper_lsb*)
     params
     (Some return_type_info)
     svar_instrs

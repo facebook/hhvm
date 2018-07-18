@@ -838,10 +838,14 @@ bool opcodeMayRaise(Opcode opc) {
   case MemoGetInstanceValue:
   case MemoGetStaticCache:
   case MemoGetStaticValue:
+  case MemoGetLSBCache:
+  case MemoGetLSBValue:
   case MemoSetInstanceCache:
   case MemoSetInstanceValue:
   case MemoSetStaticCache:
   case MemoSetStaticValue:
+  case MemoSetLSBCache:
+  case MemoSetLSBValue:
   case MethodExists:
   case MIterFree:
   case MIterNext:

@@ -208,6 +208,14 @@ bool FunctionScope::hasUserAttr(const char *attr) const {
   return m_userAttributes.find(attr) != m_userAttributes.end();
 }
 
+bool FunctionScope::hasMemoize() const {
+  return hasUserAttr("__Memoize") || hasUserAttr("__MemoizeLSB");
+}
+
+bool FunctionScope::hasMemoizeLSB() const {
+  return hasUserAttr("__MemoizeLSB");
+}
+
 bool FunctionScope::isParamCoerceMode() const {
   return m_coerceMode & (AttrParamCoerceModeNull | AttrParamCoerceModeFalse);
 }

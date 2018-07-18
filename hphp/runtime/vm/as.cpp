@@ -2050,6 +2050,7 @@ void fixup_default_values(AsmState& as, FuncEmitter* fe) {
  *            |  ".try_catch" directive-catch
  *            |  ".try" directive-try-catch
  *            |  ".ismemoizewrapper"
+ *            |  ".ismemoizewrapperlsb"
  *            |  ".dynamicallycallable"
  *            |  ".srcloc" directive-srcloc
  *            |  ".doc" directive-doccomment
@@ -2081,6 +2082,12 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
     if (word[0] == '.') {
       if (word == ".ismemoizewrapper") {
         as.fe->isMemoizeWrapper = true;
+        as.in.expectWs(';');
+        continue;
+      }
+      if (word == ".ismemoizewrapperlsb") {
+        as.fe->isMemoizeWrapper = true;
+        as.fe->isMemoizeWrapperLSB = true;
         as.in.expectWs(';');
         continue;
       }

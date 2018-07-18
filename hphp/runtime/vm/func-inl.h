@@ -425,6 +425,10 @@ inline bool Func::isMemoizeWrapper() const {
   return shared()->m_isMemoizeWrapper;
 }
 
+inline bool Func::isMemoizeWrapperLSB() const {
+  return shared()->m_isMemoizeWrapperLSB;
+}
+
 inline bool Func::isMemoizeImpl() const {
   return isMemoizeImplName(name());
 }

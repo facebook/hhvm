@@ -398,6 +398,7 @@ struct Func : FuncBase {
   bool isPairGenerator : 1;
 
   bool isMemoizeWrapper : 1;
+  bool isMemoizeWrapperLSB : 1;
 
   bool isMemoizeImpl : 1;
 

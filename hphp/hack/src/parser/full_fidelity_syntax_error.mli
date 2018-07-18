@@ -258,6 +258,8 @@ val sealed_val_not_classname: string
 val sealed_final: string
 val interface_implements: string
 val memoize_on_lambda: string
+val memoize_lsb_on_non_static: string
+val memoize_lsb_on_non_method: string
 val instanceof_paren: string -> string
 val instanceof_invalid_scope_resolution: string
 val instanceof_memberselection_inside_scoperesolution: string

@@ -1310,6 +1310,7 @@ void emit_finish_func(EmitUnitState& state,
   fe.isPairGenerator = func.isPairGenerator;
   fe.isNative = func.nativeInfo != nullptr;
   fe.isMemoizeWrapper = func.isMemoizeWrapper;
+  fe.isMemoizeWrapperLSB = func.isMemoizeWrapperLSB;
 
   auto const retTy = state.index.lookup_return_type_and_clear(&func);
   if (!retTy.subtypeOf(BBottom)) {

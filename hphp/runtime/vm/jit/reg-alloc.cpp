@@ -74,6 +74,8 @@ bool loadsCell(Opcode op) {
   case LdPackedElem:
   case MemoGetStaticValue:
   case MemoGetStaticCache:
+  case MemoGetLSBValue:
+  case MemoGetLSBCache:
   case MemoGetInstanceValue:
   case MemoGetInstanceCache:
     switch (arch()) {

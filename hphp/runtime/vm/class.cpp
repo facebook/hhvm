@@ -406,6 +406,9 @@ EnumValues* Class::setEnumValues(EnumValues* values) {
 
 Class::ExtraData::~ExtraData() {
   delete m_enumValues.load(std::memory_order_relaxed);
+  if (m_lsbMemoExtra.m_handles) {
+    vm_free(m_lsbMemoExtra.m_handles);
+  }
 }
 
 void Class::destroy() {
@@ -862,6 +865,18 @@ void Class::initSProps() const {
   m_sPropCacheInit.initWith(true);
 }
 
+Slot Class::lsbMemoSlot(const Func* func, bool forValue) const {
+  assertx(m_extra);
+  if (forValue) {
+    assertx(func->numParams() == 0);
+  } else {
+    assertx(func->numParams() > 0);
+  }
+  const auto& slots = m_extra->m_lsbMemoExtra.m_slots;
+  auto it = slots.find(func->getFuncId());
+  always_assert(it != slots.end());
+  return it->second;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Property storage.
@@ -1761,7 +1776,8 @@ Class::Class(PreClass* preClass, Class* parent,
   setRequirements();
   setNativeDataInfo();
   setEnumType();
-  setMemoCacheInfo();
+  setInstanceMemoCacheInfo();
+  setLSBMemoCacheInfo();
 
   // A class is allowed to implement two interfaces that share the same slot if
   // we'll fatal trying to define that class, so this has to happen after all
@@ -3039,7 +3055,71 @@ void Class::setEnumType() {
   }
 }
 
-void Class::setMemoCacheInfo() {
+void Class::setLSBMemoCacheInfo() {
+  boost::container::flat_map<FuncId, Slot> slots;
+  Slot numSlots = 0;
+
+  /* Inherit slots from parent */
+  if (m_parent && m_parent->m_extra) {
+    numSlots = m_parent->m_extra->m_lsbMemoExtra.m_numSlots;
+  }
+
+  /* If any of our methods need slots, insert them at the end */
+  auto const methodCount = numMethods();
+  uint64_t assignCount = 0;
+  for (Slot i = 0; i < methodCount; ++i) {
+    auto const f = getMethod(i);
+    if (f->isMemoizeWrapperLSB() && f->cls() == this) {
+      slots.emplace(f->getFuncId(), numSlots++);
+      ++assignCount;
+    }
+  }
+  always_assert(assignCount == slots.size());
+
+  if (numSlots != 0) {
+    allocExtraData();
+    auto& mx = m_extra->m_lsbMemoExtra;
+    mx.m_slots = std::move(slots);
+    mx.m_numSlots = numSlots;
+    initLSBMemoHandles();
+  }
+}
+
+void Class::initLSBMemoHandles() {
+  /* Allocate handles array */
+  auto& mx = m_extra->m_lsbMemoExtra;
+  auto const numSlots = mx.m_numSlots;
+  rds::Handle* handles = static_cast<rds::Handle*>(
+    vm_malloc(numSlots * sizeof(rds::Handle)));
+
+  /* Assign handle to every slot */
+  uint64_t assignCount = 0;
+  uint64_t assignSum = 0;
+  const Class* cls = this;
+  while (cls != nullptr && cls->m_extra) {
+    for (const auto& kv : cls->m_extra->m_lsbMemoExtra.m_slots) {
+      auto const func = Func::fromFuncId(kv.first);
+      auto const slot = kv.second;
+      assertx(slot >= 0 && slot < numSlots);
+      if (func->numParams() == 0) {
+        handles[slot] = rds::bindLSBMemoValue(this, func).handle();
+      } else {
+        handles[slot] = rds::bindLSBMemoCache(this, func).handle();
+      }
+      ++assignCount;
+      assignSum += slot;
+    }
+    cls = cls->m_parent.get();
+  }
+  /* Sanity check: Make sure we assigned every slot exactly once */
+  always_assert(numSlots == assignCount);
+  always_assert(assignSum == ((numSlots - 1) * numSlots) / 2);
+
+  assertx(mx.m_handles == nullptr);
+  mx.m_handles = handles;
+}
+
+void Class::setInstanceMemoCacheInfo() {
   // Inherit the data from the parent, if any.
   if (m_parent && m_parent->hasMemoSlots()) {
     allocExtraData();

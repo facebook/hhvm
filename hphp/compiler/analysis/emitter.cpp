@@ -9444,10 +9444,27 @@ void EmitterVisitor::emitPostponedMeths() {
       }
     }
 
-    if (funcScope->userAttributes().count("__Memoize") &&
+    if (funcScope->hasMemoize() &&
         !funcScope->isAbstract()) {
       auto const originalName = fe->name;
       auto const rewrittenName = Func::genMemoizeImplName(originalName);
+      bool withLSB = funcScope->hasMemoizeLSB();
+
+      // Can only apply MemoizeLSB to static methods
+      if (withLSB) {
+        if (!meth->is(Statement::KindOfMethodStatement)) {
+          auto exn = IncludeTimeFatalException(meth,
+            "<<__MemoizeLSB>> can only be applied to methods");
+          exn.setParseFatal(true);
+          throw exn;
+        }
+        if (!funcScope->isStatic()) {
+          auto exn = IncludeTimeFatalException(meth,
+            "<<__MemoizeLSB>> can only be applied to static methods");
+          exn.setParseFatal(true);
+          throw exn;
+        }
+      }
 
       FuncEmitter* memoizeFe = nullptr;
       if (meth->is(Statement::KindOfFunctionStatement)) {
@@ -9470,6 +9487,7 @@ void EmitterVisitor::emitPostponedMeths() {
       // Emit the new method that handles the memoization
       m_curFunc = memoizeFe;
       m_curFunc->isMemoizeWrapper = true;
+      m_curFunc->isMemoizeWrapperLSB = withLSB;
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
       emitMemoizeMethod(meth, rewrittenName);
 
@@ -10101,7 +10119,8 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   if (isFunc) {
     e.FPushFuncD(numParams, methName);
   } else if (meth->getFunctionScope()->isStatic()) {
-    if (classScope && classScope->isTrait()) {
+    if (m_curFunc->isMemoizeWrapperLSB ||
+        (classScope && classScope->isTrait())) {
       e.FPushClsMethodSD(numParams, SpecialClsRef::Self, methName);
     } else {
       e.FPushClsMethodD(numParams, methName, m_curFunc->pce()->name());

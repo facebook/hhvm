@@ -1046,6 +1046,36 @@ public:
   std::pair<Slot, bool> memoSlotForFunc(FuncId func) const;
 
   /////////////////////////////////////////////////////////////////////////////
+  // LSB Memoize methods
+  //
+  /*
+   * Retrieve the slot corresponding to the value/cache for a function
+   * when bound to this class or a subclass.
+   * These are for use by the JIT.
+   */
+  Slot lsbMemoSlot(const Func* func, bool forValue) const;
+
+  /*
+   * Get the offset into the Class of the extra structure
+   * Used by the JIT to load m_extra
+   */
+  static constexpr size_t extraOffset() {
+    static_assert(
+      sizeof(m_extra) == sizeof(ExtraData*),
+      "The JIT loads m_extra as a bare pointer");
+    return offsetof(Class, m_extra);
+  }
+
+  /*
+   * Get the offset into the extra structure of m_handles.
+   * Used by the JIT.
+   */
+  static constexpr size_t lsbMemoExtraHandlesOffset() {
+    return offsetof(ExtraData, m_lsbMemoExtra) +
+           offsetof(LSBMemoExtra, m_handles);
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
   // Other methods.
   //
   // Avoiding adding methods to this section.
@@ -1119,6 +1149,30 @@ public:
   // ExtraData.
 
 private:
+  struct LSBMemoExtra {
+    /*
+     * Mapping of methods (declared by this class only) to their assigned slots
+     * for LSB memoization. This is populated in the Class ctor when LSB
+     * memoized methods are present.
+     *
+     */
+    boost::container::flat_map<FuncId, Slot> m_slots;
+
+    /*
+     * The total number of memo slots, and also the next LSB memo slot to
+     * assign. This must be larger than our parent's m_numSlots, since slots
+     * are inherited.
+     */
+    Slot m_numSlots{0};
+
+    /*
+     * Cached handles to LSB memoization for this class.
+     * This array is initialized in the Class ctor, when LSB memoized
+     * methods are present.
+     */
+    rds::Handle* m_handles{nullptr};
+  };
+
   struct ExtraData {
     ~ExtraData();
 
@@ -1190,13 +1244,17 @@ private:
      * The next memo slot to assign. This is inherited from the parent.
      */
     Slot m_nextMemoSlot{0};
+
+    /*
+     * MemoizeLSB extra data
+     */
+    mutable LSBMemoExtra m_lsbMemoExtra;
   };
 
   /*
    * Allocate the ExtraData; done only when necessary.
    */
   void allocExtraData();
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Internal types.
@@ -1348,11 +1406,13 @@ private:
   void checkRequirementConstraints() const;
   void raiseUnsatisfiedRequirement(const PreClass::ClassRequirement*) const;
   void setNativeDataInfo();
-  void setMemoCacheInfo();
+  void setInstanceMemoCacheInfo();
+  void setLSBMemoCacheInfo();
 
   template<bool setParents> void setInstanceBitsImpl();
   void addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const;
 
+  void initLSBMemoHandles();
 
   /////////////////////////////////////////////////////////////////////////////
   // Static data members.

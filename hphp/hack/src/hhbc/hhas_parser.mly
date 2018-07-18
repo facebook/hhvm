@@ -27,6 +27,7 @@ open Hhas_parser_actions
 %token METHODDIRECTIVE CONSTDIRECTIVE ENUMTYDIRECTIVE USESDIRECTIVE
 %token TRYFAULTDIRECTIVE PROPERTYDIRECTIVE FILEPATHDIRECTIVE
 %token ISMEMOIZEWRAPPERDIRECTIVE STATICDIRECTIVE REQUIREDIRECTIVE
+%token ISMEMOIZEWRAPPERLSBDIRECTIVE STATICDIRECTIVE REQUIREDIRECTIVE
 %token SRCLOCDIRECTIVE
 %token METADATADIRECTIVE
 %token LANGLE
@@ -82,6 +83,7 @@ maindecl:
       {Hhas_body.make (Hhas_asm.instrs $5)
         (Hhas_asm.decl_vars $5) (Hhas_asm.num_iters $5)
         (Hhas_asm.num_cls_ref_slots $5) (Hhas_asm.is_memoize_wrapper $5)
+        (Hhas_asm.is_memoize_wrapper_lsb $5)
         [](*params*) None(*return type*) (Hhas_asm.static_inits $5)
         None (* doc *) None (* env *)}
 ;
@@ -110,6 +112,7 @@ fundecl:
               (Hhas_asm.num_iters $10)
               (Hhas_asm.num_cls_ref_slots $10)
               (Hhas_asm.is_memoize_wrapper $10)
+              (Hhas_asm.is_memoize_wrapper_lsb $10)
               $6 (*params*)
               $4 (*typeinfo*)
               (Hhas_asm.static_inits $10)
@@ -154,6 +157,10 @@ requires:
 ismemoizewrapper:
     | /* empty */ {false}
     | ISMEMOIZEWRAPPERDIRECTIVE SEMI nl {true}
+;
+ismemoizewrapperlsb:
+    | /* empty */ {false}
+    | ISMEMOIZEWRAPPERLSBDIRECTIVE SEMI nl {true}
 ;
 declvarlist:
     | STRING {[$1]}
@@ -273,6 +280,7 @@ methoddecl:
       (Hhas_asm.num_iters $10)
       (Hhas_asm.num_cls_ref_slots $10)
       (Hhas_asm.is_memoize_wrapper $10)
+      (Hhas_asm.is_memoize_wrapper_lsb $10)
       $6 (* params *)
       $4 (* return type *)
       (Hhas_asm.static_inits $10)
@@ -491,8 +499,8 @@ optionalint:
     | INT { Some $1 }
 ;
 functionbodywithdirectives:
-    | ismemoizewrapper numiters numclsrefslots declvars statics nl functionbody
-      {Hhas_asm.make $7 $4 $2 $3 $1 $5}
+    | ismemoizewrapper ismemoizewrapperlsb numiters numclsrefslots declvars statics nl functionbody
+      {Hhas_asm.make $8 $5 $3 $4 $1 $2 $6}
 ;
 functionbody:
     | /* empty */ {Instruction_sequence.empty}

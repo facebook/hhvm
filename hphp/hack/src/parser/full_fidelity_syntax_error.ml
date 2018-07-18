@@ -448,6 +448,12 @@ let interface_implements =
 let memoize_on_lambda = "<<__Memoize>> attribute is not allowed on lambdas or \
   anonymous functions."
 
+let memoize_lsb_on_non_static =
+  "<<__MemoizeLSB>> can only be applied to static methods"
+
+let memoize_lsb_on_non_method =
+  "<<__MemoizeLSB>> can only be applied to methods"
+
 let instanceof_paren x =
   Printf.sprintf "`instanceof (%s)` is not allowed because it is ambiguous. Is `%s` a class or a constant?"
     x x

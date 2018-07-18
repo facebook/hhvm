@@ -11,6 +11,7 @@ val make_body:
   Instruction_sequence.t ->
   string list -> (* Actually local_id list *)
   bool ->
+  bool ->
   Hhas_param.t list ->
   Hhas_type_info.t option ->
   string list ->

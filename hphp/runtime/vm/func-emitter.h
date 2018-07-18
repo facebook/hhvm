@@ -291,13 +291,14 @@ public:
   union {
     uint8_t m_repoBoolBitset{0};
     struct {
-      bool isMemoizeWrapper : 1;
-      bool isClosureBody    : 1;
-      bool isAsync          : 1;
-      bool containsCalls    : 1;
-      bool isNative         : 1;
-      bool isGenerator      : 1;
-      bool isPairGenerator  : 1;
+      bool isMemoizeWrapper    : 1;
+      bool isMemoizeWrapperLSB : 1;
+      bool isClosureBody       : 1;
+      bool isAsync             : 1;
+      bool containsCalls       : 1;
+      bool isNative            : 1;
+      bool isGenerator         : 1;
+      bool isPairGenerator     : 1;
     };
   };
 

@@ -90,6 +90,8 @@ struct FunctionScope : BlockScope {
   bool isInOutParam(int index) const;
 
   bool hasUserAttr(const char *attr) const;
+  bool hasMemoize() const;
+  bool hasMemoizeLSB() const;
 
   /**
    * What kind of function this is.

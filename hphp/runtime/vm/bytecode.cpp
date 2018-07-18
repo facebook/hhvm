@@ -3926,8 +3926,12 @@ OPTBLD_INLINE void iopMemoGet(PC& pc, PC taken, LocalRange keys) {
   auto const c = [&] () -> const Cell* {
     auto const func = vmfp()->m_func;
     if (!func->isMethod() || func->isStatic()) {
+      auto const lsbCls =
+        func->isMemoizeWrapperLSB() ? vmfp()->getClass() : nullptr;
       if (keys.count > 0) {
-        auto cache = rds::bindStaticMemoCache(func);
+        auto cache =
+          lsbCls ? rds::bindLSBMemoCache(lsbCls, func)
+                 : rds::bindStaticMemoCache(func);
         if (!cache.isInit()) return nullptr;
         auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
         if (auto getter = memoCacheGetForKeyCount(keys.count)) {
@@ -3940,7 +3944,9 @@ OPTBLD_INLINE void iopMemoGet(PC& pc, PC taken, LocalRange keys) {
         );
       }
 
-      auto cache = rds::bindStaticMemoValue(func);
+      auto cache =
+        lsbCls ? rds::bindLSBMemoValue(lsbCls, func)
+               : rds::bindStaticMemoValue(func);
       return cache.isInit() ? cache.get() : nullptr;
     }
 
@@ -4019,8 +4025,12 @@ OPTBLD_INLINE void iopMemoSet(LocalRange keys) {
 
   auto const func = vmfp()->m_func;
   if (!func->isMethod() || func->isStatic()) {
+    auto const lsbCls =
+      func->isMemoizeWrapperLSB() ? vmfp()->getClass() : nullptr;
     if (keys.count > 0) {
-      auto cache = rds::bindStaticMemoCache(func);
+      auto cache =
+        lsbCls ? rds::bindLSBMemoCache(lsbCls, func)
+               : rds::bindStaticMemoCache(func);
       if (!cache.isInit()) cache.initWith(nullptr);
       auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
       if (auto setter = memoCacheSetForKeyCount(keys.count)) {
@@ -4034,7 +4044,9 @@ OPTBLD_INLINE void iopMemoSet(LocalRange keys) {
       );
     }
 
-    auto cache = rds::bindStaticMemoValue(func);
+    auto cache =
+      lsbCls ? rds::bindLSBMemoValue(lsbCls, func)
+             : rds::bindStaticMemoValue(func);
     if (!cache.isInit()) {
       tvWriteUninit(*cache);
       cache.markInit();

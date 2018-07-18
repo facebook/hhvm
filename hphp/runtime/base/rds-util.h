@@ -22,6 +22,7 @@
 
 namespace HPHP {
   struct NamedEntity;
+  struct Class;
   struct Func;
   struct StringData;
   struct MemoCacheBase;
@@ -67,6 +68,18 @@ attachStaticMemoValue(const Func*);
 
 Link<MemoCacheBase*, rds::Mode::Normal>
 attachStaticMemoCache(const Func*);
+
+Link<Cell, rds::Mode::Normal>
+bindLSBMemoValue(const Class*, const Func*);
+
+Link<MemoCacheBase*, rds::Mode::Normal>
+bindLSBMemoCache(const Class*, const Func*);
+
+Link<Cell, rds::Mode::Normal>
+attachLSBMemoValue(const Class*, const Func*);
+
+Link<MemoCacheBase*, rds::Mode::Normal>
+attachLSBMemoCache(const Class*, const Func*);
 
 //////////////////////////////////////////////////////////////////////
 

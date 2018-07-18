@@ -63,10 +63,10 @@ let make_info ast_class class_id ast_methods =
     memoize_class_id = class_id;
   }
 
-let get_cls_method info param_count method_id =
+let get_cls_method info param_count method_id with_lsb =
   let method_id =
     Hhbc_id.Method.add_suffix method_id memoize_suffix in
-  if info.memoize_is_trait
+  if info.memoize_is_trait || with_lsb
   then
     instr_fpushclsmethodsd param_count SpecialClsRef.Self method_id
   else
@@ -129,7 +129,7 @@ let make_memoize_instance_method_with_params_code ~pos
     default_value_setters ]
 
 let make_memoize_static_method_no_params_code
-  info scope deprecation_info method_id =
+  info scope deprecation_info method_id with_lsb =
   let label = Label.Regular 0 in
   let deprecation_body =
     Emit_body.emit_deprecation_warning scope deprecation_info
@@ -139,14 +139,14 @@ let make_memoize_static_method_no_params_code
     instr_memoget label None;
     instr_retc;
     instr_label label;
-    get_cls_method info 0 method_id;
+    get_cls_method info 0 method_id with_lsb;
     instr_fcall 0;
     instr_unboxr;
     instr_memoset None;
     instr_retc ]
 
 let make_memoize_static_method_with_params_code ~pos
-  env info scope deprecation_info method_id params =
+  env info scope deprecation_info method_id with_lsb params =
   let param_count = List.length params in
   let label = Label.Regular 0 in
   let first_local = Local.Unnamed param_count in
@@ -166,7 +166,7 @@ let make_memoize_static_method_with_params_code ~pos
     instr_memoget label (Some (first_local, param_count));
     instr_retc;
     instr_label label;
-    get_cls_method info param_count method_id;
+    get_cls_method info param_count method_id with_lsb;
     param_code_gets params;
     instr_fcall param_count;
     instr_unboxr;
@@ -174,12 +174,12 @@ let make_memoize_static_method_with_params_code ~pos
     instr_retc;
     default_value_setters ]
 
-let make_memoize_static_method_code ~pos env info scope deprecation_info method_id params =
+let make_memoize_static_method_code ~pos env info scope deprecation_info method_id with_lsb params =
   if List.is_empty params then
-    make_memoize_static_method_no_params_code info scope deprecation_info method_id
+    make_memoize_static_method_no_params_code info scope deprecation_info method_id with_lsb
   else
     make_memoize_static_method_with_params_code ~pos env info scope
-                                                deprecation_info method_id params
+                                                deprecation_info method_id with_lsb params
 
 let make_memoize_instance_method_code
       ~pos env scope deprecation_info method_id params =
@@ -190,11 +190,12 @@ let make_memoize_instance_method_code
          ~pos env scope deprecation_info method_id params
 
 (* Construct the wrapper function *)
-let make_wrapper env return_type params instrs =
+let make_wrapper env return_type params instrs with_lsb =
   Emit_body.make_body
     instrs
     [] (* decl_vars *)
     true (* is_memoize_wrapper *)
+    with_lsb (* is_memoize_wrapper_lsb *)
     params
     (Some return_type)
     [] (* static_inits *)
@@ -202,14 +203,16 @@ let make_wrapper env return_type params instrs =
     (Some env)
 
 let emit ~pos env info return_type_info scope
-         deprecation_info params is_static method_id =
+         deprecation_info params is_static method_id with_lsb =
   let instrs =
     Emit_pos.emit_pos_then pos @@
     if is_static
-    then make_memoize_static_method_code ~pos env info scope deprecation_info method_id params
-    else make_memoize_instance_method_code ~pos env scope deprecation_info method_id params
+    then make_memoize_static_method_code
+      ~pos env info scope deprecation_info method_id with_lsb params
+    else make_memoize_instance_method_code
+      ~pos env scope deprecation_info method_id params
   in
-  make_wrapper env return_type_info params instrs
+  make_wrapper env return_type_info params instrs with_lsb
 
 let emit_memoize_wrapper_body env memoize_info ast_method
                               ~namespace scope deprecation_info params ret =
@@ -224,8 +227,10 @@ let emit_memoize_wrapper_body env memoize_info ast_method
     let (_,original_name) = ast_method.Ast.m_name in
     let method_id =
       Hhbc_id.Method.from_ast_name original_name in
+    let with_lsb =
+      Emit_attribute.ast_any_is_memoize_lsb ast_method.Ast.m_user_attributes in
     emit ~pos env memoize_info return_type_info scope deprecation_info
-         params is_static method_id
+         params is_static method_id with_lsb
 
 let make_memoize_wrapper_method env info ast_class ast_method =
   (* This is cut-and-paste from emit_method above, with special casing for

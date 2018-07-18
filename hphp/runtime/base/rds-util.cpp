@@ -66,6 +66,34 @@ attachStaticMemoCache(const Func* func) {
   );
 }
 
+Link<Cell, rds::Mode::Normal>
+bindLSBMemoValue(const Class* cls, const Func* func) {
+  return bind<Cell,Mode::Normal>(
+    LSBMemoValue { cls, func->getFuncId() }
+  );
+}
+
+Link<Cell, rds::Mode::Normal>
+attachLSBMemoValue(const Class* cls, const Func* func) {
+  return attach<Cell,Mode::Normal>(
+    LSBMemoValue { cls, func->getFuncId() }
+  );
+}
+
+Link<MemoCacheBase*, rds::Mode::Normal>
+bindLSBMemoCache(const Class* cls, const Func* func) {
+  return bind<MemoCacheBase*,Mode::Normal>(
+    LSBMemoCache { cls, func->getFuncId() }
+  );
+}
+
+Link<MemoCacheBase*, rds::Mode::Normal>
+attachLSBMemoCache(const Class* cls, const Func* func) {
+  return attach<MemoCacheBase*,Mode::Normal>(
+    LSBMemoCache { cls, func->getFuncId() }
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

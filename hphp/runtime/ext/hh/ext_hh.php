@@ -70,6 +70,17 @@ function serialize_memoize_param(mixed $param): arraykey;
 function clear_static_memoization(?string $cls, ?string $func = null) : bool;
 
 /**
+ * Clear __MemoizeLSB data
+ *  - if $func is non-null, clear cache for $cls::$func
+ *  - if $func is null, clear all LSB memoization caches for $cls
+ *
+ * Operates on a single class at a time. Clearing the cache for $cls::$func
+ * does not clear the cache for $otherClass::$func, for any other class.
+ */
+<<__Native, __ParamCoerceModeFalse>>
+function clear_lsb_memoization(string $cls, ?string $func = null) : bool;
+
+/**
  * Clear memoization data on object instance
  */
 <<__Native, __ParamCoerceModeFalse>>

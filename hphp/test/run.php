@@ -2966,6 +2966,9 @@ SKIPPER
 SHIP
       ."\n";
   }
+  if (!empty($options['failure-file'])) {
+    @unlink($options['failure-file']);
+  }
   if (isset($options['verbose'])) {
     print_commands($tests, $options);
   }

@@ -239,7 +239,12 @@ let compute_complete_global
   (* Colon hack: in "case Foo::Bar:", we wouldn't want to show autocomplete *)
   (* here, but we would in "<nt:" and "$a->:" and "function f():". We can   *)
   (* recognize this case by whether the prefix is empty.                    *)
-  if autocomplete_context.is_after_single_colon && gname = "" then
+  (* We do this by checking the identifier length, as the string will       *)
+  (* include the current namespace.                                         *)
+  let have_user_prefix = match !autocomplete_identifier with
+    | None -> failwith "No autocomplete position was set"
+    | Some (pos, _) -> Pos.length pos > suffix_len in
+  if autocomplete_context.is_after_single_colon && not have_user_prefix then
     ()
   else begin
 

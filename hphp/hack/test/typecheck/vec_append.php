@@ -9,7 +9,7 @@ final class Ref<T> implements IRef<T> {
   public function __construct(public T $value) {}
 }
 
-function set_default<Tk, Tv>(
+function set_default<Tk as arraykey, Tv>(
   \Ref<dict<Tk, Tv>> $dict,
   Tk $key,
   Tv $default,

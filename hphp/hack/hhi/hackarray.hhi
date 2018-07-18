@@ -8,6 +8,6 @@
  *
  */
 
-abstract final class dict<+Tk, +Tv> implements Indexish<Tk, Tv>, XHPChild {}
+abstract final class dict<+Tk as arraykey, +Tv> implements Indexish<Tk, Tv>, XHPChild {}
 abstract final class keyset<+T as arraykey> implements Indexish<T, T>, XHPChild {}
 abstract final class vec<+T> implements Indexish<int, T>, XHPChild {}

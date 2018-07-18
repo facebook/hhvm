@@ -19,5 +19,5 @@ function f(): void {
   expect_dict2(get_container() as dict<_, _>); // ok
 }
 
-function expect_dict1(dict<mixed, mixed> $dict): void {}
+function expect_dict1(dict<arraykey, mixed> $dict): void {}
 function expect_dict2(dict<int, string> $dict): void {}

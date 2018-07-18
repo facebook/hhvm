@@ -18,5 +18,5 @@ function h(KeyedContainer<int, string> $x): void {
   expect_dict2($x); // ok
 }
 
-function expect_dict1(dict<mixed, mixed> $dict): void {}
+function expect_dict1(dict<arraykey, mixed> $dict): void {}
 function expect_dict2(dict<int, string> $dict): void {}

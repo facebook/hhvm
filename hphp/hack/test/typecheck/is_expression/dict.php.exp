@@ -4,11 +4,11 @@ File "dict.php", line 6, characters 18-19:
 Invalid argument (Typing[4110])
   File "dict.php", line 25, characters 28-30:
   This is an int
-  File "dict.php", line 4, characters 7-8:
-  It is incompatible with a value of generic type Tk#1 from this is expression test
+  File "hhi_lib__srcs/hackarray.hhi", line 11, characters 34-41:
+  It is incompatible with an array key (int/string)
 File "dict.php", line 13, characters 18-19:
 Invalid argument (Typing[4110])
   File "dict.php", line 25, characters 28-30:
   This is an int
-  File "dict.php", line 11, characters 7-8:
-  It is incompatible with a value of generic type Tk#1 from this is expression test
+  File "hhi_lib__srcs/hackarray.hhi", line 11, characters 34-41:
+  It is incompatible with an array key (int/string)

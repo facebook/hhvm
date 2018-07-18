@@ -143,7 +143,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
   public static function fromDArray<Tk, Tv>(
     darray<Tk, Awaitable<Tv>> $deps
   ): Awaitable<void>;
-  public static function fromDict<Tk, Tv>(
+  public static function fromDict<Tk as arraykey, Tv>(
     dict<Tk, Awaitable<Tv>> $deps
   ): Awaitable<void>;
   public static function fromMap<Tk, Tv>(

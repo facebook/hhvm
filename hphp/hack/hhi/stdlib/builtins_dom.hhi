@@ -280,8 +280,7 @@ class DOMDocumentType extends DOMNode {
   /* readonly */ public string $internalSubset;
 
   // Methods
-  /* HH_IGNORE_ERROR[2071] */
-  public function __debuginfo(): darray;
+  <<__PHPStdLib>> public function __debuginfo(): array;
 
 }
 

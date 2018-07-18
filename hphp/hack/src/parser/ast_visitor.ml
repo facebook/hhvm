@@ -62,7 +62,6 @@ class type ['a] ast_visitor_type = object
   method on_goto : 'a -> pstring -> 'a
   method on_hint: 'a -> hint -> 'a
   method on_id : 'a -> id -> 'a
-  method on_id_type_arguments : 'a -> id -> hint list -> 'a
   method on_if : 'a -> expr -> block -> block -> 'a
   method on_import: 'a -> import_flavor -> expr -> 'a
   method on_import_flavor: 'a -> import_flavor -> 'a
@@ -76,7 +75,7 @@ class type ['a] ast_visitor_type = object
   method on_lfun: 'a -> fun_ -> 'a
   method on_list : 'a -> expr list -> 'a
   method on_lvar : 'a -> id -> 'a
-  method on_new : 'a -> expr -> expr list -> expr list -> 'a
+  method on_new : 'a -> expr -> hint list -> expr list -> expr list -> 'a
   method on_newanoncls : 'a -> expr list -> expr list -> class_ -> 'a
   method on_noop : 'a -> 'a
   method on_null : 'a -> 'a
@@ -376,7 +375,6 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | String s    -> this#on_string acc s
    | Execution_operator s -> this#on_execution_operator acc s
    | Id id       -> this#on_id acc id
-   | Id_type_arguments (id, hl) -> this#on_id_type_arguments acc id hl
    | Lvar id     -> this#on_lvar acc id
    | Yield_break -> this#on_yield_break acc
    | Yield e     -> this#on_yield acc e
@@ -402,7 +400,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | As          (e, h, b) -> this#on_as acc e h b
    | BracedExpr e
    | ParenthesizedExpr e -> this#on_expr acc e
-   | New         (e, el, uel) -> this#on_new acc e el uel
+   | New         (e, hl, el, uel) -> this#on_new acc e hl el uel
    | NewAnonClass (el, uel, cl) -> this#on_newanoncls acc el uel cl
    | Efun        (f, idl)         -> this#on_efun acc f idl
    | Xml         (id, attrl, el) -> this#on_xml acc id attrl el
@@ -431,9 +429,6 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     end  acc sfnel
 
   method on_id acc _ = acc
-  method on_id_type_arguments acc _ hl =
-    let acc = List.fold_left this#on_hint acc hl in
-    acc
 
   method on_lvar acc _ = acc
 
@@ -542,8 +537,9 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     let acc = this#on_hint acc h in
     acc
 
-  method on_new acc e el uel =
+  method on_new acc e hl el uel =
     let acc = this#on_expr acc e in
+    let acc = List.fold_left this#on_hint acc hl in
     let acc = List.fold_left this#on_expr acc el in
     let acc = List.fold_left this#on_expr acc uel in
     acc

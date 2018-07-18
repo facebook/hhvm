@@ -1413,8 +1413,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
     | ConstructorCall
       { constructor_call_argument_list; constructor_call_type; _ } ->
       let args, varargs = split_args_varargs constructor_call_argument_list in
-      New
-      ( (match syntax constructor_call_type with
+      let e, hl = match syntax constructor_call_type with
         | GenericTypeSpecifier { generic_class_type; generic_argument_list } ->
           let name = pos_name generic_class_type env in
           let hints =
@@ -1424,11 +1423,14 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
             | _ ->
               missing_syntax "generic type arguments" generic_argument_list env
           in
-          fst name, Id_type_arguments (name, hints)
+          (fst name, Id name), hints
         | SimpleTypeSpecifier _ ->
-          let name = pos_name constructor_call_type env in fst name, Id name
-        | _ -> pExpr constructor_call_type env
-        )
+          let name = pos_name constructor_call_type env in
+          (fst name, Id name), []
+        | _ -> pExpr constructor_call_type env, [] in
+      New
+      ( e
+      , hl
       , args
       , varargs
       )
@@ -1473,17 +1475,11 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       NewAnonClass (args, varargs, cls)
     | GenericTypeSpecifier
       { generic_class_type
-      ; generic_argument_list
+      ; _
       } ->
         let name = pos_name generic_class_type env in
-        let hints =
-          match syntax generic_argument_list with
-          | TypeArguments { type_arguments_types; _ }
-            -> couldMap ~f:pHint type_arguments_types env
-          | _ ->
-            missing_syntax "generic type arguments" generic_argument_list env
-        in
-        Id_type_arguments (name, hints)
+        (* TODO: We are dropping generics here *)
+        Id name
     | LiteralExpression { literal_expression = expr } ->
       (match syntax expr with
       | Token _ ->

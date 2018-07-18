@@ -1124,6 +1124,7 @@ and emit_xhp env p id attributes children =
   emit_expr ~need_ref:false env @@
     (p, A.New (
       (p, A.Id renamed_id),
+      [],
       [attribute_map ; children_vec ; filename ; line],
       []))
 
@@ -1672,7 +1673,7 @@ and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
      be handled in the same way *)
   | A.Execution_operator _ ->
     emit_call_expr ?last_pos ~need_ref env expr
-  | A.New (typeexpr, args, uargs) ->
+  | A.New (typeexpr, _, args, uargs) ->
     emit_box_if_necessary pos need_ref @@ emit_new env pos typeexpr args uargs
   | A.NewAnonClass (args, uargs, { A.c_name = (_, cls_name); _ }) ->
     let cls_idx = int_of_string cls_name in
@@ -1722,8 +1723,7 @@ and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
       emit_pos (Option.value ~default:pos last_pos);
       if need_ref then instr_vgetn else instr_cgetn
     ]
-  | A.Id id
-  | A.Id_type_arguments (id, _) ->
+  | A.Id id ->
     emit_pos_then pos @@
     emit_box_if_necessary pos need_ref @@ emit_id env id
   | A.Xml (id, attributes, children) ->

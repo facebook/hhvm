@@ -217,7 +217,7 @@ class declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body
     let acc = List.fold_left el2 ~f:on_arg ~init:acc in
     acc
 
-  method! on_new acc expr exprs1 exprs2 =
+  method! on_new acc expr _hl exprs1 exprs2 =
     let acc = this#on_expr acc expr in
     let acc = add_bare_exprs this acc exprs1 in
     let acc = add_bare_exprs this acc exprs2 in

@@ -173,12 +173,12 @@ class dependency_visitor = object(this)
   } in
   super#on_gconst dep_env c
 
-  method! on_New dep_env c0 _c1 _c2 =
+  method! on_New dep_env c0 _c1 _c2 _c3 =
     match snd c0 with
     | Id id ->
       add_class_dep dep_env id
     | _ -> ();
-    super#on_New dep_env c0 _c1 _c2
+    super#on_New dep_env c0 _c1 _c2 _c3
 
   method! on_hint dep_env hint =
     (match (snd hint) with

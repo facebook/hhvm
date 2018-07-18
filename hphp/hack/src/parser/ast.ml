@@ -384,7 +384,6 @@ and expr_ =
   | False
   | Omitted
   | Id of id
-  | Id_type_arguments of id * hint list
   (* Special case: the pipe variable $$ *)
   | Lvar of id
   (* General dollar expression e.g. ${"a" . $y}. Braced expression
@@ -421,7 +420,7 @@ and expr_ =
   | As of expr * hint * (* is nullable *) bool
   | BracedExpr of expr
   | ParenthesizedExpr of expr
-  | New of expr * expr list * expr list
+  | New of expr * hint list * expr list * expr list
   | NewAnonClass of expr list * expr list * class_
   (* Traditional PHP-style closure with a use list. Each use element is
     a name and a bool indicating if its a reference or value *)

@@ -2213,9 +2213,6 @@ module Make (GetLocals : GetLocals) = struct
         | Some x -> N.ImmutableVar x
         | None -> N.Id (Env.global_const env x)
       end (* match *)
-    | Id_type_arguments (_x, _hl) ->
-      (* Shouldn't happen: parser only allows this in New *)
-      failwith "Unexpected Id with type arguments"
     | Lvar (_, x) when x = SN.SpecialIdents.this -> N.This
     | Lvar (_, x) when x = SN.SpecialIdents.dollardollar ->
       N.Dollardollar (Env.found_dollardollar env p)
@@ -2548,19 +2545,15 @@ module Make (GetLocals : GetLocals) = struct
       let e1 = expr env e in
       let h1 = hint ~allow_wildcard:true env h in
       N.As (e1, h1, b)
-    | New ((_, Id_type_arguments (x, hl)), el, uel) ->
+    | New ((_, Id x), hl, el, uel)
+    | New ((_, Lvar x), hl, el, uel) ->
       N.New (make_class_id env x hl,
         exprl env el,
         exprl env uel)
-    | New ((_, Id x), el, uel)
-    | New ((_, Lvar x), el, uel) ->
-      N.New (make_class_id env x [],
-        exprl env el,
-        exprl env uel)
-    | New ((p, _e), el, uel) ->
+    | New ((p, _e), hl, el, uel) ->
       if (fst env).in_mode = FileInfo.Mstrict
       then Errors.dynamic_new_in_strict_mode p;
-      N.New (make_class_id env (p, SN.Classes.cUnknown) [],
+      N.New (make_class_id env (p, SN.Classes.cUnknown) hl,
         exprl env el,
         exprl env uel)
     | NewAnonClass _ ->

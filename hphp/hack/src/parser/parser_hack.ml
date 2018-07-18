@@ -3763,27 +3763,24 @@ and use_list env =
 
 and expr_new env pos_start =
   with_priority env Tnew begin fun env ->
-    let cname =
+    let cname, hl =
       let e = expr env in
       match e with
-      | p, Id id ->
-        let typeargs = class_hint_params env in
-        if typeargs == []
-        then e
-        else (p, Id_type_arguments (id, typeargs))
+      | _, Id _ ->
+        e, class_hint_params env
       | _, Lvar _
       | _, Array_get _
       | _, Obj_get _
       | _, Class_get _
       | _, Call _ ->
-        e
+        e, []
       | _, _ ->
-          error_expect env "class name";
-          e
+        error_expect env "class name";
+        e, []
     in
     let args1, args2 = expr_call_list env in
     let pos_end = Pos.make env.file env.lb in
-    Pos.btw pos_start pos_end, New (cname, args1, args2)
+    Pos.btw pos_start pos_end, New (cname, hl, args1, args2)
   end
 
 (*****************************************************************************)

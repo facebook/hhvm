@@ -115,7 +115,6 @@ and expr_ =
   | This
   | True
   | False
-  (* TODO: to match AST we need Id_type_arguments as well *)
   | Id of sid
   | Lvar of lid
   | ImmutableVar of lid

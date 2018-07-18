@@ -269,7 +269,7 @@ and expr tcopt acc (_, e) =
     let acc = expr tcopt acc e1 in
     let acc = Option.value_map oe2 ~default:acc ~f:(expr tcopt acc) in
     acc
-  | New (e1, es2, es3)
+  | New (e1, _, es2, es3)
   | Call (e1, _, es2, es3) ->
     let acc = expr tcopt acc e1 in
     let acc = exprs acc es2 in
@@ -300,7 +300,6 @@ and expr tcopt acc (_, e) =
   | False
   | Omitted
   | Id _
-  | Id_type_arguments _
   | Yield_break
   | Int _
   | Float _

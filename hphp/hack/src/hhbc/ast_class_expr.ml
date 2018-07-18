@@ -65,17 +65,15 @@ let get_original_parent_class_name ~check_traits ~resolve_self scope =
 let expr_to_class_expr ?(check_traits=false) ~resolve_self scope (_, expr_ as expr) =
   match expr_ with
   | A.Id (_, id) when SU.is_static id -> Class_static
-  | A.Id (pos, id)
-  | A.Id_type_arguments ((pos, id), _) when SU.is_parent id ->
+  | A.Id (pos, id) when SU.is_parent id ->
     begin match get_original_parent_class_name ~resolve_self ~check_traits scope with
     | Some name -> Class_id (pos, name)
     | None -> Class_parent
     end
-  | A.Id (pos, id)
-  | A.Id_type_arguments ((pos, id), _) when SU.is_self id ->
+  | A.Id (pos, id) when SU.is_self id ->
     begin match get_original_class_name ~resolve_self ~check_traits scope with
     | Some name -> Class_id (pos, name)
     | None -> Class_self
     end
-  | A.Id id | A.Id_type_arguments (id, _) -> Class_id id
+  | A.Id id -> Class_id id
   | _ -> Class_expr expr

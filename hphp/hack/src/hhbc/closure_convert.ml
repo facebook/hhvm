@@ -564,7 +564,7 @@ let check_if_in_async_context { scope; pos; _ } =
 let rec convert_expr env st (p, expr_ as expr) =
   match expr_ with
   | Null | True | False | Omitted | Yield_break
-  | Id_type_arguments _ | Int _ | Float _ | String _ -> st, expr
+  | Int _ | Float _ | String _ -> st, expr
   | Varray es ->
     let st, es = List.map_env st es (convert_expr env) in
     st, (p, Varray es)
@@ -677,11 +677,11 @@ let rec convert_expr env st (p, expr_ as expr) =
   | As (e, h, b) ->
     let st, e = convert_expr env st e in
     st, (p, As (e, h, b))
-  | New (e, el1, el2) ->
+  | New (e, typeargs, el1, el2) ->
     let st, e = convert_expr env st e in
     let st, el1 = convert_exprs env st el1 in
     let st, el2 = convert_exprs env st el2 in
-    st, (p, New(e, el1, el2))
+    st, (p, New (e, typeargs, el1, el2))
   | NewAnonClass (args, varargs, cls) ->
     let cls = { cls with
       c_name = (fst cls.c_name, make_anonymous_class_name env st) } in

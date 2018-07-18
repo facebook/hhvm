@@ -1145,7 +1145,6 @@ and string_of_param_default_value ~env expr =
       | _ -> id
     in
     Php_escaping.escape id
-  | A.Id_type_arguments ((_, litstr), _)
   | A.Lvar (_, litstr) -> Php_escaping.escape litstr
   | A.Float litstr -> SU.Float.with_scientific_notation litstr
   | A.Int litstr -> SU.Integer.to_decimal litstr
@@ -1187,11 +1186,11 @@ and string_of_param_default_value ~env expr =
     let e1 = string_of_param_default_value ~env e1 in
     let e2 = string_of_param_default_value ~env e2 in
     e1 ^ " " ^ bop ^ " " ^ e2
-  | A.New (e, es, ues)
+  | A.New (e, _, es, ues)
   | A.Call (e, _, es, ues) ->
     let e = String_utils.lstrip (string_of_param_default_value ~env e) "\\\\" in
     let es = List.map (string_of_param_default_value ~env) (es @ ues) in
-    let prefix = match snd expr with A.New (_, _, _) -> "new " | _ -> "" in
+    let prefix = match snd expr with A.New (_, _, _, _) -> "new " | _ -> "" in
     prefix
     ^ e
     ^ "("

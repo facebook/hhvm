@@ -299,7 +299,7 @@ function run_hhvm(OptionMap $opts): void {
   } else {
     // Give the return value of the command back to the caller.
     $retval = null;
-    passthru($cmd, $retval);
+    passthru($cmd, &$retval);
     exit($retval);
   }
 }

@@ -529,7 +529,7 @@ struct SparseHeap {
   /*
    * Return the (likely sparse) address range that contains every slab.
    */
-  MemBlock slab_range() const;
+  MemBlock slab_range() const { return m_slab_range; }
 
  protected:
   struct SlabInfo {
@@ -541,9 +541,8 @@ struct SparseHeap {
     uint16_t version{0};                // tag used with SlabManager
   };
   std::vector<SlabInfo> m_pooled_slabs;
-  RadixMap<HeapObject*,4,8> m_bigs;
-  uintptr_t m_slab_min{std::numeric_limits<uintptr_t>::max()};
-  uintptr_t m_slab_max{0};
+  RadixMap<HeapObject*,kLgSmallSizeQuantum,8> m_bigs;
+  MemBlock m_slab_range;
   int64_t m_hugeBytes{0};             // compare with RequestHugeMaxBytes
   SlabManager* m_slabManager{nullptr};
 };

@@ -490,4 +490,5 @@ MutableExpressionAsMultipleMutableArguments = 4269
 InvalidUnsetTargetInRx = 4270
 CoroutineOutsideExperimental = 4271
 PPLMethPointer = 4272
+InvalidTruthinessTest = 4273
   |}]

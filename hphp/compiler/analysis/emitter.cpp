@@ -12165,10 +12165,8 @@ void genText(UnitEmitter* ue, const std::string& outputPath) {
     if (!f) {
       Logger::Error("Unable to open %s for write", fullPath.c_str());
     } else {
-      CodeGenerator cg(&f, CodeGenerator::TextHHBC);
-      auto const& md5 = ue->md5();
-      cg.printf("Hash: %" PRIx64 "%016" PRIx64 "\n", md5.q[0], md5.q[1]);
-      cg.printRaw(unit->toString().c_str());
+      f << "Hash: " << ue->md5().toString() << std::endl;
+      f << unit->toString();
       f.close();
     }
   }

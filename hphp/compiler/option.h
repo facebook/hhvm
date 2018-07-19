@@ -83,14 +83,6 @@ struct Option {
    */
   static hphp_string_imap<std::string> ConstantFunctions;
 
-  /**
-   * CodeGenerator options for PHP.
-   */
-  static bool GeneratePickledPHP;
-  static bool GenerateInlinedPHP;
-  static bool GenerateTrimmedPHP;
-  static std::string ProgramPrologue;
-  static std::string TrimmedPrologue;
   static std::set<std::string> VolatileClasses;
   static std::map<std::string,std::string, stdltistr> AutoloadClassMap;
   static std::map<std::string,std::string, stdltistr> AutoloadFuncMap;

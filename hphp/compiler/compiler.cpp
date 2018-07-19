@@ -212,16 +212,13 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("version", "display version number")
     ("target,t", value<std::string>(&po.target)->default_value("run"),
      "lint | "
-     "php | "
      "hhbc | "
      "filecache | "
      "run (default)")
     ("format,f", value<std::string>(&po.format),
      "lint: (none); \n"
-     "php: trimmed (default) | inlined | pickled |"
-     " <any combination of them by any separator>; \n"
-     "hhbc: binary (default) | text; \n"
-     "run: cluster (default) | file")
+     "hhbc: binary (default) | hhas | text | exe; \n"
+     "run: binary (default) | hhas | text | exe")
     ("input-dir", value<std::string>(&po.inputDir), "input directory")
     ("program", value<std::string>(&po.program)->default_value("program"),
      "final program name to use")
@@ -381,7 +378,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
   if (po.target != "run"
       && po.target != "lint"
-      && po.target != "php"
       && po.target != "hhbc"
       && po.target != "filecache") {
     Logger::Error("Error in command line: target '%s' is not supported.",
@@ -495,14 +491,8 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
   Option::ProgramName = po.program;
 
-  if (po.format.empty()) {
-    if (po.target == "php") {
-      po.format = "trimmed";
-    } else if (po.target == "run") {
-      po.format = "binary";
-    } else if (po.target == "hhbc") {
-      po.format = "binary";
-    }
+  if (po.format.empty() && (po.target == "run" || po.target == "hhbc")) {
+    po.format = "binary";
   }
 
   if (po.optimizeLevel == -1) {
@@ -576,26 +566,20 @@ int process(const CompilerOptions &po) {
     }
   };
 
-  bool isPickledPHP = (po.target == "php" && po.format == "pickled");
-  if (!isPickledPHP) {
-    bool wp = Option::WholeProgram;
-    Option::WholeProgram = false;
-    BuiltinSymbols::s_systemAr = ar;
-    hphp_process_init();
-    processInitRan = true;
-    BuiltinSymbols::s_systemAr.reset();
-    Option::WholeProgram = wp;
-    if (po.target == "hhbc" && !Option::WholeProgram) {
-      // We're trying to produce the same bytecode as runtime parsing.
-      // There's nothing to do.
-    } else {
-      if (!BuiltinSymbols::Load(ar)) {
-        return false;
-      }
-    }
+  bool wp = Option::WholeProgram;
+  Option::WholeProgram = false;
+  BuiltinSymbols::s_systemAr = ar;
+  hphp_process_init();
+  processInitRan = true;
+  BuiltinSymbols::s_systemAr.reset();
+  Option::WholeProgram = wp;
+  if (po.target == "hhbc" && !Option::WholeProgram) {
+    // We're trying to produce the same bytecode as runtime parsing.
+    // There's nothing to do.
   } else {
-    hphp_process_init();
-    processInitRan = true;
+    if (!BuiltinSymbols::Load(ar)) {
+      return false;
+    }
   }
 
   LitstrTable::init();
@@ -603,41 +587,35 @@ int process(const CompilerOptions &po) {
 
   {
     Timer timer2(Timer::WallTime, "parsing inputs");
-    if (!po.inputs.empty() && isPickledPHP) {
+    ar->setPackage(&package);
+    ar->setParseOnDemand(po.parseOnDemand);
+    if (!po.parseOnDemand) {
+      ar->setParseOnDemandDirs(Option::ParseOnDemandDirs);
+    }
+    if (po.modules.empty() && po.fmodules.empty() &&
+        po.ffiles.empty() && po.inputs.empty() && po.inputList.empty()) {
+      package.addAllFiles(false);
+    } else {
+      for (unsigned int i = 0; i < po.modules.size(); i++) {
+        package.addDirectory(po.modules[i], false);
+      }
+      for (unsigned int i = 0; i < po.fmodules.size(); i++) {
+        package.addDirectory(po.fmodules[i], true);
+      }
+      for (unsigned int i = 0; i < po.ffiles.size(); i++) {
+        package.addSourceFile(po.ffiles[i]);
+      }
+      for (unsigned int i = 0; i < po.cmodules.size(); i++) {
+        package.addStaticDirectory(po.cmodules[i]);
+      }
+      for (unsigned int i = 0; i < po.cfiles.size(); i++) {
+        package.addStaticFile(po.cfiles[i]);
+      }
       for (unsigned int i = 0; i < po.inputs.size(); i++) {
         package.addSourceFile(po.inputs[i]);
       }
-    } else {
-      ar->setPackage(&package);
-      ar->setParseOnDemand(po.parseOnDemand);
-      if (!po.parseOnDemand) {
-        ar->setParseOnDemandDirs(Option::ParseOnDemandDirs);
-      }
-      if (po.modules.empty() && po.fmodules.empty() &&
-          po.ffiles.empty() && po.inputs.empty() && po.inputList.empty()) {
-        package.addAllFiles(false);
-      } else {
-        for (unsigned int i = 0; i < po.modules.size(); i++) {
-          package.addDirectory(po.modules[i], false);
-        }
-        for (unsigned int i = 0; i < po.fmodules.size(); i++) {
-          package.addDirectory(po.fmodules[i], true);
-        }
-        for (unsigned int i = 0; i < po.ffiles.size(); i++) {
-          package.addSourceFile(po.ffiles[i]);
-        }
-        for (unsigned int i = 0; i < po.cmodules.size(); i++) {
-          package.addStaticDirectory(po.cmodules[i]);
-        }
-        for (unsigned int i = 0; i < po.cfiles.size(); i++) {
-          package.addStaticFile(po.cfiles[i]);
-        }
-        for (unsigned int i = 0; i < po.inputs.size(); i++) {
-          package.addSourceFile(po.inputs[i]);
-        }
-        if (!po.inputList.empty()) {
-          package.addInputList(po.inputList);
-        }
+      if (!po.inputList.empty()) {
+        package.addInputList(po.inputList);
       }
     }
     if (po.target != "filecache") {
@@ -678,9 +656,7 @@ int process(const CompilerOptions &po) {
     });
 
   int ret = 0;
-  if (po.target == "php") {
-    ret = phpTarget(po, ar);
-  } else if (po.target == "hhbc") {
+  if (po.target == "hhbc") {
     ret = hhbcTarget(po, std::move(ar), fileCacheThread);
   } else if (po.target == "run") {
     ret = runTargetCheck(po, std::move(ar), fileCacheThread);
@@ -719,61 +695,6 @@ int lintTarget(const CompilerOptions &po) {
       ret = 1;
     }
   }
-  return ret;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-int phpTarget(const CompilerOptions &po, AnalysisResultPtr ar) {
-  int ret = 0;
-
-  // format
-  int formatCount = 0;
-  if (po.format.find("pickled") != std::string::npos) {
-    Option::GeneratePickledPHP = true;
-    formatCount++;
-  }
-  if (po.format.find("inlined") != std::string::npos) {
-    Option::GenerateInlinedPHP = true;
-    formatCount++;
-  }
-  if (po.format.find("trimmed") != std::string::npos) {
-    Option::GenerateTrimmedPHP = true;
-    formatCount++;
-  }
-  if (formatCount == 0) {
-    Logger::Error("Unknown format for PHP target: %s", po.format.c_str());
-    return 1;
-  }
-
-  // generate
-  ar->setOutputPath(po.outputDir);
-  if (Option::GeneratePickledPHP) {
-    Logger::Info("creating pickled PHP files...");
-    std::string outputDir = po.outputDir;
-    if (formatCount > 1) outputDir += "/pickled";
-    mkdir(outputDir.c_str(), 0777);
-    ar->outputAllPHP(CodeGenerator::PickledPHP);
-  }
-  if (Option::GenerateInlinedPHP) {
-    Logger::Info("creating inlined PHP files...");
-    std::string outputDir = po.outputDir;
-    if (formatCount > 1) outputDir += "/inlined";
-    mkdir(outputDir.c_str(), 0777);
-    if (!ar->outputAllPHP(CodeGenerator::InlinedPHP)) {
-      ret = -1;
-    }
-  }
-  if (Option::GenerateTrimmedPHP) {
-    Logger::Info("creating trimmed PHP files...");
-    std::string outputDir = po.outputDir;
-    if (formatCount > 1) outputDir += "/trimmed";
-    mkdir(outputDir.c_str(), 0777);
-    if (!ar->outputAllPHP(CodeGenerator::TrimmedPHP)) {
-      ret = -1;
-    }
-  }
-
   return ret;
 }
 

@@ -57,11 +57,6 @@ std::vector<std::string> Option::ParseOnDemandDirs;
 
 std::vector<std::string> Option::IncludeSearchPaths;
 
-bool Option::GeneratePickledPHP = false;
-bool Option::GenerateInlinedPHP = false;
-bool Option::GenerateTrimmedPHP = false;
-std::string Option::ProgramPrologue;
-std::string Option::TrimmedPrologue;
 std::set<std::string> Option::VolatileClasses;
 std::map<std::string,std::string,stdltistr> Option::AutoloadClassMap;
 std::map<std::string,std::string,stdltistr> Option::AutoloadFuncMap;

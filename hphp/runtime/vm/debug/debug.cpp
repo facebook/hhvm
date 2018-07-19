@@ -57,6 +57,13 @@ void initDebugInfo() {
   s_info = new DebugInfo();
 }
 
+void destroyDebugInfo() {
+  if (s_info) {
+    delete s_info;
+    s_info = nullptr;
+  }
+}
+
 DebugInfo* DebugInfo::Get() {
   return s_info;
 }

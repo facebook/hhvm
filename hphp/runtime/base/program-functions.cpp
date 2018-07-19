@@ -71,6 +71,7 @@
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/extern-compiler.h"
@@ -2351,6 +2352,8 @@ void hphp_process_init() {
     InitFiniNode::ProcessInitConcurrentWaitForEnd();
     BootStats::mark("extra_process_init_concurrent_wait");
   };
+  jit::mcgen::processInit();
+  jit::processInitProfData();
   g_vmProcessInit();
   BootStats::mark("g_vmProcessInit");
 
@@ -2803,6 +2806,7 @@ void hphp_process_exit() noexcept {
   LOG_AND_IGNORE(InitFiniNode::ProcessFini())
   LOG_AND_IGNORE(folly::SingletonVault::singleton()->destroyInstances())
   LOG_AND_IGNORE(embedded_data_cleanup())
+  LOG_AND_IGNORE(Debug::destroyDebugInfo())
 #undef LOG_AND_IGNORE
 }
 

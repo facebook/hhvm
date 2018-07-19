@@ -15,11 +15,16 @@
 */
 
 #include "hphp/runtime/ext/vsdebug/session.h"
+
+#include "hphp/runtime/ext/vsdebug/debugger.h"
+
+#include "hphp/runtime/vm/treadmill.h"
+
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/vm/treadmill.h"
+
 #include "hphp/util/process.h"
 
 namespace HPHP {

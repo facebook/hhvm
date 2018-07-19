@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/ext/vsdebug/break_mode.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
-#include "hphp/runtime/ext/vsdebug/debugger.h"
 
 #include <string>
 #include <unordered_map>
@@ -29,6 +28,7 @@
 namespace HPHP {
 namespace VSDEBUG {
 
+struct Debugger;
 struct ClientPreferences;
 struct RequestInfo;
 

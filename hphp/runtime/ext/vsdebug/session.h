@@ -18,7 +18,6 @@
 #define incl_HPHP_VSDEBUG_SESSION_H_
 
 #include "hphp/runtime/ext/vsdebug/logging.h"
-#include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/transport.h"
 #include "hphp/runtime/ext/vsdebug/command_queue.h"
 #include "hphp/runtime/ext/vsdebug/command.h"

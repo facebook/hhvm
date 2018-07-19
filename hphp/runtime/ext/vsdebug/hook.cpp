@@ -16,6 +16,9 @@
 
 #include "hphp/runtime/ext/vsdebug/hook.h"
 
+#include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
+#include "hphp/runtime/ext/vsdebug/debugger.h"
+
 namespace HPHP {
 namespace VSDEBUG {
 

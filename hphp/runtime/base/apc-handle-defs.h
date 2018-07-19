@@ -18,7 +18,6 @@
 #define incl_HPHP_APC_HANDLE_DEFS_H_
 
 #include "hphp/runtime/base/apc-handle.h"
-#include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/execution-context.h"
 
 namespace HPHP {

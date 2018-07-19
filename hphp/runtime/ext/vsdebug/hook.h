@@ -18,11 +18,11 @@
 #define incl_HPHP_VSDEBUG_HOOK_H_
 
 #include "hphp/runtime/vm/debugger-hook.h"
-#include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 
 namespace HPHP {
 namespace VSDEBUG {
 
+struct Debugger;
 struct RequestInfo;
 
 struct VSDebugHook final : DebuggerHook {

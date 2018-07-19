@@ -14,10 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/ext/vsdebug/breakpoint.h"
+
 #include "hphp/runtime/ext/vsdebug/command.h"
+#include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/logging.h"
+
 #include "hphp/runtime/vm/runtime-compiler.h"
+
+#include "hphp/runtime/base/execution-context.h"
 
 namespace HPHP {
 namespace VSDEBUG {

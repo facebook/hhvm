@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/util/process.h"

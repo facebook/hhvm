@@ -1,6 +1,6 @@
 File "xhpchild_implicit_return.php", line 14, characters 10-12:
 Invalid return type (Typing[4110])
-File "xhpchild_implicit_return.php", line 14, characters 17-24:
-This is an object of type XHPChild
 File "xhpchild_implicit_return.php", line 14, characters 10-12:
-It is incompatible with void because this function implicitly returns void
+This is void because this function implicitly returns void
+File "xhpchild_implicit_return.php", line 14, characters 17-24:
+It is incompatible with an object of type XHPChild

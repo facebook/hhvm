@@ -1,6 +1,6 @@
 File "void_isnt_dynamic.php", line 3, characters 10-12:
 Invalid return type (Typing[4110])
-File "void_isnt_dynamic.php", line 3, characters 17-23:
-This is a dynamic value
 File "void_isnt_dynamic.php", line 3, characters 10-12:
-It is incompatible with void because this function implicitly returns void
+This is void because this function implicitly returns void
+File "void_isnt_dynamic.php", line 3, characters 17-23:
+It is incompatible with a dynamic value

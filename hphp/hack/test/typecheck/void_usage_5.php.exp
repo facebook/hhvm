@@ -1,6 +1,8 @@
 File "void_usage_5.php", line 12, characters 3-15:
-  array<^(string | void)>
-File "void_usage_5.php", line 13, characters 12-15:
-You are using the return value of a void function (Typing[4119])
+  array<^(string)>
 File "void_usage_5.php", line 5, characters 5-64:
-A void function doesn't return a value because this function implicitly returns void
+Invalid return type (Typing[4110])
+File "void_usage_5.php", line 5, characters 5-64:
+This is void because this function implicitly returns void
+File "void_usage_5.php", line 10, characters 11-16:
+It is incompatible with a string

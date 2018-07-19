@@ -23,5 +23,6 @@ abstract final class C {
       $y = await self::genEntityExample($x);
       return $y;
     }
+    return null;
   }
 }

@@ -112,6 +112,7 @@ let () =
     ~tco_disallow_array_cell_pass_by_ref:false
     ~tco_language_feature_logging:false
     ~tco_unsafe_rx:false
+    ~tco_disallow_implicit_returns_in_non_void_functions:true
     ~ignored_fixme_codes: ISet.empty
     ~forward_compatibility_level: ForwardCompatibilityLevel.default
   in

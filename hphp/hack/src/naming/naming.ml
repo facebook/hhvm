@@ -2711,7 +2711,8 @@ module Make (GetLocals : GetLocals) = struct
     Env.scope env (
     fun env ->
       (* If the variable does not begin with $, it is an immutable binding *)
-      let x2 = if (snd x2).[0] = '$' (* This is always true if hacksperimental is off *)
+      let x2 = if (snd x2) <> ""
+        && (snd x2).[0] = '$' (* This is always true if hacksperimental is off *)
         then Env.new_lvar env x2
         else Env.new_let_local env x2
       in

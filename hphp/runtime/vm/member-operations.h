@@ -501,6 +501,12 @@ inline tv_rval Elem(TypedValue& tvRef,
   assertx(mode != MOpMode::Define && mode != MOpMode::Unset);
   assertx(tvIsPlausible(base.tv()));
 
+  if (mode == MOpMode::InOut) {
+    if (UNLIKELY(tvIsRef(base) && !base.val().pref->isReferenced())) {
+      base = base.unboxed();
+    }
+  }
+
   if (LIKELY(tvIsArray(base))) {
     return ElemArray<mode, keyType, intishWarn>(base.val().parr, key);
   }

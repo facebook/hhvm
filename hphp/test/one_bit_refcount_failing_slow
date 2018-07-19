@@ -21,3 +21,4 @@ slow/unserialize-reference-overwritten.php
 slow/hack_arr_compat/parse-str.php
 slow/dv_array_hack_arr/ext_xenon/xenon_crash.php
 slow/dv_array/ext_xenon/xenon_crash.php
+slow/inout-refs.php

@@ -241,7 +241,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
    * turns it on. *)
   let class_no_dynamic_props = class_is_immutable in
   let class_id, _ =
-    Hhbc_id.Class.elaborate_id_at_definition_site namespace ast_class.Ast.c_name in
+    Hhbc_id.Class.elaborate_id namespace ast_class.Ast.c_name in
   let class_is_trait = ast_class.A.c_kind = Ast.Ctrait in
   let class_is_interface = ast_is_interface ast_class in
   let class_uses =

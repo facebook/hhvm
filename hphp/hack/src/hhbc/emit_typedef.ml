@@ -26,7 +26,7 @@ let emit_typedef : Ast.typedef -> Hhas_typedef.t =
   fun ast_typedef ->
   let namespace = ast_typedef.Ast.t_namespace in
   let typedef_name, _ =
-    Hhbc_id.Class.elaborate_id_at_definition_site namespace ast_typedef.Ast.t_id in
+    Hhbc_id.Class.elaborate_id namespace ast_typedef.Ast.t_id in
   let typedef_attributes =
     Emit_attribute.from_asts namespace ast_typedef.Ast.t_user_attributes in
   let tparams = Emit_body.tparams_to_strings ast_typedef.Ast.t_tparams in

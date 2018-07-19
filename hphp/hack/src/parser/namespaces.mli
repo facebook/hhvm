@@ -38,6 +38,3 @@ val elaborate_def:
   Namespace_env.env ->
   Ast.def ->
   Namespace_env.env * Ast.def list
-
-val aliased_to_fully_qualified_id : (string * string) list -> string -> string
-val fully_qualified_to_aliased_id : (string * string) list -> string -> string

@@ -18,7 +18,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
   fun (ast_fun, is_top) ->
   let namespace = ast_fun.A.f_namespace in
   let original_id, _ =
-    Hhbc_id.Function.elaborate_id_at_definition_site namespace ast_fun.A.f_name in
+    Hhbc_id.Function.elaborate_id namespace ast_fun.A.f_name in
   let function_is_async =
     ast_fun.Ast.f_fun_kind = Ast_defs.FAsync
     || ast_fun.Ast.f_fun_kind = Ast_defs.FAsyncGenerator in

@@ -23,9 +23,10 @@ namespace B {
     echo "B\n";
   }
 }
+
 namespace {
-  use A; // doesn't override alias 
+  use A; // overrides alias
   use namespace C; // overrides alias
-  A\x(); // B\x();
+  A\x(); // A\x();
   C\x(); // C\x();
 }

@@ -210,6 +210,7 @@ let is_letter_important word idx =
   if idx <= 1 then true (* First 2 letters *)
   else if Char.uppercase_ascii c = c then true (* Uppercase letter *)
   else if String.get word (idx - 1) = '_' then true (* Preceding underscore *)
+  else if String.get word (idx - 1) = '\\' then true (* Namespaced *)
   else false (* Not important *)
 
 (* Indexes up to `max_num` important letters of a word *)

@@ -32,21 +32,22 @@
 #include "hphp/runtime/vm/jit/array-offset-profile.h"
 #include "hphp/runtime/vm/jit/call-target-profile.h"
 #include "hphp/runtime/vm/jit/cls-cns-profile.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/meth-profile.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/profile-refcount.h"
 #include "hphp/runtime/vm/jit/release-vv-profile.h"
 #include "hphp/runtime/vm/jit/switch-profile.h"
-#include "hphp/runtime/vm/jit/type-profile.h"
-#include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
-#include "hphp/runtime/vm/named-entity.h"
+#include "hphp/runtime/vm/jit/type-profile.h"
 #include "hphp/runtime/vm/named-entity-defs.h"
-#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/repo-global-data.h"
-#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/type-profile.h"
+#include "hphp/runtime/vm/unit.h"
 
 #include "hphp/util/build-info.h"
 #include "hphp/util/process.h"
@@ -779,6 +780,7 @@ void merge_loaded_units(int numWorkers) {
   std::atomic<size_t> index{0};
   for (auto worker = 0; worker < numWorkers; ++worker) {
     workers.push_back(std::thread([&] {
+      ProfileNonVMThread nonVM;
       hphp_thread_init();
       hphp_session_init(Treadmill::SessionKind::PreloadRepo);
 

@@ -15,33 +15,17 @@
 */
 #include "hphp/runtime/base/unit-cache.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <memory>
-#include <string>
-#include <cstdlib>
-#include <thread>
-
-#include <folly/ScopeGuard.h>
-#include <folly/portability/Fcntl.h>
-
-#include "hphp/util/assertions.h"
-#include "hphp/util/rank.h"
-#include "hphp/util/mutex.h"
-#include "hphp/util/process.h"
-#include "hphp/util/struct-log.h"
-#include "hphp/util/timer.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/system-profiler.h"
-#include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/source-root-info.h"
@@ -50,6 +34,24 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/type-profile.h"
+
+#include "hphp/util/assertions.h"
+#include "hphp/util/mutex.h"
+#include "hphp/util/process.h"
+#include "hphp/util/rank.h"
+#include "hphp/util/struct-log.h"
+#include "hphp/util/timer.h"
+
+#include <cstdlib>
+#include <memory>
+#include <string>
+#include <thread>
+
+#include <folly/AtomicHashMap.h>
+#include <folly/Optional.h>
+#include <folly/portability/Fcntl.h>
+#include <folly/portability/SysStat.h>
 
 #ifdef __APPLE__
 #define st_mtim st_mtimespec
@@ -816,6 +818,7 @@ void preloadRepo() {
   std::atomic<size_t> index{0};
   for (auto worker = 0; worker < numWorkers; ++worker) {
     workers.push_back(std::thread([&] {
+      ProfileNonVMThread nonVM;
       hphp_thread_init();
       hphp_session_init(Treadmill::SessionKind::PreloadRepo);
 

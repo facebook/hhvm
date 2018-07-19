@@ -690,6 +690,17 @@ struct RCState {
    * The mapped value is -1 if no ASet is currently supported by that location.
    */
   std::array<ASetID,kMaxTrackedALocs> support_map;
+
+  /*
+   * When we decref an unbalanced location, we have to reduce the
+   * lower bounds of all the may-alias sets too; but we can defer
+   * doing so until the next point at which they could be
+   * "observed". This means that one decref won't necessarily
+   * interfere with a subsequent decref (although the side effects of
+   * the first one could still affect it). So we record the unbalanced
+   * decrefs here, and apply them at the next non-trivial instruction.
+   */
+  CompactVector<ASetID> unbalanced_decrefs;
 };
 
 // The analysis result structure for rc_analyze.
@@ -1569,6 +1580,35 @@ bool merge_into(Env& /*env*/, RCState& dst, const RCState& src) {
 
   always_assert(dst.asets.size() == src.asets.size());
 
+  if (src.unbalanced_decrefs.size()) {
+    auto tmp = src.unbalanced_decrefs;
+    if (dst.unbalanced_decrefs.size()) {
+      // Need to merge the unbalanced_decrefs. For each aset in
+      // either, we want the destination to end up with max(aset in
+      // dst, aset in src) occurrances of aset (a kind of "union with
+      // counts").
+      std::sort(tmp.begin(), tmp.end());
+      std::sort(dst.unbalanced_decrefs.begin(), dst.unbalanced_decrefs.end());
+      auto j = 0;
+      for (int i = 0, sz = dst.unbalanced_decrefs.size(); i < sz; ) {
+        if (j == tmp.size()) break;
+        if (tmp[j] > dst.unbalanced_decrefs[i]) {
+          ++i;
+          continue;
+        }
+        if (tmp[j] < dst.unbalanced_decrefs[i]) {
+          dst.unbalanced_decrefs.push_back(tmp[j++]);
+          continue;
+        }
+        i++;
+        j++;
+      }
+      while (j < tmp.size()) dst.unbalanced_decrefs.push_back(tmp[j++]);
+    } else {
+      dst.unbalanced_decrefs = std::move(tmp);
+    }
+  }
+
   // We'll reconstruct the support_map vector after merging each aset.
   dst.support_map.fill(-1);
 
@@ -1639,6 +1679,20 @@ void reduce_lower_bound(Env& /*env*/, RCState& state, uint32_t asetID) {
   }
 }
 
+void observe_unbalanced_decrefs(Env& env, RCState& state, PreAdder add_node) {
+  for (auto asetID : state.unbalanced_decrefs) {
+    FTRACE(4, "    unbalanced decref: {}\n", asetID);
+    for (auto may_id : env.asets[asetID].may_alias) {
+      reduce_lower_bound(env, state, may_id);
+      DEBUG_ONLY auto& may_set = state.asets[may_id];
+      FTRACE(5, "      {} lb: {}({})\n",
+             may_id, may_set.lower_bound, may_set.unsupported_refs);
+      add_node(may_id, NReq{1});
+    }
+  }
+  state.unbalanced_decrefs.clear();
+}
+
 /*
  * Note that its ok to clear the memory support and continue in
  * pessimize situations. If later, after increasing the lower bound,
@@ -1671,6 +1725,7 @@ void pessimize_one(Env& /*env*/, RCState& state, ASetID asetID,
 
 void pessimize_all(Env& env, RCState& state, PreAdder add_node) {
   FTRACE(3, "    pessimize_all\n");
+  observe_unbalanced_decrefs(env, state, add_node);
   for (auto asetID = uint32_t{0}; asetID < state.asets.size(); ++asetID) {
     pessimize_one(env, state, asetID, add_node);
   }
@@ -1710,8 +1765,9 @@ void observe(Env& env, RCState& state, ASetID asetID, PreAdder add_node) {
   }
 }
 
-void observe_all(Env& /*env*/, RCState& state, PreAdder add_node) {
+void observe_all(Env& env, RCState& state, PreAdder add_node) {
   FTRACE(3, "    observe_all\n");
+  observe_unbalanced_decrefs(env, state, add_node);
   for (auto asetID = uint32_t{0}; asetID < state.asets.size(); ++asetID) {
     add_node(asetID, NReq{std::numeric_limits<int32_t>::max()});
   }
@@ -1754,15 +1810,8 @@ void may_decref(Env& env, RCState& state, ASetID asetID, PreAdder add_node) {
          asetID, aset.lower_bound, aset.unsupported_refs);
 
   if (balanced) return;
-  FTRACE(4, "    unbalanced decref:\n");
-
-  for (auto may_id : env.asets[asetID].may_alias) {
-    reduce_lower_bound(env, state, may_id);
-    DEBUG_ONLY auto& may_set = state.asets[may_id];
-    FTRACE(5, "      {} lb: {}({})\n",
-           may_id, may_set.lower_bound, may_set.unsupported_refs);
-    add_node(may_id, NReq{1});
-  }
+  FTRACE(4, "    adding unbalanced decref: {}\n", asetID);
+  state.unbalanced_decrefs.push_back(asetID);
 }
 
 void kill_unsupported_refs(RCState& state, PreAdder add_node = {}) {
@@ -2062,6 +2111,7 @@ void analyze_mem_effects(Env& env,
 
     [&] (GeneralEffects x)  {
       if (inst.is(CallBuiltin)) {
+        observe_unbalanced_decrefs(env, state, add_node);
         kill_unsupported_refs(state, add_node);
         observe_for_is_referenced(env, state, add_node);
       }
@@ -2081,18 +2131,29 @@ void analyze_mem_effects(Env& env,
                                        InlineReturnNoFrame,
                                        SyncReturnBC
                                       );
+      if (may_decref && x.stores != AEmpty) {
+        observe_unbalanced_decrefs(env, state, add_node);
+      }
       reduce_support(env, state, x.stores, may_decref, add_node);
       // For the moves set, we have no way to track where the pointers may be
       // moved to, so we need to account for it, via unsupported_refs.
       reduce_support(env, state, x.moves, false, add_node);
     },
 
-    [&] (ReturnEffects)     { observe_all(env, state, add_node); },
-    [&] (ExitEffects)       { observe_all(env, state, add_node); },
+    [&] (ReturnEffects)     {
+      observe_all(env, state, add_node);
+    },
+    [&] (ExitEffects)       {
+      observe_all(env, state, add_node);
+    },
 
-    [&] (UnknownEffects)    { pessimize_all(env, state, add_node); },
+    [&] (UnknownEffects)    {
+      pessimize_all(env, state, add_node);
+    },
 
-    [&] (CallEffects e) { handle_call(env, state, inst, e, add_node); },
+    [&] (CallEffects e) {
+      handle_call(env, state, inst, e, add_node);
+    },
     [&] (PureStore x)   { pure_store(env, state, x.dst, x.value, add_node); },
     [&] (PureLoad x)    { pure_load(env, state, x.src, inst.dst(), add_node); },
 
@@ -2182,6 +2243,7 @@ void rc_analyze_inst(Env& env,
     propagate(inst.taken());
     return;
   case IncRef:
+    observe_unbalanced_decrefs(env, state, add_node);
     if_aset(env, inst.src(0), [&] (ASetID asetID) {
       auto& aset = state.asets[asetID];
       if (!aset.lower_bound) {
@@ -2222,10 +2284,14 @@ void rc_analyze_inst(Env& env,
     // changes some stack AliasClasses to not exist anymore.  See comments in
     // pure_spill_frame for an explanation of why we don't need any support
     // bits on this now.
+    observe_unbalanced_decrefs(env, state, add_node);
     drop_support_bits(env, state,
       env.ainfo.expand(canonicalize(inline_fp_frame(&inst))));
     break;
   default:
+    if (!irrelevant_inst(inst)) {
+      observe_unbalanced_decrefs(env, state, add_node);
+    }
     break;
   }
 
@@ -2697,9 +2763,19 @@ void pre_local_transfer(PreEnv& penv, bool incDec, Block* blk) {
           continue;
         }
         if (state.asets[id].lower_bound >= 2) {
-          FTRACE(2, "    ** decnz:  {}\n", inst);
-          inst.setOpcode(DecRefNZ);
-          inst.clearExtra();
+          // take account of any unbalanced_decrefs that might mean
+          // that the lower bound is less than we think.
+          auto lb = state.asets[id].lower_bound;
+          for (auto const asetID : state.unbalanced_decrefs) {
+            for (auto may_id : penv.env.asets[asetID].may_alias) {
+              if (may_id == id) lb--;
+            }
+          }
+          if (lb >= 2) {
+            FTRACE(2, "    ** decnz:  {}\n", inst);
+            inst.setOpcode(DecRefNZ);
+            inst.clearExtra();
+          }
         }
       }
       rc_analyze_step(penv.env, inst, state, [&] (Block*) {}, preAdder);

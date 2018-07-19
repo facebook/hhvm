@@ -1892,8 +1892,14 @@ static int execute_program_impl(int argc, char** argv) {
     return path;
   };
 
-  // We want to do this as early as possible because any allocations before-hand
-  // will get a generic unknown type type-index.
+  // We want to initialize the type-scanners as early as possible
+  // because any allocations before-hand will get a generic unknown
+  // type type-index.
+  SCOPE_EXIT {
+    // this would be handled by hphp_process_exit, but some paths
+    // short circuit before getting there.
+    embedded_data_cleanup();
+  };
   try {
     type_scan::init(
       addTypeToEmbeddedPath(

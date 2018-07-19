@@ -206,21 +206,25 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
 and localize_tparams ~ety_env env pos tyl tparams =
   let length = min (List.length tyl) (List.length tparams) in
   let tyl, tparams = List.take tyl length, List.take tparams length in
-  List.map2_env env tyl tparams (localize_tparam ~ety_env pos)
+  let ety_env = { ety_env with validate_dty = None; } in
+  let (env, _), tyl = List.map2_env (env, ety_env) tyl tparams (localize_tparam pos) in
+  env, tyl
 
-and localize_tparam ~ety_env pos env ty (_, (_, name), cstrl, _) =
+and localize_tparam pos (env, ety_env) ty (_, (_, name), cstrl, _) =
   match ty with
     | r, Tapply ((_, x), _argl) when x = SN.Typehints.wildcard ->
-      let env, name = Env.add_fresh_generic_parameter env name in
-      let ty_fresh = (r, Tabstract (AKgeneric name, None)) in
-      let ety_env = {ety_env with validate_dty = None} in
+      let env, new_name = Env.add_fresh_generic_parameter env name in
+      let ty_fresh = (r, Tabstract (AKgeneric new_name, None)) in
       let env = List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
-          (* Substitute fresh type parameters for
-           * original formals in constraint *)
         let env, ty = localize ~ety_env env ty in
         TUtils.add_constraint pos env ck ty_fresh ty) in
-      env, ty_fresh
-    | _ -> localize ~ety_env env ty
+      (* Substitute fresh type parameters for original formals in constraint *)
+      let substs = SMap.add name ty_fresh ety_env.substs in
+      let ety_env = { ety_env with substs; } in
+      (env, ety_env), ty_fresh
+    | _ ->
+      let env, ty = localize ~ety_env env ty in
+      (env, ety_env), ty
 
 and tyl_contains_wildcard tyl =
   List.exists tyl begin function

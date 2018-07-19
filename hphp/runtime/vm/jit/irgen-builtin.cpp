@@ -2146,7 +2146,22 @@ void emitAKExists(IRGS& env) {
 
   if (!key->isA(TStr) && !key->isA(TInt)) PUNT(AKExists_badKey);
 
-  auto const val =
+  // packed array and Vector collections support: true iff key>=0 && key<count
+  const auto packed = [&](Opcode count) {
+    push(env, gen(env, CheckRange, key, gen(env, count, arr)));
+    decRef(env, arr);
+  };
+  if (arr->isA(TObj) && key->isA(TInt) &&
+      collections::isType(arr->type().clsSpec().cls(), CollectionType::Vector,
+                          CollectionType::ImmVector)) {
+    return packed(CountCollection);
+  }
+  if (arr->isA(TArr) && key->isA(TInt) &&
+      arr->type().arrSpec().kind() == ArrayData::kPackedKind) {
+    return packed(CountArrayFast);
+  }
+
+ auto const val =
     gen(env, arr->isA(TArr) ? AKExistsArr : AKExistsObj, arr, key);
   push(env, val);
   decRef(env, arr);

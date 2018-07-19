@@ -30,7 +30,7 @@ class type ['a] ast_visitor_type = object
   method on_pipe : 'a -> expr -> expr -> 'a
   method on_block : 'a -> block -> 'a
   method on_break : 'a -> expr option -> 'a
-  method on_call : 'a -> expr -> hint list -> expr list -> expr list -> 'a
+  method on_call : 'a -> expr -> targ list -> expr list -> expr list -> 'a
   method on_callconv : 'a -> param_kind -> expr -> 'a
   method on_case : 'a -> case -> 'a
   method on_cast : 'a -> hint -> expr -> 'a
@@ -75,7 +75,7 @@ class type ['a] ast_visitor_type = object
   method on_lfun: 'a -> fun_ -> 'a
   method on_list : 'a -> expr list -> 'a
   method on_lvar : 'a -> id -> 'a
-  method on_new : 'a -> expr -> hint list -> expr list -> expr list -> 'a
+  method on_new : 'a -> expr -> targ list -> expr list -> expr list -> 'a
   method on_newanoncls : 'a -> expr list -> expr list -> class_ -> 'a
   method on_noop : 'a -> 'a
   method on_null : 'a -> 'a
@@ -97,6 +97,7 @@ class type ['a] ast_visitor_type = object
   method on_string : 'a -> string -> 'a
   method on_suspend: 'a -> expr -> 'a
   method on_switch : 'a -> expr -> case list -> 'a
+  method on_targ : 'a -> (hint * bool) -> 'a
   method on_throw : 'a -> expr -> 'a
   method on_true : 'a -> 'a
   method on_try : 'a -> block -> catch list -> block -> 'a
@@ -202,6 +203,10 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
       let acc = this#on_id acc id2 in
       let acc = List.fold_left this#on_id acc idl in
       acc
+
+  method on_targ acc (h, _) =
+    let acc = this#on_hint acc h in
+    acc
 
   method on_throw acc e =
     let acc = this#on_expr acc e in
@@ -458,7 +463,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
 
   method on_call acc e hl el uel =
     let acc = this#on_expr acc e in
-    let acc = List.fold_left this#on_hint acc hl in
+    let acc = List.fold_left this#on_targ acc hl in
     let acc = List.fold_left this#on_expr acc el in
     let acc = List.fold_left this#on_expr acc uel in
     acc
@@ -539,7 +544,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
 
   method on_new acc e hl el uel =
     let acc = this#on_expr acc e in
-    let acc = List.fold_left this#on_hint acc hl in
+    let acc = List.fold_left this#on_targ acc hl in
     let acc = List.fold_left this#on_expr acc el in
     let acc = List.fold_left this#on_expr acc uel in
     acc

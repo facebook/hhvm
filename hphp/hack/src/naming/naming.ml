@@ -1084,14 +1084,14 @@ module Make (GetLocals : GetLocals) = struct
     List.map l
       (hint ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth env)
   and hintl_funcall env l =
-    hintl
-      ~allow_wildcard:true
-      ~forbid_this:false
-      ~allow_typedef:true
-      ~allow_retonly:true
-      ~tp_depth:1
-      env
-      l
+    List.map l fst (* drop reified *)
+    |> hintl
+        ~allow_wildcard:true
+        ~forbid_this:false
+        ~allow_typedef:true
+        ~allow_retonly:true
+        ~tp_depth:1
+        env
 
   (**************************************************************************)
   (* All the methods and static methods of an interface are "implicitly"
@@ -2548,10 +2548,12 @@ module Make (GetLocals : GetLocals) = struct
       N.As (e1, h1, b)
     | New ((_, Id x), hl, el, uel)
     | New ((_, Lvar x), hl, el, uel) ->
+      let hl = List.map hl fst in
       N.New (make_class_id env x hl,
         exprl env el,
         exprl env uel)
     | New ((p, _e), hl, el, uel) ->
+      let hl = List.map hl fst in
       if (fst env).in_mode = FileInfo.Mstrict
       then Errors.dynamic_new_in_strict_mode p;
       N.New (make_class_id env (p, SN.Classes.cUnknown) hl,

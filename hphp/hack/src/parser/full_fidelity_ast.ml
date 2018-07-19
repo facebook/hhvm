@@ -821,6 +821,9 @@ let rec pHint : hint parser = fun node env ->
   in
   pPos node env, pHint_ node env
 
+let pTarg node env =
+  pHint node env, false (* false for is_reified *)
+
 type fun_hdr =
   { fh_suspension_kind : suspension_kind
   ; fh_name            : pstring
@@ -1176,7 +1179,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           | GenericTypeSpecifier { generic_argument_list; _ } ->
             begin match syntax generic_argument_list with
               | TypeArguments { type_arguments_types; _ }
-                -> couldMap ~f:pHint type_arguments_types env
+                -> couldMap ~f:pTarg type_arguments_types env
               | _ -> []
             end
           | _ -> []
@@ -1206,7 +1209,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       let hints =
         begin match (syntax type_args) with
           | TypeArguments { type_arguments_types; _ } ->
-            couldMap ~f:pHint type_arguments_types env
+            couldMap ~f:pTarg type_arguments_types env
           | _ -> missing_syntax "type arguments" type_args env
         end in
       Call (pExpr recv env, hints, couldMap ~f:pExpr args env, [])
@@ -1419,7 +1422,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           let hints =
             match syntax generic_argument_list with
             | TypeArguments { type_arguments_types; _ }
-              -> couldMap ~f:pHint type_arguments_types env
+              -> couldMap ~f:pTarg type_arguments_types env
             | _ ->
               missing_syntax "generic type arguments" generic_argument_list env
           in

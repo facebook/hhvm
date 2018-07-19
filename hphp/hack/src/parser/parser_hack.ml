@@ -3493,7 +3493,8 @@ and expr_call env e1 =
 and expr_call_with_hint env e1 =
   reduce env e1 Tlt begin fun e1 env ->
     L.back env.lb;
-    let hint_list = call_site_hint_params env in
+    let hint_list = call_site_hint_params env
+      |> List.map ~f:(fun h -> (h, false)) in
     let args1, args2 = expr_call_list env in
     let end_ = Pos.make env.file env.lb in
     Pos.btw (fst e1) end_, Call (e1, hint_list, args1, args2)
@@ -3767,7 +3768,9 @@ and expr_new env pos_start =
       let e = expr env in
       match e with
       | _, Id _ ->
-        e, class_hint_params env
+        let hint_list =
+          class_hint_params env |> List.map ~f:(fun h -> (h, false)) in
+        e, hint_list
       | _, Lvar _
       | _, Array_get _
       | _, Obj_get _

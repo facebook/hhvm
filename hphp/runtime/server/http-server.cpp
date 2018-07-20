@@ -88,8 +88,7 @@ static void on_kill(int sig) {
 ///////////////////////////////////////////////////////////////////////////////
 
 HttpServer::HttpServer()
-  : m_stopped(false), m_killed(false), m_stopReason(nullptr),
-    m_watchDog(this, &HttpServer::watchDog) {
+  : m_stopped(false), m_killed(false), m_stopReason(nullptr) {
   LoadFactor = RuntimeOption::EvalInitialLoadFactor;
 
   // enabling mutex profiling, but it's not turned on
@@ -253,11 +252,6 @@ void HttpServer::playShutdownRequest(const std::string& fileName) {
 
 HttpServer::~HttpServer() {
   m_counterCallback.deinit();
-
-  // XXX: why should we have to call stop here?  If we haven't already
-  // stopped (and joined all the threads), watchDog could still be
-  // running and leaving this destructor without a wait would be
-  // wrong...
   stop();
 }
 
@@ -319,8 +313,6 @@ void HttpServer::runOrExitProcess() {
     }
     Logger::Info(msg);
   }
-
-  m_watchDog.start();
 
   if (RuntimeOption::ServerPort) {
     if (!startServer(true)) {
@@ -443,7 +435,6 @@ void HttpServer::runOrExitProcess() {
   EvictFileCache();
 
   waitForServers();
-  m_watchDog.waitForEnd();
   playShutdownRequest(RuntimeOption::ServerCleanupRequest);
 }
 
@@ -593,34 +584,6 @@ void HttpServer::killPid() {
     }
     Logger::Error("Unable to read pid file %s for any meaningful pid",
                   RuntimeOption::PidFile.c_str());
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// watch dog thread
-
-void HttpServer::watchDog() {
-  int count = 0;
-  bool noneed = false;
-  while (!m_stopped && !noneed) {
-    noneed = true;
-
-    if (RuntimeOption::DropCacheCycle > 0) {
-      noneed = false;
-      if ((count % RuntimeOption::DropCacheCycle) == 0) { // every hour
-        dropCache();
-      }
-    }
-
-    sleep(1);
-    ++count;
-
-    if (RuntimeOption::MaxRSSPollingCycle > 0) {
-      noneed = false;
-      if ((count % RuntimeOption::MaxRSSPollingCycle) == 0) { // every minute
-        checkMemory();
-      }
-    }
   }
 }
 
@@ -797,26 +760,6 @@ void HttpServer::LogShutdownStats() {
   }
   StructuredLog::log("webserver_shutdown_timing", entry);
   ShutdownStats.clear();
-}
-
-void HttpServer::dropCache() {
-  FILE *f = fopen("/proc/sys/vm/drop_caches", "w");
-  if (f) {
-    // http://www.linuxinsight.com/proc_sys_vm_drop_caches.html
-    const char *FREE_ALL_CACHES = "3\n";
-    fwrite(FREE_ALL_CACHES, 2, 1, f);
-    fclose(f);
-  }
-}
-
-void HttpServer::checkMemory() {
-  int64_t used = Process::GetMemUsageMb() * 1024 * 1024;
-  if (RuntimeOption::MaxRSS > 0 && used > RuntimeOption::MaxRSS) {
-    Logger::Error(
-      "ResourceLimit.MaxRSS %" PRId64 " reached %" PRId64 " used, exiting",
-      RuntimeOption::MaxRSS, used);
-    stop();
-  }
 }
 
 void HttpServer::getSatelliteStats(

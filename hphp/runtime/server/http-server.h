@@ -64,7 +64,6 @@ public:
   bool isStopped() const { return m_stopped;}
 
   void flushLog();
-  void watchDog();
 
   void takeoverShutdown() override;
 
@@ -129,10 +128,6 @@ private:
   void removePid();
   void killPid();
 
-  // memory monitoring functions
-  void dropCache();
-  void checkMemory();
-
   // Allow cleanups (e.g., flush cached values into a database) using
   // PHP code when server stops.
   void playShutdownRequest(const std::string& fileName);
@@ -146,7 +141,6 @@ private:
   ServerPtr m_pageServer;
   ServerPtr m_adminServer;
   std::vector<std::unique_ptr<SatelliteServer>> m_satellites;
-  AsyncFunc<HttpServer> m_watchDog;
   ServiceData::CounterCallback m_counterCallback;
 };
 

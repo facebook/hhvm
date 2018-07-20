@@ -399,9 +399,6 @@ struct RuntimeOption {
   static double ProfilerTraceExpansion;
   static int32_t ProfilerMaxTraceBuffer;
 
-  static int64_t MaxRSS;
-  static int64_t MaxRSSPollingCycle;
-  static int64_t DropCacheCycle;
   static int64_t MaxSQLRowCount;
   static int64_t SocketDefaultTimeout;
   static bool LockCodeMemory;

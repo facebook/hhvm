@@ -389,9 +389,6 @@ std::string RuntimeOption::StatsXSLProxy;
 int RuntimeOption::StatsSlotDuration = 10 * 60; // 10 minutes
 int RuntimeOption::StatsMaxSlot = 12 * 6; // 12 hours
 
-int64_t RuntimeOption::MaxRSS = 0;
-int64_t RuntimeOption::MaxRSSPollingCycle = 0;
-int64_t RuntimeOption::DropCacheCycle = 0;
 int64_t RuntimeOption::MaxSQLRowCount = 0;
 int64_t RuntimeOption::SocketDefaultTimeout = 60;
 bool RuntimeOption::LockCodeMemory = false;
@@ -1154,13 +1151,8 @@ void RuntimeOption::Load(
     Config::Bind(s_max_socket, ini, config, "ResourceLimit.MaxSocket", 0);
     Config::Bind(s_rss, ini, config, "ResourceLimit.RSS", 0);
 
-    Config::Bind(MaxRSS, ini, config, "ResourceLimit.MaxRSS", 0);
     Config::Bind(SocketDefaultTimeout, ini, config,
                  "ResourceLimit.SocketDefaultTimeout", 60);
-    Config::Bind(MaxRSSPollingCycle, ini, config,
-                 "ResourceLimit.MaxRSSPollingCycle", 0);
-    Config::Bind(DropCacheCycle, ini, config, "ResourceLimit.DropCacheCycle",
-                 0);
     Config::Bind(MaxSQLRowCount, ini, config, "ResourceLimit.MaxSQLRowCount",
                  0);
     Config::Bind(SerializationSizeLimit, ini, config,

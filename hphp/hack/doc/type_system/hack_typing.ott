@@ -1525,6 +1525,12 @@ G ; K |- e := t1' , U
 ----------------------- :: array_append
 G ; K |- e [] := t2 , U
 
+G ; K |- e : t1
+G |- t1 [sfn] := t2 => t1'
+G ; K |- e := t1' , U
+-------------------------- :: shape_field
+G ; K |- e [sfn] := t2 , U
+
 {{ com \subsection*{Array append} }}
 {{ com \addcontentsline{toc}{subsection}{Array append} }}
 
@@ -1562,6 +1568,45 @@ G |- t1[] := t => t1'
 G |- t2[] := t => t2'
 -------------------------------------------------- :: union
 G |- (t1 | t2) [] := t => t1' | t2'
+
+{{ com \subsection*{Shape field} }}
+{{ com \addcontentsline{toc}{subsection}{Shape field} }}
+
+defn
+  G |- t1 [sfn] := t2 => t1' :: :: shape_field :: 'shape_field_'
+  {{ com under locals [[G]], a value of type [[t2]] can be assigned to a
+  shape field sfn of an lvalue of type [[t1]] and the result is of type
+  [[t1']] }}
+by
+
+G |- u1 <: t1
+G |- u2 <: t2
+G |- t1 [sfn] := t2 => t1'
+-------------------------------------------------- :: sub
+G |- u1 [sfn] := u2 => t1'
+
+-------------------------------------------------- :: closed_set
+G |- shape ( sft1 , .. , sftn , ?sfn => t , sft1' , .. , sftm' ) [sfn] := t' => shape ( sft1 , .. , sftn , sfn => t' , sft1' , .. , sftm' )
+
+-------------------------------------------------- :: open_set
+G |- shape ( sft1 , .. , sftn , ?sfn => t , sft1' , .. , sftm' , vardots ) [sfn] := t' => shape ( sft1 , .. , sftn , sfn => t' , sft1' , .. , sftm' , vardots )
+
+{{ com
+
+These rules imply that not only can we reassign an existing field, but
+also we can set a new field, because a shape that doesn't have a field
+$[[sfn]]$ is a subtype of a shape that does have it and in which
+$[[sfn]]$ is optional.  For open shapes the type of the field must be
+$[[mixed]]$, but for closed shapes it can be anything.  This follows
+from rules \ottdrulename{sub\_closed\_shape\_widen} and
+\ottdrulename{sub\_open\_shape\_widen}.
+
+}}
+
+G |- t1 [sfn] := t => t1'
+G |- t2 [sfn] := t => t2'
+-------------------------------------------------- :: union
+G |- (t1 | t2) [sfn] := t => t1' | t2'
 
 {{ com \section*{Statements} }}
 {{ com \addcontentsline{toc}{section}{Statements} }}

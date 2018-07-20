@@ -52,14 +52,7 @@ struct WddxPacket : ResourceData {
                    const String& varName,
                    bool hasVarTag);
 
-  using ArrayOrObject = Either<ArrayData*,ObjectData*>;
-  struct EitherHash {
-    size_t operator()(const ArrayOrObject data) const {
-      return data.toOpaque();
-    }
-  };
-  using SeenContainers = req::hash_set<ArrayOrObject, EitherHash>;
-
+  using SeenContainers = req::fast_set<const HeapObject*>;
   bool recursiveAddVarImpl(const String& varName, const Variant& varVariant,
                            bool hasVarTag, SeenContainers& seen);
 

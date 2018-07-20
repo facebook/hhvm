@@ -1272,15 +1272,13 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
 
   // At each step, we fetch from the PreClass is important because the
   // order in which getMethods returns matters
-  req::StringISet visitedMethods;
+  req::StringIFastSet visitedMethods;
   auto st = req::make<c_Set>();
   st->reserve(cls->numMethods());
 
   auto add = [&] (const Func* m) {
     if (m->isGenerated()) return;
-    if (visitedMethods.count(m->nameStr())) return;
-
-    visitedMethods.insert(m->nameStr());
+    if (!visitedMethods.insert(m->nameStr()).second) return;
     if (m->attrs() & mask) {
       st->add(HHVM_FN(strtolower)(m->nameStr()).get());
     }

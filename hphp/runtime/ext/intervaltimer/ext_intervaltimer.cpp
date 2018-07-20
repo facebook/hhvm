@@ -29,7 +29,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct TimerPool final : RequestEventHandler {
-  using TimerSet = req::hash_set<IntervalTimer*>;
+  using TimerSet = req::fast_set<IntervalTimer*>;
   TimerSet& timers() { return *m_timers; }
 
   void requestInit() override {

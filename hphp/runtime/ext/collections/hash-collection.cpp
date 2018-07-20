@@ -61,7 +61,7 @@ int32_t* HashCollection::warnUnbalanced(size_t n, int32_t* ei) const {
 
 NEVER_INLINE
 void HashCollection::warnOnStrIntDup() const {
-  req::hash_set<int64_t> seenVals;
+  req::fast_set<int64_t> seenVals;
 
   auto* eLimit = elmLimit();
   for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
@@ -75,7 +75,7 @@ void HashCollection::warnOnStrIntDup() const {
       if (!e->skey->isStrictlyInteger(newVal)) continue;
     }
 
-    if (seenVals.find(newVal) != seenVals.end()) {
+    if (!seenVals.insert(newVal).second) {
       auto cls = getVMClass()->name()->toCppString();
       auto pos = cls.rfind('\\');
       if (pos != std::string::npos) {
@@ -89,11 +89,8 @@ void HashCollection::warnOnStrIntDup() const {
         newVal,
         newVal
       );
-
       return;
     }
-
-    seenVals.insert(newVal);
   }
   // Do nothing if no 'duplicates' were found.
 }

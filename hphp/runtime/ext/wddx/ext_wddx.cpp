@@ -81,7 +81,7 @@ bool WddxPacket::recursiveAddVarImpl(const String& varName,
   if (isArray || isObject) {
     Array varAsArray;
     Object varAsObject;
-    ArrayOrObject ptr;
+    const HeapObject* ptr = nullptr;
     if (isArray) {
       varAsArray = varVariant.toArray();
       ptr = varAsArray.get();
@@ -91,7 +91,7 @@ bool WddxPacket::recursiveAddVarImpl(const String& varName,
       varAsArray = varAsObject.toArray();
       ptr = varAsObject.get();
     }
-    assertx(!ptr.isNull());
+    assertx(ptr);
     if (!seen.emplace(ptr).second) {
       raise_warning("recursion detected");
       return false;

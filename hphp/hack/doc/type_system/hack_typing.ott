@@ -1519,6 +1519,50 @@ G' ; K , skip : G'' |- e2 := t2 , U2
 ---------------------------------------------- :: pair
 G ; K , skip : G'' |- list ( e1 , e2 ) := `Pair` < t1 , t2> , U1[U2]
 
+G ; K |- e : t1
+G |- t1 [] := t2 => t1'
+G ; K |- e := t1' , U
+----------------------- :: array_append
+G ; K |- e [] := t2 , U
+
+{{ com \subsection*{Array append} }}
+{{ com \addcontentsline{toc}{subsection}{Array append} }}
+
+defn
+  G |- t1 [] := t2 => t1' :: :: array_append :: 'array_append_'
+  {{ com under locals [[G]], a value of type [[t2]] can be appended to
+  an lvalue of type [[t1]] and the result is of type [[t1']] }}
+by
+
+G |- u1 <: t1
+G |- u2 <: t2
+G |- t1 [] := t2 => t1'
+-------------------------------------------------- :: sub
+G |- u1 [] := u2 => t1'
+
+-------------------------------------------------- :: vec
+G |- vec < t > [] := t => vec < t >
+
+-------------------------------------------------- :: keyset
+G |- keyset < t > [] := t => keyset < t >
+
+-------------------------------------------------- :: vecarray
+G |- array < t > [] := t => array < t >
+
+-------------------------------------------------- :: vector
+G |- `Vector` < t > [] := t => `Vector` < t >
+
+-------------------------------------------------- :: set
+G |- `Set` < t > [] := t => `Set` < t >
+
+-------------------------------------------------- :: map
+G |- `Map` < t1 , t2 > [] := `Pair` < t1 , t2 > => `Map` < t1 , t2 >
+
+G |- t1[] := t => t1'
+G |- t2[] := t => t2'
+-------------------------------------------------- :: union
+G |- (t1 | t2) [] := t => t1' | t2'
+
 {{ com \section*{Statements} }}
 {{ com \addcontentsline{toc}{section}{Statements} }}
 

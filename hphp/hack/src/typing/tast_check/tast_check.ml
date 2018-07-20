@@ -14,6 +14,7 @@ let visitor = Tast_visitor.iter_with [
   Type_test_hint_check.handler;
   Ppl_check.handler;
   Coroutine_check.handler;
+  Redundant_nullsafe_check.handler;
 ]
 
 let program = visitor#go

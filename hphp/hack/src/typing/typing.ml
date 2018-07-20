@@ -4713,15 +4713,6 @@ and member_not_found pos ~is_method class_ member_name r =
 
 and obj_get ~is_method ~nullsafe ?(valkind = `other) ?(explicit_tparams=[])
             ?(pos_params: expr list option) env ty1 cid id k =
-  let env =
-    match nullsafe with
-    | Some p when not (type_could_be_null env ty1) ->
-      let env, (r, _) = Env.expand_type env ty1 in
-        Errors.nullsafe_not_needed p
-          (Reason.to_string
-           "This is what makes me believe it cannot be null" r);
-        env
-    | _ -> env in
   let env, method_, _ =
     obj_get_with_visibility ~is_method ~nullsafe ~valkind ~pos_params
       ~explicit_tparams env ty1 cid id k in
@@ -4953,19 +4944,6 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~(pos_params : expr list option) ?(ex
     nullable_obj_get (r, Tany)
   | _, _ ->
     k (obj_get_concrete_ty ~is_method ~valkind ~pos_params ~explicit_tparams env ety1 cid id k_lhs)
-
-
-(* Return true if the type ty1 contains the null value *)
-and type_could_be_null env ty1 =
-  let _, tyl = TUtils.get_concrete_supertypes env ty1 in
-  List.exists tyl
-    (fun ety ->
-      match snd ety with
-      | Toption _ | Tunresolved _ | Tmixed | Tany | Terr | Tdynamic -> true
-      | Tprim Tvoid -> TUtils.is_void_type_of_null env
-      | Tarraykind _ | Tprim _ | Tvar _ | Tfun _ | Tabstract _
-      | Tclass (_, _) | Ttuple _ | Tanon (_, _) | Tobject
-      | Tshape _ | Tnonnull -> false)
 
 and class_id_for_new p env cid =
   let env, te, ty = static_class_id ~check_constraints:false p env cid in

@@ -482,7 +482,7 @@ let invalid_constructor_method_call = "Method call following immediate construct
   requires parentheses around constructor call."
 
 let do_not_use_xor =
-  "Do not use \"xor\", it has surprising precedence. Cast to bool and use \"^\" instead"
+  "Do not use \"xor\", it has surprising precedence. Cast to bool and use \"!==\" instead"
 
 let do_not_use_or =
   "Do not use \"or\", it has surprising precedence. Use \"||\" instead"

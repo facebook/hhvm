@@ -3034,7 +3034,7 @@ and expr_remain env e1 =
       expr_binop env Tbarbar BArbar e1
   | Tword when Lexing.lexeme env.lb = "xor" ->
       error env ("Do not use \"xor\", it has surprising precedence. "^
-        "Cast to bool and use \"^\" instead");
+        "Cast to bool and use \"!==\" instead");
       expr_binop env Txor Xor e1
   | _ ->
       L.back env.lb; e1

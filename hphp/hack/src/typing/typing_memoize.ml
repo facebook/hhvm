@@ -37,7 +37,7 @@ let check_param : Env.env -> Nast.fun_param -> unit =
         Typing_tdef.force_expand_typedef ~ety_env env ty in
       check_memoizable env t'
     (* Just accept all generic types for now. Stricter check_memoizables to come later. *)
-    | _, Tgeneric _ ->
+    | _, Tabstract (AKgeneric _, _) ->
       ()
     (* For parameter type 'this::TID' defined by 'type const TID as Bar' check_memoizables
      * Bar recursively.

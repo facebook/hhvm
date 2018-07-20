@@ -10,6 +10,7 @@ function factory_c<Targ, Tobj as C<Targ>>(
   Targ $arg,
 ): Tobj {
   $inst = new $klass($arg);
+  hh_show($inst);
   return $inst;
 }
 

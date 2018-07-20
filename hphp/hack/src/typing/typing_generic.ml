@@ -29,8 +29,9 @@ end = struct
   let rec ty (_, x) = ty_ x
   and ty_ = function
     | Tabstract ((AKdependent (_, _) | AKenum _), cstr) -> ty_opt cstr
-    | Tgeneric x when AbstractKind.is_generic_dep_ty x -> ()
-    | Tgeneric x -> raise (Found x)
+    | Tabstract (AKgeneric x, cstr) when AbstractKind.is_generic_dep_ty x ->
+      ty_opt cstr
+    | Tabstract (AKgeneric x, _) -> raise (Found x)
     | Tdynamic | Tanon _ | Tany | Terr | Tmixed | Tnonnull | Tprim _ -> ()
     | Tarraykind akind ->
       begin match akind with

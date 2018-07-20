@@ -45,18 +45,14 @@ let visitor = object(this)
       | _ -> acc
   method! on_tfun acc r fun_type = update acc @@ Invalid (r, Tfun fun_type)
   method! on_tvar acc r id = update acc @@ Invalid (r, Tvar id)
-  method! on_tgeneric acc r name =
-    if Env.is_fresh_generic_parameter name
-    then acc
-    else if AbstractKind.is_generic_dep_ty name
-    then
-      let bounds = TySet.elements (Env.get_upper_bounds acc.env name) in
-      List.fold_left bounds ~f:this#on_type ~init:acc
-    else update acc @@ Invalid (r, Tgeneric name)
   method! on_tabstract acc r ak ty_opt =
     match ak with
     | AKenum _ -> acc
     | AKdependent (`this, _) -> acc
+    | AKgeneric name when Env.is_fresh_generic_parameter name -> acc
+    | AKgeneric name when AbstractKind.is_generic_dep_ty name ->
+      let bounds = TySet.elements (Env.get_upper_bounds acc.env name) in
+      List.fold_left bounds ~f:this#on_type ~init:acc
     | _ -> update acc @@ Invalid (r, Tabstract (ak, ty_opt))
   method! on_tanon acc r arity id =
     update acc @@ Invalid (r, Tanon (arity, id))
@@ -80,7 +76,7 @@ let visitor = object(this)
   method! on_tarraykind acc r array_kind =
     update acc @@ Invalid (r, Tarraykind array_kind)
   method is_wildcard = function
-    | _, Tgeneric name ->
+    | _, Tabstract (AKgeneric name, _) ->
       Env.is_fresh_generic_parameter name
     | _ -> false
 end

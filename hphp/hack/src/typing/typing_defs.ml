@@ -54,6 +54,13 @@ and _ ty_ =
   (* Either an object type or a type alias, ty list are the arguments *)
   | Tapply : Nast.sid * decl ty list -> decl ty_
 
+  (* The type of a generic parameter. The constraints on a generic parameter
+   * are accessed through the lenv.tpenv component of the environment, which
+   * is set up when checking the body of a function or method. See uses of
+   * Typing_phase.localize_generic_parameters_with_bounds.
+   *)
+  | Tgeneric : string -> decl ty_
+
   (* Name of class, name of type const, remaining names of type consts *)
   | Taccess : taccess_type -> decl ty_
 
@@ -114,13 +121,6 @@ and _ ty_ =
 
   (* All the primitive types: int, string, void, etc. *)
   | Tprim : Nast.tprim -> 'phase ty_
-
-  (* The type of a generic parameter. The constraints on a generic parameter
-   * are accessed through the lenv.tpenv component of the environment, which
-   * is set up when checking the body of a function or method. See uses of
-   * Typing_phase.localize_generic_parameters_with_bounds.
-   *)
-  | Tgeneric : string -> 'phase ty_
 
   (* A wrapper around fun_type, which contains the full type information for a
    * function, method, lambda, etc. Note that lambdas have an additional layer
@@ -273,6 +273,8 @@ and abstract_kind =
   | AKnewtype of string * locl ty list
     (* enum foo ... *)
   | AKenum of string
+    (* <T super C> ; None if 'as' constrained *)
+  | AKgeneric of string
     (* see dependent_type *)
   | AKdependent of dependent_type
 
@@ -569,6 +571,7 @@ let get_param_mode ~is_ref callconv =
 module AbstractKind = struct
   let to_string = function
     | AKnewtype (name, _) -> name
+    | AKgeneric name -> name
     | AKenum name -> "enum "^(Utils.strip_ns name)
     | AKdependent (dt, ids) ->
        let dt =
@@ -648,7 +651,6 @@ let ty_con_ordinal ty =
   | Tobject -> 14
   | Tclass _ -> 15
   | Tarraykind _ -> 16
-  | Tgeneric _ -> 17
 
 let array_kind_con_ordinal ak =
   match ak with
@@ -666,7 +668,8 @@ let abstract_kind_con_ordinal ak =
   match ak with
   | AKnewtype _ -> 0
   | AKenum _ -> 1
-  | AKdependent _ -> 2
+  | AKgeneric _ -> 2
+  | AKdependent _ -> 3
 
 (* Compare two types syntactically, ignoring reason information and other
  * small differences that do not affect type inference behaviour. This
@@ -716,8 +719,6 @@ let rec ty_compare ty1 ty2 =
       compare v1 v2
     | Tanon (_, id1), Tanon (_, id2) ->
       compare id1 id2
-    | Tgeneric s1, Tgeneric s2 ->
-      String.compare s1 s2
     | _ ->
       ty_con_ordinal ty1 - ty_con_ordinal ty2
 
@@ -789,6 +790,7 @@ let rec ty_compare ty1 ty2 =
       | 0 -> tyl_compare tyl tyl2
       | n -> n
       end
+    | AKgeneric id1, AKgeneric id2
     | AKenum id1, AKenum id2 ->
       String.compare id1 id2
     | AKdependent d1, AKdependent d2 ->

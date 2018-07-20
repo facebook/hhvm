@@ -50,11 +50,10 @@ let rec transform_shapemap ?(nullable = false) env ty shape =
         (* An enum is considered a valid bound *)
         | Tabstract (AKenum _, _) -> false
         | Tabstract (_, None) -> true
-        | Tgeneric _ -> true
         | _ -> false in
       if is_unbound then (env, shape) else
       let is_generic =
-        match snd ety with Tgeneric _ -> true | _ -> false in
+        match snd ety with Tabstract (AKgeneric _, _) -> true | _ -> false in
       let transform_shape_field field { sft_ty; _ } (env, shape) =
         let open Ast in
 

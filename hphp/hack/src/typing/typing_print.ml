@@ -80,9 +80,7 @@ module ErrorString = struct
     | Tvar _             -> "some value"
     | Tanon _    -> "a function"
     | Tfun _     -> "a function"
-    | Tgeneric s when AbstractKind.is_generic_dep_ty s ->
-      "the expression dependent type " ^ s
-    | Tgeneric x    -> "a value of generic type " ^ x
+    | Tgeneric x    -> "a value of declared generic type " ^ x
     | Tabstract (AKnewtype (x, _), _)
         when x = SN.Classes.cClassname -> "a classname string"
     | Tabstract (AKnewtype (x, _), _)
@@ -110,6 +108,9 @@ module ErrorString = struct
     match ak, cstr with
     | AKnewtype (_, _), _ -> "an object of type "^x
     | AKenum _, _ -> "a value of "^x
+    | AKgeneric s, _ when AbstractKind.is_generic_dep_ty s ->
+      "the expression dependent type "^s
+    | AKgeneric _, _ -> "a value of generic type "^x
     | AKdependent (`cls c, []), Some (_, ty) ->
         type_ ty^" (known to be exactly the class '"^strip_ns c^"')"
     | AKdependent ((`static | `expr _), _), _ ->
@@ -194,6 +195,7 @@ module Suggest = struct
     | Tmixed                 -> "mixed"
     | Tnonnull               -> "nonnull"
     | Tgeneric s             -> s
+    | Tabstract (AKgeneric s, _) -> s
     | Toption (_, Tnonnull)  -> "mixed"
     | Toption ty             -> "?" ^ type_ ty
     | Tprim tp               -> prim tp
@@ -688,6 +690,8 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
   | Tdynamic ->
     obj @@ kind "dynamic"
   | Tgeneric s ->
+    obj @@ kind "generic" @ name s
+  | Tabstract (AKgeneric s, _) ->
     obj @@ kind "generic" @ name s
   | Tabstract (AKenum s, opt_ty) ->
     obj @@ kind "enum" @ name s @ as_type opt_ty

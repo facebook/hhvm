@@ -229,24 +229,13 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
           in
           let env, argl = List.map2_env env argl1 argl2 unify in
           env, Tabstract (AKnewtype (x1, argl), tcstr)
-  | Tgeneric x1, Tgeneric x2 when x1 = x2 ->
-      env, Tgeneric x1
-
-  (* If we are trying to unify a type parameter T with another type t it's
-     possible that we can get there through subtyping in both directions.
-     For example we might have T as C, T super C, and we're asked
-     to unify T with C. This should succeed. We don't apply this
-     transitively, but assume that the type parameter environment is
-     already closed under transitivity. This is ensured by
-     Typing_subtype.add_constraint. *)
-
-  | Tgeneric x, _
-    when generic_param_matches ~opts env x (r2,ty2) ->
-    env, ty2
-
-  | _, Tgeneric x
-    when generic_param_matches ~opts env x (r1,ty1) ->
-    env, ty1
+  | Tabstract (AKgeneric x1, tcstr1),
+    Tabstract (AKgeneric x2, tcstr2)
+    when x1 = x2 && (Option.is_none tcstr1 = Option.is_none tcstr2) ->
+      let env, tcstr = match Option.map2 tcstr1 tcstr2 ~f:(unify env) with
+        | None -> env, None
+        | Some (env, cstr) -> env, Some cstr in
+      env, Tabstract (AKgeneric x1, tcstr)
 
   | Tabstract (ak1, tcstr1), Tabstract (ak2, tcstr2)
     when ak1 = ak2 && (Option.is_none tcstr1 = Option.is_none tcstr2) ->
@@ -276,7 +265,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
                | Tclass ((_, y), _) -> y = x
                | Tany | Terr | Tmixed | Tnonnull | Tarraykind _ | Tprim _
                | Toption _ | Tvar _ | Tabstract (_, _) | Ttuple _
-               | Tanon (_, _) | Tgeneric _ | Tfun _ | Tunresolved _ | Tobject
+               | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
                | Tshape _ | Tdynamic -> false
              end
              ~do_: begin fun error ->
@@ -417,8 +406,24 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
     when String.compare enum_name class_name = 0 ->
     env, Tclass ((post, class_name), tylist)
 
+  (* If we are trying to unify a type parameter T with another type t it's
+     possible that we can get there through subtyping in both directions.
+     For example we might have T as C, T super C, and we're asked
+     to unify T with C. This should succeed. We don't apply this
+     transitively, but assume that the type parameter environment is
+     already closed under transitivity. This is ensured by
+     Typing_subtype.add_constraint. *)
+
+  | Tabstract (AKgeneric x, _), _
+    when generic_param_matches ~opts env x (r2,ty2) ->
+    env, ty2
+
+  | _, Tabstract (AKgeneric x, _)
+    when generic_param_matches ~opts env x (r1,ty1) ->
+    env, ty1
+
   | (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
-      | Tvar _ | Tgeneric _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
+      | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
       | Tfun _ | Tunresolved _ | Tobject | Tshape _), _ ->
         (* Make sure to add a dependency on any classes referenced here, even if
          * we're in an error state (i.e., where we are right now). The need for

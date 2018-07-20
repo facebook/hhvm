@@ -53,7 +53,6 @@ class type type_mapper_type = object
     env -> Reason.t  -> abstract_kind -> locl ty option -> result
   method on_tclass : env -> Reason.t -> Nast.sid -> locl ty list -> result
   method on_tobject : env -> Reason.t -> result
-  method on_tgeneric : env -> Reason.t -> string -> result
   method on_tshape :
     env
       -> Reason.t
@@ -97,7 +96,6 @@ class shallow_type_mapper: type_mapper_type = object(this)
   method on_tclass env r x tyl = env, (r, Tclass (x, tyl))
   method on_tobject env r = env, (r, Tobject)
   method on_tshape env r fields_known fdm = env, (r, Tshape (fields_known, fdm))
-  method on_tgeneric env r s = env, (r, Tgeneric s)
 
   method on_type env (r, ty) = match ty with
     | Tvar n -> this#on_tvar env r n
@@ -126,7 +124,6 @@ class shallow_type_mapper: type_mapper_type = object(this)
     | Tdynamic -> this#on_tdynamic env r
     | Tobject -> this#on_tobject env r
     | Tshape (fields_known, fdm) -> this#on_tshape env r fields_known fdm
-    | Tgeneric s -> this#on_tgeneric env r s
 end
 
 (* Mixin class - adding it to shallow type mapper creates a mapper that
@@ -197,6 +194,9 @@ class deep_type_mapper = object(this)
     })
   method! on_tabstract env r ak cstr =
     match ak with
+      | AKgeneric x ->
+          let env, cstr = this#on_opt_type env cstr in
+          env, (r, Tabstract (AKgeneric x, cstr))
       | AKnewtype (x, tyl) ->
           let env, tyl = List.map_env env tyl this#on_type in
           let env, cstr = this#on_opt_type env cstr in

@@ -81,7 +81,7 @@ let save_type hint_kind env x arg =
         )
     | _, (Terr | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
       | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
-      | Tfun _ | Tunresolved _ | Tobject | Tshape _ | Tgeneric _) -> ()
+      | Tfun _ | Tunresolved _ | Tobject | Tshape _) -> ()
   end
 
 let save_return env x arg = save_type Kreturn env x arg
@@ -172,7 +172,7 @@ and normalize_ tcopt = function
         | _, (Terr | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _
           | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
           | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject | Tshape _
-          | Tgeneric _ | Tdynamic
+          | Tdynamic
              ) -> true
       end in
       normalize_ tcopt (Tunresolved tyl)
@@ -185,7 +185,7 @@ and normalize_ tcopt = function
         | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Tdynamic
           | Toption _ | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
           | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
-          | Tshape _ | Tgeneric _ ) -> raise Exit
+          | Tshape _) -> raise Exit
       end in
       let x_imp = get_implements tcopt x in
       let set = List.fold_left rl ~f:begin fun x_imp x ->
@@ -216,7 +216,7 @@ and normalize_ tcopt = function
       )
     with Exit -> Tarraykind AKany
   end
-  | Tgeneric _ as x -> x
+  | Tabstract (AKgeneric _, _) as x -> x
   | Tabstract (AKdependent _, Some ty) -> normalize_ tcopt (snd ty)
   | Toption (_, (Toption (_, _) as ty)) -> normalize_ tcopt ty
   | Toption (_, Tprim Nast.Tvoid) -> raise Exit

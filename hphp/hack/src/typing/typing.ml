@@ -760,7 +760,7 @@ and stmt env = function
             let env = Type.sub_type pos Reason.URreturn env rty return_type in
             env, T.Return(p, Some te)
         | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _
-          | Tvar _ | Tfun _ | Tgeneric _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
+          | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
           | Tanon (_, _) | Tobject | Tshape _ | Tdynamic) ->
             Typing_suggest.save_return env return_type rty;
             let env = Type.sub_type pos Reason.URreturn env rty return_type in
@@ -992,7 +992,7 @@ and check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
         caselist enum_coming_from_unresolved;
       env
     | Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tclass _ | Toption _
-      | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tgeneric _ | Ttuple _ | Tanon (_, _)
+      | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _ | Tanon (_, _)
       | Tobject | Tshape _ | Tdynamic -> env
 
 and finally_cont fb env ctx =
@@ -3440,7 +3440,7 @@ and call_parent_construct pos env el uel =
             | None -> assert false)
         | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _
               | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
-              | Tabstract (_, _) | Tgeneric _ | Tanon (_, _) | Tunresolved _ | Tobject
+              | Tabstract (_, _) | Tanon (_, _) | Tunresolved _ | Tobject
              ) ->
            Errors.parent_outside_class pos;
            let ty = (Reason.Rwitness pos, Typing_utils.terr env) in
@@ -3456,7 +3456,7 @@ and check_abstract_parent_meth mname pos fty =
 and is_abstract_ft fty = match fty with
   | _r, Tfun { ft_abstract = true; _ } -> true
   | _r, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _
-            | Tvar _ | Tfun _ | Tclass (_, _) | Tabstract (_, _) | Tgeneric _ | Ttuple _
+            | Tvar _ | Tfun _ | Tclass (_, _) | Tabstract (_, _) | Ttuple _
             | Tanon _ | Tunresolved _ | Tobject | Tshape _ | Tdynamic
         )
     -> false
@@ -4423,21 +4423,17 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
       let env, fields = TS.transform_shapemap env ty fields in
       let ty = r, Tshape (fk, fields) in
       array_get ~lhs_of_null_coalesce is_lvalue p env ty e2 ty2
-  | Tabstract _
-  | Tgeneric _ ->
+  | Tabstract _ ->
     let resl =
     try_over_concrete_supertypes env ety1
       begin fun env ty ->
         array_get ~lhs_of_null_coalesce is_lvalue p env ty e2 ty2
       end in
     begin match resl with
-    | [res] ->
-      res
+    | [res] -> res
     | res::rest
-      when List.for_all rest ~f:(fun x -> ty_equal (snd x) (snd res)) ->
-      res
-    | _ ->
-      error_array env p ety1
+      when List.for_all rest ~f:(fun x -> ty_equal (snd x) (snd res)) -> res
+    | _ -> error_array env p ety1
     end
   | Tmixed | Tnonnull | Tprim _ | Tvar _ | Tfun _
   | Tclass (_, _) | Tanon (_, _) ->
@@ -4496,7 +4492,7 @@ and array_append p env ty1 =
             else env, (Reason.Rwitness p, Typing_utils.tany env)
         | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _
         | Tvar _ | Tfun _ | Tclass (_, _) | Ttuple _
-        | Tanon (_, _) | Tunresolved _ | Tshape _ | Tabstract _ | Tgeneric _ ->
+        | Tanon (_, _) | Tunresolved _ | Tshape _ | Tabstract _ ->
           error_array_append env p ty1
     end in
   match resl with
@@ -4571,7 +4567,7 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
   | _, Tabstract (_, Some ty) ->
       class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc
         ~pos_params env cid ty (p, mid)
-  | _, Tabstract (_, None) | _, Tgeneric _ ->
+  | _, Tabstract (_, None) ->
       let resl = try_over_concrete_supertypes env cty (fun env ty ->
         class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc
           ~pos_params env cid ty (p, mid)) in
@@ -4912,18 +4908,16 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~(pos_params : expr list option) ?(ex
     | _ -> k_lhs (p', Tabstract (ak, Some ty)) in
     obj_get_ ~is_method ~nullsafe ~valkind ~pos_params ~explicit_tparams env ty cid id k k_lhs'
 
-  | p', (Tabstract(_,_) | Tgeneric _) ->
+  | p', (Tabstract(ak,_)) ->
     let resl =
     try_over_concrete_supertypes env ety1
       (fun env ty ->
       (* We probably don't want to rewrap new types for the 'this' closure *)
       (* TODO AKENN: we shouldn't refine constraints by changing
        * the type like this *)
-         let k_lhs' ty = match ety1 with
-         | _, Tabstract (AKnewtype (_, _), _) -> k_lhs ty
-         | _, Tabstract (ak, _) -> k_lhs (p', Tabstract (ak, Some ty))
-         | _, Tgeneric _ -> (k_lhs ety1) (* We only got here via a bound *)
-         | _, _ -> k_lhs ty in
+         let k_lhs' ty = match ak with
+         | AKnewtype (_, _) -> k_lhs ty
+         | _ -> k_lhs (p', Tabstract (ak, Some ty)) in
          obj_get_concrete_ty ~is_method ~valkind ~pos_params ~explicit_tparams env ty cid id k_lhs'
       ) in
     begin match resl with
@@ -4974,7 +4968,7 @@ and class_id_for_new p env cid =
             | Some class_info -> get_info ((sid, class_info, ty)::res) tyl
           end
         | _, (Tany | Terr | Tmixed | Tnonnull | Tarraykind _ | Toption _
-              | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tgeneric _ | Ttuple _
+              | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _
               | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _ | Tdynamic ) ->
           get_info res tyl in
   get_info [] [ty]
@@ -5113,7 +5107,7 @@ and static_class_id ~check_constraints p env =
           )
       | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _
             | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
-            | Tanon (_, _) | Tunresolved _ | Tabstract (_, _) | Tgeneric _ | Tobject
+            | Tanon (_, _) | Tunresolved _ | Tabstract (_, _) | Tobject
            ) ->
         let parent = Env.get_parent env in
         let parent_defined = snd parent <> Typing_utils.tany env in
@@ -5149,9 +5143,8 @@ and static_class_id ~check_constraints p env =
         match TUtils.get_base_type env ty with
         | _, Tabstract (AKnewtype (classname, [the_cls]), _) when
             classname = SN.Classes.cClassname -> resolve_ety the_cls
-        | _, Tgeneric _
-        | _, Tclass _ ->
-          ty
+        | _, Tabstract (AKgeneric _, _)
+        | _, Tclass _ -> ty
         | r, Tunresolved tyl -> r, Tunresolved (List.map tyl resolve_ety)
         | _, Tvar _ as ty -> resolve_ety ty
         | _, Tdynamic as ty -> ty
@@ -5712,7 +5705,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
       | (_, Tdynamic), (_, Tdynamic) ->
           make_result env te1 te2 (Reason.Rarith p, Tdynamic)
       | (_, (Tany | Terr | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tdynamic
-        | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tgeneric _ | Tclass (_, _)
+        | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _)
         | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
             )
         ), _ ->
@@ -5903,19 +5896,9 @@ and refine_lvalue_type env e ~refine =
   | _ -> env
 
 and condition_nullity ~nonnull env e =
-  let refine =
-    if nonnull
-    then (fun env ty ->
-       match ty with
-      (* We can't do anything inline with a generic parameter itself but we can update
-       * its constraints with an upper bound of nonnull
-       *)
-      | r, Tgeneric _ ->
-        let env = Typing_subtype.add_constraint (Reason.to_pos r)
-          env Ast.Constraint_as ty (r, Tnonnull) in
-        env, ty
-      | _ -> TUtils.non_null env ty)
-    else fun env ty -> env, ty in
+  let refine = if nonnull
+    then TUtils.non_null
+    else (fun env ty -> env, ty) in
   refine_lvalue_type env e ~refine
 
 and condition_isset env = function
@@ -5963,7 +5946,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
       | _, Tarraykind (AKany | AKempty)
       | _, Tprim Tbool -> env
       | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tdynamic
-        | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tgeneric _ | Tclass (_, _)
+        | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _)
         | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
         ) ->
           condition env (not tparamet) (p, Binop (Ast.Eqeq, e, (p, Null))))
@@ -6048,11 +6031,11 @@ and condition ?lhs_of_null_coalesce env tparamet =
           look at all of its upper bounds and create an unresolved type to
           represent all of the possible types.
         *)
-        | r, Tgeneric s when AbstractKind.is_generic_dep_ty s ->
+        | r, Tabstract (AKgeneric s, _) when AbstractKind.is_generic_dep_ty s ->
           let upper_bounds = TySet.elements (Env.get_upper_bounds env s) in
           let env, tyl = List.map_env env upper_bounds resolve_obj in
           env, (r, Tunresolved tyl)
-        | _, Tgeneric name ->
+        | _, Tabstract (AKgeneric name, _) ->
           if safe_instanceof_enabled
           then Errors.instanceof_generic_classname p name;
           env, obj_ty
@@ -6162,7 +6145,7 @@ and safely_refine_type env p reason ivar_pos ivar_ty hint_ty =
     | _, Tabstract (AKdependent (`this, []), Some (_, Tclass _)) ->
       ExprDepTy.make env CIstatic hint_ty
     | _, (Tany | Tmixed | Tprim _ | Toption _ | Ttuple _
-        | Tshape _ | Tvar _ | Tabstract _ | Tgeneric _ | Tarraykind _ | Tanon _
+        | Tshape _ | Tvar _ | Tabstract _ | Tarraykind _ | Tanon _
         | Tunresolved _ | Tobject | Terr | Tfun _  | Tdynamic) ->
       (* TODO(kunalm) Implement the type refinement for each type *)
       env, hint_ty
@@ -6184,7 +6167,7 @@ and safe_instanceof env p class_name class_info ivar_pos ivar_ty obj_ty =
       ^ ">" in
   let reason = Reason.Rinstanceof (ivar_pos, s) in
   let tyl_fresh = List.map
-      ~f:(fun new_name -> (reason, Tgeneric new_name))
+      ~f:(fun new_name -> (reason, Tabstract (AKgeneric new_name, None)))
       new_names in
   let env, obj_ty =
     safely_refine_class_type
@@ -6199,14 +6182,14 @@ and isexpr_generate_fresh_tparams env class_info reason hint_tyl =
     List.map hint_tyl (fun x -> Some x) @ (List.init pad_len (fun _ -> None)) in
   let replace_wildcard env hint_ty ((_, (_, tparam_name), _, _) as tp) =
     match hint_ty with
-      | Some (_, Tgeneric name)
+      | Some (_, Tabstract (AKgeneric name, _))
         when Env.is_fresh_generic_parameter name ->
-        env, (Some (tp, name), (reason, Tgeneric name))
+        env, (Some (tp, name), (reason, Tabstract (AKgeneric name, None)))
       | Some ty ->
         env, (None, ty)
       | None ->
         let env, new_name = Env.add_fresh_generic_parameter env tparam_name in
-        env, (Some (tp, new_name), (reason, Tgeneric new_name))
+        env, (Some (tp, new_name), (reason, Tabstract (AKgeneric new_name, None)))
   in
   let env, tparams_and_tyl = List.map2_env env hint_tyl class_info.tc_tparams
     ~f:replace_wildcard in
@@ -6310,11 +6293,11 @@ and is_array env ty p pred_name arg_expr =
   refine_lvalue_type env arg_expr ~refine:begin fun env arg_ty ->
     let r = Reason.Rpredicated (p, pred_name) in
     let env, tarrkey_name = Env.add_fresh_generic_parameter env "Tk" in
-    let tarrkey = (r, Tgeneric tarrkey_name) in
+    let tarrkey = (r, Tabstract (AKgeneric tarrkey_name, None)) in
     let env = SubType.add_constraint p env Ast.Constraint_as
       tarrkey (r, Tprim Tarraykey) in
     let env, tfresh_name = Env.add_fresh_generic_parameter env "T" in
-    let tfresh = (r, Tgeneric tfresh_name) in
+    let tfresh = (r, Tabstract (AKgeneric tfresh_name, None)) in
     (* This is the refined type of e inside the branch *)
     let refined_ty = (r,
       match ty with

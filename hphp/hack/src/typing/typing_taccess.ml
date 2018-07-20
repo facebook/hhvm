@@ -97,7 +97,7 @@ and expand env (root_reason, root_ty as root) =
             create_root_from_type_constant
               env class_pos class_name root head in
           expand { env with ids = tail } ty
-      | Tgeneric s ->
+      | Tabstract (AKgeneric s, _) ->
         let dep_ty = generic_to_dep_ty s in
         let env =
           { env with
@@ -208,7 +208,7 @@ and create_root_from_type_constant env class_pos class_name root_ty (pos, tconst
         | _ ->
             let ty =
               Reason.Rwitness (fst typeconst.ttc_name),
-              Tgeneric (class_name ^ "::" ^ tconst) in
+              Tabstract (AKgeneric (class_name^"::"^tconst), None) in
               let dep_tys =
               List.map env.dep_tys (fun (r, (d, s)) -> r, (d, s @ [tconst])) in
             { env with dep_tys = dep_tys }, ty

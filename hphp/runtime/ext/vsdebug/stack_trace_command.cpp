@@ -58,6 +58,10 @@ bool StackTraceCommand::executeImpl(
 
   int startFrame = tryGetInt(args, "startFrame", 0);
   int levels = tryGetInt(args, "levels", INT_MAX);
+  if (levels == 0) {
+    // Per protocol: if levels is 0, all frames should be returned.
+    levels = INT_MAX;
+  }
   int levelsAdded = 0;
 
   // Respond with a stack trace!

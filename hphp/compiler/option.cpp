@@ -267,9 +267,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalNoticeOnBuiltinDynamicCalls,
                ini, config, "NoticeOnBuiltinDynamicCalls",
                RuntimeOption::EvalNoticeOnBuiltinDynamicCalls);
-  Config::Bind(RuntimeOption::EvalUseMSRVForInOut,
-               ini, config, "UseMSRVForInOut",
-               RuntimeOption::EvalUseMSRVForInOut);
   Config::Bind(RuntimeOption::EvalAllowObjectDestructors,
                ini, config, "AllowObjectDestructors",
                RuntimeOption::EvalAllowObjectDestructors);

@@ -1,3 +1,0 @@
-<?hh
-
-if (!ini_get('hhvm.use_msrv_for_in_out')) echo "skip\n";

@@ -286,7 +286,6 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
     gd.HackArrCompatDVCmpNotices;
   RuntimeOption::EvalHackArrCompatSerializeNotices =
     gd.HackArrCompatSerializeNotices;
-  RuntimeOption::EvalUseMSRVForInOut = gd.UseMSRVForInOut;
   RuntimeOption::EvalHackArrDVArrs = gd.HackArrDVArrs;
   RuntimeOption::EvalDisableReturnByReference = gd.DisableReturnByReference;
   return {
@@ -377,7 +376,6 @@ void write_global_data(
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     gd.ConstantFunctions.push_back(elm);
   }
-  gd.UseMSRVForInOut = RuntimeOption::EvalUseMSRVForInOut;
 
   globalArrayTypeTable().repopulate(*arrTable);
   // NOTE: There's no way to tell if saveGlobalData() fails for some reason.

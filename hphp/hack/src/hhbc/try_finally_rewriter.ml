@@ -154,7 +154,6 @@ let emit_return
   let ret_instr = if need_ref then instr_retv else instr_retc in
   (* check if there are try/finally region *)
   let jump_targets = Emit_env.get_jump_targets env in
-  let msrv = Hhbc_options.use_msrv_for_inout !Hhbc_options.compiler_options in
   begin match JT.get_closest_enclosing_finally_label jump_targets with
   (* no finally blocks, but there might be some iterators that should be
       released before exit - do it *)
@@ -181,16 +180,14 @@ let emit_return
         load_retval_instr;
         verify_return_instr;
         verify_out;
-        if not msrv && num_out <> 0 then instr_new_vec_array (num_out + 1) else empty;
         release_iterators_instr;
-        if msrv && num_out <> 0 then instr_retm (num_out + 1) else ret_instr
+        if num_out <> 0 then instr_retm (num_out + 1) else ret_instr
       ]
     else gather [
       verify_return_instr;
       verify_out;
-      if not msrv && num_out <> 0 then instr_new_vec_array (num_out + 1) else empty;
       release_iterators_instr;
-      if msrv && num_out <> 0 then instr_retm (num_out + 1) else ret_instr
+      if num_out <> 0 then instr_retm (num_out + 1) else ret_instr
     ]
   (* ret is in finally block and there might be iterators to release -
     jump to finally block via Jmp/IterBreak *)

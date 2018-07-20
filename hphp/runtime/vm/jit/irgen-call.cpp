@@ -1511,10 +1511,6 @@ void emitFCallUnpack(IRGS& env, uint32_t numParams) {
 }
 
 void emitFCallUnpackM(IRGS& env, uint32_t numParams, uint32_t numOut) {
-  if (!RuntimeOption::EvalHHIRGenerateCallM) {
-    interpOne(env, *env.currentNormalizedInstruction);
-    return;
-  }
   implFCallUnpack(env, numParams, numOut - 1);
 }
 
@@ -1572,10 +1568,6 @@ void emitFCallD(IRGS& env,
 }
 
 void emitFCallM(IRGS& env, uint32_t numParams, uint32_t numOut) {
-  if (!RuntimeOption::EvalHHIRGenerateCallM) {
-    interpOne(env, *env.currentNormalizedInstruction);
-    return;
-  }
   implFCall(env, numParams, numOut - 1);
 }
 
@@ -1584,10 +1576,6 @@ void emitFCallDM(IRGS& env,
                  uint32_t numOut,
                  const StringData*,
                  const StringData*) {
-  if (!RuntimeOption::EvalHHIRGenerateCallM) {
-    interpOne(env, *env.currentNormalizedInstruction);
-    return;
-  }
   implFCall(env, numParams, numOut - 1);
 }
 

@@ -2839,11 +2839,9 @@ and emit_args_and_call env call_pos args uargs =
   let rec aux i rem_args inout_setters =
     match rem_args with
     | [] ->
-      let msrv =
-        Hhbc_options.use_msrv_for_inout !Hhbc_options.compiler_options in
       let use_unpack = (uargs != []) in
       let num_inout = List.length inout_setters in
-      let use_callm = msrv && (num_inout > 0) in
+      let use_callm = num_inout > 0 in
       let nargs = List.length all_args in
       let instr_call = match (use_callm, use_unpack) with
       | (false, false) -> instr (ICall (FCall nargs))
@@ -2866,7 +2864,6 @@ and emit_args_and_call env call_pos args uargs =
         else begin
           let local = Local.get_unnamed_local () in
           gather [
-            if msrv then empty else instr_unboxr;
             Emit_inout_helpers.emit_list_set_for_inout_call local
               (List.rev inout_setters)
           ]
@@ -3315,8 +3312,7 @@ and emit_call env pos (_, expr_ as expr) args uargs =
     | _ -> ());
   let nargs = List.length args + List.length uargs in
   let inout_arg_positions = get_inout_arg_positions args in
-  let msrv = Hhbc_options.use_msrv_for_inout !Hhbc_options.compiler_options in
-  let num_uninit = if msrv then List.length inout_arg_positions else 0 in
+  let num_uninit = List.length inout_arg_positions in
   let default () =
     let flavor = if List.is_empty inout_arg_positions then
       Flavor.ReturnVal else Flavor.Cell in

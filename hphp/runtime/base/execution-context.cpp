@@ -1682,7 +1682,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   TypedValue retval;
   if (doStackCheck(retval)) return retval;
 
-  if (UNLIKELY(RuntimeOption::EvalUseMSRVForInOut && f->takesInOutParams())) {
+  if (UNLIKELY(f->takesInOutParams())) {
     for (auto i = f->numInOutParams(); i > 0; --i) vmStack().pushNull();
   }
 
@@ -1705,7 +1705,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
     ar->trashVarEnv();
   }
 
-  if (UNLIKELY(RuntimeOption::EvalUseMSRVForInOut && f->takesInOutParams())) {
+  if (UNLIKELY(f->takesInOutParams())) {
     ar->setFCallM();
   }
 
@@ -1747,7 +1747,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
 
     // `retptr' might point somewhere that is affected by {push,pop}VMState(),
     // so don't write to it until after we pop the nested VM state.
-    if (UNLIKELY(RuntimeOption::EvalUseMSRVForInOut && f->takesInOutParams())) {
+    if (UNLIKELY(f->takesInOutParams())) {
       VArrayInit varr(f->numInOutParams() + 1);
       for (uint32_t i = 0; i < f->numInOutParams() + 1; ++i) {
         varr.append(*vmStack().topTV());

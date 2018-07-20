@@ -191,12 +191,6 @@ struct Repo::GlobalData {
   bool ReffinessInvariance = false;
 
   /*
-   * Should we use the multiple stack return value optimization for inout
-   * function calls?
-   */
-  bool UseMSRVForInOut = false;
-
-  /*
    * Are objects allowed to run destructors?
    */
   bool AllowObjectDestructors = false;
@@ -240,7 +234,6 @@ struct Repo::GlobalData {
       (ReffinessInvariance)
       (ForbidDynamicCalls)
       (NoticeOnBuiltinDynamicCalls)
-      (UseMSRVForInOut)
       (AllowObjectDestructors)
       (Signature)
       (DisableReturnByReference)

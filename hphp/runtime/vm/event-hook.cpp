@@ -385,46 +385,27 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     if (UNLIKELY(func->takesInOutParams())) {
       uint32_t count = func->numInOutParams();
 
-      if (RuntimeOption::EvalUseMSRVForInOut) {
-        auto start = stack.topTV();
-        auto const end = start + count;
+      auto start = stack.topTV();
+      auto const end = start + count;
 
-        auto push = [&] (TypedValue v) {
-          assertx(start < end);
-          tvIncRefGen(v);
-          *start++ = v;
-        };
+      auto push = [&] (TypedValue v) {
+        assertx(start < end);
+        tvIncRefGen(v);
+        *start++ = v;
+      };
 
-        uint32_t param = 0;
-        IterateKV(args.get(), [&] (Cell, TypedValue v) {
-          if (param >= func->numParams() || !func->params()[param++].inout) {
-            return;
-          }
-          push(v);
-        });
+      uint32_t param = 0;
+      IterateKV(args.get(), [&] (Cell, TypedValue v) {
+        if (param >= func->numParams() || !func->params()[param++].inout) {
+          return;
+        }
+        push(v);
+      });
 
-        while (start < end) push(make_tv<KindOfNull>());
-        cellDup(*ret.asCell(), *stack.allocTV());
-      } else {
-        VArrayInit varr(count + 1);
-        varr.append(*ret.asCell());
-
-        uint32_t param = 0;
-        uint32_t added = 0;
-        IterateKV(args.get(), [&] (Cell, TypedValue v) {
-          if (param >= func->numParams() || !func->params()[param++].inout) {
-            return;
-          }
-          added++;
-          varr.append(v);
-        });
-
-        for (; added < count; ++added) varr.append(make_tv<KindOfNull>());
-        *stack.allocTV() = make_array_like_tv(varr.toArray().detach());
-      }
-    } else {
-      cellDup(*ret.asCell(), *stack.allocTV());
+      while (start < end) push(make_tv<KindOfNull>());
     }
+
+    cellDup(*ret.asCell(), *stack.allocTV());
 
     vmfp() = outer;
     vmpc() = outer ? outer->func()->unit()->at(pcOff) : nullptr;

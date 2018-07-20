@@ -854,11 +854,6 @@ struct RuntimeOption {
   F(int32_t, ForbidDynamicCalls, 0)                                     \
   F(int32_t, ServerOOMAdj, 0)                                           \
   F(std::string, PreludePath, "")                                       \
-  /* Use the CallM/RetM ABI to return multiple values via the stack for \
-     inout functions */                                                 \
-  F(bool, UseMSRVForInOut, true)                                        \
-  F(bool, HHIRGenerateCallM, true)                                      \
-  F(bool, HHIRGenerateRetM, true)                                       \
   F(uint32_t, NonSharedInstanceMemoCaches, 10)                          \
   F(std::vector<std::string>, IniGetHide, std::vector<std::string>())   \
   F(std::string, UseRemoteUnixServer, "no")                             \

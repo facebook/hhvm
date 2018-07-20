@@ -251,11 +251,6 @@ void emitRetM(IRGS& env, uint32_t nvals) {
   assertx(!curFunc(env)->isResumable());
   assertx(nvals > 1);
 
-  if (!RuntimeOption::EvalHHIRGenerateRetM) {
-    interpOne(env, *env.currentNormalizedInstruction);
-    return;
-  }
-
   // Pop the return values. Since they will be teleported to their places in
   // memory, we don't care about their types.
   for (int i = 0; i < nvals - 1; i++) {

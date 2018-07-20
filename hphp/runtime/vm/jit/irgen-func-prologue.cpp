@@ -534,7 +534,7 @@ const StaticString
 void emitCallMCheck(IRGS& env) {
   auto const func = curFunc(env);
 
-  if (!RuntimeOption::EvalUseMSRVForInOut || !func->takesInOutParams()) {
+  if (!func->takesInOutParams()) {
     return;
   }
 

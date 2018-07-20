@@ -82,29 +82,10 @@ let emit_list_set_for_inout_call local inout_params = Local.scope @@ fun () ->
   let all_but_last, last =
     List.split_n inout_params (List.length inout_params - 1) in
   let last = List.hd_exn last in
-  let msrv =
-    Hhbc_options.use_msrv_for_inout !Hhbc_options.compiler_options in
-  match msrv with
-  | false ->
-    let try_body =
-      gather [
-        emit_set_instrs (Some local) (1, instr_setl local);
-        gather @@ List.map all_but_last ~f:(emit_set_instrs (Some local));
-        emit_set_instrs ~is_last:true (Some local) last
-      ]
-    in
-    let unset_instr = instr_unsetl local in
-    let f_label = Label.next_fault () in
-    let fault_body = gather [ unset_instr; instr_unwind ] in
-    gather [
-      instr_try_fault f_label try_body fault_body;
-      unset_instr
-    ]
-  | true ->
-    gather [
-      instr_setl local;
-      instr_popc;
-      gather @@ List.map all_but_last ~f:(emit_set_instrs None);
-      emit_set_instrs ~is_last:true None last;
-      instr_pushl local
-    ]
+  gather [
+    instr_setl local;
+    instr_popc;
+    gather @@ List.map all_but_last ~f:(emit_set_instrs None);
+    emit_set_instrs ~is_last:true None last;
+    instr_pushl local
+  ]

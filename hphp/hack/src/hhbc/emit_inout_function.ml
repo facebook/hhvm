@@ -33,29 +33,23 @@ let emit_body_instrs_inout params call_instrs =
   let inout_params = List.filter_map params ~f:(fun p ->
       if not @@ Hhas_param.is_inout p then None else
         Some (instr_setl @@ Local.Named (Hhas_param.name p))) in
-  let msrv = Hhbc_options.use_msrv_for_inout !Hhbc_options.compiler_options in
   let local = Local.get_unnamed_local () in
   let has_variadic = is_last_param_variadic param_count params in
   let num_inout = List.length inout_params in
-  let num_uninit = if msrv then num_inout else 0 in
   gather [
-    gather @@ List.init num_uninit ~f:(fun _ -> instr_nulluninit);
+    gather @@ List.init num_inout ~f:(fun _ -> instr_nulluninit);
     call_instrs;
     param_instrs;
-    begin match (msrv, has_variadic) with
-    | (false, false) -> instr (ICall (FCall param_count))
-    | (false, true) -> instr (ICall (FCallUnpack param_count))
-    | (true, false) -> instr (ICall (FCallM (param_count, num_inout + 1)))
-    | (true, true) -> instr (ICall (FCallUnpackM (param_count, num_inout + 1)))
+    begin match has_variadic with
+    | false -> instr (ICall (FCallM (param_count, num_inout + 1)))
+    | true -> instr (ICall (FCallUnpackM (param_count, num_inout + 1)))
     end;
-    begin if msrv then empty else instr_unboxr_nop end;
     Emit_inout_helpers.emit_list_set_for_inout_call local inout_params;
     instr_retc
   ]
 
 let emit_body_instrs_ref params call_instrs =
   let param_count = List.length params in
-  let msrv = Hhbc_options.use_msrv_for_inout !Hhbc_options.compiler_options in
   let param_instrs = gather @@
     List.map params ~f:(fun p ->
       let local = Local.Named (Hhas_param.name p) in
@@ -79,13 +73,7 @@ let emit_body_instrs_ref params call_instrs =
     fcall_instr;
     instr_unboxr_nop;
     gather param_get_instrs;
-    if msrv then
-      instr_retm (List.length param_get_instrs + 1)
-    else
-      gather [
-        instr_new_vec_array (List.length param_get_instrs + 1);
-        instr_retc;
-      ]
+    instr_retm (List.length param_get_instrs + 1)
   ]
 
 let emit_body_instrs ~wrapper_type env pos params call_instrs =

@@ -14,8 +14,8 @@ slow/ext_vsdebug/launch.php
 slow/ext_vsdebug/set_variable.php
 slow/ext_vsdebug/step.php
 slow/dict/ref-fail-leak.php
-slow/inout/tuple/tests/complex-expr.php
-slow/inout/tuple/tests/invalid-index.php
+slow/inout/complex-expr.php
+slow/inout/invalid-index.php
 slow/vec/ref-fail-leak.php
 slow/unserialize-reference-overwritten.php
 slow/hack_arr_compat/parse-str.php

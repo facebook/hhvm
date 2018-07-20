@@ -66,7 +66,6 @@ inline void calleeDynamicCallChecks(const ActRec* ar) {
 }
 
 inline void checkForRequiredCallM(const ActRec* ar) {
-  if (!RuntimeOption::EvalUseMSRVForInOut) return;
   if (!ar->func()->takesInOutParams()) return;
 
   if (!ar->isFCallM()) {

@@ -284,7 +284,6 @@ let is_mixed_or_dynamic t =
  String_utils.string_ends_with t "HH\\dynamic"
 
 let emit_verify_out params =
-  let msrv = Hhbc_options.use_msrv_for_inout !Hhbc_options.compiler_options in
   let param_instrs = List.filter_mapi params ~f:(fun i p ->
     if not @@ Hhas_param.is_inout p then None else
       let b = match Hhas_param.type_info p with
@@ -298,7 +297,7 @@ let emit_verify_out params =
           if b then instr_verifyOutType (Param_unnamed i) else empty
         ]
       )) in
-  let param_instrs = if msrv then List.rev param_instrs else param_instrs in
+  let param_instrs = List.rev param_instrs in
   let len = List.length param_instrs in
   if len = 0 then (0, empty) else (len, gather param_instrs)
 

@@ -1610,11 +1610,13 @@ let rec try_intersect env ty tyl =
     else
     if is_sub_type_alt env ty' ty = Some true
     then try_intersect env ty' tyl'
-    else match snd ty, snd ty' with
-    | Tnonnull, Toption t
-    | Toption t, Tnonnull -> try_intersect env t tyl'
-    | Toption t, Tclass _ -> try_intersect env t tyl
-    | Tclass _, Toption t -> try_intersect env ty (t::tyl')
+    else
+    let nonnull_ty = (fst ty, Tnonnull) in
+    match ty, ty' with
+    | (_, Toption t), _ when is_sub_type_alt env ty' nonnull_ty = Some true ->
+      try_intersect env t (ty'::tyl')
+    | _, (_, Toption t) when is_sub_type_alt env ty nonnull_ty = Some true ->
+      try_intersect env t (ty::tyl')
     | _, _ -> ty' :: try_intersect env ty tyl'
 
 (* Attempt to compute the union of a type with an existing list union.

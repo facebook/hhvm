@@ -960,6 +960,11 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       for_end_of_loop = after_iter;
       for_right_paren = right_p;
       for_body = body; } ->
+    let after_each_expr is_last =
+      if is_last
+      then Nothing
+      else space_split ()
+    in
     Concat [
       t env kw;
       Space;
@@ -967,15 +972,15 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       WithRule (Rule.Parental, Concat [
         Split;
         Nest [
-          handle_possible_list env ~after_each:after_each_argument init;
+          handle_possible_list env ~after_each:after_each_expr init;
           t env semi1;
           Space;
           Split;
-          handle_possible_list env ~after_each:after_each_argument control;
+          handle_possible_list env ~after_each:after_each_expr control;
           t env semi2;
           Space;
           Split;
-          handle_possible_list env ~after_each:after_each_argument after_iter;
+          handle_possible_list env ~after_each:after_each_expr after_iter;
         ];
         Split;
         t env right_p;

@@ -239,11 +239,18 @@ module WithStatementAndDeclAndTypeParser
         (* Treat as an attempt to prefix a non-double-quoted string *)
         let parser = with_error parser SyntaxError.prefixed_invalid_string_kind in
         parse_name_or_collection_literal_expression parser qualified_name
-      | DoubleQuotedStringLiteral | DoubleQuotedStringLiteralHead ->
+      | DoubleQuotedStringLiteral ->
         (* This name prefixes a double-quoted string *)
-        parse_prefixed_string parser1 qualified_name str_maybe
+        let (parser, str) = Make.token parser1 str_maybe in
+        let (parser, str) = Make.literal_expression parser str in
+        Make.prefixed_string_expression parser qualified_name str
+      | DoubleQuotedStringLiteralHead ->
+        (* This name prefixes a double-quoted string containing embedded expressions *)
+        let (parser, str) = parse_double_quoted_like_string
+          parser1 str_maybe Lexer.Literal_double_quoted in
+        Make.prefixed_string_expression parser qualified_name str
       | _ ->
-        (* Not a prefixed string *)
+        (* Not a prefixed string or an attempt at one *)
         parse_name_or_collection_literal_expression parser qualified_name
       end
     | Backslash ->
@@ -403,11 +410,6 @@ module WithStatementAndDeclAndTypeParser
     else
       let parser = with_error parser SyntaxError.error1019 in
       parse_as_name_or_error parser
-
-  and parse_prefixed_string parser name str =
-    let (parser, str) = parse_double_quoted_like_string
-      parser str Lexer.Literal_double_quoted in
-    Make.prefixed_string_expression parser name str
 
   and parse_double_quoted_like_string parser head literal_kind =
     parse_string_literal parser head literal_kind

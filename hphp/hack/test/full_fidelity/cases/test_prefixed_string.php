@@ -5,4 +5,5 @@ function f() : void {
   $y = "worst";
   $z = f"{$x} was the {$y} of times";
   $w = re"blah blah";
+  $a = re"";
 }

@@ -52,7 +52,9 @@ static zip* _zip_open(const String& filename, int _flags, int* zep) {
       *zep = ZIP_ER_OPEN;
       return nullptr;
     }
-    return zip_fdopen(fd, _flags & ZIP_CHECKCONS, zep);
+    if (auto z = zip_fdopen(fd, _flags & ZIP_CHECKCONS, zep)) return z;
+    close(fd);
+    return nullptr;
   }
   return zip_open(to_full_path(filename).c_str(), _flags, zep);
 }

@@ -1229,9 +1229,12 @@ struct PropAccessInfo::Hash {
 };
 
 struct PropRecurInfo {
-  using RecurSet = req::hash_set<PropAccessInfo, PropAccessInfo::Hash>;
+  using RecurSet = req::fast_set<PropAccessInfo, PropAccessInfo::Hash>;
+  // activePropInfo optimizes the common non-recursive case, when our activeSet
+  // would only contain one entry. When we add a second entry, we start using
+  // activeSet.
   const PropAccessInfo* activePropInfo{nullptr};
-  RecurSet* activeSet{nullptr};
+  RecurSet activeSet;
 };
 
 namespace {
@@ -1262,18 +1265,16 @@ magic_prop_impl(const StringData* /*key*/, const PropAccessInfo& info,
                 Invoker invoker) {
   auto recur_info = propRecurInfo.get();
   if (UNLIKELY(recur_info->activePropInfo != nullptr)) {
-    auto activeSet = recur_info->activeSet;
-    if (!activeSet) {
-      activeSet = req::make_raw<PropRecurInfo::RecurSet>();
-      activeSet->insert(*recur_info->activePropInfo);
-      recur_info->activeSet = activeSet;
+    auto& activeSet = recur_info->activeSet;
+    if (activeSet.empty()) {
+      activeSet.insert(*recur_info->activePropInfo);
     }
-    if (!activeSet->insert(info).second) {
+    if (!activeSet.insert(info).second) {
       // We're already running a magic method on the same type here.
       return {false, make_tv<KindOfUninit>()};
     }
     SCOPE_EXIT {
-      activeSet->erase(info);
+      activeSet.erase(info);
     };
 
     return {true, invoker()};
@@ -1282,11 +1283,7 @@ magic_prop_impl(const StringData* /*key*/, const PropAccessInfo& info,
   recur_info->activePropInfo = &info;
   SCOPE_EXIT {
     recur_info->activePropInfo = nullptr;
-    auto activeSet = recur_info->activeSet;
-    if (UNLIKELY(activeSet != nullptr)) {
-      req::destroy_raw(activeSet);
-      recur_info->activeSet = nullptr;
-    }
+    PropRecurInfo::RecurSet{}.swap(recur_info->activeSet);
   };
 
   return {true, invoker()};

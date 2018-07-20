@@ -22,7 +22,7 @@ let rec can_be_null env ty =
   | Tprim Nast.Tvoid -> TUtils.is_void_type_of_null env
   | Tunresolved tyl -> List.exists tyl (can_be_null env)
   | Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Tvar _
-    | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
+    | Tfun _ | Tgeneric _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
     | Tanon (_, _) | Tobject | Tshape _ | Tdynamic -> false
 
 let rec enforce_not_awaitable env p ty =
@@ -34,7 +34,7 @@ let rec enforce_not_awaitable env p ty =
       awaitable = SN.Classes.cAwaitable ->
     Errors.discarded_awaitable p (Reason.to_pos r)
   | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _
-    | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
+    | Tvar _ | Tfun _ | Tgeneric _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
     | Tanon (_, _) | Tobject | Tshape _ | Tdynamic) -> ()
 
 let enforce_nullable_or_not_awaitable env p ty =
@@ -77,7 +77,7 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
   | _, Tdynamic -> (* Awaiting a dynamic results in a new dynamic *)
     env, (r, Tdynamic)
   | _, (Terr | Tany | Tmixed | Tarraykind _ | Tnonnull | Tprim _
-    | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
+    | Tvar _ | Tfun _ | Tabstract (_, _) | Tgeneric _ | Tclass (_, _) | Ttuple _
     | Tanon (_, _) | Tobject | Tshape _ ) ->
     let expected_type = r, Tclass ((p, SN.Classes.cAwaitable), [type_var]) in
     let return_type = match e_opt_ty with
@@ -85,7 +85,7 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
       | _, Terr -> r, Terr
       | _, Tdynamic -> r, Tdynamic
       | _, (Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Tvar _ | Tfun _
-        | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
+        | Tabstract (_, _) | Tgeneric _ | Tclass (_, _) | Ttuple _ | Tanon (_, _)
         | Toption _ | Tunresolved _ | Tobject | Tshape _) -> type_var
     in
 
@@ -184,7 +184,7 @@ let rec gen_array_rec env p ty =
         env, (r, Tunresolved rtyl)
       end
       | _, (Terr | Tany | Tmixed | Tnonnull | Tprim _ | Toption _ | Tvar _
-        | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Tanon (_, _) | Tobject
+        | Tfun _ | Tgeneric _ | Tabstract (_, _) | Tclass (_, _) | Tanon (_, _) | Tobject
         | Tshape _ | Tdynamic
            ) -> overload_extract_from_awaitable env p ety
   end in
@@ -218,7 +218,7 @@ let rec gen_array_rec env p ty =
     env, (r, Tarraykind (AKtuple fields))
   | _, Ttuple tyl -> gen_array_va_rec env p tyl
   | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _
-    | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Tdynamic
+    | Tvar _ | Tfun _ | Tgeneric _ | Tabstract (_, _) | Tclass (_, _) | Tdynamic
     | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
        ) -> gena env p ty
 
@@ -234,7 +234,7 @@ and gen_array_va_rec env p tyl =
     | _, Tarraykind _ -> gen_array_rec env p ty
     | _, Ttuple tyl -> genva env p tyl
     | _, (Terr | Tany | Tmixed | Tnonnull | Tprim _ | Tvar _ | Tfun _ | Tdynamic
-      | Tabstract (_, _) | Tclass (_, _) | Tanon (_, _) | Tunresolved _
+      | Tabstract (_, _) | Tgeneric _ | Tclass (_, _) | Tanon (_, _) | Tunresolved _
       | Tobject | Tshape _) ->
        overload_extract_from_awaitable env p ty) in
 

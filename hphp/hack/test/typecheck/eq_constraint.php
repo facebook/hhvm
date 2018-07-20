@@ -12,9 +12,16 @@ class Boxing<Tclass> {
   public function getWithDefault<Tinner>(
     Tinner $default,
   ): Tinner where
-    Tclass = ?Tinner,
+    Tclass as ?Tinner,
   {
-    return $this->member ?: $default;
+    if ($this->member !== null) {
+      return $this->member;
+    } else {
+      return $default;
+    }
+    // This doesn't work because non-null-ness is reflected in the
+    // type parameter environment, which isn't merged
+    return $this->member !== null ? $this->member : $default;
   }
 
   public function getOrExcept<Tinner>(): Tinner where Tclass = ?Tinner {

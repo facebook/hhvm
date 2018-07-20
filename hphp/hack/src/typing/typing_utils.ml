@@ -132,7 +132,7 @@ let get_all_supertypes env ty =
       | Tabstract (_, Some ty) ->
         iter seen env (TySet.add ty acc) (ty::tyl)
 
-      | Tabstract (AKgeneric n, _) ->
+      | Tgeneric n ->
         if SSet.mem n seen
         then iter seen env acc tyl
         else iter (SSet.add n seen) env acc
@@ -162,10 +162,7 @@ let get_concrete_supertypes env ty =
       | Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), Some ty) ->
         iter seen env (TySet.add ty acc) tyl
 
-      | Tabstract (_, Some ty) ->
-        iter seen env acc (ty::tyl)
-
-      | Tabstract (AKgeneric n, _) ->
+      | Tgeneric n ->
         if SSet.mem n seen
         then iter seen env acc tyl
         else iter (SSet.add n seen) env acc
@@ -207,7 +204,7 @@ let rec get_base_type env ty =
       classname = SN.Classes.cClassname -> ty
   (* If we have an expression dependent type and it only has one super
     type, we can treat it similarly to AKdependent _, Some ty  *)
-  | Tabstract (AKgeneric n, _) when AbstractKind.is_generic_dep_ty n ->
+  | Tgeneric n when AbstractKind.is_generic_dep_ty n ->
     begin match TySet.elements (Env.get_upper_bounds env n) with
     | ty2::_ when ty_equal ty ty2 -> ty
     (* If it's exactly equal, then the base ty is just this one *)
@@ -216,7 +213,8 @@ let rec get_base_type env ty =
       then ty else get_base_type env ty
     | [] -> ty
     end
-  | Tabstract _ ->
+  | Tabstract _
+  | Tgeneric _ ->
     begin match get_concrete_supertypes env ty with
     (* If the type is exactly equal, we don't want to recurse *)
     | _, ty2::_ when ty_equal ty ty2 -> ty
@@ -239,7 +237,7 @@ let get_class_ids env ty =
     | _, Tclass ((_, cid), _) -> cid::acc
     | _, (Toption ty | Tabstract (_, Some ty)) -> aux seen acc ty
     | _, Tunresolved tys -> List.fold tys ~init:acc ~f:(aux seen)
-    | _, Tabstract (AKgeneric name, None) when not (List.mem seen name) ->
+    | _, Tgeneric name when not (List.mem seen name) ->
       let seen = name :: seen in
       let upper_bounds = Env.get_upper_bounds env name in
       TySet.fold (fun ty acc -> aux seen acc ty) upper_bounds acc
@@ -287,11 +285,11 @@ let simplified_uerror env ty1 ty2 =
     | Tclass _, Tabstract (AKdependent (`static, []), _) -> false
     | Tabstract (AKdependent _, Some _), _
     | _, Tabstract (AKdependent _, Some _) -> true
-    | Tabstract(AKgeneric s, _), _ ->
+    | Tgeneric s, _ ->
       let base_ty1 = get_base_type env ty1 in
       AbstractKind.is_generic_dep_ty s &&
       not (ty_equal ty1 base_ty1)
-    | _, Tabstract(AKgeneric s, _) ->
+    | _, Tgeneric s ->
       let base_ty2 = get_base_type env ty2 in
       AbstractKind.is_generic_dep_ty s &&
       not (ty_equal ty2 base_ty2)
@@ -535,7 +533,7 @@ let rec push_option_out env ty =
     end
   | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Tvar _
     | Tclass (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
-    | Tobject | Tshape _ | Tdynamic) -> env, ty
+    | Tobject | Tgeneric _ | Tshape _ | Tdynamic) -> env, ty
 
 (**
  * Strips away all Toption that we possible can in a type, expanding type

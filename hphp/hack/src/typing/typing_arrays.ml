@@ -45,25 +45,31 @@ end
 (* Abstract types declared "as array<...>" permit array operations, but if
  * those operations modify the array it has to be downgraded from generic
  * to just an array.*)
+let downcast_to_array_type this env ty =
+ match TUtils.get_all_supertypes env ty with
+ | _, [] -> env, ty
+ | env, tyl ->
+   let is_array = function
+   | _, Tarraykind _ -> true
+   | _ -> false in
+   match List.filter tyl is_array with
+   | [] ->
+     env, ty
+   | x::_ ->
+     (* If the abstract type has multiple concrete supertypes
+     which are arrays, just take the first one.
+     TODO(jjwu): Try all of them and find one that works
+     *)
+     this#on_type env x
+
 class virtual downcast_tabstract_to_array_type_mapper = object(this)
   method on_tabstract env r ak cstr =
     let ty = (r, Tabstract(ak, cstr)) in
-    match TUtils.get_all_supertypes env ty with
-    | _, [] -> env, ty
-    | env, tyl ->
-      let is_array = function
-      | _, Tarraykind _ -> true
-      | _ -> false in
-      match List.filter tyl is_array with
-      | [] ->
-        env, ty
-      | x::_ ->
-        (* If the abstract type has multiple concrete supertypes
-        which are arrays, just take the first one.
-        TODO(jjwu): Try all of them and find one that works
-        *)
-        this#on_type env x
+    downcast_to_array_type this env ty
 
+  method on_tgeneric env r name =
+    let ty = (r, Tgeneric name) in
+    downcast_to_array_type this env ty
 
   method virtual on_type : env -> locl ty -> result
 end

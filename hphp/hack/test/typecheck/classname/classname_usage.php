@@ -77,13 +77,10 @@ class Sub extends Super {
 
 function classname_polymorphism1(classname<I> $name): string {
   $ret = $name::bar();
-  hh_show($ret);
   return $ret;
 }
 
 function classname_polymorphism2<T as I>(classname<T> $name): string {
-  hh_show($name);
   $ret = $name::bar();
-  hh_show($ret);
   return $ret;
 }

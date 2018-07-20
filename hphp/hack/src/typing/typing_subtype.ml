@@ -147,7 +147,8 @@ let check_mutability
   | _ ->
     res
 
-let rec process_simplify_subtype_result ~this_ty ~unwrappedToption_super env { constraints; failed } =
+let rec process_simplify_subtype_result
+  ~this_ty ~unwrappedToption_super env { constraints; failed } =
   match failed with
   | Some f ->
     f ();
@@ -1342,7 +1343,7 @@ and sub_type_unwrapped_helper env ~this_ty
         let this_ty = Option.first_some this_ty (Some ety_sub) in
          sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty ty_super)
 
-  | (_, Tabstract (AKgeneric _, _)), (_, Toption arg_ty_super) ->
+  | (_, Tgeneric _), (_, Toption arg_ty_super) ->
     Errors.try_
       (fun () ->
         sub_type_unwrapped env ~this_ty ~unwrappedToption_super:true ty_sub arg_ty_super)
@@ -1382,7 +1383,7 @@ and sub_type_unwrapped_helper env ~this_ty
    * against generic parameter which is similar
    *)
   | (_, Tabstract (AKnewtype (_, _), Some ty)),
-    (_, Tabstract (AKgeneric _, _)) ->
+    (_, Tgeneric _) ->
      Errors.try_
        (fun () -> fst (Unify.unify env ty_super ty_sub))
        (fun _ ->
@@ -1426,7 +1427,7 @@ and sub_type_unwrapped_helper env ~this_ty
    *    but if we also try sub_generic_params then we succeed, because
    *    we end up checking this::TC <: this::TC.
   *)
-  | (_, Tabstract (AKdependent _, Some ty)), (_, Tabstract (AKgeneric _, _)) ->
+  | (_, Tabstract (AKdependent _, Some ty)), (_, Tgeneric _) ->
     Errors.try_
       (fun () -> fst (Unify.unify env ty_super ty_sub))
       (fun _ ->
@@ -1451,7 +1452,7 @@ and sub_type_unwrapped_helper env ~this_ty
    * We delegate this case to a separate function in order to catch cycles
    * in constraints e.g. <T1 as T2, T2 as T3, T3 as T1>
    *)
-  | (_, Tabstract (AKgeneric _, _)), _ ->
+  | (_, Tgeneric _), _ ->
     sub_generic_params SSet.empty env ~this_ty
       ~unwrappedToption_super ty_sub ty_super
 
@@ -1459,7 +1460,7 @@ and sub_type_unwrapped_helper env ~this_ty
    * We delegate this case to a separate function in order to catch cycles
    * in constraints e.g. <T1 as T2, T2 as T3, T3 as T1>
   *)
-  | _, (_, Tabstract (AKgeneric _, _)) ->
+  | _, (_, Tgeneric _) ->
     sub_generic_params SSet.empty env ~this_ty
       ~unwrappedToption_super ty_sub ty_super
 
@@ -1480,13 +1481,12 @@ and sub_generic_params
     env in
   match ety_sub, ety_super with
   (* If subtype and supertype are the same generic parameter, we're done *)
-  | (_, Tabstract (AKgeneric name_sub, _)),
-    (_, Tabstract (AKgeneric name_super, _))
-       when name_sub = name_super
+  | (_, Tgeneric name_sub),
+    (_, Tgeneric name_super) when name_sub = name_super
     -> env
 
   (* Subtype is generic parameter *)
-  | (r_sub, Tabstract (AKgeneric name_sub, opt_sub_cstr)), _ ->
+  | (r_sub, Tgeneric name_sub), _ ->
     (* If the generic is actually an expression dependent type,
       we need to update the Unification environment's this_ty
     *)
@@ -1520,11 +1520,10 @@ and sub_generic_params
               then (Reason.explain_generic_constraint
                 env.Env.pos r_sub name_sub l; env)
               else try_bounds tyl)
-      in try_bounds (Option.to_list opt_sub_cstr @
-           Typing_set.elements (Env.get_upper_bounds env name_sub))
+      in try_bounds (Typing_set.elements (Env.get_upper_bounds env name_sub))
 
   (* Supertype is generic parameter *)
-  | _, (r_super, Tabstract (AKgeneric name_super, _)) ->
+  | _, (r_super, Tgeneric name_super) ->
     (* If we've seen this type parameter before then we must have gone
      * round a cycle so we fail
      *)
@@ -1605,6 +1604,10 @@ let rec try_intersect env ty tyl =
   match tyl with
   | [] -> [ty]
   | ty'::tyl' ->
+    Typing_log.log_types 2 (Reason.to_pos (fst ty)) env
+      [Typing_log.Log_sub ("Typing_subtype.try_intersect",
+       [Typing_log.Log_type ("ty", ty);
+        Typing_log.Log_type ("ty'", ty')])];
     if is_sub_type_alt env ty ty' = Some true
     then try_intersect env ty tyl'
     else
@@ -1668,7 +1671,7 @@ let rec sub_string
       (* Enums are either ints or strings, and so can always be used in a
        * stringish context *)
       env
-  | (_, Tabstract _) ->
+  | (_, Tabstract _) | (_, Tgeneric _) ->
     begin match TUtils.get_concrete_supertypes env ty2 with
       | _, [] ->
         fail ()
@@ -1772,8 +1775,7 @@ let subtype_method
   let add_tparams_constraints env (tparams: locl tparam list) =
     let add_bound env (_, (pos, name), cstrl, _) =
       List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
-        let tparam_ty = (Reason.Rwitness pos,
-          Tabstract(AKgeneric name, None)) in
+        let tparam_ty = (Reason.Rwitness pos, Tgeneric name) in
         Typing_utils.add_constraint pos env ck tparam_ty ty) in
     List.fold_left tparams ~f:add_bound ~init: env in
 
@@ -1803,7 +1805,7 @@ let subtype_method
   let check_tparams_constraints env tparams =
   let check_tparam_constraints env (_var, (p, name), cstrl, _) =
     List.fold_left cstrl ~init:env ~f:begin fun env (ck, cstr_ty) ->
-      let tgeneric = (Reason.Rwitness p, Tabstract (AKgeneric name, None)) in
+      let tgeneric = (Reason.Rwitness p, Tgeneric name) in
       Typing_generic_constraint.check_constraint env ck cstr_ty tgeneric
     end in
   List.fold_left tparams ~init:env ~f:check_tparam_constraints in
@@ -1836,7 +1838,7 @@ let decompose_subtype_add_bound
   let env, ty_sub = Env.expand_type env ty_sub in
   match ty_sub, ty_super with
   (* name_sub <: ty_super so add an upper bound on name_sub *)
-  | (_, Tabstract (AKgeneric name_sub, _)), _ when ty_sub != ty_super ->
+  | (_, Tgeneric name_sub), _ when ty_sub != ty_super ->
     Typing_log.log_types 2 p env
       [Typing_log.Log_sub ("Typing_subtype.decompose_subtype_add_bound",
        [Typing_log.Log_type ("ty_sub", ty_sub);
@@ -1847,7 +1849,7 @@ let decompose_subtype_add_bound
     else Env.add_upper_bound ~intersect:(try_intersect env) env name_sub ty_super
 
   (* ty_sub <: name_super so add a lower bound on name_super *)
-  | _, (_, Tabstract (AKgeneric name_super, _)) when ty_sub != ty_super ->
+  | _, (_, Tgeneric name_super) when ty_sub != ty_super ->
     Typing_log.log_types 2 p env
     [Typing_log.Log_sub ("Typing_subtype.decompose_subtype_add_bound",
      [Typing_log.Log_type ("ty_sub", ty_sub);
@@ -1962,7 +1964,8 @@ let add_constraint
           ~f:(fun env x ->
             List.fold_left (Typing_set.elements (Env.get_lower_bounds env x)) ~init:env
               ~f:(fun env ty_sub' ->
-                List.fold_left (Typing_set.elements (Env.get_upper_bounds env x)) ~init:env
+                let upper_bounds = Typing_set.elements (Env.get_upper_bounds env x) in
+                List.fold_left upper_bounds ~init:env
                   ~f:(fun env ty_super' ->
                     decompose_subtype p env ty_sub' ty_super'))) in
       if Env.get_tpenv_size env' = oldsize

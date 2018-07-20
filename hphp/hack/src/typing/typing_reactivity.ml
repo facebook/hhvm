@@ -51,7 +51,7 @@ let rec condition_type_from_reactivity r =
    - for all other cases return None *)
 let get_associated_condition_type env ~is_self ty =
   match ty with
-  | _, Tabstract (AKgeneric n, _) ->
+  | _, Tgeneric n ->
     Env.get_condition_type env n
   | _, Tabstract (AKdependent (`static, []), _)
   | _, Tabstract (AKdependent (`this, []), _) ->
@@ -338,7 +338,7 @@ let verify_void_return_to_rx ~is_expr_statement p env ft =
 let try_substitute_type_with_condition env cond_ty ty =
   generate_fresh_name_for_target_of_condition_type env ty cond_ty
   |> Option.map ~f:begin fun fresh_type_argument_name ->
-    let param_ty = Reason.none, Tabstract ((AKgeneric fresh_type_argument_name), None) in
+    let param_ty = Reason.none, Tgeneric fresh_type_argument_name in
     (* if generic type is already registered this means we already saw
        parameter with the same pair (declared type * condition type) so there
        is no need to add condition type to env again  *)

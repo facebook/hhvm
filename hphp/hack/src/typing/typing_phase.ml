@@ -153,7 +153,7 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
       | Some x_ty ->
         env, (ety_env, (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty))
       | None ->
-        env, (ety_env, (r, Tabstract (AKgeneric x, None)))
+        env, (ety_env, (r, Tgeneric x))
     end
   | r, Toption ty ->
        let env, ty = localize ~ety_env env ty in
@@ -214,7 +214,7 @@ and localize_tparam pos (env, ety_env) ty (_, (_, name), cstrl, _) =
   match ty with
     | r, Tapply ((_, x), _argl) when x = SN.Typehints.wildcard ->
       let env, new_name = Env.add_fresh_generic_parameter env name in
-      let ty_fresh = (r, Tabstract (AKgeneric new_name, None)) in
+      let ty_fresh = (r, Tgeneric new_name) in
       let env = List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
         let env, ty = localize ~ety_env env ty in
         TUtils.add_constraint pos env ck ty_fresh ty) in
@@ -447,7 +447,7 @@ let localize_generic_parameters_with_bounds
     ~ety_env (env:Env.env) (tparams:Nast.tparam list) =
   let env = Env.add_generic_parameters env tparams in
   let localize_bound env ((_var, (pos,name), cstrl, _): Nast.tparam) =
-    let tparam_ty = (Reason.Rwitness pos, Tabstract(AKgeneric name, None)) in
+    let tparam_ty = (Reason.Rwitness pos, Tgeneric name) in
     List.map_env env cstrl (fun env (ck, h) ->
       let env, ty = localize env (Decl_hint.hint env.Env.decl_env h) ~ety_env in
       env, (tparam_ty, ck, ty)) in

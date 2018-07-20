@@ -52,7 +52,7 @@ let rec walk_and_gather_xhp_ ~env ~ureason ~pos cty =
        * implement <<__ConsistentAttributes>> as a way to make this hacky
        * inference sound and check it before doing this conversion. *)
       walk_and_gather_xhp_ ~env ~ureason ~pos (Env.get_self env)
-  | Tabstract _ ->
+  | Tabstract _ | Tgeneric _ ->
       let env, tyl = TUtils.get_concrete_supertypes env cty in
       let (env, acc), _ = List.map_env (env, []) tyl (fun (env, acc) ty ->
         let env, acc' = walk_and_gather_xhp_ ~env ~ureason ~pos ty in

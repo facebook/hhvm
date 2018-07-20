@@ -91,12 +91,12 @@ module ExprDepTy = struct
             But T1::T is exactly equal to int, so $x->get() no longer needs
             to be expression dependent. Thus, $x->get() typechecks.
           *)
-            | (_, Tabstract (AKgeneric s, _)) when
+            | (_, Tgeneric s) when
             not (Typing_set.is_empty (Env.get_equal_bounds env s)) ->
             (env, ty)
             | _ ->
              let ty_name = to_string dep_ty in
-             let new_ty = (r, Tabstract(AKgeneric ty_name, None)) in
+             let new_ty = (r, Tgeneric ty_name) in
               let env = Env.add_upper_bound_global env ty_name ty in
               (env, new_ty)
           end
@@ -133,9 +133,9 @@ module ExprDepTy = struct
   let rec should_apply env ty =
     let env, ty = Env.expand_type env ty in
     match snd ty with
-    | Tabstract(AKgeneric s, _) when AbstractKind.is_generic_dep_ty s ->
+    | Tgeneric s when AbstractKind.is_generic_dep_ty s ->
       false
-    | Tabstract (AKgeneric _, _) ->
+    | Tgeneric _ ->
       let env, tyl = Typing_utils.get_concrete_supertypes env ty in
       List.exists tyl (should_apply env)
     | Toption ty

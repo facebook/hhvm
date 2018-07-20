@@ -143,7 +143,7 @@ let get_equal_bounds env name =
 
 let rec is_generic_param ~elide_nullable ty name =
   match ty with
-  | (_, Tabstract (AKgeneric name', None)) -> name = name'
+  | (_, Tgeneric name') -> name = name'
   | (_, Toption ty) when elide_nullable -> is_generic_param ~elide_nullable ty name
   | _ -> false
 
@@ -183,42 +183,40 @@ let env_with_global_tpenv env global_tpenv =
 let add_upper_bound_global env name ty =
   let tpenv =
     begin match ty with
-    | (r, Tabstract (AKgeneric formal_super, _)) ->
-      add_lower_bound_ env.global_tpenv formal_super
-        (r, Tabstract (AKgeneric name, None))
+    | (r, Tgeneric formal_super) ->
+      add_lower_bound_ env.global_tpenv formal_super (r, Tgeneric name)
     | _ -> env.global_tpenv
     end in
    { env with global_tpenv=(add_upper_bound_ tpenv name ty) }
 
- (* Add a single new upper bound [ty] to generic parameter [name] in the local
-  * type parameter environment of [env].
-  * If the optional [intersect] operation is supplied, then use this to avoid
-  * adding redundant bounds by merging the type with existing bounds. This makes
-  * sense because a conjunction of upper bounds
-  *   (T <: t1) /\ ... /\ (T <: tn)
-  * is equivalent to a single upper bound
-  *   T <: (t1 & ... & tn)
-  *)
- let add_upper_bound ?intersect env name ty =
-   let tpenv =
-     begin match ty with
-     | (r, Tabstract (AKgeneric formal_super, _)) ->
-       add_lower_bound_ env.lenv.tpenv formal_super
-         (r, Tabstract (AKgeneric name, None))
-     | _ -> env.lenv.tpenv
-     end in
-   match intersect with
-   | None -> env_with_tpenv env (add_upper_bound_ tpenv name ty)
-   | Some intersect ->
-     let tyl = intersect ty (TySet.elements (get_upper_bounds env name)) in
-     let add ty tys =
-       if is_generic_param ~elide_nullable:true ty name
-       then tys else TySet.add ty tys in
-     let upper_bounds = List.fold_right ~init:TySet.empty ~f:add tyl in
-     let lower_bounds = get_tpenv_lower_bounds env.lenv.tpenv name in
-     env_with_tpenv env (SMap.add name {lower_bounds; upper_bounds} tpenv)
+(* Add a single new upper bound [ty] to generic parameter [name] in the local
+ * type parameter environment of [env].
+ * If the optional [intersect] operation is supplied, then use this to avoid
+ * adding redundant bounds by merging the type with existing bounds. This makes
+ * sense because a conjunction of upper bounds
+ *   (T <: t1) /\ ... /\ (T <: tn)
+ * is equivalent to a single upper bound
+ *   T <: (t1 & ... & tn)
+ *)
+let add_upper_bound ?intersect env name ty =
+  let tpenv =
+    begin match ty with
+    | (r, Tgeneric formal_super) ->
+      add_lower_bound_ env.lenv.tpenv formal_super (r, Tgeneric name)
+    | _ -> env.lenv.tpenv
+    end in
+  match intersect with
+  | None -> env_with_tpenv env (add_upper_bound_ tpenv name ty)
+  | Some intersect ->
+    let tyl = intersect ty (TySet.elements (get_upper_bounds env name)) in
+    let add ty tys =
+      if is_generic_param ~elide_nullable:true ty name
+      then tys else TySet.add ty tys in
+    let upper_bounds = List.fold_right ~init:TySet.empty ~f:add tyl in
+    let lower_bounds = get_tpenv_lower_bounds env.lenv.tpenv name in
+    env_with_tpenv env (SMap.add name {lower_bounds; upper_bounds} tpenv)
 
-(* Add a single new upper lower [ty] to generic parameter [name] in the
+(* Add a single new lower bound [ty] to generic parameter [name] in the
  * local type parameter environment [env].
  * If the optional [union] operation is supplied, then use this to avoid
  * adding redundant bounds by merging the type with existing bounds. This makes
@@ -230,9 +228,8 @@ let add_upper_bound_global env name ty =
 let add_lower_bound ?union env name ty =
   let tpenv =
     begin match ty with
-    | (r, Tabstract (AKgeneric formal_sub, _)) ->
-      add_upper_bound_ env.lenv.tpenv formal_sub
-        (r, Tabstract (AKgeneric name, None))
+    | (r, Tgeneric formal_sub) ->
+      add_upper_bound_ env.lenv.tpenv formal_sub (r, Tgeneric name)
     | _ -> env.lenv.tpenv
     end in
   match union with
@@ -285,10 +282,7 @@ let is_fresh_generic_parameter name =
 let tparams_visitor env =
   object(this)
     inherit [SSet.t] Type_visitor.type_visitor
-    method! on_tabstract acc _ ak _ty_opt =
-      match ak with
-      | AKgeneric s -> SSet.add s acc
-      | _ -> acc
+    method! on_tgeneric acc _ s = SSet.add s acc
     method! on_tvar acc r ix =
       let _env, ty = get_type env r ix in
       this#on_type acc ty
@@ -300,7 +294,7 @@ let get_tpenv_tparams env =
   SMap.fold begin fun _x { lower_bounds; upper_bounds } acc ->
     let folder ty acc =
       match ty with
-      | _, Tabstract (AKgeneric _, _) -> acc
+      | _, Tgeneric _ -> acc
       | _ -> get_tparams_aux env acc ty in
     TySet.fold folder lower_bounds @@
     TySet.fold folder upper_bounds acc

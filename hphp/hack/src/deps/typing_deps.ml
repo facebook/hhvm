@@ -95,10 +95,10 @@ module Graph = struct
     = "hh_assert_allow_dependency_table_reads"
 
   let hh_add_dep x =
-    SharedMem.with_worker_exit (fun () -> hh_add_dep x)
+    WorkerCancel.with_worker_exit (fun () -> hh_add_dep x)
 
   let hh_get_dep x =
-    SharedMem.with_worker_exit (fun () -> hh_get_dep x)
+    WorkerCancel.with_worker_exit (fun () -> hh_get_dep x)
 
   let add x y = hh_add_dep ((x lsl 31) lor y)
 

@@ -413,7 +413,7 @@ let rec class_decl_if_missing class_env c =
     if Decl_heap.Classes.mem cid then () else
       (* Class elements are in memory if and only if the class itself is there.
        * Exiting before class declaration is ready would break this invariant *)
-      SharedMem.with_no_cancellations @@ fun () ->
+      WorkerCancel.with_no_cancellations @@ fun () ->
       class_naming_and_decl class_env cid c
   end
 

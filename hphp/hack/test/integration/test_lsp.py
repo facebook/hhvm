@@ -141,14 +141,7 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         # If the server's busy, maybe the machine's just under too much pressure
         # to give results in a timely fashion. Doing a retry would only defer
         # the question of what to do in that case, so instead we'll just skip.
-        transcript_str = str(observed_transcript)
-        if "'message': 'Server busy'" in transcript_str:
-            raise unittest.SkipTest("Hack server busy")
-            return
-
-        if "'message': 'request timed out'" in transcript_str:
-            raise unittest.SkipTest("Hack server timed out")
-            return
+        self.throw_on_skip(observed_transcript)
 
         # validation checks that the number of items matches and that
         # the responses are exactly identical to what we expect
@@ -160,6 +153,21 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         )
         for i in range(len(expected_items)):
             self.assertEqual(observed_items[i], expected_items[i])
+
+    def throw_on_skip(self, transcript: Transcript):
+        failure_messages = [
+            "Server busy",
+            "timed out",
+        ]
+        for entry in transcript.values():
+            received = entry.received
+            if received is None:
+                continue
+            if received.get("error"):
+                message = received["error"]["message"]
+                for failure_message in failure_messages:
+                    if failure_message in message:
+                        raise unittest.SkipTest(message)
 
     def prepare_environment(self):
         self.maxDiff = None

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -10,7 +10,11 @@
  */
 
 if (true) {
-  function f(): void {}
+  function f(): void {} // bad
 } else {
-  function g(): void {}
+  function g(): void {} // bad
+}
+
+class ConditionalDecl {
+  function h(): void {} // good
 }

@@ -1380,7 +1380,16 @@ let redeclaration_errors env node parents namespace_name names errors =
         in
         { names with
           t_functions = strmap_add function_name def names.t_functions }, errors
-      | _ -> names, errors
+      | _ ->
+        (* Only check this in strict mode. *)
+        let mode_opt = FileInfo.parse_mode @@ SyntaxTree.mode env.syntax_tree in
+        if mode_opt <> Some FileInfo.Mstrict then names, errors else
+        let error = make_error_from_node
+          ~error_type:SyntaxError.ParseError
+          node
+          SyntaxError.decl_outside_global_scope
+        in
+        names, error :: errors
     end
   | _ -> names, errors
 
@@ -2094,7 +2103,7 @@ let check_type_name syntax_tree name namespace_name name_text location names err
     names, errors
   end
 
-let classish_errors env node _parents namespace_name names errors =
+let classish_errors env node parents namespace_name names errors =
   match syntax node with
   | ClassishDeclaration cd ->
     (* Given a ClassishDeclaration node, test whether or not it's a trait
@@ -2103,6 +2112,18 @@ let classish_errors env node _parents namespace_name names errors =
       (* Invalid if uses 'extends' and is a trait. *)
       token_kind cd.classish_extends_keyword = Some TokenKind.Extends &&
         token_kind cd.classish_keyword = Some TokenKind.Trait in
+
+    (* Given a ClassishDeclaration node, test whether it's declared in the
+       global scope. *)
+    let classish_declaration_check _ =
+      (* Only check this in strict mode. *)
+      let mode_opt = FileInfo.parse_mode @@ SyntaxTree.mode env.syntax_tree in
+      if mode_opt <> Some FileInfo.Mstrict then false else
+      match List.map syntax parents with
+      | [SyntaxList _; Script _]
+      | [SyntaxList _; NamespaceBody _; NamespaceDeclaration _; SyntaxList _; Script _] -> false
+      | _ -> true
+    in
 
     (* Given a sealed ClassishDeclaration node, test whether all the params
      * are classnames. *)
@@ -2174,6 +2195,10 @@ let classish_errors env node _parents namespace_name names errors =
       produce_error errors
       (is_reserved_keyword env) cd.classish_name
       SyntaxError.reserved_keyword_as_class_name cd.classish_name in
+    let errors =
+      produce_error errors
+      classish_declaration_check ()
+      SyntaxError.decl_outside_global_scope cd.classish_name in
     let errors =
       if is_token_kind cd.classish_keyword TokenKind.Interface &&
         not (is_missing cd.classish_implements_keyword)

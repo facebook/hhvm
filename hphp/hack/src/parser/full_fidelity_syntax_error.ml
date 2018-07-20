@@ -543,3 +543,5 @@ let toplevel_statements =
   "Toplevel statements besides requires are not allowed in strict files"
 
 let dollar_unary = "The dollar sign ('$') cannot be used as a unary operator"
+
+let decl_outside_global_scope = "Declarations are not supported outside global scope"

@@ -382,7 +382,7 @@ bool HHVM_FUNCTION(clear_static_memoization,
     if (!cls) return false;
     if (isStringType(funcStr.m_type)) {
       auto const func = cls->lookupMethod(funcStr.m_data.pstr);
-      return func && clear(func);
+      return func && func->isStatic() && clear(func);
     }
     auto ret = false;
     for (auto i = cls->numMethods(); i--; ) {

@@ -1579,6 +1579,74 @@ and is_sub_type
   Errors.is_hh_fixme := f;
   result
 
+(* Non-side-effecting test for subtypes, using simplify_subtype.
+ * Result is
+ *   result = Some true implies ty1 <: ty2
+ *   result = Some false implies NOT ty1 <: ty2
+ *   result = None, we don't know
+ *)
+let is_sub_type_alt env ty1 ty2 =
+  match simplify_subtype ~deep:true ~this_ty:(Some ty1) ty1 ty2 (env, initial_result) with
+  | _, { constraints = []; failed = None } -> Some true
+  | _, { constraints = _; failed = Some _ }-> Some false
+  | _ -> None
+
+(* Attempt to compute the intersection of a type with an existing list intersection.
+ * If try_intersect env t [t1;...;tn] = [u1; ...; um]
+ * then u1&...&um must be the greatest lower bound of t and t1&...&tn wrt subtyping.
+ * For example:
+ *   try_intersect nonnull [?C] = [C]
+ *   try_intersect t1 [t2] = [t1]  if t1 <: t2
+ * Note: it's acceptable to return [t;t1;...;tn] but the intention is that
+ * we simplify (as above) wherever practical.
+ * It can be assumed that the original list contains no redundancy.
+ *)
+let rec try_intersect env ty tyl =
+  match tyl with
+  | [] -> [ty]
+  | ty'::tyl' ->
+    if is_sub_type_alt env ty ty' = Some true
+    then try_intersect env ty tyl'
+    else
+    if is_sub_type_alt env ty' ty = Some true
+    then try_intersect env ty' tyl'
+    else match snd ty, snd ty' with
+    | Tnonnull, Toption t
+    | Toption t, Tnonnull -> try_intersect env t tyl'
+    | Toption t, Tclass _ -> try_intersect env t tyl
+    | Tclass _, Toption t -> try_intersect env ty (t::tyl')
+    | _, _ -> ty' :: try_intersect env ty tyl'
+
+(* Attempt to compute the union of a type with an existing list union.
+ * If try_union env t [t1;...;tn] = [u1;...;um]
+ * then u1|...|um must be the least upper bound of t and t1|...|tn wrt subtyping.
+ * For example:
+ *   try_union int [float] = [num]
+ *   try_union t1 [t2] = [t1] if t2 <: t1
+ *
+ * Notes:
+ * 1. It's acceptable to return [t;t1;...;tn] but the intention is that
+ *    we simplify (as above) wherever practical.
+ * 2. Do not use Tunresolved for a syntactic union - the caller can do that.
+ * 3. It can be assumed that the original list contains no redundancy.
+ * TODO: there are many more unions to implement yet.
+ *)
+let rec try_union env ty tyl =
+  match tyl with
+  | [] -> [ty]
+  | ty'::tyl' ->
+    if is_sub_type_alt env ty ty' = Some true
+    then try_union env ty' tyl'
+    else
+    if is_sub_type_alt env ty' ty = Some true
+    then try_union env ty tyl'
+    else match snd ty, snd ty' with
+    | Tprim Nast.Tfloat, Tprim Nast.Tint
+    | Tprim Nast.Tint, Tprim Nast.Tfloat ->
+      let t = (fst ty, Tprim Nast.Tnum) in
+      try_union env t tyl'
+    | _, _ -> ty' :: try_union env ty tyl'
+
 let rec sub_string
   (p : Pos.Map.key)
   (env : Env.env)
@@ -1756,7 +1824,6 @@ let subtype_method
 
   Env.env_with_tpenv env old_tpenv
 
-
 let decompose_subtype_add_bound
   p
   (env : Env.env)
@@ -1775,7 +1842,7 @@ let decompose_subtype_add_bound
     let tys = Env.get_upper_bounds env name_sub in
     (* Don't add the same type twice! *)
     if Typing_set.mem ty_super tys then env
-    else Env.add_upper_bound env name_sub ty_super
+    else Env.add_upper_bound ~intersect:(try_intersect env) env name_sub ty_super
 
   (* ty_sub <: name_super so add a lower bound on name_super *)
   | _, (_, Tabstract (AKgeneric name_super, _)) when ty_sub != ty_super ->
@@ -1786,7 +1853,7 @@ let decompose_subtype_add_bound
     let tys = Env.get_lower_bounds env name_super in
     (* Don't add the same type twice! *)
     if Typing_set.mem ty_sub tys then env
-    else Env.add_lower_bound env name_super ty_sub
+    else Env.add_lower_bound ~union:(try_union env) env name_super ty_sub
 
   | _, _ ->
     env
@@ -1901,18 +1968,6 @@ let add_constraint
       else iter (n+1) env'
   in
     iter 0 env'
-
-(* Non-side-effecting test for subtypes, using simplify_subtype.
- * Result is
- *   result = Some true implies ty1 <: ty2
- *   result = Some false implies NOT ty1 <: ty2
- *   result = None, we don't know
- *)
-let is_sub_type_alt env ty1 ty2 =
-  match simplify_subtype ~deep:true ~this_ty:(Some ty1) ty1 ty2 (env, initial_result) with
-  | _, { constraints = []; failed = None } -> Some true
-  | _, { constraints = _; failed = Some _ }-> Some false
-  | _ -> None
 
 (*****************************************************************************)
 (* Exporting *)

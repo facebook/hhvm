@@ -190,17 +190,44 @@ let add_upper_bound_global env name ty =
     end in
    { env with global_tpenv=(add_upper_bound_ tpenv name ty) }
 
-let add_upper_bound env name ty =
-  let tpenv =
-    begin match ty with
-    | (r, Tabstract (AKgeneric formal_super, _)) ->
-      add_lower_bound_ env.lenv.tpenv formal_super
-        (r, Tabstract (AKgeneric name, None))
-    | _ -> env.lenv.tpenv
-    end in
-  env_with_tpenv env (add_upper_bound_ tpenv name ty)
+ (* Add a single new upper bound [ty] to generic parameter [name] in the local
+  * type parameter environment of [env].
+  * If the optional [intersect] operation is supplied, then use this to avoid
+  * adding redundant bounds by merging the type with existing bounds. This makes
+  * sense because a conjunction of upper bounds
+  *   (T <: t1) /\ ... /\ (T <: tn)
+  * is equivalent to a single upper bound
+  *   T <: (t1 & ... & tn)
+  *)
+ let add_upper_bound ?intersect env name ty =
+   let tpenv =
+     begin match ty with
+     | (r, Tabstract (AKgeneric formal_super, _)) ->
+       add_lower_bound_ env.lenv.tpenv formal_super
+         (r, Tabstract (AKgeneric name, None))
+     | _ -> env.lenv.tpenv
+     end in
+   match intersect with
+   | None -> env_with_tpenv env (add_upper_bound_ tpenv name ty)
+   | Some intersect ->
+     let tyl = intersect ty (TySet.elements (get_upper_bounds env name)) in
+     let add ty tys =
+       if is_generic_param ~elide_nullable:true ty name
+       then tys else TySet.add ty tys in
+     let upper_bounds = List.fold_right ~init:TySet.empty ~f:add tyl in
+     let lower_bounds = get_tpenv_lower_bounds env.lenv.tpenv name in
+     env_with_tpenv env (SMap.add name {lower_bounds; upper_bounds} tpenv)
 
-let add_lower_bound env name ty =
+(* Add a single new upper lower [ty] to generic parameter [name] in the
+ * local type parameter environment [env].
+ * If the optional [union] operation is supplied, then use this to avoid
+ * adding redundant bounds by merging the type with existing bounds. This makes
+ * sense because a conjunction of lower bounds
+ *   (t1 <: T) /\ ... /\ (tn <: T)
+ * is equivalent to a single lower bound
+ *   (t1 | ... | tn) <: T
+ *)
+let add_lower_bound ?union env name ty =
   let tpenv =
     begin match ty with
     | (r, Tabstract (AKgeneric formal_sub, _)) ->
@@ -208,7 +235,13 @@ let add_lower_bound env name ty =
         (r, Tabstract (AKgeneric name, None))
     | _ -> env.lenv.tpenv
     end in
-  env_with_tpenv env (add_lower_bound_ tpenv name ty)
+  match union with
+  | None -> env_with_tpenv env (add_lower_bound_ tpenv name ty)
+  | Some union ->
+    let tyl = union ty (TySet.elements (get_lower_bounds env name)) in
+    let lower_bounds = List.fold_right ~init:TySet.empty ~f:TySet.add tyl in
+    let upper_bounds = get_tpenv_upper_bounds env.lenv.tpenv name in
+    env_with_tpenv env (SMap.add name {lower_bounds; upper_bounds} tpenv)
 
 (* Add type parameters to environment, initially with no bounds.
  * Existing type parameters with the same name will be overridden. *)

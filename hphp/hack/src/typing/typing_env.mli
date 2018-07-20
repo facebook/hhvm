@@ -107,8 +107,12 @@ val get_tpenv_lower_bounds : tpenv -> string -> tparam_bounds
 val get_tpenv_upper_bounds : tpenv -> string -> tparam_bounds
 val get_lower_bounds : env -> string -> tparam_bounds
 val get_upper_bounds : env -> string -> tparam_bounds
-val add_upper_bound : env -> string -> locl ty -> env
-val add_lower_bound : env -> string -> locl ty -> env
+val add_upper_bound :
+  ?intersect:(locl ty -> locl ty list -> locl ty list) ->
+  env -> string -> locl ty -> env
+val add_lower_bound :
+  ?union:(locl ty -> locl ty list -> locl ty list) ->
+  env -> string -> locl ty -> env
 val get_equal_bounds : env -> string -> tparam_bounds
 val get_tparams : env -> 'a ty -> SSet.t
 val add_upper_bound_global : env -> string -> locl ty -> env

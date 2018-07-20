@@ -1292,21 +1292,20 @@ G ; K |- new C ( e1 , .. , en ) : # C < t1 , .. , tm >
 {{ com \subsection{Property access} }}
 
 G ; K |- e : u
-G |- u -> x : t
+u -> x : t
 ------------------- :: property_access
 G ; K |- e -> x : t
 
 G ; K |- e : ? u
-G |- u -> x : t
+u -> x : t
 ---------------------- :: nullsafe_property_access
 G ; K |- e ?-> x : ? t
 
 {{ com \subsection{Static property access} }}
 
-C' inst' <:: C inst
-class C typarams cextends cimpls { constructor static t $ x ; member1 .. membern }
----------------------------------------------------------------------------------- :: static_property_access
-G ; K |- C' :: x : t
+C declares static x : t
+----------------------- :: static_property_access
+G ; K |- C :: x : t
 
 {{ com \subsection{Function application} }}
 
@@ -1413,24 +1412,46 @@ t2 awaits t2'
 ------------------------------- :: union
 t1 | t2 awaits t1' | t2'
 
-{{ com \section*{Types with properties} }}
-{{ com \addcontentsline{toc}{section}{Types with properties} }}
+{{ com \section*{Property declarations} }}
+{{ com \addcontentsline{toc}{section}{Property declarations} }}
 
 defn
-  G |- u -> x : t :: :: property :: 'property_'
-  {{ com under locals [[G]], type [[u]] has property [[x]] of type [[t]] }}
+  u declares x : t :: :: declares :: 'declares_'
+  {{ com type [[u]] declares a property [[x]] of type [[t]] }}
 by
 
 class C < var1 T1 constraint1 , .. , varm Tm constraintm > cextends cimpls { constructor t $ x ; member1 .. membern }
 ----------------------------------------------------------- :: exact_class
-G |- # C < t1 , .. , tm > -> x : { t1 / T1 , .. , tm / Tm } { # C < t1 , .. , tm > / this } t
+# C < t1 , .. , tm > declares x : { t1 / T1 , .. , tm / Tm } { # C < t1 , .. , tm > / this } t
 
-G |- u1 -> x : t1
-G |- u2 -> x : t2
+defn
+  u -> x : t :: :: property :: 'property_'
+  {{ com type [[u]] has a property [[x]] of type [[t]] }}
+by
+
+u declares x : t
+---------------- :: declaration
+u -> x : t
+
+u1 -> x : t1
+u2 -> x : t2
 ------------------------------- :: union
-G |- ( u1 | u2 ) -> x : t1 | t2
+( u1 | u2 ) -> x : t1 | t2
 
 {{ com TODO: use of $[[this]]$ type in the type of a property }}
+
+{{ com \section*{Static property declarations} }}
+{{ com \addcontentsline{toc}{section}{Static property declarations} }}
+
+defn
+  C declares static x : t :: :: declares_static :: 'declares_static_'
+  {{ com class [[C]] declares a static property [[x]] of type [[x]] }}
+by
+
+C' inst' <:: C inst
+class C typarams cextends cimpls { constructor static t $ x ; member1 .. membern }
+---------------------------------------------------------------------------------- :: derived
+C' declares static x : t
 
 {{ com \section*{Expression refinement} }}
 {{ com \addcontentsline{toc}{section}{Expression refinement} }}
@@ -1531,6 +1552,15 @@ G ; K |- e := t1' , U
 -------------------------- :: shape_field
 G ; K |- e [sfn] := t2 , U
 
+G ; K |- e : u
+G |- u -> x := t
+---------------------- :: property
+G ; K |- e -> x := t ,
+
+C declares static x : t
+----------------------- :: static_property
+G ; K |- C :: x := t ,
+
 {{ com \subsection*{Array append} }}
 {{ com \addcontentsline{toc}{subsection}{Array append} }}
 
@@ -1607,6 +1637,28 @@ G |- t1 [sfn] := t => t1'
 G |- t2 [sfn] := t => t2'
 -------------------------------------------------- :: union
 G |- (t1 | t2) [sfn] := t => t1' | t2'
+
+{{ com \subsection*{Property} }}
+{{ com \addcontentsline{toc}{subsection}{Property} }}
+
+defn
+  G |- u -> x := t :: :: property_assignment :: 'property_assignment_'
+  {{ com under locals [[G]], a value of type [[t]] can be assigned to a property [[x]] of a value of type [[u]] }}
+by
+
+G |- u -> x := t
+G |- t' <: t
+----------------- :: sub
+G |- u -> x := t'
+
+u declares x : t
+---------------- :: declaration
+G |- u -> x := t
+
+G |- u1 -> x := t
+G |- u2 -> x := t
+------------------- :: union
+G |- (u1 | u2) -> x := t
 
 {{ com \section*{Statements} }}
 {{ com \addcontentsline{toc}{section}{Statements} }}

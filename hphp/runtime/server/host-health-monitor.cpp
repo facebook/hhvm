@@ -16,8 +16,8 @@
 
 #include "hphp/runtime/server/host-health-monitor.h"
 
-#include <thread>
 #include <folly/Singleton.h>
+#include <folly/system/ThreadName.h>
 
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/ext/extension.h"
@@ -61,11 +61,11 @@ void HostHealthMonitor::start() {
   if (UpdateFreq < 10) UpdateFreq = 10;
   if (UpdateFreq > 10000) UpdateFreq = 10000;
 
-  m_monitor_func = std::make_unique<AsyncFunc<HostHealthMonitor>>(
-    this,
-    &HostHealthMonitor::monitor
-  );
-  m_monitor_func->start();
+  m_monitor_thread = std::make_unique<std::thread>([] {
+    folly::setThreadName("HostHealthMonitor");
+    folly::Singleton<HostHealthMonitor>::try_get()->monitor();
+  });
+
   // Make sure the thread is gone after hphp_process_exit().  The node
   // is intentionally leaked.
   new InitFiniNode(
@@ -83,9 +83,9 @@ void HostHealthMonitor::stop() {
 
 void HostHealthMonitor::waitForEnd() {
   if (!m_stopped) stop();
-  if (m_monitor_func) {
-    m_monitor_func->waitForEnd();
-    m_monitor_func.reset();
+  if (m_monitor_thread) {
+    m_monitor_thread->join();
+    m_monitor_thread.reset();
   }
 }
 

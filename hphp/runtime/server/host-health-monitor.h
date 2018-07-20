@@ -20,11 +20,11 @@
 #include <condition_variable>
 #include <memory>
 #include <mutex>
+#include <thread>
 #include <vector>
 #include <boost/container/flat_set.hpp>
 
-#include "hphp/runtime/base/config.h"
-#include "hphp/util/async-func.h"
+#include "hphp/util/assertions.h"
 #include "hphp/util/health-monitor-types.h"
 
 namespace HPHP {
@@ -32,7 +32,7 @@ namespace HPHP {
 // This class must be used as a singleton.
 struct HostHealthMonitor {
   void subscribe(IHostHealthObserver* observer) {
-    assertx(observer != nullptr);
+    assertx(observer);
     std::lock_guard<std::mutex> g(m_lock);
     m_observers.insert(observer);
   }
@@ -58,7 +58,7 @@ struct HostHealthMonitor {
   std::mutex m_stopped_lock;
   std::condition_variable m_condition;
   bool m_stopped{true};
-  std::unique_ptr<AsyncFunc<HostHealthMonitor>> m_monitor_func;
+  std::unique_ptr<std::thread> m_monitor_thread;
 };
 
 }

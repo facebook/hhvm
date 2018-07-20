@@ -786,7 +786,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env x.using_block_left_paren;
       Split;
       WithRule (Rule.Parental, Concat [
-        Nest [handle_possible_list env x.using_block_expressions];
+        Nest [handle_possible_list env ~after_each:separate_with_space_split x.using_block_expressions];
         Split;
         t env x.using_block_right_paren;
       ]);
@@ -960,11 +960,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       for_end_of_loop = after_iter;
       for_right_paren = right_p;
       for_body = body; } ->
-    let after_each_expr is_last =
-      if is_last
-      then Nothing
-      else space_split ()
-    in
     Concat [
       t env kw;
       Space;
@@ -972,15 +967,15 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       WithRule (Rule.Parental, Concat [
         Split;
         Nest [
-          handle_possible_list env ~after_each:after_each_expr init;
+          handle_possible_list env ~after_each:separate_with_space_split init;
           t env semi1;
           Space;
           Split;
-          handle_possible_list env ~after_each:after_each_expr control;
+          handle_possible_list env ~after_each:separate_with_space_split control;
           t env semi2;
           Space;
           Split;
-          handle_possible_list env ~after_each:after_each_expr after_iter;
+          handle_possible_list env ~after_each:separate_with_space_split after_iter;
         ];
         Split;
         t env right_p;
@@ -2293,6 +2288,11 @@ and nest env ?(spaces=false) right_delim nodes =
 and after_each_argument is_last =
   if is_last
   then Split
+  else space_split ()
+
+and separate_with_space_split is_last =
+  if is_last
+  then Nothing
   else space_split ()
 
 and handle_lambda_body env node =

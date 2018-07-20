@@ -266,6 +266,7 @@ e {{ ocaml expr }} :: 'e_' ::= {{ com expressions }}
   | string_literal             ::   :: string         {{ com string literal }}
   | integer_literal            ::   :: int            {{ com integer literal }}
   | sfn                        ::   :: sfn            {{ com shape field name }}
+  | i                          ::   :: tuple_index    {{ com tuple index }}
   | $this                      ::   :: this           {{ com this value }} {{ tex \mathtt{\$this} }}
   | lvar                       ::   :: lvar           {{ com local variable }}
   | id                         ::   :: id             {{ com top-level function }}
@@ -1307,6 +1308,13 @@ C declares static x : t
 ----------------------- :: static_property_access
 G ; K |- C :: x : t
 
+{{ com \subsection{Array/shape/tuple indexing} }}
+
+G ; K |- e1 : t1
+G ; K |- t1 [ e2 ] : t
+---------------------- :: indexing
+G ; K |- e1 [ e2 ] : t
+
 {{ com \subsection{Function application} }}
 
 {{ com Function application is complicated by the possibility of
@@ -1453,6 +1461,30 @@ class C typarams cextends cimpls { constructor static t $ x ; member1 .. membern
 ---------------------------------------------------------------------------------- :: derived
 C' declares static x : t
 
+{{ com \section*{Types supporting indexing} }}
+{{ com \addcontentsline{toc}{section}{Types supporting indexing} }}
+
+defn
+  G ; K |- u [ e ] : t :: :: indexing :: 'indexing_'
+  {{ com type [[u]] supports indexing at a value [[e]] producing the result of type [[t]]
+  under environment [[G]] and continuations [[K]] }}
+by
+
+G ; K |- e : t1
+------------------------------------------ :: indexish
+G ; K |- `Indexish` < t1 , t2 > [ e ] : t2
+
+------------------------------------------------- :: shape
+G ; K |- shape ( sfn => t , vardots ) [ sfn ] : t
+
+------------------------------------------------------- :: tuple
+G ; K |- (t1 , .. , ti , t , t1' , .. , tj' ) [ i ] : t
+
+G ; K |- u1 [ e ] : t1
+G ; K |- u2 [ e ] : t2
+------------------------------------ :: union
+G ; K |- ( u1 | u2 ) [ e ] : t1 | t2
+
 {{ com \section*{Expression refinement} }}
 {{ com \addcontentsline{toc}{section}{Expression refinement} }}
 
@@ -1546,12 +1578,6 @@ G ; K |- e := t1' , U
 ----------------------- :: array_append
 G ; K |- e [] := t2 , U
 
-G ; K |- e : t1
-G |- t1 [sfn] := t2 => t1'
-G ; K |- e := t1' , U
--------------------------- :: shape_field
-G ; K |- e [sfn] := t2 , U
-
 G ; K |- e : u
 G |- u -> x := t
 ---------------------- :: property
@@ -1560,6 +1586,12 @@ G ; K |- e -> x := t ,
 C declares static x : t
 ----------------------- :: static_property
 G ; K |- C :: x := t ,
+
+G ; K , skip : G' |- e1 : t1
+G' ; K , skip : G'' |- t1 [ e2 ] := t => t1'
+G'' ; K , skip : G''' |- e1 := t1' , U
+-------------------------------------------------- :: indexing
+G ; K , skip : G''' |- e1 [ e2 ] := t , U
 
 {{ com \subsection*{Array append} }}
 {{ com \addcontentsline{toc}{subsection}{Array append} }}
@@ -1599,44 +1631,71 @@ G |- t2[] := t => t2'
 -------------------------------------------------- :: union
 G |- (t1 | t2) [] := t => t1' | t2'
 
-{{ com \subsection*{Shape field} }}
-{{ com \addcontentsline{toc}{subsection}{Shape field} }}
+{{ com \subsection*{Array/shape/tuple element} }}
+{{ com \addcontentsline{toc}{subsection}{Array/shape/tuple element} }}
 
 defn
-  G |- t1 [sfn] := t2 => t1' :: :: shape_field :: 'shape_field_'
-  {{ com under locals [[G]], a value of type [[t2]] can be assigned to a
-  shape field sfn of an lvalue of type [[t1]] and the result is of type
-  [[t1']] }}
+  G ; K |- t1 [ e2 ] := t => t1' :: :: array_get :: 'array_get_'
+  {{ com value [[e2]] is a valid index into values of type [[t1]] and assignment
+  of a value of type [[t]] to the element at that index produces a value of type
+  [[t1']] under environment [[G]] and continuations [[K]] }}
 by
 
 G |- u1 <: t1
-G |- u2 <: t2
-G |- t1 [sfn] := t2 => t1'
+G |- u <: t
+G ; K |- t1 [ e2 ] := t => t1'
 -------------------------------------------------- :: sub
-G |- u1 [sfn] := u2 => t1'
+G ; K |- u1 [ e2 ] := u => t1'
+
+G ; K |- e : int
+-------------------------------------------------- :: vec
+G ; K |- vec < t > [ e ] := t => vec < t >
+
+G ; K |- e : t1
+-------------------------------------------------- :: dict
+G ; K |- dict < t1 , t2 > [ e ] := t2 => dict < t1 , t2 >
+
+G ; K |- e : int
+-------------------------------------------------- :: vecarray
+G ; K |- array < t > [ e ] := t => array < t >
+
+G ; K |- e : t1
+-------------------------------------------------- :: maparray
+G ; K |- array < t1 , t2 > [ e ] := t2 => array < t1 , t2 >
+
+G ; K |- e : int
+-------------------------------------------------- :: vector
+G ; K |- `Vector` < t > [ e ] := t => `Vector` < t >
+
+G ; K |- e : t1
+-------------------------------------------------- :: map
+G ; K |- `Map` < t1 , t2 > [ e1 ] := t2 => `Map` < t1 , t2 >
 
 -------------------------------------------------- :: closed_set
-G |- shape ( sft1 , .. , sftn , ?sfn => t , sft1' , .. , sftm' ) [sfn] := t' => shape ( sft1 , .. , sftn , sfn => t' , sft1' , .. , sftm' )
+G ; K |- shape ( sft1 , .. , sftn , ?sfn => t , sft1' , .. , sftm' ) [sfn] := t' => shape ( sft1 , .. , sftn , sfn => t' , sft1' , .. , sftm' )
 
 -------------------------------------------------- :: open_set
-G |- shape ( sft1 , .. , sftn , ?sfn => t , sft1' , .. , sftm' , vardots ) [sfn] := t' => shape ( sft1 , .. , sftn , sfn => t' , sft1' , .. , sftm' , vardots )
+G ; K |- shape ( sft1 , .. , sftn , ?sfn => t , sft1' , .. , sftm' , vardots ) [sfn] := t' => shape ( sft1 , .. , sftn , sfn => t' , sft1' , .. , sftm' , vardots )
 
 {{ com
 
-These rules imply that not only can we reassign an existing field, but
-also we can set a new field, because a shape that doesn't have a field
-$[[sfn]]$ is a subtype of a shape that does have it and in which
-$[[sfn]]$ is optional.  For open shapes the type of the field must be
-$[[mixed]]$, but for closed shapes it can be anything.  This follows
-from rules \ottdrulename{sub\_closed\_shape\_widen} and
+The above two rules imply that not only can we reassign an existing
+field, but also we can set a new field, because a shape that doesn't
+have a field $[[sfn]]$ is a subtype of a shape that does have it and
+in which $[[sfn]]$ is optional.  For open shapes the type of the field
+must be $[[mixed]]$, but for closed shapes it can be anything.  This
+follows from rules \ottdrulename{sub\_closed\_shape\_widen} and
 \ottdrulename{sub\_open\_shape\_widen}.
 
 }}
 
-G |- t1 [sfn] := t => t1'
-G |- t2 [sfn] := t => t2'
+-------------------------------------------------- :: tuple
+G ; K |- ( t1 , .. , ti , t , t1' , .. , tj' ) [ i ] := t' => ( t1 , .. , ti , t' , t1' , .. , tj' )
+
+G ; K |- t1 [ e ] := t => t1'
+G ; K |- t2 [ e ] := t => t2'
 -------------------------------------------------- :: union
-G |- (t1 | t2) [sfn] := t => t1' | t2'
+G ; K |- (t1 | t2) [ e ] := t => t1' | t2'
 
 {{ com \subsection*{Property} }}
 {{ com \addcontentsline{toc}{subsection}{Property} }}

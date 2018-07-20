@@ -75,6 +75,9 @@ struct DebugTransport {
   // VS Code protocol event types
   static constexpr char* EventTypeOutput = "output";
 
+  // Custom event types.
+  static constexpr char* EventTypeConnectionRefused = "hhvmConnectionRefused";
+
   // Message output levels to be displayed in the debugger console.
   // NOTE: the protocol explicitly defines:
   //    "console", "stdout", "stderr", "telemetry", with "console" being the

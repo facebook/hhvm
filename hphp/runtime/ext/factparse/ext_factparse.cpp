@@ -15,18 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/factparse/parser.h"
-
-#include <sys/stat.h>
-
-#include <fstream>
-
-#include <folly/Conv.h>
-#include <folly/MPMCQueue.h>
-
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/memory-manager.h"
@@ -36,45 +25,21 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/json/ext_json.h"
-#include "hphp/runtime/server/writer.h"
 #include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/treadmill.h"
-#include "hphp/system/systemlib.h"
 #include "hphp/util/file.h"
-#include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/job-queue.h"
+
+#include <folly/Conv.h>
+#include <folly/MPMCQueue.h>
+
+#include <sys/stat.h>
 
 TRACE_SET_MOD(factparse)
 
 namespace HPHP {
 namespace {
-
-const StaticString
-  s_md5sum0("md5sum0"),
-  s_md5sum1("md5sum1"),
-  s_types("types"),
-  s_constants("constants"),
-  s_functions("functions"),
-  s_typeAliases("typeAliases"),
-  s_name("name"),
-  s_kindOf("kindOf"),
-  s_baseTypes("baseTypes"),
-  s_class("class"),
-  s_interface("interface"),
-  s_enum("enum"),
-  s_trait("trait"),
-  s_unknown("unknown"),
-  s_mixed("mixed"),
-  s_flags("flags"),
-  s_requireImplements("requireImplements"),
-  s_requireExtends("requireExtends");
-
-const StaticString* g_factKindOfMap[] = {
-  #define FACT_KIND_MAP(x, y) &s_ ## y
-  FACT_KIND_GEN(FACT_KIND_MAP)
-  #undef FACT_KIND_MAP
-};
 
 template<class T>
 void parse_file(
@@ -231,89 +196,6 @@ void facts_parse_threaded(
       tvCastToString(pathList->atPos(i)));
   }
   dispatcher.waitEmpty();
-}
-
-void buildOneResult(
-  Facts::ParseResult& inRes,
-  ArrayInit& outResArr,
-  const HPHP::String& path)
-{
-  if (inRes.error) {
-    outResArr.set(path, uninit_null());
-    return;
-  }
-
-  // Re-pack types
-  PackedArrayInit resTypes(inRes.typesMap.size());
-  for (auto& name_type : inRes.typesMap) {
-    auto type = name_type.second;
-    int typeDetailsFields = 4;
-    if (type.kindOf == Facts::FactKindOf::Trait) {
-      typeDetailsFields += 2;
-    } else if (type.kindOf == Facts::FactKindOf::Interface) {
-      typeDetailsFields++;
-    }
-    ArrayInit typeDetails(typeDetailsFields, ArrayInit::Map{});
-
-    typeDetails.add(s_name, String(name_type.first));
-    typeDetails.add(s_kindOf, String(*g_factKindOfMap[(int)type.kindOf]));
-    typeDetails.add(s_flags, Variant(type.flags));
-
-    PackedArrayInit resBaseTypes(type.baseTypes.size());
-    for (auto& baseType : type.baseTypes) {
-      resBaseTypes.append(String(baseType));
-    }
-    typeDetails.add(s_baseTypes, resBaseTypes.toArray());
-
-    switch (type.kindOf) {
-      case Facts::FactKindOf::Trait: {
-        PackedArrayInit resRequireImplements(type.requireImplements.size());
-        for (auto& t : type.requireImplements) {
-          resRequireImplements.append(String(t));
-        }
-        typeDetails.add(s_requireImplements, resRequireImplements.toArray());
-      }
-      // FALLTHROUGH
-
-      case Facts::FactKindOf::Interface: {
-        PackedArrayInit resRequireExtends(type.requireExtends.size());
-        for (auto& t : type.requireExtends) {
-          resRequireExtends.append(String(t));
-        }
-        typeDetails.add(s_requireExtends, resRequireExtends.toArray());
-      }
-      default: ;
-    }
-    resTypes.append(typeDetails.toArray());
-  }
-
-  // Re-pack functions
-  PackedArrayInit resFunctions(inRes.functions.size());
-  for (auto& function : inRes.functions) {
-    resFunctions.append(String(function));
-  }
-
-  // Re-pack constants
-  PackedArrayInit resConstants(inRes.constants.size());
-  for (auto& constant : inRes.constants) {
-    resConstants.append(String(constant));
-  }
-
-  // Re-pack type aliases
-  PackedArrayInit resTypeAliases(inRes.typeAliases.size());
-  for (auto& typeAlias : inRes.typeAliases) {
-    resTypeAliases.append(String(typeAlias));
-  }
-
-  auto resArr = make_map_array(
-    s_md5sum0, reinterpret_cast<int64_t&>(inRes.md5sum[0]),
-    s_md5sum1, reinterpret_cast<int64_t&>(inRes.md5sum[1]),
-    s_types, resTypes.toArray(),
-    s_functions, resFunctions.toArray(),
-    s_constants, resConstants.toArray(),
-    s_typeAliases, resTypeAliases.toArray());
-
-  outResArr.set(path, resArr);
 }
 
 struct HackCFactsExtractor {

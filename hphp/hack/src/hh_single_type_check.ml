@@ -933,7 +933,7 @@ let handle_mode
     } in
     let filename = Relative_path.to_absolute filename in
     let content = cat filename in
-    let include_defs = false in
+    let include_defs = true in
     let labelled_file = ServerCommandTypes.LabelledFileContent { filename; content; } in
     let results = ServerFindRefs.go_from_file
       (labelled_file, line, column, include_defs) genv env in

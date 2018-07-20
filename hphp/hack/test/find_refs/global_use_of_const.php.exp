@@ -1,4 +1,5 @@
 Foo::FOO
 File "global_use_of_const.php", line 9, characters 8-10:
 File "global_use_of_const.php", line 12, characters 25-27:
-2 total results
+File "global_use_of_const.php", line 5, characters 16-18:
+3 total results

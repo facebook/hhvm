@@ -664,6 +664,8 @@ function oss_test_option_map(): OptionInfoMap {
                                         "names."},
     'fbmake'              => Pair {'',  "Output a stream of JSON objects that ".
                                         "Facebook's test systems understand"},
+    'testpilot'           => Pair {'',  "Output a stream of JSON objects that ".
+                                        "Facebook's test systems understand"},
     'by-file'             => Pair {'f',  "DEFAULT: Run tests for a framework ".
                                          "on a per test file basis, as ".
                                          "opposed to a an individual test ".

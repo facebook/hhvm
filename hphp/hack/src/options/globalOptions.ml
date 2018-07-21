@@ -127,6 +127,11 @@ let tco_experimental_void_is_type_of_null = "void_is_type_of_null"
  *)
 let tco_experimental_null_coalesce_assignment = "null_coalesce_assignment"
 
+(**
+ * Enable reified generics
+ *)
+let tco_experimental_reified_generics = "reified_generics"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -147,6 +152,7 @@ let tco_experimental_all =
      tco_hacksperimental;
      tco_experimental_void_is_type_of_null;
      tco_experimental_null_coalesce_assignment;
+     tco_experimental_reified_generics;
    ]
 
 let tco_migration_flags_all =

@@ -194,6 +194,7 @@ module type SyntaxKind_S = sig
   val is_generic_type_specifier : r -> bool
   val is_nullable_type_specifier : r -> bool
   val is_soft_type_specifier : r -> bool
+  val is_reified_type_argument : r -> bool
   val is_type_arguments : r -> bool
   val is_type_parameters : r -> bool
   val is_tuple_type_specifier : r -> bool
@@ -371,7 +372,7 @@ module SyntaxKind(SC : SC_S)
   let make_tuple_type_explicit_specifier arg0 arg1 arg2 arg3 state = compose SK.TupleTypeExplicitSpecifier (SC.make_tuple_type_explicit_specifier (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_varray_type_specifier arg0 arg1 arg2 arg3 arg4 state = compose SK.VarrayTypeSpecifier (SC.make_varray_type_specifier (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
   let make_vector_array_type_specifier arg0 arg1 arg2 arg3 state = compose SK.VectorArrayTypeSpecifier (SC.make_vector_array_type_specifier (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
-  let make_type_parameter arg0 arg1 arg2 state = compose SK.TypeParameter (SC.make_type_parameter (snd arg0) (snd arg1) (snd arg2) state)
+  let make_type_parameter arg0 arg1 arg2 arg3 state = compose SK.TypeParameter (SC.make_type_parameter (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_type_constraint arg0 arg1 state = compose SK.TypeConstraint (SC.make_type_constraint (snd arg0) (snd arg1) state)
   let make_darray_type_specifier arg0 arg1 arg2 arg3 arg4 arg5 arg6 state = compose SK.DarrayTypeSpecifier (SC.make_darray_type_specifier (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) state)
   let make_map_array_type_specifier arg0 arg1 arg2 arg3 arg4 arg5 state = compose SK.MapArrayTypeSpecifier (SC.make_map_array_type_specifier (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) state)
@@ -387,6 +388,7 @@ module SyntaxKind(SC : SC_S)
   let make_generic_type_specifier arg0 arg1 state = compose SK.GenericTypeSpecifier (SC.make_generic_type_specifier (snd arg0) (snd arg1) state)
   let make_nullable_type_specifier arg0 arg1 state = compose SK.NullableTypeSpecifier (SC.make_nullable_type_specifier (snd arg0) (snd arg1) state)
   let make_soft_type_specifier arg0 arg1 state = compose SK.SoftTypeSpecifier (SC.make_soft_type_specifier (snd arg0) (snd arg1) state)
+  let make_reified_type_argument arg0 arg1 state = compose SK.ReifiedTypeArgument (SC.make_reified_type_argument (snd arg0) (snd arg1) state)
   let make_type_arguments arg0 arg1 arg2 state = compose SK.TypeArguments (SC.make_type_arguments (snd arg0) (snd arg1) (snd arg2) state)
   let make_type_parameters arg0 arg1 arg2 state = compose SK.TypeParameters (SC.make_type_parameters (snd arg0) (snd arg1) (snd arg2) state)
   let make_tuple_type_specifier arg0 arg1 arg2 state = compose SK.TupleTypeSpecifier (SC.make_tuple_type_specifier (snd arg0) (snd arg1) (snd arg2) state)
@@ -562,6 +564,7 @@ module SyntaxKind(SC : SC_S)
   let is_generic_type_specifier                       = has_kind SK.GenericTypeSpecifier
   let is_nullable_type_specifier                      = has_kind SK.NullableTypeSpecifier
   let is_soft_type_specifier                          = has_kind SK.SoftTypeSpecifier
+  let is_reified_type_argument                        = has_kind SK.ReifiedTypeArgument
   let is_type_arguments                               = has_kind SK.TypeArguments
   let is_type_parameters                              = has_kind SK.TypeParameters
   let is_tuple_type_specifier                         = has_kind SK.TupleTypeSpecifier

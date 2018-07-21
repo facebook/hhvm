@@ -294,5 +294,6 @@ val pair_initializer_needed : string
 val pair_initializer_arity : string
 val nested_unary_reference : string
 val toplevel_statements : string
+val invalid_reified : string
 val dollar_unary : string
 val decl_outside_global_scope : string

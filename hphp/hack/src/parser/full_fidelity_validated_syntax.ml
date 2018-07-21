@@ -3366,12 +3366,14 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { type_constraints = validate_list_with (validate_type_constraint) x.type_constraints
     ; type_name = validate_token x.type_name
     ; type_variance = validate_option_with (validate_token) x.type_variance
+    ; type_reified = validate_option_with (validate_token) x.type_reified
     }
   | s -> validation_fail (Some SyntaxKind.TypeParameter) s
   and invalidate_type_parameter : type_parameter invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.TypeParameter
-      { type_variance = invalidate_option_with (invalidate_token) x.type_variance
+      { type_reified = invalidate_option_with (invalidate_token) x.type_reified
+      ; type_variance = invalidate_option_with (invalidate_token) x.type_variance
       ; type_name = invalidate_token x.type_name
       ; type_constraints = invalidate_list_with (invalidate_type_constraint) x.type_constraints
       }
@@ -3646,6 +3648,20 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.SoftTypeSpecifier
       { soft_at = invalidate_token x.soft_at
       ; soft_type = invalidate_specifier x.soft_type
+      }
+    ; Syntax.value = v
+    }
+  and validate_reified_type_argument : reified_type_argument validator = function
+  | { Syntax.syntax = Syntax.ReifiedTypeArgument x; value = v } -> v,
+    { reified_type_argument_type = validate_specifier x.reified_type_argument_type
+    ; reified_type_argument_reified = validate_token x.reified_type_argument_reified
+    }
+  | s -> validation_fail (Some SyntaxKind.ReifiedTypeArgument) s
+  and invalidate_reified_type_argument : reified_type_argument invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.ReifiedTypeArgument
+      { reified_type_argument_reified = invalidate_token x.reified_type_argument_reified
+      ; reified_type_argument_type = invalidate_specifier x.reified_type_argument_type
       }
     ; Syntax.value = v
     }

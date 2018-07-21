@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2018-06-07-0001",
+  "version" : "2018-07-19-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -193,6 +193,8 @@
       "token_text" : "public" },
     { "token_kind" : "Real",
       "token_text" : "real" },
+    { "token_kind" : "Reified",
+      "token_text" : "reified" },
     { "token_kind" : "Require",
       "token_text" : "require" },
     { "token_kind" : "Require_once",
@@ -1932,6 +1934,7 @@
       "description" : "type_parameter",
       "prefix" : "type",
       "fields" : [
+        { "field_name" : "reified" },
         { "field_name" : "variance" },
         { "field_name" : "name" },
         { "field_name" : "constraints" }
@@ -2085,6 +2088,14 @@
       "prefix" : "soft",
       "fields" : [
         { "field_name" : "at" },
+        { "field_name" : "type" }
+      ] },
+    { "kind_name" : "ReifiedTypeArgument",
+      "type_name" : "reified_type_argument",
+      "description" : "reified_type_argument",
+      "prefix" : "reified_type_argument",
+      "fields" : [
+        { "field_name" : "reified" },
         { "field_name" : "type" }
       ] },
     { "kind_name" : "TypeArguments",

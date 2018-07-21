@@ -237,7 +237,8 @@ and parse_variance_opt parser =
 
 (* SPEC
   generic-type-parameter:
-    generic-type-parameter-variance-opt  name  generic-type-constraint-list-opt
+    generic-type-parameter-reified-opt  generic-type-parameter-variance-opt
+      name  generic-type-constraint-list-opt
 
   generic-type-parameter-variance:
     +
@@ -246,14 +247,16 @@ and parse_variance_opt parser =
   TODO: SPEC ISSUE: We allow any number of type constraints, not just zero
   or one as indicated in the spec.
   https://github.com/hhvm/hack-langspec/issues/83
+  TODO: Update the spec with reified
 *)
 and parse_type_parameter parser =
-  let parser, variance = parse_variance_opt parser in
+  let (parser, reified) = optional_token parser Reified in
+  let (parser, variance) = parse_variance_opt parser in
   let (parser, type_name) = require_name_allow_keywords parser in
   let (parser, constraints) =
     parse_list_until_none parser parse_generic_type_constraint_opt
   in
-  Make.type_parameter parser variance type_name constraints
+  Make.type_parameter parser reified variance type_name constraints
 
 (* SPEC
   type-parameter-list:
@@ -366,6 +369,15 @@ and parse_closure_param_type_or_ellipsis parser =
       Make.variadic_parameter parser callconv ts token
     | _ -> Make.closure_parameter_type_specifier parser callconv ts
 
+and parse_optionally_reified_type parser =
+  let (parser1, token) = next_token parser in
+  if (Token.kind token) = Reified then
+    let (parser, reified_kw) = Make.token parser1 token in
+    let (parser, type_argument) = parse_type_specifier parser in
+    Make.reified_type_argument parser reified_kw type_argument
+  else
+    parse_type_specifier parser
+
 and parse_generic_type_argument_list parser =
   (* SPEC:
     generic-type-argument-list:
@@ -392,7 +404,7 @@ and parse_generic_type_argument_list parser =
       parser
       GreaterThan
       SyntaxError.error1007
-      parse_return_type
+      parse_optionally_reified_type
   in
   let (parser1, close_angle) = next_token parser in
   if (Token.kind close_angle) = GreaterThan then

@@ -1245,11 +1245,11 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     
-  let make_type_parameter p0 p1 p2 stack =
+  let make_type_parameter p0 p1 p2 p3 stack =
     match stack with
-    | a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2] [a0; a1; a2] "type_parameter" in
-      let node = Syntax.make_type_parameter p0 p1 p2 in
+    | a3 :: a2 :: a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1; p2; p3] [a0; a1; a2; a3] "type_parameter" in
+      let node = Syntax.make_type_parameter p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     
@@ -1370,6 +1370,14 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     | a1 :: a0 :: rem ->
       let () = verify ~stack [p0; p1] [a0; a1] "soft_type_specifier" in
       let node = Syntax.make_soft_type_specifier p0 p1 in
+      node :: rem, node
+    | _ -> failwith "Unexpected stack state"
+    
+  let make_reified_type_argument p0 p1 stack =
+    match stack with
+    | a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1] [a0; a1] "reified_type_argument" in
+      let node = Syntax.make_reified_type_argument p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     

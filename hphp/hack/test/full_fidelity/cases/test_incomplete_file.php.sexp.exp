@@ -25,7 +25,8 @@
                  (list 1
                   ((list_item 1
                     ((type_parameter 1
-                      ((missing 0 ()) (() name 1 ()) (missing 0 ())))
+                      ((missing 0 ()) (missing 0 ()) (() name 1 ())
+                       (missing 0 ())))
                      (missing 0 ())))))
                  (() > 1 ())))
                (() "(" 1 ()) (missing 0 ()) (() ")" 1 ((whitespace 1)))

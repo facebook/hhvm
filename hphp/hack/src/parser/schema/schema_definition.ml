@@ -1945,7 +1945,8 @@ let schema : schema_node list =
     ; prefix      = "type"
     ; aggregates  = []
     ; fields =
-      [ "variance", ZeroOrOne Token
+      [ "reified", ZeroOrOne Token
+      ; "variance", ZeroOrOne Token
       ; "name", Token
       ; "constraints", ZeroOrMore (Just "TypeConstraint")
       ]
@@ -2147,6 +2148,17 @@ let schema : schema_node list =
     ; aggregates  = [ Specifier ]
     ; fields =
       [ "at", Token
+      ; "type", Aggregate Specifier
+      ]
+    }
+  ; { kind_name   = "ReifiedTypeArgument"
+    ; type_name   = "reified_type_argument"
+    ; func_name   = "reified_type_argument"
+    ; description = "reified_type_argument"
+    ; prefix      = "reified_type_argument"
+    ; aggregates  = []
+    ; fields =
+      [ "reified", Token
       ; "type", Aggregate Specifier
       ]
     }

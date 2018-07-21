@@ -170,6 +170,13 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
   | Syntax.SoftTypeSpecifier _
   | Syntax.ListItem _ ->
     transform_simple env node
+  | Syntax.ReifiedTypeArgument
+    { reified_type_argument_reified; reified_type_argument_type } ->
+    Concat [
+      t env reified_type_argument_reified;
+      Space;
+      t env reified_type_argument_type;
+    ]
   | Syntax.QualifiedName { qualified_name_parts; } ->
     handle_possible_list env qualified_name_parts
   | Syntax.ExpressionStatement _ ->
@@ -1994,10 +2001,13 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         left_a ks_type trailing_comma right_a;
     ]
   | Syntax.TypeParameter {
+      type_reified = reified;
       type_variance = variance;
       type_name = name;
       type_constraints = constraints; } ->
     Concat [
+      t env reified;
+      when_present reified space;
       t env variance;
       t env name;
       when_present constraints space;

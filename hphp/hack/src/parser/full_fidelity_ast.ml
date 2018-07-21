@@ -817,12 +817,18 @@ let rec pHint : hint parser = fun node env ->
       | Happly (b, []) -> Haccess (b, child, [])
       | _ -> missing_syntax "type constant base" node env
       )
+    | ReifiedTypeArgument _ ->
+      raise_parsing_error env (`Node node) SyntaxError.invalid_reified;
+      missing_syntax "type hint - reified" node env
     | _ -> missing_syntax "type hint" node env
   in
   pPos node env, pHint_ node env
 
 let pTarg node env =
-  pHint node env, false (* false for is_reified *)
+  match syntax node with
+    | ReifiedTypeArgument { reified_type_argument_type = t; _} ->
+      pHint t env, true
+    | _ -> pHint node env, false
 
 type fun_hdr =
   { fh_suspension_kind : suspension_kind
@@ -2153,7 +2159,8 @@ and pTConstraint : (constraint_kind * hint) parser = fun node env ->
 and pTParaml : tparam list parser = fun node env ->
   let pTParam : tparam parser = fun node env ->
     match syntax node with
-    | TypeParameter { type_variance; type_name; type_constraints } ->
+    | TypeParameter
+      { type_reified; type_variance; type_name; type_constraints } ->
       ( (match token_kind type_variance with
         | Some TK.Plus  -> Covariant
         | Some TK.Minus -> Contravariant
@@ -2161,7 +2168,7 @@ and pTParaml : tparam list parser = fun node env ->
         )
       , pos_name type_name env
       , couldMap ~f:pTConstraint type_constraints env
-      , false (* reified *)
+      , not @@ is_missing type_reified
       )
     | _ -> missing_syntax "type parameter" node env
   in

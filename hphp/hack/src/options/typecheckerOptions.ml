@@ -49,10 +49,10 @@ let experimental_disable_optional_and_unknown_shape_fields =
 let experimental_no_trait_reuse = GlobalOptions.tco_experimental_no_trait_reuse
 let experimental_void_is_type_of_null =
   GlobalOptions.tco_experimental_void_is_type_of_null
-
 let experimental_null_coalesce_assignment =
   GlobalOptions.tco_experimental_null_coalesce_assignment
-
+let experimental_reified_generics =
+  GlobalOptions.tco_experimental_reified_generics
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all
 let dynamic_view = GlobalOptions.tco_dynamic_view

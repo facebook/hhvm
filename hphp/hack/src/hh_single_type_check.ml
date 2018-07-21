@@ -152,6 +152,7 @@ let parse_options () =
   let disallow_ambiguous_lambda = ref false in
   let disallow_array_typehint = ref false in
   let disallow_array_literal = ref false in
+  let disallow_reified_generics = ref false in
   let no_fallback_in_namespaces = ref false in
   let dynamic_view = ref false in
   let allow_array_as_tuple = ref false in
@@ -297,6 +298,9 @@ let parse_options () =
     "--disallow-array-literal",
       Arg.Set disallow_array_literal,
       " Disallow usage of array literals.";
+    "--disallow-reified-generics",
+      Arg.Set disallow_reified_generics,
+      " Disallow usage of reified generics.";
     "--no-fallback-in-namespaces",
       Arg.Set no_fallback_in_namespaces,
       " Treat foo() as namespace\\foo() and MY_CONST as namespace\\MY_CONST.";
@@ -358,6 +362,8 @@ let parse_options () =
         then !disable_optional_and_unknown_shape_fields
         else if x = GlobalOptions.tco_hacksperimental
         then !hacksperimental
+        else if x = GlobalOptions.tco_experimental_reified_generics
+        then not (!disallow_reified_generics)
         else if x = GlobalOptions.tco_experimental_void_is_type_of_null
         then !void_is_type_of_null
         else true

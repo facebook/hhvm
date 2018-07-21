@@ -541,6 +541,8 @@ let nested_unary_reference = "References cannot be followed by unary operators"
 
 let toplevel_statements =
   "Toplevel statements besides requires are not allowed in strict files"
+let invalid_reified =
+  "Invalid place to put reified"
 
 let dollar_unary = "The dollar sign ('$') cannot be used as a unary operator"
 

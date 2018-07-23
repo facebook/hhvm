@@ -80,6 +80,10 @@ bool inliningIsForbiddenFor(const Func* callee) {
 ///////////////////////////////////////////////////////////////////////////////
 // canInlineAt() helpers.
 
+const StaticString
+  s_AlwaysInline("__ALWAYS_INLINE"),
+  s_NeverInline("__NEVER_INLINE");
+
 /*
  * Check if the funcd of `inst' has any characteristics which prevent inlining,
  * without peeking into its bytecode or regions.
@@ -122,6 +126,11 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee) {
   if (callee->isMethod() && callee->cls() == Generator::getClass()) {
     return refuse("generator member function");
   }
+  if (!RuntimeOption::EvalHHIRInliningIgnoreHints &&
+      callee->userAttributes().count(s_NeverInline.get())) {
+    return refuse("callee marked __NEVER_INLINE");
+  }
+
   return true;
 }
 
@@ -465,7 +474,15 @@ int InliningDecider::accountForInlining(SrcKey callerSk,
                                         const Func* callee,
                                         const RegionDesc& region,
                                         const irgen::IRGS& irgs) {
-  int cost = computeTranslationCost(callerSk, callerFPushOp, region);
+  auto const alwaysInl =
+    !RuntimeOption::EvalHHIRInliningIgnoreHints &&
+    callee->userAttributes().count(s_AlwaysInline.get());
+
+  // Functions marked as always inline don't contribute to overall cost
+  int cost = alwaysInl
+    ? 0
+    : computeTranslationCost(callerSk, callerFPushOp, region);
+
   m_costStack.push_back(cost);
   m_cost       += cost;
   m_callDepth  += 1;
@@ -559,6 +576,12 @@ bool InliningDecider::shouldInline(SrcKey callerSk,
 
   if (!hasRet) {
     return refuse("region has no returns");
+  }
+
+  // Ignore cost computation for functions marked __ALWAYS_INLINE
+  if (!RuntimeOption::EvalHHIRInliningIgnoreHints &&
+      callee->userAttributes().count(s_AlwaysInline.get())) {
+    return accept("callee marked as __ALWAYS_INLINE");
   }
 
   // Refuse if the cost exceeds our thresholds.

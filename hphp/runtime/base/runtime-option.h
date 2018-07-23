@@ -686,6 +686,7 @@ struct RuntimeOption {
   F(double,   HHIRInliningVasmCalleeExp, .5)                            \
   F(uint32_t, HHIRInliningMaxReturnDecRefs, 12)                         \
   F(uint32_t, HHIRInliningMaxReturnLocals, 20)                          \
+  F(bool,     HHIRInliningIgnoreHints, !debug)                          \
   F(bool, HHIRInlineFrameOpts,         true)                            \
   F(bool, HHIRPartialInlineFrameOpts,  true)                            \
   F(bool, HHIRInlineSingletons,        true)                            \

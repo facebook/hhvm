@@ -179,8 +179,15 @@ struct PreClassEmitter {
   Id id() const { return m_id; }
   void setIfaceVtableSlot(Slot s) { m_ifaceVtableSlot = s; }
   const MethodVec& methods() const { return m_methods; }
-  bool hasMethod(const StringData* name) {
+  bool hasMethod(const StringData* name) const {
     return m_methodMap.find(name) != m_methodMap.end();
+  }
+  FuncEmitter* lookupMethod(const StringData* name) const {
+    return folly::get_default(m_methodMap, name);
+  }
+  size_t numProperties() const { return m_propMap.size(); }
+  bool hasProp(const StringData* name) const {
+    return m_propMap.find(name) != m_propMap.end();
   }
   const PropMap::Builder& propMap() const { return m_propMap; }
   const ConstMap::Builder& constMap() const { return m_constMap; }

@@ -526,7 +526,7 @@ registerBuiltinNativeFunc(const char* name,
 
 const char* checkTypeFunc(const NativeSig& sig,
                           const TypeConstraint& retType,
-                          const Func* func);
+                          const FuncEmitter* func);
 
 NativeFunctionInfo getNativeFunction(const StringData* fname,
                                      const StringData* cname = nullptr,

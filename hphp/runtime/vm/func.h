@@ -97,6 +97,8 @@ struct EHEnt {
   int m_parentIndex;
   Offset m_handler;
   Offset m_end;
+
+  template<class SerDe> void serde(SerDe& sd);
 };
 
 /*
@@ -1124,6 +1126,11 @@ struct Func final {
   };
 
   void prettyPrint(std::ostream& out, const PrintOpts& = PrintOpts()) const;
+
+  /*
+   * Print function attributes to out.
+   */
+  static void print_attrs(std::ostream& out, Attr attrs);
 
 
   /////////////////////////////////////////////////////////////////////////////

@@ -610,7 +610,7 @@ void Func::resetPrologue(int numParams) {
 ///////////////////////////////////////////////////////////////////////////////
 // Pretty printer.
 
-static void print_attrs(std::ostream& out, Attr attrs) {
+void Func::print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrStatic)    { out << " static"; }
   if (attrs & AttrPublic)    { out << " public"; }
   if (attrs & AttrProtected) { out << " protected"; }

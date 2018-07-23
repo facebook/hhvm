@@ -1,7 +1,13 @@
 Verification Error (unit %s func ): DefCls references nonexistent class (3)
+
 Verification Error (unit %s func ): DefClsNop references nonexistent class (4)
+
 Verification Error (unit %s func ): CreateCl must reference a closure defined in the same unit
+
 Verification Error (unit %s func ): Cannot DefFunc main
+
 Verification Error (unit %s func ): DefFunc references nonexistent function (2)
+
 Verification Error (unit %s func ): DefTypeAlias references nonexistent type alias (1)
+
 Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

@@ -542,8 +542,42 @@ allocateBCRegion(const unsigned char* bc, size_t bclen) {
   return mem;
 }
 
+bool UnitEmitter::check(bool verbose) const {
+  return Verifier::checkUnit(
+    this,
+    verbose ? Verifier::kVerbose : Verifier::kStderr
+  );
+}
+
 std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
   INC_TPC(unit_load);
+
+  static const bool kVerify = debug || RuntimeOption::EvalVerify ||
+    RuntimeOption::EvalVerifyOnly;
+  static const bool kVerifyVerboseSystem =
+    getenv("HHVM_VERIFY_VERBOSE_SYSTEM");
+  static const bool kVerifyVerbose =
+    kVerifyVerboseSystem || getenv("HHVM_VERIFY_VERBOSE");
+
+  const bool isSystemLib =
+    boost::starts_with(m_filepath->data(), "/:systemlib");
+  const bool doVerify =
+    kVerify || boost::ends_with(m_filepath->data(), ".hhas");
+  if (doVerify) {
+    auto const verbose = isSystemLib ? kVerifyVerboseSystem : kVerifyVerbose;
+    if (!check(verbose) && !verbose) {
+      std::cerr << folly::format(
+        "Verification failed for unit {}. Re-run with HHVM_VERIFY_VERBOSE{}=1 "
+        "to see more details.\n",
+        m_filepath->data(), isSystemLib ? "_SYSTEM" : ""
+      );
+    }
+    if (!isSystemLib && RuntimeOption::EvalVerifyOnly) {
+      std::fflush(stdout);
+      _Exit(0);
+    }
+  }
+
   std::unique_ptr<Unit> u {
     RuntimeOption::RepoAuthoritative && !RuntimeOption::SandboxMode &&
       m_litstrs.empty() && m_arrayTypeTable.empty() ?
@@ -710,38 +744,6 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
   } else {
     assertx(!m_litstrs.size());
     assertx(m_arrayTypeTable.empty());
-  }
-
-  static const bool kVerify = debug || RuntimeOption::EvalVerify ||
-    RuntimeOption::EvalVerifyOnly;
-  static const bool kVerifyVerboseSystem =
-    getenv("HHVM_VERIFY_VERBOSE_SYSTEM");
-  static const bool kVerifyVerbose =
-    kVerifyVerboseSystem || getenv("HHVM_VERIFY_VERBOSE");
-
-  const bool isSystemLib = u->filepath()->empty() ||
-    boost::contains(u->filepath()->data(), "systemlib");
-  const bool doVerify =
-    kVerify || boost::ends_with(u->filepath()->data(), "hhas");
-  if (doVerify) {
-    auto const verbose = isSystemLib ? kVerifyVerboseSystem : kVerifyVerbose;
-    auto const ok = Verifier::checkUnit(
-      u.get(),
-      verbose ? Verifier::kVerbose : Verifier::kStderr
-    );
-
-    if (!ok && !verbose) {
-      std::cerr << folly::format(
-        "Verification failed for unit {}. Re-run with HHVM_VERIFY_VERBOSE{}=1 "
-        "to see more details.\n",
-        u->filepath()->data(), isSystemLib ? "_SYSTEM" : ""
-      );
-    }
-  }
-
-  if (RuntimeOption::EvalVerifyOnly) {
-    std::fflush(stdout);
-    _Exit(0);
   }
 
   if (RuntimeOption::EvalDumpHhas > 1 ||

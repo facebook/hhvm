@@ -135,23 +135,6 @@ void FuncEmitter::commit(RepoTxn& txn) const {
      .insert(*this, txn, usn, m_sn, m_pce ? m_pce->id() : -1, name, top);
 }
 
-static std::vector<EHEnt> toFixed(const std::vector<EHEntEmitter>& vec) {
-  std::vector<EHEnt> ret;
-  for (auto const& ehe : vec) {
-    EHEnt e;
-    e.m_type = ehe.m_type;
-    e.m_itRef = ehe.m_itRef;
-    e.m_base = ehe.m_base;
-    e.m_past = ehe.m_past;
-    e.m_iterId = ehe.m_iterId;
-    e.m_parentIndex = ehe.m_parentIndex;
-    e.m_handler = ehe.m_handler;
-    e.m_end = ehe.m_end;
-    ret.emplace_back(std::move(e));
-  }
-  return ret;
-}
-
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(name->data()[0]) ||
     ParserBase::IsClosureName(name->toCppString()) ||
@@ -255,7 +238,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_numIterators = m_numIterators;
   f->m_maxStackCells = maxStackCells;
   f->shared()->m_staticVars = staticVars;
-  f->shared()->m_ehtab = toFixed(ehtab);
+  f->shared()->m_ehtab = ehtab;
   f->shared()->m_fpitab = fpitab;
   f->shared()->m_isClosureBody = isClosureBody;
   f->shared()->m_isAsync = isAsync;
@@ -359,10 +342,10 @@ Id FuncEmitter::allocUnnamedLocal() {
 ///////////////////////////////////////////////////////////////////////////////
 // Unit tables.
 
-EHEntEmitter& FuncEmitter::addEHEnt() {
+EHEnt& FuncEmitter::addEHEnt() {
   assertx(!m_ehTabSorted
     || "should only mark the ehtab as sorted after adding all of them");
-  ehtab.push_back(EHEntEmitter());
+  ehtab.emplace_back();
   ehtab.back().m_parentIndex = 7777;
   return ehtab.back();
 }
@@ -383,7 +366,7 @@ namespace {
  *       e2 is a Fault funclet.
  */
 struct EHEntComp {
-  bool operator()(const EHEntEmitter& e1, const EHEntEmitter& e2) const {
+  bool operator()(const EHEnt& e1, const EHEnt& e2) const {
     if (e1.m_base == e2.m_base) {
       if (e1.m_past == e2.m_past) {
         static_assert(!static_cast<uint8_t>(EHEnt::Type::Catch),

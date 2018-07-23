@@ -23,8 +23,8 @@
 
 namespace HPHP {
 
-struct Unit;
-struct Func;
+struct UnitEmitter;
+struct FuncEmitter;
 
 namespace Verifier {
 
@@ -51,7 +51,7 @@ enum ErrorMode {
  * -- SourceLoc
  * -- Metadata
  */
-bool checkUnit(const Unit*, ErrorMode mode = kStderr);
+bool checkUnit(const UnitEmitter*, ErrorMode mode = kStderr);
 
 /**
  * Checker for one Func.  Rules from doc/bytecode.specification:
@@ -101,7 +101,7 @@ bool checkUnit(const Unit*, ErrorMode mode = kStderr);
  *    certian attributes are mutually exclusive, others aren't, some
  *    imply bytecode restrictions.  (access This from static? etc).
  */
-bool checkFunc(const Func*, ErrorMode mode = kStderr);
+bool checkFunc(const FuncEmitter*, ErrorMode mode = kStderr);
 
 /**
  * Checker for HNI native function signatures. Verifies that argument types
@@ -121,7 +121,7 @@ bool checkFunc(const Func*, ErrorMode mode = kStderr);
  * -- Methods take an ObjectData* as their first argument
  * -- Static methods take a const Class* as their first argument
  */
-bool checkNativeFunc(const Func*, ErrorMode mode = kStderr);
+bool checkNativeFunc(const FuncEmitter*, ErrorMode mode = kStderr);
 
 }} // HPHP::Verifier
 

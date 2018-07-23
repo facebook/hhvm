@@ -84,7 +84,7 @@ struct IterKindId {
 using IterKindIdTable = std::vector<IterKindId>;
 
 struct FuncChecker {
-  FuncChecker(const Func* func, ErrorMode mode);
+  FuncChecker(const FuncEmitter* func, ErrorMode mode);
   ~FuncChecker();
   bool checkOffsets();
   bool checkFlow();
@@ -140,15 +140,15 @@ struct FuncChecker {
   void copyState(State* to, const State* from);
   void initState(State* s);
   const FlavorDesc* sig(PC pc);
-  Offset offset(PC pc) const { return pc - unit()->entry(); }
-  PC at(Offset off) const { return unit()->at(off); }
-  int maxStack() const { return m_func->maxStackCells(); }
-  int maxFpi() const { return m_func->fpitab().size(); }
+  Offset offset(PC pc) const { return pc - unit()->bc(); }
+  PC at(Offset off) const { return unit()->bc() + off; }
+  int maxStack() const { return m_func->maxStackCells; }
+  int maxFpi() const { return m_func->fpitab.size(); }
   int numIters() const { return m_func->numIterators(); }
   int numLocals() const { return m_func->numLocals(); }
-  int numParams() const { return m_func->numParams(); }
+  int numParams() const { return m_func->params.size(); }
   int numClsRefSlots() const { return m_func->numClsRefSlots(); }
-  const Unit* unit() const { return m_func->unit(); }
+  const UnitEmitter* unit() const { return &m_func->ue(); }
   IterKindIdTable iterBreakIds(PC& pc) const;
 
  private:
@@ -171,7 +171,7 @@ struct FuncChecker {
  private:
   Arena m_arena;
   BlockInfo* m_info; // one per block
-  const Func* const m_func;
+  const FuncEmitter* const m_func;
   Graph* m_graph;
   Bits m_instrs;
   ErrorMode m_errmode;
@@ -181,17 +181,17 @@ struct FuncChecker {
 
 const StaticString s_invoke("__invoke");
 
-bool checkNativeFunc(const Func* func, ErrorMode mode) {
-  auto const funcname = func->displayName();
-  auto const pc = func->preClass();
+bool checkNativeFunc(const FuncEmitter* func, ErrorMode mode) {
+  auto const funcname = func->name;
+  auto const pc = func->pce();
   auto const clsname = pc ? pc->name() : nullptr;
   auto const& info = Native::getNativeFunction(funcname, clsname,
-                                               func->isStatic());
+                                               func->attrs & AttrStatic);
 
-  if (func->arFuncPtr() == Native::unimplementedWrapper) return true;
+  if (!info.ptr) return true;
 
-  if (func->isAsync()) {
-    verify_error(func->unit(), func, mode == kThrow,
+  if (func->isAsync) {
+    verify_error(&func->ue(), func, mode == kThrow,
       "<<__Native>> function %s%s%s is declared async; <<__Native>> functions "
       "can return Awaitable<T>, but can not be declared async.\n",
       clsname ? clsname->data() : "",
@@ -201,14 +201,14 @@ bool checkNativeFunc(const Func* func, ErrorMode mode) {
     return false;
   }
 
-  auto const& tc = func->returnTypeConstraint();
+  auto const& tc = func->retTypeConstraint;
   auto const message = Native::checkTypeFunc(info.sig, tc, func);
 
   if (message) {
     auto const tstr = info.sig.toString(clsname ? clsname->data() : nullptr,
                                         funcname->data());
 
-    verify_error(func->unit(), func, mode == kThrow,
+    verify_error(&func->ue(), func, mode == kThrow,
       "<<__Native>> function %s%s%s does not match C++ function "
       "signature (%s): %s\n",
       clsname ? clsname->data() : "",
@@ -223,11 +223,11 @@ bool checkNativeFunc(const Func* func, ErrorMode mode) {
   return true;
 }
 
-bool checkFunc(const Func* func, ErrorMode mode) {
+bool checkFunc(const FuncEmitter* func, ErrorMode mode) {
   if (mode == kVerbose) {
-    func->prettyPrint(std::cout);
-    if (func->cls() || !func->preClass()) {
-      printf("  FuncId %d\n", func->getFuncId());
+    pretty_print(func, std::cout);
+    if (!func->pce()) {
+      printf("  FuncId %d\n", func->id());
     }
     printFPI(func);
   }
@@ -236,10 +236,10 @@ bool checkFunc(const Func* func, ErrorMode mode) {
          v.checkFlow();
 }
 
-FuncChecker::FuncChecker(const Func* f, ErrorMode mode)
+FuncChecker::FuncChecker(const FuncEmitter* f, ErrorMode mode)
 : m_func(f)
 , m_graph(0)
-, m_instrs(m_arena, f->past() - f->base() + 1)
+, m_instrs(m_arena, f->past - f->base + 1)
 , m_errmode(mode) {
 }
 
@@ -271,14 +271,14 @@ Offset findSection(SectionMap& sections, Offset off) {
  */
 bool FuncChecker::checkOffsets() {
   bool ok = true;
-  assertx(unit()->bclen() >= 0);
-  PC bc = unit()->entry();
-  Offset base = m_func->base();
-  Offset past = m_func->past();
-  checkRegion("func", base, past, "unit", 0, unit()->bclen(), false);
+  assertx(unit()->bcPos() >= 0);
+  PC bc = unit()->bc();
+  Offset base = m_func->base;
+  Offset past = m_func->past;
+  checkRegion("func", base, past, "unit", 0, unit()->bcPos(), false);
   // find instruction boundaries and make sure no branches escape
   SectionMap sections;
-  for (auto& eh : m_func->ehtab()) {
+  for (auto& eh : m_func->ehtab) {
     if (eh.m_type == EHEnt::Type::Fault) {
       ok &= checkOffset("fault funclet", eh.m_handler, "func bytecode", base,
                         past, false);
@@ -298,7 +298,7 @@ bool FuncChecker::checkOffsets() {
                        section_base, section_past);
   }
   // DV entry points must be in the primary function body
-  for (auto& param : m_func->params()) {
+  for (auto& param : m_func->params) {
     if (param.hasDefaultValue()) {
       ok &= checkOffset("dv-entry", param.funcletOff, "func body", base,
                         funclets);
@@ -306,7 +306,7 @@ bool FuncChecker::checkOffsets() {
   }
   // Every FPI region must be contained within one section, either the
   // primary body or one fault funclet
-  for (auto& fpi : m_func->fpitab()) {
+  for (auto& fpi : m_func->fpitab) {
     Offset fpi_base = fpiBase(fpi, bc);
     Offset fpi_past = fpiPast(fpi, bc);
     if (checkRegion("fpi", fpi_base, fpi_past, "func", base, past)) {
@@ -321,7 +321,7 @@ bool FuncChecker::checkOffsets() {
     }
   }
   // check EH regions and targets
-  for (auto& eh : m_func->ehtab()) {
+  for (auto& eh : m_func->ehtab) {
     if (eh.m_type == EHEnt::Type::Fault) {
       ok &= checkOffset("fault", eh.m_handler, "funclets", funclets, past);
     }
@@ -339,7 +339,7 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
   bool ok = true;
   typedef std::list<PC> BranchList;
   BranchList branches;
-  PC bc = unit()->entry();
+  PC bc = unit()->bc();
   // Find instruction boundaries and branch instructions.
   for (InstrRange i(at(base), at(past)); !i.empty();) {
     auto pc = i.popFront();
@@ -349,7 +349,7 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
              opcodeToName(op), offset(pc));
       return false;
     }
-    m_instrs.set(offset(pc) - m_func->base());
+    m_instrs.set(offset(pc) - m_func->base);
     if (isSwitch(op) ||
         instrJumpTarget(bc, offset(pc)) != InvalidAbsoluteOffset) {
       if (op == OpSwitch && getImm(pc, 0).u_IVA == int(SwitchKind::Bounded)) {
@@ -432,7 +432,11 @@ bool FuncChecker::checkLocal(PC pc, int k) {
 }
 
 bool FuncChecker::checkString(PC /*pc*/, Id id) {
-  return unit()->isLitstrId(id);
+  if (isGlobalLitstrId(id)) {
+    auto globalID = decodeGlobalLitstrId(id);
+    return LitstrTable::get().contains(globalID);
+  }
+  return id < unit()->numLitstrs();
 }
 
 bool FuncChecker::checkImmVec(PC& pc, size_t elemSize) {
@@ -590,7 +594,7 @@ bool FuncChecker::checkImmRATA(PC& pc, PC const /*instr*/) {
 
 bool FuncChecker::checkImmBA(PC& pc, PC const instr) {
   // we check branch offsets in checkSection(). ignore here.
-  assertx(instrJumpTarget(unit()->entry(), offset(instr)) !=
+  assertx(instrJumpTarget(unit()->bc(), offset(instr)) !=
          InvalidAbsoluteOffset);
   pc += sizeof(Offset);
   return true;
@@ -966,7 +970,7 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
               opcodeToName(op));
         ok = false;
       } else {
-        auto const c = decode_member_key(new_pc, m_func->unit()).mcode;
+        auto const c = decode_member_key(new_pc, &m_func->ue()).mcode;
         if (!mcodeIsElem(c)) {
           error("Member instruction with mode InOut and incompatible member "
                 "code %s, must be Elem\n", memberCodeString(c));
@@ -1239,15 +1243,15 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       break;
     case Op::InitProp:
     case Op::CheckProp: {
-        auto const prop = m_func->unit()->lookupLitstrId(getImm(pc, 0).u_SA);
-        auto fname = m_func->name()->toCppString();
+        auto const prop = m_func->ue().lookupLitstr(getImm(pc, 0).u_SA);
+        auto fname = m_func->name->toCppString();
         if (fname.compare("86pinit") != 0 &&
             fname.compare("86sinit") != 0 &&
             fname.compare("86linit") != 0) {
           ferror("{} cannot appear in {} function\n", opcodeToName(op), fname);
           return false;
         }
-        if (!m_func->preClass() || !m_func->preClass()->hasProp(prop)){
+        if (!m_func->pce() || !m_func->pce()->hasProp(prop)){
              ferror("{} references non-existent property {}\n",
                     opcodeToName(op), prop);
              return false;
@@ -1275,7 +1279,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
     case Op::DefCls:
     case Op::DefClsNop: {
       auto const id = getImm(pc, 0).u_IVA;
-      if (id >= unit()->preclasses().size()) {
+      if (id >= unit()->numPreClasses()) {
         ferror("{} references nonexistent class ({})\n", opcodeToName(op), id);
         return false;
       }
@@ -1283,13 +1287,13 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
     }
     case Op::CreateCl: {
       auto const id = getImm(pc, 1).u_IVA;
-      if (id >= unit()->preclasses().size()) {
+      if (id >= unit()->numPreClasses()) {
         ferror("CreateCl must reference a closure defined in the same "
                "unit\n");
         return false;
       }
-      auto const preCls = unit()->lookupPreClassId(id);
-      if (preCls->parent()->toCppString() != std::string("Closure")) {
+      auto const preCls = unit()->pce(id);
+      if (preCls->parentName()->toCppString() != std::string("Closure")) {
         ferror("CreateCl references non-closure class {} ({})\n",
                preCls->name(), id);
         return false;
@@ -1297,7 +1301,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       auto const numBound = getImm(pc, 0).u_IVA;
       auto const invoke = preCls->lookupMethod(s_invoke.get());
       if (invoke &&
-          numBound != preCls->numProperties() - invoke->numStaticLocals()) {
+          numBound != preCls->numProperties() - invoke->staticVars.size()) {
         ferror("CreateCl bound Closure {} with {} params instead of {}\n",
                preCls->name(), numBound, preCls->numProperties());
         return false;
@@ -1306,7 +1310,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
     }
     case Op::DefFunc: {
       auto id = getImm(pc, 0).u_IVA;
-      if (id >= unit()->funcs().size()) {
+      if (id >= unit()->fevec().size()) {
         ferror("{} references nonexistent function ({})\n",
                 opcodeToName(op), id);
         return false;
@@ -1330,7 +1334,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
     case Op::name: { \
       auto const id = getImm(pc, 0).u_AA; \
       if (id < 0 || id >= unit()->numArrays() || \
-          unit()->lookupArrayId(id)->toDataType() != KindOf##name) { \
+          unit()->lookupArray(id)->toDataType() != KindOf##name) { \
         ferror("{} references array data that is not a {}\n", \
                 #name, #name); \
         return false; \
@@ -1345,7 +1349,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
     case Op::GetMemoKeyL:
     case Op::MemoGet:
     case Op::MemoSet:
-      if (!m_func->isMemoizeWrapper()) {
+      if (!m_func->isMemoizeWrapper) {
         ferror("{} can only appear within memoize wrappers\n",
                opcodeToName(op));
         return false;
@@ -1363,7 +1367,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       break;
     }
     case Op::Catch: {
-      auto handler = m_func->findEHbyHandler(offset(pc));
+      auto handler = Func::findEHbyHandler(m_func->ehtab, offset(pc));
       if (!handler || handler->m_type != EHEnt::Type::Catch ||
           offset(pc) != handler->m_handler) {
         ferror("{} must be the first instruction in a Catch handler\n",
@@ -1397,7 +1401,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
     case Op::ContEnterDelegate:
     case Op::YieldFromDelegate:
     case Op::ContUnsetDelegate:
-      if (m_func->isAsync()) {
+      if (m_func->isAsync) {
         ferror("{} may only appear in a non-async generator\n",
                opcodeToName(op));
         return false;
@@ -1406,15 +1410,15 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
     case Op::CreateCont:
     case Op::YieldK:
     case Op::Yield:
-      if (!m_func->isGenerator()) {
+      if (!m_func->isGenerator) {
         ferror("{} may only appear in a generator\n", opcodeToName(op));
         return false;
       }
       break;
     case Op::ContEnter: // Only in non-static generator methods
     case Op::ContRaise: {
-      auto cls = m_func->preClass();
-      if (m_func->isStatic() || !cls ||
+      auto cls = m_func->pce();
+      if ((m_func->attrs & AttrStatic) || !cls ||
           (cls->name()->toCppString() != std::string("Generator") &&
            cls->name()->toCppString() != std::string("HH\\AsyncGenerator"))) {
         ferror("{} may only appear in non-static methods of the "
@@ -1434,7 +1438,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
     }
     case Op::FCallAwait:
     case Op::Await: {
-      if (!m_func->isAsync()) {
+      if (!m_func->isAsync) {
         ferror("{} may only appear in an async function\n", opcodeToName(op));
         return false;
       }
@@ -1680,7 +1684,8 @@ void FuncChecker::initState(State* s) {
   s->mbr_live = false;
   s->mbr_mode.clear();
   s->silences.clear();
-  s->guaranteedThis = m_func->requiresThisInBody();
+  s->guaranteedThis =
+    !m_func->isClosureBody && (m_func->attrs & AttrRequiresThis);
 }
 
 void FuncChecker::copyState(State* to, const State* from) {
@@ -1770,7 +1775,7 @@ bool FuncChecker::checkFlow() {
     ok &= checkBlock(cur, b);
   }
   // Make sure eval stack is correct at start of each try region
-  for (auto& handler : m_func->ehtab()) {
+  for (auto& handler : m_func->ehtab) {
     if (handler.m_type == EHEnt::Type::Catch) {
       ok &= checkEHStack(handler, builder.at(handler.m_base));
     }
@@ -1831,7 +1836,7 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
 
   for (int i = 0; i < succs; i++) {
     auto const t = b->succs[i];
-    if (t && offset(t->start) == m_func->base()) {
+    if (t && offset(t->start) == m_func->base) {
       boost::dynamic_bitset<> visited(m_graph->block_count);
       if (Block::reachable(t, b, visited)) {
         error("%s: Control flow cycles from the entry-block "
@@ -1860,8 +1865,7 @@ bool FuncChecker::checkEHStack(const EHEnt& /*handler*/, Block* b) {
   const State& state = m_info[b->id].state_in;
   if (!state.stk) return true; // ignore unreachable block
   if (state.fpilen != 0) {
-    error("EH region starts with non-empty FPI stack at B%d\n",
-           b->id);
+    error("EH region starts with non-empty FPI stack at B%d\n", b->id);
     return false;
   }
   return true;
@@ -2006,7 +2010,7 @@ bool FuncChecker::checkOffset(const char* name, Offset off,
            name, off, regionName, base, past);
     return false;
   }
-  if (check_instrs && !m_instrs.get(off - m_func->base())) {
+  if (check_instrs && !m_instrs.get(off - m_func->base)) {
     error("label %s %d is not on a valid instruction boundary\n",
            name, off);
     return false;
@@ -2032,8 +2036,8 @@ bool FuncChecker::checkRegion(const char* name, Offset b, Offset p,
            name, b, p, regionName, base, past);
     return false;
   } else if (check_instrs &&
-             (!m_instrs.get(b - m_func->base()) ||
-              (p < past && !m_instrs.get(p - m_func->base())))) {
+             (!m_instrs.get(b - m_func->base) ||
+              (p < past && !m_instrs.get(p - m_func->base)))) {
     error("region %s %d:%d boundaries are inbetween instructions\n",
            name, b, p);
     return false;

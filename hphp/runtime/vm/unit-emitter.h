@@ -85,6 +85,11 @@ struct UnitEmitter {
 
   template<class SerDe> void serdeMetaData(SerDe&);
 
+  /*
+   * Run the verifier on this unit.
+   */
+  bool check(bool verbose) const;
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Basic data.
@@ -120,6 +125,9 @@ struct UnitEmitter {
   const ArrayData* lookupArray(Id id) const;
   const RepoAuthType::Array* lookupArrayType(Id id) const;
 
+  Id numArrays() const { return m_arrays.size(); }
+  Id numLitstrs() const { return m_litstrs.size(); }
+
   /*
    * Merge a literal string into either the global LitstrTable or the table for
    * the Unit.
@@ -147,7 +155,7 @@ struct UnitEmitter {
   /*
    * The Unit's pseudomain emitter.
    */
-  FuncEmitter* getMain();
+  FuncEmitter* getMain() const;
 
   /*
    * Const reference to all of the Unit's FuncEmitters.

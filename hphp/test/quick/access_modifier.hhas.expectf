@@ -1,5 +1,9 @@
-Verification Error (unit %s): Property attre in class A has more than one access modifier
 Verification Error (unit %s): Property blah in class A has no access modifier
+
+Verification Error (unit %s): Property attre in class A has more than one access modifier
+
 Verification Error (unit %s): Method get in class A has more than one access modifier
+
 Verification Error (unit %s): Method set in class A has no access modifier
+
 Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

@@ -35,6 +35,19 @@ void FPIEnt::serde(SerDe& sd) {
     ;
 }
 
+template<class SerDe>
+void EHEnt::serde(SerDe& sd) {
+  sd(m_type)
+    (m_base)
+    (m_past)
+    (m_iterId)
+    (m_handler)
+    (m_end)
+    (m_itRef)
+    (m_parentIndex)
+    ;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // ParamInfo.
 

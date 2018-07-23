@@ -21,21 +21,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-template<class SerDe>
-void EHEntEmitter::serde(SerDe& sd) {
-  sd(m_type)
-    (m_base)
-    (m_past)
-    (m_iterId)
-    (m_handler)
-    (m_end)
-    (m_itRef)
-    (m_parentIndex)
-    ;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 inline UnitEmitter& FuncEmitter::ue() const {
   return m_ue;
 }
@@ -66,7 +51,8 @@ inline Id FuncEmitter::numLocals() const {
 }
 
 inline Id FuncEmitter::numNamedLocals() const {
-  return m_numLocals - m_numUnnamedLocals;
+  // Don't use m_numUnnamedLocals here, it isn't serialized to the repo
+  return m_localNames.size();
 }
 
 inline Id FuncEmitter::numIterators() const {

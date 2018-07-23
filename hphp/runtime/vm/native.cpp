@@ -629,12 +629,19 @@ const char* kInvalidActRecFuncMessage =
   "Functions declared as ActRec must return a TypedValue* and take an ActRec* "
   "as their sole argument";
 
+static const StaticString
+  s_native("__Native"),
+  s_actrec("ActRec");
+
 const char* checkTypeFunc(const NativeSig& sig,
                           const TypeConstraint& retType,
-                          const Func* func) {
+                          const FuncEmitter* func) {
   using T = NativeSig::Type;
 
-  if (!func->nativeFuncPtr()) {
+  auto dummy = HPHP::AttrNone;
+  auto nativeAttributes = func->parseNativeAttributes(dummy);
+
+  if (nativeAttributes & Native::AttrActRec) {
     return
       sig.ret == T::ARReturn &&
       sig.args.size() == 1 &&
@@ -647,27 +654,26 @@ const char* checkTypeFunc(const NativeSig& sig,
 
   auto argIt = sig.args.begin();
   auto endIt = sig.args.end();
-  if (func->preClass()) { // called from the verifier so m_cls is not set yet
+  if (func->pce()) { // called from the verifier so m_cls is not set yet
     if (argIt == endIt) return kInvalidArgCountMessage;
     auto const ctxTy = *argIt++;
-    if (func->attrs() & HPHP::AttrStatic) {
+    if (func->attrs & HPHP::AttrStatic) {
       if (ctxTy != T::Class) return kNeedStaticContextMessage;
     } else {
       if (ctxTy != T::This) return kNeedObjectContextMessage;
     }
   }
 
-  if (func->takesNumArgs()) {
+  if (nativeAttributes & Native::AttrTakesNumArgs) {
     if (*argIt++ != T::Int64) return kInvalidNumArgsMessage;
   }
 
-  int index = 0;
-  for (auto const& pInfo : func->params()) {
+  for (auto const& pInfo : func->params) {
     if (argIt == endIt) return kInvalidArgCountMessage;
 
     auto const argTy = *argIt++;
 
-    if (func->byRef(index++)) {
+    if (pInfo.byRef) {
       if (argTy != T::MixedRef &&
           argTy != T::OutputArg) {
         return kInvalidArgTypeMessage;

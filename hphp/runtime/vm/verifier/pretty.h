@@ -24,8 +24,8 @@
 
 namespace HPHP {
 
-struct Func;
-struct Unit;
+struct FuncEmitter;
+struct UnitEmitter;
 
 namespace Verifier {
 
@@ -35,24 +35,24 @@ struct Block;
 /**
  * Pretty print the control flow graph to stdout.
  */
-void printBlocks(const Func*, const Graph*);
+void printBlocks(const FuncEmitter*, const Graph*);
 
 /**
  * Print one FPI entry to stdout.
  */
-void printFPI(const Func*);
+void printFPI(const FuncEmitter*);
 
 /**
  * Print one instr to stdout.  The format is similar to Unit.prettyPrint(),
  * except we annotate instructions with their flags (C|T|F).
  */
-void printInstr(const Unit*, PC pc);
+void printInstr(const UnitEmitter*, PC pc);
 
 /**
  * Dump one whole block to a string with a header showing its out-edges,
  * and rpo_id.
  */
-std::string blockToString(const Block* b, const Graph* g, const Unit* u);
+std::string blockToString(const Block* b, const Graph* g, const UnitEmitter* u);
 
 /**
  * Generate a GML-format file for every Func in this unit.  The filename
@@ -61,7 +61,12 @@ std::string blockToString(const Block* b, const Graph* g, const Unit* u);
  * browsing/editing/layout.
  * http://www.yworks.com/en/products_yed_about.html
  */
-void printGml(const Unit*);
+void printGml(const UnitEmitter*);
+
+/**
+ * Pretty print FuncEmitter fe in a similar fashion to pretty printing a Func.
+ */
+void pretty_print(const FuncEmitter* fe, std::ostream& out);
 
 /*
  * Called to indicate a verification error.
@@ -71,7 +76,7 @@ void printGml(const Unit*);
  *
  * The Func* may be nullptr.
  */
-void verify_error(const Unit*, const Func*, bool throws,
+void verify_error(const UnitEmitter*, const FuncEmitter*, bool throws,
   ATTRIBUTE_PRINTF_STRING const char* fmt, ...) ATTRIBUTE_PRINTF(4,5);
 
 }}

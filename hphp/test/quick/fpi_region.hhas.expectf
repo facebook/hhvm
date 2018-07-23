@@ -1,3 +1,5 @@
 Verification Error (unit %s func ): FPI contains backwards jump at JmpNZ
+
 Verification Error (unit %s func ): RetC instruction encountered inside of FPI region
+
 Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

@@ -142,6 +142,69 @@ inline int numSuccBlocks(const Block* b) {
   return peek_op(b->last) == Op::Unwind ? 1 : numSuccs(b->last);
 }
 
+#define APPLY(d, l, r)                         \
+  if (auto left = d.left()) return left->l;    \
+  if (auto right = d.right()) return right->r; \
+  not_reached()
+
+struct SomeUnit {
+  /* implicit */ SomeUnit(const Unit* u) : m_unit(u) {}
+  /* implicit */ SomeUnit(const UnitEmitter* u) : m_unit(u) {}
+
+  SomeUnit& operator=(const Unit* u) { m_unit = u; return *this; }
+  SomeUnit& operator=(const UnitEmitter* u) { m_unit = u; return *this; }
+
+  PC entry() const               { APPLY(m_unit, entry(), bc()); }
+  PC at(Offset o) const          { return entry() + o; }
+  Offset offsetOf(PC addr) const { return static_cast<Offset>(addr - entry()); }
+
+private:
+  Either<const Unit*, const UnitEmitter*> m_unit;
+};
+
+struct SomeFunc {
+  /* implicit */ SomeFunc(const Func* f) : m_func(f) {}
+  /* implicit */ SomeFunc(const FuncEmitter* f) : m_func(f) {}
+
+  SomeFunc& operator=(const Func* f) { m_func = f; return *this; }
+  SomeFunc& operator=(const FuncEmitter* f) { m_func = f; return *this; }
+
+  SomeUnit unit() const {
+    return m_func.match(
+      [&] (const Func* f)        -> SomeUnit { return f->unit(); },
+      [&] (const FuncEmitter* f) -> SomeUnit { return &f->ue(); }
+    );
+  }
+  Offset base() const   { APPLY(m_func, base(), base); }
+  Offset past() const   { APPLY(m_func, past(), past); }
+
+  size_t numParams() const { APPLY(m_func, params().size(), params.size()); }
+  const Func::ParamInfo& param(size_t idx) const {
+    APPLY(m_func, params()[idx], params[idx]);
+  }
+
+  size_t numEHEnts() const { APPLY(m_func, ehtab().size(), ehtab.size()); }
+  const EHEnt& ehent(size_t i) const { APPLY(m_func, ehtab()[i], ehtab[i]); }
+
+  const EHEnt* findEH(Offset off) const {
+    return m_func.match(
+      [&] (const Func* f) { return Func::findEH(f->ehtab(), off); },
+      [&] (const FuncEmitter* f) { return Func::findEH(f->ehtab, off); }
+    );
+  }
+  const EHEnt* findEHbyHandler(Offset off) const {
+    return m_func.match(
+      [&] (const Func* f) { return Func::findEHbyHandler(f->ehtab(), off); },
+      [&] (const FuncEmitter* f) { return Func::findEHbyHandler(f->ehtab, off);}
+    );
+  }
+
+private:
+  Either<const Func*, const FuncEmitter*> m_func;
+};
+
+#undef APPLY
+
 /**
  * A GraphBuilder holds the temporary state required for building
  * a graph and is typically not needed once a Graph is built.
@@ -151,29 +214,30 @@ private:
   typedef hphp_hash_map<PC, Block*> BlockMap;
   enum EdgeKind { FallThrough, Taken };
  public:
-  GraphBuilder(Arena& arena, const Func* func)
+  template<class F>
+  GraphBuilder(Arena& arena, const F* func)
     : m_arena(arena), m_func(func),
-      m_unit(func->unit()), m_graph(0) {
+      m_unit(m_func.unit()), m_graph(0) {
   }
   Graph* build();
-  Block* at(Offset off) const { return at(m_unit->at(off)); }
+  Block* at(Offset off) const { return at(m_unit.at(off)); }
  private:
   void createBlocks();
   void createExBlocks();
   void linkBlocks();
   void linkExBlocks();
   Block* createBlock(PC pc);
-  Block* createBlock(Offset off) { return createBlock(m_unit->at(off)); }
+  Block* createBlock(Offset off) { return createBlock(m_unit.at(off)); }
   Block* at(PC addr) const;
   Offset offset(PC addr) const {
-    return m_unit->offsetOf(addr);
+    return m_unit.offsetOf(addr);
   }
   Block** succs(Block* b);
  private:
   BlockMap m_blocks;
   Arena& m_arena;
-  const Func* const m_func;
-  const Unit* const m_unit;
+  const SomeFunc m_func;
+  const SomeUnit m_unit;
   Graph* m_graph;
 };
 
@@ -248,9 +312,9 @@ struct InstrRange {
  */
 void sortRpo(Graph* g);
 
-inline InstrRange funcInstrs(const Func* func) {
-  return InstrRange(func->unit()->at(func->base()),
-                    func->unit()->at(func->past()));
+inline InstrRange funcInstrs(SomeFunc func) {
+  return InstrRange(func.unit().at(func.base()),
+                    func.unit().at(func.past()));
 }
 
 inline InstrRange blockInstrs(const Block* b) {

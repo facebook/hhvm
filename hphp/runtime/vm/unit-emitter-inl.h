@@ -43,7 +43,7 @@ inline Offset UnitEmitter::offsetOf(const unsigned char* pc) const {
 ///////////////////////////////////////////////////////////////////////////////
 // FuncEmitters.
 
-inline FuncEmitter* UnitEmitter::getMain() {
+inline FuncEmitter* UnitEmitter::getMain() const {
   return m_fes[0];
 }
 

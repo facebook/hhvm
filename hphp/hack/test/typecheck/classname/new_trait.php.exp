@@ -1,4 +1,4 @@
-File "new_trait.php", line 6, characters 3-10:
+File "new_trait.php", line 6, characters 7-8:
 This would be an object of type Foo which must be instantiable (Typing[4002])
 File "new_trait.php", line 5, characters 22-24:
 Foo is uninstantiable

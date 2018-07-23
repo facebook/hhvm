@@ -130,7 +130,7 @@ let enum_class_check env tc consts const_types =
 
 let get_constant tc (seen, has_default) = function
   | Default _ -> (seen, true)
-  | Case ((pos, Class_const (((), CI ((_, cls), _)), (_, const))), _) ->
+  | Case ((pos, Class_const ((_, CI ((_, cls), _)), (_, const))), _) ->
     if cls <> tc.tc_name then
       (Errors.enum_switch_wrong_class pos (strip_ns tc.tc_name) (strip_ns cls);
        (seen, has_default))

@@ -71,15 +71,11 @@ let base_visitor line char = object (self)
   method! on_class_id env cid =
     let acc =
       match cid with
-      | ty, Tast.CI ((pos, _), _) ->
-        if Pos.inside pos line char
-        then Some (pos, env, ty)
-        else None
       (* Don't use the resolved class type when hovering over a CIexpr--we will
          want to show the type the expression is annotated with
          (e.g., classname<C>) and it will not have a smaller position. *)
       | _, Tast.CIexpr _ -> None
-      | _ -> None (* TODO: Associate other class_id_ variants with a pos *)
+      | annotation, _ -> self#on_expr_annotation env annotation
     in
     self#plus acc (super#on_class_id env cid)
 end

@@ -2,5 +2,5 @@ File "throw_non_exception.php", line 6, characters 9-26:
 Invalid exception (Typing[4110])
 File "throw_non_exception.php", line 6, characters 9-26:
 This is an object of type Throwable because it is used as an exception
-File "throw_non_exception.php", line 6, characters 9-26:
+File "throw_non_exception.php", line 6, characters 13-24:
 It is incompatible with an object of type NonException

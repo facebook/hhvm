@@ -1,6 +1,6 @@
 File "test_inter8.php", line 21, characters 7-9:
 Could not find method get in an object of type B (Typing[4053])
-File "test_inter8.php", line 20, characters 25-31:
+File "test_inter8.php", line 20, characters 29-29:
 This is why I think it is an object of type B
 File "test_inter8.php", line 16, characters 7-7:
 Declaration of B is here

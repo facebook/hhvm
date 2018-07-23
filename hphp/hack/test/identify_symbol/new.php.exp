@@ -8,7 +8,7 @@ definition:
    modifiers: 
 
 
-name: \Foo::__construct, kind: method, span: line 6, characters 3-11, is_declaration: false
+name: \Foo::__construct, kind: method, span: line 6, characters 7-9, is_declaration: false
 definition:
  Foo
    kind: class

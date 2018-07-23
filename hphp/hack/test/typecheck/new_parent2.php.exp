@@ -1,6 +1,6 @@
 File "new_parent2.php", line 20, characters 9-11:
 Could not find method foo in an object of type B (Typing[4053])
-File "new_parent2.php", line 19, characters 10-21:
+File "new_parent2.php", line 19, characters 14-19:
 This is why I think it is an object of type B
 File "new_parent2.php", line 12, characters 7-7:
 Declaration of B is here

@@ -96,6 +96,18 @@
    }
 },
 {
+  "comment": "call to `new TakesString(HasString::MyString)`",
+  "jsonrpc": "2.0",
+  "method": "textDocument/definition",
+  "id": 8,
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+       },
+       "position": {"line": 45, "character": 23}
+   }
+},
+{
   "jsonrpc": "2.0",
   "id": 99,
   "method": "shutdown",

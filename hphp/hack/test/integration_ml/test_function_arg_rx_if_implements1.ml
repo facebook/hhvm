@@ -40,7 +40,7 @@ function g(): void {
 let errors = {|
 File "/B.php", line 5, characters 3-12:
 Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
-File "/B.php", line 5, characters 5-11:
+File "/B.php", line 5, characters 9-9:
 Argument type must be a subtype of \Rx, now \A.
 File "/A.php", line 9, characters 10-10:
 This is the function declaration

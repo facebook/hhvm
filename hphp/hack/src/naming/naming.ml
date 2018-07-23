@@ -2318,7 +2318,7 @@ module Make (GetLocals : GetLocals) = struct
             (match (expr env e1), (expr env e2) with
             | (pc, N.String cl), (pm, N.String meth) ->
               N.Method_caller (Env.type_name env (pc, cl) ~allow_typedef:false, (pm, meth))
-            | (_, N.Class_const (((), N.CI (cl, _)), (_, mem))), (pm, N.String meth)
+            | (_, N.Class_const ((_, N.CI (cl, _)), (_, mem))), (pm, N.String meth)
               when mem = SN.Members.mClass ->
               N.Method_caller (Env.type_name env cl ~allow_typedef:false, (pm, meth))
             | (p, _), (_) ->
@@ -2348,10 +2348,10 @@ module Make (GetLocals : GetLocals) = struct
               (match (fst env).current_cls with
                 | Some (cid, _) -> N.Smethod_id (cid, (pm, meth))
                 | None -> Errors.illegal_class_meth p; N.Any)
-            | (_, N.Class_const (((), N.CI (cl, _)), (_, mem))), (pm, N.String meth)
+            | (_, N.Class_const ((_, N.CI (cl, _)), (_, mem))), (pm, N.String meth)
               when mem = SN.Members.mClass ->
               N.Smethod_id (Env.type_name env cl ~allow_typedef:false, (pm, meth))
-            | (p, N.Class_const (((), (N.CIself|N.CIstatic)), (_, mem))),
+            | (p, N.Class_const ((_, (N.CIself|N.CIstatic)), (_, mem))),
                 (pm, N.String meth) when mem = SN.Members.mClass ->
               (match (fst env).current_cls with
                 | Some (cid, _) -> N.Smethod_id (cid, (pm, meth))
@@ -2544,11 +2544,11 @@ module Make (GetLocals : GetLocals) = struct
         | _ ->
           N.CI (Env.type_name env x ~allow_typedef:false, [])
       in
-      N.InstanceOf (expr env e, ((), id))
+      N.InstanceOf (expr env e, (p, id))
     | InstanceOf (e1, (_,
         (Lvar _ | Obj_get _ | Class_get _ | Class_const _
         | Array_get _ | Call _) as e2)) ->
-      N.InstanceOf (expr env e1, ((), N.CIexpr (expr env e2)))
+      N.InstanceOf (expr env e1, (fst e2, N.CIexpr (expr env e2)))
     | InstanceOf (_e1, (p, _)) ->
       Errors.invalid_instanceof p;
       N.Any
@@ -2675,7 +2675,7 @@ module Make (GetLocals : GetLocals) = struct
     }
 
   and make_class_id env (p, x as cid) hl =
-    (),
+    p,
     match x with
       | x when x = SN.Classes.cParent ->
         if (fst env).current_cls = None then

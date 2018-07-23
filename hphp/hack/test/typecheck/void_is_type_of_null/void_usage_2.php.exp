@@ -4,5 +4,5 @@ File "", line 0, characters 0--1:
 This is void
 File "void_usage_2.php", line 10, characters 7-13:
 It was implicitly typed as void during this operation
-File "void_usage_2.php", line 12, characters 14-20:
+File "void_usage_2.php", line 12, characters 18-18:
 It is incompatible with an object of type C

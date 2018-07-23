@@ -20,12 +20,12 @@ let is_target target_line target_char { pos; _ } =
   let l, start, end_ = Pos.info_pos pos in
   l = target_line && start <= target_char && target_char - 1 <= end_
 
-let process_class_id ?(is_declaration=false) cid =
+let process_class_id ?(is_declaration=false) (pos, cid) =
   Result_set.singleton {
-    name  = snd cid;
+    name  = cid;
     type_ = Class;
     is_declaration;
-    pos   = fst cid
+    pos   = pos
   }
 
 let clean_member_name name = String_utils.lstrip name "$"
@@ -129,15 +129,7 @@ let typed_property = typed_member_id ~is_method:false ~is_const:false
 let typed_constructor env ty pos =
   typed_method env ty (pos, SN.Members.__construct)
 
-let typed_class_id env ty containing_expr_pos cid =
-  (* The `parent`, `self`, and `static` class IDs don't have an associated
-   * position, so we fall back to the position of the containing expression. *)
-  let pos =
-    match cid with
-    | Tast.CI ((pos, _), _) -> pos
-    | Tast.CIexpr ((pos, _), _) -> pos
-    | Tast.CIparent | Tast.CIself | Tast.CIstatic -> containing_expr_pos
-  in
+let typed_class_id env ty pos =
   Tast_env.get_class_ids env ty
   |> List.map ~f:(fun cid -> process_class_id (pos, cid))
   |> List.fold ~init:Result_set.empty ~f:Result_set.union
@@ -153,13 +145,13 @@ let visitor = object (self)
     let (+) = self#plus in
     let acc =
       match snd expr with
-      | Tast.New ((ty, _), _, _) ->
-        typed_constructor env ty pos
+      | Tast.New (((p, ty), _), _, _) ->
+        typed_constructor env ty p
       | Tast.Obj_get (((_, ty), _), (_, Tast.Id mid), _) ->
         typed_property env ty mid
-      | Tast.Class_const ((ty, _), mid) ->
+      | Tast.Class_const (((_, ty), _), mid) ->
         typed_const env ty mid
-      | Tast.Class_get ((ty, _), mid) ->
+      | Tast.Class_get (((_, ty), _), mid) ->
         typed_property env ty mid
       | Tast.Xml (cid, _, _) ->
         process_class_id cid
@@ -179,17 +171,18 @@ let visitor = object (self)
         process_member cid mid ~is_method:true ~is_const:false
       | _ -> self#zero
     in
-    (* This is done here instead of overriding on_class_id so that we have
-     * access to the position of the containing expression. *)
-    let class_id_acc =
-      match snd expr with
-      | Tast.Class_get ((ty, cid), _)
-      | Tast.Class_const ((ty, cid), _)
-      | Tast.New ((ty, cid), _, _) ->
-        typed_class_id env ty pos cid
-      | _ -> self#zero
-    in
-    acc + class_id_acc + super#on_expr env expr
+    acc + super#on_expr env expr
+
+  method! on_class_id env ((p, ty), cid) =
+    match cid with
+    | Tast.CIexpr expr ->
+      (* We want to special case this because we want to get the type of the
+         inner expression, which will have a type like `classname<Foo>`, rather
+         than the resolved type of the class ID, which will have a type like
+         `Foo`. Since the class ID and the inner expression have the same span,
+         it is not easy to distinguish them later. *)
+      self#on_expr env expr
+    | _ -> typed_class_id env ty p
 
   method! on_Call env ct e hl el uel =
     (* For Id, Obj_get (with an Id member), and Class_const, we don't want to
@@ -205,7 +198,7 @@ let visitor = object (self)
         process_fun_id id
       | Tast.Obj_get (((_, ty), _) as obj, (_, Tast.Id mid), _) ->
         self#on_expr env obj + typed_method env ty mid
-      | Tast.Class_const ((ty, _) as cid, mid) ->
+      | Tast.Class_const (((_, ty), _) as cid, mid) ->
         self#on_class_id env cid + typed_method env ty mid
       | _ -> self#on_expr env e
     in

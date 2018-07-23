@@ -33,3 +33,15 @@ function test(): void {
   $ee = new EE(); // should go to E::__construct
   $ff = new FF(); // should go to F
 }
+
+class TakesString {
+  public function __construct(string $s) {}
+}
+
+class HasString {
+  const MyString = "myString";
+}
+
+function testClassMemberInsideConstructorInvocation(): void {
+  $x = new TakesString(HasString::MyString);
+}

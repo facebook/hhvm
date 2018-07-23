@@ -4,9 +4,9 @@ File "this_tparam_bad1.php", line 34, characters 14-16:
 This is the expression dependent type <expr#1>
 File "this_tparam_bad1.php", line 36, characters 3-6:
   where '<expr#1>' is a reference to this expression
-File "this_tparam_bad1.php", line 36, characters 13-21:
+File "this_tparam_bad1.php", line 36, characters 17-19:
 It is incompatible with an object of type Foo
 File "this_tparam_bad1.php", line 34, characters 14-16:
 Since Foo is not final
-File "this_tparam_bad1.php", line 36, characters 13-21:
+File "this_tparam_bad1.php", line 36, characters 17-19:
 this might not be a Foo

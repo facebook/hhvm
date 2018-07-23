@@ -1,10 +1,10 @@
 File "unresolved_compare.php", line 13, characters 10-16:
 This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed (Typing[4240])
-File "unresolved_compare.php", line 11, characters 11-17:
+File "unresolved_compare.php", line 11, characters 15-15:
 This is an object of type A (known to be exactly the class 'A')
 File "unresolved_compare.php", line 11, characters 15-15:
   where the class 'A' was referenced here
-File "unresolved_compare.php", line 12, characters 11-17:
+File "unresolved_compare.php", line 12, characters 15-15:
 This is an object of type B (known to be exactly the class 'B')
 File "unresolved_compare.php", line 12, characters 15-15:
   where the class 'B' was referenced here

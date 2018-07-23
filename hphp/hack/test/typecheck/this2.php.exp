@@ -4,5 +4,5 @@ File "this2.php", line 13, characters 26-29:
 This is the expression dependent type <static>
 File "this2.php", line 13, characters 26-29:
   where '<static>' refers to the late bound type of the enclosing class
-File "this2.php", line 14, characters 12-18:
+File "this2.php", line 14, characters 16-16:
 It is incompatible with an object of type X

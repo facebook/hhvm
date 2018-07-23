@@ -6,7 +6,7 @@ File "lambda_application_incorrect_types.php", line 29, characters 12-18:
 Invalid argument (Typing[4110])
   File "lambda_application_incorrect_types.php", line 27, characters 20-21:
   This is an object of type D (variadic argument)
-  File "lambda_application_incorrect_types.php", line 29, characters 12-18:
+  File "lambda_application_incorrect_types.php", line 29, characters 16-16:
   It is incompatible with an object of type C
 File "lambda_application_incorrect_types.php", line 38, characters 33-35:
 You are trying to access the member foo but this is not an object, it is an int (Typing[4062])

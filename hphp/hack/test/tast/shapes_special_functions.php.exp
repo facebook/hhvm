@@ -19,7 +19,8 @@
                (([6:3-23], int),
                 (Call (Cnormal,
                    (([6:3-14], (function(shape('x' => int, ?'y' => int) $shape, arraykey $index, $default): int)),
-                    (Class_const ((Shapes, (CI (([6:3-9], "\\Shapes"), []))),
+                    (Class_const (
+                       (([6:3-9], Shapes), (CI (([6:3-9], "\\Shapes"), []))),
                        ([6:11-14], "idx")))),
                    [],
                    [(([6:15-17], shape('x' => int, ?'y' => int)),
@@ -31,7 +32,7 @@
                  (Call (Cnormal,
                     (([7:3-14], (function(shape('x' => int, ?'y' => int) $shape, arraykey $index, $default): int)),
                      (Class_const (
-                        (Shapes, (CI (([7:3-9], "\\Shapes"), []))),
+                        (([7:3-9], Shapes), (CI (([7:3-9], "\\Shapes"), []))),
                         ([7:11-14], "idx")))),
                     [],
                     [(([7:15-17], shape('x' => int, ?'y' => int)),
@@ -44,7 +45,7 @@
                  (Call (Cnormal,
                     (([8:3-20], (function(shape('x' => int, ?'y' => int) $shape, arraykey $index): bool)),
                      (Class_const (
-                        (Shapes, (CI (([8:3-9], "\\Shapes"), []))),
+                        (([8:3-9], Shapes), (CI (([8:3-9], "\\Shapes"), []))),
                         ([8:11-20], "keyExists")))),
                     [],
                     [(([8:21-23], shape('x' => int, ?'y' => int)),
@@ -56,7 +57,7 @@
                  (Call (Cnormal,
                     (([9:3-20], (function(inout shape('x' => int, ?'y' => int) $shape, arraykey $index): void)),
                      (Class_const (
-                        (Shapes, (CI (([9:3-9], "\\Shapes"), []))),
+                        (([9:3-9], Shapes), (CI (([9:3-9], "\\Shapes"), []))),
                         ([9:11-20], "removeKey")))),
                     [],
                     [(([9:21-24], shape('x' => int, ?'y' => int)),
@@ -71,7 +72,8 @@
                  (Call (Cnormal,
                     (([10:3-18], (function(shape('x' => int) $shape): array<string, int>)),
                      (Class_const (
-                        (Shapes, (CI (([10:3-9], "\\Shapes"), []))),
+                        (([10:3-9], Shapes),
+                         (CI (([10:3-9], "\\Shapes"), []))),
                         ([10:11-18], "toArray")))),
                     [],
                     [(([10:19-21], shape('x' => int)),

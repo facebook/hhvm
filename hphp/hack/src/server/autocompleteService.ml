@@ -496,7 +496,7 @@ let autocomplete_typed_member ~is_static env class_ty cid mid =
     end
   end
 
-let autocomplete_static_member env (ty, cid) mid =
+let autocomplete_static_member env ((_, ty), cid) mid =
   autocomplete_typed_member ~is_static:true env ty (Some cid) mid
 
 let visitor = object (self)

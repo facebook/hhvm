@@ -2072,7 +2072,7 @@ and expr_
             expr_error env p (Reason.Rwitness p)
       end
   | Class_const (cid, mid) -> class_const env p (cid, mid)
-  | Class_get (((), x), (py, y))
+  | Class_get ((px, x), (py, y))
       when Env.FakeMembers.get_static env x y <> None ->
         Env.error_if_reactive_context env @@ begin fun () ->
           Errors.static_property_in_reactive_context p
@@ -2080,13 +2080,13 @@ and expr_
         let env, local = Env.FakeMembers.make_static p env x y in
         let local = p, Lvar (p, local) in
         let env, _, ty = expr env local in
-        let env, te, _ = static_class_id ~check_constraints:false p env x in
+        let env, te, _ = static_class_id ~check_constraints:false px env x in
         make_result env (T.Class_get (te, (py, y))) ty
-  | Class_get (((), cid), mid) ->
+  | Class_get ((cpos, cid), mid) ->
       Env.error_if_reactive_context env @@ begin fun () ->
         Errors.static_property_in_reactive_context p
       end;
-      let env, te, cty = static_class_id ~check_constraints:false p env cid in
+      let env, te, cty = static_class_id ~check_constraints:false cpos env cid in
       let env = save_and_merge_next_in_catch env in
       let env, ty, _ =
         class_get ~is_method:false ~is_const:false env cty mid cid in
@@ -2242,12 +2242,12 @@ and expr_
       make_result env (T.Suspend te) ty
 
   | Special_func func -> special_func env p func
-  | New (((), c), el, uel) ->
+  | New ((pos, c), el, uel) ->
       Typing_hooks.dispatch_new_id_hook c env p;
       let env = save_and_merge_next_in_catch env in
       let env, tc, tel, tuel, ty, _ =
         new_object ~expected ~is_using_clause ~check_parent:false ~check_not_abstract:true
-          p env c el uel in
+          pos env c el uel in
       let env = Env.forget_members env p in
       make_result env (T.New(tc, tel, tuel)) ty
   | Cast ((_, Harray (None, None)), _)
@@ -2269,9 +2269,9 @@ and expr_
       end;
       let env, ty = Phase.hint_locl env hint in
       make_result env (T.Cast (hint, te)) ty
-  | InstanceOf (e, ((), cid)) ->
+  | InstanceOf (e, (pos, cid)) ->
       let env, te, _ = expr env e in
-      let env, te2, _class = instantiable_cid p env cid in
+      let env, te2, _class = instantiable_cid pos env cid in
       make_result env (T.InstanceOf (te, te2)) (Reason.Rwitness p, Tprim Tbool)
   | Is (e, hint) ->
     let env, te, _ = expr env e in
@@ -2465,7 +2465,7 @@ and expr_
           * cid = CI sid cannot produce a union of classes anyhow *)
         | (_, class_info, _)::_ -> Some class_info
       in
-      let env, _te, obj = expr env (fst sid, New (((), cid), [], [])) in
+      let env, _te, obj = expr env (fst sid, New ((fst sid, cid), [], [])) in
       let env, typed_attrs, attr_types = xhp_attribute_exprs env class_info attrl in
       let env, tel = List.fold_left el ~init:(env, []) ~f:fold_xhp_body_elements in
       let txml = T.Xml (sid, typed_attrs, List.rev tel) in
@@ -2543,8 +2543,8 @@ and expr_
       make_result env (T.Shape (ShapeMap.map (fun (te,_) -> te) tfdm))
         (Reason.Rwitness p, Tshape (FieldsFullyKnown, fdm))
 
-and class_const ?(incl_tc=false) env p (((), cid), mid) =
-  let env, ce, cty = static_class_id ~check_constraints:false p env cid in
+and class_const ?(incl_tc=false) env p ((cpos, cid), mid) =
+  let env, ce, cty = static_class_id ~check_constraints:false cpos env cid in
   let env, const_ty, cc_abstract_info =
     class_get ~is_method:false ~is_const:true ~incl_tc env cty mid cid in
   match cc_abstract_info with
@@ -3063,8 +3063,8 @@ and check_shape_keys_validity env pos keys =
            else if (key_name.[0] >= '0' && key_name.[0] <='9') then
              (Errors.invalid_shape_field_name_number key_pos);
            env, key_pos, None
-        | Ast.SFclass_const (_, cls as x, y) ->
-          let env, _te, ty = class_const env pos (((), CI (x, [])), y) in
+        | Ast.SFclass_const (p, cls as x, y) ->
+          let env, _te, ty = class_const env pos ((p, CI (x, [])), y) in
           let env = Typing_enum.check_valid_array_key_type
             Errors.invalid_shape_field_type ~allow_any:false
             env key_pos ty in
@@ -3298,7 +3298,7 @@ and assign_ p ur env e1 ty2 =
       let env, ty2' = Env.unbind env ty2 in
       let env = Type.sub_type p ur env ty2' exp_real_type in
       env, te1, ty2
-  | _, Class_get (((), x), (_, y)) ->
+  | _, Class_get ((_, x), (_, y)) ->
       let lenv = env.Env.lenv in
       let no_fakes = LEnv.env_with_empty_fakes env in
       let env, te1, real_type = lvalue no_fakes e1 in
@@ -3630,13 +3630,13 @@ and is_abstract_ft fty = match fty with
       let env = Typing_mutability.freeze_local p env tel in
       make_call_special_from_def env id tel (Tprim Tvoid)
   (* Pseudo-function `get_called_class` *)
-  | Id (cp, get_called_class) when
+  | Id (_, get_called_class) when
       get_called_class = SN.StdlibFunctions.get_called_class
       && el = [] && uel = [] ->
     check_function_in_suspend SN.StdlibFunctions.get_called_class;
     (* get_called_class fetches the late-bound class *)
     if Env.is_outside_class env then Errors.static_outside_class p;
-    class_const env p (((), CIstatic), (cp, SN.Members.mClass))
+    class_const env p ((p, CIstatic), (p, SN.Members.mClass))
   (* Special function `array_filter` *)
   | Id ((_, array_filter) as id)
       when array_filter = SN.StdlibFunctions.array_filter && el <> [] && uel = [] ->
@@ -3722,7 +3722,7 @@ and is_abstract_ft fty = match fty with
           let cid = (match e1 with
             | _, Class_const (cid, (_, x))
             | _, Class_get (cid, (_, x)) when x = SN.Members.mClass -> cid
-            | _ -> ((), Nast.CIexpr e1)) in
+            | _ -> (fst e1, Nast.CIexpr e1)) in
           class_const ~incl_tc:true env p (cid, (p, cst))
         | _ ->
           Errors.illegal_type_structure p "second argument is not a string";
@@ -3941,7 +3941,7 @@ and is_abstract_ft fty = match fty with
       | None -> unbound_name env id)
 
   (* Special function `Shapes::idx` *)
-  | Class_const (((), CI((_, shapes), _)) as class_id, ((_, idx) as method_id))
+  | Class_const ((_, CI((_, shapes), _)) as class_id, ((_, idx) as method_id))
       when shapes = SN.Shapes.cShapes && idx = SN.Shapes.idx ->
       check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.idx;
       overload_function p env class_id method_id el uel
@@ -3957,7 +3957,7 @@ and is_abstract_ft fty = match fty with
         | _ -> env, res
       end
    (* Special function `Shapes::keyExists` *)
-   | Class_const (((), CI((_, shapes), _)) as class_id, ((_, key_exists) as method_id))
+   | Class_const ((_, CI((_, shapes), _)) as class_id, ((_, key_exists) as method_id))
       when shapes = SN.Shapes.cShapes && key_exists = SN.Shapes.keyExists ->
       check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.keyExists;
       overload_function p env class_id method_id el uel
@@ -3972,7 +3972,7 @@ and is_abstract_ft fty = match fty with
         | _  -> env, res
       end
    (* Special function `Shapes::removeKey` *)
-   | Class_const (((), CI((_, shapes), _)) as class_id, ((_, remove_key) as method_id))
+   | Class_const ((_, CI((_, shapes), _)) as class_id, ((_, remove_key) as method_id))
       when shapes = SN.Shapes.cShapes && remove_key = SN.Shapes.removeKey ->
       check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.removeKey;
       overload_function p env class_id method_id el uel
@@ -3993,7 +3993,7 @@ and is_abstract_ft fty = match fty with
         | _  -> env, res
       end
   (* Special function `Shapes::toArray` *)
-  | Class_const (((), CI((_, shapes), _)) as class_id, ((_, to_array) as method_id))
+  | Class_const ((_, CI((_, shapes), _)) as class_id, ((_, to_array) as method_id))
     when shapes = SN.Shapes.cShapes && to_array = SN.Shapes.toArray ->
     check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.toArray;
     overload_function p env class_id method_id el uel
@@ -4005,18 +4005,18 @@ and is_abstract_ft fty = match fty with
     end
 
   (* Special function `parent::__construct` *)
-  | Class_const (((), CIparent), ((callee_pos, construct) as id))
+  | Class_const ((pos, CIparent), ((callee_pos, construct) as id))
     when construct = SN.Members.__construct ->
       check_class_function_in_suspend "parent" SN.Members.__construct;
       Typing_hooks.dispatch_parent_construct_hook env callee_pos;
       let env, tel, tuel, ty, pty, ctor_fty =
         call_parent_construct p env el uel in
       make_call env (T.make_typed_expr fpos ctor_fty
-        (T.Class_const ((pty, T.CIparent), id))) hl tel tuel ty
+        (T.Class_const (((pos, pty), T.CIparent), id))) hl tel tuel ty
 
   (* Calling parent method *)
-  | Class_const (((), CIparent), m) ->
-      let env, tcid, ty1 = static_class_id ~check_constraints:false p env CIparent in
+  | Class_const ((pos, CIparent), m) ->
+      let env, tcid, ty1 = static_class_id ~check_constraints:false pos env CIparent in
       if Env.is_static env
       then begin
         (* in static context, you can only call parent::foo() on static
@@ -4075,8 +4075,8 @@ and is_abstract_ft fty = match fty with
               (T.Class_const (tcid, m))) hl tel tuel ty
       end
   (* Call class method *)
-  | Class_const(((), e1), m) ->
-      let env, te1, ty1 = static_class_id ~check_constraints:true p env e1 in
+  | Class_const ((pid, e1), m) ->
+      let env, te1, ty1 = static_class_id ~check_constraints:true pid env e1 in
       let env, fty, _ =
         class_get ~is_method:true ~is_const:false ~explicit_tparams:hl
         ~pos_params:el env ty1 m e1 in
@@ -5121,7 +5121,7 @@ and this_for_method env cid default_ty = match cid with
 
 and static_class_id ~check_constraints p env =
   let make_result env te ty =
-    env, (ty, te), ty in
+    env, ((p, ty), te), ty in
   function
   | CIparent ->
     (match Env.get_self env with
@@ -5927,7 +5927,7 @@ and refine_lvalue_type env e ~refine =
       let ty = Env.get_local env (snd x) in
       let env, refined_ty = refine env ty in
       set_local env x refined_ty
-  | p, Class_get (((), cname), (_, member_name)) as e ->
+  | p, Class_get ((_, cname), (_, member_name)) as e ->
       let env, _te, ty = expr env e in
       let env, refined_ty = refine env ty in
       let env, local = Env.FakeMembers.make_static p env cname member_name in
@@ -6046,12 +6046,12 @@ and condition ?lhs_of_null_coalesce env tparamet =
   | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_resource ->
       is_type env lv Tresource (Reason.Rpredicated (p, f))
-  | _, Call (Cnormal,  (_, Class_const (((), CI ((_, class_name), _)), (_, method_name))), _, [shape; field], [])
+  | _, Call (Cnormal,  (_, Class_const ((_, CI ((_, class_name), _)), (_, method_name))), _, [shape; field], [])
     when tparamet && class_name = SN.Shapes.cShapes && method_name = SN.Shapes.keyExists ->
       key_exists env shape field
   | _, Unop (Ast.Unot, e) ->
       condition env (not tparamet) e
-  | p, InstanceOf (ivar, ((), cid)) when tparamet && is_instance_var ivar ->
+  | p, InstanceOf (ivar, (_, cid)) when tparamet && is_instance_var ivar ->
       (* Check the expession and determine its static type *)
       let env, _te, x_ty = raw_expr ~in_cond:false env ivar in
 
@@ -6318,7 +6318,7 @@ and is_instance_var = function
   | _ -> false
 
 and get_instance_var env = function
-  | p, Class_get (((), cname), (_, member_name)) ->
+  | p, Class_get ((_, cname), (_, member_name)) ->
     let env, local = Env.FakeMembers.make_static p env cname member_name in
     env, (p, local)
   | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
@@ -6986,8 +6986,8 @@ and gconst_def tcopt cst =
 
 (* Calls the method of a class, but allows the f callback to override the
  * return value type *)
-and overload_function make_call fpos p env ((), class_id) method_id el uel f =
-  let env, tcid, ty = static_class_id ~check_constraints:false p env class_id in
+and overload_function make_call fpos p env (cpos, class_id) method_id el uel f =
+  let env, tcid, ty = static_class_id ~check_constraints:false cpos env class_id in
   let env, _tel, _ = exprs ~is_func_arg:true env el in
   let env, fty, _ =
     class_get ~is_method:true ~is_const:false env ty method_id class_id in

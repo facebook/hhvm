@@ -53,7 +53,7 @@
                         (([8:5-28], void),
                          (Call (Cnormal,
                             (([8:5-24], (function(num $x): _)),
-                             (Class_const ((B, CIparent),
+                             (Class_const ((([8:5-11], B), CIparent),
                                 ([8:13-24], "__construct")))),
                             [], [(([8:25-27], int), (Lvar ([8:25-27], $x)))],
                             []))))

@@ -53,7 +53,7 @@ end = struct
     | Expr (_, Call (Cnormal, (_, Id (_, fun_name)), _, _, _)) ->
       let tcopt = Env.get_options env in
       FuncTerm.raise_exit_if_terminal (FuncTerm.get_fun tcopt fun_name)
-    | Expr (_, Call (Cnormal, (_, Class_const (((), ci), meth_id)), _, _, _)) ->
+    | Expr (_, Call (Cnormal, (_, Class_const ((_, ci), meth_id)), _, _, _)) ->
       static_meth_terminal env ci meth_id
     | If ((_, True), b1, _) -> terminal env inside_case b1
     | If ((_, False), _, b2) -> terminal env inside_case b2

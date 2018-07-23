@@ -2,7 +2,7 @@ File "reason_err_messages.php", line 4, characters 10-30:
 Invalid return type (Typing[4110])
   File "reason_err_messages.php", line 3, characters 27-29:
   This is an int
-  File "reason_err_messages.php", line 4, characters 10-30:
+  File "reason_err_messages.php", line 4, characters 10-19:
   It is incompatible with a dynamic value
 File "reason_err_messages.php", line 9, characters 10-11:
 Invalid return type (Typing[4110])

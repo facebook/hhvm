@@ -23,10 +23,11 @@
             { Aast.AnnotatedAST.fnb_nast =
               [(If (
                   (([16:9-17], ?int),
-                   (Class_get ((TestClass, CIself), ([16:15-17], "$x")))),
+                   (Class_get ((([16:9-13], TestClass), CIself),
+                      ([16:15-17], "$x")))),
                   [(Return ([17:7-23],
                       (Some (([17:14-22], int),
-                             (Class_get ((TestClass, CIself),
+                             (Class_get ((([17:14-18], TestClass), CIself),
                                 ([17:20-22], "$x")))))
                       ))
                     ],

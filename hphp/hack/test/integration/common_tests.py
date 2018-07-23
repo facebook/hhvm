@@ -491,10 +491,10 @@ class CommonTests(BarebonesTests):
             ], options=['--find-refs', 'h'])
 
         self.check_cmd_and_json_cmd([
-            'File "{root}foo_3.php", line 10, characters 13-21: Foo::__construct',
+            'File "{root}foo_3.php", line 10, characters 17-19: Foo::__construct',
             '1 total results'
             ], [
-            '[{{"name":"Foo::__construct","filename":"{root}foo_3.php","line":10,"char_start":13,"char_end":21}}]'
+            '[{{"name":"Foo::__construct","filename":"{root}foo_3.php","line":10,"char_start":17,"char_end":19}}]'
             ], options=['--find-refs', 'Foo::__construct'])
 
         self.check_cmd_and_json_cmd([

@@ -488,7 +488,7 @@ the other stars.";
       addendum = [
         "Full name: `DocBlockOnClassButNotConstructor::__construct`";
       ];
-      pos = pos_at (17, 8) (17, 45);
+      pos = pos_at (17, 12) (17, 43);
     }
   ];
   ("docblock.php", 21, 28), [
@@ -505,7 +505,7 @@ the other stars.";
         "DocBlockBase: constructor doc block.";
         "Full name: `DocBlockBase::__construct`";
       ];
-      pos = pos_at (23, 8) (23, 25);
+      pos = pos_at (23, 12) (23, 23);
     }
   ];
   ("docblock.php", 25, 14), [
@@ -515,7 +515,7 @@ the other stars.";
         "DocBlockBase: constructor doc block.";
         "Full name: `DocBlockBase::__construct`";
       ];
-      pos = pos_at (25, 10) (25, 30);
+      pos = pos_at (25, 14) (25, 28);
     }
   ];
   ("docblock.php", 84, 10), [
@@ -805,6 +805,66 @@ let doc_block_fallback_cases = [
   }];
 ]
 
+let class_id_positions = "<?hh // strict
+function create_class_id_positions(): void {
+  $x = new CIPos(CIPos2::MyConstInt);
+//               ^3:18   ^3:26
+  $x = new CIPos(CIPos2::$myStaticInt);
+//               ^5:18   ^5:26
+  $x = new CIPos(CIPos2::returnConstInt());
+//               ^7:18   ^7:26
+}
+
+class CIPos {
+  public function __construct(private int $x) {}
+}
+
+class CIPos2 {
+  const int MyConstInt = 0;
+  public static int $myStaticInt = 1;
+
+  public static function returnConstInt(): int {
+    return 2;
+  }
+}
+"
+
+let class_id_positions_cases = [
+  ("class_id_positions.php", 3, 18), [{
+    snippet = "class CIPos2";
+    addendum = [];
+    pos = pos_at (3, 18) (3, 23);
+  }];
+  ("class_id_positions.php", 3, 26), [{
+    snippet = "int CIPos2::MyConstInt";
+    addendum = [];
+    pos = pos_at (3, 26) (3, 35);
+  }];
+  ("class_id_positions.php", 5, 18), [{
+    snippet = "class CIPos2";
+    addendum = [];
+    pos = pos_at (5, 18) (5, 23);
+  }];
+  ("class_id_positions.php", 5, 26), [{
+    snippet = "public static int CIPos2::myStaticInt";
+    addendum = [];
+    pos = pos_at (5, 26) (5, 37);
+  }];
+  ("class_id_positions.php", 7, 18), [{
+    snippet = "class CIPos2";
+    addendum = [];
+    pos = pos_at (7, 18) (7, 23);
+  }];
+  ("class_id_positions.php", 7, 26), [{
+    snippet = "public static function returnConstInt(): int";
+    addendum = [
+      "Return type: `int`";
+      "Full name: `CIPos2::returnConstInt`";
+    ];
+    pos = pos_at (7, 26) (7, 39);
+  }];
+]
+
 let files = [
   "class_members.php", class_members;
   "classname_call.php", classname_call;
@@ -814,10 +874,12 @@ let files = [
   "special_cases.php", special_cases;
   "bounded_generic_fun.php", bounded_generic_fun;
   "doc_block_fallback.php", doc_block_fallback;
+  "class_id_positions.php", class_id_positions;
 ]
 
 let cases =
-  doc_block_fallback_cases
+  class_id_positions_cases
+  @ doc_block_fallback_cases
   @ special_cases_cases
   @ docblock_cases
   @ class_members_cases

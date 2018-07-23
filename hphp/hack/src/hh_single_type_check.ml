@@ -386,7 +386,7 @@ let compute_least_type tcopt popt fn =
         Nast.(List.fold fnb_nast ~init:[]
           ~f:begin fun acc stmt ->
             match stmt with
-            | Expr (_, New (((), CI ((_, "\\least_upper_bound"), hints)), _, _)) ->
+            | Expr (_, New ((_, CI ((_, "\\least_upper_bound"), hints)), _, _)) ->
               (List.map hints
                 (fun h -> snd (Typing_infer_return.type_from_hint tcopt fn h)))
               :: acc
@@ -888,13 +888,13 @@ let handle_mode
     let env = Typing_env.empty tcopt filename ~droot:None in
     let stringify_types tast =
       let tast = Tast_expand.expand_program tast in
+      let print_pos_and_ty () (pos, ty) =
+        Format.asprintf "(%a, %s)" Pos.pp pos (Typing_print.full_strip_ns env ty)
+      in
       TASTStringMapper.map_program tast
         ~map_env_annotation:(fun () -> ())
-        ~map_expr_annotation:begin fun () (pos, ty) ->
-          Format.asprintf "(%a, %s)" Pos.pp pos
-            (Typing_print.full_strip_ns env ty)
-        end
-        ~map_class_id_annotation:(fun () -> Typing_print.full_strip_ns env)
+        ~map_expr_annotation:print_pos_and_ty
+        ~map_class_id_annotation:print_pos_and_ty
     in
     let string_ast = stringify_types tast in
     Printf.printf "%s\n" (StringNAST.show_program string_ast)
@@ -922,7 +922,7 @@ let handle_mode
     let strip_types =
       TASTTypeStripper.map_program
         ~map_env_annotation:(fun _ -> ())
-        ~map_class_id_annotation:(fun _ _ -> ())
+        ~map_class_id_annotation:(fun _ (p, _) -> p)
         ~map_expr_annotation:(fun _ (p, _) -> p)
     in
     let nast = strip_types tast in

@@ -15,12 +15,12 @@ let type_collector = object
   inherit [_] Tast_visitor.reduce
   method zero = Pos.AbsolutePosMap.empty
   method plus = Pos.AbsolutePosMap.union ~combine:(fun _ a b -> Some (a @ b))
-  method! on_expr_annotation env (p,ty) =
+  method! on_expr_annotation env (p, ty) =
     Pos.AbsolutePosMap.singleton
       (Pos.to_absolute p)
       [(env, Typing_defs.LoclTy ty)]
 
-  method! on_class_id env (ty,cid) =
+  method! on_class_id env ((_, ty), cid) =
     match cid with
     | Tast.CI ((p,_),_) ->
       Pos.AbsolutePosMap.singleton

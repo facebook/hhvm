@@ -422,8 +422,8 @@ let apply_shape
 let shape_field_name_ env field =
   let open Nast in match field with
     | p, String name -> Ok (Ast.SFlit (p, name))
-    | _, Class_const (((), CI (x, _)), y) -> Ok (Ast.SFclass_const (x, y))
-    | _, Class_const (((), CIself), y) ->
+    | _, Class_const ((_, CI (x, _)), y) -> Ok (Ast.SFclass_const (x, y))
+    | _, Class_const ((_, CIself), y) ->
       let _, c_ty = Env.get_self env in
       (match c_ty with
       | Tclass (sid, _) ->

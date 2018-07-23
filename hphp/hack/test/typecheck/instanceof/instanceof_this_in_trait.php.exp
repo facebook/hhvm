@@ -1,4 +1,4 @@
-File "instanceof_this_in_trait.php", line 9, characters 12-34:
+File "instanceof_this_in_trait.php", line 9, characters 30-34:
 This would be the expression dependent type <static> which must be instantiable (Typing[4002])
 File "instanceof_this_in_trait.php", line 5, characters 7-13:
 MyTrait is uninstantiable

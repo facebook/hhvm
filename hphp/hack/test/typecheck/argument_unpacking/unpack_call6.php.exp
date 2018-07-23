@@ -4,7 +4,7 @@ Invalid argument (Typing[4110])
   This is an object of type Traversable (it is unpacked with '...')
   File "unpack_call6.php", line 11, characters 11-18:
   It is incompatible with a string
-File "unpack_call6.php", line 12, characters 3-18:
+File "unpack_call6.php", line 12, characters 7-8:
 Too few arguments (Typing[4104])
   File "unpack_call6.php", line 4, characters 19-29:
   Definition is here

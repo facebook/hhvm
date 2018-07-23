@@ -200,6 +200,26 @@
   },
   {
     "jsonrpc": "2.0",
+    "id": 8,
+    "result": [
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 40,
+            "character": 6
+          },
+          "end": {
+            "line": 40,
+            "character": 15
+          }
+        },
+        "title": "HasString"
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
     "id": 99,
     "result": null
   }

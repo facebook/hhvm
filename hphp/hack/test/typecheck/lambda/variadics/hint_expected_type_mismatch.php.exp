@@ -20,11 +20,11 @@ File "hint_expected_type_mismatch.php", line 34, characters 11-17:
 Invalid argument (Typing[4110])
   File "hint_expected_type_mismatch.php", line 27, characters 19-20:
   This is an object of type D (variadic argument)
-  File "hint_expected_type_mismatch.php", line 34, characters 11-17:
+  File "hint_expected_type_mismatch.php", line 34, characters 15-15:
   It is incompatible with an object of type C
 File "hint_expected_type_mismatch.php", line 34, characters 20-26:
 Invalid argument (Typing[4110])
   File "hint_expected_type_mismatch.php", line 27, characters 19-20:
   This is an object of type D (variadic argument)
-  File "hint_expected_type_mismatch.php", line 34, characters 20-26:
+  File "hint_expected_type_mismatch.php", line 34, characters 24-24:
   It is incompatible with an object of type C

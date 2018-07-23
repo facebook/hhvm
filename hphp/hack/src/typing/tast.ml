@@ -60,7 +60,7 @@ let pp_saved_env fmt env =
  *
  *)
 module Annotations = struct
-  module ExprAnnotation = struct
+  module PosAndTypeAnnotation = struct
     type t = Pos.t * ty
     let pp fmt (pos, ty) =
       Format.fprintf fmt "(@[";
@@ -70,14 +70,12 @@ module Annotations = struct
       Format.fprintf fmt "@])"
   end
 
+  module ExprAnnotation = PosAndTypeAnnotation
+  module ClassIdAnnotation = PosAndTypeAnnotation
+
   module EnvAnnotation = struct
     type t = saved_env
     let pp = pp_saved_env
-  end
-
-  module ClassIdAnnotation = struct
-    type t = ty
-    let pp = Pp_type.pp_ty
   end
 end
 
@@ -112,12 +110,12 @@ let nast_mapping_env env =
     env;
     map_env_annotation = (fun _ -> ());
     map_expr_annotation = (fun _ (pos, _) -> pos);
-    map_class_id_annotation = (fun _ _ -> ());
+    map_class_id_annotation = (fun _ (pos, _) -> pos);
   }
 
 let to_nast program =
   NastMapper.map_program
     ~map_env_annotation:(fun _ -> ())
     ~map_expr_annotation:(fun _ (pos, _) -> pos)
-    ~map_class_id_annotation:(fun _ _ -> ())
+    ~map_class_id_annotation:(fun _ (pos, _) -> pos)
     program

@@ -2,31 +2,31 @@ File "unpack_call11.php", line 32, characters 16-18:
 Invalid argument (Typing[4110])
   File "unpack_call11.php", line 48, characters 26-26:
   This is an object of type B
-  File "unpack_call11.php", line 17, characters 24-30:
+  File "unpack_call11.php", line 17, characters 28-28:
   It is incompatible with an object of type A
 File "unpack_call11.php", line 33, characters 26-27:
 Invalid argument (Typing[4110])
   File "unpack_call11.php", line 49, characters 32-33:
   This is an object of type B (variadic argument)
-  File "unpack_call11.php", line 15, characters 21-27:
+  File "unpack_call11.php", line 15, characters 25-25:
   It is incompatible with an object of type E
 File "unpack_call11.php", line 34, characters 35-36:
 Invalid argument (Typing[4110])
   File "unpack_call11.php", line 49, characters 32-33:
   This is an object of type B (variadic argument)
-  File "unpack_call11.php", line 15, characters 21-27:
+  File "unpack_call11.php", line 15, characters 25-25:
   It is incompatible with an object of type E
 File "unpack_call11.php", line 35, characters 26-27:
 Invalid argument (Typing[4110])
   File "unpack_call11.php", line 51, characters 33-33:
   This is an object of type E
-  File "unpack_call11.php", line 15, characters 12-18:
+  File "unpack_call11.php", line 15, characters 16-16:
   It is incompatible with an object of type B
 File "unpack_call11.php", line 35, characters 26-27:
 Invalid argument (Typing[4110])
   File "unpack_call11.php", line 51, characters 27-27:
   This is an object of type B
-  File "unpack_call11.php", line 15, characters 21-27:
+  File "unpack_call11.php", line 15, characters 25-25:
   It is incompatible with an object of type E
 File "unpack_call11.php", line 35, characters 3-28:
 Too few arguments (Typing[4104])
@@ -36,7 +36,7 @@ File "unpack_call11.php", line 36, characters 26-28:
 Invalid argument (Typing[4110])
   File "unpack_call11.php", line 52, characters 27-27:
   This is an object of type C
-  File "unpack_call11.php", line 20, characters 15-21:
+  File "unpack_call11.php", line 20, characters 19-19:
   It is incompatible with an object of type B
 File "unpack_call11.php", line 44, characters 26-27:
 Invalid argument (Typing[4110])

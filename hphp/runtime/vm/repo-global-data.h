@@ -196,6 +196,11 @@ struct Repo::GlobalData {
   bool AllowObjectDestructors = false;
 
   /*
+   * Should HHBBC do build time verification?
+   */
+  bool AbortBuildOnVerifyError = false;
+
+  /*
    * A more-or-less unique identifier for the repo
    */
   uint64_t Signature = 0;
@@ -237,6 +242,7 @@ struct Repo::GlobalData {
       (AllowObjectDestructors)
       (Signature)
       (DisableReturnByReference)
+      (AbortBuildOnVerifyError)
       ;
   }
 };

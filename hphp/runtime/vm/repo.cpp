@@ -207,6 +207,8 @@ void Repo::loadGlobalData(bool allowFailure /* = false */,
     RuntimeOption::PHP7_Substr              = s_globalData.PHP7_Substr;
     RuntimeOption::EvalReffinessInvariance  = s_globalData.ReffinessInvariance;
     RuntimeOption::EvalHackArrDVArrs        = s_globalData.HackArrDVArrs;
+    RuntimeOption::EvalAbortBuildOnVerifyError =
+      s_globalData.AbortBuildOnVerifyError;
     RuntimeOption::DisallowDynamicVarEnvFuncs =
       s_globalData.DisallowDynamicVarEnvFuncs;
     RuntimeOption::EvalAllowObjectDestructors =

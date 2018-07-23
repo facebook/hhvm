@@ -553,7 +553,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
   INC_TPC(unit_load);
 
   static const bool kVerify = debug || RuntimeOption::EvalVerify ||
-    RuntimeOption::EvalVerifyOnly;
+    RuntimeOption::EvalVerifyOnly || RuntimeOption::EvalFatalOnVerifyError;
   static const bool kVerifyVerboseSystem =
     getenv("HHVM_VERIFY_VERBOSE_SYSTEM");
   static const bool kVerifyVerbose =
@@ -565,12 +565,23 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
     kVerify || boost::ends_with(m_filepath->data(), ".hhas");
   if (doVerify) {
     auto const verbose = isSystemLib ? kVerifyVerboseSystem : kVerifyVerbose;
-    if (!check(verbose) && !verbose) {
-      std::cerr << folly::format(
-        "Verification failed for unit {}. Re-run with HHVM_VERIFY_VERBOSE{}=1 "
-        "to see more details.\n",
-        m_filepath->data(), isSystemLib ? "_SYSTEM" : ""
-      );
+    if (!check(verbose)) {
+      if (!verbose) {
+        std::cerr << folly::format(
+          "Verification failed for unit {}. Re-run with "
+          "HHVM_VERIFY_VERBOSE{}=1 to see more details.\n",
+          m_filepath->data(), isSystemLib ? "_SYSTEM" : ""
+        );
+      }
+      if (!RuntimeOption::EvalVerifyOnly &&
+          RuntimeOption::EvalFatalOnVerifyError) {
+        return createFatalUnit(
+          const_cast<StringData*>(m_filepath),
+          m_md5,
+          FatalOp::Parse,
+          makeStaticString("A bytecode verification error was detected")
+        )->create(saveLineTable);
+      }
     }
     if (!isSystemLib && RuntimeOption::EvalVerifyOnly) {
       std::fflush(stdout);

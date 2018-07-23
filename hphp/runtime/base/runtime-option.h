@@ -776,6 +776,8 @@ struct RuntimeOption {
   F(bool, Verify,                      (getenv("HHVM_VERIFY") ||        \
     !EvalHackCompilerCommand.empty()))                                  \
   F(bool, VerifyOnly,                  false)                           \
+  F(bool, FatalOnVerifyError,          !RepoAuthoritative)              \
+  F(bool, AbortBuildOnVerifyError,     true)                            \
   F(uint32_t, StaticContentsLogRate,   100)                             \
   F(uint32_t, LogUnitLoadRate,         0)                               \
   F(uint32_t, MaxDeferredErrors,       50)                              \

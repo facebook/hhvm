@@ -270,6 +270,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalAllowObjectDestructors,
                ini, config, "AllowObjectDestructors",
                RuntimeOption::EvalAllowObjectDestructors);
+  Config::Bind(RuntimeOption::EvalAbortBuildOnVerifyError,
+               ini, config, "AbortBuildOnVerifyError",
+               RuntimeOption::EvalAbortBuildOnVerifyError);
 
   {
     // Hack

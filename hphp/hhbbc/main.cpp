@@ -288,6 +288,7 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
     gd.HackArrCompatSerializeNotices;
   RuntimeOption::EvalHackArrDVArrs = gd.HackArrDVArrs;
   RuntimeOption::EvalDisableReturnByReference = gd.DisableReturnByReference;
+  RuntimeOption::EvalAbortBuildOnVerifyError = gd.AbortBuildOnVerifyError;
   return {
     parallel::map(Repo::get().enumerateUnits(RepoIdCentral, false, true),
                   [&] (const std::pair<std::string,MD5>& kv) {
@@ -314,6 +315,21 @@ void write_units(UnitEmitterQueue& ueq) {
       batchCommit(ues);
       ues.clear();
     }
+  }
+
+
+  if (RuntimeOption::EvalAbortBuildOnVerifyError) {
+    parallel::for_each(
+      ues,
+      [&] (const std::unique_ptr<UnitEmitter>& ue) {
+        always_assert_flog(
+          ue->check(false),
+          "The optimized unit for {} did not pass verification, "
+          "bailing because Eval.AbortBuildOnVerifyError is set",
+          ue->m_filepath
+        );
+      }
+    );
   }
 
   batchCommit(ues);
@@ -354,6 +370,7 @@ void write_global_data(
   gd.ReffinessInvariance         = RuntimeOption::EvalReffinessInvariance;
   gd.AllowObjectDestructors      = RuntimeOption::EvalAllowObjectDestructors;
   gd.ForbidDynamicCalls          = RuntimeOption::EvalForbidDynamicCalls;
+  gd.AbortBuildOnVerifyError     = RuntimeOption::EvalAbortBuildOnVerifyError;
   gd.NoticeOnBuiltinDynamicCalls =
     RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;
   gd.HackArrCompatIsArrayNotices =

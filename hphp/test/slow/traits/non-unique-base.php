@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 if (getenv("NOFOO")) {
   class B {}

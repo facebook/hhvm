@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class C {
   function __construct() {

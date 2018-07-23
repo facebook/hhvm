@@ -49,7 +49,8 @@ def verify_unittest(suite, repo, dir, mode='interp,jit',
     []
   )
   if repo:
-    command.extend(['-r'])
+    command.extend(['-r',
+                    '--repo-threads', '5'])
   if relocate != 0:
     command.extend(['--relocate', '%d' % relocate,
                     '--exclude-pattern', '=/debugger|ext_vsdebug/='])
@@ -106,5 +107,5 @@ def verify_unittest(suite, repo, dir, mode='interp,jit',
       name=target_name,
       command=command,
       deps=deplist,
-      tags=['serialize', 'run_as_bundle', 'hphp-test'],
+      tags=['hphp-test'] + (['run_as_bundle'] if cli_server != 0 else []),
     )

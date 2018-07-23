@@ -451,6 +451,7 @@ function get_options($argv) {
     'include:' => 'i:',
     'include-pattern:' => 'I:',
     '*repo' => 'r',
+    '*repo-threads:' => '',
     '*hhbbc2' => '',
     '*mode:' => 'm:',
     '*server' => 's',
@@ -744,10 +745,11 @@ function list_tests($files, $options) {
   $args = implode(' ', $GLOBALS['recorded_options']);
 
   foreach (find_tests($files, $options) as $test) {
-    print Status::jsonEncode(array(
-      'args' => $args,
-      'name' => $test,
-    ))."\n";
+    print str_replace('\\', '\\\\',
+                      Status::jsonEncode(
+                        array('args' => $args, 'name' => $test)
+                      )
+                     )."\n";
   }
 }
 
@@ -1051,6 +1053,7 @@ function hphp_cmd($options, $test, $program) {
     '-vRuntime.ResourceLimit.CoreFileSize=0',
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
     '-vRuntime.Eval.HackCompilerExtractPath='.bin_root().'/hackc_%{schema}',
+    '-vParserThreadCount=' . ($options['repo-threads'] ?? 1),
     '--nofork=1 -thhbc -l1 -k1',
     "-o \"$test.repo\" --program $program.hhbc \"$test\"",
     $extra_args,
@@ -1065,7 +1068,7 @@ function hhbbc_cmd($options, $test, $program) {
     '--hhbbc',
     '--no-logging',
     '--no-cores',
-    '--parallel-num-threads=1',
+    '--parallel-num-threads=' . ($options['repo-threads'] ?? 1),
     '--hack-compiler-extract-path='.bin_root().'/hackc_%{schema}',
     read_opts_file("$test.hhbbc_opts"),
     "-o \"$test.repo/$program.hhbbc\" \"$test.repo/$program.hhbc\"",

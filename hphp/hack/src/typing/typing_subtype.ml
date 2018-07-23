@@ -216,6 +216,11 @@ and simplify_subtype
     (_, Toption ty_super') ->
     simplify_subtype ~deep ~this_ty ty_sub ty_super' res
 
+  | (_, Tabstract (AKnewtype (name_sub, _), _)),
+    (_, Toption (_, Tabstract (AKnewtype (name_super, _), _) as ty_super'))
+    when name_super = name_sub ->
+    simplify_subtype ~deep ~this_ty ty_sub ty_super' res
+
   (* Arrays *)
   | (r, Tarraykind ak_sub), (_, Tarraykind ak_super) ->
     begin match ak_sub, ak_super with
@@ -456,7 +461,7 @@ and simplify_subtype
     let cid_super, cid_sub = (snd x_super), (snd x_sub) in
     if cid_super = cid_sub
     then
-      if tyl_super = [] || List.length tyl_super <> List.length tyl_sub
+      if List.length tyl_super <> List.length tyl_sub
       then default ()
       else
         begin match Env.get_class env cid_sub with
@@ -733,7 +738,7 @@ and subtype_reactivity
       ConditionTypes.try_get_method_from_condition_type
         env condition_type_super is_static method_name in
     match m with
-    | Some { ce_type = lazy (_, Typing_defs.Tfun f); _  } ->
+    | Some { ce_type = lazy (_, Tfun f); _  } ->
       (* check that reactivity of interface method (effectively a promised
          reactivity of a method in derived class) is a subtype of r_super.
          NOTE: we check only for unconditional reactivity since conditional

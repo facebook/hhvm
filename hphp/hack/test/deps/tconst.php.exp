@@ -1,5 +1,6 @@
 Class \Bar -> Class \Bar
 Class \Bar -> Class \Foo
+Class \Bar -> Class \M
 Class \Bar -> Class \N
 Class \Bar -> Cstr \Foo
 Class \Bar -> Extends \Foo

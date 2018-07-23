@@ -1,4 +1,1 @@
-File "multi_as_invoke_ambiguous.php", line 29, characters 19-21:
-You are trying to access the member Bar but there is more than one implementation on a value of generic type Tg (Typing[4161])
-  File "multi_as_invoke_ambiguous.php", line 26, characters 30-31:
-  Check this out
+No errors

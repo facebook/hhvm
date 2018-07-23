@@ -3247,8 +3247,7 @@ and assign_ p ur env e1 ty2 =
       | _ -> assign_simple p ur env e1 ty2
     end
 
-  | _, Class_get _
-  | _, Obj_get _ ->
+  | pobj, Obj_get (obj, (pm, Id (_, member_name as m)), nullflavor) ->
       let lenv = env.Env.lenv in
       let no_fakes = LEnv.env_with_empty_fakes env in
       (* In this section, we check that the assignment is compatible with
@@ -3260,6 +3259,48 @@ and assign_ p ur env e1 ty2 =
        * check that the assignment is compatible with the type of
        * the member.
        *)
+      let nullsafe = match nullflavor with
+        | OG_nullthrows -> None
+        | OG_nullsafe -> Some pobj in
+      let env, tobj, obj_ty = expr ~accept_using_var:true no_fakes obj in
+      let env = save_and_merge_next_in_catch env in
+      let env, ty2' = Env.unbind env ty2 in
+      let k (env, member_ty, vis) =
+        let env = Type.sub_type p ur env ty2' member_ty in
+        env, member_ty, vis in
+      let env, result =
+        obj_get ~is_method:false ~nullsafe ~valkind:`lvalue
+          env obj_ty (CIexpr e1) m k in
+      let te1 =
+        T.make_typed_expr pobj result
+          (T.Obj_get
+             (tobj, T.make_typed_expr pm result (T.Id m), nullflavor)) in
+      let env = { env with Env.lenv = lenv } in
+      begin match obj with
+      | _, This ->
+         let env, local = Env.FakeMembers.make p env obj member_name in
+         let env, exp_real_type = Env.expand_type env result in
+         Typing_suggest.save_member member_name env exp_real_type ty2;
+         let env, ty = set_valid_rvalue p env local ty2 in
+         env, te1, ty
+      | _, Lvar _ ->
+          let env, local = Env.FakeMembers.make p env obj member_name in
+          let env, ty = set_valid_rvalue p env local ty2 in
+          env, te1, ty
+      | _ -> env, te1, ty2
+      end
+  | _, Obj_get _ ->
+      let lenv = env.Env.lenv in
+      let no_fakes = LEnv.env_with_empty_fakes env in
+      let env, te1, real_type = lvalue no_fakes e1 in
+      let env, exp_real_type = Env.expand_type env real_type in
+      let env = { env with Env.lenv = lenv } in
+      let env, ty2' = Env.unbind env ty2 in
+      let env = Type.sub_type p ur env ty2' exp_real_type in
+      env, te1, ty2
+  | _, Class_get (((), x), (_, y)) ->
+      let lenv = env.Env.lenv in
+      let no_fakes = LEnv.env_with_empty_fakes env in
       let env, te1, real_type = lvalue no_fakes e1 in
       let env, exp_real_type = Env.expand_type env real_type in
       let env = { env with Env.lenv = lenv } in
@@ -3272,29 +3313,14 @@ and assign_ p ur env e1 ty2 =
       let env = List.fold_left real_type_list ~f:begin fun env real_type ->
         Type.sub_type p ur env ety2 real_type
       end ~init:env in
-      (match e1 with
-      | _, Obj_get ((_, This | _, Lvar _ as obj),
-                    (_, Id (_, member_name)),
-                    _) ->
-          let env, local = Env.FakeMembers.make p env obj member_name in
-          let () = (match obj with
-            | _, This ->
-              Typing_suggest.save_member member_name env exp_real_type ty2
-            | _ -> ()
-          ) in
-          let env, ty = set_valid_rvalue p env local ty2 in
-          env, te1, ty
-      | _, Class_get (((), x), (_, y)) ->
-          let env, local = Env.FakeMembers.make_static p env x y in
-          let env, ty3 = set_valid_rvalue p env local ty2 in
-          (match x with
-          | CIself
-          | CIstatic ->
-              Typing_suggest.save_member y env exp_real_type ty2;
-          | _ -> ());
-          env, te1, ty3
-      | _ -> env, te1, ty2
-      )
+      let env, local = Env.FakeMembers.make_static p env x y in
+      let env, ty3 = set_valid_rvalue p env local ty2 in
+      (match x with
+       | CIself
+       | CIstatic ->
+         Typing_suggest.save_member y env exp_real_type ty2;
+       | _ -> ());
+      env, te1, ty3
   | _, Array_get ((_, Lvar (_, lvar)) as shape, ((Some _) as e2)) ->
     let access_type = Typing_arrays.static_array_access env e2 in
     (* In the case of an assignment of the form $x['new_field'] = ...;
@@ -4711,6 +4737,27 @@ and member_not_found pos ~is_method class_ member_name r =
     | Some (def_pos, v) ->
         error (`did_you_mean (def_pos, v))
 
+(* Look up the type of the property id in the type ty1 of the receiver and
+ * use the function k to postprocess the result.
+ *
+ * Essentially, if ty1 is a concrete type, e.g., class C, then k is applied
+ * to the type of the property id in C; and if ty1 is an unresolved type,
+ * e.g., a union of classes (C1 | ... | Cn), then k is applied to the type
+ * of the property id in each Ci and the results are collected into an
+ * unresolved type.
+ *
+ * The extra flexibility offered by the functional argument k is used in two
+ * places:
+ *
+ *   (1) when type-checking method calls: if the receiver has an unresolved
+ *   type, then we need to type-check the method call with each possible
+ *   receiver type and collect the results into an unresolved type;
+ *
+ *   (2) when type-checking assignments to properties: if the receiver has
+ *   an unresolved type, then we need to check that the right hand side
+ *   value can be assigned to the property id for each of the possible types
+ *   of the receiver.
+ *)
 and obj_get ~is_method ~nullsafe ?(valkind = `other) ?(explicit_tparams=[])
             ?(pos_params: expr list option) env ty1 cid id k =
   let env, method_, _ =

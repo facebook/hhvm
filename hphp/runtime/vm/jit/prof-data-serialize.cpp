@@ -1265,8 +1265,6 @@ bool serializeProfData(const std::string& filename) {
 
     write_target_profiles(ser);
 
-    InliningDecider::serializeForbiddenInlines(ser);
-
     // We've written everything directly referenced by the profile
     // data, but jitted code might still use Classes and TypeAliasReqs
     // that haven't been otherwise mentioned (eg VerifyParamType,
@@ -1307,8 +1305,6 @@ bool deserializeProfData(const std::string& filename, int numWorkers) {
     pd->setDeserialized();
 
     read_target_profiles(ser);
-
-    InliningDecider::deserializeForbiddenInlines(ser);
 
     read_classes_and_type_aliases(ser);
 

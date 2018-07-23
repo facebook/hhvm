@@ -14,31 +14,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/std/ext_std_intrinsics.h"
-
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/ext/std/ext_std.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-void HHVM_FUNCTION(disable_inlining, const Variant& function) {
-  ObjectData* obj = nullptr;
-  HPHP::Class* cls = nullptr;
-  StringData* invName = nullptr;
-  bool dynamic = false;
-  const HPHP::Func* f = vm_decode_function(function, GetCallerFrame(),
-                                           false, obj, cls, invName, dynamic,
-                                           DecodeFlags::LookupOnly);
-  if (f == nullptr || f->isAbstract()) {
-    raise_warning("disable_inlining(): undefined function");
-    return;
-  }
-
-  jit::InliningDecider::forbidInliningOf(f);
-}
 
 void HHVM_FUNCTION(trigger_oom, bool oom) {
   if (oom) setSurpriseFlag(MemExceededFlag);
@@ -82,7 +65,6 @@ Array HHVM_FUNCTION(dummy_array_builtin, const Array& arr) {
 void StandardExtension::initIntrinsics() {
   if (!RuntimeOption::EnableIntrinsicsExtension) return;
 
-  HHVM_FALIAS(__hhvm_intrinsics\\disable_inlining, disable_inlining);
   HHVM_FALIAS(__hhvm_intrinsics\\trigger_oom, trigger_oom);
   HHVM_FALIAS(__hhvm_intrinsics\\launder_value, launder_value);
 

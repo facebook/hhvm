@@ -839,6 +839,7 @@ function hhvm_cmd_impl() {
       $config,
       '-vEval.EnableArgsInBacktraces=true',
       '-vEval.EnableIntrinsicsExtension=true',
+      '-vEval.HHIRInliningIgnoreHints=false',
       $mode,
       isset($options['wholecfg']) ? '-vEval.JitPGORegionSelector=wholecfg' : '',
 

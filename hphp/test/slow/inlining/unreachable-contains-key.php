@@ -1,5 +1,6 @@
 <?hh
 
+<<__NEVER_INLINE>>
 function get_value() {
   static $x = 0;
   $x++;
@@ -19,8 +20,6 @@ function main($base) {
     printf("%s\n", $e->getMessage());
   }
 }
-
-__hhvm_intrinsics\disable_inlining('get_value');
 
 for ($i = 0; $i < 100; ++$i) {
   main([]);

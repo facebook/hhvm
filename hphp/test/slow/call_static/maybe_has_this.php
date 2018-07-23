@@ -1,14 +1,13 @@
 <?php
 
-__hhvm_intrinsics\disable_inlining('X::foo');
-__hhvm_intrinsics\disable_inlining('X::bar');
-
 class X {
+    <<__NEVER_INLINE>>
     function foo($x) {
       if ($x instanceof X) {
         $x::bar();
       }
     }
+    <<__NEVER_INLINE>>
     function bar() {
         if (isset($this)) var_dump($this);
         else var_dump(__METHOD__);

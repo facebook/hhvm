@@ -1,12 +1,15 @@
 <?hh
 
 class FooCls {
+  <<__NEVER_INLINE>>
   function __construct($a, $b, $c, $d) {
     $this->what = array($a, $b, $c, $d);
   }
+  <<__NEVER_INLINE>>
   function why() { return $this->what; }
 }
 
+<<__NEVER_INLINE>>
 function foo_maker(bool $b, $x) {
   __hhvm_intrinsics\trigger_oom($b);
   $y = new FooCls(...$x);
@@ -27,10 +30,6 @@ $small = array('array_fill', 0, 10, 'foo');
 $large = array('array_fill', 0, 10000000000, 'foo');
 $easy = array($small, $small, $small, $small);
 $hard = array($small, $small, $small, $small, $large);
-
-__hhvm_intrinsics\disable_inlining('foo_maker');
-__hhvm_intrinsics\disable_inlining('FooCls::__construct');
-__hhvm_intrinsics\disable_inlining('FooCls::why');
 
 main(false, $small);
 main(false, $small);

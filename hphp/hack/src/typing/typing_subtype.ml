@@ -457,14 +457,32 @@ and simplify_subtype
          Tarraykind _ | Tabstract ((AKnewtype _ | AKenum _), _))) ->
     invalid ()
 
-  | (p_sub, (Tclass (x_sub, tyl_sub))), (_, (Tclass (x_super, tyl_super))) ->
+  | (p_sub, (Tclass (x_sub, tyl_sub))), (p_super, (Tclass (x_super, tyl_super))) ->
     let cid_super, cid_sub = (snd x_super), (snd x_sub) in
+    (* This is side-effecting as it registers a dependency *)
+    let class_def_sub = Env.get_class env cid_sub in
     if cid_super = cid_sub
     then
-      if List.length tyl_super <> List.length tyl_sub
-      then default ()
+      (* We handle the case where a generic A<T> is used as A *)
+      let tyl_super =
+        if List.is_empty tyl_super && not (Env.is_strict env)
+        then List.map tyl_sub (fun _ -> (p_super, Tany))
+        else tyl_super in
+      let tyl_sub =
+        if List.is_empty tyl_sub && not (Env.is_strict env)
+        then List.map tyl_super (fun _ -> (p_super, Tany))
+        else tyl_sub in
+      if List.length tyl_sub <> List.length tyl_super
+      then begin
+        let n_sub = String_utils.soi (List.length tyl_sub) in
+        let n_super = String_utils.soi (List.length tyl_super) in
+        invalid_with (fun () ->
+          Errors.type_arity_mismatch (fst x_super) n_super (fst x_sub) n_sub)
+      end
+      else if List.is_empty tyl_sub && List.is_empty tyl_super
+      then valid ()
       else
-        begin match Env.get_class env cid_sub with
+        begin match class_def_sub with
         | None ->
           default ()
 
@@ -478,14 +496,14 @@ and simplify_subtype
             class_sub.tc_tparams tyl_sub tyl_super res
         end
     else
-      begin match Env.get_class env cid_sub with
+      begin match class_def_sub with
       | None ->
         default ()
 
       | Some class_sub ->
         (* We handle the case where a generic A<T> is used as A *)
         let tyl_sub =
-          if tyl_sub = [] && not (Env.is_strict env)
+          if List.is_empty tyl_sub && not (Env.is_strict env)
           then List.map class_sub.tc_tparams (fun _ -> (p_sub, Tany))
           else tyl_sub in
         if List.length class_sub.tc_tparams <> List.length tyl_sub
@@ -1258,7 +1276,7 @@ and sub_type_unwrapped_helper env ~this_ty
         | Some class_ ->
           (* We handle the case where a generic A<T> is used as A *)
           let tyl_sub =
-            if tyl_sub = [] && not (Env.is_strict env)
+            if List.is_empty tyl_sub && not (Env.is_strict env)
             then List.map class_.tc_tparams (fun _ -> (p_sub, Tany))
             else tyl_sub
           in

@@ -40,7 +40,8 @@ def verify_unittest(suite, repo, dir, mode='interp,jit',
     compiler.get_compiler_for_current_buildfile() == 'clang'
 
   command = [
-    '$(location //hphp/test:run)',
+    '/usr/local/hphpi/bin/hhvm',
+    '$(location //hphp/test:run.php)',
     suite,
     '-m',
     mode,
@@ -85,7 +86,6 @@ def verify_unittest(suite, repo, dir, mode='interp,jit',
     '//hphp/hhvm:symlinks',
     '//hphp/runtime:runtime_core',
     '//hphp/facebook/extensions:facebook_extensions',
-    '//hphp/test:run-php',
     ('' if dir.startswith('//') else '//hphp/test:') + dir,
   ]
 

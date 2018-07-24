@@ -333,30 +333,36 @@ let get_printable_shape_field_name = Env.get_shape_field_name
 
 (* Traverses two shapes structurally, parameterized by functions to run on
   common fields (on_common_field) and when the first shape has an optional
-  field that is missing in the second (on_missing_optional_field).
+  field that is missing in the second (on_missing_omittable optional_field
+  and on_missing_non_omittable_optional_field).
+
+  This is used in subtyping and unification. When subtyping, the first and
+  second fields are respectively the supertype and subtype.
 
   The unset fields of the first shape (empty if it is fully known) must be a
   subset of the unset fields of the second shape. An error will be reported
   otherwise.
 
-  If the first shape has an optional field that is not present and not
-  explicitly unset in the second shape (i.e. the second shape is partially known
-  and the field is not listed in its unset_fields), then
-  Error.missing_optional_field will be emitted.
+  If the first shape has an optional field, we distinguish two cases:
 
-  This is used in subtyping and unification. When subtyping, the first and
-  second fields are respectively the supertype and subtype.
+    - the field may be omitted in the second shape because the shape is
+    closed or because the field is explicitly unset in it;
 
-  Example of Error.missing_optional_field for subtyping:
-    s = shape('x' => int, ...)
-    t = shape('x' => int, ?'z' => bool)
-    $s = shape('x' => 1, 'z' => 2)
-    $s is a subtype of s
-    $s is not a subtype of t
-    If s is a subtype of t, then by transitivity, $s is a subtype of t
-      --> contradiction
-    We prevent this by making sure that (apply_changes ... t s) fails because
-    t has an optional field 'z' that is not unset by s.
+    - the field may not be omitted (i.e., the second shape is open and
+    the field is not explicitly unset in it).
+
+  The first case corresponds roughly to the rule
+
+      shape() <: shape(?'x' => t),
+
+  saying that a closed shape can be widened with optional fields of any
+  types.  The second case corresponds to the rule
+
+      shape(...) <: shape(?'x' => mixed, ...),
+
+  i.e., an open shape can be widened with optional fields of type mixed
+  only.
+
 *)
 let apply_shape
   ~on_common_field

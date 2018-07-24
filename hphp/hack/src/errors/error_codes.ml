@@ -363,7 +363,7 @@ module Typing                               = struct
   | InvalidShapeFieldNameNumber
   | ShapeFieldsUnknown
   | InvalidShapeRemoveKey
-  | MissingOptionalField
+  | MissingOptionalFieldDEPRECATED
   | ShapeFieldUnset
   | AbstractConcreteOverride
   | LocalVariableModifedAndUsed

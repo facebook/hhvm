@@ -1693,18 +1693,6 @@ let unknown_field_disallowed_in_shape pos1 pos2 name =
       "The field '" ^ name ^ "' is set in the shape.";
     ]
 
-let missing_optional_field pos1 pos2 name =
-  add_list (Typing.err_code Typing.MissingOptionalField)
-    (* We have the position of shape type that is marked as optional -
-     * explain why we can't omit it despite this.*)
-    (if pos2 <> Pos.none then (
-      (pos1, "The field '"^name^"' may be set to an unknown type. " ^
-              "Explicitly null out the field, or remove it " ^
-              "(with Shapes::removeKey(...))")::
-      [pos2, "The field '"^name^"' is defined as optional"])
-   else
-      [pos1, "The field '"^name^"' is missing"])
-
 let shape_fields_unknown pos1 pos2 =
   add_list (Typing.err_code Typing.ShapeFieldsUnknown)
     [

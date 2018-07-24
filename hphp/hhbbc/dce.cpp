@@ -1631,6 +1631,33 @@ void dce(Env& env, const bc::SetOpL& op) {
     });
 }
 
+void dce(Env& env, const bc::ArrayIdx& op) {
+  stack_ops(env, [&] (UseInfo& ui) {
+      if (!env.flags.wasPEI && allUnused(ui)) {
+        return PushFlags::MarkUnused;
+      }
+      return PushFlags::MarkLive;
+    });
+}
+
+void dce(Env& env, const bc::Idx& op) {
+  stack_ops(env, [&] (UseInfo& ui) {
+      if (!env.flags.wasPEI && allUnused(ui)) {
+        return PushFlags::MarkUnused;
+      }
+      return PushFlags::MarkLive;
+    });
+}
+
+void dce(Env& env, const bc::AKExists& op) {
+  stack_ops(env, [&] (UseInfo& ui) {
+      if (!env.flags.wasPEI && allUnused(ui)) {
+        return PushFlags::MarkUnused;
+      }
+      return PushFlags::MarkLive;
+    });
+}
+
 /*
  * Default implementation is conservative: assume we use all of our
  * inputs, and can't be removed even if our output is unused.

@@ -3427,6 +3427,13 @@ Emptiness emptiness(const Type& t) {
     if (!could_have_magic_bool_conversion(t)) {
       return Emptiness::NonEmpty;
     }
+  }
+
+  if (is_opt(t)) {
+    // Something like ?Int=0 is always empty, but ?Int=1 may or may not be.
+    if (auto v = tv(unopt(t))) {
+      return cellToBool(*v) ? Emptiness::Maybe : Emptiness::Empty;
+    }
   } else if (auto v = tv(t)) {
     return cellToBool(*v) ? Emptiness::NonEmpty : Emptiness::Empty;
   }
@@ -3710,9 +3717,10 @@ Type assert_emptiness(Type t) {
 Type assert_nonemptiness(Type t) {
   t = remove_uninit(std::move(t));
   if (is_opt(t)) t = unopt(std::move(t));
-  if (t.subtypeOfAny(TNull, TFalse, TArrE, TVecE, TDictE, TKeysetE)) {
+  if (t.subtypeOf(BNull | BFalse | BArrE | BVecE | BDictE | BKeysetE)) {
     return TBottom;
   }
+  if (auto const v = tv(t)) return cellToBool(*v) ? t : TBottom;
   if (t.subtypeOf(BBool)) return TTrue;
 
   auto remove = [&] (trep m, trep e) {
@@ -3888,22 +3896,21 @@ ArrKey disect_array_key(const Type& keyTy) {
 std::pair<Type,bool> arr_val_elem(const Type& aval, const ArrKey& key) {
   assert(aval.m_dataTag == DataTag::ArrLikeVal);
   auto ad = aval.m_data.aval;
-  auto const isPhpArray = aval.subtypeOrNull(BArr);
   if (key.i) {
     if (auto const r = ad->rval(*key.i)) {
       return { from_cell(r.tv()), true };
     }
-    return { isPhpArray ? TInitNull : TBottom, false };
+    return { TBottom, false };
   } else if (key.s) {
     if (auto const r = ad->rval(*key.s)) {
       return { from_cell(r.tv()), true };
     }
-    return { isPhpArray ? TInitNull : TBottom, false };
+    return { TBottom, false };
   }
 
   auto const couldBeInt = key.type.couldBe(BInt);
   auto const couldBeStr = key.type.couldBe(BStr);
-  auto ty = isPhpArray ? TInitNull : TBottom;
+  auto ty = TBottom;
   IterateKV(ad, [&] (Cell k, TypedValue v) {
       if (isStringType(k.m_type) ? couldBeStr : couldBeInt) {
         ty |= from_cell(v);
@@ -3922,15 +3929,14 @@ std::pair<Type,bool> arr_val_elem(const Type& aval, const ArrKey& key) {
  */
 std::pair<Type,bool> arr_map_elem(const Type& map, const ArrKey& key) {
   assert(map.m_dataTag == DataTag::ArrLikeMap);
-  auto const isPhpArray = map.subtypeOrNull(BArr);
   if (auto const k = key.tv()) {
     auto r = map.m_data.map->map.find(*k);
     if (r != map.m_data.map->map.end()) return { r->second, true };
-    return { isPhpArray ? TInitNull : TBottom, false };
+    return { TBottom, false };
   }
   auto couldBeInt = key.type.couldBe(BInt);
   auto couldBeStr = key.type.couldBe(BStr);
-  auto ty = isPhpArray ? TInitNull : TBottom;
+  auto ty = TBottom;
   for (auto const& kv : map.m_data.map->map) {
     if (isStringType(kv.first.m_type) ? couldBeStr : couldBeInt) {
       ty |= kv.second;
@@ -3949,20 +3955,15 @@ std::pair<Type,bool> arr_map_elem(const Type& map, const ArrKey& key) {
  */
 std::pair<Type,bool> arr_packed_elem(const Type& pack, const ArrKey& key) {
   assert(pack.m_dataTag == DataTag::ArrLikePacked);
-  auto const isPhpArray = pack.subtypeOrNull(BArr);
   if (key.i) {
     if (*key.i >= 0 && *key.i < pack.m_data.packed->elems.size()) {
       return { pack.m_data.packed->elems[*key.i], true };
     }
-    return { isPhpArray ? TInitNull : TBottom, false };
+    return { TBottom, false };
   } else if (!key.type.couldBe(BInt)) {
-    return { isPhpArray ? TInitNull : TBottom, false };
+    return { TBottom, false };
   }
-  auto ret = packed_values(*pack.m_data.packed);
-  if (isPhpArray) {
-    ret |= TInitNull;
-  }
-  return { ret, false };
+  return { packed_values(*pack.m_data.packed), false };
 }
 
 /*
@@ -3970,16 +3971,10 @@ std::pair<Type,bool> arr_packed_elem(const Type& pack, const ArrKey& key) {
  */
 std::pair<Type,bool> arr_packedn_elem(const Type& pack, const ArrKey& key) {
   assert(pack.m_dataTag == DataTag::ArrLikePackedN);
-  auto const isPhpArray = pack.subtypeOrNull(BArr);
   if (key.s || !key.type.couldBe(BInt) || (key.i && *key.i < 0)) {
-    return {isPhpArray ? TInitNull : TBottom, false};
+    return { TBottom, false };
   }
-
-  if (isPhpArray) {
-    return {union_of(pack.m_data.packedn->type, TInitNull), false};
-  }
-
-  return {pack.m_data.packedn->type, false};
+  return { pack.m_data.packedn->type, false };
 }
 
 /*
@@ -4146,14 +4141,18 @@ Type arr_map_newelem(Type& map, const Type& val) {
   return ival(lastK + 1);
 }
 
-std::pair<Type, ThrowMode> array_like_elem(const Type& arr, const ArrKey& key) {
+std::pair<Type, ThrowMode> array_like_elem(const Type& arr,
+                                           const ArrKey& key,
+                                           const Type& defaultTy) {
   const bool maybeEmpty = arr.couldBe(BArrLikeE);
   const bool mustBeStatic = arr.subtypeOrNull(BSArrLike);
 
-  auto const isPhpArray = arr.subtypeOrNull(BArr);
   if (!arr.couldBe(BArrLikeN)) {
     assert(maybeEmpty);
-    return { isPhpArray ? TInitNull : TBottom, ThrowMode::MissingElement };
+    return {
+      defaultTy,
+      key.mayThrow ? ThrowMode::MaybeBadKey : ThrowMode::MissingElement
+    };
   }
   auto pair = [&]() -> std::pair<Type, bool> {
     switch (arr.m_dataTag) {
@@ -4165,8 +4164,16 @@ std::pair<Type, ThrowMode> array_like_elem(const Type& arr, const ArrKey& key) {
     case DataTag::RefInner:
       not_reached();
 
-    case DataTag::None:
-      return { mustBeStatic ? TInitUnc : TInitCell, false };
+    case DataTag::None: {
+      auto const val = [&]{
+        if (arr.subtypeOrNull(BVArr) && !key.type.couldBe(BInt)) return TBottom;
+        if (arr.subtypeOrNull(BKeyset)) {
+          return mustBeStatic ? TUncArrKey : TArrKey;
+        }
+        return mustBeStatic ? TInitUnc : TInitCell;
+      }();
+      return { val, false };
+    }
 
     case DataTag::ArrLikeVal:
       return arr_val_elem(arr, key);
@@ -4181,27 +4188,27 @@ std::pair<Type, ThrowMode> array_like_elem(const Type& arr, const ArrKey& key) {
       return arr_map_elem(arr, key);
 
     case DataTag::ArrLikeMapN:
-      if (isPhpArray) {
-        return { union_of(arr.m_data.mapn->val, TInitNull), false};
-      } else {
-        return { arr.m_data.mapn->val, false };
-      }
+      return { arr.m_data.mapn->val, false };
     }
     not_reached();
   }();
 
+  auto const isBottom = pair.first.subtypeOf(BBottom);
   std::pair<Type, ThrowMode> ret = {
     std::move(pair.first),
     key.mayThrow ? ThrowMode::MaybeBadKey :
-    pair.second ? ThrowMode::None : ThrowMode::MaybeMissingElement
+    pair.second ? ThrowMode::None :
+    isBottom ? ThrowMode::MissingElement :
+    ThrowMode::MaybeMissingElement
   };
+  if (!pair.second) ret.first |= defaultTy;
 
   if (!ret.first.subtypeOf(BInitCell)) {
     ret.first = TInitCell;
   }
 
   if (maybeEmpty) {
-    if (isPhpArray) ret.first |= TInitNull;
+    ret.first |= defaultTy;
     if (ret.second == ThrowMode::None) {
       ret.second = ThrowMode::MaybeMissingElement;
     }
@@ -4211,10 +4218,10 @@ std::pair<Type, ThrowMode> array_like_elem(const Type& arr, const ArrKey& key) {
 }
 
 std::pair<Type,ThrowMode>
-array_elem(const Type& arr, const Type& undisectedKey) {
-  assert(arr.subtypeOf(BArr));
+array_elem(const Type& arr, const Type& undisectedKey, const Type& defaultTy) {
+  assert(arr.subtypeOrNull(BArr));
   auto const key = disect_array_key(undisectedKey);
-  return array_like_elem(arr, key);
+  return array_like_elem(arr, key, defaultTy);
 }
 
 /*
@@ -4728,10 +4735,10 @@ ArrKey disect_vec_key(const Type& keyTy) {
 }
 
 std::pair<Type, ThrowMode>
-vec_elem(const Type& vec, const Type& undisectedKey) {
+vec_elem(const Type& vec, const Type& undisectedKey, const Type& defaultTy) {
   auto const key = disect_vec_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
-  return array_like_elem(vec, key);
+  return array_like_elem(vec, key, defaultTy);
 }
 
 std::pair<Type, ThrowMode>
@@ -4781,10 +4788,10 @@ ArrKey disect_strict_key(const Type& keyTy) {
 }
 
 std::pair<Type, ThrowMode>
-dict_elem(const Type& dict, const Type& undisectedKey) {
+dict_elem(const Type& dict, const Type& undisectedKey, const Type& defaultTy) {
   auto const key = disect_strict_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
-  return array_like_elem(dict, key);
+  return array_like_elem(dict, key, defaultTy);
 }
 
 std::pair<Type, ThrowMode>
@@ -4805,10 +4812,12 @@ std::pair<Type,Type> dict_newelem(Type dict, const Type& val) {
 //////////////////////////////////////////////////////////////////////
 
 std::pair<Type, ThrowMode>
-keyset_elem(const Type& keyset, const Type& undisectedKey) {
+keyset_elem(const Type& keyset,
+            const Type& undisectedKey,
+            const Type& defaultTy) {
   auto const key = disect_strict_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
-  return array_like_elem(keyset, key);
+  return array_like_elem(keyset, key, defaultTy);
 }
 
 std::pair<Type, ThrowMode>

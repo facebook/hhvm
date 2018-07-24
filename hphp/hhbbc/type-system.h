@@ -641,7 +641,8 @@ private:
   friend std::pair<Type,bool> arr_packedn_elem(const Type& pack,
                                                const ArrKey& key);
   friend std::pair<Type,ThrowMode> array_like_elem(const Type& arr,
-                                                    const ArrKey& key);
+                                                   const ArrKey& key,
+                                                   const Type& defaultTy);
   friend std::pair<Type,ThrowMode> array_like_set(Type arr,
                                                   const ArrKey& key,
                                                   const Type& val);
@@ -1434,10 +1435,14 @@ Type assert_nonemptiness(Type);
  *
  * Pre: first arg is a subtype of TArr, TVec, TDict, TKeyset respectively.
  */
-std::pair<Type,ThrowMode> array_elem(const Type& arr, const Type& key);
-std::pair<Type, ThrowMode> vec_elem(const Type& vec, const Type& key);
-std::pair<Type, ThrowMode> dict_elem(const Type& dict, const Type& key);
-std::pair<Type, ThrowMode> keyset_elem(const Type& keyset, const Type& key);
+std::pair<Type,ThrowMode> array_elem(const Type& arr, const Type& key,
+                                     const Type& defaultTy = TInitNull);
+std::pair<Type, ThrowMode> vec_elem(const Type& vec, const Type& key,
+                                    const Type& defaultTy = TBottom);
+std::pair<Type, ThrowMode> dict_elem(const Type& dict, const Type& key,
+                                     const Type& defaultTy = TBottom);
+std::pair<Type, ThrowMode> keyset_elem(const Type& keyset, const Type& key,
+                                       const Type& defaultTy = TBottom);
 
 /*
  * (array|vec|dict|keyset)_set

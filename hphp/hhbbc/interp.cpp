@@ -1840,20 +1840,90 @@ void in(ISS& env, const bc::ClsRefGetC& op) {
 }
 
 void in(ISS& env, const bc::AKExists& /*op*/) {
-  auto const t1   = popC(env);
-  auto const t2   = popC(env);
+  auto const base = popC(env);
+  auto const key  = popC(env);
 
-  auto const mayThrow = [&]{
-    if (!t1.subtypeOfAny(TObj, TArr, TVec, TDict, TKeyset)) return true;
-    if (t2.subtypeOfAny(TStr, TNull)) {
-      return t1.subtypeOfAny(TObj, TArr) &&
-        RuntimeOption::EvalHackArrCompatNotices;
+  // Bases other than array-like or object will raise a warning and return
+  // false.
+  if (!base.couldBeAny(TArr, TVec, TDict, TKeyset, TObj)) {
+    return push(env, TFalse);
+  }
+
+  // Push the returned type and annotate effects appropriately, taking into
+  // account if the base might be null. Allowing for a possibly null base lets
+  // us capture more cases.
+  auto const finish = [&] (const Type& t, bool mayThrow) {
+    if (base.couldBe(BInitNull)) return push(env, union_of(t, TFalse));
+    if (!mayThrow) {
+      constprop(env);
+      effect_free(env);
     }
-    if (t2.subtypeOf(BInt)) return false;
-    return true;
-  }();
+    if (base.subtypeOf(BBottom)) unreachable(env);
+    return push(env, t);
+  };
 
-  if (!mayThrow) nothrow(env);
+  // Helper for Hack arrays. "validKey" is the set of key types which can return
+  // a value from AKExists. "silentKey" is the set of key types which will
+  // silently return false (anything else throws). The Hack array elem functions
+  // will treat values of "silentKey" as throwing, so we must identify those
+  // cases and deal with them.
+  auto const hackArr = [&] (std::pair<Type, ThrowMode> elem,
+                            const Type& validKey,
+                            const Type& silentKey) {
+    switch (elem.second) {
+      case ThrowMode::None:
+        assertx(key.subtypeOf(validKey));
+        return finish(TTrue, false);
+      case ThrowMode::MaybeMissingElement:
+        assertx(key.subtypeOf(validKey));
+        return finish(TBool, false);
+      case ThrowMode::MissingElement:
+        assertx(key.subtypeOf(validKey));
+        return finish(TFalse, false);
+      case ThrowMode::MaybeBadKey:
+        assertx(key.couldBe(validKey));
+        return finish(
+          elem.first.subtypeOf(BBottom) ? TFalse : TBool,
+          !key.subtypeOf(BOptArrKey)
+        );
+      case ThrowMode::BadOperation:
+        assertx(!key.couldBe(validKey));
+        return finish(key.couldBe(silentKey) ? TFalse : TBottom, true);
+    }
+  };
+
+  // Vecs will throw for any key other than Int, Str, or Null, and will silently
+  // return false for the latter two.
+  if (base.subtypeOrNull(BVec)) {
+    if (key.subtypeOrNull(BStr)) return finish(TFalse, false);
+    return hackArr(vec_elem(base, key, TBottom), TInt, TOptStr);
+  }
+
+  // Dicts and keysets will throw for any key other than Int, Str, or Null,
+  // and will silently return false for Null.
+  if (base.subtypeOfAny(TOptDict, TOptKeyset)) {
+    if (key.subtypeOf(BInitNull)) return finish(TFalse, false);
+    auto const elem = base.subtypeOrNull(BDict)
+      ? dict_elem(base, key, TBottom)
+      : keyset_elem(base, key, TBottom);
+    return hackArr(elem, TArrKey, TInitNull);
+  }
+
+  if (base.subtypeOrNull(BArr)) {
+    // Unlike Idx, AKExists will transform a null key on arrays into the static
+    // empty string, so we don't need to do any fixups here.
+    auto const elem = array_elem(base, key, TBottom);
+    switch (elem.second) {
+      case ThrowMode::None:                return finish(TTrue, false);
+      case ThrowMode::MaybeMissingElement: return finish(TBool, false);
+      case ThrowMode::MissingElement:      return finish(TFalse, false);
+      case ThrowMode::MaybeBadKey:
+        return finish(elem.first.subtypeOf(BBottom) ? TFalse : TBool, true);
+      case ThrowMode::BadOperation:        always_assert(false);
+    }
+  }
+
+  // Objects or other unions of possible bases
   push(env, TBool);
 }
 
@@ -4349,15 +4419,135 @@ void in(ISS& env, const bc::AwaitAll& op) {
   push(env, TInitNull);
 }
 
-void in(ISS& env, const bc::Idx&) {
-  popC(env); popC(env); popC(env);
+namespace {
+
+void idxImpl(ISS& env, bool arraysOnly) {
+  auto const def  = popC(env);
+  auto const key  = popC(env);
+  auto const base = popC(env);
+
+  if (key.subtypeOf(BInitNull)) {
+    // A null key, regardless of whether we're ArrayIdx or Idx will always
+    // silently return the default value, regardless of the base type.
+    constprop(env);
+    effect_free(env);
+    return push(env, def);
+  }
+
+  // Push the returned type and annotate effects appropriately, taking into
+  // account if the base might be null. Allowing for a possibly null base lets
+  // us capture more cases.
+  auto const finish = [&] (const Type& t, bool canThrow) {
+    // A null base will raise if we're ArrayIdx. For Idx, it will silently
+    // return the default value.
+    auto const baseMaybeNull = base.couldBe(BInitNull);
+    if (!canThrow && (!arraysOnly || !baseMaybeNull)) {
+      constprop(env);
+      effect_free(env);
+    }
+    if (!arraysOnly && baseMaybeNull) return push(env, union_of(t, def));
+    if (t.subtypeOf(BBottom)) unreachable(env);
+    return push(env, t);
+  };
+
+  if (arraysOnly) {
+    // If ArrayIdx, we'll raise an error for anything other than array-like and
+    // null. This op is only terminal if null isn't possible.
+    if (!base.couldBeAny(TArr, TVec, TDict, TKeyset)) {
+      return finish(key.couldBe(BInitNull) ? def : TBottom, true);
+    }
+  } else if (!base.couldBeAny(TArr, TVec, TDict, TKeyset, TStr, TObj)) {
+    // Otherwise, any strange bases for Idx will just return the default value
+    // without raising.
+    return finish(def, false);
+  }
+
+  // Helper for Hack arrays. "validKey" is the set key types which can return a
+  // value from Idx. "silentKey" is the set of key types which will silently
+  // return null (anything else throws). The Hack array elem functions will
+  // treat values of "silentKey" as throwing, so we must identify those cases
+  // and deal with them.
+  auto const hackArr = [&] (std::pair<Type, ThrowMode> elem,
+                            const Type& validKey,
+                            const Type& silentKey) {
+    switch (elem.second) {
+      case ThrowMode::None:
+      case ThrowMode::MaybeMissingElement:
+      case ThrowMode::MissingElement:
+        assertx(key.subtypeOf(validKey));
+        return finish(elem.first, false);
+      case ThrowMode::MaybeBadKey:
+        assertx(key.couldBe(validKey));
+        if (key.couldBe(silentKey)) elem.first |= def;
+        return finish(elem.first, !key.subtypeOf(BOptArrKey));
+      case ThrowMode::BadOperation:
+        assertx(!key.couldBe(validKey));
+        return finish(key.couldBe(silentKey) ? def : TBottom, true);
+    }
+  };
+
+  if (base.subtypeOrNull(BVec)) {
+    // Vecs will throw for any key other than Int, Str, or Null, and will
+    // silently return the default value for the latter two.
+    if (key.subtypeOrNull(BStr)) return finish(def, false);
+    return hackArr(vec_elem(base, key, def), TInt, TOptStr);
+  }
+
+  if (base.subtypeOfAny(TOptDict, TOptKeyset)) {
+    // Dicts and keysets will throw for any key other than Int, Str, or Null,
+    // and will silently return the default value for Null.
+    auto const elem = base.subtypeOrNull(BDict)
+      ? dict_elem(base, key, def)
+      : keyset_elem(base, key, def);
+    return hackArr(elem, TArrKey, TInitNull);
+  }
+
+  if (base.subtypeOrNull(BArr)) {
+    // A possibly null key is more complicated for arrays. array_elem() will
+    // transform a null key into an empty string (matching the semantics of
+    // array access), but that's not what Idx does. So, attempt to remove
+    // nullish from the key first. If we can't, it just means we'll get a more
+    // conservative value.
+    auto maybeNull = false;
+    auto const fixedKey = [&]{
+      if (key.couldBe(TInitNull)) {
+        maybeNull = true;
+        if (is_nullish(key)) return unnullish(key);
+      }
+      return key;
+    }();
+
+    auto elem = array_elem(base, fixedKey, def);
+    // If the key was null, Idx will return the default value, so add to the
+    // return type.
+    if (maybeNull) elem.first |= def;
+
+    switch (elem.second) {
+      case ThrowMode::None:
+      case ThrowMode::MaybeMissingElement:
+      case ThrowMode::MissingElement:
+        return finish(elem.first, false);
+      case ThrowMode::MaybeBadKey:
+        return finish(elem.first, true);
+      case ThrowMode::BadOperation:
+        always_assert(false);
+    }
+  }
+
+  if (!arraysOnly && base.subtypeOrNull(BStr)) {
+    // Idx on a string always produces a string or the default value (without
+    // ever raising).
+    return finish(union_of(TStr, def), false);
+  }
+
+  // Objects or other unions of possible bases
   push(env, TInitCell);
 }
 
-void in(ISS& env, const bc::ArrayIdx&) {
-  popC(env); popC(env); popC(env);
-  push(env, TInitCell);
 }
+
+void in(ISS& env, const bc::Idx&)      { idxImpl(env, false); }
+void in(ISS& env, const bc::ArrayIdx&) { idxImpl(env, true);  }
 
 void in(ISS& env, const bc::CheckProp&) {
   if (env.ctx.cls->attrs & AttrNoOverride) {

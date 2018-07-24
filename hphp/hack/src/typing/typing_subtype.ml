@@ -1170,17 +1170,9 @@ and sub_type_unwrapped_helper env ~this_ty
       let ty_sub = (r_sub, Tunresolved [ty_sub]) in
       sub_type_unwrapped_helper env ~this_ty
         ~unwrappedToption_super ty_sub ty_super
-  | (_, Tunresolved _), (_, Tany) ->
-      (* This branch is necessary in the following case:
-       * function foo<T as I>(T $x)
-       * if I call foo with an intersection type, T is a Tvar,
-       * it's expanded version (ety_super in this case) is Tany and what
-       * we end up doing is unifying all the elements of the intersection
-       * together ...
-       * Thanks to this branch, the type variable unifies with the intersection
-       * type.
-       *)
-    fst (Unify.unify env ty_super ty_sub)
+   (* This case is for when Tany comes from expanding an empty Tvar - it will
+    * result in binding the type variable to the other type. *)
+  | _, (_, Tany) -> fst (Unify.unify env ty_super ty_sub)
     (* If the subtype is a type variable bound to an empty unresolved, record
      * this in the todo list to be checked later. But make sure that we wrap
      * any error using the position and reason information that was supplied
@@ -1227,9 +1219,6 @@ and sub_type_unwrapped_helper env ~this_ty
 (* ### End Tunresolved madness ### *)
 (****************************************************************************)
   | (_, Tany), _ -> env
-  (* This case is for when Tany comes from expanding an empty Tvar - it will
-   * result in binding the type variable to the other type. *)
-  | _, (_, Tany) -> fst (Unify.unify env ty_super ty_sub)
   | (_,   Tabstract (AKdependent d_sub, Some ty_sub)),
     (_, Tabstract (AKdependent d_super, Some ty_super))
         when d_sub = d_super ->

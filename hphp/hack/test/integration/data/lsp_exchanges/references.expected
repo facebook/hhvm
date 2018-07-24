@@ -90,11 +90,43 @@
         "uri": "${php_file_uri}",
         "range": {
           "start": {
-            "line": 18,
+            "line": 9,
+            "character": 18
+          },
+          "end": {
+            "line": 9,
+            "character": 33
+          }
+        }
+      },
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 19,
+            "character": 21
+          },
+          "end": {
+            "line": 19,
+            "character": 36
+          }
+        }
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 13,
+    "result": [
+      {
+        "uri": "${php_file_uri}",
+        "range": {
+          "start": {
+            "line": 30,
             "character": 24
           },
           "end": {
-            "line": 18,
+            "line": 30,
             "character": 26
           }
         }
@@ -103,11 +135,11 @@
         "uri": "${php_file_uri}",
         "range": {
           "start": {
-            "line": 19,
+            "line": 31,
             "character": 2
           },
           "end": {
-            "line": 19,
+            "line": 31,
             "character": 4
           }
         }
@@ -116,11 +148,11 @@
         "uri": "${php_file_uri}",
         "range": {
           "start": {
-            "line": 20,
+            "line": 32,
             "character": 4
           },
           "end": {
-            "line": 20,
+            "line": 32,
             "character": 6
           }
         }
@@ -129,11 +161,11 @@
         "uri": "${php_file_uri}",
         "range": {
           "start": {
-            "line": 20,
+            "line": 32,
             "character": 10
           },
           "end": {
-            "line": 20,
+            "line": 32,
             "character": 12
           }
         }
@@ -142,11 +174,11 @@
         "uri": "${php_file_uri}",
         "range": {
           "start": {
-            "line": 20,
+            "line": 32,
             "character": 24
           },
           "end": {
-            "line": 20,
+            "line": 32,
             "character": 26
           }
         }
@@ -155,11 +187,11 @@
         "uri": "${php_file_uri}",
         "range": {
           "start": {
-            "line": 22,
+            "line": 34,
             "character": 20
           },
           "end": {
-            "line": 22,
+            "line": 34,
             "character": 22
           }
         }
@@ -168,11 +200,11 @@
         "uri": "${php_file_uri}",
         "range": {
           "start": {
-            "line": 25,
+            "line": 37,
             "character": 30
           },
           "end": {
-            "line": 25,
+            "line": 37,
             "character": 32
           }
         }
@@ -181,11 +213,11 @@
         "uri": "${php_file_uri}",
         "range": {
           "start": {
-            "line": 26,
+            "line": 38,
             "character": 11
           },
           "end": {
-            "line": 26,
+            "line": 38,
             "character": 13
           }
         }

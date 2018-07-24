@@ -21,8 +21,14 @@ type action =
   | ClassRename of string * string (* old_name * new_name *)
   | ClassConstRename of string * string * string
     (* class_name * old_name * new_name *)
-  | MethodRename of string * string * string
-    (* class_name * old_name * new_name*)
+  | MethodRename of {
+    filename: string option;
+    definition: string SymbolDefinition.t option;
+    class_name: string;
+    old_name: string;
+    new_name: string;
+  }
+    (* file_input * method_defition * class_name * old_name * new_name*)
   | FunctionRename of string * string (* old_name * new_name *)
   | LocalVarRename of {
       filename: Relative_path.t;

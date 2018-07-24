@@ -148,8 +148,15 @@ let go conn args mode before after =
         failwith "Before and After classname must match"
       end
       else
-        ServerRefactorTypes.MethodRename
-          (before_class, before_method, after_method)
+        let filename = None in
+        let definition = None in
+        ServerRefactorTypes.MethodRename {
+          filename;
+          definition;
+          class_name = before_class;
+          old_name = before_method;
+          new_name = after_method;
+        }
     | _ ->
         failwith "Unexpected Mode" in
 

@@ -219,6 +219,7 @@ void callFunc(const Func* func, void *ctx,
         callFuncInt64Impl(f, GP_args, GP_count, SIMD_args, SIMD_count) & 1;
       return;
 
+    case KindOfFunc:
     case KindOfInt64:
       ret.m_data.num =
         callFuncInt64Impl(f, GP_args, GP_count, SIMD_args, SIMD_count);
@@ -259,8 +260,6 @@ void callFunc(const Func* func, void *ctx,
     }
 
     case KindOfUninit:
-    // TODO (T29639296)
-    case KindOfFunc:
       break;
   }
 
@@ -386,7 +385,6 @@ bool coerceFCallArgs(TypedValue* args,
       case KindOfPersistentKeyset:
       case KindOfPersistentArray:
       case KindOfRef:
-      // TODO (T29639296)
       case KindOfFunc:
         not_reached();
     }
@@ -609,9 +607,7 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfNull:         return ty == T::Void;
     case KindOfRef:          return ty == T::Mixed    || ty == T::OutputArg;
     case KindOfInt64:        return ty == T::Int64    || ty == T::Int32;
-    // TODO (T29639296)
-    case KindOfFunc:
-      break;
+    case KindOfFunc:         return ty == T::Func;
   }
   not_reached();
 }
@@ -752,6 +748,7 @@ static std::string nativeTypeString(NativeSig::Type ty) {
   case T::This:       return "this";
   case T::Class:      return "class";
   case T::Void:       return "void";
+  case T::Func:       return "func";
   }
   not_reached();
 }

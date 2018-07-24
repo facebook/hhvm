@@ -2887,10 +2887,14 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
           match = doubleCheck(val->m_data.dbl, intval);
           return;
 
+        case KindOfFunc:
         case KindOfPersistentString:
         case KindOfString: {
           double dval = 0.0;
-          DataType t = val->m_data.pstr->isNumericWithVal(intval, dval, 1);
+          auto const str = isFuncType(val->m_type) ?
+            funcToStringHelper(val->m_data.pfunc) :
+            val->m_data.pstr;
+          DataType t = str->isNumericWithVal(intval, dval, 1);
           switch (t) {
             case KindOfNull:
               intval = 0;
@@ -2958,8 +2962,6 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
           return;
 
         case KindOfRef:
-        // TODO (T29639296)
-        case KindOfFunc:
           break;
       }
       not_reached();

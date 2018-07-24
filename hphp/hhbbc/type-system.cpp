@@ -3024,10 +3024,7 @@ Type from_DataType(DataType dt) {
   case KindOfRef:      return TRef;
   case KindOfObject:   return TObj;
   case KindOfResource: return TRes;
-  // TODO (T29639296)
-  case KindOfFunc:
-    always_assert(false);
-    break;
+  case KindOfFunc:     return TFunc;
   }
   always_assert(0 && "dt in from_DataType didn't satisfy preconditions");
 }

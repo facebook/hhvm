@@ -780,6 +780,8 @@ void chain_is_type(IRGS& env, SSATmp* c, bool nullable,
   );
 };
 
+const StaticString s_FUNC_CONVERSION("Func to string conversion");
+
 bool emitIsAsTypeStructWithoutResolvingIfPossible(
   IRGS& env,
   const ArrayData* ts,
@@ -836,7 +838,12 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_int:         return primitive(TInt);
     case TypeStructure::Kind::T_bool:        return primitive(TBool);
     case TypeStructure::Kind::T_float:       return primitive(TDbl);
-    case TypeStructure::Kind::T_string:      return primitive(TStr);
+    case TypeStructure::Kind::T_string: {
+      if (t->isA(TFunc) && RuntimeOption::EvalRaiseFuncConversionWarning) {
+        gen(env, RaiseWarning, cns(env, s_FUNC_CONVERSION.get()));
+      }
+      return unionOf(TStr, TFunc);
+    }
     case TypeStructure::Kind::T_void:        return primitive(TNull);
     case TypeStructure::Kind::T_keyset:      return primitive(TKeyset);
     case TypeStructure::Kind::T_nonnull:     return primitive(TNull, true);

@@ -225,6 +225,11 @@ inline tv_rval ElemArrayPre(ArrayData* base, TypedValue key) {
   if (isStringType(dt)) {
     return ElemArrayPre<mode, intishWarn>(base, key.m_data.pstr);
   }
+  if (isFuncType(dt)) {
+    return ElemArrayPre<mode, intishWarn>(
+      base, const_cast<StringData*>(funcToStringHelper(key.m_data.pfunc))
+    );
+  }
 
   // TODO(#3888164): Array elements can never be KindOfUninit.  This API should
   // be changed.
@@ -468,9 +473,11 @@ NEVER_INLINE tv_rval ElemSlow(TypedValue& tvRef,
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
-    // TODO (T29639296)
-    case KindOfFunc:
       return ElemScalar();
+    case KindOfFunc:
+      return ElemString<mode, keyType>(
+        tvRef, funcToStringHelper(base.val().pfunc), key
+      );
     case KindOfPersistentString:
     case KindOfString:
       return ElemString<mode, keyType>(tvRef, base.val().pstr, key);
@@ -1552,6 +1559,12 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
       a, key.m_data.num, value, copy
     );
   }
+  if (isFuncType(key.m_type)) {
+    return SetElemArrayPre<setResult, intishWarn>(
+      a, const_cast<StringData*>(funcToStringHelper(key.m_data.pfunc)), value,
+      copy
+    );
+  }
   if (checkHACMisc()) {
     raiseHackArrCompatImplicitArrayKey(&key);
   }
@@ -2389,6 +2402,11 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, TypedValue key,
   if (key.m_type == KindOfInt64) {
     return UnsetElemArrayPre<false>(a, key.m_data.num, copy);
   }
+  if (isFuncType(key.m_type)) {
+    return UnsetElemArrayPre<intishWarn>(
+      a, const_cast<StringData*>(funcToStringHelper(key.m_data.pfunc)), copy
+    );
+  }
   auto const k = tvToKey(key, a);
   if (isNullType(k.m_type)) return a;
   return a->remove(k, copy);
@@ -2631,7 +2649,7 @@ bool IssetEmptyElemObj(ObjectData* instance, key_type<keyType> key) {
  * IssetEmptyElem when base is a String
  */
 template <bool useEmpty, KeyType keyType>
-bool IssetEmptyElemString(tv_rval base, key_type<keyType> key) {
+bool IssetEmptyElemString(const StringData* sd, key_type<keyType> key) {
   // TODO Task #2716479: Fix this so that the warnings raised match
   // PHP5.
   auto scratchKey = initScratchKey(key);
@@ -2664,14 +2682,14 @@ bool IssetEmptyElemString(tv_rval base, key_type<keyType> key) {
     }
     x = tv.m_data.num;
   }
-  if (x < 0 || x >= val(base).pstr->size()) {
+  if (x < 0 || x >= sd->size()) {
     return useEmpty;
   }
   if (!useEmpty) {
     return true;
   }
 
-  auto str = val(base).pstr->getChar(x);
+  auto str = sd->getChar(x);
   assertx(str->isStatic());
   return !str->toBoolean();
 }
@@ -2743,13 +2761,16 @@ NEVER_INLINE bool IssetEmptyElemSlow(tv_rval base, key_type<keyType> key) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
-    // TODO (T29639296)
-    case KindOfFunc:
       return useEmpty;
+
+    case KindOfFunc:
+      return IssetEmptyElemString<useEmpty, keyType>(
+        funcToStringHelper(val(base).pfunc), key
+      );
 
     case KindOfPersistentString:
     case KindOfString:
-      return IssetEmptyElemString<useEmpty, keyType>(base, key);
+      return IssetEmptyElemString<useEmpty, keyType>(val(base).pstr, key);
 
     case KindOfPersistentVec:
     case KindOfVec:

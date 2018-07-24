@@ -64,6 +64,14 @@ typename Op::RetType cellRelOp(Op op, Cell cell, bool val) {
   }
 }
 
+template<class Op, typename Num>
+auto strRelOp(Op op, Cell cell, Num val, const StringData* str) {
+  auto const num = stringToNumeric(str);
+  return num.m_type == KindOfInt64 ? op(num.m_data.num, val) :
+         num.m_type == KindOfDouble ? op(num.m_data.dbl, val) :
+         op(0, val);
+}
+
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
   assertx(cellIsPlausible(cell));
@@ -83,12 +91,8 @@ typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
       return op(cell.m_data.dbl, val);
 
     case KindOfPersistentString:
-    case KindOfString: {
-      auto const num = stringToNumeric(cell.m_data.pstr);
-      return num.m_type == KindOfInt64  ? op(num.m_data.num, val) :
-             num.m_type == KindOfDouble ? op(num.m_data.dbl, val) :
-             op(0, val);
-    }
+    case KindOfString:
+      return strRelOp(op, cell, val, cell.m_data.pstr);
 
     case KindOfPersistentVec:
     case KindOfVec:
@@ -117,9 +121,10 @@ typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
     case KindOfResource:
       return op(cell.m_data.pres->data()->o_toInt64(), val);
 
-    case KindOfRef:
-    // TODO (T29639296)
     case KindOfFunc:
+      return strRelOp(op, cell, val, funcToStringHelper(cell.m_data.pfunc));
+
+    case KindOfRef:
       break;
   }
   not_reached();
@@ -144,12 +149,8 @@ typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
       return op(cell.m_data.dbl, val);
 
     case KindOfPersistentString:
-    case KindOfString: {
-      auto const num = stringToNumeric(cell.m_data.pstr);
-      return num.m_type == KindOfInt64  ? op(num.m_data.num, val) :
-             num.m_type == KindOfDouble ? op(num.m_data.dbl, val) :
-             op(0, val);
-    }
+    case KindOfString:
+      return strRelOp(op, cell, val, cell.m_data.pstr);
 
     case KindOfPersistentVec:
     case KindOfVec:
@@ -178,9 +179,10 @@ typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
     case KindOfResource:
       return op(cell.m_data.pres->data()->o_toDouble(), val);
 
-    case KindOfRef:
-    // TODO (T29639296)
     case KindOfFunc:
+      return strRelOp(op, cell, val, funcToStringHelper(cell.m_data.pfunc));
+
+    case KindOfRef:
       break;
   }
   not_reached();
@@ -250,9 +252,10 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
       return op(rd->data()->o_toDouble(), val->toDouble());
     }
 
-    case KindOfRef:
-    // TODO (T29639296)
     case KindOfFunc:
+      return op(funcToStringHelper(cell.m_data.pfunc), val);
+
+    case KindOfRef:
       break;
   }
   not_reached();
@@ -329,9 +332,11 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
       nonArr();
       return op(false, true);
 
-    case KindOfRef:
-    // TODO (T29639296)
     case KindOfFunc:
+      nonArr();
+      return op(false, true);
+
+    case KindOfRef:
       break;
   }
   not_reached();
@@ -393,9 +398,17 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
     case KindOfResource:
       return op(false, true);
 
+    case KindOfFunc: {
+      auto obj = const_cast<ObjectData*>(od);
+      if (obj->isCollection()) return op.collectionVsNonObj();
+      if (obj->hasToString()) {
+        String str(obj->invokeToString());
+        return op(funcToStringHelper(cell.m_data.pfunc), str.get());
+      }
+      return op(false, true);
+    }
+
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfFunc:
       break;
   }
   not_reached();
@@ -450,9 +463,12 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceData* rd) {
     case KindOfResource:
       return op(cell.m_data.pres->data(), rd);
 
+    case KindOfFunc: {
+      auto const str = funcToStringHelper(cell.m_data.pfunc);
+      return op(str->toDouble(), rd->o_toDouble());
+    }
+
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfFunc:
       break;
   }
   not_reached();
@@ -539,10 +555,10 @@ typename Op::RetType cellRelOp(Op op, Cell c1, Cell c2) {
   case KindOfArray:        return cellRelOp(op, c1, c2.m_data.parr);
   case KindOfObject:       return cellRelOp(op, c1, c2.m_data.pobj);
   case KindOfResource:     return cellRelOp(op, c1, c2.m_data.pres);
+  case KindOfFunc:
+    return cellRelOp(op, c1, funcToStringHelper(c2.m_data.pfunc));
 
   case KindOfRef:
-  // TODO (T29639296)
-  case KindOfFunc:
     break;
   }
   not_reached();
@@ -917,11 +933,13 @@ bool cellSame(Cell c1, Cell c2) {
       return c2.m_type == KindOfResource &&
         c1.m_data.pres == c2.m_data.pres;
 
+    case KindOfFunc:
+      if (c2.m_type != KindOfFunc) return false;
+      return c1.m_data.pfunc == c2.m_data.pfunc;
+
     case KindOfUninit:
     case KindOfNull:
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfFunc:
       break;
   }
   not_reached();

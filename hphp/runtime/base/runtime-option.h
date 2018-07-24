@@ -845,6 +845,8 @@ struct RuntimeOption {
   F(bool, ReffinessInvariance, false)                                   \
   F(bool, NoticeOnBuiltinDynamicCalls, false)                           \
   F(bool, RxPretendIsEnabled, false)                                    \
+  /* Raise warning when function pointers are used as strings. */       \
+  F(bool, RaiseFuncConversionWarning, false)                            \
   /*                                                                    \
    * Control dynamic calls to functions which haven't opted into being called \
    * that way.                                                          \

@@ -1413,6 +1413,41 @@ void VariableSerializer::serializeRef(tv_rval tv, bool isArrayKey) {
   }
 }
 
+void VariableSerializer::serializeFunc(const Func* func) {
+  auto const name = func->fullDisplayName();
+  switch (getType()) {
+    case Type::VarExport:
+    case Type::PHPOutput:
+      m_buf->append("fun(");
+      write(name->data(), name->size());
+      m_buf->append(')');
+      break;
+    case Type::VarDump:
+    case Type::DebugDump:
+      // TODO (T29639296)
+      // For now we use function(foo) to dump function pointers in most cases,
+      // and this can be changed in the future.
+      m_buf->append("function(");
+      m_buf->append(name->data());
+      m_buf->append(")\n");
+      break;
+    case Type::PrintR:
+    case Type::DebuggerDump:
+      m_buf->append("function(");
+      m_buf->append(name->data());
+      m_buf->append(')');
+      break;
+    case Type::JSON:
+      write(name->data(), name->size());
+      break;
+    case Type::Serialize:
+    case Type::Internal:
+    case Type::APCSerialize:
+    case Type::DebuggerSerialize:
+      raise_error("Unable to serialize a function value");
+  }
+}
+
 NEVER_INLINE
 void VariableSerializer::serializeVariant(tv_rval tv,
                                           bool isArrayKey /* = false */,
@@ -1487,9 +1522,9 @@ void VariableSerializer::serializeVariant(tv_rval tv,
       return;
 
     case KindOfFunc:
-      SystemLib::throwInvalidOperationExceptionObject(
-        "Unable to serialize func"
-      );
+      assertx(!isArrayKey);
+      serializeFunc(val(tv).pfunc);
+      return;
   }
   not_reached();
 }

@@ -1193,9 +1193,9 @@ std::string describeKeyType(const TypedValue* tv) {
   case KindOfObject:
     return tv->m_data.pobj->getClassName().get()->toCppString();
 
+  case KindOfFunc:            return "func";
   case KindOfRef:
     return describeKeyType(tv->m_data.pref->var()->asTypedValue());
-  case KindOfFunc:             return "func";
   }
   not_reached();
 }

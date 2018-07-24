@@ -2620,7 +2620,7 @@ To string conversions:
   Free the iterator variable whose index is given by S1 in the stack frame
   pointed to by S0.
 
-| DecodeCufIter<iterId>, D(Bool), S(Arr,Vec,Obj,Str)  S(FramePtr), NF
+| DecodeCufIter<iterId>, D(Bool), S(Arr,Vec,Obj,Str,Func)  S(FramePtr), NF
 
   Decode S0 as a callable, and write the decoded values to the iterator
   specified by IterId. Returns true iff it successfully decoded the callable.

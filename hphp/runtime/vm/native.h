@@ -256,6 +256,7 @@ const StringData* getInvokeName(ActRec* ar);
   X(String,     const String&,        String)         \
   X(Array,      const Array&,         Array)          \
   X(Resource,   const Resource&,      Resource)       \
+  X(Func,       Func*,                Func*)          \
   X(Mixed,      const Variant&,       Variant)        \
   X(ObjectArg,  ObjectArg,            ObjectArg)      \
   X(StringArg,  StringArg,            StringArg)      \

@@ -46,6 +46,7 @@ bool cellInstanceOf(const Cell* tv, const NamedEntity* ne) {
     case KindOfNull:
     case KindOfBoolean:
     case KindOfResource:
+    case KindOfFunc:
       return false;
 
     case KindOfInt64:
@@ -86,8 +87,6 @@ bool cellInstanceOf(const Cell* tv, const NamedEntity* ne) {
       return cls && tv->m_data.pobj->instanceof(cls);
 
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfFunc:
       break;
   }
   not_reached();
@@ -156,6 +155,13 @@ bool checkTypeStructureMatchesCellImpl(
       result = isDoubleType(type);
       break;
     case TypeStructure::Kind::T_string:
+      if (isFuncType(type)) {
+        if (RuntimeOption::EvalRaiseFuncConversionWarning) {
+          raise_warning("Func to string conversion");
+        }
+        result = true;
+        break;
+      }
       result = isStringType(type);
       break;
     case TypeStructure::Kind::T_resource:

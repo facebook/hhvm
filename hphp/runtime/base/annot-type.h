@@ -207,10 +207,10 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         : (RuntimeOption::EvalThisTypeHintLevel == 0)
           ? AnnotAction::Pass : AnnotAction::Fail;
     case AnnotMetaType::Callable:
-      // For "callable", if `dt' is not string/array/object we know
+      // For "callable", if `dt' is not string/array/object/func we know
       // it's not compatible, otherwise more checks are required
       return (isStringType(dt) || isArrayType(dt) || isVecType(dt) ||
-              dt == KindOfObject)
+              isFuncType(dt) || dt == KindOfObject)
         ? AnnotAction::CallableCheck : AnnotAction::Fail;
     case AnnotMetaType::VArray:
       if (!isArrayType(dt)) return AnnotAction::Fail;

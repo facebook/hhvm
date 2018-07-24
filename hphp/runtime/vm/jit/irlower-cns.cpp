@@ -120,13 +120,12 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
       case KindOfObject:
       case KindOfResource:
       case KindOfRef:
+      case KindOfFunc:
         v << copy{v.cns(pcns->m_data.num), dst.reg(0)};
         break;
       case KindOfDouble:
         v << copy{v.cns(pcns->m_data.dbl), dst.reg(0)};
         break;
-      case KindOfFunc:
-      // TODO (T29639296)
       case KindOfUninit:
         not_reached();
     }

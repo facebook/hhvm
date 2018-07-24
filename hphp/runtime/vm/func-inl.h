@@ -163,6 +163,13 @@ inline const StringData* Func::fullDisplayName() const {
     LIKELY(!takesInOutParams()) ? fullName() : stripInOutSuffix(fullName());
 }
 
+inline const StringData* funcToStringHelper(const Func* func) {
+  if (RuntimeOption::EvalRaiseFuncConversionWarning) {
+    raise_warning("Func to string conversion");
+  }
+  return func->fullDisplayName();
+}
+
 inline NamedEntity* Func::getNamedEntity() {
   assertx(!shared()->m_preClass);
   return *reinterpret_cast<LowPtr<NamedEntity>*>(&m_namedEntity);

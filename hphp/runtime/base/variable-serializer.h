@@ -268,6 +268,7 @@ private:
   void serializeResource(const ResourceData*);
   void serializeResourceImpl(const ResourceData* res);
   void serializeString(const String&);
+  void serializeFunc(const Func* func);
 
   Array getSerializeProps(const ObjectData* obj) const;
 };

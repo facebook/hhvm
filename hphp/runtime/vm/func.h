@@ -1519,6 +1519,11 @@ bool funcNeedsCallerFrame(const Func*);
  */
 void logFunc(const Func* func, StructuredLogEntry& ent);
 
+/*
+ * Convert a function pointer where a string is needed in some context.
+ */
+const StringData* funcToStringHelper(const Func* func);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

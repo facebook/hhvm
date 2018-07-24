@@ -166,10 +166,8 @@ static uint32_t memcache_get_flag_for_type(const Variant& var) {
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
-      return MMC_TYPE_STRING;
-    // TODO (T29639296)
     case KindOfFunc:
-      always_assert(false);
+      return MMC_TYPE_STRING;
   }
   not_reached();
 }

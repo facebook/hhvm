@@ -103,6 +103,9 @@ TypedNum numericConvHelper(Cell cell) {
     case KindOfBoolean:
       return make_int(cell.m_data.num);
 
+    case KindOfFunc:
+      return stringToNumeric(funcToStringHelper(cell.m_data.pfunc));
+
     case KindOfString:
     case KindOfPersistentString:
       return stringToNumeric(cell.m_data.pstr);
@@ -126,7 +129,6 @@ TypedNum numericConvHelper(Cell cell) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfRef:
-    case KindOfFunc:
       break;
   }
   not_reached();
@@ -433,10 +435,9 @@ void cellBitOpEq(Op op, tv_lval c1, Cell c2) {
 
 // Op must implement the interface described for cellIncDecOp.
 template<class Op>
-void stringIncDecOp(Op op, tv_lval cell) {
-  assertx(isStringType(type(cell)));
+void stringIncDecOp(Op op, tv_lval cell, StringData* sd) {
+  assertx(isStringType(type(cell)) || isFuncType(type(cell)));
 
-  auto const sd = val(cell).pstr;
   if (sd->empty()) {
     decRefStr(sd);
     cellCopy(op.emptyString(), cell);
@@ -490,9 +491,15 @@ void cellIncDecOp(Op op, tv_lval cell) {
       op.dblCase(cell);
       return;
 
+    case KindOfFunc: {
+      auto s = funcToStringHelper(val(cell).pfunc);
+      stringIncDecOp(op, cell, const_cast<StringData*>(s));
+      return;
+    }
+
     case KindOfPersistentString:
     case KindOfString:
-      stringIncDecOp(op, cell);
+      stringIncDecOp(op, cell, val(cell).pstr);
       return;
 
     case KindOfBoolean:
@@ -506,8 +513,6 @@ void cellIncDecOp(Op op, tv_lval cell) {
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
-    // TODO (T29639296)
-    case KindOfFunc:
       return;
 
     case KindOfRef:

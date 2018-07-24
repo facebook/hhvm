@@ -107,9 +107,11 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
         tvDecRefRes(tv);
         continue;
 
-      case KindOfRef:
-      // TODO (T29639296)
       case KindOfFunc:
+        b = funcToStringHelper(tv->m_data.pfunc)->toBoolean();
+        continue;
+
+      case KindOfRef:
         break;
     }
     not_reached();
@@ -183,9 +185,11 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
         tvDecRefRes(tv);
         continue;
 
-      case KindOfRef:
-      // TODO (T29639296)
       case KindOfFunc:
+        d = funcToStringHelper(tv->m_data.pfunc)->toDouble();
+        continue;
+
+      case KindOfRef:
         break;
     }
     not_reached();
@@ -253,9 +257,11 @@ void tvCastToInt64InPlace(TypedValue* tv) {
         tvDecRefRes(tv);
         continue;
 
-      case KindOfRef:
-      // TODO (T29639296)
       case KindOfFunc:
+        i = funcToStringHelper(tv->m_data.pfunc)->toInt64();
+        continue;
+
+      case KindOfRef:
         break;
     }
     not_reached();
@@ -313,9 +319,10 @@ double tvCastToDouble(TypedValue tv) {
     case KindOfResource:
       return tv.m_data.pres->data()->o_toDouble();
 
-    case KindOfRef:
-    // TODO (T29639296)
     case KindOfFunc:
+      return funcToStringHelper(tv.m_data.pfunc)->toDouble();
+
+    case KindOfRef:
       break;
   }
   not_reached();
@@ -398,9 +405,12 @@ void cellCastToStringInPlace(tv_lval tv) {
       );
       return;
 
+    case KindOfFunc: {
+      auto const s = funcToStringHelper(val(tv).pfunc);
+      return persistentString(const_cast<StringData*>(s));
+    }
+
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfFunc:
       break;
   }
   not_reached();
@@ -466,9 +476,12 @@ StringData* cellCastToStringData(Cell tv) {
     case KindOfResource:
       return tv.m_data.pres->data()->o_toString().detach();
 
+    case KindOfFunc: {
+      auto const s = funcToStringHelper(tv.m_data.pfunc);
+      return const_cast<StringData*>(s);
+    }
+
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfFunc:
       not_reached();
   }
   not_reached();
@@ -495,6 +508,7 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
     case KindOfPersistentString:
     case KindOfString:
     case KindOfResource:
+    case KindOfFunc:
       return ArrayData::Create(tv);
 
     case KindOfPersistentVec:
@@ -517,8 +531,6 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
     }
 
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfFunc:
       break;
   }
   not_reached();
@@ -628,9 +640,11 @@ void tvCastToArrayInPlace(TypedValue* tv) {
         tvDecRefRes(tv);
         continue;
 
-      case KindOfRef:
-      // TODO (T29639296)
       case KindOfFunc:
+        a = ArrayData::Create(tvAsVariant(tv));
+        continue;
+
+      case KindOfRef:
         break;
     }
     not_reached();
@@ -723,9 +737,12 @@ void tvCastToVecInPlace(TypedValue* tv) {
         tvDecRefGen(tv);
         continue;
 
-      case KindOfRef:
-      // TODO (T29639296)
       case KindOfFunc:
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Func to vec conversion"
+        );
+
+      case KindOfRef:
         break;
     }
     not_reached();
@@ -814,9 +831,12 @@ void tvCastToDictInPlace(TypedValue* tv) {
         tvDecRefGen(tv);
         continue;
 
-      case KindOfRef:
-      // TODO (T29639296)
       case KindOfFunc:
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Func to dict conversion"
+        );
+
+      case KindOfRef:
         break;
     }
     not_reached();
@@ -905,9 +925,12 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
         tvDecRefGen(tv);
         continue;
 
-      case KindOfRef:
-      // TODO (T29639296)
       case KindOfFunc:
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Func to keyset conversion"
+        );
+
+      case KindOfRef:
         break;
     }
     not_reached();
@@ -1006,9 +1029,12 @@ void tvCastToVArrayInPlace(TypedValue* tv) {
         tvDecRefGen(tv);
         continue;
 
-      case KindOfRef:
-      // TODO (T29639296)
       case KindOfFunc:
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Func to varray conversion"
+        );
+
+      case KindOfRef:
         break;
     }
     not_reached();
@@ -1110,9 +1136,12 @@ void tvCastToDArrayInPlace(TypedValue* tv) {
         tvDecRefGen(tv);
         continue;
 
-      case KindOfRef:
-      // TODO (T29639296)
       case KindOfFunc:
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Func to darray conversion"
+        );
+
+      case KindOfRef:
         break;
     }
     not_reached();
@@ -1142,6 +1171,7 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
     case KindOfDouble:
     case KindOfPersistentString:
     case KindOfString:
+    case KindOfFunc:
     case KindOfResource: {
       ArrayInit props(1, ArrayInit::Map{});
       props.set(s_scalar, tv);
@@ -1167,8 +1197,6 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
       return tv.m_data.pobj;
 
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfFunc:
       break;
   }
   not_reached();
@@ -1194,6 +1222,7 @@ void tvCastToObjectInPlace(TypedValue* tv) {
       case KindOfInt64:
       case KindOfDouble:
       case KindOfPersistentString:
+      case KindOfFunc:
       case KindOfResource: {
         ArrayInit props(1, ArrayInit::Map{});
         props.set(s_scalar, *tv);
@@ -1227,8 +1256,6 @@ void tvCastToObjectInPlace(TypedValue* tv) {
         return;
 
       case KindOfRef:
-      // TODO (T29639296)
-      case KindOfFunc:
         break;
     }
     not_reached();
@@ -1300,6 +1327,7 @@ bool tvCoerceParamToBooleanInPlace(TypedValue* tv,
     case KindOfDouble:
     case KindOfPersistentString:
     case KindOfString:
+    case KindOfFunc:
       tvCastToBooleanInPlace(tv);
       return true;
 
@@ -1316,8 +1344,6 @@ bool tvCoerceParamToBooleanInPlace(TypedValue* tv,
       return false;
 
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfFunc:
       break;
   }
   not_reached();
@@ -1350,11 +1376,10 @@ static bool tvCanBeCoercedToNumber(const TypedValue* tv,
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
+    case KindOfFunc:
       return false;
 
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfFunc:
       break;
   }
   not_reached();
@@ -1408,6 +1433,7 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv,
     case KindOfDouble:
     case KindOfPersistentString:
     case KindOfString:
+    case KindOfFunc:
       tvCastToStringInPlace(tv);
       return true;
 
@@ -1432,8 +1458,6 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv,
       return false;
 
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfFunc:
       break;
   }
   not_reached();
@@ -1457,6 +1481,7 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv, bool /*builtin*/) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfFunc:
       return false;
 
     case KindOfPersistentArray:
@@ -1473,8 +1498,6 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv, bool /*builtin*/) {
       return false;
 
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfFunc:
       break;
   }
   not_reached();
@@ -1500,6 +1523,7 @@ bool tvCoerceParamToVecInPlace(TypedValue* tv, bool /*builtin*/) {
     case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
+    case KindOfFunc:
       return false;
 
     case KindOfPersistentVec:
@@ -1507,8 +1531,6 @@ bool tvCoerceParamToVecInPlace(TypedValue* tv, bool /*builtin*/) {
       return true;
 
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfFunc:
       break;
   }
   not_reached();
@@ -1534,6 +1556,7 @@ bool tvCoerceParamToDictInPlace(TypedValue* tv, bool /*builtin*/) {
     case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
+    case KindOfFunc:
       return false;
 
     case KindOfPersistentDict:
@@ -1541,8 +1564,6 @@ bool tvCoerceParamToDictInPlace(TypedValue* tv, bool /*builtin*/) {
       return true;
 
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfFunc:
       break;
   }
   not_reached();
@@ -1568,6 +1589,7 @@ bool tvCoerceParamToKeysetInPlace(TypedValue* tv, bool /*builtin*/) {
     case KindOfDict:
     case KindOfPersistentArray:
     case KindOfArray:
+    case KindOfFunc:
       return false;
 
     case KindOfPersistentKeyset:
@@ -1575,8 +1597,6 @@ bool tvCoerceParamToKeysetInPlace(TypedValue* tv, bool /*builtin*/) {
       return true;
 
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfFunc:
       break;
   }
   not_reached();

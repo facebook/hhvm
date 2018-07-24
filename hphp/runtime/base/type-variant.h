@@ -756,6 +756,9 @@ struct Variant : private TypedValue {
   bool isResource() const {
     return getType() == KindOfResource;
   }
+  bool isFunc() const {
+    return isFuncType(getType());
+  }
 
   bool isNumeric(bool checkString = false) const noexcept;
   DataType toNumeric(int64_t &ival, double &dval, bool checkString = false)

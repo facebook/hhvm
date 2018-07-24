@@ -621,7 +621,8 @@ void tvGetStrings(
     case HPHP::KindOfNull:
     case HPHP::KindOfBoolean:
     case HPHP::KindOfInt64:
-    case HPHP::KindOfDouble: {
+    case HPHP::KindOfDouble:
+    case HPHP::KindOfFunc: {
       // Not strings
       break;
     }
@@ -673,9 +674,6 @@ void tvGetStrings(
       );
       break;
     }
-    // TODO (T29639296)
-    case HPHP::KindOfFunc:
-      always_assert(false);
   }
 }
 

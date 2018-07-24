@@ -242,6 +242,7 @@ let instr_querym_cget_pt num_params key =
   instr_querym num_params QueryOp.CGet (MemberKey.PT key)
 let instr_setm num_params key = instr (IFinal (SetM (num_params, key)))
 let instr_setm_pt num_params key = instr_setm num_params (MemberKey.PT key)
+let instr_resolve_func func_id = instr (IOp (ResolveFunc func_id))
 
 let instr_await = instr (IAsync Await)
 let instr_yield = instr (IGenerator Yield)

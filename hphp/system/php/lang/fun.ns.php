@@ -29,44 +29,6 @@ namespace __SystemLib {
 namespace HH {
 
 /**
- * `fun` is a special function used to create a "pointer" to a function in a
- * typeable way.
- *
- * The typechecker disallows using strings as functions; you must instead use
- * `fun()` to make sure the typechecker looks up the function signature and
- * returns a proper function type.
- *
- * For example:
- *
- * ```
- * <?hh
- * $a = [1, 2, 3];
- *
- * $c = 'count';
- * $c($a); // Type error: cannot call a string.
- *
- * $c = fun('count');
- * $c($a); // Legal: by using fun(), $c is now a callable with the right type.
- * ```
- *
- * See also:
- *  - [`meth_caller`](/hack/reference/function/HH.meth_caller/)
- *  - [`class_meth`](/hack/reference/function/HH.class_meth/)
- *  - [`inst_meth`](/hack/reference/function/HH.inst_meth/)
- *
- * @param $s Function to look up. Must be a constant string.
- * @return A callback which will call `$s` when invoked, but has the proper Hack
- *         function signature.
- *
- * @guide /hack/callables/special-functions
- */
-<<__IsFoldable>>
-function fun(string $s) /* interpreted by the type checker as
-                           (function(<hack figures this>): <and this>) */ {
-  return $s;
-}
-
-/**
  * Like `fun`, but with the purpose of
  * calling an instance method on any object of a certain class.
  *

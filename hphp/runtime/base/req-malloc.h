@@ -145,9 +145,40 @@ struct Allocator {
   typedef std::true_type folly_has_default_object_construct;
   typedef std::true_type folly_has_default_object_destroy;
 
+  template<typename U, typename A> struct action_helper {
+    using type = A;
+  };
+
+  /*
+   * When rebinding, we want to downgrade to conservative scan if the
+   * rebound type is char, unsigned char, void, or a pointer to one of
+   * those, unless Action is Ignore.
+   */
+  template<typename A> struct action_helper<char, A> {
+    using type = typename std::conditional<
+      std::is_same<type_scan::Action::Ignore, A>::value,
+      A, type_scan::Action::Conservative<T>
+    >::type;
+  };
+
+  template<typename A> struct action_helper<unsigned char, A> {
+    using type = typename action_helper<char, A>::type;
+  };
+
+  template<typename A> struct action_helper<void, A> {
+    using type = typename action_helper<char, A>::type;
+  };
+
   template <class U>
   struct rebind {
-    typedef Allocator<U, Action> other;
+    using other = Allocator<
+      U,
+      typename action_helper<
+        typename std::remove_const<
+          typename std::remove_pointer<U>::type
+        >::type, Action
+      >::type
+    >;
   };
 
   pointer address(reference value) {

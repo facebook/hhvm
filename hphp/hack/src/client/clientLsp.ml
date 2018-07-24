@@ -899,6 +899,7 @@ let make_ide_completion_response
     | Namespace_kind -> Some Completion.Module
     | Constructor_kind -> Some Completion.Constructor
     | Keyword_kind -> Some Completion.Keyword
+    | Literal_kind -> Some Completion.Value
   in
   let hack_to_itemType (completion: complete_autocomplete_result) : string option =
     (* TODO: we're using itemType (left column) for function return types, and *)

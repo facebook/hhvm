@@ -29,6 +29,7 @@ type autocomplete_kind =
   | Function_kind
   | Interface_kind
   | Keyword_kind
+  | Literal_kind
   | Method_kind
   | Namespace_kind
   | Property_kind

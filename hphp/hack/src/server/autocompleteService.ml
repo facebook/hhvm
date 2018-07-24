@@ -31,6 +31,7 @@ type autocomplete_type =
   | Actype
   | Acclass_get
   | Acprop
+  | Acshape_key
   | Actrait_only
 
 let (argument_global_type: autocomplete_type option ref) = ref None
@@ -131,6 +132,30 @@ let get_class_elt_types env class_ cid elts =
     Tast_env.is_visible env x.ce_visibility cid class_
   end in
   SMap.map elts (fun { ce_type = lazy ty; _ } -> ty)
+
+let autocomplete_shape_key env fields id =
+  if is_auto_complete (snd id)
+  then begin
+    ac_env := Some env;
+    autocomplete_identifier := Some id;
+    argument_global_type := Some Acshape_key;
+    (* not the same as `prefix == ""` in namespaces *)
+    let have_prefix = (Pos.length (fst id)) > suffix_len in
+    let prefix = strip_suffix (snd id) in
+    let add (name: Ast.shape_field_name) =
+      let code, kind, ty = match name with
+        | Ast.SFlit (pos, str) ->
+          let reason = Typing_reason.Rwitness pos in
+          let ty = Typing_defs.Tprim Aast_defs.Tstring in
+          (Printf.sprintf "'%s'" str, Literal_kind, (reason, ty))
+        | Ast.SFclass_const ((pos, cid), (_, mid)) ->
+          (Printf.sprintf "%s::%s" cid mid, Class_constant_kind, (Reason.Rwitness pos, Typing_defs.Tany))
+      in
+      if (not have_prefix) || string_starts_with code prefix
+      then add_partial_result code (Phase.decl ty) kind None
+    in
+    List.iter (Ast.ShapeMap.keys fields) ~f:add
+  end
 
 let autocomplete_member ~is_static env class_ cid id =
   (* This is used for instance "$x->|" and static "Class1::|" members. *)
@@ -433,6 +458,7 @@ let resolve_ty
     | Enum_kind -> "enum"
     | Namespace_kind -> "namespace"
     | Keyword_kind -> "keyword"
+    | Literal_kind -> "literal"
   in
   let func_details = match ty with
     | (_, Tfun ft) ->
@@ -537,6 +563,21 @@ let visitor = object (self)
     | _ -> ()
     );
     super#on_Obj_get env obj mid ognf
+
+  method! on_expr env expr =
+    begin match expr with
+    | (_, Tast.Array_get (arr, Some ((pos, _), Tast.Id (_, mid))))
+    | (_, Tast.Array_get (arr, Some ((pos, _), Tast.String mid))) ->
+      let ty = Tast.get_type arr in
+      let _, ty = Tast_env.expand_type env ty in
+      begin match ty with
+      | _, Typing_defs.Tshape (_, fields) ->
+        autocomplete_shape_key env fields (pos, mid);
+      | _ -> ()
+      end;
+    | _ -> ()
+    end;
+    super#on_expr env expr
 
   method! on_Xml env sid attrs el =
     (* In the case where we're autocompleting an open XHP bracket but haven't

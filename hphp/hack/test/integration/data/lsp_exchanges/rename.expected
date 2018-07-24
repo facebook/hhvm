@@ -1,7 +1,7 @@
 [
   {
     "jsonrpc": "2.0",
-    "id": 1,
+    "id": 990,
     "result": {
       "capabilities": {
         "textDocumentSync": {
@@ -52,7 +52,7 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 2,
+    "id": 1,
     "result": {
       "changes": {
         "${php_file_uri}": [
@@ -72,11 +72,11 @@
           {
             "range": {
               "start": {
-                "line": 20,
+                "line": 30,
                 "character": 22
               },
               "end": {
-                "line": 20,
+                "line": 30,
                 "character": 30
               }
             },
@@ -101,7 +101,7 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 3,
+    "id": 2,
     "result": {
       "changes": {
         "${php_file_uri}": [
@@ -121,11 +121,11 @@
           {
             "range": {
               "start": {
-                "line": 22,
+                "line": 32,
                 "character": 19
               },
               "end": {
-                "line": 22,
+                "line": 32,
                 "character": 28
               }
             },
@@ -134,11 +134,11 @@
           {
             "range": {
               "start": {
-                "line": 21,
+                "line": 31,
                 "character": 15
               },
               "end": {
-                "line": 21,
+                "line": 31,
                 "character": 24
               }
             },
@@ -147,11 +147,11 @@
           {
             "range": {
               "start": {
-                "line": 20,
+                "line": 30,
                 "character": 11
               },
               "end": {
-                "line": 20,
+                "line": 30,
                 "character": 20
               }
             },
@@ -160,11 +160,11 @@
           {
             "range": {
               "start": {
-                "line": 18,
+                "line": 27,
                 "character": 20
               },
               "end": {
-                "line": 18,
+                "line": 27,
                 "character": 29
               }
             },
@@ -189,7 +189,7 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 4,
+    "id": 3,
     "result": {
       "changes": {
         "${php_file_uri}": [
@@ -209,11 +209,11 @@
           {
             "range": {
               "start": {
-                "line": 19,
+                "line": 29,
                 "character": 43
               },
               "end": {
-                "line": 19,
+                "line": 29,
                 "character": 54
               }
             },
@@ -222,11 +222,11 @@
           {
             "range": {
               "start": {
-                "line": 19,
+                "line": 29,
                 "character": 15
               },
               "end": {
-                "line": 19,
+                "line": 29,
                 "character": 26
               }
             },
@@ -238,7 +238,7 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 5,
+    "id": 4,
     "result": {
       "changes": {
         "${php_file_uri}": [
@@ -258,11 +258,11 @@
           {
             "range": {
               "start": {
-                "line": 21,
+                "line": 31,
                 "character": 26
               },
               "end": {
-                "line": 21,
+                "line": 31,
                 "character": 38
               }
             },
@@ -274,7 +274,7 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 6,
+    "id": 5,
     "result": {
       "changes": {
         "${php_file_uri}": [
@@ -294,11 +294,11 @@
           {
             "range": {
               "start": {
-                "line": 22,
+                "line": 32,
                 "character": 30
               },
               "end": {
-                "line": 22,
+                "line": 32,
                 "character": 46
               }
             },
@@ -310,18 +310,18 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 7,
+    "id": 6,
     "result": {
       "changes": {
         "${php_file_uri}": [
           {
             "range": {
               "start": {
-                "line": 25,
+                "line": 37,
                 "character": 34
               },
               "end": {
-                "line": 25,
+                "line": 37,
                 "character": 40
               }
             },
@@ -330,11 +330,11 @@
           {
             "range": {
               "start": {
-                "line": 26,
+                "line": 38,
                 "character": 2
               },
               "end": {
-                "line": 26,
+                "line": 38,
                 "character": 8
               }
             },
@@ -343,11 +343,11 @@
           {
             "range": {
               "start": {
-                "line": 27,
+                "line": 39,
                 "character": 4
               },
               "end": {
-                "line": 27,
+                "line": 39,
                 "character": 10
               }
             },
@@ -356,11 +356,11 @@
           {
             "range": {
               "start": {
-                "line": 27,
+                "line": 39,
                 "character": 14
               },
               "end": {
-                "line": 27,
+                "line": 39,
                 "character": 20
               }
             },
@@ -369,11 +369,11 @@
           {
             "range": {
               "start": {
-                "line": 27,
+                "line": 39,
                 "character": 32
               },
               "end": {
-                "line": 27,
+                "line": 39,
                 "character": 38
               }
             },
@@ -382,11 +382,11 @@
           {
             "range": {
               "start": {
-                "line": 29,
+                "line": 41,
                 "character": 20
               },
               "end": {
-                "line": 29,
+                "line": 41,
                 "character": 26
               }
             },
@@ -395,11 +395,11 @@
           {
             "range": {
               "start": {
-                "line": 32,
+                "line": 44,
                 "character": 30
               },
               "end": {
-                "line": 32,
+                "line": 44,
                 "character": 36
               }
             },
@@ -408,11 +408,11 @@
           {
             "range": {
               "start": {
-                "line": 33,
+                "line": 45,
                 "character": 11
               },
               "end": {
-                "line": 33,
+                "line": 45,
                 "character": 17
               }
             },
@@ -422,6 +422,55 @@
       }
     }
   },
+  {
+  "jsonrpc": "2.0",
+  "id": 7,
+  "result": {
+    "changes": {
+      "${php_file_uri}": [
+        {
+          "range": {
+            "start": {
+              "line": 21,
+              "character": 18
+            },
+            "end": {
+              "line": 21,
+              "character": 35
+            }
+          },
+          "newText": "new_and_improved"
+        },
+        {
+          "range": {
+            "start": {
+              "line": 34,
+              "character": 22
+            },
+            "end": {
+              "line": 34,
+              "character": 39
+            }
+          },
+          "newText": "new_and_improved"
+        },
+        {
+          "range": {
+            "start": {
+              "line": 15,
+              "character": 0
+            },
+            "end": {
+              "line": 15,
+              "character": 0
+            }
+          },
+          "newText": "\n  <<__Deprecated(\"Deprecated: Use `new_and_improved` instead\")>>\n  public function deprecated_method(int $x, string $y, int $v, ...): int {\n    return $this->new_and_improved($x, $y, $v, ...Vec\\drop(func_get_args(), 3));\n  }\n"
+        }
+      ]
+    }
+  }
+},
   {
     "jsonrpc": "2.0",
     "id": 999,

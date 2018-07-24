@@ -1,7 +1,7 @@
 [
   {
     "jsonrpc": "2.0",
-    "id": 1,
+    "id": 990,
     "method": "initialize",
     "params": {
       "initializationOptions": {},
@@ -24,7 +24,7 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 2,
+    "id": 1,
     "method": "textDocument/rename",
     "params": {
       "textDocument": {
@@ -39,7 +39,7 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 3,
+    "id": 2,
     "method": "textDocument/rename",
     "params": {
       "textDocument": {
@@ -54,6 +54,21 @@
   },
   {
     "jsonrpc": "2.0",
+    "id": 3,
+    "method": "textDocument/rename",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 29,
+        "character": 18
+      },
+      "newName": "some_other_method"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
     "id": 4,
     "method": "textDocument/rename",
     "params": {
@@ -61,10 +76,10 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 19,
-        "character": 24
+        "line": 31,
+        "character": 34
       },
-      "newName": "some_other_method"
+      "newName": "ANOTHER_STR_CONSTANT"
     }
   },
   {
@@ -76,10 +91,10 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 21,
-        "character": 33
+        "line": 32,
+        "character": 39
       },
-      "newName": "ANOTHER_STR_CONSTANT"
+      "newName": "AVOGADRO_CONSTANT"
     }
   },
   {
@@ -91,10 +106,10 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 22,
-        "character": 40
+        "line": 41,
+        "character": 23
       },
-      "newName": "AVOGADRO_CONSTANT"
+      "newName": "kittens_and_rainbows"
     }
   },
   {
@@ -106,10 +121,10 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 29,
-        "character": 24
+        "line": 34,
+        "character": 29
       },
-      "newName": "$kittens_and_rainbows"
+      "newName": "new_and_improved"
     }
   },
   {

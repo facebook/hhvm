@@ -117,11 +117,21 @@ let get_deprec_wrapper_patch ~filename ~definition new_name =
                   | _ -> failwith "Expected ListItem"
                 in
                 match syntax param with
+                (* NOTE:
+                   `ParameterDeclaration` includes regular params like "$x" and
+                    _named_ variadic parameters like "...$nums". For the latter case,
+                    calling `text parameter_name` will return the entire "...$nums"
+                    string, including the ellipsis.
+
+                  `VariadicParameter` addresses the unnamed variadic parameter
+                    "...". In this case, we provide as a parameter a function call
+                    that outputs only the variadic params (and dropping the
+                    non-variadic ones).
+                *)
                   | ParameterDeclaration { parameter_name = name; _ } -> text name
-                  | VariadicParameter { variadic_parameter_call_convention = callconv; _ } ->
-                    (* TODO: Will add support here in next revision *)
-                    (* Some (text callconv) *)
-                    failwith (Printf.sprintf "VariadicParam: %s" (text callconv))
+                  | VariadicParameter _ ->
+                    let num_of_nonvariadic_params = string_of_int ((List.length params) - 1) in
+                    "...Vec\\drop(func_get_args(), " ^ num_of_nonvariadic_params ^ ")"
                   | _ -> failwith "Expected some parameter type"
               end in
               Some params_text_list

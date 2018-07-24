@@ -33,13 +33,17 @@ let find_def_filename current_filename definition =
 
   Example of deprecated wrapper & its relation to the newly named function:
 
-    public function newlyNamedFunction(int $x, SomeClass $y, ...$nums): string {
-      // some function body
-    }
-
     <<__Deprecated("Deprecated: Use `newlyNamedFunction` instead")>>
     public function oldFunctionName(int $x, SomeClass $y, ...$nums): string {
       return $this->newlyNamedFunction($x, $y, ...$nums);
+    }
+
+    /**
+     * Some docblock
+     *
+     */
+    public function newlyNamedFunction(int $x, SomeClass $y, ...$nums): string {
+      // some function body
     }
 
 *)
@@ -59,10 +63,17 @@ let construct_deprec_wrapper_text ~func_decl_text ~params_text_list ~col_start n
   let return_statement =
     return_indentation ^ "return $this->" ^ new_name ^ "(" ^ parameter_input ^ ");"
   in
-  "\n\n" ^ deprecated_header ^
+  "\n" ^ deprecated_header ^
   "\n" ^ func_decl ^ " {" ^
   "\n" ^ return_statement ^
-  "\n" ^ base_indentation ^ "}"
+  "\n" ^ base_indentation ^ "}" ^
+  "\n"
+
+let get_pos_before_docblock_from_cst_node filename node =
+  let open Full_fidelity_positioned_syntax in
+  let source_text = source_text node in
+  let start_offset = leading_start_offset node in
+  SourceText.relative_pos filename source_text start_offset start_offset
 
 let get_deprec_wrapper_patch ~filename ~definition new_name =
   let open SymbolDefinition in
@@ -78,13 +89,9 @@ let get_deprec_wrapper_patch ~filename ~definition new_name =
       stored in positions, `destruct_range` adds 1 in order to
       return an [inclusive, exclusive) span.
 
-      Thus, we later subtract 1.
+      Thus, we subtract 1.
   *)
   let _, col_start_plus1, _, _ = Pos.destruct_range definition.span in
-  let line_offset, bytes_offset, char_offset =
-    Pos.end_line_beg_offset definition.span
-  in
-  let deprec_pos_offsets = (line_offset, bytes_offset, char_offset) in
   let col_start = col_start_plus1 - 1 in
   let filename_server_type = ServerCommandTypes.FileName filename in
   let cst_node =
@@ -132,11 +139,7 @@ let get_deprec_wrapper_patch ~filename ~definition new_name =
   let filename =
     find_def_filename (Relative_path.create_detect_prefix filename) definition
   in
-  let deprec_pos = Pos.make_from_lnum_bol_cnum
-    ~pos_file:filename
-    ~pos_start:deprec_pos_offsets
-    ~pos_end:deprec_pos_offsets
-  in
+  let deprec_pos = get_pos_before_docblock_from_cst_node filename cst_node in
   let patch = {
     pos = Pos.to_absolute deprec_pos;
     text = deprec_wrapper_text;

@@ -175,14 +175,14 @@ static const StaticString s_errors("errors");
 Array HHVM_STATIC_METHOD(DateTime, getLastErrors) {
   Array errors = DateTime::getLastErrors();
   Array warnings = DateTime::getLastWarnings();
-  Array ret = Array::Create();
+  DArrayInit ret(4);
 
   ret.add(s_warning_count, warnings.size());
   ret.add(s_warnings, warnings);
   ret.add(s_error_count, errors.size());
   ret.add(s_errors, errors);
 
-  return ret;
+  return ret.toArray();
 }
 
 int64_t HHVM_METHOD(DateTime, getOffset) {

@@ -446,15 +446,15 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
 }
 
 Array TimeZone::getLocation() const {
-  Array ret;
-  if (!m_tzi) return ret;
+  if (!m_tzi) return Array{};
+  DArrayInit ret(4);
 
   ret.set(s_country_code, String(m_tzi->location.country_code, CopyString));
   ret.set(s_latitude,     m_tzi->location.latitude);
   ret.set(s_longitude,    m_tzi->location.longitude);
   ret.set(s_comments,     String(m_tzi->location.comments, CopyString));
 
-  return ret;
+  return ret.toArray();
 }
 
 void TimeZone::sweep() {

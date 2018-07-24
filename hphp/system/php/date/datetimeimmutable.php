@@ -105,7 +105,7 @@ class DateTimeImmutable implements DateTimeInterface {
     return $out;
   }
 
-  public static function getLastErrors(): array {
+  public static function getLastErrors(): darray {
     return DateTime::getLastErrors();
   }
 

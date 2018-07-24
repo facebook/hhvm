@@ -70,7 +70,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  static function getLastErrors(): array;
+  static function getLastErrors(): darray;
 
   /**
    * Returns the timezone offset.
@@ -228,7 +228,7 @@ class DateTimeZone {
    *
    */
   <<__Native>>
-  function getLocation(): array;
+  function getLocation(): darray;
 
   /**
    * Returns the name of the timezone.
@@ -848,7 +848,7 @@ function timezone_identifiers_list(int $what = 2047,
   return DateTimeZone::listIdentifiers($what, $country);
 }
 
-function timezone_location_get(DateTimeZone $timezone): array {
+function timezone_location_get(DateTimeZone $timezone): darray {
   return $timezone->getLocation();
 }
 

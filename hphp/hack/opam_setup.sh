@@ -19,4 +19,4 @@ else
 fi
 
 eval "$(opam config env)"
-opam install core_kernel.v0.11.0 ppx_deriving.4.2 visitors.20170828
+opam install core_kernel.v0.11.0 ppx_deriving.4.2 visitors.20170828 pcre.7.0.4

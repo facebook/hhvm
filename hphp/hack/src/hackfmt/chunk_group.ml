@@ -35,24 +35,31 @@ let get_char_range t =
       max end_char chunk_end
     )
 
-let constrain_rules t rbm rule_list =
-  let aux rule_id = Rule.cares_about_children (get_rule_kind t rule_id) in
-  let rules_that_care = List.filter rule_list ~f:aux in
-  List.fold rules_that_care ~init:rbm ~f:(fun acc k -> IMap.add k true acc)
+let propagate_breakage t initial_bindings =
+  initial_bindings
+  |> IMap.filter (fun _ is_broken -> is_broken)
+  |> IMap.keys
+  |> List.fold ~init:initial_bindings ~f:begin fun acc rule_id ->
+    let dependencies =
+      try IMap.find_unsafe rule_id t.rule_dependency_map
+      with Not_found -> []
+    in
+    dependencies
+    |> List.filter ~f:(fun id -> Rule.cares_about_children (get_rule_kind t id))
+    |> List.fold ~init:acc ~f:(fun acc id -> IMap.add id true acc)
+  end
+
+let get_always_rules t =
+  t.rule_map
+  |> IMap.filter (fun _ v -> v.Rule.kind = Rule.Always)
+  |> IMap.keys
 
 let get_always_rule_bindings t =
-  let is_always_rule _k v = v.Rule.kind = Rule.Always in
-  let always_rules = IMap.filter is_always_rule t.rule_map in
-  IMap.map (fun _ -> true) always_rules
+  get_always_rules t
+  |> List.fold ~init:IMap.empty ~f:(fun acc id -> IMap.add id true acc)
 
 let get_initial_rule_bindings t =
-  let is_always_rule _k v = v.Rule.kind = Rule.Always in
-  let always_rules = IMap.filter is_always_rule t.rule_map in
-  let get_dependencies rule_id =
-    try IMap.find_unsafe rule_id t.rule_dependency_map with Not_found -> [] in
-  let constrain k _v acc = constrain_rules t acc (get_dependencies k) in
-  let init_map = IMap.map (fun _ -> true) always_rules in
-  IMap.fold constrain always_rules init_map
+  propagate_breakage t (get_always_rule_bindings t)
 
 (* When a child rule is broken on, all its parent rules must break too. *)
 let is_dependency_satisfied parent_kind parent_val child_val =

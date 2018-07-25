@@ -610,8 +610,7 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfRef:          return ty == T::Mixed    || ty == T::OutputArg;
     case KindOfInt64:        return ty == T::Int64    || ty == T::Int32;
     case KindOfFunc:         return ty == T::Func;
-    // TODO (T29639296)
-    case KindOfClass:        return false;
+    case KindOfClass:        return ty == T::Class;
   }
   not_reached();
 }

@@ -1448,6 +1448,11 @@ void VariableSerializer::serializeFunc(const Func* func) {
   }
 }
 
+void VariableSerializer::serializeClass(const Class* cls) {
+  auto const name = cls->name();
+  write(name->data(), name->size());
+}
+
 NEVER_INLINE
 void VariableSerializer::serializeVariant(tv_rval tv,
                                           bool isArrayKey /* = false */,
@@ -1526,9 +1531,10 @@ void VariableSerializer::serializeVariant(tv_rval tv,
       serializeFunc(val(tv).pfunc);
       return;
 
-    // TODO (T29639296)
     case KindOfClass:
-      always_assert(false);
+      assertx(!isArrayKey);
+      serializeClass(val(tv).pclass);
+      return;
   }
   not_reached();
 }

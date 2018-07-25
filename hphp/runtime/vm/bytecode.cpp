@@ -1872,6 +1872,8 @@ static inline Class* lookupClsRef(Cell* input) {
     }
   } else if (input->m_type == KindOfObject) {
     class_ = input->m_data.pobj->getVMClass();
+  } else if (isClassType(input->m_type)) {
+    class_ = input->m_data.pclass;
   } else {
     raise_error("Cls: Expected string or object");
   }
@@ -2646,6 +2648,9 @@ OPTBLD_INLINE void iopInstanceOf() {
       ObjectData* rhs = c1->m_data.pobj;
       r = lhs->instanceof(rhs->getVMClass());
     }
+  } else if (isClassType(c1->m_type)) {
+    // TODO (T29639296) Exploit class pointer further
+    r = implInstanceOfHelper(c1->m_data.pclass->name(), c2);
   } else {
     raise_error("Class name must be a valid object or a string");
   }
@@ -2893,11 +2898,13 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
           return;
 
         case KindOfFunc:
+        case KindOfClass:
         case KindOfPersistentString:
         case KindOfString: {
           double dval = 0.0;
-          auto const str = isFuncType(val->m_type) ?
-            funcToStringHelper(val->m_data.pfunc) :
+          auto const str =
+            isFuncType(val->m_type) ? funcToStringHelper(val->m_data.pfunc) :
+            isClassType(val->m_type) ? classToStringHelper(val->m_data.pclass) :
             val->m_data.pstr;
           DataType t = str->isNumericWithVal(intval, dval, 1);
           switch (t) {
@@ -2968,8 +2975,6 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
           return;
 
         case KindOfRef:
-        // TODO (T29639296)
-        case KindOfClass:
           break;
       }
       not_reached();

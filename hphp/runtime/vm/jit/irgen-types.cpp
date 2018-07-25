@@ -781,7 +781,7 @@ void chain_is_type(IRGS& env, SSATmp* c, bool nullable,
 };
 
 const StaticString s_FUNC_CONVERSION("Func to string conversion");
-
+const StaticString s_CLASS_CONVERSION("Class to string conversion");
 bool emitIsAsTypeStructWithoutResolvingIfPossible(
   IRGS& env,
   const ArrayData* ts,
@@ -841,6 +841,9 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_string: {
       if (t->isA(TFunc) && RuntimeOption::EvalRaiseFuncConversionWarning) {
         gen(env, RaiseWarning, cns(env, s_FUNC_CONVERSION.get()));
+      } else if (t->isA(TCls) &&
+        RuntimeOption::EvalRaiseClassConversionWarning) {
+        gen(env, RaiseWarning, cns(env, s_CLASS_CONVERSION.get()));
       }
       return unionOf(TStr, TFunc);
     }

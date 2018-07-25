@@ -29,9 +29,10 @@
 
 namespace HPHP {
 
-// We want to avoid potential include cycle with func.h, so putting a forward
-// declaration here is more feasiable and simpler.
+// We want to avoid potential include cycle with func.h/class.h, so putting
+// forward declarations here is more feasible and simpler.
 const StringData* funcToStringHelper(const Func* func);
+const StringData* classToStringHelper(const Class* cls);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -59,8 +60,8 @@ inline bool cellToBool(Cell cell) {
     case KindOfRef:           break;
     case KindOfFunc:
       return funcToStringHelper(cell.m_data.pfunc)->toBoolean();
-    // TODO (T29639296)
-    case KindOfClass:         break;
+    case KindOfClass:
+      return classToStringHelper(cell.m_data.pclass)->toBoolean();
   }
   not_reached();
 }
@@ -89,8 +90,8 @@ inline int64_t cellToInt(Cell cell) {
     case KindOfRef:           break;
     case KindOfFunc:
       return funcToStringHelper(cell.m_data.pfunc)->toInt64(10);
-    // TODO (T29639296)
-    case KindOfClass:         break;
+    case KindOfClass:
+      return classToStringHelper(cell.m_data.pclass)->toInt64(10);
   }
   not_reached();
 }
@@ -119,6 +120,8 @@ inline Cell cellToKey(Cell cell, const ArrayData* ad) {
     return strToKey(cell.m_data.pstr);
   } else if (isFuncType(cell.m_type)) {
     return strToKey(funcToStringHelper(cell.m_data.pfunc));
+  } else if (isClassType(cell.m_type)) {
+    return strToKey(classToStringHelper(cell.m_data.pclass));
   }
 
   if (LIKELY(isIntType(cell.m_type))) return cell;

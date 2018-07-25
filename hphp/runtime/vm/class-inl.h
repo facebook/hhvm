@@ -652,5 +652,11 @@ inline bool classMayHaveMagicPropMethods(const Class* cls) {
   return (cls->attrs() & no_overrides) != no_overrides;
 }
 
+inline const StringData* classToStringHelper(const Class* cls) {
+ if (RuntimeOption::EvalRaiseClassConversionWarning) {
+   raise_warning("Class to string convesion");
+ }
+ return cls->name();
+}
 ///////////////////////////////////////////////////////////////////////////////
 }

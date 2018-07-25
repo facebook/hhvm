@@ -257,6 +257,7 @@ const StringData* getInvokeName(ActRec* ar);
   X(Array,      const Array&,         Array)          \
   X(Resource,   const Resource&,      Resource)       \
   X(Func,       Func*,                Func*)          \
+  X(Class,      const Class*,         const Class*)   \
   X(Mixed,      const Variant&,       Variant)        \
   X(ObjectArg,  ObjectArg,            ObjectArg)      \
   X(StringArg,  StringArg,            StringArg)      \
@@ -268,7 +269,6 @@ const StringData* getInvokeName(ActRec* ar);
   X(MixedRef,   const VRefParamValue&,VRefParamValue) \
   X(VarArgs,    ActRec*,              ActRec*)        \
   X(This,       ObjectData*,          ObjectData*)    \
-  X(Class,      const Class*,         const Class*)   \
   X(Void,       void,                 void)           \
   /**/
 

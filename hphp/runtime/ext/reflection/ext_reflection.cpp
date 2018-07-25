@@ -118,6 +118,8 @@ Class* Reflection::s_ReflectionExtensionClass = nullptr;
 Class* get_cls(const Variant& class_or_object) {
   if (class_or_object.is(KindOfObject)) {
     return class_or_object.toCObjRef()->getVMClass();
+  } else if (class_or_object.isClass()) {
+    return class_or_object.toClassVal();
   }
 
   return Unit::loadClass(class_or_object.toString().get());

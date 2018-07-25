@@ -174,7 +174,7 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
   // negativeCheckType() to indicate whether it is precise or not.
   always_assert(!type.hasConstVal());
   always_assert_flog(
-    !type.subtypeOfAny(TCls, TCountedStr, TPersistentArrLike),
+    !type.subtypeOfAny(TCountedStr, TPersistentArrLike),
     "Unsupported type in emitTypeTest(): {}", type
   );
 

@@ -473,12 +473,14 @@ NEVER_INLINE tv_rval ElemSlow(TypedValue& tvRef,
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
-    // TODO (T29639296)
-    case KindOfClass:
       return ElemScalar();
     case KindOfFunc:
       return ElemString<mode, keyType>(
         tvRef, funcToStringHelper(base.val().pfunc), key
+      );
+    case KindOfClass:
+      return ElemString<mode, keyType>(
+        tvRef, classToStringHelper(base.val().pclass), key
       );
     case KindOfPersistentString:
     case KindOfString:
@@ -2783,6 +2785,11 @@ NEVER_INLINE bool IssetEmptyElemSlow(tv_rval base, key_type<keyType> key) {
         funcToStringHelper(val(base).pfunc), key
       );
 
+    case KindOfClass:
+      return IssetEmptyElemString<useEmpty, keyType>(
+        classToStringHelper(val(base).pclass), key
+      );
+
     case KindOfPersistentString:
     case KindOfString:
       return IssetEmptyElemString<useEmpty, keyType>(val(base).pstr, key);
@@ -2809,8 +2816,6 @@ NEVER_INLINE bool IssetEmptyElemSlow(tv_rval base, key_type<keyType> key) {
       return IssetEmptyElemObj<useEmpty, keyType>(val(base).pobj, key);
 
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfClass:
       break;
   }
   unknownBaseType(type(base));

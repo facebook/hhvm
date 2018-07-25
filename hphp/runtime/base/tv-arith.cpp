@@ -106,6 +106,9 @@ TypedNum numericConvHelper(Cell cell) {
     case KindOfFunc:
       return stringToNumeric(funcToStringHelper(cell.m_data.pfunc));
 
+    case KindOfClass:
+      return stringToNumeric(classToStringHelper(cell.m_data.pclass));
+
     case KindOfString:
     case KindOfPersistentString:
       return stringToNumeric(cell.m_data.pstr);
@@ -129,8 +132,6 @@ TypedNum numericConvHelper(Cell cell) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -499,6 +500,12 @@ void cellIncDecOp(Op op, tv_lval cell) {
       return;
     }
 
+    case KindOfClass: {
+      auto s = classToStringHelper(val(cell).pclass);
+      stringIncDecOp(op, cell, const_cast<StringData*>(s));
+      return;
+    }
+
     case KindOfPersistentString:
     case KindOfString:
       stringIncDecOp(op, cell, val(cell).pstr);
@@ -515,8 +522,6 @@ void cellIncDecOp(Op op, tv_lval cell) {
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
-    // TODO (T29639296)
-    case KindOfClass:
       return;
 
     case KindOfRef:

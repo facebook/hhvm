@@ -258,6 +258,10 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(const Resource& v) noexcept
   : Variant(v.hdr()) {}
 
+  /* implicit */ Variant(Class* v) {
+    m_type = KindOfClass;
+    m_data.pclass = v;
+  }
   /*
    * Explicit conversion constructors. These all manipulate ref-counts of bare
    * pointers as a side-effect, so we want to be explicit when its happening.
@@ -766,6 +770,9 @@ struct Variant : private TypedValue {
   bool isFunc() const {
     return isFuncType(getType());
   }
+  bool isClass() const {
+    return isClassType(getType());
+  }
 
   bool isNumeric(bool checkString = false) const noexcept;
   DataType toNumeric(int64_t &ival, double &dval, bool checkString = false)
@@ -1082,6 +1089,9 @@ struct Variant : private TypedValue {
     return ObjNR(getObjectData());
   }
 
+  auto toClassVal() const {
+    return const_variant_ref{*this}.toClassVal();
+  }
   /*
    * Low level access that should be restricted to internal use.
    */

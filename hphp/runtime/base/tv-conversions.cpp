@@ -111,9 +111,11 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
         b = funcToStringHelper(tv->m_data.pfunc)->toBoolean();
         continue;
 
-      case KindOfRef:
-      // TODO (T29639296)
       case KindOfClass:
+        b = classToStringHelper(tv->m_data.pclass)->toBoolean();
+        continue;
+
+      case KindOfRef:
         break;
     }
     not_reached();
@@ -191,9 +193,11 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
         d = funcToStringHelper(tv->m_data.pfunc)->toDouble();
         continue;
 
-      case KindOfRef:
-      // TODO (T29639296)
       case KindOfClass:
+        d = classToStringHelper(tv->m_data.pclass)->toDouble();
+        continue;
+
+      case KindOfRef:
         break;
     }
     not_reached();
@@ -265,9 +269,11 @@ void tvCastToInt64InPlace(TypedValue* tv) {
         i = funcToStringHelper(tv->m_data.pfunc)->toInt64();
         continue;
 
-      case KindOfRef:
-      // TODO (T29639296)
       case KindOfClass:
+        i = classToStringHelper(tv->m_data.pclass)->toInt64();
+        continue;
+
+      case KindOfRef:
         break;
     }
     not_reached();
@@ -328,9 +334,10 @@ double tvCastToDouble(TypedValue tv) {
     case KindOfFunc:
       return funcToStringHelper(tv.m_data.pfunc)->toDouble();
 
-    case KindOfRef:
-    // TODO (T29639296)
     case KindOfClass:
+      return classToStringHelper(tv.m_data.pclass)->toDouble();
+
+    case KindOfRef:
       break;
   }
   not_reached();
@@ -418,9 +425,12 @@ void cellCastToStringInPlace(tv_lval tv) {
       return persistentString(const_cast<StringData*>(s));
     }
 
+    case KindOfClass: {
+      auto const s = classToStringHelper(val(tv).pclass);
+      return persistentString(const_cast<StringData*>(s));
+    }
+
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -491,9 +501,12 @@ StringData* cellCastToStringData(Cell tv) {
       return const_cast<StringData*>(s);
     }
 
+    case KindOfClass: {
+      auto const s = classToStringHelper(tv.m_data.pclass);
+      return const_cast<StringData*>(s);
+    }
+
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfClass:
       not_reached();
   }
   not_reached();

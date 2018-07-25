@@ -472,6 +472,10 @@ double coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
       auto s = funcToStringHelper(tv.m_data.pfunc);
       return coerceStrToDblHelper(const_cast<StringData*>(s), argNum, func);
     }
+    case KindOfClass: {
+      auto s = classToStringHelper(tv.m_data.pclass);
+      return coerceStrToDblHelper(const_cast<StringData*>(s), argNum, func);
+    }
     case KindOfPersistentString:
     case KindOfString:
       return coerceStrToDblHelper(tv.m_data.pstr, argNum, func);
@@ -487,8 +491,6 @@ double coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
-    // TODO (T29639296)
-    case KindOfClass:
       coerceCellFail(KindOfDouble, tv.m_type, argNum, func);
       break;
 
@@ -535,6 +537,11 @@ int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
       return coerceStrToIntHelper(const_cast<StringData*>(s), argNum, func);
     }
 
+    case KindOfClass: {
+      auto s = classToStringHelper(tv.m_data.pclass);
+      return coerceStrToIntHelper(const_cast<StringData*>(s), argNum, func);
+    }
+
     case KindOfPersistentString:
     case KindOfString:
       return coerceStrToIntHelper(tv.m_data.pstr, argNum, func);
@@ -550,8 +557,6 @@ int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
-    // TODO (T29639296)
-    case KindOfClass:
       coerceCellFail(KindOfInt64, tv.m_type, argNum, func);
       break;
 

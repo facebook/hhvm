@@ -97,7 +97,8 @@ bool array_is_valid_callback(const Array& arr) {
     return false;
   }
   auto const elem0 = arr.rvalAt(0).unboxed();
-  if (!isStringType(elem0.type()) && !isObjectType(elem0.type())) {
+  if (!isStringType(elem0.type()) && !isObjectType(elem0.type()) &&
+      !isClassType(elem0.type())) {
     return false;
   }
   auto const elem1 = arr.rvalAt(1).unboxed();
@@ -288,6 +289,8 @@ vm_decode_function(const_variant_ref function,
           }
           return nullptr;
         }
+      } else if (elem0.isClass()) {
+        cls = elem0.toClassVal();
       } else {
         assertx(elem0.isObject());
         this_ = elem0.getObjectData();

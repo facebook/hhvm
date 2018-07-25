@@ -368,9 +368,9 @@ bool Variant::toBooleanHelper() const {
     case KindOfResource:      return m_data.pres->data()->o_toBoolean();
     case KindOfFunc:
       return funcToStringHelper(m_data.pfunc)->toBoolean();
-    case KindOfRef:           return m_data.pref->var()->toBoolean();
-    // TODO (T29639296)
     case KindOfClass:
+      return classToStringHelper(m_data.pclass)->toBoolean();
+    case KindOfRef:           return m_data.pref->var()->toBoolean();
       always_assert(false);
   }
   not_reached();
@@ -397,9 +397,9 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfResource:      return m_data.pres->data()->o_toInt64();
     case KindOfFunc:
       return funcToStringHelper(m_data.pfunc)->toInt64();
-    case KindOfRef:           return m_data.pref->var()->toInt64(base);
-    // TODO (T29639296)
     case KindOfClass:
+      return classToStringHelper(m_data.pclass)->toInt64();
+    case KindOfRef:           return m_data.pref->var()->toInt64(base);
       always_assert(false);
   }
   not_reached();
@@ -426,9 +426,9 @@ double Variant::toDoubleHelper() const {
     case KindOfResource:      return m_data.pres->data()->o_toDouble();
     case KindOfFunc:
       return funcToStringHelper(m_data.pfunc)->toDouble();
-    case KindOfRef:           return m_data.pref->var()->toDouble();
-    // TODO (T29639296)
     case KindOfClass:
+      return classToStringHelper(m_data.pclass)->toDouble();
+    case KindOfRef:           return m_data.pref->var()->toDouble();
       always_assert(false);
   }
   not_reached();
@@ -458,9 +458,10 @@ Array Variant::toPHPArrayHelper() const {
     case KindOfFunc:
       return Array::Create(Variant{funcToStringHelper(m_data.pfunc),
                                    PersistentStrInit{}});
-    case KindOfRef:           return m_data.pref->var()->toArray();
-    // TODO (T29639296)
     case KindOfClass:
+      return Array::Create(Variant{classToStringHelper(m_data.pclass),
+                                   PersistentStrInit{}});
+    case KindOfRef:           return m_data.pref->var()->toArray();
       always_assert(false);
 
   }

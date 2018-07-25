@@ -162,6 +162,12 @@ bool checkTypeStructureMatchesCellImpl(
         }
         result = true;
         break;
+      } else if (isClassType(type)) {
+        if (RuntimeOption::EvalRaiseClassConversionWarning) {
+          raise_warning("Class to string conversion");
+        }
+        result = true;
+        break;
       }
       result = isStringType(type);
       break;

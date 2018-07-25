@@ -847,6 +847,8 @@ struct RuntimeOption {
   F(bool, RxPretendIsEnabled, false)                                    \
   /* Raise warning when function pointers are used as strings. */       \
   F(bool, RaiseFuncConversionWarning, false)                            \
+  /* Raise warning when class pointers are used as strings. */          \
+  F(bool, RaiseClassConversionWarning, false)                           \
   /*                                                                    \
    * Control dynamic calls to functions which haven't opted into being called \
    * that way.                                                          \

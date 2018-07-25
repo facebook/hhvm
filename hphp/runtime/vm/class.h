@@ -1619,6 +1619,12 @@ bool classMayHaveMagicPropMethods(const Class* cls);
  */
 const Class* getOwningClassForFunc(const Func* f);
 
+/*
+ * Convert a class pointer where a string is needed in some context. A warning
+ * will be raised when compiler option Eval.RaiseClassConversionWarning is true.
+ */
+const StringData* classToStringHelper(const Class* cls);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

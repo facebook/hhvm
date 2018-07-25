@@ -1,3 +1,4 @@
+--exclude=*.css
 --exclude=*.js
 --exclude=*.ml
 --exclude=*.mli

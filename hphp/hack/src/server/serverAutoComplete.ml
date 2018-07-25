@@ -51,15 +51,18 @@ let context_after_double_right_angle_bracket_regex = Str.regexp ".*[a-zA-z_0-9\"
 let get_autocomplete_context
     (content:string)
     (pos:File_content.position)
+    ~(is_manually_invoked:bool)
   : AutocompleteTypes.legacy_autocomplete_context =
   (* This function retrieves the current line of text up to the position,   *)
   (* and determines whether it's something like "<nt:te" or "->:attr".      *)
   (* This is a dumb implementation. Would be better to replace it with FFP. *)
   if pos.File_content.column = 1 then { AutocompleteTypes.
+    is_manually_invoked;
     is_xhp_classname = false;
     is_instance_member = false;
     is_after_single_colon = false;
     is_after_double_right_angle_bracket = false;
+    is_after_open_square_bracket = false;
   } else
   let pos_start = { pos with File_content.column = 1; } in
   let (offset_start, offset) = File_content.get_offsets content (pos_start, pos) in
@@ -69,18 +72,26 @@ let get_autocomplete_context
   let is_instance_member = Str.string_match context_xhp_member_regex text 0 in
   let is_after_single_colon = Str.string_match context_after_single_colon_regex text 0 in
   let is_after_double_right_angle_bracket = Str.string_match context_after_double_right_angle_bracket_regex text 0 in
-  { AutocompleteTypes.is_xhp_classname; is_instance_member; is_after_single_colon; is_after_double_right_angle_bracket }
-
+  let is_after_open_square_bracket = ((String.length text) >= 1) && ((Str.last_chars text 1) = "[") in
+  { AutocompleteTypes.
+    is_manually_invoked;
+    is_xhp_classname;
+    is_instance_member;
+    is_after_single_colon;
+    is_after_double_right_angle_bracket;
+    is_after_open_square_bracket;
+  }
 
 let auto_complete_at_position
   ~(delimit_on_namespaces:bool)
+  ~(is_manually_invoked:bool)
   ~(file_content:string)
   ~(pos:File_content.position)
   ~(tcopt:TypecheckerOptions.t)
   : AutocompleteTypes.complete_autocomplete_result list Utils.With_complete_flag.t=
   let open File_content in
   (* TODO: Avoid doing the "AUTO332" thing by modifying autocomplete service to accept a position *)
-  let autocomplete_context = get_autocomplete_context file_content pos in
+  let autocomplete_context = get_autocomplete_context file_content pos ~is_manually_invoked in
   let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
   let content = File_content.edit_file_unsafe file_content edits in
   auto_complete ~tcopt ~delimit_on_namespaces ~autocomplete_context content

@@ -46,10 +46,12 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, ServerSignatureHelp.go env (fn, line, char)
     | AUTOCOMPLETE content ->
         let autocomplete_context = { AutocompleteTypes.
+          is_manually_invoked = false;
           is_xhp_classname = false;
           is_instance_member = false;
           is_after_single_colon = false;
           is_after_double_right_angle_bracket = false;
+          is_after_open_square_bracket = false;
         } in (* feature not implemented here; it only works for LSP *)
         let result = ServerAutoComplete.auto_complete
           ~tcopt:env.tcopt ~delimit_on_namespaces:false ~autocomplete_context content in
@@ -135,14 +137,14 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | EDIT_FILE (path, edits) ->
         let edits = List.map edits ~f:Ide_api_types.ide_text_edit_to_fc in
         ServerFileSync.edit_file env path edits, ()
-    | IDE_AUTOCOMPLETE (path, pos, delimit_on_namespaces) ->
+    | IDE_AUTOCOMPLETE (path, pos, delimit_on_namespaces, is_manually_invoked) ->
         let open With_complete_flag in
         let pos = pos |> Ide_api_types.ide_pos_to_fc in
         let file_content = ServerFileSync.get_file_content (ServerCommandTypes.FileName path) in
         let offset = File_content.get_offset file_content pos in (* will raise if out of bounds *)
         let char_at_pos = File_content.get_char file_content offset in
         let results = ServerAutoComplete.auto_complete_at_position
-          ~delimit_on_namespaces ~file_content ~pos ~tcopt:env.tcopt in
+          ~delimit_on_namespaces ~is_manually_invoked ~file_content ~pos ~tcopt:env.tcopt in
         let completions = results.value in
         let is_complete = results.is_complete in
         env, { AutocompleteTypes.completions; char_at_pos; is_complete; }

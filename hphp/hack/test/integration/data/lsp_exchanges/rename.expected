@@ -21,7 +21,8 @@
             ">",
             "\\",
             ":",
-            "<"
+            "<",
+            "["
           ]
         },
         "signatureHelpProvider": {
@@ -55,7 +56,7 @@
     "id": 1,
     "result": {
       "changes": {
-        "${php_file_uri}": [
+        "file://${root_path}${path_sep}rename.php": [
           {
             "range": {
               "start": {
@@ -104,7 +105,7 @@
     "id": 2,
     "result": {
       "changes": {
-        "${php_file_uri}": [
+        "file://${root_path}${path_sep}rename.php": [
           {
             "range": {
               "start": {
@@ -192,7 +193,7 @@
     "id": 3,
     "result": {
       "changes": {
-        "${php_file_uri}": [
+        "file://${root_path}${path_sep}rename.php": [
           {
             "range": {
               "start": {
@@ -241,7 +242,7 @@
     "id": 4,
     "result": {
       "changes": {
-        "${php_file_uri}": [
+        "file://${root_path}${path_sep}rename.php": [
           {
             "range": {
               "start": {
@@ -277,7 +278,7 @@
     "id": 5,
     "result": {
       "changes": {
-        "${php_file_uri}": [
+        "file://${root_path}${path_sep}rename.php": [
           {
             "range": {
               "start": {
@@ -313,7 +314,7 @@
     "id": 6,
     "result": {
       "changes": {
-        "${php_file_uri}": [
+        "file://${root_path}${path_sep}rename.php": [
           {
             "range": {
               "start": {

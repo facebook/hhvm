@@ -269,8 +269,10 @@ let compute_complete_global
   let have_user_prefix = match !autocomplete_identifier with
     | None -> failwith "No autocomplete position was set"
     | Some (pos, _) -> Pos.length pos > suffix_len in
-  if autocomplete_context.is_after_single_colon && not have_user_prefix then
-    ()
+  let ctx = autocomplete_context in
+  if (not ctx.is_manually_invoked) && (not have_user_prefix) &&
+    (ctx.is_after_single_colon || ctx.is_after_open_square_bracket)
+  then ()
   else if autocomplete_context.is_after_double_right_angle_bracket then
     (* <<__Override>>AUTO332 *)
     ()

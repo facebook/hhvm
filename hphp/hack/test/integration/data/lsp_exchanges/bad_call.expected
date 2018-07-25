@@ -6,7 +6,7 @@
       "code": -32002,
       "message": "Server not yet initialized",
       "data": {
-        "stack": "[omitted for reproducibility]"
+        "stack": "Raised at file \"/data/users/fredemmott/fbsource/fbcode/hphp/hack/src/client/clientLsp.ml\", line 2119, characters 4-67\nCalled from file \"/data/users/fredemmott/fbsource/fbcode/hphp/hack/src/client/clientLsp.ml\", line 2378, characters 6-65\n"
       }
     }
   }

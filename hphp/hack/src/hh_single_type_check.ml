@@ -49,6 +49,7 @@ module TypedTree = Full_fidelity_syntax_tree
 type mode =
   | Ai of Ai_options.t
   | Autocomplete
+  | Autocomplete_manually_invoked
   | Ffp_autocomplete
   | Color
   | Coverage
@@ -176,7 +177,10 @@ let parse_options () =
       " Ignore all functions with attribute '__PHPStdLib'";
     "--auto-complete",
       Arg.Unit (set_mode Autocomplete),
-      " Produce autocomplete suggestions";
+      " Produce autocomplete suggestions as if triggered by trigger character";
+    "--auto-complete-manually-invoked",
+      Arg.Unit (set_mode Autocomplete_manually_invoked),
+      " Produce autocomplete suggestions as if manually triggered by user";
     "--auto-namespace-map",
       Arg.String (fun m ->
         auto_namespace_map := ServerConfig.convert_auto_namespace_to_map m),
@@ -705,7 +709,8 @@ let handle_mode
   mode filename tcopt popt parser files_contents files_info errors =
   match mode with
   | Ai _ -> ()
-  | Autocomplete ->
+  | Autocomplete
+  | Autocomplete_manually_invoked ->
       let token = "AUTO332" in
       let token_len = String.length token in
       let file = cat (Relative_path.to_absolute filename) in
@@ -714,9 +719,10 @@ let handle_mode
       let offset = Str.search_backward (Str.regexp token) file (String.length file) in
       let pos = File_content.offset_to_position file offset in
       let file = (Str.string_before file offset) ^ (Str.string_after file (offset + token_len)) in
+      let is_manually_invoked = mode = Autocomplete_manually_invoked in
 
       let result = ServerAutoComplete.auto_complete_at_position
-        ~tcopt ~pos ~delimit_on_namespaces:false ~file_content:file in
+        ~tcopt ~pos ~is_manually_invoked ~delimit_on_namespaces:false ~file_content:file in
       List.iter ~f: begin fun r ->
         let open AutocompleteTypes in
         Printf.printf "%s %s\n" r.res_name r.res_ty

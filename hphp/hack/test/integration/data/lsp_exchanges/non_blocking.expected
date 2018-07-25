@@ -21,7 +21,8 @@
             ">",
             "\\",
             ":",
-            "<"
+            "<",
+            "["
           ]
         },
         "signatureHelpProvider": {
@@ -55,7 +56,7 @@
     "id": 2,
     "result": [
       {
-        "uri": "${php_file_uri}",
+        "uri": "file://${root_path}${path_sep}non_blocking.php",
         "range": {
           "start": {
             "line": 2,

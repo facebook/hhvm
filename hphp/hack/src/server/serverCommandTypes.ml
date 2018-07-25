@@ -173,7 +173,7 @@ type _ t =
   | OPEN_FILE : string * string -> unit t
   | CLOSE_FILE : string -> unit t
   | EDIT_FILE : string * (text_edit list) -> unit t
-  | IDE_AUTOCOMPLETE : string * position * bool -> AutocompleteTypes.ide_result t
+  | IDE_AUTOCOMPLETE : string * position * bool * bool -> AutocompleteTypes.ide_result t
   | IDE_FFP_AUTOCOMPLETE : string * position -> AutocompleteTypes.ide_result t
   | DISCONNECT : unit t
   | SUBSCRIBE_DIAGNOSTIC : int -> unit t

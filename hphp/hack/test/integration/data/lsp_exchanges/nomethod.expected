@@ -21,7 +21,8 @@
             ">",
             "\\",
             ":",
-            "<"
+            "<",
+            "["
           ]
         },
         "signatureHelpProvider": {
@@ -57,7 +58,7 @@
       "code": -32601,
       "message": "not implemented: textDocument/nonExistingMethod",
       "data": {
-        "stack": "[omitted for reproducibility]"
+        "stack": "Raised at file \"/data/users/fredemmott/fbsource/fbcode/hphp/hack/src/client/clientLsp.ml\", line 2295, characters 4-40\nCalled from file \"/data/users/fredemmott/fbsource/fbcode/hphp/hack/src/client/clientLsp.ml\", line 2378, characters 6-65\n"
       }
     }
   },

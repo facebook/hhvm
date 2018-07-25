@@ -1402,16 +1402,11 @@ and sub_type_unwrapped_helper env ~this_ty
    *)
   | (_, Tabstract (AKnewtype (_, _), Some ty)),
     (_, Tabstract (AKgeneric _, _)) ->
-     Errors.try_
-       (fun () -> fst (Unify.unify env ty_super ty_sub))
-       (fun _ ->
-          Errors.try_
-           (fun () ->
-             sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty ty_super)
-           (fun _ ->
-              sub_generic_params SSet.empty env ~this_ty
-                ~unwrappedToption_super ty_sub ty_super)
-                )
+    Errors.try_
+      (fun () ->
+        sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty ty_super)
+      (fun _ ->
+        sub_generic_params SSet.empty env ~this_ty ~unwrappedToption_super ty_sub ty_super)
 
   (* Supertype is generic parameter *and* subtype is dependent.
    * We need to make this a special case because there is a *choice*
@@ -1439,33 +1434,21 @@ and sub_type_unwrapped_helper env ~this_ty
   *)
   | (_, Tabstract (AKdependent _, Some ty)), (_, Tabstract (AKgeneric _, _)) ->
     Errors.try_
-      (fun () -> fst (Unify.unify env ty_super ty_sub))
+      (fun () ->
+        let this_ty = Option.first_some this_ty (Some ety_sub) in
+        sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty ty_super)
       (fun _ ->
-         Errors.try_
-          (fun () ->
-            let this_ty = Option.first_some this_ty (Some ety_sub) in
-            sub_type_unwrapped env ~this_ty
-              ~unwrappedToption_super ty ty_super)
-          (fun _ ->
-             sub_generic_params SSet.empty env ~this_ty
-               ~unwrappedToption_super ty_sub ty_super))
+        sub_generic_params SSet.empty env ~this_ty ~unwrappedToption_super ty_sub ty_super)
 
   | (_, Tabstract (AKdependent _, Some ty)), _ ->
     let this_ty = Option.first_some this_ty (Some ety_sub) in
     sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty ty_super
 
-  (* Subtype is generic parameter
-   * We delegate this case to a separate function in order to catch cycles
+  (* Subtype or supertype is generic parameter
+   * We delegate these cases to a separate function in order to catch cycles
    * in constraints e.g. <T1 as T2, T2 as T3, T3 as T1>
    *)
-  | (_, Tabstract (AKgeneric _, _)), _ ->
-    sub_generic_params SSet.empty env ~this_ty
-      ~unwrappedToption_super ty_sub ty_super
-
-  (* Supertype is generic parameter
-   * We delegate this case to a separate function in order to catch cycles
-   * in constraints e.g. <T1 as T2, T2 as T3, T3 as T1>
-  *)
+  | (_, Tabstract (AKgeneric _, _)), _
   | _, (_, Tabstract (AKgeneric _, _)) ->
     sub_generic_params SSet.empty env ~this_ty
       ~unwrappedToption_super ty_sub ty_super

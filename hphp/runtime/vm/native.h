@@ -310,9 +310,13 @@ struct NativeSig {
 
   NativeSig() : ret(Type::Void) {}
 
-  NativeSig(Type _ret, const std::vector<Type>& _args)
-      : ret(_ret), args(_args) {
-  }
+  NativeSig(Type ret, const std::vector<Type>& args)
+      : ret(ret), args(args)
+  {}
+
+  NativeSig(Type ret, std::vector<Type>&& args)
+    : ret(ret), args(args)
+  {}
 
   template<class Ret>
   explicit NativeSig(Ret (*ptr)());

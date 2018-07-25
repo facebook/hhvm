@@ -389,14 +389,25 @@ and simplify_subtype
         | None -> default ()
       end
 
+  | (_, Tabstract (AKdependent d_sub, Some ty_sub)),
+    (_, Tabstract (AKdependent d_super, Some ty_super))
+    when d_sub = d_super ->
+    (* Dependent types are identical but bound might be different *)
+    let this_ty = Option.first_some this_ty (Some ety_sub) in
+    simplify_subtype ~deep ~this_ty ty_sub ty_super res
+
+  (* Abstract type with no bound is only compatible with itself (previous case),
+   * with one exception: lower bounds on generic types (hence no AKgeneric here)
+   *)
   | (_, Tabstract (AKnewtype _, None)),
     (_, (Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject |
-         Tclass _ | Tarraykind _ | Tabstract ((AKnewtype _ | AKenum _), _))) ->
+         Tclass _ | Tarraykind _ | Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), _))) ->
     invalid ()
 
+  (* For abstract type with a bound, use transitivity on bound *)
   | (_, Tabstract (AKnewtype _, Some ty)),
     (_, (Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject |
-         Tclass _ | Tarraykind _ | Tabstract ((AKnewtype _ | AKenum _), _))) ->
+         Tclass _ | Tarraykind _ | Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), _))) ->
     simplify_subtype ~deep ~this_ty ty ty_super res
 
   | (_, Tabstract (AKenum e_sub, _)), (_, Tabstract (AKenum e_super, _))
@@ -405,14 +416,15 @@ and simplify_subtype
   | (_, Tabstract ((AKenum _), _)), (_, (Tnonnull | Tprim Nast.Tarraykey)) ->
     valid ()
 
+  (* Similar to newtype above *)
   | (_, Tabstract (AKenum _, None)),
     (_, (Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject |
-         Tclass _ | Tarraykind _ | Tabstract ((AKnewtype _ | AKenum _), _))) ->
+         Tclass _ | Tarraykind _ | Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), _))) ->
     invalid ()
 
   | (_, Tabstract (AKenum _, Some ty)),
     (_, (Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject |
-         Tclass _ | Tarraykind _ | Tabstract ((AKnewtype _ | AKenum _), _))) ->
+         Tclass _ | Tarraykind _ | Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), _))) ->
     simplify_subtype ~deep ~this_ty ty ty_super res
 
   | (r_sub,   Tshape (fields_known_sub, fdm_sub)),
@@ -1219,11 +1231,6 @@ and sub_type_unwrapped_helper env ~this_ty
 (* ### End Tunresolved madness ### *)
 (****************************************************************************)
   | (_, Tany), _ -> env
-  | (_,   Tabstract (AKdependent d_sub, Some ty_sub)),
-    (_, Tabstract (AKdependent d_super, Some ty_super))
-        when d_sub = d_super ->
-      let this_ty = Option.first_some this_ty (Some ety_sub) in
-      sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty_sub ty_super
 
   (* This is sort of a hack because our handling of Toption is highly
    * dependent on how the type is structured. When we see a bare
@@ -1235,7 +1242,7 @@ and sub_type_unwrapped_helper env ~this_ty
       sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty_sub ty_super
 
   | (_, Tabstract (AKdependent d_sub, Some sub)),
-    (_,     Tabstract (AKdependent d_super, _)) when d_sub <> d_super ->
+    (_, Tabstract (AKdependent d_super, _)) when d_sub <> d_super ->
       let this_ty = Option.first_some this_ty (Some ety_sub) in
       (* If an error occurred while subtyping, we produce a unification error
        * so we get the full information on how the dependent type was
@@ -1406,14 +1413,6 @@ and sub_type_unwrapped_helper env ~this_ty
                 ~unwrappedToption_super ty_sub ty_super)
                 )
 
-  | (_, Tabstract ((AKnewtype (_, _) | AKenum _), Some ty)), _ ->
-    Errors.try_
-      (fun () ->
-        fst @@ Unify.unify env ty_super ty_sub
-      )
-      (fun _ ->  sub_type_unwrapped env ~this_ty
-        ~unwrappedToption_super ty ty_super)
-
   (* Supertype is generic parameter *and* subtype is dependent.
    * We need to make this a special case because there is a *choice*
    * of subtyping rule to apply.
@@ -1452,12 +1451,8 @@ and sub_type_unwrapped_helper env ~this_ty
                ~unwrappedToption_super ty_sub ty_super))
 
   | (_, Tabstract (AKdependent _, Some ty)), _ ->
-      Errors.try_
-        (fun () -> fst (Unify.unify env ty_super ty_sub))
-        (fun _ ->
-          let this_ty = Option.first_some this_ty (Some ety_sub) in
-          sub_type_unwrapped env ~this_ty
-            ~unwrappedToption_super ty ty_super)
+    let this_ty = Option.first_some this_ty (Some ety_sub) in
+    sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty ty_super
 
   (* Subtype is generic parameter
    * We delegate this case to a separate function in order to catch cycles

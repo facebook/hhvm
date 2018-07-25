@@ -1542,18 +1542,10 @@ SSATmp* implFCall(IRGS& env, uint32_t numParams, bool unpack, uint32_t numOut) {
 void emitFCall(IRGS& env,
                uint32_t numParams,
                uint32_t unpack,
+               uint32_t numRets,
                const StringData*,
                const StringData*) {
-  implFCall(env, numParams, unpack != 0, 0);
-}
-
-void emitFCallM(IRGS& env,
-                uint32_t numParams,
-                uint32_t unpack,
-                uint32_t numOut,
-                const StringData*,
-                const StringData*) {
-  implFCall(env, numParams, unpack != 0, numOut - 1);
+  implFCall(env, numParams, unpack != 0, numRets - 1);
 }
 
 void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,

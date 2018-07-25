@@ -40,7 +40,7 @@ let emit_body_instrs_inout params call_instrs =
     gather @@ List.init num_inout ~f:(fun _ -> instr_nulluninit);
     call_instrs;
     param_instrs;
-    instr_fcallm param_count has_variadic (num_inout + 1);
+    instr_fcall param_count has_variadic (num_inout + 1);
     Emit_inout_helpers.emit_list_set_for_inout_call local inout_params;
     instr_retc
   ]
@@ -64,7 +64,7 @@ let emit_body_instrs_ref params call_instrs =
   gather [
     call_instrs;
     param_instrs;
-    instr_fcall param_count has_variadic;
+    instr_fcall param_count has_variadic 1;
     instr_unboxr_nop;
     gather param_get_instrs;
     instr_retm (List.length param_get_instrs + 1)

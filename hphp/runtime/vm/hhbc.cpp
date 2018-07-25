@@ -439,12 +439,11 @@ int instrNumPops(PC pc) {
 #define FOUR(...) 4
 #define FIVE(...) 5
 #define MFINAL -3
-#define C_MFINAL -6
+#define C_MFINAL -5
 #define V_MFINAL C_MFINAL
 #define CVMANY -3
 #define CVUMANY -3
 #define FCALL -4
-#define FCALLM -5
 #define CMANY -3
 #define SMANY -1
 #define O(name, imm, pop, push, flags) pop,
@@ -461,7 +460,6 @@ int instrNumPops(PC pc) {
 #undef CVMANY
 #undef CVUMANY
 #undef FCALL
-#undef FCALLM
 #undef CMANY
 #undef SMANY
 #undef O
@@ -474,14 +472,12 @@ int instrNumPops(PC pc) {
   // FCallAwait, NewPackedArray, and some final member operations specify how
   // many values are popped in their first immediate
   if (n == -3) return getImm(pc, 0).u_IVA;
-  // FCall pops numArgs (imm0) and unpack (imm1)
-  if (n == -4) return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA;
-  // FCallM pops numArgs (imm0), unpack (imm1) and uninit values (imm2 - 1)
-  if (n == -5) {
+  // FCall pops numArgs (imm0), unpack (imm1) and uninit values (imm2 - 1)
+  if (n == -4) {
     return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA + getImm(pc, 2).u_IVA - 1;
   }
   // Other final member operations pop their first immediate + 1
-  if (n == -6) return getImm(pc, 0).u_IVA + 1;
+  if (n == -5) return getImm(pc, 0).u_IVA + 1;
 
   // For instructions with vector immediates, we have to scan the contents of
   // the vector immediate to determine how many values are popped
@@ -505,7 +501,7 @@ int instrNumPushes(PC pc) {
 #define FOUR(...) 4
 #define FIVE(...) 5
 #define INS_1(...) 0
-#define CMANY -1
+#define FCALL -1
 #define O(name, imm, pop, push, flags) push,
     OPCODES
 #undef NOV
@@ -515,13 +511,13 @@ int instrNumPushes(PC pc) {
 #undef FOUR
 #undef FIVE
 #undef INS_1
-#undef CMANY
+#undef FCALL
 #undef O
   };
   auto const op = peek_op(pc);
   int n = numberOfPushes[size_t(op)];
 
-  // The FCallM call flavors push a tuple of arguments onto the stack
+  // The FCall call flavors push a tuple of arguments onto the stack
   if (n == -1) return getImm(pc, 2).u_IVA;
 
   return n;
@@ -542,11 +538,6 @@ FlavorDesc manyFlavor(PC op, uint32_t i, FlavorDesc flavor) {
 }
 
 FlavorDesc fcallFlavor(PC op, uint32_t i) {
-  always_assert(i < uint32_t(instrNumPops(op)));
-  return i == 0 && getImm(op, 1).u_IVA ? CV : CVV;
-}
-
-FlavorDesc fcallmFlavor(PC op, uint32_t i) {
   always_assert(i < uint32_t(instrNumPops(op)));
   auto const numArgs = getImm(op, 0).u_IVA;
   auto const unpack = getImm(op, 1).u_IVA;
@@ -572,7 +563,6 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define CVMANY return manyFlavor(op, idx, CVV);
 #define CVUMANY return manyFlavor(op, idx, CVUV);
 #define FCALL return fcallFlavor(op, idx);
-#define FCALLM return fcallmFlavor(op, idx);
 #define CMANY return manyFlavor(op, idx, CV);
 #define SMANY return manyFlavor(op, idx, CV);
 #define O(name, imm, pop, push, flags) case Op::name: pop
@@ -592,7 +582,6 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef CVMANY
 #undef CVUMANY
 #undef FCALL
-#undef FCALLM
 #undef CMANY
 #undef SMANY
 #undef O
@@ -606,7 +595,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #define THREE(...) StackTransInfo::Kind::PushPop
 #define FOUR(...) StackTransInfo::Kind::PushPop
 #define FIVE(...) StackTransInfo::Kind::PushPop
-#define CMANY StackTransInfo::Kind::PushPop
+#define FCALL StackTransInfo::Kind::PushPop
 #define INS_1(...) StackTransInfo::Kind::InsertMid
 #define O(name, imm, pop, push, flags) push,
     OPCODES
@@ -617,7 +606,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #undef FOUR
 #undef FIVE
 #undef INS_1
-#undef CMANY
+#undef FCALL
 #undef O
   };
   static const int8_t peekPokeType[] = {
@@ -627,7 +616,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #define THREE(...) -1
 #define FOUR(...) -1
 #define FIVE(...) -1
-#define CMANY -1
+#define FCALL -1
 #define INS_1(...) 0
 #define O(name, imm, pop, push, flags) push,
     OPCODES
@@ -638,7 +627,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #undef FOUR
 #undef FIVE
 #undef INS_1
-#undef CMANY
+#undef FCALL
 #undef O
   };
   StackTransInfo ret;

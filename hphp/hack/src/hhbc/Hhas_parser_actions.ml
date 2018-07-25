@@ -1151,9 +1151,6 @@ match s with
                                        labelofiarg arg3, localidofiarg arg4))
  | "LIterNext" -> IIterator(LIterNext (iterofiarg arg1, localidofiarg arg2,
                                        labelofiarg arg3, localidofiarg arg4))
- | "FCall" ->
-    ICall(FCall (intofiarg arg1, has_unpack_of_iarg arg2,
-      class_id_of_iarg arg3, function_id_of_iarg arg4))
  | _ -> failwith ("NYI quaternary: " ^ s)
 
 let makequinaryinst s arg1 arg2 arg3 arg4 arg5 =
@@ -1164,7 +1161,7 @@ match s with
   | "LIterNextK" -> IIterator(LIterNextK (iterofiarg arg1, localidofiarg arg2,
                                           labelofiarg arg3, localidofiarg arg4,
                                           localidofiarg arg5))
-  | "FCallM" ->
-    ICall(FCallM (intofiarg arg1, has_unpack_of_iarg arg2, intofiarg arg3,
+  | "FCall" ->
+    ICall(FCall (intofiarg arg1, has_unpack_of_iarg arg2, intofiarg arg3,
       class_id_of_iarg arg4, function_id_of_iarg arg5))
   | _ -> failwith ("NYI quinary: " ^ s)

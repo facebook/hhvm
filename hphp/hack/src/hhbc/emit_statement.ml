@@ -493,7 +493,7 @@ and emit_using env pos is_block_scoped has_await e b =
     let finally = gather [
         instr_cgetl local;
         instr_fpushobjmethodd 0 fn_name A.OG_nullthrows;
-        instr_fcall 0 false;
+        instr_fcall 0 false 1;
         epilogue;
         if is_block_scoped then instr_unsetl local else empty;
       ]
@@ -1054,7 +1054,7 @@ and emit_foreach_await env pos collection iterator block =
       instr_label next_label;
       instr_cgetl iter_temp_local;
       instr_fpushobjmethodd 0 next_meth A.OG_nullthrows;
-      instr_fcall 0 false;
+      instr_fcall 0 false 1;
       instr_unboxr;
       instr_await;
       instr_setl result_temp_local;

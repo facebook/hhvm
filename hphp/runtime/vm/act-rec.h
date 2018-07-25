@@ -100,8 +100,8 @@ struct ActRec {
   enum Flags : uint32_t {
     None          = 0,
 
-    // Set if the function was called using one of the FCallM instructions and
-    // must return a value via RetM.
+    // Set if the function was called using FCall instruction with more
+    // than one return values and must return a value via RetM.
     MultiReturn = (1u << 26),
 
     // Set if this corresponds to a dynamic call

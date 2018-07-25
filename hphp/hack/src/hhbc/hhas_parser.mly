@@ -560,7 +560,7 @@ instruction:
     | ID iarg iarg iarg   {maketernaryinst $1 $2 $3 $4}
     | ID iarg iarg PLUS INT {maketernaryinst $1 $2 $3 (IAInt64 $5)}
     | ID iarg iarg iarg iarg {makequaternaryinst $1 $2 $3 $4 $5}
-    | ID iarg iarg iarg iarg iarg {makequinaryinst $1 $2 $3 $3 $5 $6}
+    | ID iarg iarg iarg iarg iarg {makequinaryinst $1 $2 $3 $4 $5 $6}
 ;
 sswitchcaselist:
     | MINUS COLON ID {[IASswitchcase ("", $3)]}

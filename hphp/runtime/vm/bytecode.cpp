@@ -3246,7 +3246,7 @@ OPTBLD_INLINE TCA iopRetM(PC& pc, uint32_t numRet) {
   vmStack().ndiscard(vmfp()->func()->numSlotsInFrame());
   vmStack().ret();
 
-  // Discard scratch space for return values allocated for FCallM
+  // Discard scratch space for return values allocated for multi return FCall
   vmStack().ndiscard(numRet - 1);
   *vmStack().topTV() = retvals[1];
 
@@ -5381,7 +5381,8 @@ bool doFCallUnpackTC(PC pc, int32_t numArgsInclUnpack, void* retAddr) {
 }
 
 OPTBLD_FLT_INLINE
-void iopFCall(PC& pc, ActRec* ar, uint32_t numArgs, uint32_t unpack,
+void iopFCall(PC& pc, ActRec* ar,
+              uint32_t numArgs, uint32_t unpack, uint32_t numRets,
               const StringData* /*clsName*/, const StringData* funcName) {
   assertx(
     funcName->empty() ||
@@ -5395,6 +5396,7 @@ void iopFCall(PC& pc, ActRec* ar, uint32_t numArgs, uint32_t unpack,
   assertx(numArgs + unpack == ar->numArgs());
   if (ar->isDynamicCall()) callerDynamicCallChecks(ar->func());
   checkStack(vmStack(), ar->func(), 0);
+  if (numRets != 1) ar->setFCallM();
   ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
   doFCall(ar, pc, numArgs, unpack != 0);
 }
@@ -5448,14 +5450,6 @@ void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
   frame_free_args(args, numNonDefault);
   vmStack().ndiscard(numArgs);
   tvCopy(ret, *vmStack().allocTV());
-}
-
-OPTBLD_FLT_INLINE
-void iopFCallM(PC& pc, ActRec* ar, uint32_t numArgs, uint32_t unpack,
-               uint32_t /* numRet */,
-               const StringData* clsName, const StringData* funcName) {
-  ar->setFCallM();
-  iopFCall(pc, ar, numArgs, unpack, clsName, funcName);
 }
 
 namespace {
@@ -6900,7 +6894,6 @@ ALWAYS_INLINE ActRec* ar_for_inst(Op op, PC origpc,
       assertx(iva_count >= 1);
       return arFromSp(ivas[0]);
     case Op::FCall:
-    case Op::FCallM:
       assertx(iva_count >= 2);
       return arFromSp(ivas[0] + ivas[1]);
     default:

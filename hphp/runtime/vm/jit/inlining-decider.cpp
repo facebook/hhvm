@@ -142,6 +142,11 @@ bool checkNumArgs(SrcKey callSK, const Func* callee) {
     return refuse("callee called with variadic arguments");
   }
 
+  auto const numRets = getImm(pc, 2).u_IVA;
+  if (numRets != 1) {
+    return refuse("callee with multiple returns");
+  }
+
   // It's okay if we passed fewer arguments than there are parameters as long
   // as the gap can be filled in by DV funclets.
   for (auto i = numArgs; i < numParams; ++i) {

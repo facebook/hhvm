@@ -1018,7 +1018,7 @@ and emit_execution_operator env pos exprs =
   gather [
     instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "shell_exec");
     instrs;
-    instr_fcall 1 false;
+    instr_fcall 1 false 1;
   ]
 
 and emit_string2 env pos exprs =
@@ -1312,7 +1312,7 @@ and emit_xhp_obj_get ~need_ref env pos e s nullflavor =
 and emit_get_class_no_args () =
   gather [
     instr_fpushfuncd 0 (Hhbc_id.Function.from_raw_string "get_class");
-    instr_fcall 0 false;
+    instr_fcall 0 false 1;
     instr_unboxr
   ]
 
@@ -1414,7 +1414,7 @@ and inline_gena_call env arg = Local.scope @@ fun () ->
                (if hack_arr_dv_arrs () then "fromDict" else "fromDArray"))
             (Hhbc_id.Class.from_raw_string "HH\\AwaitAllWaitHandle");
           instr_cgetl arr_local;
-          instr_fcall 1 false;
+          instr_fcall 1 false 1;
           instr_unboxr;
           instr_await;
           instr_popc;
@@ -2841,11 +2841,7 @@ and emit_args_and_call env call_pos args uargs =
     | [] ->
       let use_unpack = (uargs != []) in
       let num_inout = List.length inout_setters in
-      let use_callm = num_inout > 0 in
       let nargs = List.length args in
-      let instr_call = match use_callm with
-      | false -> instr_fcall nargs use_unpack
-      | true  -> instr_fcallm nargs use_unpack (num_inout + 1) in
       let instr_enforce_hint =
         if throw_on_mismatch && (args != [])
         then instr_fthrow_on_ref_mismatch (List.map args expr_starts_with_ref)
@@ -2855,7 +2851,7 @@ and emit_args_and_call env call_pos args uargs =
         (* emit call*)
         emit_pos call_pos;
         instr_enforce_hint;
-        instr_call;
+        instr_fcall nargs use_unpack (num_inout + 1);
         (* propagate inout values back *)
         if List.is_empty inout_setters
         then empty

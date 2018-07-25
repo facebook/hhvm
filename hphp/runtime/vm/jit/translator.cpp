@@ -328,8 +328,7 @@ static const struct {
    * FCall is special. Like the Ret* instructions, its manipulation of the
    * runtime stack are outside the boundaries of the tracelet abstraction.
    */
-  { OpFCall,       {FStack,           Stack1,       OutUnknown      }},
-  { OpFCallM,      {FStack,           StackN,       OutUnknown      }},
+  { OpFCall,       {FStack,           StackN,       OutUnknown      }},
   { OpFCallAwait,  {FStack,           Stack1,       OutUnknown      }},
   { OpFCallBuiltin,{BStackN|DontGuardAny,
                                       Stack1,       OutUnknown      }},
@@ -541,8 +540,6 @@ int64_t getStackPopped(PC pc) {
     case Op::FCallAwait:
       return getImm(pc, 0).u_IVA + kNumActRecCells;
     case Op::FCall:
-      return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA + kNumActRecCells;
-    case Op::FCallM:
       return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA + getImm(pc, 2).u_IVA +
         kNumActRecCells - 1;
 
@@ -584,7 +581,7 @@ int64_t getStackPopped(PC pc) {
 int64_t getStackPushed(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
-    case Op::FCallM:       return getImm(pc, 2).u_IVA;
+    case Op::FCall:        return getImm(pc, 2).u_IVA;
     default:               break;
   }
 
@@ -868,7 +865,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Jmp:
   case Op::JmpNS:
   case Op::FCall:
-  case Op::FCallM:
   case Op::FCallAwait:
   case Op::ClsCnsD:
   case Op::FIsParamByRef:
@@ -1273,12 +1269,12 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni,
   }
   auto pc = ni.pc();
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
-    if (ni.op() == OpFCallM) {
-      // This is a hack to deal with the fact that these instructions are
-      // actually popping an ActRec in the middle of their "pops." We could
+    if (ni.op() == OpFCall && instrInputFlavor(pc, i) == UV) {
+      // This is a hack to deal with the fact that this instruction is
+      // actually popping an ActRec in the middle of its "pops." We could
       // assert on the Uninit values on the stack, but the call is going to
       // override them anyway so it's not worth guarding on them.
-      if (instrInputFlavor(pc, i) == UV) break;
+      break;
     }
     auto const type =
       !builtinFunc ? flavorToType(instrInputFlavor(pc, i)) :

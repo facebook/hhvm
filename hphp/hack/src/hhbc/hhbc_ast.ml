@@ -416,8 +416,7 @@ type instruct_call =
   | FIsParamByRefCufIter of param_num * fpass_hint * Iterator.t
   | FThrowOnRefMismatch of bool list
   | FHandleRefMismatch of param_num * fpass_hint * string
-  | FCall of num_params * has_unpack * class_id * function_id
-  | FCallM of num_params * has_unpack * num_params * class_id * function_id
+  | FCall of num_params * has_unpack * num_params * class_id * function_id
   | FCallAwait of num_params * class_id * function_id
   | FCallBuiltin of num_params * num_params * string
 

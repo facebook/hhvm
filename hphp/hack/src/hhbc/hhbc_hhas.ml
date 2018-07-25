@@ -502,12 +502,8 @@ let string_of_call instruction =
   | FHandleRefMismatch (i, h, f) ->
     sep ["FHandleRefMismatch"; string_of_param_num i; string_of_fpasshint h;
          "\"" ^ f ^ "\""]
-  | FCall (n, u, c, f) ->
+  | FCall (n1, u, n2, c, f) ->
     sep ["FCall";
-      string_of_int n; string_of_has_unpack u;
-      string_of_class_id c; string_of_function_id f]
-  | FCallM (n1, u, n2, c, f) ->
-    sep ["FCallM";
       string_of_int n1; string_of_has_unpack u; string_of_int n2;
       string_of_class_id c; string_of_function_id f]
   | FCallAwait (n, c, f) ->

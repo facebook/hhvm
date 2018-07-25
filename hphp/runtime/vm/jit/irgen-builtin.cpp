@@ -2074,16 +2074,9 @@ void emitAKExists(IRGS& env) {
     gen(env, ThrowInvalidArrayKey, arr, key);
   };
 
-  if (arr->isA(TVec)) {
-    if (key->isA(TNull | TStr)) {
-      push(env, cns(env, false));
-      decRef(env, arr);
-      decRef(env, key);
-      return;
-    }
-    if (!key->isA(TInt)) {
-      return throwBadKey();
-    }
+  auto const check_packed = [&] {
+    assertx(key->isA(TInt));
+
     auto const result = cond(
       env,
       [&](Block* taken) {
@@ -2094,7 +2087,19 @@ void emitAKExists(IRGS& env) {
     );
     push(env, result);
     decRef(env, arr);
-    return;
+  };
+
+  if (arr->isA(TVec)) {
+    if (key->isA(TNull | TStr)) {
+      push(env, cns(env, false));
+      decRef(env, arr);
+      decRef(env, key);
+      return;
+    }
+    if (key->isA(TInt)) {
+      return check_packed();
+    }
+    return throwBadKey();
   }
 
   if (arr->isA(TDict) || arr->isA(TKeyset)) {
@@ -2146,19 +2151,18 @@ void emitAKExists(IRGS& env) {
 
   if (!key->isA(TStr) && !key->isA(TInt)) PUNT(AKExists_badKey);
 
-  // packed array and Vector collections support: true iff key>=0 && key<count
-  const auto packed = [&](Opcode count) {
-    push(env, gen(env, CheckRange, key, gen(env, count, arr)));
-    decRef(env, arr);
-  };
   if (arr->isA(TObj) && key->isA(TInt) &&
       collections::isType(arr->type().clsSpec().cls(), CollectionType::Vector,
                           CollectionType::ImmVector)) {
-    return packed(CountCollection);
+    auto const val =
+      gen(env, CheckRange, key, gen(env, CountCollection, arr));
+    push(env, val);
+    decRef(env, arr);
+    return;
   }
   if (arr->isA(TArr) && key->isA(TInt) &&
       arr->type().arrSpec().kind() == ArrayData::kPackedKind) {
-    return packed(CountArrayFast);
+    return check_packed();
   }
 
  auto const val =

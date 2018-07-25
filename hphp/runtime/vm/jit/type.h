@@ -322,8 +322,9 @@ constexpr bool operator>(Mem a, Mem b) {
   c(CountedKeyset,   1ULL << 19)                                        \
   c(Obj,             1ULL << 20)                                        \
   c(Res,             1ULL << 21)                                        \
-  c(Func,            1ULL << 22)
-// Boxed*:           23-46
+  c(Func,            1ULL << 22)                                        \
+  c(Cls,             1ULL << 23)                                        \
+// Boxed*:           24-48
 
 /*
  * This list should be in non-decreasing order of specificity.
@@ -344,25 +345,24 @@ constexpr bool operator>(Mem a, Mem b) {
   c(ArrLike,             kArr|kVec|kDict|kKeyset)                       \
   c(NullableObj,         kObj|kInitNull|kUninit)                        \
   c(Persistent,          kPersistentStr|kPersistentArrLike)             \
-  c(UncountedInit,       kInitNull|kBool|kInt|kDbl|kPersistent|kFunc)   \
+  c(UncountedInit,       kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls) \
   c(Uncounted,           kUninit|kUncountedInit)                        \
   c(InitCell,            kUncountedInit|kStr|kArrLike|kObj|kRes)        \
   c(Cell,                kUninit|kInitCell)
 
 #define IRT_RUNTIME                                                     \
-  IRT(Cls,         1ULL << 47)                                          \
-  IRT(VarEnv,      1ULL << 48)                                          \
-  IRT(NamedEntity, 1ULL << 49)                                          \
-  IRT(Cctx,        1ULL << 50) /* Class* with the lowest bit set,  */   \
+  IRT(VarEnv,      1ULL << 49)                                          \
+  IRT(NamedEntity, 1ULL << 50)                                          \
+  IRT(Cctx,        1ULL << 51) /* Class* with the lowest bit set,  */   \
                                /* as stored in ActRec.m_cls field  */   \
-  IRT(RetAddr,     1ULL << 51) /* Return address */                     \
-  IRT(StkPtr,      1ULL << 52) /* Stack pointer */                      \
-  IRT(FramePtr,    1ULL << 53) /* Frame pointer */                      \
-  IRT(TCA,         1ULL << 54)                                          \
-  IRT(ABC,         1ULL << 55) /* AsioBlockableChain */                 \
-  IRT(RDSHandle,   1ULL << 56) /* rds::Handle */                        \
-  IRT(Nullptr,     1ULL << 57)                                          \
-  /* bits 58-64 are unused */
+  IRT(RetAddr,     1ULL << 52) /* Return address */                     \
+  IRT(StkPtr,      1ULL << 53) /* Stack pointer */                      \
+  IRT(FramePtr,    1ULL << 54) /* Frame pointer */                      \
+  IRT(TCA,         1ULL << 55)                                          \
+  IRT(ABC,         1ULL << 56) /* AsioBlockableChain */                 \
+  IRT(RDSHandle,   1ULL << 57) /* rds::Handle */                        \
+  IRT(Nullptr,     1ULL << 58)                                          \
+  /* bits 59-64 are unused */
 
 /*
  * Gen, Counted, Init, PtrToGen, etc... are here instead of IRT_PHP_UNIONS
@@ -448,7 +448,7 @@ struct ConstCctx {
 struct Type {
 private:
   using bits_t = uint64_t;
-  static constexpr size_t kBoxShift = 23;
+  static constexpr size_t kBoxShift = 24;
 
 public:
   enum Bits : bits_t {

@@ -520,12 +520,6 @@ TEST(Type, Specialized) {
 
   auto const subCls = Type::SubCls(SystemLib::s_IteratorClass);
   EXPECT_EQ(TCls, TCls - subCls);
-  EXPECT_EQ(subCls, (subCls | TPtrToInt) - TPtrToInt);
-  EXPECT_EQ(subCls, (subCls | TLvalToInt) - TLvalToInt);
-  EXPECT_EQ(subCls, (subCls | TMemToInt) - TMemToInt);
-  EXPECT_EQ(TPtrToInt, (subCls | TPtrToInt) - subCls);
-  EXPECT_EQ(TLvalToInt, (subCls | TLvalToInt) - subCls);
-  EXPECT_EQ(TMemToInt, (subCls | TMemToInt) - subCls);
 }
 
 TEST(Type, SpecializedObjects) {

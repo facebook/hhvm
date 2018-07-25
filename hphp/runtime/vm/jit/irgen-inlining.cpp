@@ -53,9 +53,9 @@ bool beginInlining(IRGS& env,
 
   auto const& info = fpiStack.back();
   if (info.func && info.func != target) {
-    // Its possible that we have an "FCallD T2 meth" guarded by eg an
+    // Its possible that we have an "FCall T2 meth" guarded by eg an
     // InstanceOfD T2, and that we know the object has type T1, and we
-    // also know that T1::meth exists. The FCallD is actually
+    // also know that T1::meth exists. The FCall is actually
     // unreachable, but we might not have figured that out yet - so we
     // could be trying to inline T1::meth while the fpiStack has
     // T2::meth.

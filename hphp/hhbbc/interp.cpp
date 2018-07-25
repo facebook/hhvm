@@ -2064,7 +2064,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
             ObjMethodOp::NullThrows,
             false
           },
-          bc::FCall { 0 },
+          bc::FCall { 0, staticEmptyString(), staticEmptyString() },
           bc::UnboxR {},
           bc::CastString {}
         );
@@ -2087,7 +2087,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
             ObjMethodOp::NullSafe,
             false
           },
-          bc::FCall { 0 },
+          bc::FCall { 0, staticEmptyString(), staticEmptyString() },
           bc::UnboxR {},
           bc::CastString {},
           bc::Int { 0 },
@@ -3285,7 +3285,7 @@ void in(ISS& env, const bc::FThrowOnRefMismatch& op) {
         env,
         bc::FPushCtorD { 1, exCls, false },
         bc::String { err },
-        bc::FCall { 1 },
+        bc::FCall { 1, staticEmptyString(), staticEmptyString() },
         bc::UnboxRNop {},
         bc::PopC {},
         bc::Throw {}
@@ -3416,11 +3416,15 @@ void in(ISS& env, const bc::FCall& op) {
     case FPIKind::ObjInvoke:
       not_reached();
     case FPIKind::Func:
-      return reduce(
-        env,
-        bc::FCallD { op.arg1, s_empty.get(), ar.func->name() }
-      );
-      break;
+      assertx(op.str2->empty());
+      if (ar.func->name() != op.str3) {
+        // We've found a more precise type for the call, so update it
+        return reduce(
+          env,
+          bc::FCall { op.arg1, staticEmptyString(), ar.func->name() }
+        );
+      }
+      return fcallKnownImpl(env, op.arg1);
     case FPIKind::Builtin:
       return finish_builtin(env, ar.func->exactFunc(), op.arg1, false);
     case FPIKind::Ctor:
@@ -3436,10 +3440,13 @@ void in(ISS& env, const bc::FCall& op) {
       // fallthrough
     case FPIKind::ObjMeth:
     case FPIKind::ClsMeth:
-      if (ar.cls.hasValue() && ar.func->cantBeMagicCall()) {
+      assertx(op.str2->empty() == op.str3->empty());
+      if (ar.cls.hasValue() && ar.func->cantBeMagicCall() &&
+          (ar.cls->name() != op.str2 || ar.func->name() != op.str3)) {
+        // We've found a more precise type for the call, so update it
         return reduce(
           env,
-          bc::FCallD { op.arg1, ar.cls->name(), ar.func->name() }
+          bc::FCall { op.arg1, ar.cls->name(), ar.func->name() }
         );
       }
       // fallthrough
@@ -3450,28 +3457,6 @@ void in(ISS& env, const bc::FCall& op) {
     }
   }
 
-  for (auto i = uint32_t{0}; i < op.arg1; ++i) popF(env);
-  fpiPop(env);
-  specialFunctionEffects(env, ar);
-  push(env, TInitGen);
-}
-
-void in(ISS& env, const bc::FCallD& op) {
-  auto const ar = fpiTop(env);
-  if ((ar.func && ar.func->name() != op.str3) ||
-      (ar.cls && ar.cls->name() != op.str2)) {
-    // We've found a more precise type for the call, so update it
-    return reduce(
-      env,
-      bc::FCallD {
-        op.arg1, ar.cls ? ar.cls->name() : s_empty.get(), ar.func->name()
-      }
-    );
-  }
-  if (ar.kind == FPIKind::Builtin) {
-    return finish_builtin(env, ar.func->exactFunc(), op.arg1, false);
-  }
-  if (ar.func) return fcallKnownImpl(env, op.arg1);
   for (auto i = uint32_t{0}; i < op.arg1; ++i) popF(env);
   fpiPop(env);
   specialFunctionEffects(env, ar);
@@ -3492,12 +3477,12 @@ void in(ISS& env, const bc::FCallAwait& op) {
     return reduce(
       env,
       bc::FCallAwait {
-        op.arg1, ar.cls ? ar.cls->name() : s_empty.get(), ar.func->name()
+        op.arg1, ar.cls ? ar.cls->name() : staticEmptyString(), ar.func->name()
       }
     );
   }
   impl(env,
-       bc::FCallD { op.arg1, op.str2, op.str3 },
+       bc::FCall { op.arg1, op.str2, op.str3 },
        bc::UnboxRNop {},
        bc::Await {});
 }
@@ -3550,17 +3535,24 @@ void in(ISS& env, const bc::FCallM& op) {
     case FPIKind::Ctor:
       not_reached();
     case FPIKind::Func:
-      return reduce(
-        env,
-        bc::FCallDM { op.arg1, op.arg2, s_empty.get(), ar.func->name() }
-      );
-      break;
-    case FPIKind::ObjMeth:
-    case FPIKind::ClsMeth:
-      if (ar.cls.hasValue() && ar.func->cantBeMagicCall()) {
+      assertx(op.str3->empty());
+      if (ar.func->name() != op.str4) {
+        // We've found a more precise type for the call, so update it
         return reduce(
           env,
-          bc::FCallDM { op.arg1, op.arg2, ar.cls->name(), ar.func->name() }
+          bc::FCallM { op.arg1, op.arg2, staticEmptyString(), ar.func->name() }
+        );
+      }
+      return fcallKnownImpl(env, op.arg1, op.arg2);
+    case FPIKind::ObjMeth:
+    case FPIKind::ClsMeth:
+      assertx(op.str3->empty() == op.str4->empty());
+      if (ar.cls.hasValue() && ar.func->cantBeMagicCall() &&
+          (ar.cls->name() != op.str3 || ar.func->name() != op.str4)) {
+        // We've found a more precise type for the call, so update it
+        return reduce(
+          env,
+          bc::FCallM { op.arg1, op.arg2, ar.cls->name(), ar.func->name() }
         );
       }
       // fallthrough
@@ -3570,31 +3562,6 @@ void in(ISS& env, const bc::FCallM& op) {
       return fcallKnownImpl(env, op.arg1, op.arg2);
     }
   }
-
-  for (auto i = uint32_t{0}; i < op.arg1; ++i) popF(env);
-  fpiPop(env);
-  specialFunctionEffects(env, ar);
-  for (auto i = uint32_t{0}; i < op.arg2 - 1; ++i) popU(env);
-  for (auto i = uint32_t{0}; i < op.arg2; ++i) push(env, TInitCell);
-}
-
-void in(ISS& env, const bc::FCallDM& op) {
-  auto const ar = fpiTop(env);
-  if ((ar.func && ar.func->name() != op.str4) ||
-      (ar.cls && ar.cls->name() != op.str3)) {
-    // We've found a more precise type for the call, so update it
-    return reduce(
-      env,
-      bc::FCallDM {
-        op.arg1,
-        op.arg2,
-        ar.cls ? ar.cls->name() : s_empty.get(),
-        ar.func->name()
-      }
-    );
-  }
-  always_assert(ar.kind != FPIKind::Builtin);
-  if (ar.func) return fcallKnownImpl(env, op.arg1, op.arg2);
 
   for (auto i = uint32_t{0}; i < op.arg1; ++i) popF(env);
   fpiPop(env);

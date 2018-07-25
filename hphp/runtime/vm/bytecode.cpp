@@ -5340,23 +5340,18 @@ bool doFCall(ActRec* ar, PC& pc) {
   return true;
 }
 
-OPTBLD_INLINE void iopFCall(PC& pc, ActRec* ar, uint32_t numArgs) {
-  assertx(numArgs == ar->numArgs());
-  if (ar->isDynamicCall()) callerDynamicCallChecks(ar->func());
-  checkStack(vmStack(), ar->m_func, 0);
-  ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
-  doFCall(ar, pc);
-}
-
 OPTBLD_FLT_INLINE
-void iopFCallD(PC& pc, ActRec* ar, uint32_t numArgs,
-               const StringData* /*clsName*/, const StringData* funcName) {
-  if (!RuntimeOption::EvalJitEnableRenameFunction &&
-      !(ar->m_func->attrs() & AttrInterceptable)) {
-    assertx(ar->m_func->name()->isame(funcName) ||
-            (funcName == s_construct.get() &&
-             ar->m_func == ar->m_func->cls()->getCtor()));
-  }
+void iopFCall(PC& pc, ActRec* ar, uint32_t numArgs,
+              const StringData* /*clsName*/, const StringData* funcName) {
+  assertx(
+    funcName->empty() ||
+    RuntimeOption::EvalJitEnableRenameFunction ||
+    (ar->func()->attrs() & AttrInterceptable) ||
+    ar->func()->name()->isame(funcName) || (
+      funcName == s_construct.get() &&
+      ar->func() == ar->func()->cls()->getCtor()
+    )
+  );
   assertx(numArgs == ar->numArgs());
   if (ar->isDynamicCall()) callerDynamicCallChecks(ar->func());
   checkStack(vmStack(), ar->m_func, 0);
@@ -5484,16 +5479,10 @@ OPTBLD_INLINE void iopFCallUnpack(PC& pc, ActRec* ar, uint32_t numArgs) {
 }
 
 OPTBLD_FLT_INLINE
-void iopFCallM(PC& pc, ActRec* ar, uint32_t numArgs, uint32_t /* numRet */) {
+void iopFCallM(PC& pc, ActRec* ar, uint32_t numArgs, uint32_t /* numRet */,
+               const StringData* clsName, const StringData* funcName) {
   ar->setFCallM();
-  iopFCall(pc, ar, numArgs);
-}
-
-OPTBLD_FLT_INLINE
-void iopFCallDM(PC& pc, ActRec* ar, uint32_t numArgs, uint32_t /* numRet */,
-                const StringData* clsName, const StringData* funcName) {
-  ar->setFCallM();
-  iopFCallD(pc, ar, numArgs, clsName, funcName);
+  iopFCall(pc, ar, numArgs, clsName, funcName);
 }
 
 OPTBLD_INLINE void iopFCallUnpackM(PC& pc, ActRec* ar, uint32_t numArgs,
@@ -6941,11 +6930,9 @@ ALWAYS_INLINE ActRec* ar_for_inst(Op op, PC origpc,
                                   int iva_count, uint32_t* ivas) {
   switch (op) {
     case Op::FCall:
-    case Op::FCallD:
     case Op::FCallAwait:
     case Op::FCallUnpack:
     case Op::FCallM:
-    case Op::FCallDM:
     case Op::FCallUnpackM:
       assertx(iva_count >= 1);
       return arFromSp(ivas[0]);

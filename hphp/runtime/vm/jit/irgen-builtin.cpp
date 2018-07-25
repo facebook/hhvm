@@ -910,7 +910,7 @@ prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* thiz,
  *      But we implement this by generating all the relevant NativeImpl code
  *      after the InlineReturn for the callee, to make it easier for DCE to
  *      eliminate the code that constructs the callee's activation record.
- *      This means the unwinder is going to see our PC as equal to the FCallD
+ *      This means the unwinder is going to see our PC as equal to the FCall
  *      for the call to the function, which will be inside the FPI region for
  *      the call, so it'll try to pop an ActRec, so we'll need to reconstruct
  *      one for it during unwinding.

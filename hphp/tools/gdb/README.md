@@ -178,7 +178,7 @@ If no Unit is set, the raw IDs are printed instead.
     0x7f2b2f9460ae+8: FPushObjMethodD 1 "send" 0
     0x7f2b2f9460ae+15: AssertRATL 0 Cell
     0x7f2b2f9460ae+18: CGetL 0
-    0x7f2b2f9460ae+22: FCallD 1 "MyClient" "send"
+    0x7f2b2f9460ae+22: FCall 1 "MyClient" "send"
     0x7f2b2f9460ae+32: UnboxRNop
     0x7f2b2f9460ae+33: AssertRATL 1 Uninit
     0x7f2b2f9460ae+36: SetL 1

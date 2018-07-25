@@ -101,7 +101,7 @@ struct InliningDecider {
   /*
    * Can we perform inlining of `callee' at `callSK' from within `region'?
    *
-   * This is a shallow check---it asks whether `callSK' is an FCall{,D} with an
+   * This is a shallow check---it asks whether `callSK' is an FCall with an
    * appropriate FPush* in the same region, and verifies that the call does not
    * block inlining (e.g., due to missing arguments, recursion, resumable
    * callee, etc.).  It does not peek into the callee's bytecode or regions,

@@ -330,9 +330,7 @@ static const struct {
    */
   { OpFCall,       {FStack,           Stack1,       OutUnknown      }},
   { OpFCallM,      {FStack,           StackN,       OutUnknown      }},
-  { OpFCallDM,     {FStack,           StackN,       OutUnknown      }},
   { OpFCallUnpackM,{FStack,           StackN,       OutUnknown      }},
-  { OpFCallD,      {FStack,           Stack1,       OutUnknown      }},
   { OpFCallAwait,  {FStack,           Stack1,       OutUnknown      }},
   { OpFCallUnpack, {FStack,           Stack1,       OutUnknown      }},
   { OpFCallBuiltin,{BStackN|DontGuardAny,
@@ -543,13 +541,11 @@ int64_t getStackPopped(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
     case Op::FCall:
-    case Op::FCallD:
     case Op::FCallUnpack:
     case Op::FCallAwait:
       return getImm(pc, 0).u_IVA + kNumActRecCells;
 
     case Op::FCallM:
-    case Op::FCallDM:
     case Op::FCallUnpackM:
       return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA + kNumActRecCells - 1;
 
@@ -592,7 +588,6 @@ int64_t getStackPushed(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
     case Op::FCallM:       return getImm(pc, 1).u_IVA;
-    case Op::FCallDM:      return getImm(pc, 1).u_IVA;
     case Op::FCallUnpackM: return getImm(pc, 1).u_IVA;
     default:               break;
   }
@@ -877,7 +872,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Jmp:
   case Op::JmpNS:
   case Op::FCall:
-  case Op::FCallD:
   case Op::FCallUnpack:
   case Op::FCallAwait:
   case Op::ClsCnsD:
@@ -1097,7 +1091,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::MemoSet:
   case Op::RetM:
   case Op::FCallM:
-  case Op::FCallDM:
   case Op::FCallUnpackM:
   case Op::Select:
     return false;
@@ -1286,8 +1279,7 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni,
   }
   auto pc = ni.pc();
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
-    if (ni.op() == OpFCallM || ni.op() == OpFCallDM ||
-        ni.op() == OpFCallUnpackM) {
+    if (ni.op() == OpFCallM || ni.op() == OpFCallUnpackM) {
       // This is a hack to deal with the fact that these instructions are
       // actually popping an ActRec in the middle of their "pops." We could
       // assert on the Uninit values on the stack, but the call is going to

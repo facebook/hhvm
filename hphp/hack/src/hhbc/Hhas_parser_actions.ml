@@ -930,7 +930,6 @@ let makeunaryinst s arg = match s with
    | "FPushFunc" -> ICall(FPushFunc (intofiarg arg, []))
    | "FThrowOnRefMismatch" -> ICall(FThrowOnRefMismatch (listofboolofiarg arg))
    | "RetM" -> IContFlow(RetM (intofiarg arg))
-   | "FCall" -> ICall(FCall (intofiarg arg))
    | "FCallUnpack" -> ICall(FCallUnpack (intofiarg arg))
    | "ResolveFunc" -> IOp(ResolveFunc (function_id_of_iarg arg))
 
@@ -1055,7 +1054,6 @@ match s with
  | "AssertRATL" -> IMisc (AssertRATL (localidofiarg arg1, stringofiarg arg2))
  | "AssertRATStk" -> IMisc (AssertRATStk (intofiarg arg1, stringofiarg arg2))
  | "Silence" -> IMisc (Silence (localidofiarg arg1, opsilenceofiarg arg2))
- | "FCallM" -> ICall (FCallM (intofiarg arg1, intofiarg arg2))
  | "FCallUnpackM" -> ICall (FCallUnpackM (intofiarg arg1, intofiarg arg2))
 
  | "YieldFromDelegate" ->
@@ -1099,8 +1097,8 @@ let maketernaryinst s arg1 arg2 arg3 =
                                  (intofiarg arg1, specialclsrefofiarg arg2, method_id_of_iarg arg3))
  | "FIsParamByRefCufIter" ->
     ICall (FIsParamByRefCufIter (intofiarg arg1, fpasshintof arg2, iterofiarg arg3))
- | "FCallD" ->
-    ICall(FCallD (intofiarg arg1,
+ | "FCall" ->
+    ICall(FCall (intofiarg arg1,
       class_id_of_iarg arg2, function_id_of_iarg arg3))
  | "FCallAwait" ->
     ICall(FCallAwait (intofiarg arg1,
@@ -1152,8 +1150,8 @@ match s with
                                        labelofiarg arg3, localidofiarg arg4))
  | "LIterNext" -> IIterator(LIterNext (iterofiarg arg1, localidofiarg arg2,
                                        labelofiarg arg3, localidofiarg arg4))
- | "FCallDM" ->
-    ICall(FCallDM (intofiarg arg1, intofiarg arg2,
+ | "FCallM" ->
+    ICall(FCallM (intofiarg arg1, intofiarg arg2,
       class_id_of_iarg arg3, function_id_of_iarg arg4))
  | _ -> failwith ("NYI quaternary: " ^ s)
 

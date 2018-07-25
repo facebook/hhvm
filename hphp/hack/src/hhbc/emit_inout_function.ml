@@ -9,7 +9,6 @@
 
 open Instruction_sequence
 open Hh_core
-open Hhbc_ast
 
 module H = Hhbc_ast
 module SU = Hhbc_string_utils
@@ -41,8 +40,8 @@ let emit_body_instrs_inout params call_instrs =
     call_instrs;
     param_instrs;
     begin match has_variadic with
-    | false -> instr (ICall (FCallM (param_count, num_inout + 1)))
-    | true -> instr (ICall (FCallUnpackM (param_count, num_inout + 1)))
+    | false -> instr_fcallm param_count (num_inout + 1)
+    | true -> instr_fcallunpackm param_count (num_inout + 1)
     end;
     Emit_inout_helpers.emit_list_set_for_inout_call local inout_params;
     instr_retc

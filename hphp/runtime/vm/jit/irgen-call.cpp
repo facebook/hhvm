@@ -1556,26 +1556,18 @@ SSATmp* implFCall(IRGS& env, uint32_t numParams, uint32_t numOut) {
   return retVal;
 }
 
-void emitFCall(IRGS& env, uint32_t numParams) {
+void emitFCall(IRGS& env,
+               uint32_t numParams,
+               const StringData*,
+               const StringData*) {
   implFCall(env, numParams, 0);
 }
 
-void emitFCallD(IRGS& env,
+void emitFCallM(IRGS& env,
                 uint32_t numParams,
+                uint32_t numOut,
                 const StringData*,
                 const StringData*) {
-  implFCall(env, numParams, 0);
-}
-
-void emitFCallM(IRGS& env, uint32_t numParams, uint32_t numOut) {
-  implFCall(env, numParams, numOut - 1);
-}
-
-void emitFCallDM(IRGS& env,
-                 uint32_t numParams,
-                 uint32_t numOut,
-                 const StringData*,
-                 const StringData*) {
   implFCall(env, numParams, numOut - 1);
 }
 

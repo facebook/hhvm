@@ -307,7 +307,7 @@ final class Map implements \MutableMap {
             CGetL $v
             Jmp call
     by_ref: VGetL $v
-    call:   FCall 1
+    call:   FCall 1 "" ""
             UnboxR
             AssertRATL $res Obj=HH\Map
             BaseL $res Define
@@ -332,7 +332,7 @@ final class Map implements \MutableMap {
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FCall 1
+          FCall 1 "" ""
           PopR
           Throw
 
@@ -374,7 +374,7 @@ EOT
             Jmp call
     by_ref_v:
             VGetL $v
-    call:   FCall 2
+    call:   FCall 2 "" ""
             UnboxR
             AssertRATL $res Obj=HH\Map
             BaseL $res Define
@@ -399,7 +399,7 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FCall 1
+          FCall 1 "" ""
           PopR
           Throw
 
@@ -421,7 +421,7 @@ EOT
           DecodeCufIter 0 bad_func
 .try {
            FPushCtorD 0 "HH\\Map"
-           FCall 0
+           FCall 0 "" ""
            PopR
            SetL $res
            PopC
@@ -435,7 +435,7 @@ EOT
             CGetL $v
             Jmp call
     by_ref: VGetL $v
-    call:   FCall 1
+    call:   FCall 1 "" ""
             UnboxR
             JmpZ next
             CGetL $v
@@ -462,7 +462,7 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FCall 1
+          FCall 1 "" ""
           PopR
           Throw
 
@@ -484,7 +484,7 @@ EOT
           DecodeCufIter 0 bad_func
 .try {
            FPushCtorD 0 "HH\\Map"
-           FCall 0
+           FCall 0 "" ""
            PopR
            SetL $res
            PopC
@@ -505,7 +505,7 @@ EOT
             Jmp call
     by_ref_v:
             VGetL $v
-    call:   FCall 2
+    call:   FCall 2 "" ""
             UnboxR
             JmpZ next
             CGetL $v
@@ -532,7 +532,7 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FCall 1
+          FCall 1 "" ""
           PopR
           Throw
 
@@ -586,7 +586,7 @@ EOT
           DecodeCufIter 0 bad_func
 .try {
            FPushCtorD 0 "HH\\Map"
-           FCall 0
+           FCall 0 "" ""
            PopR
            SetL $res
            PopC
@@ -600,7 +600,7 @@ EOT
             CGetL $v
             Jmp call
     by_ref: VGetL $v
-    call:   FCall 1
+    call:   FCall 1 "" ""
             UnboxR
             JmpNZ skip
             IterBreak endloop <(Iter)1>
@@ -629,7 +629,7 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FCall 1
+          FCall 1 "" ""
           PopR
           Throw
 
@@ -935,7 +935,7 @@ final class ImmMap implements \ConstMap {
 .try {
            This
            FPushObjMethodD 0 "toMap" NullThrows
-           FCall 0
+           FCall 0 "" ""
            UnboxRNop
            SetL $res
            PopC
@@ -949,7 +949,7 @@ final class ImmMap implements \ConstMap {
             CGetL $v
             Jmp call
     by_ref: VGetL $v
-    call:   FCall 1
+    call:   FCall 1 "" ""
             UnboxR
             AssertRATL $res Obj=HH\Map
             BaseL $res Define
@@ -971,13 +971,13 @@ final class ImmMap implements \ConstMap {
            AssertRATL $res Obj=HH\Map
            CGetL $res
            FPushObjMethodD 0 "toImmMap" NullThrows
-           FCall 0
+           FCall 0 "" ""
            UnboxRNop
            RetC
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FCall 1
+          FCall 1 "" ""
           PopR
           Throw
 
@@ -1000,7 +1000,7 @@ EOT
 .try {
            This
            FPushObjMethodD 0 "toMap" NullThrows
-           FCall 0
+           FCall 0 "" ""
            UnboxRNop
            SetL $res
            PopC
@@ -1021,7 +1021,7 @@ EOT
             Jmp call
     by_ref_v:
             VGetL $v
-    call:   FCall 2
+    call:   FCall 2 "" ""
             UnboxR
             AssertRATL $res Obj=HH\Map
             BaseL $res Define
@@ -1043,13 +1043,13 @@ EOT
            AssertRATL $res Obj=HH\Map
            CGetL $res
            FPushObjMethodD 0 "toImmMap" NullThrows
-           FCall 0
+           FCall 0 "" ""
            UnboxRNop
            RetC
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FCall 1
+          FCall 1 "" ""
           PopR
           Throw
 
@@ -1071,7 +1071,7 @@ EOT
           DecodeCufIter 0 bad_func
 .try {
            FPushCtorD 0 "HH\\Map"
-           FCall 0
+           FCall 0 "" ""
            PopR
            SetL $res
            PopC
@@ -1085,7 +1085,7 @@ EOT
             CGetL $v
             Jmp call
     by_ref: VGetL $v
-    call:   FCall 1
+    call:   FCall 1 "" ""
             UnboxR
             JmpZ next
             CGetL $v
@@ -1109,13 +1109,13 @@ EOT
            AssertRATL $res Obj=HH\Map
            CGetL $res
            FPushObjMethodD 0 "toImmMap" NullThrows
-           FCall 0
+           FCall 0 "" ""
            UnboxRNop
            RetC
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FCall 1
+          FCall 1 "" ""
           PopR
           Throw
 
@@ -1137,7 +1137,7 @@ EOT
           DecodeCufIter 0 bad_func
 .try {
            FPushCtorD 0 "HH\\Map"
-           FCall 0
+           FCall 0 "" ""
            PopR
            SetL $res
            PopC
@@ -1158,7 +1158,7 @@ EOT
             Jmp call
     by_ref_v:
             VGetL $v
-    call:   FCall 2
+    call:   FCall 2 "" ""
             UnboxR
             JmpZ next
             CGetL $v
@@ -1182,13 +1182,13 @@ EOT
            AssertRATL $res Obj=HH\Map
            CGetL $res
            FPushObjMethodD 0 "toImmMap" NullThrows
-           FCall 0
+           FCall 0 "" ""
            UnboxRNop
            RetC
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FCall 1
+          FCall 1 "" ""
           PopR
           Throw
 
@@ -1226,7 +1226,7 @@ EOT
           DecodeCufIter 0 bad_func
 .try {
            FPushCtorD 0 "HH\\Map"
-           FCall 0
+           FCall 0 "" ""
            PopR
            SetL $res
            PopC
@@ -1240,7 +1240,7 @@ EOT
             CGetL $v
             Jmp call
     by_ref: VGetL $v
-    call:   FCall 1
+    call:   FCall 1 "" ""
             UnboxR
             JmpNZ skip
             IterBreak endloop <(Iter)1>
@@ -1266,13 +1266,13 @@ EOT
            AssertRATL $res Obj=HH\Map
            CGetL $res
            FPushObjMethodD 0 "toImmMap" NullThrows
-           FCall 0
+           FCall 0 "" ""
            UnboxRNop
            RetC
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FCall 1
+          FCall 1 "" ""
           PopR
           Throw
 

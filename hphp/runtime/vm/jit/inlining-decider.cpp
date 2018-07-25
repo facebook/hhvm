@@ -163,8 +163,7 @@ bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee) const {
   }
 
   // We can only inline at normal FCalls.
-  if (callSK.op() != Op::FCall &&
-      callSK.op() != Op::FCallD) {
+  if (callSK.op() != Op::FCall) {
     return false;
   }
 

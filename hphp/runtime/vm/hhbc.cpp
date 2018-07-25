@@ -476,7 +476,7 @@ int instrNumPops(PC pc) {
   // FCall, NewPackedArray, and some final member operations specify how many
   // values are popped in their first immediate
   if (n == -3) return getImm(pc, 0).u_IVA;
-  // FCallM, FCallDM, and FCallUnpackM pop uninit values from the stack and
+  // FCallM, and FCallUnpackM pop uninit values from the stack and
   // push multiple returned values.
   if (n == -4) return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA - 1;
   // Other final member operations pop their first immediate + 1

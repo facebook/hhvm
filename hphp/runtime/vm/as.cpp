@@ -1486,9 +1486,8 @@ std::map<std::string,ParserFunc> opcode_parsers;
     }                                                                  \
                                                                        \
     /* Other FCall* functions perform their own bounds checking. */    \
-    if (Op##name == OpFCall || Op##name == OpFCallD ||                 \
-        Op##name == OpFCallAwait || Op##name == OpFCallM ||            \
-        Op##name == OpFCallDM) {                                       \
+    if (Op##name == OpFCall || Op##name == OpFCallAwait ||             \
+        Op##name == OpFCallM) {                                        \
       as.fe->containsCalls = true;                                     \
     }                                                                  \
                                                                        \

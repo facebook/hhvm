@@ -1,7 +1,7 @@
 
 .main {
   FPushFuncD 0 "test"
-  FCall 0
+  FCall 0 "" ""
   PopR
   String "\n"
   Print

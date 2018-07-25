@@ -82,7 +82,7 @@ const void annotate(NormalizedInstruction* i,
     return i->m_unit->lookupLitstrId(id);
   };
 
-  if (!funcName && !clsName) {
+  if (funcName->empty() && clsName->empty()) {
     switch (pushOp) {
       case Op::FPushClsMethodD:
         decode_iva(pc);
@@ -109,11 +109,6 @@ const void annotate(NormalizedInstruction* i,
     case Op::FPushClsMethodD:
       isExact = true;
       isStatic = true;
-      if (!funcName && !clsName) {
-        decode_iva(pc);
-        funcName = decode_litstr();
-        clsName = decode_litstr();
-      }
       break;
     case Op::FPushClsMethod:
       isStatic = true;
@@ -126,21 +121,7 @@ const void annotate(NormalizedInstruction* i,
       isStatic = true;
       break;
     }
-    case Op::FPushFuncD:
-      if (!funcName && !clsName) {
-        decode_iva(pc);
-        funcName = decode_litstr();
-        clsName = nullptr;
-      }
-      break;
-    case Op::FPushCtorD:
-      if (!clsName) {
-        decode_iva(pc);
-        clsName = decode_litstr();
-      }
-      break;
     default:
-      if (!funcName && !clsName) return;
       break;
   }
 
@@ -152,7 +133,7 @@ const void annotate(NormalizedInstruction* i,
     lookupDirectFunc(i->source, funcName, clsName, isExact, isStatic);
 
   if (func) {
-    FTRACE(1, "found direct func ({}) for FCallD\n",
+    FTRACE(1, "found direct func ({}) for FCall\n",
            func->fullName()->data());
     i->funcd = func;
   }
@@ -165,15 +146,11 @@ const void annotate(NormalizedInstruction* i,
 void annotate(NormalizedInstruction* i) {
   switch (i->op()) {
   case Op::FCall:
-  case Op::FCallM:
-    annotate(i, nullptr, nullptr);
-    break;
-  case Op::FCallD:
     annotate(i,
              i->m_unit->lookupLitstrId(i->imm[1].u_SA),
              i->m_unit->lookupLitstrId(i->imm[2].u_SA));
     break;
-  case Op::FCallDM:
+  case Op::FCallM:
     annotate(i,
              i->m_unit->lookupLitstrId(i->imm[2].u_SA),
              i->m_unit->lookupLitstrId(i->imm[3].u_SA));

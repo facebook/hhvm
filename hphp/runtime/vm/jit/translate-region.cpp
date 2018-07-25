@@ -300,7 +300,7 @@ bool shouldTrySingletonInline(const RegionDesc& region,
 }
 
 /*
- * Check if `i' is an FPush{Func,ClsMethod}D followed by an FCall{,D} to a
+ * Check if `i' is an FPush{Func,ClsMethod}D followed by an FCall to a
  * function with a singleton pattern, and if so, inline it.  Returns true if
  * this succeeds, else false.
  */
@@ -319,8 +319,7 @@ bool tryTranslateSingletonInline(irgen::IRGS& irgs,
   auto fcall = ninst.nextSk();
 
   // Check if the next instruction is an acceptable FCall.
-  if ((fcall.op() != Op::FCall && fcall.op() != Op::FCallD) ||
-      funcd->isResumable() || funcd->isReturnRef()) {
+  if (fcall.op() != Op::FCall || funcd->isResumable() || funcd->isReturnRef()) {
     return false;
   }
 
@@ -476,7 +475,7 @@ bool inEntryRetransChain(RegionDesc::BlockId bid, const RegionDesc& region) {
 }
 
 /*
- * If `psk' is not an FCall{,D} with inlinable `callee', return nullptr.
+ * If `psk' is not an FCall with inlinable `callee', return nullptr.
  *
  * Otherwise, select a region for `callee' if one is not already present in
  * `retry'.  Update `inl' and return the region if it's inlinable.
@@ -488,8 +487,7 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
                                        const irgen::IRGS& irgs,
                                        int32_t maxBCInstrs,
                                        int& calleeCost) {
-  if (psk.srcKey.op() != Op::FCall &&
-      psk.srcKey.op() != Op::FCallD) {
+  if (psk.srcKey.op() != Op::FCall) {
     return nullptr;
   }
 
@@ -718,7 +716,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       }
 
       if (calleeRegion) {
-        always_assert(inst.op() == Op::FCall || inst.op() == Op::FCallD);
+        always_assert(inst.op() == Op::FCall);
         auto const* callee = inst.funcd;
 
         // We shouldn't be inlining profiling translations.

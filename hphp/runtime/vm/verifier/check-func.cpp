@@ -832,8 +832,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = i == n - 1 ? VV : CRV;
     }
     return m_tmp_sig;
-  case Op::FCall:        // ONE(IVA),            CVMANY,  ONE(RV)
-  case Op::FCallD:       // THREE(IVA,SA,SA),    CVMANY,  ONE(RV)
+  case Op::FCall:        // THREE(IVA,SA,SA),    CVMANY,  ONE(RV)
   case Op::FCallAwait:   // THREE(IVA,SA,SA),    CVMANY,  ONE(CV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CVV;
@@ -844,8 +843,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = (i < n - 1) ? CVV : CV;
     }
     return m_tmp_sig;
-  case Op::FCallM:       // TWO(IVA,IVA),        CVMANY_UMANY, CMANY
-  case Op::FCallDM:      // FOUR(IVA,IVA,SA,SA), CVMANY_UMANY, CMANY
+  case Op::FCallM:       // FOUR(IVA,IVA,SA,SA), CVMANY_UMANY, CMANY
     for (int i = 0, n = getImm(pc, 1).u_IVA - 1; i < n; ++i) {
       m_tmp_sig[i] = UV;
     }
@@ -1039,7 +1037,7 @@ bool FuncChecker::checkFpi(State* cur, PC pc) {
       ok = false;
     }
     auto const adjust =
-      op == OpFCallM || op == OpFCallDM || op == OpFCallUnpackM
+      op == OpFCallM || op == OpFCallUnpackM
       ? getImm(pc, 1).u_IVA - 1 : 0;
     if (cur->stklen != fpi.stkmin - adjust) {
       error("wrong # of params were passed; got %d expected %d\n",
@@ -1573,8 +1571,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     cur->stklen += pushes;
     if (op == Op::BaseSC || op == Op::BaseSL) {
       if (pushes == 1) outs[0] = outs[1];
-    } else if (op == Op::FCallM || op == Op::FCallDM ||
-               op == Op::FCallUnpackM) {
+    } else if (op == Op::FCallM || op == Op::FCallUnpackM) {
       for (int i = 0; i < pushes; ++i) {
         outs[i] = CV;
       }

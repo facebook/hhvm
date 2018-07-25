@@ -206,8 +206,16 @@ let instr_baseh = instr (IBase BaseH)
 let instr_baser i = instr (IBase (BaseR i))
 let instr_fpushfunc n param_locs = instr (ICall(FPushFunc(n, param_locs)))
 let instr_fpushfuncd count text = instr (ICall(FPushFuncD(count, text)))
-let instr_fcall count = instr (ICall(FCall count))
+let instr_fcall count =
+  let no_class = Hhbc_id.Class.from_raw_string "" in
+  let no_func = Hhbc_id.Function.from_raw_string "" in
+  instr (ICall(FCall(count, no_class, no_func)))
 let instr_fcallunpack count = instr (ICall(FCallUnpack count))
+let instr_fcallm count nrets =
+  let no_class = Hhbc_id.Class.from_raw_string "" in
+  let no_func = Hhbc_id.Function.from_raw_string "" in
+  instr (ICall(FCallM(count, nrets, no_class, no_func)))
+let instr_fcallunpackm count nrets = instr (ICall(FCallUnpackM(count, nrets)))
 let instr_cgetcunop = instr (IMisc CGetCUNop)
 let instr_ugetcunop = instr (IMisc UGetCUNop)
 let instr_memoget label range =
@@ -775,9 +783,9 @@ let get_input_output_count i =
     | FPushObjMethod _ -> (2, 0)
     | FPushCtor _ | FPushCtorD _ | FPushCtorI _ | FPushCtorS _
     | FIsParamByRef _ | FIsParamByRefCufIter _ -> (0, 1)
-    | FCall n | FCallD (n, _, _) | FCallAwait (n, _, _)| FCallUnpack n
-    | FCallBuiltin (n, _, _) -> (n, 1) | FCallM (n1, n2) -> (n1, n2)
-    | FCallDM (n1, n2, _, _) -> (n1, n2) | FCallUnpackM (n1, n2) -> (n1, n2)
+    | FCall (n, _, _) | FCallAwait (n, _, _) | FCallUnpack n
+    | FCallBuiltin (n, _, _) -> (n, 1)
+    | FCallM (n1, n2, _, _) -> (n1, n2) | FCallUnpackM (n1, n2) -> (n1, n2)
     end
   | IMisc i ->
     begin match i with

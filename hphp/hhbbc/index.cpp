@@ -2569,7 +2569,7 @@ void define_func_family(IndexData& index, borrowed_ptr<ClassInfo> cinfo,
             [&] (const MethTabEntryPair* a, const MethTabEntryPair* b) {
               // We want a canonical order for the family. Putting the
               // one corresponding to cinfo first makes sense, because
-              // the first one is used as the name for FCallD, after
+              // the first one is used as the name for FCall hint, after
               // that, sort by name so that different case spellings
               // come in the same order.
               if (a->second.func == b->second.func)   return false;

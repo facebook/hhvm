@@ -1618,7 +1618,7 @@ RetM <num returns> [C..C] -> []
 
   RetM is a variant of RetC that allows multiple cells to be returned. The RetM
   bytecode must be the only form of return used in a single function, and all
-  callers must used FCallM, FCallDM, or FCallUnpackM to invoke the function.
+  callers must used FCallM, or FCallUnpackM to invoke the function.
   Lastly, the number of arguments expected by the FCallM instruction must match
   the number returned by RetM.
 
@@ -2267,28 +2267,27 @@ FHandleRefMismatch <param id> <reffiness hint> <func name>   []  ->  []
   named %3 and the reffiness hint %2, which may be 'Cell', or 'Ref'. Depending
   on the runtime configuration, may raise a warning or throw an exception.
 
-FCall <num params>    [C|V..C|V]  ->  [R]
+FCall <num params> <class name> <func name>   [C|V..C|V]  ->  [R]
 
   FPI call. This instruction gets the bytecode address of the function
   associated with the current FPI (the callee), transfers the top %1 values
   from the stack to the callee as parameters, pops the current FPI off of the
   FPI stack, and then invokes the dispatcher to call the callee. When the
   callee returns, it will transfer the return value onto the caller's
-  evaluation stack using the R flavor.
+  evaluation stack using the R flavor. The strings in %2 and %3 provide hints
+  from static analysis to assist the region selector in determining the callee:
 
-FCallD <num params> <class name> <func name>   [C|V..C|V]  ->  [R]
-
-  FPI call direct. This instruction has exactly the effects of FCall %1, but
-  provides hints from static analysis to assist the region selector in
-  determining the callee. The strings in %2 and %3 are statically known names
-  of the class (if any) and method being called. If the call is targeting a
-  non-method, %2 must be the empty string.
+    %2          %3          callee
+    ----------+-----------+--------------
+    empty     | empty     | unknown
+    empty     | non-empty | function %3
+    non-empty | non-empty | method %2::%3
 
 FCallAwait <num params> <class name> <func name> [C|V..C|V] -> [R]
 
   FPI call direct to a known async function. Equivalent to the sequence
 
-    FCallD
+    FCall
     UnboxRNop
     Await
 
@@ -2307,11 +2306,10 @@ FCallUnpack <num params> [C|V..C|V] [C:Arr] -> [R]
   When the callee returns, it will transfer the return value onto the caller's
   evaluation stack using the R flavor.
 
-FCallM <num params> <num returns> [C..C] -> [C..C]
-FCallDM <num params> <num returns> <class name> <func name> [C..C] -> [C..C]
+FCallM <num params> <num returns> <class name> <func name> [C..C] -> [C..C]
 FCallUnpackM <num params> <num returns> [C..C] [C:Arr] -> [C..C]
 
-  These "M" variants of FCall behave similarly to FCall, FCallD, and FCallUnpack
+  These "M" variants of FCall behave similarly to FCall, and FCallUnpack
   respectively. These instructions must be used iff the callee returns via the
   RetM bytecode. The callee may only return cell values, and the number of
   values returned via RetM must match the number expected by the FCallM

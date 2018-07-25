@@ -266,6 +266,7 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
 
     case KindOfResource:
     case KindOfFunc:
+    case KindOfClass:
     case KindOfRef: {
       auto msg = folly::format(
         "Cannot Serialize unexpected type {}",

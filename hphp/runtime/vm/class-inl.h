@@ -29,11 +29,12 @@ inline bool Class::isZombie() const {
 }
 
 
-inline void Class::validate() const {
+inline bool Class::validate() const {
 #ifdef DEBUG
   assertx(m_magic == kMagic);
 #endif
   assertx(name()->checkSane());
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

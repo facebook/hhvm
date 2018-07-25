@@ -1525,6 +1525,10 @@ void VariableSerializer::serializeVariant(tv_rval tv,
       assertx(!isArrayKey);
       serializeFunc(val(tv).pfunc);
       return;
+
+    // TODO (T29639296)
+    case KindOfClass:
+      always_assert(false);
   }
   not_reached();
 }

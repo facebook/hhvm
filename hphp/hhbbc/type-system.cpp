@@ -2999,6 +2999,7 @@ Type from_cell(Cell cell) {
   case KindOfObject:
   case KindOfResource:
   case KindOfFunc:
+  case KindOfClass:
     break;
   }
   always_assert(0 && "reference counted/class/func type in from_cell");
@@ -3025,6 +3026,9 @@ Type from_DataType(DataType dt) {
   case KindOfObject:   return TObj;
   case KindOfResource: return TRes;
   case KindOfFunc:     return TFunc;
+  // TODO (T29639296)
+  case KindOfClass:
+    always_assert(false);
   }
   always_assert(0 && "dt in from_DataType didn't satisfy preconditions");
 }

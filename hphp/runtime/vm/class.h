@@ -1112,7 +1112,7 @@ public:
                                       const TypedValue& tv2);
 
   // For assertions:
-  void validate() const;
+  bool validate() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]

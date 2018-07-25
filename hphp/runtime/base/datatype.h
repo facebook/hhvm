@@ -74,7 +74,8 @@ namespace HPHP {
   DT(Int64,              6) \
   DT(Ref,                7) \
   DT(Double,             8) \
-  DT(Func,              10)
+  DT(Func,              10) \
+  DT(Class,             12) \
 
 enum class DataType : int8_t {
 #define DT(name, value) name = value,
@@ -113,7 +114,7 @@ constexpr DataType kExtraInvalidDataType = static_cast<DataType>(-127);
  * DataType limits.
  */
 auto constexpr kMinDataType = dt_t(KindOfPersistentArray);
-auto constexpr kMaxDataType = dt_t(KindOfFunc);
+auto constexpr kMaxDataType = dt_t(KindOfClass);
 auto constexpr kMinRefCountedDataType = dt_t(KindOfArray);
 auto constexpr kMaxRefCountedDataType = dt_t(KindOfRef);
 
@@ -321,6 +322,7 @@ constexpr bool isObjectType(DataType t) { return t == KindOfObject; }
 constexpr bool isResourceType(DataType t) { return t == KindOfResource; }
 constexpr bool isRefType(DataType t) { return t == KindOfRef; }
 constexpr bool isFuncType(DataType t) { return t == KindOfFunc; }
+constexpr bool isClassType(DataType t) { return t == KindOfClass; }
 
 constexpr int kHasPersistentMask = -128;
 
@@ -365,7 +367,8 @@ bool operator>=(DataType, DataType) = delete;
   case KindOfPersistentVec: \
   case KindOfPersistentDict: \
   case KindOfPersistentKeyset: \
-  case KindOfFunc
+  case KindOfFunc:          \
+  case KindOfClass
 }
 
 ///////////////////////////////////////////////////////////////////////////////

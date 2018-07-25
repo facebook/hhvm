@@ -238,6 +238,7 @@ DataType Variant::toNumeric(int64_t &ival, double &dval,
     case KindOfObject:
     case KindOfResource:
     case KindOfFunc:
+    case KindOfClass:
       return m_type;
 
     case KindOfInt64:
@@ -280,6 +281,7 @@ bool Variant::isScalar() const noexcept {
     case KindOfPersistentString:
     case KindOfString:
     case KindOfFunc:
+    case KindOfClass:
       return true;
 
     case KindOfRef:
@@ -324,6 +326,7 @@ static bool isAllowedAsConstantValueImpl(TypedValue tv) {
     case KindOfObject:
     case KindOfRef:
     case KindOfFunc:
+    case KindOfClass:
       return false;
   }
   not_reached();
@@ -366,6 +369,9 @@ bool Variant::toBooleanHelper() const {
     case KindOfFunc:
       return funcToStringHelper(m_data.pfunc)->toBoolean();
     case KindOfRef:           return m_data.pref->var()->toBoolean();
+    // TODO (T29639296)
+    case KindOfClass:
+      always_assert(false);
   }
   not_reached();
 }
@@ -392,6 +398,9 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfFunc:
       return funcToStringHelper(m_data.pfunc)->toInt64();
     case KindOfRef:           return m_data.pref->var()->toInt64(base);
+    // TODO (T29639296)
+    case KindOfClass:
+      always_assert(false);
   }
   not_reached();
 }
@@ -418,6 +427,9 @@ double Variant::toDoubleHelper() const {
     case KindOfFunc:
       return funcToStringHelper(m_data.pfunc)->toDouble();
     case KindOfRef:           return m_data.pref->var()->toDouble();
+    // TODO (T29639296)
+    case KindOfClass:
+      always_assert(false);
   }
   not_reached();
 }
@@ -447,6 +459,9 @@ Array Variant::toPHPArrayHelper() const {
       return Array::Create(Variant{funcToStringHelper(m_data.pfunc),
                                    PersistentStrInit{}});
     case KindOfRef:           return m_data.pref->var()->toArray();
+    // TODO (T29639296)
+    case KindOfClass:
+      always_assert(false);
 
   }
   not_reached();
@@ -464,6 +479,7 @@ Object Variant::toObjectHelper() const {
     case KindOfPersistentString:
     case KindOfString:
     case KindOfFunc:
+    case KindOfClass:
     case KindOfResource: {
       ArrayInit props(1, ArrayInit::Map{});
       props.set(s_scalar, *this);
@@ -511,6 +527,7 @@ Resource Variant::toResourceHelper() const {
     case KindOfArray:
     case KindOfObject:
     case KindOfFunc:
+    case KindOfClass:
       return Resource(req::make<DummyResource>());
 
     case KindOfResource:
@@ -602,6 +619,7 @@ void Variant::setEvalScalar() {
     case KindOfResource:
     case KindOfRef:
     case KindOfFunc:
+    case KindOfClass:
       break;
   }
   not_reached();

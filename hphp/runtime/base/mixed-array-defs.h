@@ -418,6 +418,7 @@ void ConvertTvToUncounted(
       break;
     }
     case KindOfFunc:
+    case KindOfClass:
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:

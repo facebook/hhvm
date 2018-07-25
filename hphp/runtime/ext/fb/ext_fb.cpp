@@ -517,9 +517,11 @@ static int fb_compact_serialize_variant(
     case KindOfResource:
     case KindOfRef:
     case KindOfFunc:
+    case KindOfClass:
       fb_compact_serialize_code(sb, FB_CS_NULL);
       raise_warning(
-        "fb_compact_serialize(): unable to serialize object/resource/ref/func"
+        "fb_compact_serialize(): unable to serialize "
+        "object/resource/ref/func/class"
       );
       break;
   }

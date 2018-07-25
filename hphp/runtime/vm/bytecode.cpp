@@ -815,6 +815,7 @@ static std::string toStringElm(const TypedValue* tv) {
   case KindOfObject:
   case KindOfResource:
   case KindOfFunc:
+  case KindOfClass:
     os << "C:";
     break;
   }
@@ -905,6 +906,10 @@ static std::string toStringElm(const TypedValue* tv) {
          << tv->m_data.pfunc->fullDisplayName()->data()
          << ")";
       continue;
+    case KindOfClass:
+    os << ":Class("
+       << tv->m_data.pclass->name()->data()
+       << ")";
     case KindOfRef:
       break;
     }
@@ -2921,6 +2926,7 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
             case KindOfResource:
             case KindOfRef:
             case KindOfFunc:
+            case KindOfClass:
               not_reached();
           }
           if (val->m_type == KindOfString) tvDecRefStr(val);
@@ -2962,6 +2968,8 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
           return;
 
         case KindOfRef:
+        // TODO (T29639296)
+        case KindOfClass:
           break;
       }
       not_reached();

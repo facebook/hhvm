@@ -126,6 +126,7 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
       return APCArray::MakeSharedEmptyArray();
 
     case KindOfFunc:
+    case KindOfClass:
       always_assert(false);
 
     case KindOfRef:

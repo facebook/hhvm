@@ -475,6 +475,7 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
     case KindOfResource         : return kRes;
     case KindOfObject           : return kObj;
     case KindOfFunc             : return kFunc;
+    case KindOfClass            : return kCls;
     case KindOfRef:
       assertx(inner != KindOfUninit);
       return bitsFromDataType(inner, KindOfUninit) << kBoxShift;
@@ -506,6 +507,7 @@ DataType Type::toDataType() const {
   if (*this <= TObj)         return KindOfObject;
   if (*this <= TRes)         return KindOfResource;
   if (*this <= TFunc)        return KindOfFunc;
+  if (*this <= TCls)         return KindOfClass;
   if (*this <= TBoxedCell)   return KindOfRef;
   always_assert_flog(false,
                      "Bad Type {} in Type::toDataType()", *this);

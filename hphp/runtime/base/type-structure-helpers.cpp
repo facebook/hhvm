@@ -47,6 +47,7 @@ bool cellInstanceOf(const Cell* tv, const NamedEntity* ne) {
     case KindOfBoolean:
     case KindOfResource:
     case KindOfFunc:
+    case KindOfClass:
       return false;
 
     case KindOfInt64:

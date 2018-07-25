@@ -300,6 +300,7 @@ std::pair<int, double> sizeOfArray(
         case KindOfArray:
         case KindOfKeyset:
         case KindOfFunc:
+        case KindOfClass:
           always_assert(false);
       }
 
@@ -397,6 +398,7 @@ void stringsOfArray(
         case KindOfArray:
         case KindOfKeyset:
         case KindOfFunc:
+        case KindOfClass:
           // this should be an always_assert(false), but that appears to trigger
           // a gcc-4.9 bug (t16350411); even after t16350411 is fixed, we
           // can't always_assert(false) here until we stop supporting gcc-4.9
@@ -442,7 +444,8 @@ std::pair<int, double> tvGetSize(
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
-    case KindOfFunc: {
+    case KindOfFunc:
+    case KindOfClass: {
       // Counted as part sizeof(TypedValue)
       break;
     }
@@ -622,7 +625,8 @@ void tvGetStrings(
     case HPHP::KindOfBoolean:
     case HPHP::KindOfInt64:
     case HPHP::KindOfDouble:
-    case HPHP::KindOfFunc: {
+    case HPHP::KindOfFunc:
+    case HPHP::KindOfClass: {
       // Not strings
       break;
     }

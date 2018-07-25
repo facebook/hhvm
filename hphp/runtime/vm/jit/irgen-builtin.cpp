@@ -749,6 +749,7 @@ SSATmp* opt_foldable(IRGS& env,
       case KindOfRef:
       // TODO (T29639296)
       case KindOfFunc:
+      case KindOfClass:
         return nullptr;
     }
   } catch (...) {

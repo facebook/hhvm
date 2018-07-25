@@ -289,6 +289,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfResource:
         return AnnotAction::Fail;
       case KindOfFunc:
+      case KindOfClass:
       case KindOfObject:
       case KindOfRef:
         not_reached();

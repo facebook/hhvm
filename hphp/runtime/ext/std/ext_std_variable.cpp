@@ -382,6 +382,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfObject:
     // TODO (T29639296)
     case KindOfFunc:
+    case KindOfClass:
       break;
 
     case KindOfRef:

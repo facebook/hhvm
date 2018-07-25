@@ -195,6 +195,7 @@ void StringBuffer::append(const Variant& v) {
     case KindOfResource:
     case KindOfRef:
     case KindOfFunc:
+    case KindOfClass:
       append(v.toString());
   }
 }

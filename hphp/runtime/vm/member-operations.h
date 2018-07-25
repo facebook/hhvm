@@ -373,7 +373,7 @@ inline tv_rval ElemKeyset(ArrayData* base, key_type<keyType> key) {
 }
 
 /**
- * Elem when base is an Int64, Double, Resource, or Func.
+ * Elem when base is an Int64, Double, or Resource.
  */
 inline tv_rval ElemScalar() {
   if (RuntimeOption::EnableHipHopSyntax) {
@@ -473,6 +473,8 @@ NEVER_INLINE tv_rval ElemSlow(TypedValue& tvRef,
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
+    // TODO (T29639296)
+    case KindOfClass:
       return ElemScalar();
     case KindOfFunc:
       return ElemString<mode, keyType>(
@@ -786,7 +788,7 @@ inline tv_lval ElemDEmptyish(tv_lval base, key_type<keyType> key) {
 }
 
 /**
- * ElemD when base is an Int64, Double, Resource, or Func.
+ * ElemD when base is an Int64, Double, Resource, Func, or Class.
  */
 inline tv_lval ElemDScalar(TypedValue& tvRef) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
@@ -871,6 +873,7 @@ tv_lval ElemD(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
+    case KindOfClass:
       return ElemDScalar(tvRef);
     case KindOfPersistentString:
     case KindOfString:
@@ -918,6 +921,7 @@ void SetWithRefMLElem(TypedValue& tvRef, tv_lval base,
       case KindOfDouble:
       case KindOfResource:
       case KindOfFunc:
+      case KindOfClass:
         return ElemDScalar(tvRef);
       case KindOfPersistentString:
       case KindOfString:
@@ -1194,6 +1198,7 @@ tv_lval ElemU(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
+    case KindOfClass:
       // Unset on scalar base never modifies the base, but the const_cast is
       // necessary to placate the type system.
       return const_cast<TypedValue*>(&immutable_uninit_base);
@@ -1299,6 +1304,7 @@ inline tv_lval NewElem(TypedValue& tvRef, tv_lval base) {
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
+    case KindOfClass:
       return NewElemInvalid(tvRef);
     case KindOfPersistentString:
     case KindOfString:
@@ -1336,7 +1342,7 @@ inline void SetElemEmptyish(tv_lval base, key_type<keyType> key,
 }
 
 /**
- * SetElem when base is an Int64, Double, Resource, or Func.
+ * SetElem when base is an Int64, Double, Resource, Func, or Class.
  */
 template <bool setResult>
 inline void SetElemScalar(Cell* value) {
@@ -1722,6 +1728,7 @@ StringData* SetElemSlow(tv_lval base, key_type<keyType> key, Cell* value) {
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
+    case KindOfClass:
       SetElemScalar<setResult>(value);
       return nullptr;
     case KindOfPersistentString:
@@ -1785,7 +1792,7 @@ inline void SetNewElemEmptyish(tv_lval base, Cell* value) {
 }
 
 /**
- * SetNewElem when base is Int64, Double, Resource or Func
+ * SetNewElem when base is Int64, Double, Resource, Func or Class
  */
 template <bool setResult>
 inline void SetNewElemScalar(Cell* value) {
@@ -1925,6 +1932,7 @@ inline void SetNewElem(tv_lval base, Cell* value) {
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
+    case KindOfClass:
       return SetNewElemScalar<setResult>(value);
     case KindOfPersistentString:
     case KindOfString:
@@ -1969,7 +1977,7 @@ inline tv_lval SetOpElemEmptyish(SetOpOp op, tv_lval base,
 }
 
 /**
- * SetOpElem when base is Int64, Double, Resource or Func
+ * SetOpElem when base is Int64, Double, Resource, Func, or Class
  */
 inline tv_lval SetOpElemScalar(TypedValue& tvRef) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
@@ -2002,6 +2010,7 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
+    case KindOfClass:
       return SetOpElemScalar(tvRef);
 
     case KindOfPersistentString:
@@ -2101,6 +2110,7 @@ inline tv_lval SetOpNewElem(TypedValue& tvRef,
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
+    case KindOfClass:
       return SetOpNewElemScalar(tvRef);
 
     case KindOfPersistentString:
@@ -2225,6 +2235,7 @@ inline Cell IncDecElem(
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
+    case KindOfClass:
       return IncDecElemScalar();
 
     case KindOfPersistentString:
@@ -2327,6 +2338,7 @@ inline Cell IncDecNewElem(
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
+    case KindOfClass:
       return IncDecNewElemScalar();
 
     case KindOfPersistentString:
@@ -2564,6 +2576,9 @@ void UnsetElemSlow(tv_lval base, key_type<keyType> key) {
     case KindOfFunc:
       raise_error("Cannot unset a func");
       return;
+    case KindOfClass:
+      raise_error("Cannot unset a class");
+      return;
 
     case KindOfPersistentString:
     case KindOfString:
@@ -2794,6 +2809,8 @@ NEVER_INLINE bool IssetEmptyElemSlow(tv_rval base, key_type<keyType> key) {
       return IssetEmptyElemObj<useEmpty, keyType>(val(base).pobj, key);
 
     case KindOfRef:
+    // TODO (T29639296)
+    case KindOfClass:
       break;
   }
   unknownBaseType(type(base));
@@ -2917,6 +2934,7 @@ tv_lval propPre(TypedValue& tvRef, tv_lval base) {
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
+    case KindOfClass:
       return propPreNull<mode>(tvRef);
 
     case KindOfPersistentString:
@@ -2970,6 +2988,7 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfFunc:
+    case KindOfClass:
       tvWriteNull(tvRef);
       raise_notice("Cannot access property on non-object");
       return &tvRef;
@@ -3103,6 +3122,7 @@ inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
     case KindOfArray:
     case KindOfResource:
     case KindOfFunc:
+    case KindOfClass:
       return SetPropNull<setResult>(val);
 
     case KindOfPersistentString:
@@ -3181,6 +3201,7 @@ inline tv_lval SetOpProp(TypedValue& tvRef,
     case KindOfArray:
     case KindOfResource:
     case KindOfFunc:
+    case KindOfClass:
       return SetOpPropNull(tvRef);
 
     case KindOfPersistentString:
@@ -3262,6 +3283,7 @@ inline Cell IncDecProp(
     case KindOfArray:
     case KindOfResource:
     case KindOfFunc:
+    case KindOfClass:
       return IncDecPropNull();
 
     case KindOfPersistentString:

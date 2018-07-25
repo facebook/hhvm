@@ -121,6 +121,10 @@ bool cellIsPlausible(const Cell cell) {
         assertPtr(cell.m_data.pfunc);
         assertx(cell.m_data.pfunc->validate());
         return;
+      case KindOfClass:
+        assertPtr(cell.m_data.pclass);
+        assertx(cell.m_data.pclass->validate());
+        return;
       case KindOfRef:
         assertx(!"KindOfRef found in a Cell");
         break;

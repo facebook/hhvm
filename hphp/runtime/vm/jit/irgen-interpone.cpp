@@ -181,6 +181,7 @@ folly::Optional<Type> interpOutputType(IRGS& env,
       return TCell;
     }
     case OutFunc: return TFunc;
+    case OutClass: return TCls;
   }
   not_reached();
 }

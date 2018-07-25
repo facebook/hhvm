@@ -220,6 +220,7 @@ void callFunc(const Func* func, void *ctx,
       return;
 
     case KindOfFunc:
+    case KindOfClass:
     case KindOfInt64:
       ret.m_data.num =
         callFuncInt64Impl(f, GP_args, GP_count, SIMD_args, SIMD_count);
@@ -386,6 +387,7 @@ bool coerceFCallArgs(TypedValue* args,
       case KindOfPersistentArray:
       case KindOfRef:
       case KindOfFunc:
+      case KindOfClass:
         not_reached();
     }
   }
@@ -608,6 +610,8 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfRef:          return ty == T::Mixed    || ty == T::OutputArg;
     case KindOfInt64:        return ty == T::Int64    || ty == T::Int32;
     case KindOfFunc:         return ty == T::Func;
+    // TODO (T29639296)
+    case KindOfClass:        return false;
   }
   not_reached();
 }

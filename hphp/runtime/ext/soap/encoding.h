@@ -277,7 +277,8 @@ inline int dataTypeToSoap(DataType dt) {
     case KindOfObject:  return SOAP_ENC_OBJECT;
     case KindOfResource:
     case KindOfRef:
-    case KindOfFunc:    return INVALID_TYPE;
+    case KindOfFunc:
+    case KindOfClass:   return INVALID_TYPE;
   }
   return INVALID_TYPE;
 }

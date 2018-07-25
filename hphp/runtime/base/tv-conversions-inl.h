@@ -59,6 +59,8 @@ inline bool cellToBool(Cell cell) {
     case KindOfRef:           break;
     case KindOfFunc:
       return funcToStringHelper(cell.m_data.pfunc)->toBoolean();
+    // TODO (T29639296)
+    case KindOfClass:         break;
   }
   not_reached();
 }
@@ -87,6 +89,8 @@ inline int64_t cellToInt(Cell cell) {
     case KindOfRef:           break;
     case KindOfFunc:
       return funcToStringHelper(cell.m_data.pfunc)->toInt64(10);
+    // TODO (T29639296)
+    case KindOfClass:         break;
   }
   not_reached();
 }
@@ -156,6 +160,7 @@ inline Cell cellToKey(Cell cell, const ArrayData* ad) {
     case KindOfString:
     case KindOfPersistentString:
     case KindOfFunc:
+    case KindOfClass:
     case KindOfRef:
       break;
   }

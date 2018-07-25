@@ -789,6 +789,7 @@ bool StringData::isNumeric() const {
     case KindOfResource:
     case KindOfRef:
     case KindOfFunc:
+    case KindOfClass:
       break;
   }
   not_reached();
@@ -820,6 +821,7 @@ bool StringData::isInteger() const {
     case KindOfResource:
     case KindOfRef:
     case KindOfFunc:
+    case KindOfClass:
       break;
   }
   not_reached();

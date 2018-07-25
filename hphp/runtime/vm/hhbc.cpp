@@ -743,6 +743,7 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
     case KindOfResource:
     case KindOfRef:
     case KindOfFunc:
+    case KindOfClass:
       break;
   }
   not_reached();

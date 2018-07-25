@@ -81,6 +81,7 @@ public:
   bool isObject()    const { return isObjectType(getType()); }
   bool isResource()  const { return isResourceType(getType()); }
   bool isFunc()      const { return isFuncType(getType()); }
+  bool isClass()     const { return isClassType(getType()); }
 
   auto toBoolean() const { return tvCastToBoolean(*m_val); }
   auto toInt64()   const { return tvCastToInt64(*m_val); }
@@ -106,6 +107,12 @@ public:
     assertx(isFunc());
     return isRefType(type(m_val)) ? val(m_val).pref->tv()->m_data.pfunc
       : val(m_val).pfunc;
+  }
+
+  auto toClassVal() const {
+    assertx(isClass());
+    return isRefType(type(m_val)) ? val(m_val).pref->tv()->m_data.pclass
+      : val(m_val).pclass;
   }
 
 protected:
@@ -785,6 +792,7 @@ struct Variant : private TypedValue {
       case KindOfPersistentArray:
       case KindOfArray:
       case KindOfFunc:
+      case KindOfClass:
         return false;
       case KindOfRef:
         return m_data.pref->var()->isIntVal();

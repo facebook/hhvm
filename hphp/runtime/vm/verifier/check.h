@@ -82,7 +82,7 @@ bool checkUnit(const UnitEmitter*, ErrorMode mode = kStderr);
  * -- every array table index in-bounds
  * -- Local variable ids must be < Func.numLocals
  * -- iter variable ids must be < Func.numIterators
- * -- FCall <num params> == FPush* <num params>
+ * -- FCall <num params> <unpack>  == FPush* <num params + unpack>
  * -- init-state of every iterator must be known everywhere
  *
  * Not Checked:

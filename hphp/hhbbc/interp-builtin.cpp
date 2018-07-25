@@ -397,7 +397,7 @@ bool can_emit_builtin(borrowed_ptr<const php::Func> func,
   // Only allowed to overrun the signature if we have somewhere to put it
   if (numArgs > func->params.size() && !variadic) return false;
 
-  // Don't convert an FCallUnpack unless we're calling a variadic function
+  // Don't convert an FCall with unpack unless we're calling a variadic function
   // with the unpack in the right place to pass it directly.
   if (hasUnpack &&
       (!variadic || numArgs != func->params.size())) {
@@ -440,36 +440,39 @@ void finish_builtin(ISS& env,
                     bool unpack) {
   std::vector<Bytecode> repl;
   assert(!unpack ||
-         (numArgs &&
-          numArgs == func->params.size() &&
+         (numArgs + 1 == func->params.size() &&
           func->params.back().isVariadic));
 
-  for (auto i = numArgs; i < func->params.size(); i++) {
-    auto const& pi = func->params[i];
-    if (pi.isVariadic) {
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        repl.emplace_back(bc::Vec { staticEmptyVecArray() });
-      } else {
-        repl.emplace_back(bc::Array { staticEmptyVArray() });
+  if (unpack) {
+    ++numArgs;
+  } else {
+    for (auto i = numArgs; i < func->params.size(); i++) {
+      auto const& pi = func->params[i];
+      if (pi.isVariadic) {
+        if (RuntimeOption::EvalHackArrDVArrs) {
+          repl.emplace_back(bc::Vec { staticEmptyVecArray() });
+        } else {
+          repl.emplace_back(bc::Array { staticEmptyVArray() });
+        }
+        continue;
       }
-      continue;
+      auto cell = pi.defaultValue.m_type == KindOfNull && !pi.builtinType ?
+        make_tv<KindOfUninit>() : pi.defaultValue;
+      repl.emplace_back(gen_constant(cell));
     }
-    auto cell = pi.defaultValue.m_type == KindOfNull && !pi.builtinType ?
-      make_tv<KindOfUninit>() : pi.defaultValue;
-    repl.emplace_back(gen_constant(cell));
-  }
-  if (!unpack &&
-      func->params.size() &&
-      func->params.back().isVariadic &&
-      numArgs >= func->params.size()) {
 
-    const uint32_t numToPack = numArgs - func->params.size() + 1;
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      repl.emplace_back(bc::NewVecArray { numToPack });
-    } else {
-      repl.emplace_back(bc::NewVArray { numToPack });
+    if (func->params.size() &&
+        func->params.back().isVariadic &&
+        numArgs >= func->params.size()) {
+
+      const uint32_t numToPack = numArgs - func->params.size() + 1;
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        repl.emplace_back(bc::NewVecArray { numToPack });
+      } else {
+        repl.emplace_back(bc::NewVArray { numToPack });
+      }
+      numArgs = func->params.size();
     }
-    numArgs = func->params.size();
   }
 
   assert(numArgs <= func->params.size());

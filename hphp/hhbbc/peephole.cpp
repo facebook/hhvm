@@ -149,20 +149,21 @@ void BasicPeephole::push_back(const Bytecode& next) {
       if (prev.op == Op::FCall) {
         auto& call = prev.FCall;
         auto async = [&]() {
-          if (call.str3->empty()) return false;
-          if (call.str2->empty()) {
+          if (call.arg2) return false;
+          if (call.str4->empty()) return false;
+          if (call.str3->empty()) {
             return m_index.is_async_func(
-              m_index.resolve_func(m_ctx, call.str3));
+              m_index.resolve_func(m_ctx, call.str4));
           }
-          auto cls = m_index.resolve_class(m_ctx, call.str2);
+          auto cls = m_index.resolve_class(m_ctx, call.str3);
           assert(cls);
           auto func = m_index.resolve_method(m_ctx, subCls(*cls),
-                                             call.str3);
+                                             call.str4);
           return m_index.is_async_func(func);
         }();
         if (async) {
           prev = bc::FCallAwait {
-            call.arg1, call.str2, call.str3
+            call.arg1, call.str3, call.str4
           };
           m_next.pop_back();
           return;

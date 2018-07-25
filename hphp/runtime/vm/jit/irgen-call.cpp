@@ -1438,7 +1438,7 @@ void emitBoxR(IRGS& env) { implBoxR(env); }
 
 void emitCallerDynamicCallChecks(IRGS& env,
                                  const Func* callee,
-                                 uint32_t numParams) {
+                                 uint32_t numStackInputs) {
   if (RuntimeOption::EvalForbidDynamicCalls <= 0) return;
   if (callee && callee->isDynamicallyCallable()) return;
 
@@ -1446,7 +1446,7 @@ void emitCallerDynamicCallChecks(IRGS& env,
   ifElse(
     env,
     [&] (Block* skip) {
-      auto const calleeAROff = spOffBCFromIRSP(env) + numParams;
+      auto const calleeAROff = spOffBCFromIRSP(env) + numStackInputs;
       auto const dynamic = gen(
         env,
         LdARIsDynamic,
@@ -1480,7 +1480,7 @@ void emitCallerDynamicCallChecks(IRGS& env,
 
 //////////////////////////////////////////////////////////////////////
 
-void implFCallUnpack(IRGS& env, uint32_t numParams, uint32_t numOut) {
+SSATmp* implFCall(IRGS& env, uint32_t numParams, bool unpack, uint32_t numOut) {
   auto const callee = env.currentNormalizedInstruction->funcd;
 
   auto const writeLocals = callee
@@ -1490,85 +1490,70 @@ void implFCallUnpack(IRGS& env, uint32_t numParams, uint32_t numOut) {
     ? funcReadsLocals(callee)
     : callReadsLocals(*env.currentNormalizedInstruction, curFunc(env));
 
-  emitCallerDynamicCallChecks(env, callee, numParams);
+  emitCallerDynamicCallChecks(env, callee, numParams + (unpack ? 1 : 0));
 
-  auto const data = CallUnpackData {
-    spOffBCFromIRSP(env),
-    numParams,
-    numOut,
-    bcOff(env),
-    nextBcOff(env),
-    callee,
-    writeLocals,
-    readLocals
-  };
-  auto const retVal = gen(env, CallUnpack, data, sp(env), fp(env));
-  push(env, retVal);
-}
-
-void emitFCallUnpack(IRGS& env, uint32_t numParams) {
-  implFCallUnpack(env, numParams, 0);
-}
-
-void emitFCallUnpackM(IRGS& env, uint32_t numParams, uint32_t numOut) {
-  implFCallUnpack(env, numParams, numOut - 1);
-}
-
-SSATmp* implFCall(IRGS& env, uint32_t numParams, uint32_t numOut) {
-  auto const returnBcOffset = nextBcOff(env) - curFunc(env)->base();
-  auto const callee = env.currentNormalizedInstruction->funcd;
-
-  auto const writeLocals = callee
-    ? funcWritesLocals(callee)
-    : callWritesLocals(*env.currentNormalizedInstruction, curFunc(env));
-  auto const readLocals = callee
-    ? funcReadsLocals(callee)
-    : callReadsLocals(*env.currentNormalizedInstruction, curFunc(env));
-  auto const needsCallerFrame = callee
-    ? funcNeedsCallerFrame(callee)
-    : callNeedsCallerFrame(
-      *env.currentNormalizedInstruction,
-      curFunc(env)
-    );
-
-  emitCallerDynamicCallChecks(env, callee, numParams);
-
-  auto op = curFunc(env)->unit()->getOp(bcOff(env));
-  auto const retVal = gen(
-    env,
-    Call,
-    CallData {
+  if (unpack) {
+    auto const data = CallUnpackData {
       spOffBCFromIRSP(env),
-      static_cast<uint32_t>(numParams),
+      numParams + 1,
       numOut,
-      returnBcOffset,
+      bcOff(env),
+      nextBcOff(env),
       callee,
       writeLocals,
-      readLocals,
-      needsCallerFrame,
-      op == Op::FCallAwait
-    },
-    sp(env),
-    fp(env)
-  );
+      readLocals
+    };
+    auto const retVal = gen(env, CallUnpack, data, sp(env), fp(env));
+    push(env, retVal);
+    return retVal;
+  } else {
+    auto const returnBcOffset = nextBcOff(env) - curFunc(env)->base();
+    auto const needsCallerFrame = callee
+      ? funcNeedsCallerFrame(callee)
+      : callNeedsCallerFrame(
+        *env.currentNormalizedInstruction,
+        curFunc(env)
+      );
 
-  push(env, retVal);
-  return retVal;
+    auto op = curFunc(env)->unit()->getOp(bcOff(env));
+    auto const retVal = gen(
+      env,
+      Call,
+      CallData {
+        spOffBCFromIRSP(env),
+        static_cast<uint32_t>(numParams),
+        numOut,
+        returnBcOffset,
+        callee,
+        writeLocals,
+        readLocals,
+        needsCallerFrame,
+        op == Op::FCallAwait
+      },
+      sp(env),
+      fp(env)
+    );
+
+    push(env, retVal);
+    return retVal;
+  }
 }
 
 void emitFCall(IRGS& env,
                uint32_t numParams,
+               uint32_t unpack,
                const StringData*,
                const StringData*) {
-  implFCall(env, numParams, 0);
+  implFCall(env, numParams, unpack != 0, 0);
 }
 
 void emitFCallM(IRGS& env,
                 uint32_t numParams,
+                uint32_t unpack,
                 uint32_t numOut,
                 const StringData*,
                 const StringData*) {
-  implFCall(env, numParams, numOut - 1);
+  implFCall(env, numParams, unpack != 0, numOut - 1);
 }
 
 void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,

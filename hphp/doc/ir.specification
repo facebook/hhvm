@@ -1676,10 +1676,10 @@ To string conversions:
 |                       NF
 
   Invoke function corresponding to the current FPI with numParams arguments,
-  the last of which is an array of the remaining args. Used for FCallUnpack.
-  S0+spOffset points to the stack resulting after the ActRec for the function
-  and numParams arguments have been pushed. CallUnpack pops the array off the
-  stack, pushes the elements of the array as arguments, and invokes the
+  the last of which is an array of the remaining args. Used for FCall with
+  unpack. S0+spOffset points to the stack resulting after the ActRec for the
+  function and numParams arguments have been pushed. CallUnpack pops the array
+  off the stack, pushes the elements of the array as arguments, and invokes the
   function in the ActRec.
 
 | SyncReturnBC<spOffset,bcOffset>, ND, S(StkPtr) S(FramePtr), NF

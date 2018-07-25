@@ -34,15 +34,13 @@ let emit_body_instrs_inout params call_instrs =
         Some (instr_setl @@ Local.Named (Hhas_param.name p))) in
   let local = Local.get_unnamed_local () in
   let has_variadic = is_last_param_variadic param_count params in
+  let param_count = if has_variadic then param_count - 1 else param_count in
   let num_inout = List.length inout_params in
   gather [
     gather @@ List.init num_inout ~f:(fun _ -> instr_nulluninit);
     call_instrs;
     param_instrs;
-    begin match has_variadic with
-    | false -> instr_fcallm param_count (num_inout + 1)
-    | true -> instr_fcallunpackm param_count (num_inout + 1)
-    end;
+    instr_fcallm param_count has_variadic (num_inout + 1);
     Emit_inout_helpers.emit_list_set_for_inout_call local inout_params;
     instr_retc
   ]
@@ -61,15 +59,12 @@ let emit_body_instrs_ref params call_instrs =
     List.filter_map params ~f:(fun p ->
         if Hhas_param.is_reference p
         then Some (instr_cgetl (Local.Named (Hhas_param.name p))) else None) in
-  let fcall_instr =
-    if is_last_param_variadic param_count params
-    then instr_fcallunpack param_count
-    else instr_fcall param_count
-  in
+  let has_variadic = is_last_param_variadic param_count params in
+  let param_count = if has_variadic then param_count - 1 else param_count in
   gather [
     call_instrs;
     param_instrs;
-    fcall_instr;
+    instr_fcall param_count has_variadic;
     instr_unboxr_nop;
     gather param_get_instrs;
     instr_retm (List.length param_get_instrs + 1)

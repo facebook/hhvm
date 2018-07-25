@@ -214,9 +214,9 @@ let stk_data : instruct -> stack_sig = function
   | ILitConst NewPair
   | IOp _
   | ILitConst AddNewElemC                  -> ["C"; "C"], ["C"]
-  | ICall FCallAwait (n, _, _)
-  | ICall FCallUnpack n
-  | ICall FCall (n, _, _)                  -> produce "C" n, ["R"]
+  | ICall FCall (n, u, _, _)
+    -> produce "C" (n + (if u then 1 else 0)), ["R"]
+  | ICall FCallAwait (n, _, _)             -> produce "C" n, ["R"]
   | ICall FCallBuiltin (n, _, _)           -> produce "C" n, ["R"]
   | ILitConst _                            -> [], ["C"]
   | ICall _                                -> ["C"], []

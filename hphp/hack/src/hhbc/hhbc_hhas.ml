@@ -84,6 +84,8 @@ let string_of_param_id x =
 
 let string_of_param_num i = string_of_int i
 
+let string_of_has_unpack has_unpack = if has_unpack then "1" else "0"
+
 let string_of_local_id x =
   match x with
   | Local.Unnamed i -> "_" ^ (string_of_int i)
@@ -500,22 +502,19 @@ let string_of_call instruction =
   | FHandleRefMismatch (i, h, f) ->
     sep ["FHandleRefMismatch"; string_of_param_num i; string_of_fpasshint h;
          "\"" ^ f ^ "\""]
-  | FCall (n, c, f) ->
+  | FCall (n, u, c, f) ->
     sep ["FCall";
-      string_of_int n; string_of_class_id c; string_of_function_id f]
+      string_of_int n; string_of_has_unpack u;
+      string_of_class_id c; string_of_function_id f]
+  | FCallM (n1, u, n2, c, f) ->
+    sep ["FCallM";
+      string_of_int n1; string_of_has_unpack u; string_of_int n2;
+      string_of_class_id c; string_of_function_id f]
   | FCallAwait (n, c, f) ->
     sep ["FCallAwait";
       string_of_int n; string_of_class_id c; string_of_function_id f]
-  | FCallUnpack n ->
-    sep ["FCallUnpack"; string_of_int n]
   | FCallBuiltin (n1, n2, id) ->
     sep ["FCallBuiltin"; string_of_int n1; string_of_int n2; SU.quote_string id]
-  | FCallUnpackM (n1, n2) ->
-    sep ["FCallUnpackM"; string_of_int n1; string_of_int n2]
-  | FCallM (n1, n2, c, f) ->
-    sep ["FCallM";
-      string_of_int n1; string_of_int n2; string_of_class_id c;
-      string_of_function_id f]
 
 let string_of_barethis_op i =
   match i with

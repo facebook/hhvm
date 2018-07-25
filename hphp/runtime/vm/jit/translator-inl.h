@@ -96,9 +96,7 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op) {
     case Op::MemoGet:
       return ControlFlowInfo::BreaksBB;
     case Op::FCall:
-    case Op::FCallUnpack:
     case Op::FCallM:
-    case Op::FCallUnpackM:
     case Op::ContEnter:
     case Op::ContRaise:
     case Op::ContEnterDelegate:

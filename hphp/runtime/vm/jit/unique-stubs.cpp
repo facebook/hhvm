@@ -217,7 +217,7 @@ FCallHelperRet fcallHelper(ActRec* ar) {
 
   try {
     VMRegAnchor _(ar);
-    if (doFCall(ar, vmpc())) {
+    if (doFCall(ar, vmpc(), ar->numArgs(), false)) {
       return { tc::ustubs().resumeHelperRet, nullptr };
     }
     // We've been asked to skip the function body (fb_intercept).  The vmregs

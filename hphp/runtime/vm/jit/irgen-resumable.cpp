@@ -403,7 +403,7 @@ void emitFCallAwait(IRGS& env,
   if (curFunc(env)->isAsyncGenerator() &&
       resumeMode(env) == ResumeMode::Async) PUNT(Await-AsyncGenerator);
 
-  auto const ret = implFCall(env, numParams, 0);
+  auto const ret = implFCall(env, numParams, false, 0);
   assertTypeStack(env, BCSPRelOffset{0}, TInitCell);
   ifThen(
     env,

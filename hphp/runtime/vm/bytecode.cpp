@@ -5325,13 +5325,40 @@ OPTBLD_INLINE void iopFHandleRefMismatch(uint32_t paramId, FPassHint hint,
   raiseParamRefMismatchForFuncName(funcName, paramId, hint == FPassHint::Cell);
 }
 
-bool doFCall(ActRec* ar, PC& pc) {
+bool doFCall(ActRec* ar, PC& pc, uint32_t numArgs, bool unpack) {
   TRACE(3, "FCall: pc %p func %p base %d\n", vmpc(),
-        vmfp()->m_func->unit()->entry(),
-        int(vmfp()->m_func->base()));
-  prepareFuncEntry(ar, pc, StackArgsState::Untrimmed);
+        vmfp()->unit()->entry(),
+        int(vmfp()->func()->base()));
+
+  if (unpack) {
+    Cell* c1 = vmStack().topC();
+    if (UNLIKELY(!isContainer(*c1))) {
+      Cell tmp = *c1;
+      // argument_unpacking RFC dictates "containers and Traversables"
+      raise_warning_unsampled("Only containers may be unpacked");
+      *c1 = make_persistent_array_like_tv(staticEmptyVArray());
+      tvDecRefGen(&tmp);
+    }
+
+    Cell args = *c1;
+    vmStack().discard(); // prepareArrayArgs will push arguments onto the stack
+    SCOPE_EXIT { tvDecRefGen(&args); };
+    checkStack(vmStack(), ar->func(), 0);
+
+    assertx(!ar->resumed());
+    auto prepResult = prepareArrayArgs(ar, args, vmStack(), numArgs,
+                                       nullptr, /* check ref annot */ true);
+    if (UNLIKELY(!prepResult)) {
+      vmStack().pushNull(); // return value is null if args are invalid
+      return false;
+    }
+  }
+
+  prepareFuncEntry(
+    ar, pc,
+    unpack ? StackArgsState::Trimmed : StackArgsState::Untrimmed);
   vmpc() = pc;
-  if (!EventHook::FunctionCall(ar, EventHook::NormalFunc)) {
+  if (UNLIKELY(!EventHook::FunctionCall(ar, EventHook::NormalFunc))) {
     pc = vmpc();
     return false;
   }
@@ -5340,8 +5367,21 @@ bool doFCall(ActRec* ar, PC& pc) {
   return true;
 }
 
+bool doFCallUnpackTC(PC pc, int32_t numArgsInclUnpack, void* retAddr) {
+  assert_native_stack_aligned();
+  assertx(tl_regState == VMRegState::DIRTY);
+  tl_regState = VMRegState::CLEAN;
+  auto const ar = arFromSp(numArgsInclUnpack);
+  assertx(ar->numArgs() == numArgsInclUnpack);
+  ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
+  ar->setJitReturn(retAddr);
+  auto const ret = doFCall(ar, pc, numArgsInclUnpack - 1, true);
+  tl_regState = VMRegState::DIRTY;
+  return ret;
+}
+
 OPTBLD_FLT_INLINE
-void iopFCall(PC& pc, ActRec* ar, uint32_t numArgs,
+void iopFCall(PC& pc, ActRec* ar, uint32_t numArgs, uint32_t unpack,
               const StringData* /*clsName*/, const StringData* funcName) {
   assertx(
     funcName->empty() ||
@@ -5352,11 +5392,11 @@ void iopFCall(PC& pc, ActRec* ar, uint32_t numArgs,
       ar->func() == ar->func()->cls()->getCtor()
     )
   );
-  assertx(numArgs == ar->numArgs());
+  assertx(numArgs + unpack == ar->numArgs());
   if (ar->isDynamicCall()) callerDynamicCallChecks(ar->func());
-  checkStack(vmStack(), ar->m_func, 0);
+  checkStack(vmStack(), ar->func(), 0);
   ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
-  doFCall(ar, pc);
+  doFCall(ar, pc, numArgs, unpack != 0);
 }
 
 OPTBLD_INLINE
@@ -5371,7 +5411,7 @@ void iopFCallAwait(PC& pc, ActRec* ar, uint32_t numArgs,
   checkStack(vmStack(), ar->m_func, 0);
   ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
   ar->setFCallAwait();
-  doFCall(ar, pc);
+  doFCall(ar, pc, numArgs, false);
 }
 
 OPTBLD_FLT_INLINE
@@ -5410,85 +5450,12 @@ void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
   tvCopy(ret, *vmStack().allocTV());
 }
 
-static bool doFCallUnpack(PC& pc, ActRec* ar, int numStackValues,
-                          void* ret = nullptr) {
-  assertx(numStackValues >= 1);
-  assertx(ar->numArgs() == numStackValues);
-
-  Cell* c1 = vmStack().topC();
-  if (UNLIKELY(!isContainer(*c1))) {
-    Cell tmp = *c1;
-    // argument_unpacking RFC dictates "containers and Traversables"
-    raise_warning_unsampled("Only containers may be unpacked");
-    *c1 = make_persistent_array_like_tv(staticEmptyVArray());
-    tvDecRefGen(&tmp);
-  }
-
-  const Func* func = ar->m_func;
-  {
-    Cell args = *c1;
-    vmStack().discard(); // prepareArrayArgs will push arguments onto the stack
-    numStackValues--;
-    SCOPE_EXIT { tvDecRefGen(&args); };
-    checkStack(vmStack(), func, 0);
-
-    assertx(!ar->resumed());
-    TRACE(3, "FCallUnpack: pc %p func %p base %d\n", vmpc(),
-          vmfp()->unit()->entry(),
-          int(vmfp()->m_func->base()));
-    ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
-
-    // When called from the jit, populate the correct return address
-    if (ret) {
-      ar->setJitReturn(ret);
-    }
-
-    auto prepResult = prepareArrayArgs(ar, args, vmStack(), numStackValues,
-                                       nullptr, /* check ref annot */ true);
-    if (UNLIKELY(!prepResult)) {
-      vmStack().pushNull(); // return value is null if args are invalid
-      return false;
-    }
-  }
-
-  prepareFuncEntry(ar, pc, StackArgsState::Trimmed);
-  vmpc() = pc;
-  if (UNLIKELY(!EventHook::FunctionCall(ar, EventHook::NormalFunc))) {
-    pc = vmpc();
-    return false;
-  }
-  calleeDynamicCallChecks(ar);
-  checkForRequiredCallM(ar);
-  return true;
-}
-
-bool doFCallUnpackTC(PC pc, int32_t numArgs, void* retAddr) {
-  assert_native_stack_aligned();
-  assertx(tl_regState == VMRegState::DIRTY);
-  tl_regState = VMRegState::CLEAN;
-  auto const ret = doFCallUnpack(pc, arFromSp(numArgs), numArgs, retAddr);
-  tl_regState = VMRegState::DIRTY;
-  return ret;
-}
-
-OPTBLD_INLINE void iopFCallUnpack(PC& pc, ActRec* ar, uint32_t numArgs) {
-  assertx(numArgs == ar->numArgs());
-  if (ar->isDynamicCall()) callerDynamicCallChecks(ar->func());
-  checkStack(vmStack(), ar->m_func, 0);
-  doFCallUnpack(pc, ar, numArgs);
-}
-
 OPTBLD_FLT_INLINE
-void iopFCallM(PC& pc, ActRec* ar, uint32_t numArgs, uint32_t /* numRet */,
+void iopFCallM(PC& pc, ActRec* ar, uint32_t numArgs, uint32_t unpack,
+               uint32_t /* numRet */,
                const StringData* clsName, const StringData* funcName) {
   ar->setFCallM();
-  iopFCall(pc, ar, numArgs, clsName, funcName);
-}
-
-OPTBLD_INLINE void iopFCallUnpackM(PC& pc, ActRec* ar, uint32_t numArgs,
-                                   uint32_t /* numRet */) {
-  ar->setFCallM();
-  iopFCallUnpack(pc, ar, numArgs);
+  iopFCall(pc, ar, numArgs, unpack, clsName, funcName);
 }
 
 namespace {
@@ -6929,13 +6896,13 @@ OPTBLD_INLINE TCA iopWrapReturn(void(fn)(PC, Params...), PC origpc,
 ALWAYS_INLINE ActRec* ar_for_inst(Op op, PC origpc,
                                   int iva_count, uint32_t* ivas) {
   switch (op) {
-    case Op::FCall:
     case Op::FCallAwait:
-    case Op::FCallUnpack:
-    case Op::FCallM:
-    case Op::FCallUnpackM:
       assertx(iva_count >= 1);
       return arFromSp(ivas[0]);
+    case Op::FCall:
+    case Op::FCallM:
+      assertx(iva_count >= 2);
+      return arFromSp(ivas[0] + ivas[1]);
     default:
       return arFromInstr(origpc);
   }

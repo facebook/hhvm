@@ -439,13 +439,12 @@ int instrNumPops(PC pc) {
 #define FOUR(...) 4
 #define FIVE(...) 5
 #define MFINAL -3
-#define C_MFINAL -5
+#define C_MFINAL -6
 #define V_MFINAL C_MFINAL
 #define CVMANY -3
 #define CVUMANY -3
-#define C_CVMANY -3
-#define CVMANY_UMANY -4
-#define C_CVMANY_UMANY -4
+#define FCALL -4
+#define FCALLM -5
 #define CMANY -3
 #define SMANY -1
 #define O(name, imm, pop, push, flags) pop,
@@ -461,9 +460,8 @@ int instrNumPops(PC pc) {
 #undef V_MFINAL
 #undef CVMANY
 #undef CVUMANY
-#undef C_CVMANY
-#undef CVMANY_UMANY
-#undef C_CVMANY_UMANY
+#undef FCALL
+#undef FCALLM
 #undef CMANY
 #undef SMANY
 #undef O
@@ -473,14 +471,17 @@ int instrNumPops(PC pc) {
   // For most instructions, we know how many values are popped based
   // solely on the opcode
   if (n >= 0) return n;
-  // FCall, NewPackedArray, and some final member operations specify how many
-  // values are popped in their first immediate
+  // FCallAwait, NewPackedArray, and some final member operations specify how
+  // many values are popped in their first immediate
   if (n == -3) return getImm(pc, 0).u_IVA;
-  // FCallM, and FCallUnpackM pop uninit values from the stack and
-  // push multiple returned values.
-  if (n == -4) return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA - 1;
+  // FCall pops numArgs (imm0) and unpack (imm1)
+  if (n == -4) return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA;
+  // FCallM pops numArgs (imm0), unpack (imm1) and uninit values (imm2 - 1)
+  if (n == -5) {
+    return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA + getImm(pc, 2).u_IVA - 1;
+  }
   // Other final member operations pop their first immediate + 1
-  if (n == -5) return getImm(pc, 0).u_IVA + 1;
+  if (n == -6) return getImm(pc, 0).u_IVA + 1;
 
   // For instructions with vector immediates, we have to scan the contents of
   // the vector immediate to determine how many values are popped
@@ -521,7 +522,7 @@ int instrNumPushes(PC pc) {
   int n = numberOfPushes[size_t(op)];
 
   // The FCallM call flavors push a tuple of arguments onto the stack
-  if (n == -1) return getImm(pc, 1).u_IVA;
+  if (n == -1) return getImm(pc, 2).u_IVA;
 
   return n;
 }
@@ -540,9 +541,17 @@ FlavorDesc manyFlavor(PC op, uint32_t i, FlavorDesc flavor) {
   return flavor;
 }
 
-FlavorDesc manyManyFlavor(PC op, uint32_t i, FlavorDesc f1, FlavorDesc f2) {
+FlavorDesc fcallFlavor(PC op, uint32_t i) {
   always_assert(i < uint32_t(instrNumPops(op)));
-  return i < getImm(op, 0).u_IVA ? f1 : f2;
+  return i == 0 && getImm(op, 1).u_IVA ? CV : CVV;
+}
+
+FlavorDesc fcallmFlavor(PC op, uint32_t i) {
+  always_assert(i < uint32_t(instrNumPops(op)));
+  auto const numArgs = getImm(op, 0).u_IVA;
+  auto const unpack = getImm(op, 1).u_IVA;
+  if (i == 0 && unpack) return CV;
+  return i < numArgs + unpack ? CVV : UV;
 }
 
 }
@@ -562,9 +571,8 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define V_MFINAL return idx == 0 ? VV : CRV;
 #define CVMANY return manyFlavor(op, idx, CVV);
 #define CVUMANY return manyFlavor(op, idx, CVUV);
-#define C_CVMANY return idx == 0 ? CV : manyFlavor(op, idx, CVV);
-#define CVMANY_UMANY return manyManyFlavor(op, idx, CVV, UV);
-#define C_CVMANY_UMANY return idx == 0 ? CV : manyManyFlavor(op, idx, CVV, UV);
+#define FCALL return fcallFlavor(op, idx);
+#define FCALLM return fcallmFlavor(op, idx);
 #define CMANY return manyFlavor(op, idx, CV);
 #define SMANY return manyFlavor(op, idx, CV);
 #define O(name, imm, pop, push, flags) case Op::name: pop
@@ -583,9 +591,8 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef V_MFINAL
 #undef CVMANY
 #undef CVUMANY
-#undef C_CVMANY
-#undef CVMANY_UMANY
-#undef C_CVMANY_UMANY
+#undef FCALL
+#undef FCALLM
 #undef CMANY
 #undef SMANY
 #undef O

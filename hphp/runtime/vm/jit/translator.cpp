@@ -330,9 +330,7 @@ static const struct {
    */
   { OpFCall,       {FStack,           Stack1,       OutUnknown      }},
   { OpFCallM,      {FStack,           StackN,       OutUnknown      }},
-  { OpFCallUnpackM,{FStack,           StackN,       OutUnknown      }},
   { OpFCallAwait,  {FStack,           Stack1,       OutUnknown      }},
-  { OpFCallUnpack, {FStack,           Stack1,       OutUnknown      }},
   { OpFCallBuiltin,{BStackN|DontGuardAny,
                                       Stack1,       OutUnknown      }},
   { OpDecodeCufIter,{Stack1,          None,         OutNone         }},
@@ -540,14 +538,13 @@ int64_t countOperands(uint64_t mask) {
 int64_t getStackPopped(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
-    case Op::FCall:
-    case Op::FCallUnpack:
     case Op::FCallAwait:
       return getImm(pc, 0).u_IVA + kNumActRecCells;
-
+    case Op::FCall:
+      return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA + kNumActRecCells;
     case Op::FCallM:
-    case Op::FCallUnpackM:
-      return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA + kNumActRecCells - 1;
+      return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA + getImm(pc, 2).u_IVA +
+        kNumActRecCells - 1;
 
     case Op::QueryM:
     case Op::VGetM:
@@ -587,8 +584,7 @@ int64_t getStackPopped(PC pc) {
 int64_t getStackPushed(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
-    case Op::FCallM:       return getImm(pc, 1).u_IVA;
-    case Op::FCallUnpackM: return getImm(pc, 1).u_IVA;
+    case Op::FCallM:       return getImm(pc, 2).u_IVA;
     default:               break;
   }
 
@@ -872,7 +868,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Jmp:
   case Op::JmpNS:
   case Op::FCall:
-  case Op::FCallUnpack:
+  case Op::FCallM:
   case Op::FCallAwait:
   case Op::ClsCnsD:
   case Op::FIsParamByRef:
@@ -1090,8 +1086,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::MemoGet:
   case Op::MemoSet:
   case Op::RetM:
-  case Op::FCallM:
-  case Op::FCallUnpackM:
   case Op::Select:
     return false;
 
@@ -1279,7 +1273,7 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni,
   }
   auto pc = ni.pc();
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
-    if (ni.op() == OpFCallM || ni.op() == OpFCallUnpackM) {
+    if (ni.op() == OpFCallM) {
       // This is a hack to deal with the fact that these instructions are
       // actually popping an ActRec in the middle of their "pops." We could
       // assert on the Uninit values on the stack, but the call is going to

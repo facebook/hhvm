@@ -59,7 +59,6 @@ namespace HPHP { namespace HHBBC {
 namespace {
 
 const StaticString s_Throwable("Throwable");
-const StaticString s_empty("");
 const StaticString s_construct("__construct");
 const StaticString s_86ctor("86ctor");
 const StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
@@ -2064,7 +2063,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
             ObjMethodOp::NullThrows,
             false
           },
-          bc::FCall { 0, staticEmptyString(), staticEmptyString() },
+          bc::FCall { 0, 0, staticEmptyString(), staticEmptyString() },
           bc::UnboxR {},
           bc::CastString {}
         );
@@ -2087,7 +2086,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
             ObjMethodOp::NullSafe,
             false
           },
-          bc::FCall { 0, staticEmptyString(), staticEmptyString() },
+          bc::FCall { 0, 0, staticEmptyString(), staticEmptyString() },
           bc::UnboxR {},
           bc::CastString {},
           bc::Int { 0 },
@@ -3285,7 +3284,7 @@ void in(ISS& env, const bc::FThrowOnRefMismatch& op) {
         env,
         bc::FPushCtorD { 1, exCls, false },
         bc::String { err },
-        bc::FCall { 1, staticEmptyString(), staticEmptyString() },
+        bc::FCall { 1, 0, staticEmptyString(), staticEmptyString() },
         bc::UnboxRNop {},
         bc::PopC {},
         bc::Throw {}
@@ -3323,12 +3322,13 @@ void pushCallReturnType(ISS& env, Type&& ty, int32_t numRets = kRegularRet) {
 const StaticString s_defined { "defined" };
 const StaticString s_function_exists { "function_exists" };
 
-void fcallKnownImpl(ISS& env, uint32_t numArgs, int32_t numRets = kRegularRet) {
+void fcallKnownImpl(ISS& env, uint32_t numArgs, bool unpack,
+                    int32_t numRets = kRegularRet) {
   auto const ar = fpiTop(env);
   always_assert(ar.func.hasValue());
 
   if (options.ConstantFoldBuiltins && ar.foldable) {
-    if (numRets == kRegularRet) {
+    if (!unpack && numRets == kRegularRet) {
       auto ty = [&] () {
         auto const func = ar.func->exactFunc();
         assertx(func);
@@ -3356,7 +3356,7 @@ void fcallKnownImpl(ISS& env, uint32_t numArgs, int32_t numRets = kRegularRet) {
     }
     fpiNotFoldable(env);
     fpiPop(env);
-    discard(env, numArgs);
+    discard(env, numArgs + (unpack ? 1 : 0));
     if (numRets != kRegularRet) {
       while (numRets--) push(env, TBottom);
       return;
@@ -3367,10 +3367,11 @@ void fcallKnownImpl(ISS& env, uint32_t numArgs, int32_t numRets = kRegularRet) {
   fpiPop(env);
   specialFunctionEffects(env, ar);
 
-  if (ar.func->name()->isame(s_function_exists.get())) {
+  if (!unpack && ar.func->name()->isame(s_function_exists.get())) {
     handle_function_exists(env, numArgs, false);
   }
 
+  if (unpack) popC(env);
   std::vector<Type> args(numArgs);
   for (auto i = uint32_t{0}; i < numArgs; ++i) {
     args[numArgs - i - 1] = popF(env);
@@ -3378,6 +3379,7 @@ void fcallKnownImpl(ISS& env, uint32_t numArgs, int32_t numRets = kRegularRet) {
 
   if (options.HardConstProp &&
       numArgs == 1 &&
+      !unpack &&
       ar.func->name()->isame(s_defined.get())) {
     // If someone calls defined('foo') they probably want foo to be
     // defined normally; ie not a persistent constant.
@@ -3389,10 +3391,10 @@ void fcallKnownImpl(ISS& env, uint32_t numArgs, int32_t numRets = kRegularRet) {
     }
   }
 
-  auto ty = env.index.lookup_return_type(
-    CallContext { env.ctx, args, ar.context },
-    *ar.func
-  );
+  auto ty = unpack
+    ? env.index.lookup_return_type(env.ctx, *ar.func)
+    : env.index.lookup_return_type(CallContext { env.ctx, args, ar.context },
+                                   *ar.func);
   if (ar.kind == FPIKind::ObjMethNS) {
     ty = union_of(std::move(ty), TInitNull);
   }
@@ -3400,10 +3402,10 @@ void fcallKnownImpl(ISS& env, uint32_t numArgs, int32_t numRets = kRegularRet) {
     pushCallReturnType(env, std::move(ty), numRets);
     return;
   }
-  auto ty2 = env.index.lookup_return_type(
-    CallContext { env.ctx, args, ar.context },
-    *ar.fallbackFunc
-  );
+  auto ty2 = unpack
+    ? env.index.lookup_return_type(env.ctx, *ar.fallbackFunc)
+    : env.index.lookup_return_type(CallContext { env.ctx, args, ar.context },
+                                   *ar.fallbackFunc);
   pushCallReturnType(env, union_of(std::move(ty), std::move(ty2)), numRets);
 }
 
@@ -3416,17 +3418,17 @@ void in(ISS& env, const bc::FCall& op) {
     case FPIKind::ObjInvoke:
       not_reached();
     case FPIKind::Func:
-      assertx(op.str2->empty());
-      if (ar.func->name() != op.str3) {
+      assertx(op.str3->empty());
+      if (ar.func->name() != op.str4) {
         // We've found a more precise type for the call, so update it
         return reduce(
           env,
-          bc::FCall { op.arg1, staticEmptyString(), ar.func->name() }
+          bc::FCall { op.arg1, op.arg2, staticEmptyString(), ar.func->name() }
         );
       }
-      return fcallKnownImpl(env, op.arg1);
+      return fcallKnownImpl(env, op.arg1, op.arg2 != 0);
     case FPIKind::Builtin:
-      return finish_builtin(env, ar.func->exactFunc(), op.arg1, false);
+      return finish_builtin(env, ar.func->exactFunc(), op.arg1, op.arg2 != 0);
     case FPIKind::Ctor:
       /*
        * Need to be wary of old-style ctors. We could get into the situation
@@ -3440,23 +3442,24 @@ void in(ISS& env, const bc::FCall& op) {
       // fallthrough
     case FPIKind::ObjMeth:
     case FPIKind::ClsMeth:
-      assertx(op.str2->empty() == op.str3->empty());
+      assertx(op.str3->empty() == op.str4->empty());
       if (ar.cls.hasValue() && ar.func->cantBeMagicCall() &&
-          (ar.cls->name() != op.str2 || ar.func->name() != op.str3)) {
+          (ar.cls->name() != op.str3 || ar.func->name() != op.str4)) {
         // We've found a more precise type for the call, so update it
         return reduce(
           env,
-          bc::FCall { op.arg1, ar.cls->name(), ar.func->name() }
+          bc::FCall { op.arg1, op.arg2, ar.cls->name(), ar.func->name() }
         );
       }
       // fallthrough
     case FPIKind::ObjMethNS:
       // If we didn't return a reduce above, we still can compute a
       // partially-known FCall effect with our res::Func.
-      return fcallKnownImpl(env, op.arg1);
+      return fcallKnownImpl(env, op.arg1, op.arg2 != 0);
     }
   }
 
+  if (op.arg2) popC(env);
   for (auto i = uint32_t{0}; i < op.arg1; ++i) popF(env);
   fpiPop(env);
   specialFunctionEffects(env, ar);
@@ -3482,46 +3485,9 @@ void in(ISS& env, const bc::FCallAwait& op) {
     );
   }
   impl(env,
-       bc::FCall { op.arg1, op.str2, op.str3 },
+       bc::FCall { op.arg1, 0, op.str2, op.str3 },
        bc::UnboxRNop {},
        bc::Await {});
-}
-
-void fcallUnpackImpl(ISS& env, int arg, int32_t numRets = kRegularRet) {
-  auto const ar = fpiTop(env);
-  if (ar.kind == FPIKind::Builtin) {
-    always_assert(numRets == kRegularRet);
-    return finish_builtin(env, ar.func->exactFunc(), arg, true);
-  }
-  if (ar.foldable) {
-    discard(env, arg);
-    fpiNotFoldable(env);
-    fpiPop(env);
-    return push(env, TBottom);
-  }
-  for (auto i = uint32_t{0}; i < arg; ++i) { popF(env); }
-  fpiPop(env);
-  specialFunctionEffects(env, ar);
-  if (ar.func) {
-    auto ty = env.index.lookup_return_type(env.ctx, *ar.func);
-    if (!ar.fallbackFunc) {
-      pushCallReturnType(env, std::move(ty), numRets);
-      return;
-    }
-    auto ty2 = env.index.lookup_return_type(env.ctx, *ar.fallbackFunc);
-    pushCallReturnType(env, union_of(std::move(ty), std::move(ty2)), numRets);
-    return;
-  }
-  if (numRets != kRegularRet) {
-    for (int i = 0; i < numRets - 1; i++) popU(env);
-    while (numRets--) push(env, TInitCell);
-    return;
-  }
-  return push(env, TInitGen);
-}
-
-void in(ISS& env, const bc::FCallUnpack& op) {
-  fcallUnpackImpl(env, op.arg1);
 }
 
 void in(ISS& env, const bc::FCallM& op) {
@@ -3535,43 +3501,42 @@ void in(ISS& env, const bc::FCallM& op) {
     case FPIKind::Ctor:
       not_reached();
     case FPIKind::Func:
-      assertx(op.str3->empty());
-      if (ar.func->name() != op.str4) {
+      assertx(op.str4->empty());
+      if (ar.func->name() != op.str5) {
         // We've found a more precise type for the call, so update it
         return reduce(
           env,
-          bc::FCallM { op.arg1, op.arg2, staticEmptyString(), ar.func->name() }
+          bc::FCallM {
+            op.arg1, op.arg2, op.arg3, staticEmptyString(), ar.func->name() }
         );
       }
-      return fcallKnownImpl(env, op.arg1, op.arg2);
+      return fcallKnownImpl(env, op.arg1, op.arg2 != 0, op.arg3);
     case FPIKind::ObjMeth:
     case FPIKind::ClsMeth:
-      assertx(op.str3->empty() == op.str4->empty());
+      assertx(op.str4->empty() == op.str5->empty());
       if (ar.cls.hasValue() && ar.func->cantBeMagicCall() &&
-          (ar.cls->name() != op.str3 || ar.func->name() != op.str4)) {
+          (ar.cls->name() != op.str4 || ar.func->name() != op.str5)) {
         // We've found a more precise type for the call, so update it
         return reduce(
           env,
-          bc::FCallM { op.arg1, op.arg2, ar.cls->name(), ar.func->name() }
+          bc::FCallM {
+            op.arg1, op.arg2, op.arg3, ar.cls->name(), ar.func->name() }
         );
       }
       // fallthrough
     case FPIKind::ObjMethNS:
       // If we didn't return a reduce above, we still can compute a
       // partially-known FCall effect with our res::Func.
-      return fcallKnownImpl(env, op.arg1, op.arg2);
+      return fcallKnownImpl(env, op.arg1, op.arg2 != 0, op.arg3);
     }
   }
 
+  if (op.arg2) popC(env);
   for (auto i = uint32_t{0}; i < op.arg1; ++i) popF(env);
   fpiPop(env);
   specialFunctionEffects(env, ar);
-  for (auto i = uint32_t{0}; i < op.arg2 - 1; ++i) popU(env);
-  for (auto i = uint32_t{0}; i < op.arg2; ++i) push(env, TInitCell);
-}
-
-void in(ISS& env, const bc::FCallUnpackM& op) {
-  fcallUnpackImpl(env, op.arg1, op.arg2);
+  for (auto i = uint32_t{0}; i < op.arg3 - 1; ++i) popU(env);
+  for (auto i = uint32_t{0}; i < op.arg3; ++i) push(env, TInitCell);
 }
 
 void in(ISS& env, const bc::DecodeCufIter& op) {

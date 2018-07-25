@@ -123,7 +123,8 @@ void handlePossibleStackOverflow(ActRec* calleeAR) {
    *
    *     o We're about to raise an uncatchable fatal, which will end the
    *       request.  We leak ExtraArgs in other similar situations for this too
-   *       (e.g. if called via FCallUnpack and then a stack overflow happens).
+   *       (e.g. if called via FCall with unpack and then a stack overflow
+   *       happens).
    *
    *     o If we were going to free the ExtraArgs structure, we'd need to make
    *       sure we can re-enter the VM right now, which means performing a

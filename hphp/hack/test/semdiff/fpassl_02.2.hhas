@@ -13,13 +13,13 @@
   .numiters 1;
   .declvars $x;
   FPushFuncD 0 "f"
-  FCall 0 "" ""
+  FCall 0 0 "" ""
   UnboxR
   FPushFuncD 0 "f"
-  FCall 0 "" ""
+  FCall 0 0 "" ""
   UnboxR
   FPushFuncD 0 "f"
-  FCall 0 "" ""
+  FCall 0 0 "" ""
   UnboxR
   NewPackedArray 3
   SetL $x
@@ -31,7 +31,7 @@
   .try_fault F2 {
     FPushClsMethodD 1 "fromDArray" "HH\\AwaitAllWaitHandle"
     CGetL _1
-    FCall 1 "" ""
+    FCall 1 0 "" ""
     UnboxR
     Await
     PopC

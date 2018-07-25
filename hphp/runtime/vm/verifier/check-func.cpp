@@ -777,9 +777,8 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define NOV { },
   #define CVMANY { },
   #define CVUMANY { },
-  #define C_CVMANY { },
-  #define CVMANY_UMANY { },
-  #define C_CVMANY_UMANY { },
+  #define FCALL { },
+  #define FCALLM { },
   #define CMANY { },
   #define SMANY { },
   #define ONE(a) { a },
@@ -800,9 +799,8 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef V_MFINAL
   #undef CVMANY
   #undef CVUMANY
-  #undef C_CVMANY
-  #undef CVMANY_UMANY
-  #undef C_CVMANY_UMANY
+  #undef FCALL
+  #undef FCALLM
   #undef CMANY
   #undef SMANY
   #undef FIVE
@@ -832,33 +830,31 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = i == n - 1 ? VV : CRV;
     }
     return m_tmp_sig;
-  case Op::FCall:        // THREE(IVA,SA,SA),    CVMANY,  ONE(RV)
   case Op::FCallAwait:   // THREE(IVA,SA,SA),    CVMANY,  ONE(CV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CVV;
     }
     return m_tmp_sig;
-  case Op::FCallUnpack:  // ONE(IVA),            C_CVMANY, ONE(RV)
-    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
-      m_tmp_sig[i] = (i < n - 1) ? CVV : CV;
-    }
+  case Op::FCall: {      // FOUR(IVA,IVA,SA,SA), FCALL,   ONE(RV)
+    auto const numArgs = getImm(pc, 0).u_IVA;
+    auto const unpack = getImm(pc, 1).u_IVA;
+    auto idx = 0;
+    for (int i = 0; i < numArgs; ++i) m_tmp_sig[idx++] = CVV;
+    if (unpack) m_tmp_sig[idx++] = CV;
+    assertx(idx == instrNumPops(pc));
     return m_tmp_sig;
-  case Op::FCallM:       // FOUR(IVA,IVA,SA,SA), CVMANY_UMANY, CMANY
-    for (int i = 0, n = getImm(pc, 1).u_IVA - 1; i < n; ++i) {
-      m_tmp_sig[i] = UV;
-    }
-    for (int i = getImm(pc, 1).u_IVA - 1, n = instrNumPops(pc); i < n; ++i) {
-      m_tmp_sig[i] = CVV;
-    }
+  }
+  case Op::FCallM: {     // FIVE(IVA,IVA,IVA,SA,SA), FCALLM,  CMANY
+    auto const numArgs = getImm(pc, 0).u_IVA;
+    auto const unpack = getImm(pc, 1).u_IVA;
+    auto const numRets = getImm(pc, 2).u_IVA;
+    auto idx = 0;
+    for (int i = 0; i < numRets - 1; ++i) m_tmp_sig[idx++] = UV;
+    for (int i = 0; i < numArgs; ++i) m_tmp_sig[idx++] = CVV;
+    if (unpack) m_tmp_sig[idx++] = CV;
+    assertx(idx == instrNumPops(pc));
     return m_tmp_sig;
-  case Op::FCallUnpackM: // TWO(IVA,IVA),        C_CVMANY_UMANY, CMANY
-    for (int i = 0, n = getImm(pc, 1).u_IVA - 1; i < n; ++i) {
-      m_tmp_sig[i] = UV;
-    }
-    for (int i = getImm(pc, 1).u_IVA - 1, n = instrNumPops(pc); i < n; ++i) {
-      m_tmp_sig[i] = (i < n - 1) ? CVV : CV;
-    }
-    return m_tmp_sig;
+  }
   case Op::FCallBuiltin: //TWO(IVA, SA), CVUMANY,  ONE(RV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CVUV;
@@ -1030,15 +1026,14 @@ bool FuncChecker::checkFpi(State* cur, PC pc) {
   if (isFCallStar(op)) {
     --cur->fpilen;
     int call_params = getImmIva(pc);
+    if (op == OpFCall || op == OpFCallM) call_params += getImm(pc, 1).u_IVA;
     int push_params = getImmIva(at(fpi.fpush));
     if (call_params != push_params) {
       error("FCall* param_count (%d) doesn't match FPush* (%d)\n",
              call_params, push_params);
       ok = false;
     }
-    auto const adjust =
-      op == OpFCallM || op == OpFCallUnpackM
-      ? getImm(pc, 1).u_IVA - 1 : 0;
+    auto const adjust = op == OpFCallM ? getImm(pc, 2).u_IVA - 1 : 0;
     if (cur->stklen != fpi.stkmin - adjust) {
       error("wrong # of params were passed; got %d expected %d\n",
             push_params + cur->stklen + adjust - fpi.stkmin, push_params);
@@ -1571,7 +1566,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     cur->stklen += pushes;
     if (op == Op::BaseSC || op == Op::BaseSL) {
       if (pushes == 1) outs[0] = outs[1];
-    } else if (op == Op::FCallM || op == Op::FCallUnpackM) {
+    } else if (op == Op::FCallM) {
       for (int i = 0; i < pushes; ++i) {
         outs[i] = CV;
       }

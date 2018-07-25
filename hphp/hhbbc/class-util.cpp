@@ -15,6 +15,7 @@
 */
 #include "hphp/hhbbc/class-util.h"
 
+#include "hphp/parser/parser.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/index.h"
@@ -76,6 +77,12 @@ bool is_unused_trait(const php::Class& c) {
 bool is_used_trait(const php::Class& c) {
   return
     (c.attrs & (AttrTrait | AttrNoOverride)) == AttrTrait;
+}
+
+std::string normalized_class_name(const php::Class& cls) {
+  auto const name = cls.name->toCppString();
+  if (!ParserBase::IsAnonymousClassName(name)) return name;
+  return name.substr(0, name.find_last_of(';'));
 }
 
 //////////////////////////////////////////////////////////////////////

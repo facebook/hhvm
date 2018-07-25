@@ -28,10 +28,11 @@
 #include <folly/gen/String.h>
 
 #include "hphp/hhbbc/cfg.h"
-#include "hphp/hhbbc/type-system.h"
-#include "hphp/hhbbc/index.h"
-#include "hphp/hhbbc/func-util.h"
+#include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/context.h"
+#include "hphp/hhbbc/func-util.h"
+#include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/type-system.h"
 
 #include "hphp/util/text-util.h"
 
@@ -214,9 +215,13 @@ std::string show(const Func& func) {
   return ret;
 }
 
-std::string show(const Class& cls) {
+std::string show(const Class& cls, bool normalizeClosures) {
   std::string ret;
-  folly::toAppend("class ", cls.name->data(), &ret);
+  folly::toAppend(
+    "class ",
+    normalizeClosures ? normalized_class_name(cls) : cls.name->data(),
+    &ret
+  );
   if (cls.parentName) {
     folly::toAppend(" extends ", cls.parentName->data(), &ret);
   }
@@ -235,7 +240,7 @@ std::string show(const Class& cls) {
   return ret;
 }
 
-std::string show(const Unit& unit) {
+std::string show(const Unit& unit, bool normalizeClosures) {
   std::string ret;
   folly::toAppend(
     "Unit ", unit.filename->data(), "\n",
@@ -246,7 +251,7 @@ std::string show(const Unit& unit) {
 
   for (auto& c : unit.classes) {
     folly::toAppend(
-      indent(2, show(*c)),
+      indent(2, show(*c, normalizeClosures)),
       &ret
     );
   }

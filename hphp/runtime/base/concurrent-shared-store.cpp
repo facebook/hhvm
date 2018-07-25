@@ -16,25 +16,27 @@
 
 #include "hphp/runtime/base/concurrent-shared-store.h"
 
-#include <mutex>
-#include <set>
-#include <string>
-#include <vector>
-#include <folly/Format.h>
+#include "hphp/runtime/base/apc-file-storage.h"
+#include "hphp/runtime/base/apc-handle-defs.h"
+#include "hphp/runtime/base/apc-object.h"
+#include "hphp/runtime/base/apc-stats.h"
+#include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/variable-unserializer.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/ext/apc/snapshot.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
-#include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/apc-handle-defs.h"
-#include "hphp/runtime/base/apc-object.h"
-#include "hphp/runtime/base/apc-stats.h"
-#include "hphp/runtime/base/apc-file-storage.h"
-#include "hphp/runtime/ext/apc/ext_apc.h"
-#include "hphp/runtime/ext/apc/snapshot.h"
-#include "hphp/runtime/vm/treadmill.h"
+#include <mutex>
+#include <set>
+#include <string>
+#include <vector>
+
+#include <folly/Format.h>
+#include <folly/Random.h>
 
 using folly::SharedMutex;
 
@@ -1192,7 +1194,8 @@ bool ConcurrentTableSharedStore
   assertx(!this->empty());
 #if TBB_VERSION_MAJOR >= 4
   auto current = this->range();
-  for (auto rnd = rand(); rnd > 0 && current.is_divisible(); rnd >>= 1) {
+  for (auto rnd = folly::Random::rand32();
+       rnd != 0 && current.is_divisible(); rnd >>= 1) {
     // Split the range 'current' into two halves: 'current' and 'otherHalf'.
     decltype(current) otherHalf(current, tbb::split());
     // Randomly choose which half to keep.

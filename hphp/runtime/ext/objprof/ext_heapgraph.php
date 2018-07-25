@@ -35,7 +35,7 @@ function heapgraph_create(): resource;
  *   exact      1 if type scanners were built, 0 otherwise
  */
 <<__Native>>
-function heapgraph_stats(resource $heapgraph): array<string, int>;
+function heapgraph_stats(resource $heapgraph): darray<string, int>;
 
 /**
  * Iterates over the nodes in the heap graph. Calls back on every node.
@@ -54,7 +54,7 @@ function heapgraph_foreach_node(resource $heapgraph, mixed $callback): void;
  * heapgraph_foreach_root().
  *
  * @param resource $heapgraph - The resource obtained with heapgraph_create
- * @param mixed $callback - function(array<string, mixed> $node): void {}
+ * @param mixed $callback - function(darray<string, mixed> $node): void {}
  * See documentation for heapgraph_node() about the "node" array passed
  * to $callback
  */
@@ -66,7 +66,7 @@ function heapgraph_foreach_root_node(resource $heapgraph,
  * Iterates over the edges in the heap graph. Calls back on every edge.
  *
  * @param resource $heapgraph - The resource obtained with heapgraph_create
- * @param mixed $callback - function(array<string, mixed> $edge): void {}
+ * @param mixed $callback - function(darray<string, mixed> $edge): void {}
  * See documentation for heapgraph_edge() about the "edge" array passed
  * to $callback
  */
@@ -79,7 +79,7 @@ function heapgraph_foreach_edge(resource $heapgraph, mixed $callback): void;
  * are also enumerable by calling heapgraph_foreach_root_node().
  *
  * @param resource $heapgraph - The resource obtained with heapgraph_create
- * @param mixed $callback - function(array<string, mixed> $edge): void {}
+ * @param mixed $callback - function(darray<string, mixed> $edge): void {}
  * See documentation for heapgraph_edge() about the "edge" array passed
  * to $callback
  */
@@ -100,8 +100,8 @@ function heapgraph_foreach_root(resource $heapgraph, mixed $callback): void;
 <<__Native>>
 function heapgraph_dfs_nodes(
   resource $heapgraph,
-  array<int> $roots,
-  array<int> $skips,
+  varray<int> $roots,
+  varray<int> $skips,
   mixed $callback,
 ): void;
 
@@ -120,8 +120,8 @@ function heapgraph_dfs_nodes(
 <<__Native>>
 function heapgraph_dfs_edges(
   resource $heapgraph,
-  array<int> $roots,
-  array<int> $skips,
+  varray<int> $roots,
+  varray<int> $skips,
   mixed $callback
 ): void;
 
@@ -152,7 +152,7 @@ function heapgraph_dfs_edges(
  *
  */
 <<__Native>>
-function heapgraph_node(resource $heapgraph, int $index): array<string, mixed>;
+function heapgraph_node(resource $heapgraph, int $index): darray<string, mixed>;
 
 /**
  * Get a specific edge (pointer) from the heap graph
@@ -179,7 +179,7 @@ function heapgraph_node(resource $heapgraph, int $index): array<string, mixed>;
  *
  */
 <<__Native>>
-function heapgraph_edge(resource $heapgraph, int $index): array<string, mixed>;
+function heapgraph_edge(resource $heapgraph, int $index): darray<string, mixed>;
 
 /**
  * Get an array of incoming edges to a specific node from the heap graph
@@ -195,7 +195,7 @@ function heapgraph_edge(resource $heapgraph, int $index): array<string, mixed>;
 function heapgraph_node_in_edges(
   resource $heapgraph,
   int $index
-): array<array<string, mixed>>;
+): varray<darray<string, mixed>>;
 
 /**
  * Get an array of outgoing edges from a specific node from the heap graph
@@ -211,6 +211,6 @@ function heapgraph_node_in_edges(
 function heapgraph_node_out_edges(
   resource $heapgraph,
   int $index
-): array<array<string, mixed>>;
+): varray<darray<string, mixed>>;
 
 }

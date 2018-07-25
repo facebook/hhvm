@@ -359,7 +359,7 @@ Array createPhpNode(HeapGraphContextPtr hgptr, int index) {
     kind_str = s_Root.get(); // fake HeaderKind "Root"
   }
 
-  auto node_arr = make_map_array(
+  auto node_arr = make_darray(
     s_index, VarNR(index),
     s_kind, VarNR(kind_str),
     s_size, VarNR(int64_t(node.size))
@@ -402,7 +402,7 @@ Array createPhpEdge(HeapGraphContextPtr hgptr, int index) {
   const auto& cptr = hgptr->cptrs[index];
   const auto& cfrom = hgptr->cnodes[ptr.from];
 
-  auto ptr_arr = make_map_array(
+  auto ptr_arr = make_darray(
     s_index, VarNR(index),
     s_kind, VarNR(edgeKindName(ptr.ptr_kind)),
     s_from, VarNR(ptr.from),
@@ -580,15 +580,15 @@ void HHVM_FUNCTION(heapgraph_dfs_edges,
 
 Array HHVM_FUNCTION(heapgraph_edge, const Resource& resource, int64_t index) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
-  if (!hgptr) return empty_array();
-  if (size_t(index) >= hgptr->hg.ptrs.size()) return empty_array();
+  if (!hgptr) return Array::CreateDArray();
+  if (size_t(index) >= hgptr->hg.ptrs.size()) return Array::CreateDArray();
   return createPhpEdge(hgptr, index);
 }
 
 Array HHVM_FUNCTION(heapgraph_node, const Resource& resource, int64_t index) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
-  if (!hgptr) return empty_array();
-  if (size_t(index) >= hgptr->hg.nodes.size()) return empty_array();
+  if (!hgptr) return Array::CreateDArray();
+  if (size_t(index) >= hgptr->hg.nodes.size()) return Array::CreateDArray();
   return createPhpNode(hgptr, index);
 }
 
@@ -597,11 +597,11 @@ Array HHVM_FUNCTION(heapgraph_node_out_edges,
   int64_t index
 ) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
-  if (!hgptr) return empty_array();
-  if (size_t(index) >= hgptr->hg.nodes.size()) return empty_array();
+  if (!hgptr) return Array::CreateVArray();
+  if (size_t(index) >= hgptr->hg.nodes.size()) return Array::CreateVArray();
   size_t num_edges{0};
   hgptr->hg.eachOutPtr(index, [&](int) { num_edges++; });
-  PackedArrayInit result(num_edges);
+  VArrayInit result(num_edges);
   hgptr->hg.eachOutPtr(index, [&](int ptr) {
     result.append(createPhpEdge(hgptr, ptr));
   });
@@ -613,11 +613,11 @@ Array HHVM_FUNCTION(heapgraph_node_in_edges,
   int64_t index
 ) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
-  if (!hgptr) return empty_array();
-  if (size_t(index) >= hgptr->hg.nodes.size()) return empty_array();
+  if (!hgptr) return Array::CreateVArray();
+  if (size_t(index) >= hgptr->hg.nodes.size()) return Array::CreateVArray();
   size_t num_edges{0};
   hgptr->hg.eachInPtr(index, [&](int) { num_edges++; });
-  PackedArrayInit result(num_edges);
+  VArrayInit result(num_edges);
   hgptr->hg.eachInPtr(index, [&](int ptr) {
     result.append(createPhpEdge(hgptr, ptr));
   });
@@ -626,8 +626,8 @@ Array HHVM_FUNCTION(heapgraph_node_in_edges,
 
 Array HHVM_FUNCTION(heapgraph_stats, const Resource& resource) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
-  if (!hgptr) return empty_array();
-  auto result = make_map_array(
+  if (!hgptr) return Array::CreateDArray();
+  auto result = make_darray(
     s_nodes, VarNR(int64_t(hgptr->hg.nodes.size())),
     s_edges, VarNR(int64_t(hgptr->hg.ptrs.size())),
     s_roots, VarNR(int64_t(hgptr->hg.root_ptrs.size())),

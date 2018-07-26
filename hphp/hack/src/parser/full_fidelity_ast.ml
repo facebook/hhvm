@@ -643,7 +643,7 @@ let pShapeFieldName : shape_field_name parser = fun name env ->
       literal_expression = { syntax = Token t; _ }
     } when Token.kind t = TK.SingleQuotedStringLiteral ||
            Token.kind t = TK.DoubleQuotedStringLiteral ->
-    let p, n = pos_name name env in SFlit (p, mkStr env name unesc_dbl n)
+    let p, n = pos_name name env in SFlit_str (p, mkStr env name unesc_dbl n)
   | _ ->
     raise_parsing_error env (`Node name) SyntaxError.invalid_shape_field_name;
     missing_syntax "shape field name" name env

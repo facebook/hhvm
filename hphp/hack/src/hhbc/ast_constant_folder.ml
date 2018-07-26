@@ -264,7 +264,12 @@ and shape_to_typed_value ns fields =
   let a = List.map fields (fun (sf, expr) ->
     let key =
       match sf with
-      | A.SFlit id ->
+      | A.SFlit_int (pos, str) ->
+        begin match expr_to_typed_value ns (pos, A.Int str) with
+        | TV.Int _ as tv -> tv
+        | _ -> failwith (str ^ " is not a valid integer index")
+        end
+      | A.SFlit_str id ->
         TV.String (snd id)
       | A.SFclass_const (class_id, id) ->
         class_const_to_typed_value ns (Pos.none, A.Id class_id) id in

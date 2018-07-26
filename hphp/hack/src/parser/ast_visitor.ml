@@ -586,7 +586,8 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
         acc
 
   method on_shape_field_name acc = function
-    | SFlit pstr -> this#on_sflit acc pstr
+    | SFlit_int pstr
+    | SFlit_str pstr -> this#on_sflit acc pstr
     | SFclass_const (id, pstr) -> this#on_sfclass_const acc id pstr
 
   method on_sflit acc pstr = this#on_pstring acc pstr

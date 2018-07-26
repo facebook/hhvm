@@ -66,7 +66,8 @@ let rec fmt_hint ~tparams ~namespace ?(strip_tparams=false) (_, h) =
 
   | A.Hshape { A.si_shape_field_list; _ } ->
     let fmt_field = function
-      | A.SFlit (_, s) -> "'" ^ s ^ "'"
+      | A.SFlit_int (_, s_i) -> s_i
+      | A.SFlit_str (_, s) -> "'" ^ s ^ "'"
       | A.SFclass_const (cid, (_, s2)) ->
         fmt_name_or_prim ~tparams ~namespace cid ^ "::" ^ s2
     in

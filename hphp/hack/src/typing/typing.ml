@@ -3047,7 +3047,7 @@ and exception_ty pos env ty =
   Type.sub_type pos (Reason.URthrow) env ty exn_ty
 
 and shape_field_pos = function
-  | Ast.SFlit (p, _) -> p
+  | Ast.SFlit_int (p, _) | Ast.SFlit_str (p, _) -> p
   | Ast.SFclass_const ((cls_pos, _), (mem_pos, _)) -> Pos.btw cls_pos mem_pos
 
 and check_shape_keys_validity env pos keys =
@@ -3057,7 +3057,9 @@ and check_shape_keys_validity env pos keys =
       (* Empty strings or literals that start with numbers are not
          permitted as shape field names. *)
       (match key with
-        | Ast.SFlit (_, key_name) ->
+        | Ast.SFlit_int _ ->
+          env, key_pos, None
+        | Ast.SFlit_str (_, key_name) ->
            if (String.length key_name = 0) then
              (Errors.invalid_shape_field_name_empty key_pos)
            else if (key_name.[0] >= '0' && key_name.[0] <='9') then
@@ -4429,7 +4431,7 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
                 ~f:(fun x -> Ast.ShapeField.compare field x = 0)
                 (ShapeMap.keys fdm) in
           let declaration_pos = match declared_field with
-            | Ast.SFlit (p, _) | Ast.SFclass_const ((p, _), _) -> p in
+            | Ast.SFlit_int (p, _) | Ast.SFlit_str (p, _) | Ast.SFclass_const ((p, _), _) -> p in
           Errors.array_get_with_optional_field
             p
             declaration_pos

@@ -109,7 +109,8 @@ let make_ft p reactivity is_coroutine params ret_ty =
   }
 
 let get_shape_field_name = function
-  | Ast.SFlit (_, s) -> s
+  | Ast.SFlit_int (_, s)
+  | Ast.SFlit_str (_, s) -> s
   | Ast.SFclass_const ((_, s1), (_, s2)) -> s1^"::"^s2
 
 let empty_bounds = TySet.empty

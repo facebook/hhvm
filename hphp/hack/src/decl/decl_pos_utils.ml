@@ -126,7 +126,8 @@ let rec ty (p, x) =
       FieldsPartiallyKnown (ShapeMap.map_and_rekey m shape_field_name pos)
 
   and shape_field_name = function
-    | Ast.SFlit s -> Ast.SFlit (string_id s)
+    | Ast.SFlit_int s -> Ast.SFlit_int (string_id s)
+    | Ast.SFlit_str s -> Ast.SFlit_str (string_id s)
     | Ast.SFclass_const (id, s) -> Ast.SFclass_const (string_id id, string_id s)
 
   and constraint_ = List.map ~f:(fun (ck, x) -> (ck, ty x))

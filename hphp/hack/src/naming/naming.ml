@@ -742,7 +742,8 @@ let check_repetition s param =
   if x <> SN.SpecialIdents.placeholder then SSet.add x s else s
 
 let convert_shape_name env = function
-  | SFlit (pos, s) -> (pos, SFlit (pos, s))
+  | SFlit_int (pos, s) -> (pos, SFlit_int (pos, s))
+  | SFlit_str (pos, s) -> (pos, SFlit_str (pos, s))
   | SFclass_const (x, (pos, y)) ->
     let class_name =
       if (snd x) = SN.Classes.cSelf then

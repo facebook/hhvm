@@ -417,7 +417,8 @@ let get_queryMOpMode need_ref op =
   | _ -> MemberOpMode.ModeNone
 
 let extract_shape_field_name_pstring = function
-  | A.SFlit s ->
+  | A.SFlit_int s -> A.Int (snd s)
+  | A.SFlit_str s ->
     Emit_type_constant.check_shape_key s;
     A.String (snd s)
   | A.SFclass_const ((pn, _) as id, p) -> A.Class_const ((pn, A.Id id), p)
@@ -1108,11 +1109,11 @@ and emit_xhp env p id attributes children =
   let create_spread p id = (p, "...$" ^ string_of_int(id)) in
   let convert_attr (spread_id, attrs) = function
     | A.Xhp_simple (name, v) ->
-        let attr = (A.SFlit name, v) in
+        let attr = (A.SFlit_str name, v) in
         (spread_id, attr::attrs)
     | A.Xhp_spread e ->
         let (p, _) = e in
-        let attr = (A.SFlit (create_spread p spread_id), e) in
+        let attr = (A.SFlit_str (create_spread p spread_id), e) in
         (spread_id + 1, attr::attrs) in
   let (_, attributes) = List.fold_left ~f:convert_attr ~init:(0, []) attributes in
   let attribute_map = p, A.Shape (List.rev attributes) in

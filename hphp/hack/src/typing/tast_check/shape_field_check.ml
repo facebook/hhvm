@@ -42,7 +42,7 @@ let shapes_key_exists env shape field_name =
   | _ -> `Unknown
 
 let trivial_shapes_key_exists_check pos1 env ((_, shape), _) field_name =
-  match shapes_key_exists env shape (SFlit field_name) with
+  match shapes_key_exists env shape (SFlit_str field_name) with
   | `DoesExist pos2 ->
     Errors.shapes_key_exists_always_true pos1 (snd field_name) pos2
   | `DoesNotExist (pos2, reason) ->
@@ -50,7 +50,7 @@ let trivial_shapes_key_exists_check pos1 env ((_, shape), _) field_name =
   | `Unknown -> ()
 
 let shapes_idx_invalid_key_check pos1 env ((_, shape), _) field_name =
-  match shapes_key_exists env shape (SFlit field_name) with
+  match shapes_key_exists env shape (SFlit_str field_name) with
   | `DoesExist _ ->
     Lint.shape_idx_access_required_field pos1 (snd field_name)
   | `DoesNotExist (pos2, reason) ->

@@ -152,7 +152,8 @@ let fold_aktuple_as_akvec f env r fields =
 let akshape_keys_consistent field_name_x field_name_y =
   let open Ast in
     match field_name_x, field_name_y with
-      | (SFlit _, SFlit _) -> true
+      | (SFlit_int _, SFlit_int _) | (SFlit_str _, SFlit_str _)
+      | (SFlit_int _, SFlit_str _) | (SFlit_str _, SFlit_int _) -> true
       | (SFclass_const ((_, cls1), _)), (SFclass_const ((_, cls2), _))
           -> cls1 = cls2
       | _ -> false

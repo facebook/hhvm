@@ -856,7 +856,8 @@ and string_of_afield_list ~env afl =
   else String.concat ", " @@ List.map (string_of_afield ~env) afl
 
 and shape_field_name_to_expr = function
-  | A.SFlit (pos, s)
+  | A.SFlit_int (pos, s) -> (pos, A.Int s)
+  | A.SFlit_str (pos, s)
   | A.SFclass_const (_, (pos, s)) -> (pos, A.String s)
 
 and string_of_bop = function

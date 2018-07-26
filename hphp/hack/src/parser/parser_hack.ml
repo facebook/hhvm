@@ -4307,10 +4307,10 @@ and shape_field env =
 and shape_field_name env =
   let pos, e = expr env in
   match e with
-  | String p -> SFlit (pos, p)
+  | String p -> SFlit_str (pos, p)
   | Class_const ((_, Id id), ps) -> SFclass_const (id, ps)
   | _ -> error_expect env "string literal or class constant";
-    SFlit (pos, "")
+    SFlit_str (pos, "")
 
 
 (*****************************************************************************)

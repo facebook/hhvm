@@ -42,7 +42,7 @@ and class_const_requires_deep_init s p =
 
 and shape_field_requires_deep_init (n, v) =
   match n with
-  | A.SFlit _ ->
+  | A.SFlit_int _ | A.SFlit_str _ ->
     expr_requires_deep_init v
   | A.SFclass_const ((_, s), (_, p)) ->
     class_const_requires_deep_init s p ||

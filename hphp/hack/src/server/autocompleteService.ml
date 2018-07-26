@@ -144,7 +144,11 @@ let autocomplete_shape_key env fields id =
     let prefix = strip_suffix (snd id) in
     let add (name: Ast.shape_field_name) =
       let code, kind, ty = match name with
-        | Ast.SFlit (pos, str) ->
+        | Ast.SFlit_int (pos, str) ->
+          let reason = Typing_reason.Rwitness pos in
+          let ty = Typing_defs.Tprim Aast_defs.Tint in
+          (str, Literal_kind, (reason, ty))
+        | Ast.SFlit_str (pos, str) ->
           let reason = Typing_reason.Rwitness pos in
           let ty = Typing_defs.Tprim Aast_defs.Tstring in
           let quote = if have_prefix then Str.first_chars prefix 1 else "'" in

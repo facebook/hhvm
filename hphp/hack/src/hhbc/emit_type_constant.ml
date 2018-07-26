@@ -85,7 +85,9 @@ let check_shape_key (pos, name) =
     pos "Shape key names may not start with integers"
 
 let shape_field_name ~namespace = function
-  | A.SFlit ((_, s) as id) ->
+  | A.SFlit_int (_, s) ->
+    s, false
+  | A.SFlit_str ((_, s) as id) ->
     check_shape_key id;
     s, false
   | A.SFclass_const (id, (_, s)) ->

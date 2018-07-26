@@ -65,6 +65,7 @@ module FullFidelityParseArgs = struct
     lower_coroutines : bool;
     enable_hh_syntax : bool;
     fail_open : bool;
+    force_hh_syntax : bool;
     (* Defining the input *)
     files : string list;
     hacksperimental: bool;
@@ -94,6 +95,7 @@ module FullFidelityParseArgs = struct
     lower_coroutines
     enable_hh_syntax
     fail_open
+    force_hh_syntax
     show_file_name
     files
     hacksperimental = {
@@ -120,6 +122,7 @@ module FullFidelityParseArgs = struct
     lower_coroutines;
     enable_hh_syntax;
     fail_open;
+    force_hh_syntax;
     show_file_name;
     files;
     hacksperimental }
@@ -163,6 +166,7 @@ module FullFidelityParseArgs = struct
     let lower_coroutines = ref true in
     let enable_hh_syntax = ref false in
     let fail_open = ref true in
+    let force_hh_syntax = ref false in
     let show_file_name = ref false in
     let set_show_file_name () = show_file_name := true in
     let files = ref [] in
@@ -265,6 +269,9 @@ No errors are filtered out.";
       "--no-fail-open",
         Arg.Clear fail_open,
         "Unset the fail_open option for the parser.";
+      "--force-hh-syntax",
+        Arg.Set force_hh_syntax,
+        "Force hh syntax for the parser.";
       "--show-file-name",
         Arg.Unit set_show_file_name,
         "Displays the file name.";
@@ -300,6 +307,7 @@ No errors are filtered out.";
       !lower_coroutines
       !enable_hh_syntax
       !fail_open
+      !force_hh_syntax
       !show_file_name
       (List.rev !files)
       !hacksperimental
@@ -328,6 +336,10 @@ let handle_existing_file args filename =
   let popt = ParserOptions.default in
   let popt = ParserOptions.with_hh_syntax_for_hhvm popt
     (args.codegen && args.enable_hh_syntax) in
+
+  if args.force_hh_syntax then begin
+    Full_fidelity_lexer.Env.set ~force_hh:true ~enable_xhp:true;
+  end;
 
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in

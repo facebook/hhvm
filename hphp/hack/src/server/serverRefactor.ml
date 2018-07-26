@@ -47,7 +47,7 @@ let find_def_filename current_filename definition =
     }
 
 *)
-let construct_deprec_wrapper_text
+let construct_deprecated_wrapper_stub
   ~func_decl_text
   ~params_text_list
   ~col_start
@@ -93,7 +93,7 @@ let get_pos_before_docblock_from_cst_node filename node =
   let start_offset = leading_start_offset node in
   SourceText.relative_pos filename source_text start_offset start_offset
 
-let get_deprec_wrapper_patch ~filename ~definition new_name =
+let get_deprecated_wrapper_patch ~filename ~definition new_name =
   let open SymbolDefinition in
   let open Full_fidelity_positioned_syntax in
   let open Option.Monad_infix in
@@ -175,8 +175,8 @@ let get_deprec_wrapper_patch ~filename ~definition new_name =
       Some (func_decl_text, params_text_list, is_async, is_static)
     | _ -> None
   end >>| fun (func_decl_text, params_text_list, is_async, is_static) ->
-  let deprec_wrapper_text =
-    construct_deprec_wrapper_text
+  let deprecated_wrapper_stub =
+    construct_deprecated_wrapper_stub
       ~func_decl_text
       ~params_text_list
       ~col_start
@@ -187,16 +187,16 @@ let get_deprec_wrapper_patch ~filename ~definition new_name =
   let filename =
     find_def_filename (Relative_path.create_detect_prefix filename) definition
   in
-  let deprec_pos = get_pos_before_docblock_from_cst_node filename cst_node in
+  let deprecated_wrapper_pos = get_pos_before_docblock_from_cst_node filename cst_node in
   let patch = {
-    pos = Pos.to_absolute deprec_pos;
-    text = deprec_wrapper_text;
+    pos = Pos.to_absolute deprecated_wrapper_pos;
+    text = deprecated_wrapper_stub;
   } in
   Insert patch
 
 let go action genv env =
   let module Types = ServerCommandTypes.Find_refs in
-  let find_refs_action, new_name, deprec_wrapper_patch = match action with
+  let find_refs_action, new_name, deprecated_wrapper_patch = match action with
     | ClassRename (old_name, new_name) ->
         Types.Class old_name, new_name, None
     | ClassConstRename (class_name, old_name, new_name) ->
@@ -205,7 +205,7 @@ let go action genv env =
     | MethodRename { filename; definition; class_name; old_name; new_name } ->
         Types.Member (class_name, Types.Method old_name),
           new_name,
-          get_deprec_wrapper_patch ~filename ~definition new_name
+          get_deprecated_wrapper_patch ~filename ~definition new_name
     | FunctionRename (old_name, new_name) ->
         Types.Function old_name, new_name, None
     | LocalVarRename { filename; file_content; line; char; new_name } ->
@@ -220,7 +220,7 @@ let go action genv env =
     let patch = Replace replacement in
     patch :: acc
   end ~init:[] in
-  Option.value_map deprec_wrapper_patch ~default:changes
+  Option.value_map deprecated_wrapper_patch ~default:changes
     ~f:begin fun patch -> patch :: changes end
 
 let go_ide (filename, line, char) new_name genv env =

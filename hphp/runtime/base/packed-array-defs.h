@@ -108,13 +108,13 @@ size_t PackedArray::heapSize(const ArrayData* ad) {
   return kSizeIndex2Size[sizeClass(ad)];
 }
 
-// Pack together the size class and the varray/darray state into a single 16-bit
+// Pack together the size class and the other aux bits into a single 16-bit
 // number which can be stored in the HeapObject object. ArrayData requires the
 // varray/darray state to be in the lower 8-bits, but we're free to use the
 // upper.
 ALWAYS_INLINE
-uint16_t PackedArray::packSizeIndexAndDV(uint8_t idx, ArrayData::DVArray dv) {
-  return (static_cast<uint16_t>(idx) << 8) | dv;
+uint16_t PackedArray::packSizeIndexAndAuxBits(uint8_t idx, uint8_t aux) {
+  return (static_cast<uint16_t>(idx) << 8) | aux;
 }
 
 ALWAYS_INLINE

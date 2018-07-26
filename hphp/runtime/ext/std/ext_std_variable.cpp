@@ -340,7 +340,11 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfVec: {
       ArrayData* arr = value.getArrayData();
       assertx(arr->isVecArray());
-      if (arr->empty()) return empty_hack(arr, s_EmptyVecArray);
+      if (arr->empty()) {
+        return UNLIKELY(arr->isLegacyArray())
+          ? s_EmptyArray
+          : empty_hack(arr, s_EmptyVecArray);
+      }
       break;
     }
 
@@ -348,7 +352,11 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfDict: {
       ArrayData* arr = value.getArrayData();
       assertx(arr->isDict());
-      if (arr->empty()) return empty_hack(arr, s_EmptyDictArray);
+      if (arr->empty()) {
+        return UNLIKELY(arr->isLegacyArray())
+          ? s_EmptyArray
+          : empty_hack(arr, s_EmptyDictArray);
+      }
       break;
     }
 

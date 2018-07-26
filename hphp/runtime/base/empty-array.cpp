@@ -124,7 +124,7 @@ arr_lval EmptyArray::MakePackedInl(TypedValue tv) {
   ad->initHeader_16(
     HeaderKind::Packed,
     OneReference,
-    PackedArray::packSizeIndexAndDV(
+    PackedArray::packSizeIndexAndAuxBits(
       PackedArray::SmallSizeIndex,
       ArrayData::kNotDVArray
     )

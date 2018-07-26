@@ -109,6 +109,12 @@ struct ArrayData : MaybeCountable {
    */
   static auto constexpr kHasApcTv    = 4;
 
+  /*
+   * Indicates that this dict or vec should use some legacy (i.e.,
+   * PHP-compatible) behaviors, including serialization
+   */
+  static auto constexpr kLegacyArray = 8;
+
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
 
@@ -280,6 +286,18 @@ public:
    * co-allocated APCTypedValue preceding this array.
    */
   bool hasApcTv() const;
+
+  /*
+   * Whether the array has legacy behaviors enabled (this bit can only be set
+   * for vecs and dicts).
+   */
+  bool isLegacyArray() const;
+  void setLegacyArray(bool legacy);
+
+  /* Get the aux bits in the header that must be preserved
+   * when we copy or resize the array
+   */
+  uint8_t auxBits() const;
 
   /*
    * Is the array a varray, darray, or neither?

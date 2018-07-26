@@ -245,7 +245,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
 
   static uint32_t capacity(const ArrayData*);
   static size_t heapSize(const ArrayData*);
-  static uint16_t packSizeIndexAndDV(uint8_t, ArrayData::DVArray);
+  static uint16_t packSizeIndexAndAuxBits(uint8_t, uint8_t);
 
   static void scan(const ArrayData*, type_scan::Scanner&);
 

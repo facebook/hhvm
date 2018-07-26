@@ -344,7 +344,11 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   memcpy(ad, &other, sizeof(MixedArray) + sizeof(Elm) * other.m_used);
 #endif
   auto const count = mode == AllocMode::Request ? OneReference : StaticValue;
-  ad->initHeader_16(dest_hk, count, dvArray);
+  ad->initHeader_16(
+      dest_hk,
+      count,
+      dvArray | (other.isLegacyArray() ? ArrayData::kLegacyArray : 0)
+  );
   CopyHash(ad->hashTab(), other.hashTab(), scale);
 
   // Bump up refcounts as needed.
@@ -374,6 +378,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   assertx(ad->m_used == other.m_used);
   assertx(ad->m_kind == dest_hk);
   assertx(ad->dvArray() == dvArray);
+  assertx(ad->isLegacyArray() == other.isLegacyArray());
   assertx(ad->m_size == other.m_size);
   assertx(ad->m_pos == other.m_pos);
   assertx(mode == AllocMode::Request ? ad->hasExactlyOneRef() :
@@ -782,7 +787,11 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
   auto ad            = reqAlloc(newScale);
   auto const oldUsed = old->m_used;
   ad->m_sizeAndPos   = old->m_sizeAndPos;
-  ad->initHeader_16(old->m_kind, OneReference, old->dvArray());
+  ad->initHeader_16(
+      old->m_kind,
+      OneReference,
+      old->auxBits()
+  );
   ad->m_scale_used   = newScale | uint64_t{oldUsed} << 32;
 
   copyElmsNextUnsafe(ad, old, oldUsed);
@@ -826,6 +835,7 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
 
   assertx(ad->kind() == old->kind());
   assertx(ad->dvArray() == old->dvArray());
+  assertx(ad->isLegacyArray() == old->isLegacyArray());
   assertx(ad->m_size == old->m_size);
   assertx(ad->hasExactlyOneRef());
   assertx(ad->m_pos == old->m_pos);
@@ -1258,7 +1268,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   auto const oldUsed = src->m_used;
 
   ad->m_sizeAndPos      = src->m_sizeAndPos;
-  ad->initHeader_16(src->m_kind, OneReference, src->dvArray());
+  ad->initHeader_16(src->m_kind, OneReference, src->auxBits());
   ad->m_scale           = scale; // don't set m_used yet
   ad->m_nextKI          = src->m_nextKI;
 
@@ -1581,6 +1591,7 @@ ArrayData* MixedArray::FromDictImpl(ArrayData* adIn, bool copy, bool toDArray) {
     // No int-like string keys, so transform in place.
     a->m_kind = HeaderKind::Mixed;
     if (toDArray) a->setDVArray(ArrayData::kDArray);
+    a->setLegacyArray(false);
     assertx(a->checkInvariants());
     return a;
   }
@@ -1615,6 +1626,7 @@ ArrayData* MixedArray::FromDictImpl(ArrayData* adIn, bool copy, bool toDArray) {
 ArrayData* MixedArray::ToPHPArrayDict(ArrayData* adIn, bool copy) {
   auto out = FromDictImpl(adIn, copy, false);
   assertx(out->isNotDVArray());
+  assertx(!out->isLegacyArray());
   return out;
 }
 
@@ -1626,6 +1638,7 @@ ArrayData* MixedArray::ToDArray(ArrayData* in, bool copy) {
   if (a->getSize() == 0) return staticEmptyDArray();
   auto out = copy ? a->copyMixed() : a;
   out->setDVArray(ArrayData::kDArray);
+  out->setLegacyArray(false);
   assertx(out->checkInvariants());
   return out;
 }
@@ -1634,6 +1647,7 @@ ArrayData* MixedArray::ToDArrayDict(ArrayData* in, bool copy) {
   if (RuntimeOption::EvalHackArrDVArrs) return in;
   auto out = FromDictImpl(in, copy, true);
   assertx(out->isDArray());
+  assertx(!out->isLegacyArray());
   return out;
 }
 

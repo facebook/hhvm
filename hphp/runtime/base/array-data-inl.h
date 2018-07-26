@@ -200,6 +200,17 @@ inline bool ArrayData::dvArraySanityCheck() const {
 
 inline bool ArrayData::hasApcTv() const { return m_aux16 & kHasApcTv; }
 
+inline bool ArrayData::isLegacyArray() const { return m_aux16 & kLegacyArray; }
+
+inline void ArrayData::setLegacyArray(bool legacy) {
+  assert(!legacy || kind() == kDictKind || kind() == kVecKind);
+  m_aux16 = (m_aux16 & ~kLegacyArray) | (legacy ? kLegacyArray : 0);
+}
+
+inline uint8_t ArrayData::auxBits() const {
+  return dvArray() | (isLegacyArray() ? kLegacyArray : 0);
+}
+
 inline bool ArrayData::useWeakKeys() const { return isPHPArray(); }
 
 inline DataType ArrayData::toDataType() const {

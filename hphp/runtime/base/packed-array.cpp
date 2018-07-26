@@ -53,7 +53,7 @@ struct PackedArray::VecInitializer {
     ad->initHeader_16(
       HeaderKind::VecArray,
       StaticValue,
-      packSizeIndexAndDV(0, ArrayData::kNotDVArray)
+      packSizeIndexAndAuxBits(0, ArrayData::kNotDVArray)
     );
     assertx(checkInvariants(ad));
   }
@@ -67,7 +67,7 @@ struct PackedArray::VArrayInitializer {
     ad->initHeader_16(
       HeaderKind::Packed,
       StaticValue,
-      packSizeIndexAndDV(0, ArrayData::kVArray)
+      packSizeIndexAndAuxBits(0, ArrayData::kVArray)
     );
     assertx(RuntimeOption::EvalHackArrDVArrs || checkInvariants(ad));
   }
@@ -264,7 +264,7 @@ ArrayData* PackedArray::Grow(ArrayData* adIn, bool copy) {
     ad->initHeader_16(
       adIn->m_kind,
       OneReference,
-      packSizeIndexAndDV(sizeIndex, adIn->dvArray())
+      packSizeIndexAndAuxBits(sizeIndex, adIn->auxBits())
     );
 
     assertx(ad->m_size == adIn->m_size);
@@ -276,7 +276,7 @@ ArrayData* PackedArray::Grow(ArrayData* adIn, bool copy) {
     ad->initHeader_16(
       adIn->m_kind,
       OneReference,
-      packSizeIndexAndDV(sizeIndex, adIn->dvArray())
+      packSizeIndexAndAuxBits(sizeIndex, adIn->auxBits())
     );
 
     assertx(ad->m_size == adIn->m_size);
@@ -358,6 +358,7 @@ ArrayData* PackedArray::Copy(const ArrayData* adIn) {
   ad->m_count = OneReference;
 
   assertx(ad->kind() == adIn->kind());
+  assertx(ad->isLegacyArray() == adIn->isLegacyArray());
   assertx(capacity(ad) == capacity(adIn));
   assertx(ad->m_size == adIn->m_size);
   assertx(ad->m_pos == adIn->m_pos);
@@ -380,7 +381,7 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
   ad->initHeader_16(
     adIn->m_kind,
     StaticValue,
-    packSizeIndexAndDV(sizeIndex, adIn->dvArray())
+    packSizeIndexAndAuxBits(sizeIndex, adIn->auxBits())
   );
 
   assertx(ad->kind() == adIn->kind());
@@ -403,7 +404,7 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
   ad->initHeader_16(
     HeaderKind::Packed,
     StaticValue,
-    packSizeIndexAndDV(sizeIndex, arr->dvArray())
+    packSizeIndexAndAuxBits(sizeIndex, arr->auxBits())
   );
   ad->m_sizeAndPos = arr->m_sizeAndPos;
 
@@ -439,7 +440,7 @@ ArrayData* PackedArray::MakeReserveImpl(uint32_t cap,
   ad->initHeader_16(
     hk,
     OneReference,
-    packSizeIndexAndDV(sizeIndex, dvarray)
+    packSizeIndexAndAuxBits(sizeIndex, dvarray)
   );
   assertx(ad->m_kind == hk);
   assertx(ad->dvArray() == dvarray);
@@ -1261,6 +1262,7 @@ ArrayData* PackedArray::ToPHPArrayVec(ArrayData* adIn, bool copy) {
   ArrayData* ad = copy ? Copy(adIn) : adIn;
   ad->m_kind = HeaderKind::Packed;
   assertx(ad->isNotDVArray());
+  ad->setLegacyArray(false);
   assertx(checkInvariants(ad));
   return ad;
 }
@@ -1273,6 +1275,7 @@ ArrayData* PackedArray::ToVArrayVec(ArrayData* adIn, bool copy) {
   ArrayData* ad = copy ? Copy(adIn) : adIn;
   ad->m_kind = HeaderKind::Packed;
   ad->setDVArray(ArrayData::kVArray);
+  ad->setLegacyArray(false);
   assertx(checkInvariants(ad));
   return ad;
 }
@@ -1322,7 +1325,7 @@ ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
     ad->initHeader_16(
       HeaderKind::VecArray,
       OneReference,
-      packSizeIndexAndDV(sizeClass(adIn), ArrayData::kNotDVArray)
+      packSizeIndexAndAuxBits(sizeClass(adIn), ArrayData::kNotDVArray)
     );
     return ad;
   };
@@ -1414,7 +1417,7 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array,
   ad->initHeader_16(
     array->m_kind,
     UncountedValue,
-    packSizeIndexAndDV(sizeIndex, array->dvArray()) |
+    packSizeIndexAndAuxBits(sizeIndex, array->auxBits()) |
     (withApcTypedValue ? ArrayData::kHasApcTv : 0)
   );
   ad->m_sizeAndPos = array->m_sizeAndPos;

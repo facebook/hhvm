@@ -40,6 +40,9 @@ function server_warmup_status_monotonic(): string;
 <<__Native>>
 function execution_context(): string;
 
+<<__Native>>
+function enable_legacy_behavior(vec_or_dict $v): vec_or_dict;
+
 }
 
 namespace {

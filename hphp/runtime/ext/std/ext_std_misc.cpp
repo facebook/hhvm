@@ -220,6 +220,7 @@ void StandardExtension::initMisc() {
     HHVM_FE(token_get_all);
     HHVM_FE(token_name);
     HHVM_FE(hphp_to_string);
+    HHVM_FALIAS(HH\\enable_legacy_behavior, enable_legacy_behavior);
     HHVM_FALIAS(__SystemLib\\max2, SystemLib_max2);
     HHVM_FALIAS(__SystemLib\\min2, SystemLib_min2);
 
@@ -965,6 +966,17 @@ String HHVM_FUNCTION(token_name, int64_t token) {
     return table[token];
   }
   return "UNKNOWN";
+}
+
+Variant HHVM_FUNCTION(enable_legacy_behavior, const Variant& v) {
+  if (v.isVecArray() || v.isDict()) {
+    auto arr = v.toCArrRef().copy();
+    arr->setLegacyArray(true);
+    return arr;
+  } else {
+    raise_warning("enable_legacy_behavior expects a dict or vec");
+    return v;
+  }
 }
 
 String HHVM_FUNCTION(hphp_to_string, const Variant& v) {

@@ -52,6 +52,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           is_after_single_colon = false;
           is_after_double_right_angle_bracket = false;
           is_after_open_square_bracket = false;
+          is_after_quote = false;
         } in (* feature not implemented here; it only works for LSP *)
         let result = ServerAutoComplete.auto_complete
           ~tcopt:env.tcopt ~delimit_on_namespaces:false ~autocomplete_context content in

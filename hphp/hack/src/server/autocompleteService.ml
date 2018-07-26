@@ -147,7 +147,8 @@ let autocomplete_shape_key env fields id =
         | Ast.SFlit (pos, str) ->
           let reason = Typing_reason.Rwitness pos in
           let ty = Typing_defs.Tprim Aast_defs.Tstring in
-          (Printf.sprintf "'%s'" str, Literal_kind, (reason, ty))
+          let quote = if have_prefix then Str.first_chars prefix 1 else "'" in
+          (quote^str^quote, Literal_kind, (reason, ty))
         | Ast.SFclass_const ((pos, cid), (_, mid)) ->
           (Printf.sprintf "%s::%s" cid mid, Class_constant_kind, (Reason.Rwitness pos, Typing_defs.Tany))
       in
@@ -261,9 +262,11 @@ let compute_complete_global
   let gname = Utils.strip_ns !auto_complete_for_global in
   let gname = strip_suffix gname in
   let gname = if autocomplete_context.is_xhp_classname then (":" ^ gname) else gname in
-  (* Colon hack: in "case Foo::Bar:", we wouldn't want to show autocomplete *)
-  (* here, but we would in "<nt:" and "$a->:" and "function f():". We can   *)
-  (* recognize this case by whether the prefix is empty.                    *)
+  (* is_after_single_colon : XHP vs switch statements                       *)
+  (* is_after_open_square_bracket : shape field names vs container keys     *)
+  (* is_after_quote: shape field names vs arbitrary strings                 *)
+  (*                                                                        *)
+  (* We can recognize these cases by whether the prefix is empty.           *)
   (* We do this by checking the identifier length, as the string will       *)
   (* include the current namespace.                                         *)
   let have_user_prefix = match !autocomplete_identifier with
@@ -271,9 +274,9 @@ let compute_complete_global
     | Some (pos, _) -> Pos.length pos > suffix_len in
   let ctx = autocomplete_context in
   if (not ctx.is_manually_invoked) && (not have_user_prefix) &&
-    (ctx.is_after_single_colon || ctx.is_after_open_square_bracket)
+    (ctx.is_after_single_colon || ctx.is_after_open_square_bracket || ctx.is_after_quote)
   then ()
-  else if autocomplete_context.is_after_double_right_angle_bracket then
+  else if ctx.is_after_double_right_angle_bracket then
     (* <<__Override>>AUTO332 *)
     ()
   else begin
@@ -567,18 +570,36 @@ let visitor = object (self)
     super#on_Obj_get env obj mid ognf
 
   method! on_expr env expr =
-    begin match expr with
-    | (_, Tast.Array_get (arr, Some ((pos, _), Tast.Id (_, mid))))
-    | (_, Tast.Array_get (arr, Some ((pos, _), Tast.String mid))) ->
+    (match expr with
+    | (_, Tast.Array_get (arr, Some ((pos, _), key))) ->
       let ty = Tast.get_type arr in
       let _, ty = Tast_env.expand_type env ty in
       begin match ty with
       | _, Typing_defs.Tshape (_, fields) ->
-        autocomplete_shape_key env fields (pos, mid);
+        (match key with
+        | Tast.Id (_, mid) -> autocomplete_shape_key env fields (pos, mid);
+        | Tast.String mid ->
+          (* autocomplete generally assumes that there's a token ending with the suffix; *)
+          (* This isn't the case for `$shape['a`, unless it's at the end of the file *)
+          let offset = String_utils.substring_index auto_complete_suffix mid in
+          if offset = -1
+          then autocomplete_shape_key env fields (pos, mid)
+          else begin
+            let mid = Str.string_before mid (offset + suffix_len) in
+            let (line, bol, cnum) = Pos.line_beg_offset pos in
+            let pos = Pos.make_from_lnum_bol_cnum
+              ~pos_file:(Pos.filename pos)
+              ~pos_start:(line, bol, cnum)
+              ~pos_end:(line, bol, cnum + offset + suffix_len)
+            in
+            autocomplete_shape_key env fields (pos, mid);
+          end
+        | _ -> ()
+        )
       | _ -> ()
       end;
     | _ -> ()
-    end;
+    );
     super#on_expr env expr
 
   method! on_Xml env sid attrs el =

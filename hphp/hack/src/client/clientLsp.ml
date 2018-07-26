@@ -1613,7 +1613,7 @@ let do_initialize () : Initialize.result =
       hoverProvider = true;
       completionProvider = Some {
         resolveProvider = true;
-        completion_triggerCharacters = ["$"; ">"; "\\"; ":"; "<"; "["];
+        completion_triggerCharacters = ["$"; ">"; "\\"; ":"; "<"; "["; "'"; "\"" ];
       };
       signatureHelpProvider = Some { sighelp_triggerCharacters = ["("; ","] };
       definitionProvider = true;

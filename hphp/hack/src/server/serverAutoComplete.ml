@@ -47,6 +47,8 @@ let context_xhp_member_regex = Str.regexp ".*->[a-zA-Z_0-9:]*$"
 let context_after_single_colon_regex = Str.regexp ".*[a-zA-Z_0-9\"']:$"
 (* For identifying user attributes *)
 let context_after_double_right_angle_bracket_regex = Str.regexp ".*[a-zA-z_0-9\"' ,)]>>$"
+(* For identifying shape keys *)
+let context_after_quote = Str.regexp ".*['\"]$"
 
 let get_autocomplete_context
     (content:string)
@@ -63,6 +65,7 @@ let get_autocomplete_context
     is_after_single_colon = false;
     is_after_double_right_angle_bracket = false;
     is_after_open_square_bracket = false;
+    is_after_quote = false;
   } else
   let pos_start = { pos with File_content.column = 1; } in
   let (offset_start, offset) = File_content.get_offsets content (pos_start, pos) in
@@ -73,6 +76,7 @@ let get_autocomplete_context
   let is_after_single_colon = Str.string_match context_after_single_colon_regex text 0 in
   let is_after_double_right_angle_bracket = Str.string_match context_after_double_right_angle_bracket_regex text 0 in
   let is_after_open_square_bracket = ((String.length text) >= 1) && ((Str.last_chars text 1) = "[") in
+  let is_after_quote = Str.string_match context_after_quote text 0 in
   { AutocompleteTypes.
     is_manually_invoked;
     is_xhp_classname;
@@ -80,6 +84,7 @@ let get_autocomplete_context
     is_after_single_colon;
     is_after_double_right_angle_bracket;
     is_after_open_square_bracket;
+    is_after_quote;
   }
 
 let auto_complete_at_position

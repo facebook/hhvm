@@ -87,24 +87,67 @@ void Extension::CompileSystemlib(const std::string &slib,
  * If {name} is not passed, then {m_name} is assumed.
  */
 void Extension::loadSystemlib(const std::string& name) {
-  std::string n = name.empty() ?
-    std::string(m_name.data(), m_name.size()) : name;
+  assert(!name.empty());
 #ifdef _MSC_VER
   std::string section("ext_");
 #else
   std::string section("ext.");
 #endif
-  section += HHVM_FN(md5)(n, false).substr(0, 12).data();
+  section += HHVM_FN(md5)(name, false).substr(0, 12).data();
   std::string hhas;
   std::string slib = get_systemlib(&hhas, section, m_dsoName);
   if (!slib.empty()) {
-    std::string phpname = s_systemlibPhpName + n;
+    std::string phpname = s_systemlibPhpName + name;
     CompileSystemlib(slib, phpname);
   }
   if (!hhas.empty()) {
-    std::string hhasname = s_systemlibHhasName + n;
+    std::string hhasname = s_systemlibHhasName + name;
     CompileSystemlib(hhas, hhasname);
   }
+}
+
+void Extension::moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*hdf*/)
+{}
+
+void Extension::moduleInfo(Array &info) {
+  info.set(String(m_name), true);
+}
+
+void Extension::moduleInit()
+{}
+
+void Extension::moduleShutdown()
+{}
+
+void Extension::threadInit()
+{}
+
+void Extension::threadShutdown()
+{}
+
+void Extension::requestInit()
+{}
+
+void Extension::requestShutdown()
+{}
+
+// override this to control extension_loaded() return value
+bool Extension::moduleEnabled() const {
+  return true;
+}
+
+const Extension::DependencySet Extension::getDeps() const {
+  // No dependencies by default
+  return DependencySet();
+}
+
+void Extension::registerExtensionFunction(const String& name) {
+  assertx(name.get()->isStatic());
+  m_functions.push_back(name.get());
+}
+
+const std::vector<StringData*>& Extension::getExtensionFunctions() const {
+  return m_functions;
 }
 
 /////////////////////////////////////////////////////////////////////////////

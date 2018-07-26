@@ -58,7 +58,8 @@ struct Extension : IDebuggable {
   static bool IsSystemlibPath(const std::string& path);
 
   // Look for "ext.{namehash}" in the binary and compile/merge it
-  void loadSystemlib(const std::string& name = "");
+  void loadSystemlib() { loadSystemlib(m_name); }
+  void loadSystemlib(const std::string& name);
 
   // Compile and merge an systemlib fragment
   static void CompileSystemlib(const std::string &slib,
@@ -67,28 +68,26 @@ public:
   explicit Extension(const char* name, const char* version = "");
   ~Extension() override {}
 
-  const char* getVersion() const { return m_version.c_str();}
+  const char* getVersion() const { return m_version.c_str(); }
 
   // override these functions to implement module specific init/shutdown
   // sequences and information display.
-  virtual void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*hdf*/) {}
-  virtual void moduleInfo(Array &info) { info.set(String(m_name), true);}
-  virtual void moduleInit() {}
-  virtual void moduleShutdown() {}
-  virtual void threadInit() {}
-  virtual void threadShutdown() {}
-  virtual void requestInit() {}
-  virtual void requestShutdown() {}
+  virtual void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*hdf*/);
+  virtual void moduleInfo(Array &info);
+  virtual void moduleInit();
+  virtual void moduleShutdown();
+  virtual void threadInit();
+  virtual void threadShutdown();
+  virtual void requestInit();
+  virtual void requestShutdown();
 
   // override this to control extension_loaded() return value
-  virtual bool moduleEnabled() const { return true; }
+  virtual bool moduleEnabled() const;
 
-  typedef std::set<std::string> DependencySet;
-  typedef std::map<Extension*, DependencySet> DependencySetMap;
-  virtual const DependencySet getDeps() const {
-    // No dependencies by default
-    return DependencySet();
-  }
+  using DependencySet = std::set<std::string>;
+  using DependencySetMap = std::map<Extension*, DependencySet>;
+
+  virtual const DependencySet getDeps() const;
 
   void setDSOName(const std::string &name) {
     m_dsoName = name;
@@ -98,14 +97,11 @@ public:
     return m_name;
   }
 
-  void registerExtensionFunction(const String& name) {
-    assertx(name.get()->isStatic());
-    m_functions.push_back(name.get());
-  }
+  void registerExtensionFunction(const String& name);
 
-  const std::vector<StringData*>& getExtensionFunctions() const {
-    return m_functions;
-  }
+  // access the list of functions (excluding methods);
+  // helper for get_extension_funcs()
+  const std::vector<StringData*>& getExtensionFunctions() const;
 
 private:
   std::string m_name;

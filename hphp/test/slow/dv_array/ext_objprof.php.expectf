@@ -1,0 +1,95 @@
+array(2) {
+  ["LeafClass"]=>
+  array(4) {
+    ["instances"]=>
+    int(1)
+    ["bytes"]=>
+    int(%d)
+    ["bytes_normalized"]=>
+    float(%d)
+    ["paths"]=>
+    NULL
+  }
+  ["NodeClass"]=>
+  array(4) {
+    ["instances"]=>
+    int(1)
+    ["bytes"]=>
+    int(%d)
+    ["bytes_normalized"]=>
+    float(%d)
+    ["paths"]=>
+    NULL
+  }
+}
+array(2) {
+  ["LeafClass"]=>
+  array(4) {
+    ["instances"]=>
+    int(1)
+    ["bytes"]=>
+    int(%d)
+    ["bytes_normalized"]=>
+    float(%d)
+    ["paths"]=>
+    array(1) {
+      ["Object:NodeClass->Property:child->Object:LeafClass"]=>
+      array(1) {
+        ["refs"]=>
+        int(1)
+      }
+    }
+  }
+  ["NodeClass"]=>
+  array(4) {
+    ["instances"]=>
+    int(1)
+    ["bytes"]=>
+    int(%d)
+    ["bytes_normalized"]=>
+    float(%d)
+    ["paths"]=>
+    array(0) {
+    }
+  }
+}
+array(1) {
+  ["NodeClass"]=>
+  array(4) {
+    ["instances"]=>
+    int(1)
+    ["bytes"]=>
+    int(%d)
+    ["bytes_normalized"]=>
+    float(%d)
+    ["paths"]=>
+    NULL
+  }
+}
+array(1) {
+  ["NodeClass"]=>
+  array(4) {
+    ["instances"]=>
+    int(1)
+    ["bytes"]=>
+    int(%d)
+    ["bytes_normalized"]=>
+    float(%d)
+    ["paths"]=>
+    array(0) {
+    }
+  }
+}
+array(1) {
+  ["%d"]=>
+  array(4) {
+    ["dups"]=>
+    int(1)
+    ["refs"]=>
+    int(1)
+    ["srefs"]=>
+    int(0)
+    ["path"]=>
+    string(13) "LeafClass:str"
+  }
+}

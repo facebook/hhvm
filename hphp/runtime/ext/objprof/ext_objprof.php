@@ -18,7 +18,7 @@ type ObjprofObjectStats = shape(
   'instances'        => int,
   'bytes'            => int,
   'bytes_normalized' => float,
-  'paths'            => ?array<string, ObjprofPathsStats>,
+  'paths'            => ?darray<string, ObjprofPathsStats>,
 );
 
 type ObjprofStringStats = shape(
@@ -31,20 +31,20 @@ type ObjprofStringStats = shape(
 <<__Native>>
 function objprof_get_data(
   int $flags = OBJPROF_FLAGS_DEFAULT,
-  array<string> $exclude_list = array(),
-): array<string, ObjprofObjectStats>;
+  varray<string> $exclude_list = varray[],
+): darray<string, ObjprofObjectStats>;
 
 <<__Native>>
 function objprof_get_paths(
   int $flags = OBJPROF_FLAGS_DEFAULT,
-  array<string> $exclude_list = array(),
-): array<string, ObjprofObjectStats>;
+  varray<string> $exclude_list = varray[],
+): darray<string, ObjprofObjectStats>;
 
 <<__Native>>
-function objprof_get_strings(int $min_dup): array<string, ObjprofStringStats>;
+function objprof_get_strings(int $min_dup): darray<string, ObjprofStringStats>;
 
 <<__Native>>
-function thread_memory_stats(): array<string, int>;
+function thread_memory_stats(): darray<string, int>;
 
 <<__Native>>
 function thread_mark_stack(): void;

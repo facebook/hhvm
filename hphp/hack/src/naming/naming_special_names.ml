@@ -404,3 +404,7 @@ module PPLFunctions = struct
     List.iter all_reserved (HashSet.add h);
     fun name -> HashSet.mem h name
 end
+
+module Regex = struct
+  let tPattern = "\\HH\\Lib\\Regex\\Pattern"
+end

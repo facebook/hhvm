@@ -1,0 +1,2 @@
+File "non_re_prefixed_string.php", line 4, characters 8-20:
+Only `re`-prefixed strings allowed. (Parsing[1002])

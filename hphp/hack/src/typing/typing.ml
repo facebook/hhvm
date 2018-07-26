@@ -1373,6 +1373,11 @@ and expr_
         (Env.get_options env)
         TypecheckerOptions.experimental_null_coalesce_assignment in
 
+  let re_prefixed_strings_enabled =
+      TypecheckerOptions.experimental_feature_enabled
+        (Env.get_options env)
+        TypecheckerOptions.experimental_re_prefixed_strings in
+
   let subtype_arraykey ~class_name ~key_pos env key_ty =
     let ty_arraykey = Reason.Ridx_dict key_pos, Tprim Tarraykey in
     Type.sub_type p (Reason.index_class class_name) env key_ty ty_arraykey in
@@ -1647,9 +1652,22 @@ and expr_
   | String2 idl ->
       let env, tel = string2 env idl in
       make_result env (T.String2 tel) (Reason.Rwitness p, Tprim Tstring)
-  | PrefixedString _ ->
-      Errors.experimental_feature p "prefixed strings";
-      expr_error env p (Reason.Rnone)
+  | PrefixedString (n, e) ->
+      if n <> "re"
+      then begin
+        Errors.experimental_feature p
+          "String prefixes other than `re` (experimental) are not yet supported.";
+        expr_error env p (Reason.Rnone)
+      end else if not re_prefixed_strings_enabled
+      then begin
+        Errors.experimental_feature p "`re`-prefixed strings";
+        expr_error env p (Reason.Rnone)
+      end else
+        let env, te, ty = expr env e in
+        let p = fst e in
+        let env = SubType.sub_string p env ty in
+        make_result env (T.PrefixedString (n, te))
+          (Typing_regex.type_pattern e)
   | Fun_id x ->
       Typing_hooks.dispatch_id_hook x env;
       let env, fty = fun_type_of_id env x [] in

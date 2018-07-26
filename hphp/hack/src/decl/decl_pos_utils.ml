@@ -94,6 +94,7 @@ let rec reason = function
   | Rmissing_optional_field (p, n) -> Rmissing_optional_field (pos p, n)
   | Rcontravariant_generic (r1, n) -> Rcontravariant_generic (reason r1, n)
   | Rinvariant_generic (r1, n) -> Rcontravariant_generic (reason r1, n)
+  | Rregex p                 -> Rregex (pos p)
 
 let string_id (p, x) = pos p, x
 

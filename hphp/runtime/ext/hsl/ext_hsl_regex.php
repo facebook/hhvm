@@ -17,5 +17,5 @@
 
 namespace HH\Lib\Regex {
   type Match = shape(...);
-  newtype Pattern as string = string;
+  newtype Pattern<+T as Match> as string = string;
 }

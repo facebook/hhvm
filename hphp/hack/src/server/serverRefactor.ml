@@ -47,7 +47,12 @@ let find_def_filename current_filename definition =
     }
 
 *)
-let construct_deprec_wrapper_text ~func_decl_text ~params_text_list ~col_start new_name =
+let construct_deprec_wrapper_text
+  ~func_decl_text
+  ~params_text_list
+  ~col_start
+  ~is_async
+  new_name =
   (* Since the starting column position points to the beginning of the function
       declaration header, we can use it to figure out the indentation level
       of the function, and insert whitespace accordingly *)
@@ -60,8 +65,14 @@ let construct_deprec_wrapper_text ~func_decl_text ~params_text_list ~col_start n
   let func_body_indentation = String.make 2 ' ' in
   let return_indentation = base_indentation ^ func_body_indentation in
   let parameter_input = String.concat ", " params_text_list in
+  let maybe_await =
+    if is_async then "await "
+    else ""
+  in
   let return_statement =
-    return_indentation ^ "return $this->" ^ new_name ^ "(" ^ parameter_input ^ ");"
+    return_indentation ^
+    "return " ^ maybe_await ^ "$this->" ^
+    new_name ^ "(" ^ parameter_input ^ ");"
   in
   "\n" ^ deprecated_header ^
   "\n" ^ func_decl ^ " {" ^
@@ -105,46 +116,58 @@ let get_deprec_wrapper_patch ~filename ~definition new_name =
           }; _
       } ->
       let func_decl_text = text func_decl in
-      let params_text_list = match syntax func_decl with
+      let params_text_list, is_async = match syntax func_decl with
         | FunctionDeclarationHeader {
-            function_parameter_list = params; _
+            function_parameter_list = params;
+            function_modifiers = modifiers; _
           } ->
-            begin match syntax params with
-            | SyntaxList params ->
-              let params_text_list = List.map params ~f:begin fun param ->
-                let param = match syntax param with
-                  | ListItem { list_item; _ } -> list_item
-                  | _ -> failwith "Expected ListItem"
-                in
-                match syntax param with
-                (* NOTE:
-                   `ParameterDeclaration` includes regular params like "$x" and
-                    _named_ variadic parameters like "...$nums". For the latter case,
-                    calling `text parameter_name` will return the entire "...$nums"
-                    string, including the ellipsis.
+            let params_text_list = match syntax params with
+              | SyntaxList params ->
+                let params_text_list = List.map params ~f:begin fun param ->
+                  let param = match syntax param with
+                    | ListItem { list_item; _ } -> list_item
+                    | _ -> failwith "Expected ListItem"
+                  in
+                  match syntax param with
+                  (* NOTE:
+                     `ParameterDeclaration` includes regular params like "$x" and
+                      _named_ variadic parameters like "...$nums". For the latter case,
+                      calling `text parameter_name` will return the entire "...$nums"
+                      string, including the ellipsis.
 
-                  `VariadicParameter` addresses the unnamed variadic parameter
-                    "...". In this case, we provide as a parameter a function call
-                    that outputs only the variadic params (and dropping the
-                    non-variadic ones).
-                *)
-                  | ParameterDeclaration { parameter_name = name; _ } -> text name
-                  | VariadicParameter _ ->
-                    let num_of_nonvariadic_params = string_of_int ((List.length params) - 1) in
-                    "...Vec\\drop(func_get_args(), " ^ num_of_nonvariadic_params ^ ")"
-                  | _ -> failwith "Expected some parameter type"
-              end in
-              Some params_text_list
-            | _ -> None
-            end
-        | _ -> None
+                    `VariadicParameter` addresses the unnamed variadic parameter
+                      "...". In this case, we provide as a parameter a function call
+                      that outputs only the variadic params (and dropping the
+                      non-variadic ones).
+                  *)
+                    | ParameterDeclaration { parameter_name = name; _ } -> text name
+                    | VariadicParameter _ ->
+                      let num_of_nonvariadic_params = string_of_int ((List.length params) - 1) in
+                      "...Vec\\drop(func_get_args(), " ^ num_of_nonvariadic_params ^ ")"
+                    | _ -> failwith "Expected some parameter type"
+                end in
+                Some params_text_list
+              | _ -> None
+            in
+            let is_async = match syntax modifiers with
+              | SyntaxList modifiers ->
+                List.exists modifiers ~f:(fun modifier -> (text modifier) = "async")
+              | _ -> false
+            in
+            params_text_list, is_async
+        | _ -> None, false
       in
       params_text_list >>= fun params_text_list ->
-      Some (func_decl_text, params_text_list)
+      Some (func_decl_text, params_text_list, is_async)
     | _ -> None
-  end >>| fun (func_decl_text, params_text_list) ->
+  end >>| fun (func_decl_text, params_text_list, is_async) ->
   let deprec_wrapper_text =
-    construct_deprec_wrapper_text ~func_decl_text ~params_text_list ~col_start new_name
+    construct_deprec_wrapper_text
+      ~func_decl_text
+      ~params_text_list
+      ~col_start
+      ~is_async
+      new_name
   in
   let filename =
     find_def_filename (Relative_path.create_detect_prefix filename) definition

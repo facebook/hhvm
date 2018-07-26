@@ -52,6 +52,7 @@ let construct_deprec_wrapper_text
   ~params_text_list
   ~col_start
   ~is_async
+  ~is_static
   new_name =
   (* Since the starting column position points to the beginning of the function
       declaration header, we can use it to figure out the indentation level
@@ -66,12 +67,18 @@ let construct_deprec_wrapper_text
   let return_indentation = base_indentation ^ func_body_indentation in
   let parameter_input = String.concat ", " params_text_list in
   let maybe_await =
-    if is_async then "await "
+    if is_async
+    then "await "
     else ""
+  in
+  let this_or_self =
+    if is_static
+    then "self::"
+    else "$this->"
   in
   let return_statement =
     return_indentation ^
-    "return " ^ maybe_await ^ "$this->" ^
+    "return " ^ maybe_await ^ this_or_self ^
     new_name ^ "(" ^ parameter_input ^ ");"
   in
   "\n" ^ deprecated_header ^
@@ -116,7 +123,7 @@ let get_deprec_wrapper_patch ~filename ~definition new_name =
           }; _
       } ->
       let func_decl_text = text func_decl in
-      let params_text_list, is_async = match syntax func_decl with
+      let params_text_list, is_async, is_static = match syntax func_decl with
         | FunctionDeclarationHeader {
             function_parameter_list = params;
             function_modifiers = modifiers; _
@@ -149,24 +156,31 @@ let get_deprec_wrapper_patch ~filename ~definition new_name =
                 Some params_text_list
               | _ -> None
             in
-            let is_async = match syntax modifiers with
+            let is_async, is_static = match syntax modifiers with
               | SyntaxList modifiers ->
-                List.exists modifiers ~f:(fun modifier -> (text modifier) = "async")
-              | _ -> false
+                let is_async =
+                  List.exists modifiers ~f:(fun modifier -> (text modifier) = "async")
+                in
+                let is_static =
+                  List.exists modifiers ~f:(fun modifier -> (text modifier) = "static")
+                in
+                is_async, is_static
+              | _ -> false, false
             in
-            params_text_list, is_async
-        | _ -> None, false
+            params_text_list, is_async, is_static
+        | _ -> None, false, false
       in
       params_text_list >>= fun params_text_list ->
-      Some (func_decl_text, params_text_list, is_async)
+      Some (func_decl_text, params_text_list, is_async, is_static)
     | _ -> None
-  end >>| fun (func_decl_text, params_text_list, is_async) ->
+  end >>| fun (func_decl_text, params_text_list, is_async, is_static) ->
   let deprec_wrapper_text =
     construct_deprec_wrapper_text
       ~func_decl_text
       ~params_text_list
       ~col_start
       ~is_async
+      ~is_static
       new_name
   in
   let filename =

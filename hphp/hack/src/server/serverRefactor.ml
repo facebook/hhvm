@@ -196,20 +196,19 @@ let get_deprecated_wrapper_patch ~filename ~definition new_name =
 
 let go action genv env =
   let module Types = ServerCommandTypes.Find_refs in
-  let find_refs_action, new_name, deprecated_wrapper_patch = match action with
+  let find_refs_action, new_name = match action with
     | ClassRename (old_name, new_name) ->
-        Types.Class old_name, new_name, None
+        Types.Class old_name, new_name
     | ClassConstRename (class_name, old_name, new_name) ->
         Types.Member (class_name, Types.Class_const old_name),
-          new_name, None
-    | MethodRename { filename; definition; class_name; old_name; new_name } ->
+          new_name
+    | MethodRename { class_name; old_name; new_name; _ } ->
         Types.Member (class_name, Types.Method old_name),
-          new_name,
-          get_deprecated_wrapper_patch ~filename ~definition new_name
+          new_name
     | FunctionRename (old_name, new_name) ->
-        Types.Function old_name, new_name, None
+        Types.Function old_name, new_name
     | LocalVarRename { filename; file_content; line; char; new_name } ->
-        Types.LocalVar { filename; file_content; line; char }, new_name, None in
+        Types.LocalVar { filename; file_content; line; char }, new_name in
   let include_defs = true in
   let refs = ServerFindRefs.get_refs find_refs_action include_defs genv env in
   let changes = List.fold_left refs ~f:begin fun acc x ->
@@ -220,6 +219,14 @@ let go action genv env =
     let patch = Replace replacement in
     patch :: acc
   end ~init:[] in
+  let deprecated_wrapper_patch = match action with
+    | MethodRename { filename; definition; _ } ->
+      get_deprecated_wrapper_patch ~filename ~definition new_name
+    | FunctionRename _
+    | ClassRename _
+    | ClassConstRename _
+    | LocalVarRename _ -> None
+  in
   Option.value_map deprecated_wrapper_patch ~default:changes
     ~f:begin fun patch -> patch :: changes end
 

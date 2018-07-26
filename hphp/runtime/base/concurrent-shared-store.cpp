@@ -1087,9 +1087,11 @@ static void dumpOneKeyAndValue(std::ostream &out,
     if (!sval->expired()) {
       auto const value = sval->data().match(
         [&] (APCHandle* handle) {
+          out << "INMEMORY ";
           return handle->toLocal();
         },
         [&] (char* sAddr) {
+          out << "ONDISK ";
           // we need unserialize and serialize again because the format was
           // APCSerialize
           return apc_unserialize(sAddr, sval->getSerializedSize());

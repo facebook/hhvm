@@ -137,6 +137,8 @@ module type S = sig
   val format_string :
     Pos.t -> string -> string -> Pos.t -> string -> string -> unit
   val expected_literal_string : Pos.t -> unit
+  val re_prefixed_non_string : Pos.t -> string -> unit
+  val bad_regex_pattern : Pos.t -> string -> unit
   val generic_array_strict : Pos.t -> unit
   val strict_members_not_known : Pos.t -> string -> unit
   val option_return_only_typehint : Pos.t -> [< `void | `noreturn ] -> unit

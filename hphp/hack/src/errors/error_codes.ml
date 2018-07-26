@@ -497,6 +497,8 @@ module Typing                               = struct
   | CoroutineOutsideExperimental
   | PPLMethPointer
   | InvalidTruthinessTest
+  | RePrefixedNonString
+  | BadRegexPattern
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum

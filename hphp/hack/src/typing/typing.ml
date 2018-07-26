@@ -1666,8 +1666,21 @@ and expr_
         let env, te, ty = expr env e in
         let p = fst e in
         let env = SubType.sub_string p env ty in
-        make_result env (T.PrefixedString (n, te))
-          (Typing_regex.type_pattern e)
+        (match snd e with
+        | String _ ->
+            begin try make_result env (T.PrefixedString (n, te))
+              (Typing_regex.type_pattern e)
+            with Pcre.Error (Pcre.BadPattern (s, i)) ->
+              let s = s ^ " [" ^ (string_of_int i) ^ "]" in
+              Errors.bad_regex_pattern p s;
+              expr_error env p (Reason.Rregex p)
+            end
+        | String2 _ ->
+          Errors.re_prefixed_non_string p "Strings with embedded expressions";
+          expr_error env p (Reason.Rregex p)
+        | _ ->
+          Errors.re_prefixed_non_string p "Non-strings";
+          expr_error env p (Reason.Rregex p))
   | Fun_id x ->
       Typing_hooks.dispatch_id_hook x env;
       let env, fty = fun_type_of_id env x [] in

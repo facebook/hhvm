@@ -1,3 +1,7 @@
+Errors:
+  [24:13-34] Bad regex pattern; two named subpatterns have the same name [14].
+  [25:13-28] Bad regex pattern; group name must start with a non-digit [5].
+  [26:13-17] Bad regex pattern; \c at end of pattern [2].
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([3:15-19], (Hprim Tvoid))); f_name = ([3:10-11], "\\f");
@@ -76,5 +80,41 @@
          ];
        f_body =
        (NamedBody { Aast.AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
+  (Fun
+     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([22:15-19], (Hprim Tvoid)));
+       f_name = ([22:10-11], "\\g"); f_tparams = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+       f_body =
+       (NamedBody
+          { Aast.AnnotatedAST.fnb_nast =
+            [(Expr
+                (([23:3-31], HH\Lib\Regex\Pattern<shape('0' => string, '1' => string, 'o' => string)>),
+                 (Binop ((Eq None),
+                    (([23:3-9], HH\Lib\Regex\Pattern<shape('0' => string, '1' => string, 'o' => string)>),
+                     (Lvar ([23:3-9], $good0))),
+                    (([23:12-31], HH\Lib\Regex\Pattern<shape('0' => string, '1' => string, 'o' => string)>),
+                     (PrefixedString ("re",
+                        (([23:14-31], string), (String "Hel(\\D)(?'o'\\D)"))
+                        )))
+                    ))));
+              (Expr
+                 (([24:3-34], _),
+                  (Binop ((Eq None),
+                     (([24:3-8], _), (Lvar ([24:3-8], $bad1))),
+                     (([24:13-34], _), Any)))));
+              (Expr
+                 (([25:3-28], _),
+                  (Binop ((Eq None),
+                     (([25:3-8], _), (Lvar ([25:3-8], $bad2))),
+                     (([25:13-28], _), Any)))));
+              (Expr
+                 (([26:3-17], _),
+                  (Binop ((Eq None),
+                     (([26:3-8], _), (Lvar ([26:3-8], $bad3))),
+                     (([26:13-17], _), Any)))))
+              ];
+            fnb_unsafe = false });
        f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
   ]

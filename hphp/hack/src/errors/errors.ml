@@ -1769,6 +1769,14 @@ let expected_literal_string pos =
   add (Typing.err_code Typing.ExpectedLiteralString) pos
     "This argument must be a literal string"
 
+let re_prefixed_non_string pos non_strings =
+  add (Typing.err_code Typing.RePrefixedNonString) pos
+    (non_strings^" are not allowed to be to be `re`-prefixed")
+
+let bad_regex_pattern pos s =
+  add (Typing.err_code Typing.BadRegexPattern) pos
+    ("Bad regex pattern; "^s^".")
+
 let generic_array_strict p =
   add (Typing.err_code Typing.GenericArrayStrict) p
     "You cannot have an array without generics in strict mode"

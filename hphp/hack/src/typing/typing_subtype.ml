@@ -413,6 +413,10 @@ and simplify_subtype
   | (_, Tabstract (AKenum e_sub, _)), (_, Tabstract (AKenum e_super, _))
     when e_sub = e_super -> valid ()
 
+  | (_, Tabstract (AKenum enum_name, _)), (_, Tclass ((_, class_name), _))
+  | (_, Tclass ((_, class_name), _)), (_, Tabstract (AKenum enum_name, _))
+    when enum_name = class_name -> valid ()
+
   | (_, Tabstract ((AKenum _), _)), (_, (Tnonnull | Tprim Nast.Tarraykey)) ->
     valid ()
 
@@ -586,6 +590,13 @@ and simplify_subtype
       | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _
       | Tobject | Tclass _ | Tarraykind _)),
     (_, Tnonnull) -> valid ()
+
+  (* Any class type is a subtype of object *)
+  | (_, Tclass _), (_, Tobject) -> valid ()
+
+  (* Match what's done in unify for non-strict code *)
+  | (_, Tobject), (_, Tclass _) when not (Env.is_strict env) -> valid ()
+
   | (_, Tprim Nast.Tstring), (_, Tclass ((_, stringish), _))
       when stringish = SN.Classes.cStringish -> valid ()
   | (_, Tarraykind _), (_, Tclass ((_, xhp_child), _))
@@ -1259,6 +1270,38 @@ and sub_type_unwrapped_helper env ~this_ty
         end
         ~do_: (fun _ -> TUtils.simplified_uerror env ty_super ty_sub)
 
+  | (r_sub, _),
+    (_, Tabstract (AKdependent (expr_dep, _),
+      Some (_, Tclass ((_, x) as id, _) as ty_bound))) ->
+    let class_ = Env.get_class env x in
+    (* For final non-contravariant class C, there is no difference between
+     * `this as C<t1,...,tn>` and `C<t1,...,tn>`.
+     *)
+    begin match class_ with
+    | Some class_ty
+      when TUtils.class_is_final_and_not_contravariant class_ty ->
+      sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty_sub ty_bound
+    | _ ->
+      (Errors.try_when
+         (fun () -> TUtils.simplified_uerror env ty_super ty_sub)
+             ~when_: begin fun () ->
+               match snd ty_sub with
+               | Tclass ((_, y), _) -> y = x
+               | Tany | Terr | Tmixed | Tnonnull | Tarraykind _ | Tprim _
+               | Toption _ | Tvar _ | Tabstract (_, _) | Ttuple _
+               | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
+               | Tshape _ | Tdynamic -> false
+             end
+             ~do_: begin fun error ->
+               if expr_dep = `cls x then
+                 Errors.exact_class_final id (Reason.to_pos r_sub) error
+               else
+                 Errors.this_final id (Reason.to_pos r_sub) error
+             end
+          );
+          env
+    end
+
   | (p_sub, (Tclass (x_sub, tyl_sub))),
     (_, (Tclass (x_super, _tyl_super))) ->
     let cid_super, cid_sub = (snd x_super), (snd x_sub) in
@@ -1454,6 +1497,8 @@ and sub_type_unwrapped_helper env ~this_ty
       ~unwrappedToption_super ty_sub ty_super
 
   | _, _ ->
+    (* TODO: replace this by fail() once we support all subtyping rules that
+     * are implemented in unification *)
     fst (Unify.unify env ty_super ty_sub)
 
 and sub_generic_params

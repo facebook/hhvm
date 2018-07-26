@@ -154,6 +154,7 @@ let get_deprec_wrapper_patch ~filename ~definition new_name =
                     | _ -> failwith "Expected some parameter type"
                 end in
                 Some params_text_list
+              | Missing -> Some []
               | _ -> None
             in
             let is_async, is_static = match syntax modifiers with

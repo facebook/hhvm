@@ -232,6 +232,19 @@
               }
             },
             "newText": "some_other_method"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 11,
+                "character": 0
+              },
+              "end": {
+                "line": 11,
+                "character": 0
+              }
+            },
+            "newText": "\n  <<__Deprecated(\"Deprecated: Use `some_other_method` instead\")>>\n  public function test_method(): int {\n    return $this->some_other_method();\n  }\n"
           }
         ]
       }
@@ -424,54 +437,54 @@
     }
   },
   {
-  "jsonrpc": "2.0",
-  "id": 7,
-  "result": {
-    "changes": {
-      "${php_file_uri}": [
-        {
-          "range": {
-            "start": {
-              "line": 21,
-              "character": 18
+    "jsonrpc": "2.0",
+    "id": 7,
+    "result": {
+      "changes": {
+        "${php_file_uri}": [
+          {
+            "range": {
+              "start": {
+                "line": 21,
+                "character": 18
+              },
+              "end": {
+                "line": 21,
+                "character": 35
+              }
             },
-            "end": {
-              "line": 21,
-              "character": 35
-            }
+            "newText": "new_and_improved"
           },
-          "newText": "new_and_improved"
-        },
-        {
-          "range": {
-            "start": {
-              "line": 34,
-              "character": 22
+          {
+            "range": {
+              "start": {
+                "line": 34,
+                "character": 22
+              },
+              "end": {
+                "line": 34,
+                "character": 39
+              }
             },
-            "end": {
-              "line": 34,
-              "character": 39
-            }
+            "newText": "new_and_improved"
           },
-          "newText": "new_and_improved"
-        },
-        {
-          "range": {
-            "start": {
-              "line": 15,
-              "character": 0
+          {
+            "range": {
+              "start": {
+                "line": 15,
+                "character": 0
+              },
+              "end": {
+                "line": 15,
+                "character": 0
+              }
             },
-            "end": {
-              "line": 15,
-              "character": 0
-            }
-          },
-          "newText": "\n  <<__Deprecated(\"Deprecated: Use `new_and_improved` instead\")>>\n  public function deprecated_method(int $x, string $y, int $v, ...): int {\n    return $this->new_and_improved($x, $y, $v, ...Vec\\drop(func_get_args(), 3));\n  }\n"
-        }
-      ]
+            "newText": "\n  <<__Deprecated(\"Deprecated: Use `new_and_improved` instead\")>>\n  public function deprecated_method(int $x, string $y, int $v, ...): int {\n    return $this->new_and_improved($x, $y, $v, ...Vec\\drop(func_get_args(), 3));\n  }\n"
+          }
+        ]
+      }
     }
-  }
-},
+  },
   {
     "jsonrpc": "2.0",
     "id": 999,

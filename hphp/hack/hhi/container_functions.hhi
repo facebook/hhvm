@@ -15,7 +15,7 @@
  */
 
 <<__PHPStdLib, __Rx>>
-function array_key_exists<Tk, Tv>(mixed $key, ?KeyedContainer<Tk, Tv> $search): bool;
+function array_key_exists<Tk, Tv>(mixed $key, <<__MaybeMutable>> ?KeyedContainer<Tk, Tv> $search): bool;
 
 <<__PHPStdLib, __Rx>>
 function array_sum/*<T>*/(/*Container<T>*/ $input)/*: num*/;

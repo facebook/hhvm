@@ -30,13 +30,13 @@ function array_fill<T>(int $start_index, int $num, T $value): array<T>;
 <<__PHPStdLib, __Rx>>
 function chr(int $ascii): string;
 <<__PHPStdLib, __Rx>>
-function count(mixed $x, int $mode = COUNT_NORMAL): int; // count takes Countable or array. We'll need to hardcode this...
+function count(<<__MaybeMutable>> mixed $x, int $mode = COUNT_NORMAL): int; // count takes Countable or array. We'll need to hardcode this...
 <<__PHPStdLib, __Rx>>
 function dechex(int $number): string;
 <<__Rx>>
 function func_get_args(): varray;
 <<__PHPStdLib, __Rx>>
-function implode(string $glue, $pieces): string; // could be Container<Stringish>
+function implode(string $glue, <<__MaybeMutable>> $pieces): string; // could be Container<Stringish>
 <<__PHPStdLib, __Rx>>
 function explode(string $delimiter, ?Stringish $str, int $limit = 0x7FFFFFFF): array; // : array<string> & false for '' delimiter
 <<__Rx>>

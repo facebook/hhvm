@@ -2290,7 +2290,10 @@ module Make (GetLocals : GetLocals) = struct
           Errors.illegal_meth_fun p; N.Any
         | [_, String s] when genv.in_ppl && SN.PPLFunctions.is_reserved s ->
           Errors.ppl_meth_pointer p ("fun("^s^")"); N.Any
-        | [p, String x] -> N.Fun_id (Env.fun_id env (p, x))
+        | [p, String x] ->
+          (* Functions referenced by fun() are always fully-qualified. *)
+          let x = if x <> "" && x.[0] <> '\\' then "\\" ^ x else x in
+          N.Fun_id (Env.fun_id env (p, x))
         | [p, _] ->
             Errors.illegal_fun p;
             N.Any

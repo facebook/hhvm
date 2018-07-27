@@ -4692,14 +4692,16 @@ bool could_copy_on_write(const Type& t) {
 }
 
 bool is_type_might_raise(const Type& testTy, const Type& valTy) {
-  if (!RuntimeOption::EvalHackArrCompatIsArrayNotices) return false;
   if (is_opt(testTy)) return is_type_might_raise(unopt(testTy), valTy);
-  if (testTy.subtypeOf(BVArr)) return valTy.couldBe(BVec);
-  if (testTy.subtypeOf(BDArr)) return valTy.couldBe(BDict);
-  if (testTy.subtypeOf(BArr))  return valTy.couldBe(BVArr | BDArr | BVec |
-                                                    BDict | BKeyset);
-  if (testTy.subtypeOf(BVec))  return valTy.couldBe(BVArr);
-  if (testTy.subtypeOf(BDict)) return valTy.couldBe(BDArr);
+  if (RuntimeOption::EvalHackArrCompatIsArrayNotices) {
+    if (testTy.subtypeOf(BVArr)) return valTy.couldBe(BVec);
+    if (testTy.subtypeOf(BDArr)) return valTy.couldBe(BDict);
+    if (testTy.subtypeOf(BArr))  return valTy.couldBe(BVArr | BDArr | BVec |
+                                                      BDict | BKeyset);
+  } else if (RuntimeOption::EvalHackArrCompatIsVecDictNotices) {
+    if (testTy.subtypeOf(BVec))  return valTy.couldBe(BVArr);
+    if (testTy.subtypeOf(BDict)) return valTy.couldBe(BDArr);
+  }
   return false;
 }
 

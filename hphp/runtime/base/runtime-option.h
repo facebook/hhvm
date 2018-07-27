@@ -830,7 +830,10 @@ struct RuntimeOption {
   F(bool, HackArrCompatCheckFalseyPromote, false)                       \
   F(bool, HackArrCompatCheckCompare, false)                             \
   F(bool, HackArrCompatCheckMisc, false)                                \
+  /* Raise notices when is_array is called with any array-like type */  \
   F(bool, HackArrCompatIsArrayNotices, false)                           \
+  /* Raise notices when is_vec or is_dict  is called with a v/darray */ \
+  F(bool, HackArrCompatIsVecDictNotices, false)                         \
   F(bool, HackArrCompatPromoteNotices, false)                           \
   F(bool, HackArrCompatTypeHintNotices, false)                          \
   F(bool, HackArrCompatDVCmpNotices, false)                             \

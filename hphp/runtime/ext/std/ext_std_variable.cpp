@@ -145,7 +145,7 @@ bool HHVM_FUNCTION(is_array, const Variant& v) {
 }
 
 bool HHVM_FUNCTION(HH_is_vec, const Variant& v) {
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
     if (v.isPHPArray()) {
       auto const& arr = v.toCArrRef();
       if (arr.isVArray()) {
@@ -158,7 +158,7 @@ bool HHVM_FUNCTION(HH_is_vec, const Variant& v) {
 }
 
 bool HHVM_FUNCTION(HH_is_dict, const Variant& v) {
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
     if (v.isPHPArray()) {
       auto const& arr = v.toCArrRef();
       if (arr.isDArray()) {
@@ -176,7 +176,7 @@ bool HHVM_FUNCTION(HH_is_keyset, const Variant& v) {
 
 bool HHVM_FUNCTION(HH_is_varray, const Variant& val) {
   if (RuntimeOption::EvalHackArrDVArrs) return is_vec(val);
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
     if (val.isVecArray()) {
       raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_VARR);
       return false;
@@ -187,7 +187,7 @@ bool HHVM_FUNCTION(HH_is_varray, const Variant& val) {
 
 bool HHVM_FUNCTION(HH_is_darray, const Variant& val) {
   if (RuntimeOption::EvalHackArrDVArrs) return is_dict(val);
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
     if (val.isDict()) {
       raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_DARR);
       return false;

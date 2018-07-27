@@ -454,7 +454,7 @@ SSATmp* isDVArrayImpl(IRGS& env, SSATmp* val, IsTypeOp op) {
     },
     [&](SSATmp*) { return cns(env, true); },
     [&]{
-      if (RuntimeOption::EvalHackArrCompatIsArrayNotices) {
+      if (RuntimeOption::EvalHackArrCompatIsVecDictNotices) {
         ifElse(
           env,
           [&] (Block* taken) {
@@ -488,7 +488,7 @@ SSATmp* isDVArrayImpl(IRGS& env, SSATmp* val, IsTypeOp op) {
 }
 
 SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
-  if (!RuntimeOption::EvalHackArrCompatIsArrayNotices) {
+  if (!RuntimeOption::EvalHackArrCompatIsVecDictNotices) {
     return gen(env, IsType, TVec, src);
   }
 
@@ -523,7 +523,7 @@ SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
 }
 
 SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
-  if (!RuntimeOption::EvalHackArrCompatIsArrayNotices) {
+  if (!RuntimeOption::EvalHackArrCompatIsVecDictNotices) {
     return gen(env, IsType, TDict, src);
   }
 

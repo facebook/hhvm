@@ -4240,7 +4240,7 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
     }
     return is_array(tvAsCVarRef(val));
   case IsTypeOp::Vec:
-    if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
       if (isArrayType(val->m_type)) {
         if (val->m_data.parr->isVArray()) {
           raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VARR_IS_VEC);
@@ -4250,7 +4250,7 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
     }
     return is_vec(tvAsCVarRef(val));
   case IsTypeOp::Dict:
-    if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
       if (isArrayType(val->m_type)) {
         if (val->m_data.parr->isDArray()) {
           raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_DICT);
@@ -4267,7 +4267,7 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
   case IsTypeOp::ArrLike: return isArrayLikeType(val->m_type);
   case IsTypeOp::VArray:
     assertx(!RuntimeOption::EvalHackArrDVArrs);
-    if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
       if (isVecType(val->m_type)) {
         raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_VARR);
         return false;
@@ -4276,7 +4276,7 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
     return is_varray(tvAsCVarRef(val));
   case IsTypeOp::DArray:
     assertx(!RuntimeOption::EvalHackArrDVArrs);
-    if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
       if (isDictType(val->m_type)) {
         raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_DARR);
         return false;

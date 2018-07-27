@@ -1,1 +1,2 @@
 -vRuntime.Eval.HackArrCompatIsArrayNotices=true
+-vRuntime.Eval.HackArrCompatIsVecDictNotices=true

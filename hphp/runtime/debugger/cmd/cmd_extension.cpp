@@ -118,12 +118,15 @@ bool CmdExtension::processList(DebuggerProxy &proxy) {
   if (hrLen > DebuggerClient::LineWidth) hrLen = DebuggerClient::LineWidth;
 
   StringBuffer sb;
-  for (int i = 0; i < hrLen; i++) sb.append(BOX_H); sb.append("\n");
+  for (int i = 0; i < hrLen; i++) sb.append(BOX_H);
+  sb.append("\n");
   sb.append(StringUtil::Pad("Name\\Support", nameLen));
   sb.append("Info    Dump    Verb    Version\n");
-  for (int i = 0; i < hrLen; i++) sb.append(BOX_H); sb.append("\n");
+  for (int i = 0; i < hrLen; i++) sb.append(BOX_H);
+  sb.append("\n");
   sb.append(body);
-  for (int i = 0; i < hrLen; i++) sb.append(BOX_H); sb.append("\n");
+  for (int i = 0; i < hrLen; i++) sb.append(BOX_H);
+  sb.append("\n");
 
   m_out = sb.detach();
   return proxy.sendToClient(this);

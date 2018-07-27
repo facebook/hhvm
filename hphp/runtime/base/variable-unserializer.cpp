@@ -20,6 +20,7 @@
 
 #include <folly/Conv.h>
 #include <folly/Range.h>
+#include <folly/lang/Launder.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -626,7 +627,7 @@ void VariableUnserializer::unserializeRemainingProps(
         raise_error("Cannot access empty property");
       }
       // private or protected
-      subLen = strlen(kdata + 1) + 2;
+      subLen = strlen(folly::launder(kdata) + 1) + 2;
       if (UNLIKELY(subLen >= ksize)) {
         if (subLen == ksize) {
           raise_error("Cannot access empty property");
@@ -1074,7 +1075,7 @@ void VariableUnserializer::unserializeVariant(
                       raise_error("Cannot access empty property");
                     }
                     // private or protected
-                    auto subLen = strlen(kdata + 1) + 2;
+                    auto subLen = strlen(folly::launder(kdata) + 1) + 2;
                     if (UNLIKELY(subLen >= ksize)) {
                       if (subLen == ksize) {
                         raise_error("Cannot access empty property");

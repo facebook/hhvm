@@ -51,7 +51,7 @@ void verify_return_type(Type ret, const CallDest& dest, F fail) {
 
     // Some JIT types are much more specific than what we can express in C++,
     // so treat certain classes of types as equivalent.
-    static auto constexpr special_types = {
+    static std::array<Type, 6> constexpr special_types = {
       TPtrToGen,
       TLvalToGen,
       TBoxedInitCell,

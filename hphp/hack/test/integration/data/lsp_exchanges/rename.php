@@ -22,6 +22,19 @@ class TestClass { // 2. Rename TestClass
   public function deprecated_method(int $x, string $y, int $v, ...): int {
     return $x;
   }
+  // 8. Rename depr_static
+  public static function depr_static(int $x, string $y, int $v, ...): int {
+    return $x;
+  }
+
+  // 9. Rename depr_async
+  public async function depr_async(int $x, int $v, ...): Awaitable<int> {
+    return $x;
+  }
+
+  // 10. Rename depr_static_async
+  public static async function depr_static_async(int $x): Awaitable<void> {
+  }
 }
 
 function test_rename(): void {
@@ -40,8 +53,8 @@ async function async_test_rename(): Awaitable<int> {
 }
 
 async function call_test_rename(): Awaitable<int> {
-  test_rename(); // 8. Rename test_rename
-  return await async_test_rename(); // 9. Rename async_test_rename
+  test_rename(); // 11. Rename test_rename
+  return await async_test_rename(); // 12. Rename async_test_rename
 }
 
 function test_rename_localvar(int $local): void {      //  Should match

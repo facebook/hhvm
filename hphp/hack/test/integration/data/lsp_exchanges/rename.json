@@ -61,7 +61,7 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 29,
+        "line": 42,
         "character": 18
       },
       "newName": "some_other_method"
@@ -76,7 +76,7 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 31,
+        "line": 44,
         "character": 34
       },
       "newName": "ANOTHER_STR_CONSTANT"
@@ -91,7 +91,7 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 32,
+        "line": 45,
         "character": 39
       },
       "newName": "AVOGADRO_CONSTANT"
@@ -106,7 +106,7 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 50,
+        "line": 63,
         "character": 23
       },
       "newName": "kittens_and_rainbows"
@@ -121,7 +121,7 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 34,
+        "line": 47,
         "character": 29
       },
       "newName": "new_and_improved"
@@ -129,14 +129,59 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 8,
+     "id": 8,
+     "method": "textDocument/rename",
+     "params": {
+       "textDocument": {
+         "uri": "${php_file_uri}"
+       },
+       "position": {
+         "line": 25,
+         "character": 33
+       },
+       "newName": "new_static_method"
+     }
+   },
+   {
+     "jsonrpc": "2.0",
+     "id": 9,
+     "method": "textDocument/rename",
+     "params": {
+       "textDocument": {
+         "uri": "${php_file_uri}"
+       },
+       "position": {
+         "line": 30,
+         "character": 33
+       },
+       "newName": "new_async_method"
+     }
+   },
+  {
+    "jsonrpc": "2.0",
+     "id": 10,
+     "method": "textDocument/rename",
+     "params": {
+       "textDocument": {
+         "uri": "${php_file_uri}"
+       },
+       "position": {
+         "line": 35,
+         "character": 42
+       },
+       "newName": "new_static_async_method"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 11,
     "method": "textDocument/rename",
     "params": {
       "textDocument": {
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 42,
+        "line": 55,
         "character": 11
       },
       "newName": "new_test_rename_method"
@@ -144,14 +189,14 @@
   },
   {
     "jsonrpc": "2.0",
-    "id": 9,
+    "id": 12,
     "method": "textDocument/rename",
     "params": {
       "textDocument": {
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 43,
+        "line": 56,
         "character": 29
       },
       "newName": "new_async_test_rename_method"

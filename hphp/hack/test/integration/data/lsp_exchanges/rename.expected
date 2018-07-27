@@ -75,11 +75,11 @@
           {
             "range": {
               "start": {
-                "line": 30,
+                "line": 43,
                 "character": 22
               },
               "end": {
-                "line": 30,
+                "line": 43,
                 "character": 30
               }
             },
@@ -124,11 +124,11 @@
           {
             "range": {
               "start": {
-                "line": 32,
+                "line": 45,
                 "character": 19
               },
               "end": {
-                "line": 32,
+                "line": 45,
                 "character": 28
               }
             },
@@ -137,11 +137,11 @@
           {
             "range": {
               "start": {
-                "line": 31,
+                "line": 44,
                 "character": 15
               },
               "end": {
-                "line": 31,
+                "line": 44,
                 "character": 24
               }
             },
@@ -150,11 +150,11 @@
           {
             "range": {
               "start": {
-                "line": 30,
+                "line": 43,
                 "character": 11
               },
               "end": {
-                "line": 30,
+                "line": 43,
                 "character": 20
               }
             },
@@ -163,11 +163,11 @@
           {
             "range": {
               "start": {
-                "line": 27,
+                "line": 40,
                 "character": 20
               },
               "end": {
-                "line": 27,
+                "line": 40,
                 "character": 29
               }
             },
@@ -212,11 +212,11 @@
           {
             "range": {
               "start": {
-                "line": 29,
+                "line": 42,
                 "character": 43
               },
               "end": {
-                "line": 29,
+                "line": 42,
                 "character": 54
               }
             },
@@ -225,11 +225,11 @@
           {
             "range": {
               "start": {
-                "line": 29,
+                "line": 42,
                 "character": 15
               },
               "end": {
-                "line": 29,
+                "line": 42,
                 "character": 26
               }
             },
@@ -274,11 +274,11 @@
           {
             "range": {
               "start": {
-                "line": 31,
+                "line": 44,
                 "character": 26
               },
               "end": {
-                "line": 31,
+                "line": 44,
                 "character": 38
               }
             },
@@ -310,11 +310,11 @@
           {
             "range": {
               "start": {
-                "line": 32,
+                "line": 45,
                 "character": 30
               },
               "end": {
-                "line": 32,
+                "line": 45,
                 "character": 46
               }
             },
@@ -333,11 +333,11 @@
           {
             "range": {
               "start": {
-                "line": 46,
+                "line": 59,
                 "character": 34
               },
               "end": {
-                "line": 46,
+                "line": 59,
                 "character": 40
               }
             },
@@ -346,11 +346,11 @@
           {
             "range": {
               "start": {
-                "line": 47,
+                "line": 60,
                 "character": 2
               },
               "end": {
-                "line": 47,
+                "line": 60,
                 "character": 8
               }
             },
@@ -359,11 +359,11 @@
           {
             "range": {
               "start": {
-                "line": 48,
+                "line": 61,
                 "character": 4
               },
               "end": {
-                "line": 48,
+                "line": 61,
                 "character": 10
               }
             },
@@ -372,11 +372,11 @@
           {
             "range": {
               "start": {
-                "line": 48,
+                "line": 61,
                 "character": 14
               },
               "end": {
-                "line": 48,
+                "line": 61,
                 "character": 20
               }
             },
@@ -385,11 +385,11 @@
           {
             "range": {
               "start": {
-                "line": 48,
+                "line": 61,
                 "character": 32
               },
               "end": {
-                "line": 48,
+                "line": 61,
                 "character": 38
               }
             },
@@ -398,11 +398,11 @@
           {
             "range": {
               "start": {
-                "line": 50,
+                "line": 63,
                 "character": 20
               },
               "end": {
-                "line": 50,
+                "line": 63,
                 "character": 26
               }
             },
@@ -411,11 +411,11 @@
           {
             "range": {
               "start": {
-                "line": 53,
+                "line": 66,
                 "character": 30
               },
               "end": {
-                "line": 53,
+                "line": 66,
                 "character": 36
               }
             },
@@ -424,11 +424,11 @@
           {
             "range": {
               "start": {
-                "line": 54,
+                "line": 67,
                 "character": 11
               },
               "end": {
-                "line": 54,
+                "line": 67,
                 "character": 17
               }
             },
@@ -460,11 +460,11 @@
           {
             "range": {
               "start": {
-                "line": 34,
+                "line": 47,
                 "character": 22
               },
               "end": {
-                "line": 34,
+                "line": 47,
                 "character": 39
               }
             },
@@ -496,41 +496,28 @@
           {
             "range": {
               "start": {
-                "line": 26,
-                "character": 9
+                "line": 25,
+                "character": 25
               },
               "end": {
-                "line": 26,
-                "character": 20
+                "line": 25,
+                "character": 36
               }
             },
-            "newText": "new_test_rename_method"
+            "newText": "new_static_method"
           },
           {
             "range": {
               "start": {
-                "line": 42,
-                "character": 2
-              },
-              "end": {
-                "line": 42,
-                "character": 13
-              }
-            },
-            "newText": "new_test_rename_method"
-          },
-          {
-            "range": {
-              "start": {
-                "line": 25,
+                "line": 24,
                 "character": 0
               },
               "end": {
-                "line": 25,
+                "line": 24,
                 "character": 0
               }
             },
-            "newText": "\n<<__Deprecated(\"Deprecated: Use `new_test_rename_method` instead\")>>\nfunction test_rename(): void {\n  return new_test_rename_method();\n}\n"
+            "newText": "\n  <<__Deprecated(\"Deprecated: Use `new_static_method` instead\")>>\n  public static function depr_static(int $x, string $y, int $v, ...): int {\n    return self::new_static_method($x, $y, $v, ...Vec\\drop(func_get_args(), 3));\n  }\n"
           }
         ]
       }
@@ -545,37 +532,158 @@
           {
             "range": {
               "start": {
-                "line": 37,
-                "character": 15
+                "line": 30,
+                "character": 24
               },
               "end": {
-                "line": 37,
-                "character": 32
+                "line": 30,
+                "character": 34
               }
             },
-            "newText": "new_async_test_rename_method"
+            "newText": "new_async_method"
           },
           {
             "range": {
               "start": {
-                "line": 43,
-                "character": 15
-              },
-              "end": {
-                "line": 43,
-                "character": 32
-              }
-            },
-            "newText": "new_async_test_rename_method"
-          },
-          {
-            "range": {
-              "start": {
-                "line": 36,
+                "line": 28,
                 "character": 0
               },
               "end": {
-                "line": 36,
+                "line": 28,
+                "character": 0
+              }
+            },
+            "newText": "\n  <<__Deprecated(\"Deprecated: Use `new_async_method` instead\")>>\n  public async function depr_async(int $x, int $v, ...): Awaitable<int> {\n    return await $this->new_async_method($x, $v, ...Vec\\drop(func_get_args(), 2));\n  }\n"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 10,
+    "result": {
+      "changes": {
+        "${php_file_uri}": [
+          {
+            "range": {
+              "start": {
+                "line": 35,
+                "character": 31
+              },
+              "end": {
+                "line": 35,
+                "character": 48
+              }
+            },
+            "newText": "new_static_async_method"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 33,
+                "character": 0
+              },
+              "end": {
+                "line": 33,
+                "character": 0
+              }
+            },
+            "newText": "\n  <<__Deprecated(\"Deprecated: Use `new_static_async_method` instead\")>>\n  public static async function depr_static_async(int $x): Awaitable<void> {\n    return await self::new_static_async_method($x);\n  }\n"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 11,
+    "result": {
+      "changes": {
+        "${php_file_uri}": [
+          {
+            "range": {
+              "start": {
+                "line": 39,
+                "character": 9
+              },
+              "end": {
+                "line": 39,
+                "character": 20
+              }
+            },
+            "newText": "new_test_rename_method"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 55,
+                "character": 2
+              },
+              "end": {
+                "line": 55,
+                "character": 13
+              }
+            },
+            "newText": "new_test_rename_method"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 38,
+                "character": 0
+              },
+              "end": {
+                "line": 38,
+                "character": 0
+              }
+            },
+            "newText": "\n<<__Deprecated(\"Deprecated: Use `new_test_rename_method` instead\")>>\nfunction test_rename(): void {\n  return new_test_rename_method();\n}\n"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 12,
+    "result": {
+      "changes": {
+        "${php_file_uri}": [
+          {
+            "range": {
+              "start": {
+                "line": 50,
+                "character": 15
+              },
+              "end": {
+                "line": 50,
+                "character": 32
+              }
+            },
+            "newText": "new_async_test_rename_method"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 56,
+                "character": 15
+              },
+              "end": {
+                "line": 56,
+                "character": 32
+              }
+            },
+            "newText": "new_async_test_rename_method"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 49,
+                "character": 0
+              },
+              "end": {
+                "line": 49,
                 "character": 0
               }
             },

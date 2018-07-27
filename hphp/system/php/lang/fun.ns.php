@@ -100,41 +100,4 @@ function class_meth(string $class, string $method)
   return varray[$class, $method];
 }
 
-/**
- * Like `fun`, but with the purpose of calling an instance method on a specific
- * object.
- *
- * This function can only be used on public methods; for private or protected
- * methods, use a lambda instead.
- *
- * Example:
- *
- * ```
- * <?hh
- *  class C {
- *   public function isOdd(int $i): bool { return $i % 2 == 1; }
- *   private function filter(Vector<int> $data): Vector<int> {
- *     $callback = inst_meth($this, 'isOdd');
- *     return $data->filter($callback);
- *   }
- * }
- * ```
- *
- * See also:
- *  - [`fun`](/hack/reference/function/HH.fun/)
- *  - [`meth_caller`](/hack/reference/function/HH.meth_caller/)
- *  - [`class_meth`](/hack/reference/function/HH.class_meth/)
- *
- * @param $instance Any class object.
- * @param $method Method to call on `$instance`. Must be a constant string.
- * @return A callback which will call `$method` when invoked.
- *
- * @guide /hack/callables/special-functions
- */
-function inst_meth($instance, string $method)
-  /* : (function(<hack figures this>): <and this>) */ {
-  invariant(\is_object($instance), 'expecting an object');
-  return varray[$instance, $method];
-}
-
 }

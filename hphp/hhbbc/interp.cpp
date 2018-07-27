@@ -2900,6 +2900,13 @@ void in(ISS& env, const bc::ResolveFunc& op) {
   push(env, TFunc);
 }
 
+void in(ISS& env, const bc::ResolveObjMethod& op) {
+  // TODO (T29639296)
+  popC(env);
+  popC(env);
+  push(env, TVArr);
+}
+
 const StaticString s_nullFunc { "__SystemLib\\__86null" };
 
 void in(ISS& env, const bc::FPushObjMethodD& op) {

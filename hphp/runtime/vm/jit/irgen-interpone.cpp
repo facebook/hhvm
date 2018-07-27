@@ -120,6 +120,7 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutInt64:       return TInt;
     case OutArray:       return TArr;
     case OutArrayImm:    return TArr; // Should be StaticArr/Vec/Dict: t2124292
+    case OutVArray:      return RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
     case OutVec:         return TVec;
     case OutVecImm:      return TVec;
     case OutDict:        return TDict;

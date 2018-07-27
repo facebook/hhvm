@@ -4775,6 +4775,13 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
   if (isArrayLikeType(c1->m_type) || isStringType(c1->m_type)) {
     Variant v = Variant::wrap(*c1);
 
+    auto wrapInOutName = [&] (Cell* c, const StringData* mth) {
+      VArrayInit ai{2};
+      ai.append(c->m_data.parr->at(int64_t(0)));
+      ai.append(Variant::attach(appendSuffix(mth)));
+      return ai.toVariant();
+    };
+
     // Handle inout name mangling
     if (UNLIKELY(n)) {
       if (isStringType(c1->m_type)) {
@@ -4782,10 +4789,9 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
       } else if (c1->m_data.parr->size() == 2){
         auto s = c1->m_data.parr->at(1);
         if (isStringType(s.m_type)) {
-          VArrayInit ai{2};
-          ai.append(c1->m_data.parr->at(int64_t(0)));
-          ai.append(Variant::attach(appendSuffix(s.m_data.pstr)));
-          v = ai.toVariant();
+          v = wrapInOutName(c1, s.m_data.pstr);
+        } else if (isFuncType(s.m_type)) {
+          v = wrapInOutName(c1, s.m_data.pfunc->fullDisplayName());
         }
       }
     }
@@ -4795,6 +4801,9 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
     //   array('Class', 'method'),
     //   vec[$instance, 'method'],
     //   vec['Class', 'method'],
+    //   array(Class*, Func*),
+    //   array(ObjectData*, Func*),
+    //   Func*,
     //   'func_name'
     //   'class::method'
     // which are all valid callables
@@ -4953,6 +4962,16 @@ void fPushNullObjMethod(int numArgs) {
   ar->setDynamicCall();
 }
 
+static void raise_resolve_non_object(const char* methodName,
+                                     const char* typeName = nullptr) {
+  auto const msg = folly::sformat(
+    "Cannot resolve a member function {}() on a non-object ({})",
+    methodName, typeName
+  );
+
+  raise_fatal_error(msg.c_str());
+}
+
 static void throw_call_non_object(const char* methodName,
                                   const char* typeName = nullptr) {
   std::string msg;
@@ -5022,6 +5041,56 @@ iopFPushObjMethodD(uint32_t numArgs, const StringData* name, ObjMethodOp op) {
   // We handle decReffing obj in fPushObjMethodImpl
   vmStack().discard();
   fPushObjMethodImpl(const_cast<StringData*>(name), obj, numArgs, false);
+}
+
+OPTBLD_INLINE void iopResolveObjMethod() {
+  Cell* c1 = vmStack().topC();
+  Cell* c2 = vmStack().indC(1);
+  if (!isStringType(c1->m_type)) {
+    raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
+  }
+  auto name = c1->m_data.pstr;
+  if (!isObjectType(c2->m_type)) {
+    raise_resolve_non_object(name->data(),
+                             getDataTypeString(c2->m_type).get()->data());
+  }
+  ObjectData* thiz = nullptr;
+  HPHP::Class* cls = nullptr;
+  StringData* invName = nullptr;
+  bool dynamic = false;
+  VArrayInit ai{2};
+  ai.append(cellAsVariant(*c2));
+  ai.append(cellAsVariant(*c1));
+  auto arr = ai.toArray();
+  auto const func = vm_decode_function(
+    Variant{arr},
+    vmfp(),
+    /* forwarding */ false,
+    thiz,
+    cls,
+    invName,
+    dynamic,
+    DecodeFlags::NoWarn
+  );
+  assertx(dynamic);
+  if (!func) raise_error("Failure to resolve method name \'%s\'", name->data());
+  if (invName) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Unable to resolve magic call for inst_meth()"
+    );
+  }
+  if (!thiz) {
+    assertx(cls);
+    arr.set(int64_t(0), Variant{cls});
+  }
+  arr.set(1, Variant{func});
+  vmStack().popC();
+  vmStack().popC();
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    vmStack().pushVecNoRc(arr.detach());
+  } else {
+    vmStack().pushArrayNoRc(arr.detach());
+  }
 }
 
 namespace {

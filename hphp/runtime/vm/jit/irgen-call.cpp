@@ -106,13 +106,13 @@ const Func* findInterfaceMethod(const Class* iface,
   return nullptr;
 }
 
-void fpushObjMethodExactFunc(
+SSATmp* lookupObjMethodExactFunc(
   IRGS& env,
   SSATmp* obj,
   const Class* exactClass,
   const Func* func,
   const StringData* methodName,
-  uint32_t numParams
+  SSATmp*& objOrCls
 ) {
   /*
    * lookupImmutableMethod will return Funcs from AttrUnique classes, but in
@@ -120,28 +120,21 @@ void fpushObjMethodExactFunc(
    * exists.
    *
    * Static function: store base class into this slot instead of obj and decref
-   * the obj that was pushed as the this pointer since the obj won't be in the
-   * actrec and thus MethodCache::lookup won't decref it.
+   * the obj that was pushed as the this pointer since the obj won't be owned by
+   * the runtime and thus MethodCache::lookup won't decref it.
    *
    * Static closure body: we still need to pass the object instance for the
    * closure prologue to properly do its dispatch (and extract use vars). It
-   * will decref it and put the class on the actrec before entering the "real"
-   * cloned closure body.
+   * will decref it and set up the alternative class pointer before entering the
+   * "real" cloned closure body.
    */
-  SSATmp* objOrCls = obj;
+  objOrCls = obj;
   implIncStat(env, Stats::ObjMethod_known);
   if (func->isStaticInPrologue()) {
     objOrCls = exactClass ? cns(env, exactClass) : gen(env, LdObjClass, obj);
     decRef(env, obj);
   }
-  fpushActRec(
-    env,
-    cns(env, func),
-    objOrCls,
-    numParams,
-    methodName,
-    cns(env, false)
-  );
+  return cns(env, func);
 }
 
 const Func*
@@ -153,11 +146,11 @@ lookupInterfaceFuncForFPushObjMethod(IRGS& /*env*/, const Class* baseClass,
   return findInterfaceMethod(baseClass, methodName);
 }
 
-void fpushObjMethodInterfaceFunc(
+SSATmp* lookupObjMethodInterfaceFunc(
   IRGS& env,
   SSATmp* obj,
   const Func* ifaceFunc,
-  int32_t numParams
+  SSATmp*& objOrCls
 ) {
   auto const vtableSlot = ifaceFunc->cls()->preClass()->ifaceVtableSlot();
 
@@ -166,46 +159,65 @@ void fpushObjMethodInterfaceFunc(
   auto func = gen(env, LdIfaceMethod,
                   IfaceMethodData{vtableSlot, ifaceFunc->methodSlot()},
                   cls);
-  SSATmp* objOrCls = obj;
+  objOrCls = obj;
   if (ifaceFunc->attrs() & AttrStatic) {
     decRef(env, obj);
     objOrCls = cls;
   }
-  fpushActRec(
-    env,
-    func,
-    objOrCls,
-    numParams,
-    /* invName */nullptr,
-    cns(env, false)
-  );
-  return;
+  return func;
 }
 
-void fpushObjMethodNonExactFunc(IRGS& env, SSATmp* obj,
-                                const Class* /*baseClass*/, const Func* func,
-                                uint32_t numParams) {
+SSATmp* lookupObjMethodNonExactFunc(IRGS& env, SSATmp* obj,
+                                    const Class* /*baseClass*/,
+                                    const Func* func,
+                                    SSATmp*& objOrCls) {
   implIncStat(env, Stats::ObjMethod_methodslot);
   auto const clsTmp = gen(env, LdObjClass, obj);
-  auto const funcTmp = gen(
+  auto funcTmp = gen(
     env,
     LdClsMethod,
     clsTmp,
     cns(env, -(func->methodSlot() + 1))
   );
-  SSATmp* objOrCls = obj;
+  objOrCls = obj;
   if (func->isStaticInPrologue()) {
     decRef(env, obj);
     objOrCls = clsTmp;
   }
-  fpushActRec(
-    env,
-    funcTmp,
-    objOrCls,
-    numParams,
-    /* invName */nullptr,
-    cns(env, false)
-  );
+  return funcTmp;
+}
+
+SSATmp* lookupObjMethodWithBaseClass(
+  IRGS& env,
+  SSATmp* obj,
+  const Class* baseClass,
+  const StringData* methodName,
+  bool exactClass,
+  SSATmp*& objOrCls,
+  bool& magicCall
+) {
+  magicCall = false;
+  if (auto const func = lookupImmutableMethod(
+        baseClass, methodName, magicCall,
+        /* staticLookup: */ false, curFunc(env), exactClass)) {
+    if (exactClass ||
+        func->attrs() & AttrPrivate ||
+        func->isImmutableFrom(baseClass)) {
+      return lookupObjMethodExactFunc(env, obj,
+                                      exactClass ? baseClass : nullptr,
+                                      func,
+                                      magicCall ? methodName : nullptr,
+                                      objOrCls);
+    }
+    return lookupObjMethodNonExactFunc(env, obj, baseClass, func, objOrCls);
+  }
+
+  if (auto const func =
+      lookupInterfaceFuncForFPushObjMethod(env, baseClass, methodName)) {
+    return lookupObjMethodInterfaceFunc(env, obj, func, objOrCls);
+  }
+
+  return nullptr;
 }
 
 void fpushObjMethodWithBaseClass(
@@ -218,26 +230,12 @@ void fpushObjMethodWithBaseClass(
   bool exactClass
 ) {
   bool magicCall = false;
-  if (auto const func = lookupImmutableMethod(
-        baseClass, methodName, magicCall,
-        /* staticLookup: */ false, curFunc(env), exactClass)) {
-    if (exactClass ||
-        func->attrs() & AttrPrivate ||
-        func->isImmutableFrom(baseClass)) {
-      fpushObjMethodExactFunc(env, obj,
-                              exactClass ? baseClass : nullptr,
-                              func,
-                              magicCall ? methodName : nullptr,
-                              numParams);
-      return;
-    }
-    fpushObjMethodNonExactFunc(env, obj, baseClass, func, numParams);
-    return;
-  }
-
-  if (auto const func =
-      lookupInterfaceFuncForFPushObjMethod(env, baseClass, methodName)) {
-    fpushObjMethodInterfaceFunc(env, obj, func, numParams);
+  SSATmp* objOrCls = nullptr;
+  if (auto func = lookupObjMethodWithBaseClass(
+        env, obj, baseClass, methodName, exactClass,
+        objOrCls, magicCall)) {
+    fpushActRec(env, func, objOrCls, numParams,
+                magicCall ? methodName : nullptr, cns(env, false));
     return;
   }
 
@@ -1163,6 +1161,43 @@ void emitFPushClsMethodD(IRGS& env,
               numParams,
               nullptr,
               cns(env, false));
+}
+
+const StaticString s_resolveMagicCall(
+  "Unable to resolve magic call for inst_meth()");
+
+void emitResolveObjMethod(IRGS& env) {
+  auto const name = topC(env, BCSPRelOffset { 0 });
+  auto const obj = topC(env, BCSPRelOffset { 1 });
+  if (!(obj->type() <= TObj) || !(name->type() <= TStr)) {
+    PUNT(ResolveObjMethod-nonObjStr);
+  }
+  if (!name->hasConstVal()) PUNT(ResolveObjMethod-nonConstStr);
+  auto cls = obj->type().clsSpec().cls();
+  if (!cls || env.irb->constrainValue(obj, GuardConstraint(cls).setWeak())) {
+    PUNT(ResolveObjMethod-unknownClass);
+  }
+  auto const exactClass = obj->type().clsSpec().exact() ||
+                    cls->attrs() & AttrNoOverride;
+  auto const methodName = name->strVal();
+  bool magicCall = false;
+  SSATmp* objOrCls = nullptr;
+  if (auto funcTmp = lookupObjMethodWithBaseClass(env, obj, cls, methodName,
+        exactClass, objOrCls, magicCall)) {
+    if (magicCall) {
+      gen(env, ThrowInvalidOperation, cns(env, s_resolveMagicCall.get()));
+      return;
+    }
+    auto methPair = gen(env, AllocVArray, PackedArrayData { 2 });
+    gen(env, InitPackedLayoutArray, IndexData { 0 }, methPair, objOrCls);
+    gen(env, InitPackedLayoutArray, IndexData { 1 }, methPair, funcTmp);
+    decRef(env, name);
+    popC(env);
+    popC(env);
+    push(env, methPair);
+    return;
+  }
+  PUNT(ResolveObjMethod-unkownObjMethod);
 }
 
 namespace {

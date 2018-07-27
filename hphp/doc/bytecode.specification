@@ -4247,6 +4247,14 @@ ResolveFunc <litstr id>   []  ->  [C]
   Resolve %1 as a function name to a function pointer value, then push the
   pointer onto the top of stack. When resolution fails, raise an error.
 
+ResolveObjMethod [C C] -> [C]
+
+  Resolve $1 as a method of $2 to a method array, then push the array onto the
+  top of stack. When $1 represents a class method of $2, the first element of
+  the resulting array is the class pointer of $2, otherwise the first element is
+  always $2. Fatal if the function resolves to a magic __call method. When
+  resolution fails, raise an error.
+
 15. Async functions
 -------------------
 

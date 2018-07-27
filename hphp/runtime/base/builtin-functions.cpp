@@ -102,7 +102,7 @@ bool array_is_valid_callback(const Array& arr) {
     return false;
   }
   auto const elem1 = arr.rvalAt(1).unboxed();
-  if (!isStringType(elem1.type())) {
+  if (!isStringType(elem1.type()) && !isFuncType(elem1.type())) {
     return false;
   }
   return true;
@@ -153,7 +153,7 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
 
     if (arr.size() != 2 ||
         clsname.is_dummy() ||
-        !isStringType(mthname.type())) {
+        (!isStringType(mthname.type()) && !isFuncType(mthname.type()))) {
       if (name) *name->var() = array_string;
       return false;
     }
@@ -163,9 +163,19 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
       clsString = clsname.val().pobj->getClassName().get();
     } else if (isStringType(clsname.type())) {
       clsString = clsname.val().pstr;
+    } else if (isClassType(clsname.type())) {
+      clsString = const_cast<StringData*>(clsname.val().pclass->name());
     } else {
       if (name) *name->var() = array_string;
       return false;
+    }
+
+    if (isFuncType(mthname.type())) {
+      if (name) {
+        *name->var() = Variant{mthname.val().pfunc->fullDisplayName(),
+                               Variant::PersistentStrInit{}};
+      }
+      return true;
     }
 
     if (name) {
@@ -242,12 +252,28 @@ vm_decode_function(const_variant_ref function,
         }
         return nullptr;
       }
+
+      Variant elem0 = arr[0];
       Variant elem1 = arr[1];
+      if (elem1.isFunc()) {
+        if (elem0.isObject()) {
+          this_ = elem0.getObjectData();
+          cls = this_->getVMClass();
+        } else if (elem0.isClass()) {
+          cls = elem0.toClassVal();
+        } else {
+          raise_error("calling an ill-formed array without resolved "
+                      "object/class pointer");
+          return nullptr;
+        }
+        return elem1.toFuncVal();
+      }
+
+      assertx(elem1.isString());
       name = elem1.toString();
       pos = name.find("::");
       nameContainsClass =
         (pos != 0 && pos != String::npos && pos + 2 < name.size());
-      Variant elem0 = arr[0];
       if (elem0.isString()) {
         String sclass = elem0.toString();
         if (sclass.get()->isame(s_self.get())) {

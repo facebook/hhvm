@@ -59,7 +59,7 @@ union Value {
   RefData*      pref;   // KindOfRef
   MaybeCountable* pcnt; // for alias-safe generic refcounting operations
   MemoCacheBase* pcache; // Not valid except when in a MemoSlot
-  Func*         pfunc;  // KindOfFunc
+  const Func*   pfunc;  // KindOfFunc
   Class*        pclass; // KindOfClass
 };
 

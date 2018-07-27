@@ -32,7 +32,7 @@ namespace HPHP {
 bool cellIsPlausible(const Cell cell) {
   assertx(!isRefType(cell.m_type));
 
-  auto assertPtr = [](void* ptr) {
+  auto assertPtr = [](const void* ptr) {
     assertx(ptr && (uintptr_t(ptr) % sizeof(ptr) == 0));
   };
 

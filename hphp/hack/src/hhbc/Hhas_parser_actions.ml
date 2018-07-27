@@ -937,6 +937,7 @@ let makeunaryinst s arg = match s with
    | "FThrowOnRefMismatch" -> ICall(FThrowOnRefMismatch (listofboolofiarg arg))
    | "RetM" -> IContFlow(RetM (intofiarg arg))
    | "ResolveFunc" -> IOp(ResolveFunc (function_id_of_iarg arg))
+   | "ResolveObjMethod" -> IOp (ResolveObjMethod)
 
    (* instruct_base *)
    | "BaseC" -> IBase(BaseC (intofiarg arg))

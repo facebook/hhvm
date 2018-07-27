@@ -35,6 +35,9 @@ var_dump(meth_caller('HH\Vector', 'count')->getClassName());
 var_dump(meth_caller('HH\Vector', 'count')->getMethodName());
 
 class C {
+  function __construct() {
+    $this->th = 'th';
+  }
   public static function isOdd($i) { return $i % 2 == 1;}
   public function filter($data)  {
     $callback = inst_meth($this, 'isOdd');
@@ -47,6 +50,11 @@ class C {
 
   public function ref(&$x = null) {
     return 0;
+  }
+
+  public function meth(inout string $x) {
+    $x = $x . $this->th;
+    return "inst_" . $x;
   }
 }
 
@@ -63,6 +71,12 @@ $caller = meth_caller(C::class, 'ref');
 $x = 1;
 var_dump($caller(new C()));
 var_dump($caller(new C(), $x));
+
+$c = new C();
+$meth = inst_meth($c, 'meth');
+$str = 'me';
+var_dump($meth(inout $str));
+var_dump($str);
 
 print_r($f);
 var_export($f);

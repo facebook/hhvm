@@ -299,6 +299,12 @@ struct Variant : private TypedValue {
     }
   }
 
+  explicit Variant(const Func* f) noexcept {
+    assertx(f);
+    m_type = KindOfFunc;
+    m_data.pfunc = f;
+  }
+
   template <typename T>
   explicit Variant(const req::ptr<T>& ptr) : Variant(ptr.get()) { }
   template <typename T>
@@ -1089,6 +1095,9 @@ struct Variant : private TypedValue {
     return ObjNR(getObjectData());
   }
 
+  auto toFuncVal() const {
+    return const_variant_ref{*this}.toFuncVal();
+  }
   auto toClassVal() const {
     return const_variant_ref{*this}.toClassVal();
   }

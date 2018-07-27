@@ -1,0 +1,6 @@
+File "option_awaitable.php", line 5, characters 10-29:
+Invalid return type (Typing[4110])
+File "option_awaitable.php", line 4, characters 60-62:
+This is an int
+File "option_awaitable.php", line 5, characters 26-29:
+It is incompatible with void

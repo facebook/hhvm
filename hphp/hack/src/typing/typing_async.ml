@@ -73,7 +73,7 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
     let env, ty = TUtils.non_null env ty in
     env, (r, Toption ty)
   | r, Tprim Nast.Tvoid when TUtils.is_void_type_of_null env ->
-    overload_extract_from_awaitable env p (r, Tany)
+    env, (r, Tprim Nast.Tvoid)
   | _, Tdynamic -> (* Awaiting a dynamic results in a new dynamic *)
     env, (r, Tdynamic)
   | _, (Terr | Tany | Tmixed | Tarraykind _ | Tnonnull | Tprim _

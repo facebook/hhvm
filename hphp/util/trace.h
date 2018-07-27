@@ -313,7 +313,7 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-#if (defined(DEBUG) || defined(USE_TRACE)) /* { */
+#if (!defined(NDEBUG) || defined(USE_TRACE)) /* { */
 #  ifndef USE_TRACE
 #    define USE_TRACE 1
 #  endif
@@ -399,7 +399,7 @@ void setTraceThread(const std::string& traceSpec);
 
 //////////////////////////////////////////////////////////////////////
 
-#else /* } (defined(DEBUG) || defined(USE_TRACE)) { */
+#else /* } (!defined(NDEBUG) || defined(USE_TRACE)) { */
 
 //////////////////////////////////////////////////////////////////////
 /*
@@ -450,7 +450,7 @@ inline void setTraceThread(const std::string& /*traceSpec*/) {}
 
 //////////////////////////////////////////////////////////////////////
 
-#endif /* } (defined(DEBUG) || defined(USE_TRACE)) */
+#endif /* } (!defined(NDEBUG) || defined(USE_TRACE)) */
 
 } // Trace
 

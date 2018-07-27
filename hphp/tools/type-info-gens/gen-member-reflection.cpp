@@ -42,7 +42,7 @@ const std::string kProgramDescription =
   "Generate member reflection helpers from debug-info";
 
 constexpr bool actually_run =
-#if !defined(DEBUG) || defined(HHVM_ENABLE_MEMBER_REFLECTION)
+#if defined(NDEBUG) || defined(HHVM_ENABLE_MEMBER_REFLECTION)
   true;
 #else
   false;

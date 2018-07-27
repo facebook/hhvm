@@ -1407,7 +1407,7 @@ public:
   // Do not re-order without checking perf!
 
 private:
-#ifdef DEBUG
+#ifndef NDEBUG
   // For asserts only.
   int m_magic;
 #endif

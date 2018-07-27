@@ -32,7 +32,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 constexpr bool debug =
-#ifdef DEBUG
+#ifndef NDEBUG
   true
 #else
   false

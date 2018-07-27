@@ -56,7 +56,7 @@
 static void
 debug (const char *format,...)
 {
-#ifdef DEBUG
+#ifndef NDEBUG
   va_list args;
 
   va_start (args, format);
@@ -173,7 +173,7 @@ DetectKanjiCode (unsigned char *str)
   }
     }
 
-#ifdef DEBUG
+#ifndef NDEBUG
   if (whatcode == ASCII)
     debug ("Kanji code not included.");
   else if (whatcode == EUCORSJIS)

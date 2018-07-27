@@ -19,7 +19,7 @@
 
 #include <signal.h>
 
-#ifdef DEBUG
+#ifndef NDEBUG
 
 /*
  * Conditionally drop into the debugger

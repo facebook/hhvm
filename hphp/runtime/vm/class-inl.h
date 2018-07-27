@@ -30,7 +30,7 @@ inline bool Class::isZombie() const {
 
 
 inline bool Class::validate() const {
-#ifdef DEBUG
+#ifndef NDEBUG
   assertx(m_magic == kMagic);
 #endif
   assertx(name()->checkSane());

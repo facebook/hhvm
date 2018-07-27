@@ -59,7 +59,7 @@ KeysetInit::KeysetInit(size_t n, CheckAllocation)
 
 DArrayInit::DArrayInit(size_t n, CheckAllocation)
     : m_arr{nullptr}
-#ifdef DEBUG
+#ifndef NDEBUG
     , m_addCount(0)
     , m_expectedCount(n)
 #endif

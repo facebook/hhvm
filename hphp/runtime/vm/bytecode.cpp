@@ -139,7 +139,7 @@ using jit::TCA;
 
 // GCC 4.8 has some real problems with all the inlining in this file, so don't
 // go overboard with that version.
-#if DEBUG || ((__GNUC__ == 4) && (__GNUC_MINOR__ == 8))
+#if !defined(NDEBUG) || ((__GNUC__ == 4) && (__GNUC_MINOR__ == 8))
 #define OPTBLD_INLINE
 #define OPTBLD_FLT_INLINE
 #else

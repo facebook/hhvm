@@ -1431,7 +1431,7 @@ public:
 private:
   static constexpr uint32_t kMagic = 0xce7adb33;
 
-#ifdef DEBUG
+#ifndef NDEBUG
   // For asserts only.
   uint32_t m_magic;
 #endif

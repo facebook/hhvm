@@ -91,7 +91,7 @@ inline const void* Func::mallocEnd() const {
 }
 
 inline bool Func::validate() const {
-#ifdef DEBUG
+#ifndef NDEBUG
   assertx(m_magic == kMagic);
 #endif
   assertx(m_name != nullptr);
@@ -307,7 +307,7 @@ inline uint32_t Func::numNonVariadicParams() const {
 }
 
 inline bool Func::hasVariadicCaptureParam() const {
-#ifdef DEBUG
+#ifndef NDEBUG
   assertx(bool(m_attrs & AttrVariadicParam) ==
          (numParams() && params()[numParams() - 1].variadic));
 #endif

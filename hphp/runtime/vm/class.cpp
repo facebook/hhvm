@@ -215,7 +215,7 @@ template<size_t sz>
 struct assert_sizeof_class {
   // If this static_assert fails, the compiler error will have the real value
   // of sizeof_Class in it since it's in this struct's type.
-#ifdef DEBUG
+#ifndef NDEBUG
   static_assert(sz == (use_lowptr ? 268 : 312), "Change this only on purpose");
 #else
   static_assert(sz == (use_lowptr ? 260 : 304), "Change this only on purpose");
@@ -495,7 +495,7 @@ Class::~Class() {
     low_free(p);
   }
 
-#ifdef DEBUG
+#ifndef NDEBUG
   validate();
   m_magic = ~m_magic;
 #endif
@@ -1749,7 +1749,7 @@ void checkDeclarationCompat(const PreClass* preClass,
 Class::Class(PreClass* preClass, Class* parent,
              CompactVector<ClassPtr>&& usedTraits,
              unsigned classVecLen, unsigned funcVecLen)
-#ifdef DEBUG
+#ifndef NDEBUG
   : m_magic{kMagic}
   , m_parent(parent)
 #else

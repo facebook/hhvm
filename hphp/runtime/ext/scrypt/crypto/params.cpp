@@ -90,7 +90,7 @@ pickparams(size_t maxmem, double maxmemfrac, double maxtime,
    * limit requires that 4Nrp <= opslimit.  If opslimit < memlimit/32,
    * opslimit imposes the stronger limit on N.
    */
-#ifdef DEBUG
+#ifndef NDEBUG
   fprintf(stderr, "Requiring 128Nr <= %zu, 4Nrp <= %f\n",
       memlimit, opslimit);
 #endif
@@ -117,7 +117,7 @@ pickparams(size_t maxmem, double maxmemfrac, double maxtime,
     *p = (uint32_t)(maxrp) / *r;
   }
 
-#ifdef DEBUG
+#ifndef NDEBUG
   fprintf(stderr, "N = %zu r = %d p = %d\n",
       (size_t)(1) << *logN, (int)(*r), (int)(*p));
 #endif
@@ -235,7 +235,7 @@ scryptenc_cpuperf(double * opps)
   if (getclockres(&resd))
     return 2;
 
-#ifdef DEBUG
+#ifndef NDEBUG
   fprintf(stderr, "Clock resolution is %f\n", resd);
 #endif
 
@@ -272,7 +272,7 @@ scryptenc_cpuperf(double * opps)
       break;
   } while (1);
 
-#ifdef DEBUG
+#ifndef NDEBUG
   fprintf(stderr, "%ju salsa20/8 cores performed in %f seconds\n",
       (uintmax_t)i, diffd);
 #endif
@@ -460,7 +460,7 @@ memtouse(size_t maxmem, double maxmemfrac, size_t * memlimit)
     return 1;
 #endif
 
-#ifdef DEBUG
+#ifndef NDEBUG
   fprintf(stderr, "Memory limits are %zu %zu %zu %zu\n",
       sysctl_memlimit, sysinfo_memlimit, rlimit_memlimit,
       sysconf_memlimit);
@@ -490,7 +490,7 @@ memtouse(size_t maxmem, double maxmemfrac, size_t * memlimit)
   if (memavail < 1048576)
     memavail = 1048576;
 
-#ifdef DEBUG
+#ifndef NDEBUG
   fprintf(stderr, "Allowing up to %zu memory to be used\n", memavail);
 #endif
 

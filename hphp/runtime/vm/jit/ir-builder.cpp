@@ -167,7 +167,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
 
   assertx(IMPLIES(inst->isBlockEnd(), where == m_curBlock->end()) &&
          "Can't insert a BlockEnd instruction in the middle of a block");
-  if (do_assert && where != m_curBlock->begin()) {
+  if (debug && where != m_curBlock->begin()) {
     UNUSED auto prevIt = where;
     --prevIt;
     assertx(!prevIt->isBlockEnd() &&
@@ -982,7 +982,7 @@ void IRBuilder::pushBlock(BCMarker marker, Block* b) {
   m_curBlock = b;
   m_curBCContext = BCContext { marker, 0 };
 
-  if (do_assert) {
+  if (debug) {
     for (UNUSED auto const& state : m_savedBlocks) {
       assertx(state.block != b &&
              "Can't push a block that's already in the saved stack");

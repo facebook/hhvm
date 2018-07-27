@@ -41,7 +41,7 @@ static void allocAndJoin(size_t size, bool free) {
 TEST(MemoryManager, OnThreadExit) {
   allocAndJoin(42, true);
   allocAndJoin(kMaxSmallSize + 1, true);
-#ifdef DEBUG
+#ifndef NDEBUG
   EXPECT_DEATH(allocAndJoin(42, false), "");
   EXPECT_DEATH(allocAndJoin(kMaxSmallSize + 1, false), "");
 #endif

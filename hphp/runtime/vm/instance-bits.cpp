@@ -120,7 +120,7 @@ void initImpl(F&& func) {
     g_initFlag.store(true, std::memory_order_release);
     return;
   }
-  if (do_assert) s_initThread.store(pthread_self(), std::memory_order_release);
+  if (debug) s_initThread.store(pthread_self(), std::memory_order_release);
 
   func();
 
@@ -133,7 +133,7 @@ void initImpl(F&& func) {
     cls->setInstanceBitsAndParents();
   });
 
-  if (do_assert) {
+  if (debug) {
     // There isn't a canonical invalid pthread_t, but this is only used for the
     // assert in lookup() and it's ok to have false negatives.
     s_initThread.store(pthread_t{}, std::memory_order_release);

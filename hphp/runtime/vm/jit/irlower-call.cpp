@@ -151,7 +151,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   if (isNativeImplCall) {
     // The assumption here is that for builtins, the generated func contains
     // only a single opcode (NativeImpl), and there are no non-argument locals.
-    if (do_assert) {
+    if (debug) {
       assertx(argc == callee->numLocals());
       assertx(callee->numIterators() == 0);
       assertx(callee->numClsRefSlots() == 0);

@@ -21,7 +21,7 @@ namespace HPHP {
 
 bool phpBreakpointEnabled(const char* sourceName);
 
-#ifndef DEBUG
+#ifdef NDEBUG
 inline bool phpBreakpointEnabled(const char* sourceName) {
   return false;
 }

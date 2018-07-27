@@ -63,7 +63,7 @@ enum class UnwindAction {
   ResumeVM,
 };
 
-#if (defined(DEBUG) || defined(USE_TRACE))
+#if (!defined(NDEBUG) || defined(USE_TRACE))
 std::string describeFault(const Fault& f) {
   return folly::format("[user exception] {}",
                        implicit_cast<void*>(f.m_userException)).str();

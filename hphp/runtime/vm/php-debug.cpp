@@ -50,7 +50,7 @@ struct PhpDebugger {
 
 static PhpDebugger dbg;
 
-#ifdef DEBUG
+#ifndef NDEBUG
 bool phpBreakpointEnabled(const char* sourceName) {
   return dbg.isBpFunction(sourceName);
 }

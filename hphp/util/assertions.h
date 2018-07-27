@@ -220,14 +220,6 @@ private:
 #define assert_flog(e, ...) static_cast<void>(0)
 #endif
 
-const bool do_assert =
-#ifdef NDEBUG
-  false
-#else
-  true
-#endif
-  ;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }

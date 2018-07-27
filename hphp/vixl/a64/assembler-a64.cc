@@ -366,7 +366,7 @@ Assembler::~Assembler() {
 
 
 void Assembler::Reset() {
-#ifdef DEBUG
+#ifndef NDEBUG
   assert(literal_pool_monitor_ == 0);
   cb_.zero();
   finalized_ = false;
@@ -381,7 +381,7 @@ void Assembler::FinalizeCode() {
   if (!literals_.empty()) {
     EmitLiteralPool();
   }
-#ifdef DEBUG
+#ifndef NDEBUG
   finalized_ = true;
 #endif
 }

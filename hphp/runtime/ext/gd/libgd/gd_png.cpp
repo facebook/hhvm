@@ -398,7 +398,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
         }
       }
   }
-#ifdef DEBUG
+#ifndef NDEBUG
   if (!im->trueColor) {
     for (i = num_palette; i < gdMaxColors; ++i) {
       if (!open[i]) {

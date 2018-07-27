@@ -72,7 +72,7 @@
   __attribute__((__format__ (__printf__, a1, a2)))
 #define ATTRIBUTE_UNUSED   __attribute__((__unused__))
 #define ATTRIBUTE_USED     __attribute__((__used__))
-#ifdef DEBUG
+#ifndef NDEBUG
 # define FLATTEN           /*nop*/
 # define ALWAYS_INLINE     inline
 # define INLINE_FLATTEN    inline
@@ -101,7 +101,7 @@
 # define HHVM_ATTRIBUTE_WEAK
 #endif
 
-#ifdef DEBUG
+#ifndef NDEBUG
 # define DEBUG_ONLY /* nop */
 #else
 # define DEBUG_ONLY UNUSED

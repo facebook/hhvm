@@ -33,7 +33,7 @@ namespace HPHP {
 template <bool enableAssertions>
 struct BaseMutex {
 private:
-#ifdef DEBUG
+#ifndef NDEBUG
   static const int kMagic = 0xba5eba11;
   int          m_magic;
   Rank         m_rank;
@@ -44,7 +44,7 @@ private:
   bool         m_hasOwner;
 #endif
   inline void recordAcquisition() {
-#ifdef DEBUG
+#ifndef NDEBUG
     if (enableAssertions) {
       assert(!m_hasOwner || m_owner == std::this_thread::get_id());
       assert(m_acquires == 0 || m_owner == std::this_thread::get_id());
@@ -57,7 +57,7 @@ private:
 #endif
   }
   inline void invalidateOwner() {
-#ifdef DEBUG
+#ifndef NDEBUG
     if (enableAssertions) {
       m_hasOwner = false;
       m_acquires = 0;
@@ -65,7 +65,7 @@ private:
 #endif
   }
   inline void recordRelease() {
-#ifdef DEBUG
+#ifndef NDEBUG
     if (enableAssertions) {
       popRank(m_rank);
       assertOwnedBySelf();
@@ -78,7 +78,7 @@ private:
   }
 public:
   inline void assertNotOwned() const {
-#ifdef DEBUG
+#ifndef NDEBUG
     if (enableAssertions) {
       assert(!m_hasOwner);
       assert(m_acquires == 0);
@@ -86,7 +86,7 @@ public:
 #endif
   }
   inline void assertOwnedBySelf() const {
-#ifdef DEBUG
+#ifndef NDEBUG
     if (enableAssertions) {
       assert(m_hasOwner);
       assert(m_owner == std::this_thread::get_id());
@@ -108,7 +108,7 @@ public:
 #endif
     }
     pthread_mutex_init(&m_mutex, &m_mutexattr);
-#ifdef DEBUG
+#ifndef NDEBUG
     m_rank = r;
     m_magic = kMagic;
     invalidateOwner();
@@ -118,19 +118,19 @@ public:
   BaseMutex(const BaseMutex&) = delete;
   BaseMutex& operator=(const BaseMutex&) = delete;
   ~BaseMutex() {
-#ifdef DEBUG
+#ifndef NDEBUG
     assert(m_magic == kMagic);
 #endif
     assertNotOwned();
     pthread_mutex_destroy(&m_mutex);
     pthread_mutexattr_destroy(&m_mutexattr);
-#ifdef DEBUG
+#ifndef NDEBUG
     m_magic = ~m_magic;
 #endif
   }
 
   bool tryLock() {
-#ifdef DEBUG
+#ifndef NDEBUG
     assert(m_magic == kMagic);
 #endif
     bool success = !pthread_mutex_trylock(&m_mutex);
@@ -142,7 +142,7 @@ public:
   }
 
   void lock() {
-#ifdef DEBUG
+#ifndef NDEBUG
     assert(m_magic == kMagic);
     checkRank(m_rank);
 #endif
@@ -154,7 +154,7 @@ public:
   }
 
   void unlock() {
-#ifdef DEBUG
+#ifndef NDEBUG
     assert(m_magic == kMagic);
 #endif
     recordRelease();
@@ -195,7 +195,7 @@ struct SimpleMutex : BaseMutex<true> {
  */
 struct ReadWriteMutex {
 private:
-#ifdef DEBUG
+#ifndef NDEBUG
 /*
  * We have a track record of self-deadlocking on these, and our pthread
  * implementation tends to do crazy things when a rwlock is double-wlocked,
@@ -206,33 +206,33 @@ private:
 #endif
 
   void invalidateWriteOwner() {
-#ifdef DEBUG
+#ifndef NDEBUG
     m_writeOwner = std::thread::id();
 #endif
   }
 
   void recordWriteAcquire() {
-#ifdef DEBUG
+#ifndef NDEBUG
     assert(m_writeOwner == std::thread::id());
     m_writeOwner = std::this_thread::get_id();
 #endif
   }
 
   void assertNotWriteOwner() {
-#ifdef DEBUG
+#ifndef NDEBUG
     assert(m_writeOwner != std::this_thread::get_id());
 #endif
   }
 
   void assertNotWriteOwned() {
-#ifdef DEBUG
+#ifndef NDEBUG
     assert(m_writeOwner == std::thread::id());
 #endif
   }
 
   public:
   explicit ReadWriteMutex(DEBUG_ONLY Rank rank = RankUnranked)
-#ifdef DEBUG
+#ifndef NDEBUG
       : m_rank(rank)
 #endif
   {
@@ -273,7 +273,7 @@ private:
   bool attemptRead() { return !pthread_rwlock_tryrdlock(&m_rwlock); }
   bool attemptWrite() { return !pthread_rwlock_trywrlock(&m_rwlock); }
   void release() {
-#ifdef DEBUG
+#ifndef NDEBUG
     popRank(m_rank);
     if (m_writeOwner == std::this_thread::get_id()) {
       invalidateWriteOwner();

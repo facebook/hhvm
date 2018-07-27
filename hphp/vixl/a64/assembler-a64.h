@@ -1810,7 +1810,7 @@ class Assembler {
     assert(sizeof(instruction) == sizeof(uint32_t));
     CheckBufferSpace();
 
-#ifdef DEBUG
+#ifndef NDEBUG
     finalized_ = false;
 #endif
 
@@ -1821,7 +1821,7 @@ class Assembler {
   void EmitData(void const * data, unsigned size) {
     CheckBufferSpace();
 
-#ifdef DEBUG
+#ifndef NDEBUG
     finalized_ = false;
 #endif
 
@@ -1845,7 +1845,7 @@ class Assembler {
 
   friend class BlockLiteralPoolScope;
 
-#ifdef DEBUG
+#ifndef NDEBUG
   bool finalized_;
 #endif
 };

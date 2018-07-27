@@ -455,7 +455,7 @@ void ServerStats::ReportStatus(std::string& output, Writer::Format format) {
 
   w->writeEntry("compiler", compilerId().begin());
 
-#ifdef DEBUG
+#ifndef NDEBUG
   w->writeEntry("debug", "yes");
 #else
   w->writeEntry("debug", "no");

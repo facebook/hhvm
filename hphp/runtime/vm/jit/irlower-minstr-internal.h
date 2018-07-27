@@ -90,7 +90,7 @@ struct assert_same {
   static auto const optabWrapper = [&] {                        \
     auto const n = 1 << multiBitWidth(__VA_ARGS__);             \
     auto optab = std::make_unique<T[]>(n);                      \
-    if (do_assert) memset(optab.get(), 0, n * sizeof(T));       \
+    if (debug) memset(optab.get(), 0, n * sizeof(T));       \
     TABLE(FILL_ROW);                                            \
     return optab;                                               \
   }();                                                          \

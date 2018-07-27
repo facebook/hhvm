@@ -236,7 +236,7 @@ void StandardExtension::initMisc() {
     HHVM_RC_DBL(INF, k_INF);
     HHVM_RC_DBL(NAN, k_NAN);
     HHVM_RC_INT(PHP_MAXPATHLEN, PATH_MAX);
-#if DEBUG
+#ifndef NDEBUG
     HHVM_RC_BOOL(PHP_DEBUG, true);
 #else
     HHVM_RC_BOOL(PHP_DEBUG, false);

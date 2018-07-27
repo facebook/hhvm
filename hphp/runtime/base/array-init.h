@@ -53,7 +53,7 @@ template<typename TArray, DataType DT>
 struct ArrayInitBase {
   explicit ArrayInitBase(size_t n)
     : m_arr(TArray::MakeReserve(n))
-#ifdef DEBUG
+#ifndef NDEBUG
     , m_addCount(0)
     , m_expectedCount(n)
 #endif
@@ -63,14 +63,14 @@ struct ArrayInitBase {
 
   ArrayInitBase(ArrayInitBase&& other) noexcept
     : m_arr(other.m_arr)
-#ifdef DEBUG
+#ifndef NDEBUG
     , m_addCount(other.m_addCount)
     , m_expectedCount(other.m_expectedCount)
 #endif
   {
     assertx(!m_arr || m_arr->toDataType() == DT);
     other.m_arr = nullptr;
-#ifdef DEBUG
+#ifndef NDEBUG
     other.m_expectedCount = 0;
 #endif
   }
@@ -97,7 +97,7 @@ struct ArrayInitBase {
     assertx(m_arr->toDataType() == DT);
     auto const ptr = m_arr;
     m_arr = nullptr;
-#ifdef DEBUG
+#ifndef NDEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return Variant(ptr, DT, Variant::ArrayInitCtor{});
@@ -108,7 +108,7 @@ struct ArrayInitBase {
     assertx(m_arr->toDataType() == DT);
     auto const ptr = m_arr;
     m_arr = nullptr;
-#ifdef DEBUG
+#ifndef NDEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return Array(ptr, Array::ArrayInitCtor::Tag);
@@ -119,7 +119,7 @@ struct ArrayInitBase {
     assertx(m_arr->toDataType() == DT);
     auto const ptr = m_arr;
     m_arr = nullptr;
-#ifdef DEBUG
+#ifndef NDEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return ptr;
@@ -134,7 +134,7 @@ protected:
    * Only used by the constructors of derived classes.
    */
   ArrayInitBase(size_t n, CheckAllocation)
-#ifdef DEBUG
+#ifndef NDEBUG
     : m_addCount(0)
     , m_expectedCount(n)
 #endif
@@ -151,7 +151,7 @@ protected:
 
 protected:
   ArrayData* m_arr;
-#ifdef DEBUG
+#ifndef NDEBUG
   size_t m_addCount;
   size_t m_expectedCount;
 #endif
@@ -646,7 +646,7 @@ struct VArrayInit {
               ? PackedArray::MakeReserveVec(n)
               : PackedArray::MakeReserveVArray(n)
            )
-#ifdef DEBUG
+#ifndef NDEBUG
     , m_addCount(0)
     , m_expectedCount(n)
 #endif
@@ -656,14 +656,14 @@ struct VArrayInit {
 
   VArrayInit(VArrayInit&& other) noexcept
     : m_arr(other.m_arr)
-#ifdef DEBUG
+#ifndef NDEBUG
     , m_addCount(other.m_addCount)
     , m_expectedCount(other.m_expectedCount)
 #endif
   {
     assertx(!m_arr || m_arr->isVecOrVArray());
     other.m_arr = nullptr;
-#ifdef DEBUG
+#ifndef NDEBUG
     other.m_expectedCount = 0;
 #endif
   }
@@ -699,7 +699,7 @@ struct VArrayInit {
     assertx(m_arr->isVecOrVArray());
     auto const ptr = m_arr;
     m_arr = nullptr;
-#ifdef DEBUG
+#ifndef NDEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return Variant(ptr, ptr->toDataType(), Variant::ArrayInitCtor{});
@@ -710,7 +710,7 @@ struct VArrayInit {
     assertx(m_arr->isVecOrVArray());
     auto const ptr = m_arr;
     m_arr = nullptr;
-#ifdef DEBUG
+#ifndef NDEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return Array(ptr, Array::ArrayInitCtor::Tag);
@@ -721,7 +721,7 @@ struct VArrayInit {
     assertx(m_arr->isVecOrVArray());
     auto const ptr = m_arr;
     m_arr = nullptr;
-#ifdef DEBUG
+#ifndef NDEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return ptr;
@@ -739,7 +739,7 @@ private:
   }
 
   ArrayData* m_arr;
-#ifdef DEBUG
+#ifndef NDEBUG
   size_t m_addCount;
   size_t m_expectedCount;
 #endif
@@ -751,7 +751,7 @@ struct DArrayInit {
               ? MixedArray::MakeReserveDict(n)
               : MixedArray::MakeReserveDArray(n)
            )
-#ifdef DEBUG
+#ifndef NDEBUG
     , m_addCount(0)
     , m_expectedCount(n)
 #endif
@@ -763,14 +763,14 @@ struct DArrayInit {
 
   DArrayInit(DArrayInit&& other) noexcept
     : m_arr(other.m_arr)
-#ifdef DEBUG
+#ifndef NDEBUG
     , m_addCount(other.m_addCount)
     , m_expectedCount(other.m_expectedCount)
 #endif
   {
     assertx(!m_arr || m_arr->isDictOrDArray());
     other.m_arr = nullptr;
-#ifdef DEBUG
+#ifndef NDEBUG
     other.m_expectedCount = 0;
 #endif
   }
@@ -909,7 +909,7 @@ struct DArrayInit {
     assertx(m_arr->isDictOrDArray());
     auto const ptr = m_arr;
     m_arr = nullptr;
-#ifdef DEBUG
+#ifndef NDEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return Variant(ptr, ptr->toDataType(), Variant::ArrayInitCtor{});
@@ -920,7 +920,7 @@ struct DArrayInit {
     assertx(m_arr->isDictOrDArray());
     auto const ptr = m_arr;
     m_arr = nullptr;
-#ifdef DEBUG
+#ifndef NDEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return Array(ptr, Array::ArrayInitCtor::Tag);
@@ -931,7 +931,7 @@ struct DArrayInit {
     assertx(m_arr->isDictOrDArray());
     auto const ptr = m_arr;
     m_arr = nullptr;
-#ifdef DEBUG
+#ifndef NDEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return ptr;
@@ -949,7 +949,7 @@ private:
   }
 
   ArrayData* m_arr;
-#ifdef DEBUG
+#ifndef NDEBUG
   size_t m_addCount;
   size_t m_expectedCount;
 #endif

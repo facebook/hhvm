@@ -275,7 +275,7 @@ static CallMap s_callMap {
     {DebugBacktraceFast, debug_backtrace_fast, DSSA, SSync, {}},
     {InitThrowableFileAndLine,
                          throwable_init_file_and_line_from_builtin,
-                           DNone, do_assert ? SSync : SNone, {{SSA, 0}}},
+                           DNone, debug ? SSync : SNone, {{SSA, 0}}},
     {RegisterLiveObj,    registerLiveObj, DNone, SNone, {{SSA, 0}}},
     {LdClsCtor,          loadClassCtor, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}}},

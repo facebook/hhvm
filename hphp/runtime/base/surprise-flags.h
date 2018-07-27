@@ -108,7 +108,7 @@ enum SurpriseFlag : size_t {
  * regardess of whether they actually are set.
  */
 struct NoHandleSurpriseScope {
-#ifdef DEBUG
+#ifndef NDEBUG
   static void AssertNone(SurpriseFlag flags);
   explicit NoHandleSurpriseScope(SurpriseFlag flags);
   ~NoHandleSurpriseScope();

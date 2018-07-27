@@ -1601,7 +1601,7 @@ void ExecutionContext::requestInit() {
 
   HHProf::Request::StartProfiling();
 
-#ifdef DEBUG
+#ifndef NDEBUG
   Class* cls = NamedEntity::get(s_stdclass.get())->clsList();
   assertx(cls);
   assertx(cls == SystemLib::s_stdclassClass);

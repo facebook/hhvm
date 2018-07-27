@@ -116,7 +116,7 @@ Func::~Func() {
     // and the memory may now be in use by another function.
     jit::clobberFuncGuards(this);
   }
-#ifdef DEBUG
+#ifndef NDEBUG
   validate();
   m_magic = ~m_magic;
 #endif
@@ -233,7 +233,7 @@ void Func::rename(const StringData* name) {
 // Initialization.
 
 void Func::init(int numParams) {
-#ifdef DEBUG
+#ifndef NDEBUG
   m_magic = kMagic;
 #endif
   // For methods, we defer setting the full name until m_cls is initialized

@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/init-fini-node.h"
 
+#include "hphp/util/compilation-flags.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/util/timer.h"
@@ -50,7 +51,7 @@ void start(DeltaCounter& dc) {
 void end(DeltaCounter& dc) {
   dc.acc += getCurrentCounter() - dc.start;
   assertx(dc.start != kInvalidCounter);
-  if (do_assert) dc.start = kInvalidCounter;
+  if (debug) dc.start = kInvalidCounter;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -11,11 +11,7 @@ bool(false)
 
 Notice: Hack Array Compat: is_array() called on keyset in %s/is_array.php on line 43
 bool(false)
-
-Notice: Hack Array Compat: is_array() called on varray in %s/is_array.php on line 44
 bool(true)
-
-Notice: Hack Array Compat: is_array() called on darray in %s/is_array.php on line 45
 bool(true)
 ---------------------- is_varray -------------------
 bool(false)
@@ -70,11 +66,7 @@ bool(false)
 
 Notice: Hack Array Compat: is_array() called on keyset in %s/is_array.php on line 5
 bool(false)
-
-Notice: Hack Array Compat: is_array() called on varray in %s/is_array.php on line 5
 bool(true)
-
-Notice: Hack Array Compat: is_array() called on darray in %s/is_array.php on line 5
 bool(true)
 ---------------------- is_varray ---------------------
 bool(false)
@@ -129,11 +121,7 @@ bool(false)
 
 Notice: Hack Array Compat: is_array() called on keyset in %s/is_array.php on line 21
 bool(false)
-
-Notice: Hack Array Compat: is_array() called on varray in %s/is_array.php on line 21
 bool(true)
-
-Notice: Hack Array Compat: is_array() called on darray in %s/is_array.php on line 21
 bool(true)
 ---------------------- is_varray ---------------------
 bool(false)

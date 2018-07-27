@@ -563,35 +563,6 @@ SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
     return gen(env, IsType, TArr, src);
   }
 
-  auto const secondCheck = [&](SSATmp* arr) {
-    ifElse(
-      env,
-      [&](Block* taken) { gen(env, CheckDArray, taken, arr); },
-      [&]{
-        gen(
-          env,
-          RaiseHackArrCompatNotice,
-          cns(env, makeStaticString(Strings::HACKARR_COMPAT_DARR_IS_ARR))
-        );
-      }
-    );
-  };
-
-  auto const firstCheck = [&](SSATmp* arr) {
-    ifThenElse(
-      env,
-      [&](Block* taken) { gen(env, CheckVArray, taken, arr); },
-      [&]{
-        gen(
-          env,
-          RaiseHackArrCompatNotice,
-          cns(env, makeStaticString(Strings::HACKARR_COMPAT_VARR_IS_ARR))
-        );
-      },
-      [&]{ secondCheck(arr); }
-    );
-  };
-
 #define X(name, type, msg, next)                                        \
   auto const name = [&]{                                                \
     ifThenElse(                                                         \
@@ -616,7 +587,7 @@ SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
 
   return cond(
     env,
-    [&](Block* taken) { firstCheck(gen(env, CheckType, TArr, taken, src)); },
+    [&](Block* taken) { gen(env, CheckType, TArr, taken, src); },
     [&]{ return cns(env, true); },
     [&]{ vecCheck(); return cns(env, false); }
   );

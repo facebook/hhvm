@@ -4696,8 +4696,7 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
   if (RuntimeOption::EvalHackArrCompatIsArrayNotices) {
     if (testTy.subtypeOf(BVArr)) return valTy.couldBe(BVec);
     if (testTy.subtypeOf(BDArr)) return valTy.couldBe(BDict);
-    if (testTy.subtypeOf(BArr))  return valTy.couldBe(BVArr | BDArr | BVec |
-                                                      BDict | BKeyset);
+    if (testTy.subtypeOf(BArr))  return valTy.couldBe(BVec | BDict | BKeyset);
   } else if (RuntimeOption::EvalHackArrCompatIsVecDictNotices) {
     if (testTy.subtypeOf(BVec))  return valTy.couldBe(BVArr);
     if (testTy.subtypeOf(BDict)) return valTy.couldBe(BDArr);

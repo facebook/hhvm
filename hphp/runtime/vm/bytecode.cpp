@@ -4223,11 +4223,6 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices &&
         !vmfp()->m_func->isBuiltin())) {
       if (isArrayType(val->m_type)) {
-        if (val->m_data.parr->isVArray()) {
-          raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VARR_IS_ARR);
-        } else if (val->m_data.parr->isDArray()) {
-          raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_ARR);
-        }
         return true;
       } else if (isVecType(val->m_type)) {
         raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_ARR);

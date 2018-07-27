@@ -125,12 +125,6 @@ bool HHVM_FUNCTION(is_scalar, const Variant& v) {
 bool HHVM_FUNCTION(is_array, const Variant& v) {
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
     if (v.isPHPArray()) {
-      auto const& arr = v.toCArrRef();
-      if (arr.isVArray()) {
-        raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VARR_IS_ARR);
-      } else if (arr.isDArray()) {
-        raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_ARR);
-      }
       return true;
     } else if (v.isVecArray()) {
       raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_ARR);

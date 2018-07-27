@@ -820,8 +820,7 @@ void sameJmpImpl(ISS& env, const Same& same, const JmpOp& jmp) {
          (ty0.subtypeOf(BUnc) && ty1.subtypeOf(BUnc)))) {
       if (loc1 == StackDupId) {
         setStkLocal(env, loc0);
-      } else {
-        assertx(loc0 != loc1 && !locsAreEquiv(env, loc0, loc1));
+      } else if (loc0 != loc1 && !locsAreEquiv(env, loc0, loc1)) {
         auto loc = loc0;
         while (true) {
           auto const other = findLocEquiv(env, loc);

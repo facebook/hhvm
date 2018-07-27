@@ -61,7 +61,7 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 42,
+        "line": 45,
         "character": 18
       },
       "newName": "some_other_method"
@@ -76,7 +76,7 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 44,
+        "line": 47,
         "character": 34
       },
       "newName": "ANOTHER_STR_CONSTANT"
@@ -91,7 +91,7 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 45,
+        "line": 48,
         "character": 39
       },
       "newName": "AVOGADRO_CONSTANT"
@@ -106,7 +106,7 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 63,
+        "line": 66,
         "character": 23
       },
       "newName": "kittens_and_rainbows"
@@ -121,7 +121,7 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 47,
+        "line": 50,
         "character": 29
       },
       "newName": "new_and_improved"
@@ -136,7 +136,7 @@
          "uri": "${php_file_uri}"
        },
        "position": {
-         "line": 25,
+         "line": 26,
          "character": 33
        },
        "newName": "new_static_method"
@@ -151,7 +151,7 @@
          "uri": "${php_file_uri}"
        },
        "position": {
-         "line": 30,
+         "line": 31,
          "character": 33
        },
        "newName": "new_async_method"
@@ -166,7 +166,7 @@
          "uri": "${php_file_uri}"
        },
        "position": {
-         "line": 35,
+         "line": 36,
          "character": 42
        },
        "newName": "new_static_async_method"
@@ -181,7 +181,7 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 55,
+        "line": 58,
         "character": 11
       },
       "newName": "new_test_rename_method"
@@ -196,7 +196,7 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 56,
+        "line": 59,
         "character": 29
       },
       "newName": "new_async_test_rename_method"

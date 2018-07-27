@@ -48,13 +48,14 @@ let find_def_filename current_filename definition =
 
 *)
 let construct_deprecated_wrapper_stub
-  ~(func_decl_text: string)
-  ~(params_text_list: string list)
-  ~(col_start: int)
-  ~(is_async: bool)
-  ~(func_ref: deprecated_wrapper_function_ref)
-   (new_name: string)
-  : string =
+~(func_decl_text: string)
+~(params_text_list: string list)
+~(col_start: int)
+~(returns_void: bool)
+~(is_async: bool)
+~(func_ref: deprecated_wrapper_function_ref)
+ (new_name: string)
+: string =
   (* Since the starting column position points to the beginning of the function
       declaration header, we can use it to figure out the indentation level
       of the function, and insert whitespace accordingly *)
@@ -67,6 +68,11 @@ let construct_deprecated_wrapper_stub
   let func_body_indentation = String.make 2 ' ' in
   let return_indentation = base_indentation ^ func_body_indentation in
   let parameter_input = String.concat ", " params_text_list in
+  let maybe_return =
+    if returns_void
+    then ""
+    else "return "
+  in
   let maybe_await =
     if is_async
     then "await "
@@ -79,7 +85,7 @@ let construct_deprecated_wrapper_stub
   in
   let return_statement =
     return_indentation ^
-    "return " ^ maybe_await ^ maybe_this_or_self ^
+    maybe_return ^ maybe_await ^ maybe_this_or_self ^
     new_name ^ "(" ^ parameter_input ^ ");"
   in
   "\n" ^ deprecated_header ^
@@ -119,6 +125,7 @@ let get_deprecated_wrapper_patch ~filename ~definition new_name =
   let get_params_modifier_info func_decl = match syntax func_decl with
     | FunctionDeclarationHeader {
         function_parameter_list = params;
+        function_type = ret_type;
         function_modifiers = modifiers; _
       } ->
         let params_text_list = match syntax params with
@@ -150,6 +157,29 @@ let get_deprecated_wrapper_patch ~filename ~definition new_name =
           | Missing -> Some []
           | _ -> None
         in
+        let returns_void = match syntax ret_type with
+          | GenericTypeSpecifier {
+              generic_class_type = generic_type;
+              generic_argument_list = { syntax =
+                TypeArguments {
+                  type_arguments_types = { syntax =
+                    SyntaxList [{ syntax =
+                      ListItem {
+                        list_item = { syntax =
+                          SimpleTypeSpecifier {
+                            simple_type_specifier = type_spec
+                          }; _
+                        }; _
+                      }; _
+                    }]; _
+                  }; _
+                }; _
+              }; _
+            } -> (text generic_type) = "Awaitable" && (text type_spec) = "void"
+          | SimpleTypeSpecifier { simple_type_specifier = type_spec } ->
+            (text type_spec) = "void"
+          | _ -> false
+        in
         let is_async, is_static = match syntax modifiers with
           | SyntaxList modifiers ->
             let is_async =
@@ -161,18 +191,13 @@ let get_deprecated_wrapper_patch ~filename ~definition new_name =
             is_async, is_static
           | _ -> false, false
         in
-        params_text_list, is_async, is_static
-    | _ -> None, false, false
+        params_text_list, returns_void, is_async, is_static
+    | _ -> None, false, false, false
   in
-  begin match cst_node with
-  | {
-      syntax =
-        MethodishDeclaration {
-          methodish_function_decl_header = func_decl; _
-        }; _
-    } ->
+  begin match syntax cst_node with
+  | MethodishDeclaration { methodish_function_decl_header = func_decl; _ } ->
       let func_decl_text = text func_decl in
-      let params_text_list, is_async, is_static =
+      let params_text_list, returns_void, is_async, is_static =
         get_params_modifier_info func_decl
       in
       let func_ref =
@@ -181,27 +206,23 @@ let get_deprecated_wrapper_patch ~filename ~definition new_name =
         else DeprecatedNonStaticMethodRef
       in
       params_text_list >>= fun params_text_list ->
-      Some (func_decl_text, params_text_list, is_async, func_ref)
-  | {
-      syntax =
-        FunctionDeclaration {
-          function_declaration_header = func_decl; _
-        }; _
-    } ->
+      Some (func_decl_text, params_text_list, returns_void, is_async, func_ref)
+  | FunctionDeclaration { function_declaration_header = func_decl; _ } ->
       let func_decl_text = text func_decl in
-      let params_text_list, is_async, _ =
+      let params_text_list, returns_void, is_async, _ =
         get_params_modifier_info func_decl
       in
       let func_ref = DeprecatedFunctionRef in
       params_text_list >>= fun params_text_list ->
-      Some (func_decl_text, params_text_list, is_async, func_ref)
+      Some (func_decl_text, params_text_list, returns_void, is_async, func_ref)
   | _ -> None
-  end >>| fun (func_decl_text, params_text_list, is_async, func_ref) ->
+  end >>| fun (func_decl_text, params_text_list, returns_void, is_async, func_ref) ->
   let deprecated_wrapper_stub =
     construct_deprecated_wrapper_stub
       ~func_decl_text
       ~params_text_list
       ~col_start
+      ~returns_void
       ~is_async
       ~func_ref
       new_name

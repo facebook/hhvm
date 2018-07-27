@@ -75,11 +75,11 @@
           {
             "range": {
               "start": {
-                "line": 43,
+                "line": 46,
                 "character": 22
               },
               "end": {
-                "line": 43,
+                "line": 46,
                 "character": 30
               }
             },
@@ -124,11 +124,11 @@
           {
             "range": {
               "start": {
-                "line": 45,
+                "line": 48,
                 "character": 19
               },
               "end": {
-                "line": 45,
+                "line": 48,
                 "character": 28
               }
             },
@@ -137,11 +137,11 @@
           {
             "range": {
               "start": {
-                "line": 44,
+                "line": 47,
                 "character": 15
               },
               "end": {
-                "line": 44,
+                "line": 47,
                 "character": 24
               }
             },
@@ -150,11 +150,11 @@
           {
             "range": {
               "start": {
-                "line": 43,
+                "line": 46,
                 "character": 11
               },
               "end": {
-                "line": 43,
+                "line": 46,
                 "character": 20
               }
             },
@@ -163,11 +163,11 @@
           {
             "range": {
               "start": {
-                "line": 40,
+                "line": 43,
                 "character": 20
               },
               "end": {
-                "line": 40,
+                "line": 43,
                 "character": 29
               }
             },
@@ -212,11 +212,11 @@
           {
             "range": {
               "start": {
-                "line": 42,
+                "line": 45,
                 "character": 43
               },
               "end": {
-                "line": 42,
+                "line": 45,
                 "character": 54
               }
             },
@@ -225,11 +225,11 @@
           {
             "range": {
               "start": {
-                "line": 42,
+                "line": 45,
                 "character": 15
               },
               "end": {
-                "line": 42,
+                "line": 45,
                 "character": 26
               }
             },
@@ -274,11 +274,11 @@
           {
             "range": {
               "start": {
-                "line": 44,
+                "line": 47,
                 "character": 26
               },
               "end": {
-                "line": 44,
+                "line": 47,
                 "character": 38
               }
             },
@@ -310,11 +310,11 @@
           {
             "range": {
               "start": {
-                "line": 45,
+                "line": 48,
                 "character": 30
               },
               "end": {
-                "line": 45,
+                "line": 48,
                 "character": 46
               }
             },
@@ -333,11 +333,11 @@
           {
             "range": {
               "start": {
-                "line": 59,
+                "line": 62,
                 "character": 34
               },
               "end": {
-                "line": 59,
+                "line": 62,
                 "character": 40
               }
             },
@@ -346,11 +346,11 @@
           {
             "range": {
               "start": {
-                "line": 60,
+                "line": 63,
                 "character": 2
               },
               "end": {
-                "line": 60,
+                "line": 63,
                 "character": 8
               }
             },
@@ -359,11 +359,11 @@
           {
             "range": {
               "start": {
-                "line": 61,
+                "line": 64,
                 "character": 4
               },
               "end": {
-                "line": 61,
+                "line": 64,
                 "character": 10
               }
             },
@@ -372,11 +372,11 @@
           {
             "range": {
               "start": {
-                "line": 61,
+                "line": 64,
                 "character": 14
               },
               "end": {
-                "line": 61,
+                "line": 64,
                 "character": 20
               }
             },
@@ -385,11 +385,11 @@
           {
             "range": {
               "start": {
-                "line": 61,
+                "line": 64,
                 "character": 32
               },
               "end": {
-                "line": 61,
+                "line": 64,
                 "character": 38
               }
             },
@@ -398,11 +398,11 @@
           {
             "range": {
               "start": {
-                "line": 63,
+                "line": 66,
                 "character": 20
               },
               "end": {
-                "line": 63,
+                "line": 66,
                 "character": 26
               }
             },
@@ -411,11 +411,11 @@
           {
             "range": {
               "start": {
-                "line": 66,
+                "line": 69,
                 "character": 30
               },
               "end": {
-                "line": 66,
+                "line": 69,
                 "character": 36
               }
             },
@@ -424,11 +424,11 @@
           {
             "range": {
               "start": {
-                "line": 67,
+                "line": 70,
                 "character": 11
               },
               "end": {
-                "line": 67,
+                "line": 70,
                 "character": 17
               }
             },
@@ -460,11 +460,11 @@
           {
             "range": {
               "start": {
-                "line": 47,
+                "line": 50,
                 "character": 22
               },
               "end": {
-                "line": 47,
+                "line": 50,
                 "character": 39
               }
             },
@@ -496,11 +496,11 @@
           {
             "range": {
               "start": {
-                "line": 25,
+                "line": 26,
                 "character": 25
               },
               "end": {
-                "line": 25,
+                "line": 26,
                 "character": 36
               }
             },
@@ -532,11 +532,11 @@
           {
             "range": {
               "start": {
-                "line": 30,
+                "line": 31,
                 "character": 24
               },
               "end": {
-                "line": 30,
+                "line": 31,
                 "character": 34
               }
             },
@@ -545,11 +545,11 @@
           {
             "range": {
               "start": {
-                "line": 28,
+                "line": 29,
                 "character": 0
               },
               "end": {
-                "line": 28,
+                "line": 29,
                 "character": 0
               }
             },
@@ -568,11 +568,11 @@
           {
             "range": {
               "start": {
-                "line": 35,
+                "line": 36,
                 "character": 31
               },
               "end": {
-                "line": 35,
+                "line": 36,
                 "character": 48
               }
             },
@@ -581,15 +581,15 @@
           {
             "range": {
               "start": {
-                "line": 33,
+                "line": 34,
                 "character": 0
               },
               "end": {
-                "line": 33,
+                "line": 34,
                 "character": 0
               }
             },
-            "newText": "\n  <<__Deprecated(\"Deprecated: Use `new_static_async_method` instead\")>>\n  public static async function depr_static_async(int $x): Awaitable<void> {\n    return await self::new_static_async_method($x);\n  }\n"
+            "newText": "\n  <<__Deprecated(\"Deprecated: Use `new_static_async_method` instead\")>>\n  public static async function depr_static_async(int $x): Awaitable<\n    void,\n  > {\n    await self::new_static_async_method($x);\n  }\n"
           }
         ]
       }
@@ -604,11 +604,11 @@
           {
             "range": {
               "start": {
-                "line": 39,
+                "line": 42,
                 "character": 9
               },
               "end": {
-                "line": 39,
+                "line": 42,
                 "character": 20
               }
             },
@@ -617,11 +617,11 @@
           {
             "range": {
               "start": {
-                "line": 55,
+                "line": 58,
                 "character": 2
               },
               "end": {
-                "line": 55,
+                "line": 58,
                 "character": 13
               }
             },
@@ -630,15 +630,15 @@
           {
             "range": {
               "start": {
-                "line": 38,
+                "line": 41,
                 "character": 0
               },
               "end": {
-                "line": 38,
+                "line": 41,
                 "character": 0
               }
             },
-            "newText": "\n<<__Deprecated(\"Deprecated: Use `new_test_rename_method` instead\")>>\nfunction test_rename(): void {\n  return new_test_rename_method();\n}\n"
+            "newText": "\n<<__Deprecated(\"Deprecated: Use `new_test_rename_method` instead\")>>\nfunction test_rename(): void {\n  new_test_rename_method();\n}\n"
           }
         ]
       }
@@ -653,11 +653,11 @@
           {
             "range": {
               "start": {
-                "line": 50,
+                "line": 53,
                 "character": 15
               },
               "end": {
-                "line": 50,
+                "line": 53,
                 "character": 32
               }
             },
@@ -666,11 +666,11 @@
           {
             "range": {
               "start": {
-                "line": 56,
+                "line": 59,
                 "character": 15
               },
               "end": {
-                "line": 56,
+                "line": 59,
                 "character": 32
               }
             },
@@ -679,11 +679,11 @@
           {
             "range": {
               "start": {
-                "line": 49,
+                "line": 52,
                 "character": 0
               },
               "end": {
-                "line": 49,
+                "line": 52,
                 "character": 0
               }
             },

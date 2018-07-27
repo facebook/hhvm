@@ -22,6 +22,7 @@ class TestClass { // 2. Rename TestClass
   public function deprecated_method(int $x, string $y, int $v, ...): int {
     return $x;
   }
+
   // 8. Rename depr_static
   public static function depr_static(int $x, string $y, int $v, ...): int {
     return $x;
@@ -33,8 +34,10 @@ class TestClass { // 2. Rename TestClass
   }
 
   // 10. Rename depr_static_async
-  public static async function depr_static_async(int $x): Awaitable<void> {
-  }
+  public static async function depr_static_async(int $x): Awaitable<
+    void,
+  >
+  {}
 }
 
 function test_rename(): void {

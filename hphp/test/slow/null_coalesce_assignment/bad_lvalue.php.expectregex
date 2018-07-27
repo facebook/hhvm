@@ -1,0 +1,1 @@
+Fatal error\: (Can't use return value in write context|Invalid lvalue) in [^\r\n]+\/test\/slow\/null_coalesce_assignment\/bad_lvalue.php on line 4

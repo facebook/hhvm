@@ -964,7 +964,8 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
     }
 
     if(cur->mbr_mode && cur->mbr_mode != op_mode) {
-      if (cur->mbr_mode != MOpMode::Warn || op_mode != MOpMode::InOut) {
+      if (cur->mbr_mode != MOpMode::Warn ||
+        (op_mode != MOpMode::InOut && op_mode != MOpMode::None)) {
         error("Member base register mode at %s is %s when it should be %s\n",
               opcodeToName(op),
               op_mode ? subopToName(op_mode.value()) : "Unknown",

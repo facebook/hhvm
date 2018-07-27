@@ -566,23 +566,27 @@ and emit_binop ~need_ref env pos op e1 e2 =
       emit_short_circuit_op env pos (A.Binop (op, e1, e2))
   | A.Eq None ->
     emit_lval_op ~need_ref env pos LValOp.Set e1 (Some e2)
+  | A.Eq (Some A.QuestionQuestion) ->
+    emit_box_if_necessary pos need_ref @@
+      emit_null_coalesce_assignment ~need_ref env pos e1 e2
   | A.Eq (Some obop) ->
     begin match binop_to_eqop obop with
     | None -> failwith "illegal eq op"
     | Some op -> emit_lval_op ~need_ref env pos (LValOp.SetOp op) e1 (Some e2)
     end
-  | A.QuestionQuestion -> emit_box_if_necessary pos need_ref @@
-    let end_label = Label.next_regular () in
-    gather [
-      emit_quiet_expr env pos e1;
-      instr_dup;
-      instr_istypec OpNull;
-      instr_not;
-      instr_jmpnz end_label;
-      instr_popc;
-      emit_expr ~need_ref:false env e2;
-      instr_label end_label;
-    ]
+  | A.QuestionQuestion ->
+    emit_box_if_necessary pos need_ref @@
+      let end_label = Label.next_regular () in
+      gather [
+        fst (emit_quiet_expr env pos e1);
+        instr_dup;
+        instr_istypec OpNull;
+        instr_not;
+        instr_jmpnz end_label;
+        instr_popc;
+        emit_expr ~need_ref:false env e2;
+        instr_label end_label;
+      ]
   | _ ->
     if not (optimize_null_check ())
     then default ()
@@ -899,7 +903,7 @@ and emit_load_class_const env pos cexpr id =
       load_const
     ]
 
-and emit_class_expr env cexpr prop =
+and emit_class_expr ?(null_coalesce_assignment=false) env cexpr prop =
   match cexpr with
   | Class_expr ((pos, (A.BracedExpr _ |
                      A.Dollar _ |
@@ -953,6 +957,7 @@ and emit_class_expr env cexpr prop =
       emit_expr ~need_ref:false env e, true
   in
   let load_cls_ref = emit_load_class_ref env (fst prop) cexpr in
+  let load_prop = if null_coalesce_assignment then empty else load_prop in
   if load_prop_first then load_prop, load_cls_ref
   else load_cls_ref, load_prop
 
@@ -1158,11 +1163,11 @@ and emit_call_isset_expr env outer_pos (pos, expr_ as expr) =
       instr_issetg
     ]
   | A.Array_get (base_expr, opt_elem_expr) ->
-    emit_array_get ~need_ref:false env pos QueryOp.Isset base_expr opt_elem_expr
+    fst (emit_array_get ~need_ref:false env pos QueryOp.Isset base_expr opt_elem_expr)
   | A.Class_get (cid, id)  ->
     emit_class_get env QueryOp.Isset false cid id
   | A.Obj_get (expr, prop, nullflavor) ->
-    emit_obj_get ~need_ref:false env pos QueryOp.Isset expr prop nullflavor
+    fst (emit_obj_get ~need_ref:false env pos QueryOp.Isset expr prop nullflavor)
   | A.Lvar (_, n) when SN.Superglobals.is_superglobal n ->
     gather [
       emit_pos outer_pos;
@@ -1203,11 +1208,11 @@ and emit_call_empty_expr env outer_pos (pos, expr_ as expr) =
       instr_emptyg
     ]
   | A.Array_get(base_expr, opt_elem_expr) ->
-    emit_array_get ~need_ref:false env pos QueryOp.Empty base_expr opt_elem_expr
+    fst (emit_array_get ~need_ref:false env pos QueryOp.Empty base_expr opt_elem_expr)
   | A.Class_get (cid, id) ->
     emit_class_get env QueryOp.Empty false cid id
   | A.Obj_get (expr, prop, nullflavor) ->
-    emit_obj_get ~need_ref:false env pos QueryOp.Empty expr prop nullflavor
+    fst (emit_obj_get ~need_ref:false env pos QueryOp.Empty expr prop nullflavor)
   | A.Lvar(_, id) when SN.Superglobals.is_superglobal id ->
     gather [
       instr_string @@ SU.Locals.strip_dollar id;
@@ -1640,10 +1645,10 @@ and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
     ]
   | A.Array_get(base_expr, opt_elem_expr) ->
     let query_op = if need_ref then QueryOp.Empty else QueryOp.CGet in
-    emit_array_get ~need_ref env pos query_op base_expr opt_elem_expr
+    fst (emit_array_get ~need_ref env pos query_op base_expr opt_elem_expr)
   | A.Obj_get (expr, prop, nullflavor) ->
     let query_op = if need_ref then QueryOp.Empty else QueryOp.CGet in
-    emit_obj_get ~need_ref env pos query_op expr prop nullflavor
+    fst (emit_obj_get ~need_ref env pos query_op expr prop nullflavor)
 
   | A.Call ((_, A.Id (_, id)), _, exprs, [])
     when String.lowercase_ascii id = "isset" ->
@@ -2185,7 +2190,33 @@ and emit_short_circuit_op env pos expr =
     r1.instrs;
     if_true; ]
 
-and emit_quiet_expr env pos (_, expr_ as expr) =
+and emit_null_coalesce_assignment ~need_ref env pos e1 e2 =
+  let end_label = Label.next_regular () in
+  let do_set_label = Label.next_regular () in
+  let l_nonnull = Local.get_unnamed_local () in
+  let quiet_instr, querym_n_unpopped =
+    emit_quiet_expr ~null_coalesce_assignment:true env pos e1 in
+  let emit_popc_n n_unpopped =
+    match n_unpopped with
+    | Some n -> gather (List.init n (fun _ -> instr_popc))
+    | None -> empty
+  in
+  gather [
+    quiet_instr;
+    instr_dup;
+    instr_istypec OpNull;
+    instr_jmpnz do_set_label;
+    instr_popl l_nonnull;
+    emit_popc_n querym_n_unpopped;
+    instr_pushl l_nonnull;
+    instr_jmp end_label;
+    instr_label do_set_label;
+    instr_popc;
+    emit_lval_op ~null_coalesce_assignment:true ~need_ref env pos LValOp.Set e1 (Some e2);
+    instr_label end_label;
+  ]
+
+and emit_quiet_expr ?(null_coalesce_assignment=false) env pos (_, expr_ as expr) =
   match expr_ with
   | A.Lvar (name_pos, name) when name = SN.Superglobals.globals ->
     gather [
@@ -2193,27 +2224,29 @@ and emit_quiet_expr env pos (_, expr_ as expr) =
       instr_string (SU.Locals.strip_dollar name);
       emit_pos pos;
       instr (IGet CGetQuietG)
-    ]
+    ], None
   | A.Lvar ((_, name) as id) when not (is_local_this env name) ->
-    instr_cgetquietl (get_local env id)
+    instr_cgetquietl (get_local env id), None
   | A.Dollar e ->
     gather [
       emit_expr ~need_ref:false env e;
       emit_pos pos;
       instr_cgetquietn
-    ]
+    ], None
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
       emit_expr ~need_ref:false env e;
       emit_pos pos;
       instr (IGet CGetQuietG)
-    ]
+    ], None
   | A.Array_get(base_expr, opt_elem_expr) ->
-    emit_array_get ~need_ref:false env pos QueryOp.CGetQuiet base_expr opt_elem_expr
+    emit_array_get ~null_coalesce_assignment ~need_ref:false
+      env pos QueryOp.CGetQuiet base_expr opt_elem_expr
   | A.Obj_get (expr, prop, nullflavor) ->
-    emit_obj_get ~need_ref:false env pos QueryOp.CGetQuiet expr prop nullflavor
+    emit_obj_get ~null_coalesce_assignment ~need_ref:false
+      env pos QueryOp.CGetQuiet expr prop nullflavor
   | _ ->
-    emit_expr ~need_ref:false env expr
+    emit_expr ~need_ref:false env expr, None
 
 (* returns instruction that will represent setter for $base[local] where
    is_base is true when result cell is base for another subscript operator and
@@ -2269,16 +2302,16 @@ and is_trivial ~is_base env (_, e) =
 (* Emit code for e1[e2] or isset(e1[e2]).
  *)
 
-and emit_array_get ?(no_final=false) ?mode ~need_ref
+and emit_array_get ?(null_coalesce_assignment=false) ?(no_final=false) ?mode ~need_ref
   env outer_pos qop base_expr opt_elem_expr =
   let result =
-    emit_array_get_worker ~no_final ?mode ~need_ref ~inout_param_info:None
+    emit_array_get_worker ~null_coalesce_assignment ~no_final ?mode ~need_ref ~inout_param_info:None
     env outer_pos qop base_expr opt_elem_expr in
   match result with
-  | Array_get_regular i -> i
-  | Array_get_inout _ -> failwith "unexpected inout"
+  | Array_get_regular i, querym_n_unpopped -> i, querym_n_unpopped
+  | Array_get_inout _, _ -> failwith "unexpected inout"
 
-and emit_array_get_worker ?(no_final=false) ?mode
+and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?mode
   ~need_ref ~inout_param_info
   env outer_pos qop base_expr opt_elem_expr =
   (* Disallow use of array(..)[] *)
@@ -2290,23 +2323,30 @@ and emit_array_get_worker ?(no_final=false) ?mode
   | _ ->
   let local_temp_kind =
     get_local_temp_kind ~is_base:false inout_param_info env opt_elem_expr in
-  let mode = Option.value mode ~default:(get_queryMOpMode need_ref qop) in
+  let mode =
+    if null_coalesce_assignment then MemberOpMode.Warn
+    else Option.value mode ~default:(get_queryMOpMode need_ref qop) in
+  let querym_n_unpopped = ref None in
   let elem_expr_instrs, elem_stack_size =
-    emit_elem_instrs ~local_temp_kind env opt_elem_expr in
-  let mk = get_elem_member_key env 0 opt_elem_expr in
+    emit_elem_instrs ~local_temp_kind ~null_coalesce_assignment env opt_elem_expr in
+  let mk = get_elem_member_key ~null_coalesce_assignment env 0 opt_elem_expr in
   let base_result =
     emit_base_worker ~is_object:false ~inout_param_info
       ~notice:(match qop with QueryOp.Isset -> NoNotice | _ -> Notice)
+      ~null_coalesce_assignment
       env mode elem_stack_size base_expr in
   let make_final total_stack_size =
     if no_final then empty else
     instr (IFinal (
       if need_ref then
         VGetM (total_stack_size, mk)
-      else
+      else if null_coalesce_assignment then begin
+        querym_n_unpopped := Some total_stack_size;
+        QueryM (0, qop, mk)
+      end else
         QueryM (total_stack_size, qop, mk)
     )) in
-  match base_result, local_temp_kind with
+  let instr = match base_result, local_temp_kind with
   | Array_get_base_regular base, None ->
     (* both base and expression don't need to store anything *)
     Array_get_regular (gather [
@@ -2379,10 +2419,12 @@ and emit_array_get_worker ?(no_final=false) ?mode
       instr_setm 0 (MemberKey.EL local);
     ] in
     Array_get_inout { load; store }
+  in
+  instr, !querym_n_unpopped
 
 (* Emit code for e1->e2 or e1?->e2 or isset(e1->e2).
  *)
-and emit_obj_get ~need_ref env pos qop expr prop null_flavor =
+and emit_obj_get ?(null_coalesce_assignment=false) ~need_ref env pos qop expr prop null_flavor =
   match snd expr with
   | A.Lvar (pos, id)
     when id = SN.SpecialIdents.this && null_flavor = A.OG_nullsafe ->
@@ -2391,17 +2433,19 @@ and emit_obj_get ~need_ref env pos qop expr prop null_flavor =
   | _ ->
     begin match snd prop with
     | A.Id (_, s) when SU.Xhp.is_xhp s ->
-      emit_xhp_obj_get ~need_ref env pos expr s null_flavor
+      emit_xhp_obj_get ~need_ref env pos expr s null_flavor, None
     | _ ->
-      let mode = get_queryMOpMode need_ref qop in
+      let mode =
+        if null_coalesce_assignment then MemberOpMode.Warn
+        else get_queryMOpMode need_ref qop in
       let mk, prop_expr_instrs, prop_stack_size =
-        emit_prop_expr env null_flavor 0 prop in
+        emit_prop_expr ~null_coalesce_assignment env null_flavor 0 prop in
       let base_expr_instrs_begin,
           base_expr_instrs_end,
           base_setup_instrs,
           base_stack_size =
         emit_base
-          ~is_object:true ~notice:Notice
+          ~is_object:true ~notice:Notice ~null_coalesce_assignment
           env mode prop_stack_size expr
       in
       let total_stack_size = prop_stack_size + base_stack_size in
@@ -2409,17 +2453,23 @@ and emit_obj_get ~need_ref env pos qop expr prop null_flavor =
         instr (IFinal (
           if need_ref then
             VGetM (total_stack_size, mk)
+          else if null_coalesce_assignment then
+            QueryM (0, qop, mk)
           else
             QueryM (total_stack_size, qop, mk)
         )) in
-      gather [
-        base_expr_instrs_begin;
-        prop_expr_instrs;
-        base_expr_instrs_end;
-        emit_pos pos;
-        base_setup_instrs;
-        final_instr
-      ]
+      let querym_n_unpopped =
+        if null_coalesce_assignment then Some total_stack_size else None in
+      let instr =
+        gather [
+          base_expr_instrs_begin;
+          prop_expr_instrs;
+          base_expr_instrs_end;
+          emit_pos pos;
+          base_setup_instrs;
+          final_instr
+        ] in
+      instr, querym_n_unpopped
     end
 
 and is_special_class_constant_accessed_with_class_id env (_, cName) id =
@@ -2429,13 +2479,14 @@ and is_special_class_constant_accessed_with_class_id env (_, cName) id =
   (not (SU.is_self cName || SU.is_parent cName || SU.is_static cName)
   || (Ast_scope.Scope.is_in_trait (Emit_env.get_scope env)) && SU.is_self cName)
 
-and emit_elem_instrs env ~local_temp_kind opt_elem_expr =
+and emit_elem_instrs env ~local_temp_kind ?(null_coalesce_assignment=false) opt_elem_expr =
   match opt_elem_expr with
   (* These all have special inline versions of member keys *)
   | Some (_, (A.Int _ | A.String _)) -> empty, 0
   | Some (_, (A.Lvar ((_, id) as pid))) when not (is_local_this env id) ->
     if Option.is_some local_temp_kind
     then instr_cgetquietl (get_local env pid), 0
+    else if null_coalesce_assignment then instr_cgetl (get_local env pid), 1
     else empty, 0
   | Some (_, (A.Class_const ((_, A.Id cid), (_, id))))
     when is_special_class_constant_accessed_with_class_id env cid id -> empty, 0
@@ -2446,11 +2497,12 @@ and emit_elem_instrs env ~local_temp_kind opt_elem_expr =
  * expressions of the form `base[elem]`.
  * If the array element is missing, use the special key `W`.
  *)
-and get_elem_member_key env stack_index opt_expr =
+and get_elem_member_key ?(null_coalesce_assignment=false) env stack_index opt_expr =
   match opt_expr with
   (* Special case for local *)
   | Some (_, A.Lvar id) when not (is_local_this env (snd id)) ->
-    MemberKey.EL (get_local env id)
+    if null_coalesce_assignment then MemberKey.EC stack_index
+    else MemberKey.EL (get_local env id)
   (* Special case for literal integer *)
   | Some (_, A.Int str as int_expr)->
     let open Ast_constant_folder in
@@ -2485,7 +2537,8 @@ and get_elem_member_key env stack_index opt_expr =
 (* Get the member key for a property, and return any instructions and
  * the size of the stack in the case that the property cannot be
  * placed inline in the instruction. *)
-and emit_prop_expr env null_flavor stack_index prop_expr =
+and emit_prop_expr ?(null_coalesce_assignment=false) env null_flavor
+  stack_index prop_expr =
   let mk =
     match snd prop_expr with
     | A.Id ((_, name) as id) when String_utils.string_starts_with name "$" ->
@@ -2515,6 +2568,10 @@ and emit_prop_expr env null_flavor stack_index prop_expr =
   match mk with
   | MemberKey.PC _ ->
     mk, emit_expr ~need_ref:false env prop_expr, 1
+  | MemberKey.PL local ->
+    if null_coalesce_assignment
+    then MemberKey.PC stack_index, instr_cgetl local, 1
+    else mk, empty, 0
   | _ ->
     mk, empty, 0
 
@@ -2548,8 +2605,8 @@ and emit_prop_expr env null_flavor stack_index prop_expr =
  *   QueryM 1 CGet EC:0
  *)
 
-and emit_base ~is_object ~notice env mode base_offset e =
-  let result = emit_base_worker ~is_object ~notice ~inout_param_info:None
+and emit_base ~is_object ~notice ?(null_coalesce_assignment=false) env mode base_offset e =
+  let result = emit_base_worker ~is_object ~notice ~inout_param_info:None ~null_coalesce_assignment
     env mode base_offset e in
   match result with
   | Array_get_base_regular i ->
@@ -2559,7 +2616,8 @@ and emit_base ~is_object ~notice env mode base_offset e =
     i.stack_size
   | Array_get_base_inout _ -> failwith "unexpected inout"
 
-and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
+and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assignment=false)
+  env mode base_offset
   (pos, expr_ as expr) =
   let base_mode =
     if mode = MemberOpMode.InOut then MemberOpMode.Warn else mode in
@@ -2650,13 +2708,13 @@ and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
      let local_temp_kind =
        get_local_temp_kind ~is_base:false inout_param_info env opt_elem_expr in
      let elem_expr_instrs, elem_stack_size =
-       emit_elem_instrs ~local_temp_kind env opt_elem_expr in
+       emit_elem_instrs ~local_temp_kind ~null_coalesce_assignment env opt_elem_expr in
      let base_result =
        emit_base_worker
-         ~notice ~is_object:false ~inout_param_info
+         ~notice ~is_object:false ~inout_param_info ~null_coalesce_assignment
          env mode (base_offset + elem_stack_size) base_expr
      in
-     let mk = get_elem_member_key env base_offset opt_elem_expr in
+     let mk = get_elem_member_key ~null_coalesce_assignment env base_offset opt_elem_expr in
      let make_setup_instrs base_setup_instrs =
        gather [
          base_setup_instrs;
@@ -2734,12 +2792,12 @@ and emit_base_worker ~is_object ~notice ~inout_param_info env mode base_offset
          1
      | _ ->
        let mk, prop_expr_instrs, prop_stack_size =
-         emit_prop_expr env null_flavor base_offset prop_expr in
+         emit_prop_expr ~null_coalesce_assignment env null_flavor base_offset prop_expr in
        let base_expr_instrs_begin,
            base_expr_instrs_end,
            base_setup_instrs,
            base_stack_size =
-         emit_base ~notice:Notice ~is_object:true
+         emit_base ~notice:Notice ~is_object:true ~null_coalesce_assignment
            env mode (base_offset + prop_stack_size) base_expr
        in
        let total_stack_size = prop_stack_size + base_stack_size in
@@ -2883,16 +2941,16 @@ and emit_args_and_call env call_pos args uargs =
         ]
       | A.Array_get (base_expr, opt_elem_expr) -> begin
         let array_get_result =
-          emit_array_get_worker ~need_ref:false
+          fst (emit_array_get_worker ~need_ref:false
             ~inout_param_info:(Some (i, aliases)) env pos
-            QueryOp.InOut base_expr opt_elem_expr in
+            QueryOp.InOut base_expr opt_elem_expr) in
         match array_get_result with
         | Array_get_regular instrs ->
           let setter =
             let base =
-              emit_array_get ~no_final:true ~need_ref:false
+              fst (emit_array_get ~no_final:true ~need_ref:false
                 ~mode:MemberOpMode.Define
-                env pos QueryOp.InOut base_expr opt_elem_expr in
+                env pos QueryOp.InOut base_expr opt_elem_expr) in
             gather [
               base;
               instr_setm 0 (get_elem_member_key env 0 opt_elem_expr);
@@ -2970,14 +3028,14 @@ and emit_args_and_call env call_pos args uargs =
       | A.Array_get (base_expr, opt_elem_expr) ->
         let env = { env with Emit_env.env_allows_array_append = true } in
         emit_ref_cond empty
-          (emit_array_get ~need_ref:false env pos QueryOp.CGet base_expr
-            opt_elem_expr)
-          (emit_array_get ~need_ref:true env pos QueryOp.Empty base_expr
-            opt_elem_expr)
+          (fst (emit_array_get ~need_ref:false env pos QueryOp.CGet base_expr
+            opt_elem_expr))
+          (fst (emit_array_get ~need_ref:true env pos QueryOp.Empty base_expr
+            opt_elem_expr))
       | A.Obj_get (e1, e2, nullflavor) ->
         emit_ref_cond empty
-          (emit_obj_get ~need_ref:false env pos QueryOp.CGet e1 e2 nullflavor)
-          (emit_obj_get ~need_ref:true env pos QueryOp.Empty e1 e2 nullflavor)
+          (fst (emit_obj_get ~need_ref:false env pos QueryOp.CGet e1 e2 nullflavor))
+          (fst (emit_obj_get ~need_ref:true env pos QueryOp.Empty e1 e2 nullflavor))
       | A.Class_get (cid, prop) ->
         emit_ref_cond empty
           (emit_class_get env QueryOp.CGet false cid prop)
@@ -3553,7 +3611,7 @@ and binary_assignment_rhs_starts_with_ref = function
   | _ -> false
 
 (* Emit code for an l-value operation *)
-and emit_lval_op ~need_ref env pos op expr1 opt_expr2 =
+and emit_lval_op ?(null_coalesce_assignment=false) ~need_ref env pos op expr1 opt_expr2 =
   let op, make_ref =
     match op, opt_expr2 with
     | LValOp.Set, Some e when expr_starts_with_ref e -> LValOp.SetRef, true
@@ -3602,16 +3660,16 @@ and emit_lval_op ~need_ref env pos op expr1 opt_expr2 =
           | Some e -> emit_expr ~need_ref:make_ref env e, 1
         in
         gather [
-          emit_lval_op_nonlist env pos op expr1 rhs_instrs rhs_stack_size;
+          emit_lval_op_nonlist ~null_coalesce_assignment env pos op expr1 rhs_instrs rhs_stack_size;
           match need_ref, make_ref with
             | false, true -> emit_pos_then pos instr_unbox
             | true, false -> emit_pos_then pos instr_box
             | _ -> empty
         ]
 
-and emit_lval_op_nonlist env pos op e rhs_instrs rhs_stack_size =
+and emit_lval_op_nonlist ?(null_coalesce_assignment=false) env pos op e rhs_instrs rhs_stack_size =
   let (lhs, rhs, setop) =
-    emit_lval_op_nonlist_steps env pos op e rhs_instrs rhs_stack_size
+    emit_lval_op_nonlist_steps ~null_coalesce_assignment env pos op e rhs_instrs rhs_stack_size
   in
   gather [
     lhs;
@@ -3619,7 +3677,8 @@ and emit_lval_op_nonlist env pos op e rhs_instrs rhs_stack_size =
     setop;
   ]
 
-and emit_lval_op_nonlist_steps env outer_pos op (pos, expr_) rhs_instrs rhs_stack_size =
+and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
+  env outer_pos op (pos, expr_) rhs_instrs rhs_stack_size =
   let env =
   match op with
   (* Unbelieveably, $test[] += 5; is legal in PHP, but $test[] = $test[] + 5 is not *)
@@ -3699,22 +3758,24 @@ and emit_lval_op_nonlist_steps env outer_pos op (pos, expr_) rhs_instrs rhs_stac
       | LValOp.Unset -> MemberOpMode.Unset
       | _ -> MemberOpMode.Define in
     let elem_expr_instrs, elem_stack_size =
-      emit_elem_instrs ~local_temp_kind:None env opt_elem_expr in
+      emit_elem_instrs ~local_temp_kind:None ~null_coalesce_assignment env opt_elem_expr in
+    let elem_expr_instrs =
+      if null_coalesce_assignment then empty else elem_expr_instrs in
     let base_offset = elem_stack_size + rhs_stack_size in
     let base_expr_instrs_begin,
         base_expr_instrs_end,
         base_setup_instrs,
         base_stack_size =
-      emit_base ~notice:Notice ~is_object:false env
+      emit_base ~notice:Notice ~is_object:false ~null_coalesce_assignment env
         mode base_offset base_expr
     in
-    let mk = get_elem_member_key env rhs_stack_size opt_elem_expr in
+    let mk = get_elem_member_key ~null_coalesce_assignment env rhs_stack_size opt_elem_expr in
     let total_stack_size = elem_stack_size + base_stack_size in
     let final_instr =
       emit_pos_then pos @@
       emit_final_member_op total_stack_size op mk in
     gather [
-      base_expr_instrs_begin;
+      if null_coalesce_assignment then empty else base_expr_instrs_begin;
       elem_expr_instrs;
       base_expr_instrs_end;
     ],
@@ -3733,14 +3794,16 @@ and emit_lval_op_nonlist_steps env outer_pos op (pos, expr_) rhs_instrs rhs_stac
       | LValOp.Unset -> MemberOpMode.Unset
       | _ -> MemberOpMode.Define in
     let mk, prop_expr_instrs, prop_stack_size =
-      emit_prop_expr env null_flavor rhs_stack_size e2 in
+      emit_prop_expr ~null_coalesce_assignment env null_flavor rhs_stack_size e2 in
+    let prop_expr_instrs =
+      if null_coalesce_assignment then empty else prop_expr_instrs in
     let base_offset = prop_stack_size + rhs_stack_size in
     let base_expr_instrs_begin,
         base_expr_instrs_end,
         base_setup_instrs,
         base_stack_size =
       emit_base
-        ~notice:Notice ~is_object:true
+        ~notice:Notice ~is_object:true ~null_coalesce_assignment
         env mode base_offset e1
     in
     let total_stack_size = prop_stack_size + base_stack_size in
@@ -3748,7 +3811,7 @@ and emit_lval_op_nonlist_steps env outer_pos op (pos, expr_) rhs_instrs rhs_stac
       emit_pos_then pos @@
       emit_final_member_op total_stack_size op mk in
     gather [
-      base_expr_instrs_begin;
+      if null_coalesce_assignment then empty else base_expr_instrs_begin;
       prop_expr_instrs;
       base_expr_instrs_end;
     ],
@@ -3773,22 +3836,22 @@ and emit_lval_op_nonlist_steps env outer_pos op (pos, expr_) rhs_instrs rhs_stac
            final_instr
          ]
       | _ ->
-         let instrs, under_top = emit_first_expr env e in
-         if under_top
-         then
-           emit_load_class_ref env pos cexpr,
-           rhs_instrs,
-           gather [instrs; final_instr]
-         else
-           gather [instrs; emit_load_class_ref env pos cexpr],
-           rhs_instrs,
-           final_instr
+        let instrs, under_top = emit_first_expr env e in
+        if under_top
+        then
+          emit_load_class_ref env pos cexpr,
+          rhs_instrs,
+          gather [instrs; final_instr]
+        else
+          gather [instrs; emit_load_class_ref env pos cexpr],
+          rhs_instrs,
+          final_instr
       end
-      | _ ->
+    | _ ->
       let final_instr =
         emit_pos_then pos @@
         emit_final_static_op cid prop op in
-      of_pair @@ emit_class_expr env cexpr prop,
+      of_pair @@ emit_class_expr ~null_coalesce_assignment env cexpr prop,
       rhs_instrs,
       final_instr
     end

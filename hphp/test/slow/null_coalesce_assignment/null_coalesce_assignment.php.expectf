@@ -1,0 +1,331 @@
+test_basic()
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+test_falsey()
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+test_array_get()
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+test_array_get() $arr:
+n_dump from line %d:
+array(8) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(43)
+  [2]=>
+  int(44)
+  [3]=>
+  int(45)
+  [4]=>
+  int(46)
+  [5]=>
+  int(47)
+  [6]=>
+  int(7)
+  [100]=>
+  int(48)
+}
+
+test_counter_array()
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+test_counter_array() $carr:
+n_dump from line %d:
+object(CounterArray)#1 (2) {
+  ["container":"CounterArray":private]=>
+  array(3) {
+    [0]=>
+    int(42)
+    [1]=>
+    int(43)
+    [2]=>
+    int(44)
+  }
+  ["counter"]=>
+  int(4)
+}
+
+test_object_get()
+bool(true)
+bool(true)
+bool(true)
+test_object_get() CounterArray $obj:
+n_dump from line %d:
+object(CounterArray)#1 (5) {
+  ["container":"CounterArray":private]=>
+  array(0) {
+  }
+  ["counter"]=>
+  int(0)
+  ["addme"]=>
+  string(5) "added"
+  ["addmetoo"]=>
+  object(Closure$test_object_get;%d)#2 (0) {
+  }
+  ["42"]=>
+  string(10) "addmethree"
+}
+
+bool(true)
+bool(true)
+bool(true)
+test_object_get() MagicGetSet $obj:
+n_dump from line %d:
+object(MagicGetSet)#3 (1) {
+  ["data":"MagicGetSet":private]=>
+  array(2) {
+    ["addme"]=>
+    string(6) "add me"
+    ["addmetoo"]=>
+    string(10) "add me too"
+  }
+}
+
+test_associativity()
+bool(true)
+bool(true)
+
+test_multi_dim_basic()
+bool(true)
+n_dump from line %d:
+array(1) {
+  [4]=>
+  array(1) {
+    [2]=>
+    array(1) {
+      ["I am a constant"]=>
+      int(42)
+    }
+  }
+}
+bool(true)
+n_dump from line %d:
+object(Foo)#3 (1) {
+  ["foo2"]=>
+  object(Foo2)#4 (1) {
+    ["vbar"]=>
+    string(8) "Who am I"
+  }
+}
+bool(true)
+n_dump from line %d:
+object(Foo)#5 (1) {
+  ["foo2"]=>
+  object(Foo2)#6 (2) {
+    ["vbar"]=>
+    string(8) "Who am I"
+    ["vbar2"]=>
+    int(43)
+  }
+}
+bool(true)
+n_dump from line %d:
+object(Foo)#7 (1) {
+  ["foo2"]=>
+  object(Foo2)#8 (2) {
+    ["vbar"]=>
+    string(8) "Who am I"
+    ["bar2"]=>
+    int(42)
+  }
+}
+
+test_null_base()
+
+Notice: Undefined variable: arr in %s/hphp/test/slow/null_coalesce_assignment/null_coalesce_assignment.php on line 286
+bool(true)
+bool(true)
+bool(true)
+
+Notice: Undefined variable: obj in %s/hphp/test/slow/null_coalesce_assignment/null_coalesce_assignment.php on line 290
+
+Warning: Creating default object from empty value in %s/hphp/test/slow/null_coalesce_assignment/null_coalesce_assignment.php on line 290
+bool(true)
+
+Warning: Creating default object from empty value in %s/hphp/test/slow/null_coalesce_assignment/null_coalesce_assignment.php on line 291
+bool(true)
+n_dump from line %d:
+bool(true)
+
+test_multi_dim_lvars()
+bool(true)
+n_dump from line %d:
+array(1) {
+  [4]=>
+  array(1) {
+    [2]=>
+    array(1) {
+      [0]=>
+      int(2)
+    }
+  }
+}
+
+Notice: Undefined index: 2 in %s/slow/null_coalesce_assignment/null_coalesce_assignment.php on line 309
+bool(true)
+n_dump from line %d:
+array(2) {
+  [4]=>
+  array(1) {
+    [2]=>
+    array(1) {
+      [0]=>
+      int(2)
+    }
+  }
+  [2]=>
+  array(1) {
+    [2]=>
+    array(1) {
+      [1]=>
+      int(3)
+    }
+  }
+}
+bool(true)
+n_dump from line %d:
+array(2) {
+  [4]=>
+  array(1) {
+    [2]=>
+    array(1) {
+      [0]=>
+      int(2)
+    }
+  }
+  [2]=>
+  array(1) {
+    [2]=>
+    array(2) {
+      [1]=>
+      int(3)
+      [3]=>
+      int(5)
+    }
+  }
+}
+bool(true)
+n_dump from line %d:
+array(2) {
+  [4]=>
+  array(1) {
+    [2]=>
+    array(1) {
+      [0]=>
+      int(2)
+    }
+  }
+  [2]=>
+  array(1) {
+    [2]=>
+    array(3) {
+      [1]=>
+      int(3)
+      [3]=>
+      int(5)
+      ["I am a constant"]=>
+      string(4) "Yay!"
+    }
+  }
+}
+bool(true)
+n_dump from line %d:
+array(2) {
+  [4]=>
+  array(1) {
+    [2]=>
+    array(1) {
+      [0]=>
+      int(2)
+    }
+  }
+  [2]=>
+  array(1) {
+    [2]=>
+    array(4) {
+      [1]=>
+      int(3)
+      [3]=>
+      int(5)
+      ["I am a constant"]=>
+      string(4) "Yay!"
+      ["I too am a constant"]=>
+      int(3)
+    }
+  }
+}
+bool(true)
+n_dump from line %d:
+object(Foo)#7 (1) {
+  ["foo2"]=>
+  object(Foo2)#8 (2) {
+    ["vbar"]=>
+    string(8) "Who am I"
+    ["vbar2"]=>
+    string(11) "Don't at me"
+  }
+}
+bool(true)
+n_dump from line %d:
+object(Foo)#9 (1) {
+  ["foo2"]=>
+  object(Foo2)#10 (2) {
+    ["vbar"]=>
+    string(8) "Who am I"
+    ["vbar2"]=>
+    string(11) "Don't at me"
+  }
+}
+
+test_multi_dim_side_effects()
+a
+c
+bool(true)
+n_dump from line 348:
+array(1) {
+  ["a"]=>
+  object(Shoo)#9 (1) {
+    ["b"]=>
+    array(1) {
+      ["c"]=>
+      int(42)
+    }
+  }
+}

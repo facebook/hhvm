@@ -28,7 +28,12 @@ type action =
       old_name: string;
       new_name: string;
     }
-  | FunctionRename of string * string (* old_name * new_name *)
+  | FunctionRename of {
+      filename: string option;
+      definition: string SymbolDefinition.t option;
+      old_name: string;
+      new_name: string;
+    }
   | LocalVarRename of {
       filename: Relative_path.t;
       file_content: string;
@@ -36,3 +41,8 @@ type action =
       char: int;
       new_name: string;
     }
+
+ type deprecated_wrapper_function_ref =
+  | DeprecatedStaticMethodRef
+  | DeprecatedNonStaticMethodRef
+  | DeprecatedFunctionRef

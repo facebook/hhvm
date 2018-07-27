@@ -128,7 +128,19 @@ let go_ide conn args filename line char new_name =
 let go conn args mode before after =
     let command = match mode with
     | "Class" -> ServerRefactorTypes.ClassRename (before, after)
-    | "Function" -> ServerRefactorTypes.FunctionRename (before, after)
+    | "Function" ->
+      (*
+        We set these to `None` here because we don't want to add a deprecated
+          wrapper after the rename. Likewise for `MethodRename`
+      *)
+      let filename = None in
+      let definition = None in
+      ServerRefactorTypes.FunctionRename {
+        filename;
+        definition;
+        old_name = before;
+        new_name = after;
+      }
     | "Method" ->
       let befores = Str.split (Str.regexp "::") before in
       if (List.length befores) <> 2

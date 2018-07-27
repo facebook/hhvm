@@ -58,7 +58,7 @@
     "id": 1,
     "result": {
       "changes": {
-        "file://${root_path}${path_sep}rename.php": [
+        "${php_file_uri}": [
           {
             "range": {
               "start": {
@@ -107,7 +107,7 @@
     "id": 2,
     "result": {
       "changes": {
-        "file://${root_path}${path_sep}rename.php": [
+        "${php_file_uri}": [
           {
             "range": {
               "start": {
@@ -195,7 +195,7 @@
     "id": 3,
     "result": {
       "changes": {
-        "file://${root_path}${path_sep}rename.php": [
+        "${php_file_uri}": [
           {
             "range": {
               "start": {
@@ -257,7 +257,7 @@
     "id": 4,
     "result": {
       "changes": {
-        "file://${root_path}${path_sep}rename.php": [
+        "${php_file_uri}": [
           {
             "range": {
               "start": {
@@ -293,7 +293,7 @@
     "id": 5,
     "result": {
       "changes": {
-        "file://${root_path}${path_sep}rename.php": [
+        "${php_file_uri}": [
           {
             "range": {
               "start": {
@@ -329,15 +329,15 @@
     "id": 6,
     "result": {
       "changes": {
-        "file://${root_path}${path_sep}rename.php": [
+        "${php_file_uri}": [
           {
             "range": {
               "start": {
-                "line": 37,
+                "line": 46,
                 "character": 34
               },
               "end": {
-                "line": 37,
+                "line": 46,
                 "character": 40
               }
             },
@@ -346,11 +346,11 @@
           {
             "range": {
               "start": {
-                "line": 38,
+                "line": 47,
                 "character": 2
               },
               "end": {
-                "line": 38,
+                "line": 47,
                 "character": 8
               }
             },
@@ -359,11 +359,11 @@
           {
             "range": {
               "start": {
-                "line": 39,
+                "line": 48,
                 "character": 4
               },
               "end": {
-                "line": 39,
+                "line": 48,
                 "character": 10
               }
             },
@@ -372,11 +372,11 @@
           {
             "range": {
               "start": {
-                "line": 39,
+                "line": 48,
                 "character": 14
               },
               "end": {
-                "line": 39,
+                "line": 48,
                 "character": 20
               }
             },
@@ -385,11 +385,11 @@
           {
             "range": {
               "start": {
-                "line": 39,
+                "line": 48,
                 "character": 32
               },
               "end": {
-                "line": 39,
+                "line": 48,
                 "character": 38
               }
             },
@@ -398,11 +398,11 @@
           {
             "range": {
               "start": {
-                "line": 41,
+                "line": 50,
                 "character": 20
               },
               "end": {
-                "line": 41,
+                "line": 50,
                 "character": 26
               }
             },
@@ -411,11 +411,11 @@
           {
             "range": {
               "start": {
-                "line": 44,
+                "line": 53,
                 "character": 30
               },
               "end": {
-                "line": 44,
+                "line": 53,
                 "character": 36
               }
             },
@@ -424,11 +424,11 @@
           {
             "range": {
               "start": {
-                "line": 45,
+                "line": 54,
                 "character": 11
               },
               "end": {
-                "line": 45,
+                "line": 54,
                 "character": 17
               }
             },
@@ -482,6 +482,104 @@
               }
             },
             "newText": "\n  <<__Deprecated(\"Deprecated: Use `new_and_improved` instead\")>>\n  public function deprecated_method(int $x, string $y, int $v, ...): int {\n    return $this->new_and_improved($x, $y, $v, ...Vec\\drop(func_get_args(), 3));\n  }\n"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 8,
+    "result": {
+      "changes": {
+        "${php_file_uri}": [
+          {
+            "range": {
+              "start": {
+                "line": 26,
+                "character": 9
+              },
+              "end": {
+                "line": 26,
+                "character": 20
+              }
+            },
+            "newText": "new_test_rename_method"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 42,
+                "character": 2
+              },
+              "end": {
+                "line": 42,
+                "character": 13
+              }
+            },
+            "newText": "new_test_rename_method"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 25,
+                "character": 0
+              },
+              "end": {
+                "line": 25,
+                "character": 0
+              }
+            },
+            "newText": "\n<<__Deprecated(\"Deprecated: Use `new_test_rename_method` instead\")>>\nfunction test_rename(): void {\n  return new_test_rename_method();\n}\n"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 9,
+    "result": {
+      "changes": {
+        "${php_file_uri}": [
+          {
+            "range": {
+              "start": {
+                "line": 37,
+                "character": 15
+              },
+              "end": {
+                "line": 37,
+                "character": 32
+              }
+            },
+            "newText": "new_async_test_rename_method"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 43,
+                "character": 15
+              },
+              "end": {
+                "line": 43,
+                "character": 32
+              }
+            },
+            "newText": "new_async_test_rename_method"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 36,
+                "character": 0
+              },
+              "end": {
+                "line": 36,
+                "character": 0
+              }
+            },
+            "newText": "\n<<__Deprecated(\"Deprecated: Use `new_async_test_rename_method` instead\")>>\nasync function async_test_rename(): Awaitable<int> {\n  return await new_async_test_rename_method();\n}\n"
           }
         ]
       }

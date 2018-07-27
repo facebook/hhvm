@@ -48,12 +48,13 @@ let find_def_filename current_filename definition =
 
 *)
 let construct_deprecated_wrapper_stub
-  ~func_decl_text
-  ~params_text_list
-  ~col_start
-  ~is_async
-  ~is_static
-  new_name =
+  ~(func_decl_text: string)
+  ~(params_text_list: string list)
+  ~(col_start: int)
+  ~(is_async: bool)
+  ~(func_ref: deprecated_wrapper_function_ref)
+   (new_name: string)
+  : string =
   (* Since the starting column position points to the beginning of the function
       declaration header, we can use it to figure out the indentation level
       of the function, and insert whitespace accordingly *)
@@ -71,14 +72,14 @@ let construct_deprecated_wrapper_stub
     then "await "
     else ""
   in
-  let this_or_self =
-    if is_static
-    then "self::"
-    else "$this->"
+  let maybe_this_or_self = match func_ref with
+    | DeprecatedStaticMethodRef -> "self::"
+    | DeprecatedNonStaticMethodRef -> "$this->"
+    | DeprecatedFunctionRef -> ""
   in
   let return_statement =
     return_indentation ^
-    "return " ^ maybe_await ^ this_or_self ^
+    "return " ^ maybe_await ^ maybe_this_or_self ^
     new_name ^ "(" ^ parameter_input ^ ");"
   in
   "\n" ^ deprecated_header ^
@@ -115,73 +116,94 @@ let get_deprecated_wrapper_patch ~filename ~definition new_name =
   let cst_node =
     ServerSymbolDefinition.get_definition_cst_node filename_server_type definition in
   cst_node >>= fun cst_node ->
-  begin match cst_node with
-    | {
-        syntax =
-          MethodishDeclaration {
-            methodish_function_decl_header = func_decl; _
-          }; _
+  let get_params_modifier_info func_decl = match syntax func_decl with
+    | FunctionDeclarationHeader {
+        function_parameter_list = params;
+        function_modifiers = modifiers; _
       } ->
-      let func_decl_text = text func_decl in
-      let params_text_list, is_async, is_static = match syntax func_decl with
-        | FunctionDeclarationHeader {
-            function_parameter_list = params;
-            function_modifiers = modifiers; _
-          } ->
-            let params_text_list = match syntax params with
-              | SyntaxList params ->
-                let params_text_list = List.map params ~f:begin fun param ->
-                  let param = match syntax param with
-                    | ListItem { list_item; _ } -> list_item
-                    | _ -> failwith "Expected ListItem"
-                  in
-                  match syntax param with
-                  (* NOTE:
-                     `ParameterDeclaration` includes regular params like "$x" and
-                      _named_ variadic parameters like "...$nums". For the latter case,
-                      calling `text parameter_name` will return the entire "...$nums"
-                      string, including the ellipsis.
+        let params_text_list = match syntax params with
+          | SyntaxList params ->
+            let params_text_list = List.map params ~f:begin fun param ->
+              let param = match syntax param with
+                | ListItem { list_item; _ } -> list_item
+                | _ -> failwith "Expected ListItem"
+              in
+              match syntax param with
+              (* NOTE:
+                 `ParameterDeclaration` includes regular params like "$x" and
+                  _named_ variadic parameters like "...$nums". For the latter case,
+                  calling `text parameter_name` will return the entire "...$nums"
+                  string, including the ellipsis.
 
-                    `VariadicParameter` addresses the unnamed variadic parameter
-                      "...". In this case, we provide as a parameter a function call
-                      that outputs only the variadic params (and dropping the
-                      non-variadic ones).
-                  *)
-                    | ParameterDeclaration { parameter_name = name; _ } -> text name
-                    | VariadicParameter _ ->
-                      let num_of_nonvariadic_params = string_of_int ((List.length params) - 1) in
-                      "...Vec\\drop(func_get_args(), " ^ num_of_nonvariadic_params ^ ")"
-                    | _ -> failwith "Expected some parameter type"
-                end in
-                Some params_text_list
-              | Missing -> Some []
-              | _ -> None
+                `VariadicParameter` addresses the unnamed variadic parameter
+                  "...". In this case, we provide as a parameter a function call
+                  that outputs only the variadic params (and dropping the
+                  non-variadic ones).
+              *)
+                | ParameterDeclaration { parameter_name = name; _ } -> text name
+                | VariadicParameter _ ->
+                  let num_of_nonvariadic_params = string_of_int ((List.length params) - 1) in
+                  "...Vec\\drop(func_get_args(), " ^ num_of_nonvariadic_params ^ ")"
+                | _ -> failwith "Expected some parameter type"
+            end in
+            Some params_text_list
+          | Missing -> Some []
+          | _ -> None
+        in
+        let is_async, is_static = match syntax modifiers with
+          | SyntaxList modifiers ->
+            let is_async =
+              List.exists modifiers ~f:(fun modifier -> (text modifier) = "async")
             in
-            let is_async, is_static = match syntax modifiers with
-              | SyntaxList modifiers ->
-                let is_async =
-                  List.exists modifiers ~f:(fun modifier -> (text modifier) = "async")
-                in
-                let is_static =
-                  List.exists modifiers ~f:(fun modifier -> (text modifier) = "static")
-                in
-                is_async, is_static
-              | _ -> false, false
+            let is_static =
+              List.exists modifiers ~f:(fun modifier -> (text modifier) = "static")
             in
-            params_text_list, is_async, is_static
-        | _ -> None, false, false
+            is_async, is_static
+          | _ -> false, false
+        in
+        params_text_list, is_async, is_static
+    | _ -> None, false, false
+  in
+  begin match cst_node with
+  | {
+      syntax =
+        MethodishDeclaration {
+          methodish_function_decl_header = func_decl; _
+        }; _
+    } ->
+      let func_decl_text = text func_decl in
+      let params_text_list, is_async, is_static =
+        get_params_modifier_info func_decl
+      in
+      let func_ref =
+        if is_static
+        then DeprecatedStaticMethodRef
+        else DeprecatedNonStaticMethodRef
       in
       params_text_list >>= fun params_text_list ->
-      Some (func_decl_text, params_text_list, is_async, is_static)
-    | _ -> None
-  end >>| fun (func_decl_text, params_text_list, is_async, is_static) ->
+      Some (func_decl_text, params_text_list, is_async, func_ref)
+  | {
+      syntax =
+        FunctionDeclaration {
+          function_declaration_header = func_decl; _
+        }; _
+    } ->
+      let func_decl_text = text func_decl in
+      let params_text_list, is_async, _ =
+        get_params_modifier_info func_decl
+      in
+      let func_ref = DeprecatedFunctionRef in
+      params_text_list >>= fun params_text_list ->
+      Some (func_decl_text, params_text_list, is_async, func_ref)
+  | _ -> None
+  end >>| fun (func_decl_text, params_text_list, is_async, func_ref) ->
   let deprecated_wrapper_stub =
     construct_deprecated_wrapper_stub
       ~func_decl_text
       ~params_text_list
       ~col_start
       ~is_async
-      ~is_static
+      ~func_ref
       new_name
   in
   let filename =
@@ -205,7 +227,7 @@ let go action genv env =
     | MethodRename { class_name; old_name; new_name; _ } ->
         Types.Member (class_name, Types.Method old_name),
           new_name
-    | FunctionRename (old_name, new_name) ->
+    | FunctionRename { old_name; new_name; _ } ->
         Types.Function old_name, new_name
     | LocalVarRename { filename; file_content; line; char; new_name } ->
         Types.LocalVar { filename; file_content; line; char }, new_name in
@@ -220,9 +242,9 @@ let go action genv env =
     patch :: acc
   end ~init:[] in
   let deprecated_wrapper_patch = match action with
+    | FunctionRename { filename; definition; _ }
     | MethodRename { filename; definition; _ } ->
       get_deprecated_wrapper_patch ~filename ~definition new_name
-    | FunctionRename _
     | ClassRename _
     | ClassConstRename _
     | LocalVarRename _ -> None
@@ -241,7 +263,12 @@ let go_ide (filename, line, char) new_name genv env =
     match kind, pieces with
     | Function, [function_name] ->
       let command =
-        ServerRefactorTypes.FunctionRename (function_name, new_name) in
+        ServerRefactorTypes.FunctionRename {
+          filename = Some filename;
+          definition = Some definition;
+          old_name = function_name;
+          new_name;
+        } in
       go command genv env
     | Class, [class_name] ->
       let command =

@@ -106,7 +106,7 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 41,
+        "line": 50,
         "character": 23
       },
       "newName": "kittens_and_rainbows"
@@ -125,6 +125,36 @@
         "character": 29
       },
       "newName": "new_and_improved"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 8,
+    "method": "textDocument/rename",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 42,
+        "character": 11
+      },
+      "newName": "new_test_rename_method"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 9,
+    "method": "textDocument/rename",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 43,
+        "character": 29
+      },
+      "newName": "new_async_test_rename_method"
     }
   },
   {

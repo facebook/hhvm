@@ -35,6 +35,15 @@ function test_rename(): void {
   $num = $test_class->deprecated_method(5, "", 4, 4, 3, 5, "hello");
 }
 
+async function async_test_rename(): Awaitable<int> {
+  return 5;
+}
+
+async function call_test_rename(): Awaitable<int> {
+  test_rename(); // 8. Rename test_rename
+  return await async_test_rename(); // 9. Rename async_test_rename
+}
+
 function test_rename_localvar(int $local): void {      //  Should match
   $local = 3;                                           //  Should match
   j($local) + $local + h("\$x = $local");     //  1st, 2nd, and 4th should match

@@ -7,15 +7,20 @@
  *
  *)
 
+type query =
+  | And of query list
+  | Or of query list
+  | Term of string
+
 type t
 
 val make : unit -> t
 
 val update : t -> string -> string list -> unit
 (** Given a function name and a list of search terms to associate with that
-    function, mutate the given index to associate those search terms with the given
+    function, mutate the given index to associate these search terms with the given
     function. *)
 
-val get : t -> string -> SSet.t
-(** Return the set of function names associated with the given search_term in
-    the given index. *)
+val get : t -> query -> string list
+(** Return an ordered list of function names associated with the given query
+    from the index *)

@@ -20,8 +20,7 @@ let documents =
   ]
 
 let verify_query index query exp =
-  let results = get index query in
-  assert_equal exp (SSet.elements results)
+  assert_equal exp (get index query)
 
 let assert_results
     ~search_term
@@ -37,12 +36,12 @@ let index_test_suite =
   "update_index" >:::
   [ "no_results" >::
     assert_results
-      ~search_term:"arity=3"
+      ~search_term:(Term "arity=3")
       ~exp:[]
 
   ; "valid_return_type" >::
     assert_results
-      ~search_term:"ret<:void"
+      ~search_term:(Term "ret<:void")
       ~exp:["\\set_string"]
 
   ; "identical_search_terms" >::
@@ -57,17 +56,17 @@ let index_test_suite =
       List.iter identical_funs ~f:(fun (name, terms) ->
         update index name terms
       );
-      verify_query index "ret<:string" ["\\identical_fun"]
+      verify_query index (Term "ret<:string") ["\\identical_fun"]
     end
 
   ; "verify_update" >::
     assert_results
-      ~search_term:"arg1<:int"
+      ~search_term:(Term "arg1<:int")
       ~exp:["\\int_to_string"; "\\sum"]
 
   ; "invalid_query" >::
     assert_results
-      ~search_term:"arg0<:"
+      ~search_term:(Term "arg0<:")
       ~exp:[]
   ]
 

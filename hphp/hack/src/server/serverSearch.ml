@@ -58,7 +58,7 @@ let result_to_json res =
 
 let re_colon_colon = Str.regexp "::"
 
-let go popt workers query type_ =
+let go tcopt workers query type_ =
   let fuzzy = !HackSearchService.fuzzy in
   let results =
     (* If query contains "::", search class methods instead of top level definitions *)
@@ -66,7 +66,7 @@ let go popt workers query type_ =
     | [class_name_query; method_query] ->
       (* Get the class with the most similar name to `class_name_query` *)
       let class_ =
-        HackSearchService.MasterApi.query popt ~fuzzy workers class_name_query type_
+        HackSearchService.MasterApi.query tcopt ~fuzzy workers class_name_query type_
         |> List.find ~f:begin fun result ->
           match result with
           | SearchUtils.{result_type = HackSearchService.Class _; _} -> true
@@ -75,14 +75,16 @@ let go popt workers query type_ =
       in
       begin match class_ with
       | Some SearchUtils.{name; _} ->
-        HackSearchService.ClassMethods.query popt name method_query
+        HackSearchService.ClassMethods.query tcopt name method_query
       | None ->
         (* When we can't find a class with a name similar to the given one,
            just return no search results. *)
         []
       end
     | _  ->
-      HackSearchService.MasterApi.query popt ~fuzzy workers query type_
+      match SignatureSearchParser.parse_query query with
+      | Some signature_query -> SignatureSearchService.go tcopt signature_query
+      | None -> HackSearchService.MasterApi.query tcopt ~fuzzy workers query type_
   in
 
   List.map results SearchUtils.to_absolute

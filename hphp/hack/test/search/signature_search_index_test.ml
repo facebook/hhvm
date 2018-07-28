@@ -11,36 +11,12 @@ open Hh_core
 open OUnit
 open SignatureSearchIndex
 
-let default_terms =
-  [ "\\int_to_string",
-    [ Arity 1
-    ; Parameter {position = 1; type_ = ITprim Nast.Tint}
-    ; Return_type (ITprim Nast.Tstring)
-    ]
-
-  ; "\\sum",
-    [ Arity 2
-    ; Parameter {position = 1; type_ = ITprim Nast.Tint}
-    ; Parameter {position = 2; type_ = ITprim Nast.Tint}
-    ; Return_type (ITprim Nast.Tint)
-    ]
-
-  ; "\\C\\count",
-    [ Arity 1
-    ; Parameter {position = 1; type_ = ITapply "Container"}
-    ; Return_type (ITprim Nast.Tint)
-    ]
-
-  ; "\\get_string",
-    [ Arity 0
-    ; Return_type (ITprim Nast.Tstring)
-    ]
-
-  ; "\\set_string",
-    [ Arity 1
-    ; Parameter {position = 1; type_ = ITprim Nast.Tstring}
-    ; Return_type (ITprim Nast.Tvoid)
-    ]
+let documents =
+  [ "\\int_to_string", ["arity=1"; "arg1<:int"; "ret<:string"]
+  ; "\\sum"          , ["arity=2"; "arg1<:int"; "arg2<:int"; "ret<:int"]
+  ; "\\C\\count"     , ["arity=1"; "arg1<:Container"; "ret<:int"]
+  ; "\\get_string"   , ["arity=0"; "ret<:string"]
+  ; "\\set_string"   , ["arity=1"; "arg1<:string"; "ret<:void"]
   ]
 
 let verify_query index query exp =
@@ -52,7 +28,7 @@ let assert_results
     ~exp
     () =
   let index = make () in
-  List.iter default_terms ~f:(fun (name, terms) ->
+  List.iter documents ~f:(fun (name, terms) ->
     update index name terms
   );
   verify_query index search_term exp
@@ -61,52 +37,37 @@ let index_test_suite =
   "update_index" >:::
   [ "no_results" >::
     assert_results
-      ~search_term:(Arity 3)
+      ~search_term:"arity=3"
       ~exp:[]
 
   ; "valid_return_type" >::
     assert_results
-      ~search_term:(Return_type (ITprim Nast.Tvoid))
+      ~search_term:"ret<:void"
       ~exp:["\\set_string"]
 
   ; "identical_search_terms" >::
     begin fun () ->
       let index = make () in
       let identical_funs =
-        [ "\\identical_fun",
-          [ Arity 1
-          ; Parameter {position = 1; type_ = ITapply "vec"}
-          ; Return_type (ITprim Nast.Tstring)
-          ]
-
-        ; "\\identical_fun",
-          [ Arity 1
-          ; Parameter {position = 1; type_ = ITapply "vec"}
-          ; Return_type (ITprim Nast.Tstring)
-          ]
-
-        ; "\\identical_fun",
-          [ Arity 1
-          ; Parameter {position = 1; type_ = ITapply "vec"}
-          ; Return_type (ITprim Nast.Tstring)
-          ]
+        [ "\\identical_fun", ["ret<:string"]
+        ; "\\identical_fun", ["ret<:string"]
+        ; "\\identical_fun", ["ret<:string"]
         ]
       in
       List.iter identical_funs ~f:(fun (name, terms) ->
         update index name terms
       );
-      let search_term = Return_type (ITprim Nast.Tstring) in
-      verify_query index search_term ["\\identical_fun"]
+      verify_query index "ret<:string" ["\\identical_fun"]
     end
 
   ; "verify_update" >::
     assert_results
-      ~search_term:(Parameter {position = 1; type_ = ITprim Nast.Tint})
+      ~search_term:"arg1<:int"
       ~exp:["\\int_to_string"; "\\sum"]
 
   ; "invalid_query" >::
     assert_results
-      ~search_term:(Parameter {position = 0; type_ = ITapply ""})
+      ~search_term:"arg0<:"
       ~exp:[]
   ]
 

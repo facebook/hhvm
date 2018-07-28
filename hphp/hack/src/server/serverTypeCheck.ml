@@ -266,7 +266,7 @@ let parsing genv env to_check ~stop_at_errors =
   SearchServiceRunner.update_fileinfo_map fast;
   (* During integration tests, we want to pretend that search is run
     synchronously *)
-  if SearchServiceRunner.should_run_completely genv
+   if SearchServiceRunner.should_run_completely genv
     then SearchServiceRunner.run_completely genv;
 
   if stop_at_errors then begin
@@ -771,6 +771,10 @@ end = functor(CheckKind:CheckKindType) -> struct
 
     let _ : bool = Typing_deps.allow_dependency_table_reads
       deptable_unlocked in
+
+    (* Build SignatureSearch Index after Type-decl phase *)
+    SignatureSearchService.build env.tcopt env.files_info;
+
     (* TYPE CHECKING *)
     let fast, lazy_check_later = CheckKind.get_defs_to_recheck
       files_to_parse fast files_info to_recheck env in

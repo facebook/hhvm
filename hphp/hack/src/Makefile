@@ -73,6 +73,7 @@ MODULES=\
   procs\
   recorder\
   search\
+	search/signatures\
   server\
   socket\
   stubs\

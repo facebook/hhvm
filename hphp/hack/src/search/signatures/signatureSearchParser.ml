@@ -9,15 +9,34 @@
 
 open Hh_core
 
-type parsed_query = {
-  function_params : string list;
-  function_output : string;
+type type_specifier =
+  | TSsimple of string
+  | TSoption of type_specifier
+
+type query_type =
+  | QTtype of type_specifier
+  | QTwildcard
+
+type signature_query = {
+  function_params : query_type list;
+  function_output : query_type;
 }
 
 let re_function_query = Str.regexp "[ \t]*function[ \t]*(\\([^)]*\\))[ \t]*:\\([^)]*\\)"
 
+let re_indexable_type = Str.regexp {|\??\\?[ \t]*[_a-zA-z][\_a-zA-Z0-9]*|}
+
+let parse_query_type type_str =
+  if not (Str.string_match re_indexable_type type_str 0) then None
+  else if type_str = "_" then Some QTwildcard
+  else if type_str.[0] = '?' then
+    let type_str = Str.string_after type_str 1 in
+    let type_str = String.trim type_str in
+    Some (QTtype (TSoption (TSsimple type_str)))
+  else Some (QTtype (TSsimple type_str))
+
 (* Match query to a format of function(type,type,_):type *)
-let parse_query (query : string) : parsed_query option =
+let parse_query (query : string) : signature_query option =
   try
     let _ : int = Str.search_forward re_function_query query 0 in
     let function_output = String.trim (Str.matched_group 2 query) in
@@ -29,7 +48,13 @@ let parse_query (query : string) : parsed_query option =
         | "" -> None
         | trimmed_input -> Some trimmed_input
       )
-     in
-     Some {function_params; function_output}
+      |> List.map ~f:parse_query_type
+      |> Option.all
+    in
+    let function_output = parse_query_type function_output in
+    match function_params, function_output with
+    | Some function_params, Some function_output ->
+      Some {function_params; function_output}
+    | _ -> None
   with
   | Not_found -> None

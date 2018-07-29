@@ -58,8 +58,9 @@ set(OLD_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
 set(CMAKE_REQUIRED_FLAGS "-std=c++1y")
 CHECK_CXX_SOURCE_COMPILES("
 #include <atomic>
+#include <stdint.h>
 int main() {
-    struct Test { int val; };
+    struct Test { int64_t val1; int64_t val2; };
     std::atomic<Test> s;
     s.is_lock_free();
 }

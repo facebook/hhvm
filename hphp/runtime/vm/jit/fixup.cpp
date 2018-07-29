@@ -61,6 +61,7 @@ struct VMRegs {
   PC pc;
   TypedValue* sp;
   const ActRec* fp;
+  TCA retAddr;
 };
 
 struct IndirectFixup {
@@ -102,7 +103,7 @@ PC pc(const ActRec* /*ar*/, const Func* f, const Fixup& fixup) {
   return f->getEntry() + fixup.pcOffset;
 }
 
-void regsFromActRec(CTCA tca, const ActRec* ar, const Fixup& fixup,
+void regsFromActRec(TCA tca, const ActRec* ar, const Fixup& fixup,
                     VMRegs* outRegs) {
   const Func* f = ar->m_func;
   assertx(f);
@@ -111,6 +112,7 @@ void regsFromActRec(CTCA tca, const ActRec* ar, const Fixup& fixup,
   assertx(fixup.spOffset >= 0);
   outRegs->pc = pc(ar, f, fixup);
   outRegs->fp = ar;
+  outRegs->retAddr = tca;
 
   if (UNLIKELY(ar->resumed())) {
     TypedValue* stackBase = Stack::resumableStackBase(ar);
@@ -123,7 +125,7 @@ void regsFromActRec(CTCA tca, const ActRec* ar, const Fixup& fixup,
 //////////////////////////////////////////////////////////////////////
 
 bool getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) {
-  CTCA tca = (CTCA)ar->m_savedRip;
+  TCA tca = (TCA)ar->m_savedRip;
 
   auto ent = s_fixups.find(tc::addrToOffset(tca));
   if (!ent) return false;
@@ -133,9 +135,8 @@ bool getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) {
   if (ent->isIndirect()) {
     auto savedRIPAddr = reinterpret_cast<uintptr_t>(ar) +
                         ent->indirect.returnIpDisp;
-    ent = s_fixups.find(
-      tc::addrToOffset(*reinterpret_cast<CTCA*>(savedRIPAddr))
-    );
+    tca = *reinterpret_cast<TCA*>(savedRIPAddr);
+    ent = s_fixups.find(tc::addrToOffset(tca));
     assertx(ent && !ent->isIndirect());
   }
 
@@ -194,6 +195,7 @@ void fixupWork(ExecutionContext* /*ec*/, ActRec* nextRbp) {
         vmRegs.fp = const_cast<ActRec*>(regs.fp);
         vmRegs.pc = reinterpret_cast<PC>(regs.pc);
         vmRegs.stack.top() = regs.sp;
+        vmRegs.jitReturnAddr = regs.retAddr;
         return;
       }
     }

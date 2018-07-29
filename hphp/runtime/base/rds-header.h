@@ -58,6 +58,10 @@ struct VMRegs {
    * this is just a single pointer. */
   ActRec* jitCalledFrame;
 
+  /* Holds the address at which execution will resume in the TC for the last
+     TC frame in this VM nesting. */
+  jit::TCA jitReturnAddr;
+
   TYPE_SCAN_CUSTOM() {
     // ActRecs are always interior pointers so the type-scanner won't
     // automatically enqueue them.

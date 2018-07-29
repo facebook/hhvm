@@ -176,6 +176,7 @@ struct Vgen {
     // skip the "ld 2,24(1)" or "nop" emitted by "Assembler::call" at the end
     TCA saved_pc = a.frontier() - call_skip_bytes_for_ret;
     env.meta.catches.emplace_back(saved_pc, nullptr);
+    env.record_inline_stack(saved_pc);
   }
 
   // instructions
@@ -599,6 +600,7 @@ void Vgen::emit(const syncpoint& i) {
   FTRACE(5, "IR recordSyncPoint: {} {} {}\n", saved_pc,
          i.fix.pcOffset, i.fix.spOffset);
   env.meta.fixups.emplace_back(saved_pc, i.fix);
+  env.record_inline_stack(saved_pc);
 }
 
 /*
@@ -641,6 +643,7 @@ void Vgen::emit(const unwind& i) {
   // skip the "ld 2,24(1)" or "nop" emitted by "Assembler::call" at the end
   TCA saved_pc = a.frontier() - call_skip_bytes_for_ret;
   catches.push_back({saved_pc, i.targets[1]});
+  env.record_inline_stack(saved_pc);
   emit(jmp{i.targets[0]});
 }
 

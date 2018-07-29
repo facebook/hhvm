@@ -719,16 +719,19 @@ void Vgen::emit(const calltc& i) {
 
 void Vgen::emit(const nothrow& /*i*/) {
   env.meta.catches.emplace_back(a.frontier(), nullptr);
+  env.record_inline_stack(a.frontier());
 }
 
 void Vgen::emit(const syncpoint& i) {
   FTRACE(5, "IR recordSyncPoint: {} {} {}\n", a.frontier(),
          i.fix.pcOffset, i.fix.spOffset);
   env.meta.fixups.emplace_back(a.frontier(), i.fix);
+  env.record_inline_stack(a.frontier());
 }
 
 void Vgen::emit(const unwind& i) {
   catches.push_back({a.frontier(), i.targets[1]});
+  env.record_inline_stack(a.frontier());
   emit(jmp{i.targets[0]});
 }
 

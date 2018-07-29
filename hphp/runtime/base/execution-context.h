@@ -60,6 +60,7 @@ struct VMState {
   TypedValue* sp;
   MInstrState mInstrState;
   ActRec* jitCalledFrame;
+  jit::TCA jitReturnAddr;
 };
 
 enum class InclOpFlags {
@@ -412,7 +413,8 @@ public:
   ActRec* getPrevVMState(const ActRec* fp,
                          Offset* prevPc = nullptr,
                          TypedValue** prevSp = nullptr,
-                         bool* fromVMEntry = nullptr);
+                         bool* fromVMEntry = nullptr,
+                         uint64_t* jitReturnAddr = nullptr);
   ActRec* getPrevVMStateSkipFrame(const ActRec* fp,
                                   Offset* prevPc = nullptr,
                                   TypedValue** prevSp = nullptr,

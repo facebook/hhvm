@@ -174,10 +174,20 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
      * But the target is an instruction, so skip over any nops
      * that might have been inserted (eg for alignment).
      */
-    if (auto const adjusted = rel.adjustedAddressAfter(ct.second)) {
-      ct.second = adjusted;
-    }
+     if (auto const adjusted = rel.adjustedAddressAfter(ct.second)) {
+       ct.second = adjusted;
+     }
   }
+
+  for (auto& is : meta.inlineStacks) {
+    /*
+     * As with fixups and catches these are return addresses.
+     */
+     if (auto const adjusted = rel.adjustedAddressBefore(is.first)) {
+       is.first = adjusted;
+     }
+   }
+
 
   for (auto& jt : meta.jmpTransIDs) {
     if (auto const adjusted = rel.adjustedAddressAfter(jt.first)) {

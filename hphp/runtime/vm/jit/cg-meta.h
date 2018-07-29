@@ -31,6 +31,20 @@
 
 namespace HPHP { namespace jit {
 
+using IFrameID = int32_t;
+
+struct IFrame {
+  const Func* func; // callee (m_func)
+  int32_t soff;     // caller offset (m_soff)
+  IFrameID parent;  // parent frame (m_sfp)
+};
+
+struct IStack {
+  IFrameID frame; // leaf frame in this stack
+  uint32_t nframes;
+  uint32_t soff;
+};
+
 /*
  * CGMeta contains a variety of different metadata information that is
  * collected during code generation.
@@ -63,9 +77,11 @@ struct CGMeta {
    * Pending MCGenerator table entries.
    */
   std::vector<std::pair<TCA,Fixup>> fixups;
-  std::vector<std::pair<CTCA,TCA>> catches;
+  std::vector<std::pair<TCA,TCA>> catches;
   std::vector<std::pair<TCA,TransID>> jmpTransIDs;
   std::vector<std::pair<TCA,Reason>> trapReasons;
+  std::vector<IFrame> inlineFrames;
+  std::vector<std::pair<TCA,IStack>> inlineStacks;
 
   /*
    * On some architectures (like ARM) we want to pool up literals and emit them
@@ -188,6 +204,30 @@ Reason* getTrapReason(CTCA addr);
 void poolLiteral(CodeBlock& cb, CGMeta& meta, uint64_t val, uint8_t width,
                   bool smashable);
 
+folly::Optional<IStack> inlineStackAt(CTCA addr);
+IFrame getInlineFrame(IFrameID id);
+
 }}
+
+namespace folly {
+template<> class FormatValue<HPHP::jit::IFrame> {
+public:
+  explicit FormatValue(HPHP::jit::IFrame ifr) : m_ifr(ifr) {}
+
+  template<typename Callback>
+  void format(FormatArg& arg, Callback& cb) const {
+    auto str = folly::sformat(
+      "IFrame{func = {}, soff = {}, parent = {}}",
+      m_ifr.func->fullName()->data(),
+      m_ifr.soff,
+      m_ifr.parent
+    );
+    format_value::formatString(str, arg, cb);
+  }
+
+private:
+  HPHP::jit::IFrame m_ifr;
+};
+}
 
 #endif

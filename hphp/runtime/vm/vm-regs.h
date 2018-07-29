@@ -124,6 +124,10 @@ inline ActRec*& vmJitCalledFrame() {
   return vmRegsUnsafe().jitCalledFrame;
 }
 
+inline jit::TCA& vmJitReturnAddr() {
+  return vmRegsUnsafe().jitReturnAddr;
+}
+
 inline void assert_native_stack_aligned() {
 #ifndef _MSC_VER
   assertx(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)) % 16 == 0);

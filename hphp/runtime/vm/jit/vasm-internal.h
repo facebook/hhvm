@@ -49,6 +49,8 @@ struct Venv {
     , meta(meta)
   {}
 
+  void record_inline_stack(TCA);
+
   Vunit& unit;
   Vtext& text;
   CGMeta& meta;
@@ -58,12 +60,15 @@ struct Venv {
   Vlabel current{0};
   Vlabel next{0};
 
+  uint32_t pending_frames{0}; // unpushed inlined frames
   int frame{-1};
   CodeAddress framestart;
+  const IRInstruction* origin;
 
   jit::vector<CodeAddress> addrs;
   jit::vector<LabelPatch> jmps, jccs;
   jit::vector<LabelPatch> catches;
+  jit::vector<std::pair<TCA,IStack>> stacks;
 
   /*
    * fallThrus allow Vgen::patch to know if a Vunit falls through to the next

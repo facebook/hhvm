@@ -50,7 +50,34 @@ const StaticString
   s_arrow("->"),
   s_double_colon("::");
 
-static c_WaitableWaitHandle* getParentWH(
+namespace {
+
+struct BTContext {
+  BTContext() {
+    auto const flags = ActRec::LocalsDecRefd; // don't attempt to read locals
+    auto const handler = (intptr_t)jit::tc::ustubs().retInlHelper;
+    fakeAR[0].m_sfp = &fakeAR[1];
+    fakeAR[1].m_sfp = &fakeAR[0];
+    fakeAR[0].m_savedRip = fakeAR[1].m_savedRip = handler;
+    fakeAR[0].m_numArgsAndFlags = fakeAR[1].m_numArgsAndFlags = flags;
+  }
+
+  bool hasInlFrames{false};
+
+  // fakeAR is used to generate pseudo-frames representing inlined functions
+  // whose frames have been elided. The array operates like a ring buffer as
+  // createBacktrace needs to inspect the current and previous frame pointer,
+  // thus we introduce an m_sfp cycle between these frames.
+  ActRec fakeAR[2];
+  jit::IStack inlineStack;
+
+  // stashedAR stores a pointer to the frame that should be returned after the
+  // inlined stack has been traversed and stashedPC stores the corresponding PC.
+  ActRec* stashedAR{nullptr};
+  Offset stashedPC{kInvalidOffset};
+};
+
+c_WaitableWaitHandle* getParentWH(
     c_WaitableWaitHandle* wh,
     context_idx_t contextIdx,
     folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs) {
@@ -68,7 +95,7 @@ static c_WaitableWaitHandle* getParentWH(
 }
 
 // walks up the wait handle dependency chain, until it finds activation record
-static ActRec* getActRecFromWaitHandle(
+ActRec* getActRecFromWaitHandle(
     c_WaitableWaitHandle* currentWaitHandle,
     context_idx_t contextIdx,
     Offset* prevPc,
@@ -92,10 +119,57 @@ static ActRec* getActRecFromWaitHandle(
   return AsioSession::Get()->getContext(contextIdx)->getSavedFP();
 }
 
-static ActRec* getPrevActRec(
-    const ActRec* fp, Offset* prevPc,
+ActRec* initBTContextAt(
+  BTContext& ctx, jit::CTCA ip, ActRec* fp, Offset* prevPc
+) {
+  if (auto stk = jit::inlineStackAt(ip)) {
+    assertx(stk->nframes != 0);
+    auto prevFp = &ctx.fakeAR[0];
+    auto ifr = jit::getInlineFrame(stk->frame);
+    ctx.inlineStack = *stk;
+    prevFp->m_soff = ifr.soff;
+    prevFp->m_func = ifr.func;
+
+    ctx.stashedAR = fp;
+    ctx.inlineStack.frame = ifr.parent;
+    ctx.hasInlFrames = --ctx.inlineStack.nframes > 0;
+    if (prevPc) {
+      ctx.stashedPC = *prevPc;
+      *prevPc = stk->soff + ifr.func->base();
+    }
+    return prevFp;
+  }
+  return nullptr;
+}
+
+ActRec* getPrevActRec(
+    BTContext& ctx, const ActRec* fp, Offset* prevPc,
     folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs) {
   c_WaitableWaitHandle* currentWaitHandle = nullptr;
+
+  if (UNLIKELY(ctx.hasInlFrames)) {
+    assertx(fp == &ctx.fakeAR[0] || fp == &ctx.fakeAR[1]);
+    assertx(fp->m_sfp == &ctx.fakeAR[0] || fp->m_sfp == &ctx.fakeAR[1]);
+    assertx(fp != fp->m_sfp);
+    assertx(ctx.inlineStack.nframes > 0);
+
+    auto prevFp = fp->m_sfp;
+    auto ifr = jit::getInlineFrame(ctx.inlineStack.frame);
+    prevFp->m_soff = ifr.soff;
+    prevFp->m_func = ifr.func;
+
+    ctx.inlineStack.frame = ifr.parent;
+    ctx.hasInlFrames = --ctx.inlineStack.nframes > 0;
+    if (prevPc) *prevPc = fp->m_soff + ifr.func->base();
+    return prevFp;
+  }
+
+  if (auto ret = ctx.stashedAR) {
+    if (prevPc && ctx.stashedPC != kInvalidOffset) *prevPc = ctx.stashedPC;
+    ctx.stashedAR = nullptr;
+    ctx.stashedPC = kInvalidOffset;
+    return ret;
+  }
 
   if (fp && fp->func() && fp->resumed()) {
     if (fp->func()->isAsyncFunction()) {
@@ -107,6 +181,9 @@ static ActRec* getPrevActRec(
       }
     }
   }
+
+  ActRec* prevFp;
+  auto rip = fp ? fp->m_savedRip : 0;
 
   if (currentWaitHandle != nullptr) {
     if (currentWaitHandle->isFinished()) {
@@ -124,15 +201,23 @@ static ActRec* getPrevActRec(
     auto const contextIdx = currentWaitHandle->getContextIdx();
 
     currentWaitHandle = getParentWH(currentWaitHandle, contextIdx, visitedWHs);
-    return getActRecFromWaitHandle(
+    prevFp = getActRecFromWaitHandle(
       currentWaitHandle, contextIdx, prevPc, visitedWHs);
+  } else {
+    prevFp = g_context->getPrevVMState(fp, prevPc, nullptr, nullptr, &rip);
   }
 
-  return g_context->getPrevVMState(fp, prevPc);
+  if (fp) {
+    if (auto ret = initBTContextAt(ctx, (jit::TCA)rip, prevFp, prevPc)) {
+      return ret;
+    }
+  }
+
+  return prevFp;
 }
 
 // wrapper around getActRecFromWaitHandle, which does some extra validation
-static ActRec* getActRecFromWaitHandleWrapper(
+ActRec* getActRecFromWaitHandleWrapper(
     c_WaitableWaitHandle* currentWaitHandle, Offset* prevPc,
     folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs) {
   if (currentWaitHandle->isFinished()) {
@@ -148,6 +233,8 @@ static ActRec* getActRecFromWaitHandleWrapper(
     currentWaitHandle, contextIdx, prevPc, visitedWHs);
 }
 
+}
+
 Array createBacktrace(const BacktraceArgs& btArgs) {
   if (btArgs.isCompact()) {
     return createCompactBacktrace()->extract();
@@ -155,6 +242,8 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
   auto bt = Array::CreateVArray();
   folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
+
+  BTContext ctx;
 
   // If there is a parser frame, put it at the beginning of the backtrace.
   if (btArgs.m_parserFrame) {
@@ -182,11 +271,17 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
     // Get the fp and pc of the top frame (possibly skipping one frame).
 
+    if (!btArgs.m_skipInlined) {
+      pc = vmfp()->func()->unit()->offsetOf(vmpc());
+      fp = initBTContextAt(ctx, vmJitReturnAddr(), vmfp(), &pc);
+    }
+
     if (btArgs.m_skipTop) {
-      fp = getPrevActRec(vmfp(), &pc, visitedWHs);
+      if (!fp) fp = vmfp();
+      fp = getPrevActRec(ctx, fp, &pc, visitedWHs);
       // We skipped over the only VM frame, we're done.
       if (!fp) return bt;
-    } else {
+    } else if (!fp) {
       fp = vmfp();
       auto const unit = fp->func()->unit();
       assertx(unit);
@@ -195,7 +290,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
     if (btArgs.m_skipInlined && RuntimeOption::EvalJit) {
       while (fp && (jit::TCA)fp->m_savedRip == jit::tc::ustubs().retInlHelper) {
-        fp = getPrevActRec(fp, &pc, visitedWHs);
+        fp = getPrevActRec(ctx, fp, &pc, visitedWHs);
       }
       if (!fp) return bt;
     }
@@ -228,10 +323,10 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
   // Handle the subsequent VM frames.
   Offset prevPc = 0;
-  for (auto prevFp = getPrevActRec(fp, &prevPc, visitedWHs);
+  for (auto prevFp = getPrevActRec(ctx, fp, &prevPc, visitedWHs);
        fp != nullptr && (btArgs.m_limit == 0 || depth < btArgs.m_limit);
        fp = prevFp, pc = prevPc,
-         prevFp = getPrevActRec(fp, &prevPc, visitedWHs)) {
+         prevFp = getPrevActRec(ctx, fp, &prevPc, visitedWHs)) {
     // Do not capture frame for HPHP only functions.
     if (fp->func()->isNoInjection()) continue;
 
@@ -438,9 +533,16 @@ static void walkStack(L func) {
   // If there are no VM frames, we're done.
   if (!fp || !rds::header()) return;
 
+  BTContext ctx;
+
   // Handle the subsequent VM frames.
-  Offset prevPc = 0;
-  for (; fp != nullptr; fp = getPrevActRec(fp, &prevPc, visitedWHs)) {
+  Offset prevPc = vmfp()->func()->unit()->offsetOf(vmpc());
+  auto const addr = vmJitReturnAddr();
+  if (auto inl = initBTContextAt(ctx, addr, vmfp(), &prevPc)) {
+    fp = inl;
+  }
+
+  for (; fp != nullptr; fp = getPrevActRec(ctx, fp, &prevPc, visitedWHs)) {
 
     // Do not capture frame for HPHP only functions.
     if (fp->func()->isNoInjection()) continue;

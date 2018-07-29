@@ -380,6 +380,7 @@ static void sync_regstate_to_caller(ActRec* preLive) {
     : preLive->m_sfp;
   regs.fp = fp;
   regs.pc = fp->func()->unit()->at(fp->func()->base() + preLive->m_soff);
+  regs.jitReturnAddr = (TCA)preLive->m_savedRip;
 
   tl_regState = VMRegState::CLEAN;
 }

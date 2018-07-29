@@ -126,6 +126,8 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::funcguard:
     case Vinstr::inlinestart:
     case Vinstr::inlineend:
+    case Vinstr::pushframe:
+    case Vinstr::popframe:
     // native function abi
     case Vinstr::vcall:
     case Vinstr::vinvoke:

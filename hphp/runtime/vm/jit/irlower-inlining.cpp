@@ -65,6 +65,7 @@ void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
     v << storeqi{0, ar + AROFF(m_invName)};
   }
 
+  v << pushframe{};
   v << lea{ar, dstLoc(env, inst, 0).reg()};
 }
 
@@ -73,6 +74,7 @@ void cgInlineReturn(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const callerFPOff = inst->extra<InlineReturn>()->offset;
   v << lea{fp[cellsToBytes(callerFPOff.offset)], rvmfp()};
+  v << popframe{};
   v << inlineend{};
 }
 

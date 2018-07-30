@@ -3,6 +3,6 @@
 function g(int $x) {}
 
 function f(mixed $x) {
-  $x ?as int;
-  g($x);
+  $y = $x ?as int;
+  g($y);
 }

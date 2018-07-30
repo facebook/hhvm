@@ -2,5 +2,5 @@ File "primitive2.php", line 7, characters 5-6:
 Invalid argument (Typing[4110])
   File "primitive2.php", line 3, characters 12-14:
   This is an int
-  File "primitive2.php", line 6, characters 3-12:
+  File "primitive2.php", line 6, characters 8-17:
   It is incompatible with a nullable type

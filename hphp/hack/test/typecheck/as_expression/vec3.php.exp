@@ -1,0 +1,12 @@
+File "vec3.php", line 5, characters 15-16:
+Invalid argument (Typing[4110])
+  File "vec3.php", line 11, characters 23-32:
+  This is an object of type vec
+  File "vec3.php", line 3, characters 12-28:
+  It is incompatible with an object of type Container
+File "vec3.php", line 6, characters 15-16:
+Invalid argument (Typing[4110])
+  File "vec3.php", line 12, characters 23-33:
+  This is an object of type vec
+  File "vec3.php", line 3, characters 12-28:
+  It is incompatible with an object of type Container

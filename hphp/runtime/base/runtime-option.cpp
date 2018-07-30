@@ -613,6 +613,10 @@ static inline int retranslateAllSecondsDefault() {
   return RuntimeOption::ServerExecutionMode() ? 180 : 0;
 }
 
+static inline bool layoutSplitHotColdDefault() {
+  return arch() != Arch::ARM;
+}
+
 uint64_t ahotDefault() {
   return RuntimeOption::RepoAuthoritative ? 4 << 20 : 0;
 }

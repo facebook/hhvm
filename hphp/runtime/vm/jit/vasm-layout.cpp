@@ -277,7 +277,9 @@ struct Clusterizer {
     initClusters();
     clusterize();
     sortClusters();
-    splitHotColdClusters();
+    if (RuntimeOption::EvalJitLayoutSplitHotCold) {
+      splitHotColdClusters();
+    }
     FTRACE(1, "{}", toString());
   }
 
@@ -520,6 +522,14 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit) {
       [&] (Vlabel b) {
         return unit.blocks[b].area_idx == AreaIndex::Cold;
       });
+  }
+
+  if (!RuntimeOption::EvalJitLayoutSplitHotCold) {
+    for (auto b : labels) {
+      if (unit.blocks[b].area_idx == AreaIndex::Cold) {
+        unit.blocks[b].area_idx = AreaIndex::Main;
+      }
+    }
   }
 
   if (Trace::moduleEnabled(Trace::layout, 1)) {

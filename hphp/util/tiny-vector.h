@@ -17,17 +17,17 @@
 #ifndef incl_HPHP_UTIL_TINYVECTOR_H_
 #define incl_HPHP_UTIL_TINYVECTOR_H_
 
-#include <stdlib.h>
-#include <boost/type_traits/has_trivial_destructor.hpp>
-#include <boost/type_traits/has_trivial_copy.hpp>
-#include <boost/type_traits/has_trivial_assign.hpp>
-#include <boost/iterator/iterator_facade.hpp>
 #include <algorithm>
+#include <memory>
+#include <type_traits>
+
+#include <boost/iterator/iterator_facade.hpp>
+#include <folly/portability/Malloc.h>
+
 #include "hphp/util/alloc.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/compact-tagged-ptrs.h"
 
-#include <folly/portability/Malloc.h>
 
 namespace HPHP {
 
@@ -61,17 +61,17 @@ namespace HPHP {
  * accessible inline instead of moved to the heap.)
  */
 
-// Allocator interface to control how TinyVector allocates memory. It would be
-// nice if it could use the standard allocator interface. However, it expects to
-// allocate raw memory of N bytes, while the standard allocator interface
-// allocates N instances of type T.
-template <typename T> struct TinyVectorMallocAllocator {
+// Allocator interface with an additional `usable_size()` API.
+template <typename T>
+struct TinyVectorMallocAllocator {
+  using size_type = std::size_t;
+  using value_type = T;
   template <typename U> struct rebind {
-    using type = TinyVectorMallocAllocator<U>;
+    using other = TinyVectorMallocAllocator<U>;
   };
 
   void* allocate(std::size_t size) const { return malloc(size); }
-  void deallocate(void* ptr) const { free(ptr); }
+  void deallocate(void* ptr, size_t) const { free(ptr); }
   std::size_t usable_size(void* ptr, std::size_t /*size*/) const {
     return malloc_usable_size(ptr);
   }
@@ -80,20 +80,55 @@ template <typename T> struct TinyVectorMallocAllocator {
 template<class T,
          size_t InternalSize = 1,
          size_t MinHeapCapacity = 0,
-         typename OrigAllocator = TinyVectorMallocAllocator<T>>
+         typename OrigAllocator = std::allocator<char>>
 struct TinyVector {
-  struct const_iterator;
-
-#ifndef __INTEL_COMPILER
-  static_assert(boost::has_trivial_destructor<T>::value,
+  static_assert(std::is_trivially_destructible<T>::value,
                 "TinyVector only supports elements with trivial destructors");
-  static_assert(boost::has_trivial_copy<T>::value &&
-                boost::has_trivial_assign<T>::value,
+  static_assert(std::is_trivially_copy_constructible<T>::value &&
+                std::is_trivially_copy_assignable<T>::value,
                 "TinyVector only supports elements with trivial copy "
                 "constructors and trivial assignment operators");
-#endif
   static_assert(InternalSize >= 1,
                 "TinyVector assumes that the internal size is at least 1");
+
+  /*
+   * We need to see if the allocator implements a member named `usable_size`.
+   * If it does, we assume it is a method like
+   *   size_type Alloc::usable_size(pointer, size_type);
+   */
+  template <typename Alloc> struct alloc_traits : std::allocator_traits<Alloc> {
+    using typename std::allocator_traits<Alloc>::size_type;
+
+   private:
+    template <typename AT, decltype(&AT::usable_size)* = nullptr>
+    struct valid_type;
+    template <typename AT = Alloc>
+    static std::true_type helper(valid_type<AT>*);
+    template <typename AT = Alloc> static std::false_type helper(...);
+    static constexpr bool has_usable_size =
+      std::is_same<std::true_type, decltype(helper(nullptr))>::value;
+
+    template<typename AT = Alloc> static size_type usable_size_impl(
+      typename std::enable_if<alloc_traits<AT>::has_usable_size, AT>::type& a,
+      void* ptr, size_type size) {
+      return a.usable_size(ptr, size);
+    }
+    template<typename AT = Alloc> static size_type usable_size_impl(
+      typename std::enable_if<!alloc_traits<AT>::has_usable_size, AT>::type&,
+      void*, size_type size) {
+      return size;
+    }
+   public:
+    static size_type usable_size(Alloc& a, void* ptr, size_type size) {
+      return usable_size_impl(a, ptr, size);
+    }
+  };
+
+  using Allocator = typename OrigAllocator::template rebind<uint8_t>::other;
+  using AT = alloc_traits<Allocator>;
+  using AllocPtr = typename AT::pointer;
+
+  struct const_iterator;
 
   TinyVector() {}
   ~TinyVector() { clear(); }
@@ -118,7 +153,8 @@ struct TinyVector {
 
   void clear() {
     if (HeapData* p = m_impl.m_data.ptr()) {
-      m_impl.deallocate(p);
+      alloc_traits<Impl>::deallocate(m_impl, reinterpret_cast<AllocPtr>(p),
+                                     allocSize(p->capacity));
     }
     m_impl.m_data.set(0, 0);
   }
@@ -177,16 +213,17 @@ struct TinyVector {
       currentHeap ? currentHeap * 4 / 3
                   : std::max(neededHeap, MinHeapCapacity),
       neededHeap);
-    const size_t requested = sizeof(HeapData) + sizeof(T) * newCapacity;
-    HeapData* newHeap = static_cast<HeapData*>(m_impl.allocate(requested));
-    newHeap->capacity = (m_impl.usable_size(newHeap, requested) -
-                         offsetof(HeapData, vals)) / sizeof(T);
+    const size_t requested = allocSize(newCapacity);
+    auto newHeap = reinterpret_cast<HeapData*>(AT::allocate(m_impl, requested));
+    const size_t usableSize = AT::usable_size(m_impl, newHeap, requested);
+    newHeap->capacity = (usableSize - offsetof(HeapData, vals)) / sizeof(T);
 
-    if (m_impl.m_data.ptr()) {
+    if (HeapData* p = m_impl.m_data.ptr()) {
       std::copy(&m_impl.m_data.ptr()->vals[0],
                 &m_impl.m_data.ptr()->vals[size() - InternalSize],
                 &newHeap->vals[0]);
-      m_impl.deallocate(m_impl.m_data.ptr());
+      AT::deallocate(m_impl, reinterpret_cast<AllocPtr>(p),
+                     allocSize(p->capacity));
     }
     m_impl.m_data.set(size(), newHeap);
   }
@@ -207,14 +244,17 @@ private:
     T vals[0];
   };
 
+  static constexpr std::size_t allocSize(uint32_t capacity) {
+    return sizeof(HeapData) + sizeof(T) * capacity;
+  }
+
   T* location(size_t index) {
-    return index < InternalSize ?
-                   &m_impl.m_vals[index]
+    return index < InternalSize
+                   ? &m_impl.m_vals[index]
                    : &m_impl.m_data.ptr()->vals[index - InternalSize];
   }
 
 private:
-  using Allocator = typename OrigAllocator::template rebind<HeapData>::type;
   struct Impl : Allocator {
     CompactSizedPtr<HeapData> m_data;
     T m_vals[InternalSize];

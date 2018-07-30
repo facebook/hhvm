@@ -33,18 +33,19 @@ namespace HPHP {
  * between 2 states:
  *   State 0: m_val == 0
  *     This is the initial state for a newly constructed CompactVector.
- *     There are no elements and no malloced block of memory.
+ *     There are no elements and no allocated block of memory.
  *   State 1: m_val != 0
  *     In this state, m_data points to a malloced block of memory. The
  *     number of elements, the capacity of the block, and the values of
- *     all the elements reside in the malloced block of memory.
+ *     all the elements reside in the allocated block of memory.
  */
-template <typename T>
-struct CompactVector {
+template <typename T, typename Alloc = std::allocator<char>>
+struct CompactVector : private Alloc::template rebind<char>::other {
   using size_type = std::size_t;
   using value_type = T;
   using iterator = T*;
   using const_iterator = const T*;
+  using Allocator = typename Alloc::template rebind<char>::other;
 
   friend iterator begin(CompactVector& v) { return v.begin(); }
   friend iterator end(CompactVector& v) { return v.end(); }
@@ -102,6 +103,9 @@ struct CompactVector {
 
   void reserve(size_type sz);
 private:
+  using Allocator::allocate;
+  using Allocator::deallocate;
+
   struct CompactVectorData {
     uint32_t m_len;
     uint32_t m_capacity;
@@ -118,6 +122,7 @@ private:
   bool resize_helper(size_type sz);
 
   CompactVectorData* m_data;
+
   static constexpr size_type initial_capacity = 4;
   /* We mainly want this so pretty.py can figure out the alignment */
   static constexpr size_type elems_offset =
@@ -127,44 +132,46 @@ private:
   using elems_offset_type = char[elems_offset];
 };
 
-template <typename T>
-CompactVector<T>::CompactVector() {
+template <typename T, typename A>
+CompactVector<T, A>::CompactVector() {
   m_data = nullptr;
 }
 
-template <typename T>
-CompactVector<T>::CompactVector(size_type n) {
+template <typename T, typename A>
+CompactVector<T, A>::CompactVector(size_type n) {
   m_data = nullptr;
   resize(n);
 }
 
-template <typename T>
-CompactVector<T>::CompactVector(size_type n, const T& val) {
+template <typename T, typename A>
+CompactVector<T, A>::CompactVector(size_type n, const T& val) {
   m_data = nullptr;
   resize(n, val);
 }
 
-template <typename T>
-CompactVector<T>::CompactVector(CompactVector&& other) noexcept
-    : m_data(other.m_data) {
+template <typename T, typename A>
+CompactVector<T, A>::CompactVector(CompactVector&& other) noexcept
+  : m_data(other.m_data) {
   other.m_data = nullptr;
 }
 
-template <typename T>
-CompactVector<T>::CompactVector(const CompactVector& other) : m_data(nullptr) {
+template <typename T, typename A>
+CompactVector<T, A>::CompactVector(const CompactVector& other)
+  : m_data(nullptr) {
   assign(other);
 }
 
-template <typename T>
-CompactVector<T>& CompactVector<T>::operator=(const CompactVector& other) {
+template <typename T, typename A>
+CompactVector<T, A>&
+CompactVector<T, A>::operator=(const CompactVector& other) {
   if (this == &other) return *this;
   clear();
   assign(other);
   return *this;
 }
 
-template <typename T>
-CompactVector<T>::CompactVector(std::initializer_list<T> init) :
+template <typename T, typename A>
+CompactVector<T, A>::CompactVector(std::initializer_list<T> init) :
     m_data(nullptr) {
   reserve_impl(init.size());
   for (auto const& e : init) {
@@ -172,8 +179,8 @@ CompactVector<T>::CompactVector(std::initializer_list<T> init) :
   }
 }
 
-template <typename T>
-void CompactVector<T>::assign(const CompactVector& other) {
+template <typename T, typename A>
+void CompactVector<T, A>::assign(const CompactVector& other) {
   assert(!m_data);
   if (!other.size()) return;
   reserve_impl(other.m_data->m_len);
@@ -183,19 +190,19 @@ void CompactVector<T>::assign(const CompactVector& other) {
   }
 }
 
-template <typename T>
-CompactVector<T>& CompactVector<T>::operator=(CompactVector&& other) {
+template <typename T, typename A>
+CompactVector<T, A>& CompactVector<T, A>::operator=(CompactVector&& other) {
   std::swap(m_data, other.m_data);
   return *this;
 }
 
-template <typename T>
-void CompactVector<T>::swap(CompactVector& other) noexcept {
+template <typename T, typename A>
+void CompactVector<T, A>::swap(CompactVector& other) noexcept {
   std::swap(m_data, other.m_data);
 }
 
-template <typename T>
-bool CompactVector<T>::operator==(const CompactVector& other) const {
+template <typename T, typename A>
+bool CompactVector<T, A>::operator==(const CompactVector& other) const {
   auto const sz = size();
   if (sz != other.size()) return false;
   for (size_type i = 0; i < sz; ++i) {
@@ -204,47 +211,47 @@ bool CompactVector<T>::operator==(const CompactVector& other) const {
   return true;
 }
 
-template <typename T>
-CompactVector<T>::~CompactVector() {
+template <typename T, typename A>
+CompactVector<T, A>::~CompactVector() {
   clear();
 }
 
-template <typename T>
-T* CompactVector<T>::elems() const {
+template <typename T, typename A>
+T* CompactVector<T, A>::elems() const {
   assert(m_data);
   return (T*)((char*)m_data + elems_offset);
 }
 
-template <typename T>
-size_t CompactVector<T>::required_mem(size_type n) {
+template <typename T, typename A>
+size_t CompactVector<T, A>::required_mem(size_type n) {
   return elems_offset + sizeof(T) * n;
 }
 
-template <typename T>
-T* CompactVector<T>::get(size_type index) const {
-  // Index into the malloced block of memory
+template <typename T, typename A>
+T* CompactVector<T, A>::get(size_type index) const {
+  // Index into the allocated block of memory
   auto e = elems();
   assert(index < m_data->m_len);
   return e + index;
 }
 
-template <typename T>
-bool CompactVector<T>::empty() const {
+template <typename T, typename A>
+bool CompactVector<T, A>::empty() const {
   return size() == 0;
 }
 
-template <typename T>
-typename CompactVector<T>::size_type CompactVector<T>::size() const {
+template <typename T, typename A>
+typename CompactVector<T, A>::size_type CompactVector<T, A>::size() const {
   return m_data ? m_data->m_len : 0;
 }
 
-template <typename T>
-typename CompactVector<T>::size_type CompactVector<T>::capacity() {
+template <typename T, typename A>
+typename CompactVector<T, A>::size_type CompactVector<T, A>::capacity() {
   return m_data ? m_data->m_capacity : 0;
 }
 
-template <typename T>
-void CompactVector<T>::erase(iterator elm) {
+template <typename T, typename A>
+void CompactVector<T, A>::erase(iterator elm) {
   assert(elm - elems() < size());
   auto const e = end();
   while (++elm != e) {
@@ -254,8 +261,8 @@ void CompactVector<T>::erase(iterator elm) {
   m_data->m_len--;
 }
 
-template <typename T>
-void CompactVector<T>::erase(iterator elm1, iterator elm2) {
+template <typename T, typename A>
+void CompactVector<T, A>::erase(iterator elm1, iterator elm2) {
   if (elm1 == elm2) return;
   assert(elems() <= elm1 && elm1 <= elm2 && elm2 <= end());
   auto const e = end();
@@ -268,8 +275,8 @@ void CompactVector<T>::erase(iterator elm1, iterator elm2) {
   }
 }
 
-template <typename T>
-bool CompactVector<T>::resize_helper(size_type sz) {
+template <typename T, typename A>
+bool CompactVector<T, A>::resize_helper(size_type sz) {
   auto const old_size = size();
   if (sz == old_size) return true;
   if (sz > old_size) {
@@ -284,24 +291,24 @@ bool CompactVector<T>::resize_helper(size_type sz) {
   return true;
 }
 
-template <typename T>
-void CompactVector<T>::resize(size_type sz, const value_type& v) {
+template <typename T, typename A>
+void CompactVector<T, A>::resize(size_type sz, const value_type& v) {
   if (resize_helper(sz)) return;
   while (m_data->m_len < sz) {
     push_back(v);
   }
 }
 
-template <typename T>
-void CompactVector<T>::resize(size_type sz) {
+template <typename T, typename A>
+void CompactVector<T, A>::resize(size_type sz) {
   if (resize_helper(sz)) return;
   while (m_data->m_len < sz) {
     push_back(T{});
   }
 }
 
-template <typename T>
-void CompactVector<T>::shrink_to_fit() {
+template <typename T, typename A>
+void CompactVector<T, A>::shrink_to_fit() {
   if (!m_data || m_data->m_capacity == m_data->m_len) return;
   if (!m_data->m_len) {
     clear();
@@ -310,40 +317,43 @@ void CompactVector<T>::shrink_to_fit() {
   reserve_impl(m_data->m_len);
 }
 
-template <typename T>
-void copy(CompactVector<T>& dest, const std::vector<T>& src) {
+template <typename T, typename A>
+void copy(CompactVector<T, A>& dest, const std::vector<T>& src) {
   dest.clear();
   dest.reserve(src.size());
   for (auto const& v : src) dest.push_back(v);
 }
 
-template <typename T>
-void CompactVector<T>::clear() {
+template <typename T, typename A>
+void CompactVector<T, A>::clear() {
+  if (!m_data) return;
   if (!std::is_trivially_destructible<T>::value) {
     if (auto sz = size()) {
       auto elm = elems();
       do { elm++->~T(); } while (--sz);
     }
   }
-  free(m_data);
+  deallocate(reinterpret_cast<char*>(m_data),
+             required_mem(m_data->m_capacity));
   m_data = nullptr;
 }
 
-template <typename T>
-void CompactVector<T>::grow() {
+template <typename T, typename A>
+void CompactVector<T, A>::grow() {
   reserve_impl(m_data ? m_data->m_capacity * 2LL : initial_capacity);
 }
 
-template <typename T>
-void CompactVector<T>::reserve_impl(size_type new_capacity) {
+template <typename T, typename A>
+void CompactVector<T, A>::reserve_impl(size_type new_capacity) {
+  auto new_data = (CompactVectorData*)allocate(required_mem(new_capacity));
+  if (!new_data) throw std::bad_alloc{};
+
   if (m_data) {
     auto len = m_data->m_len;
-    auto const old_data = m_data;
+    auto old_data = m_data;
+    auto const old_capacity = old_data->m_capacity;
     auto old_elems = elems();
-
-    m_data = (CompactVectorData*)malloc(required_mem(new_capacity));
-    if (!m_data) throw std::bad_alloc{};
-
+    m_data = new_data;
     auto new_elems = elems();
     m_data->m_len = len;
     m_data->m_capacity = safe_cast<uint32_t>(new_capacity);
@@ -351,26 +361,25 @@ void CompactVector<T>::reserve_impl(size_type new_capacity) {
       new (new_elems++) T(std::move(*old_elems));
       old_elems++->~T();
     }
-    free(old_data);
+    deallocate(reinterpret_cast<char*>(old_data), required_mem(old_capacity));
   } else {
     // If there are currently no elements, all we have to do is allocate a
     // block of memory and initialize m_len and m_capacity.
-    m_data = (CompactVectorData*)malloc(required_mem(new_capacity));
-    if (!m_data) throw std::bad_alloc{};
+    m_data = new_data;
     m_data->m_len = 0;
     m_data->m_capacity = new_capacity;
   }
 }
 
-template <typename T>
-void CompactVector<T>::reserve(size_type new_capacity) {
+template <typename T, typename A>
+void CompactVector<T, A>::reserve(size_type new_capacity) {
   if (new_capacity > capacity()) reserve_impl(new_capacity);
 }
 
-template <typename T>
+template <typename T, typename A>
 template <typename U>
-typename CompactVector<T>::iterator
-CompactVector<T>::insert_impl(iterator before, U&& val) {
+typename CompactVector<T, A>::iterator
+CompactVector<T, A>::insert_impl(iterator before, U&& val) {
   auto const sz = size();
   assert(sz <= capacity());
   if (sz == capacity()) {
@@ -390,8 +399,8 @@ CompactVector<T>::insert_impl(iterator before, U&& val) {
   return e;
 }
 
-template <typename T>
-void CompactVector<T>::push_back(const T& val) {
+template <typename T, typename A>
+void CompactVector<T, A>::push_back(const T& val) {
   auto const sz = size();
   assert(sz <= capacity());
   if (sz == capacity()) grow();
@@ -399,8 +408,8 @@ void CompactVector<T>::push_back(const T& val) {
   new (get(sz)) T(val);
 }
 
-template <typename T>
-void CompactVector<T>::push_back(T&& val) {
+template <typename T, typename A>
+void CompactVector<T, A>::push_back(T&& val) {
   auto const sz = size();
   assert(sz <= capacity());
   if (sz == capacity()) grow();
@@ -408,9 +417,9 @@ void CompactVector<T>::push_back(T&& val) {
   new (get(sz)) T(std::move(val));
 }
 
-template <typename T>
+template <typename T, typename A>
 template <class... Args>
-void CompactVector<T>::emplace_back(Args&&... args) {
+void CompactVector<T, A>::emplace_back(Args&&... args) {
   auto const sz = size();
   assert(sz <= capacity());
   if (sz == capacity()) grow();
@@ -418,8 +427,8 @@ void CompactVector<T>::emplace_back(Args&&... args) {
   new (get(sz)) T(std::forward<Args>(args)...);
 }
 
-template <typename T>
-void CompactVector<T>::pop_back() {
+template <typename T, typename A>
+void CompactVector<T, A>::pop_back() {
   if (m_data && m_data->m_len > 0) {
     // Otherwise, we just decrement the length
     --(m_data->m_len);

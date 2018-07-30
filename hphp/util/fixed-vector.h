@@ -34,14 +34,16 @@ namespace HPHP {
  * Useful when you know the exact size something will take, and don't
  * need more than that many elements.
  */
-template<typename T, typename Allocator = std::allocator<T>>
+template<typename T, typename Alloc = std::allocator<T>>
 struct FixedVector {
-  typedef uint32_t size_type;
-  typedef T value_type;
-  typedef T* iterator;
-  typedef const T* const_iterator;
-  typedef std::reverse_iterator<iterator> reverse_iterator;
-  typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+  using Allocator =
+    typename std::allocator_traits<Alloc>::template rebind_alloc<T>;
+  using size_type = uint32_t;
+  using value_type = T;
+  using iterator = T*;
+  using const_iterator = const T*;
+  using reverse_iterator = std::reverse_iterator<iterator>;
+  using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
   /*
    * Default constructor leaves a FixedVector with size() == 0.

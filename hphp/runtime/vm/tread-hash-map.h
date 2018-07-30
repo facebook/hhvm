@@ -50,10 +50,11 @@ extern uint64_t g_emptyTable;
 
 template<class Key, class Val,
          class HashFunc = std::hash<Key>,
-         class Allocator = std::allocator<char>>
-struct TreadHashMap {
+         class Alloc = std::allocator<char>>
+struct TreadHashMap : private HashFunc,
+                      private Alloc::template rebind<char>::other {
+  using Allocator = typename Alloc::template rebind<char>::other;
   using value_type = std::pair<std::atomic<Key>,Val>;
-
   static_assert(
     std::is_trivially_destructible<Key>::value &&
     std::is_trivially_destructible<Val>::value,
@@ -248,7 +249,7 @@ private:
 
   size_t project(Table* tab, Key key) const {
     assertx(folly::isPowTwo(tab->capac));
-    return m_hash(key) & (tab->capac - 1);
+    return HashFunc::operator()(key) & (tab->capac - 1);
   }
 
   constexpr size_t allocSize(uint32_t cap) {
@@ -257,7 +258,7 @@ private:
 
   Table* allocTable(uint32_t capacity) {
     auto size = allocSize(capacity);
-    auto ret = reinterpret_cast<Table*>(m_alloc.allocate(size));
+    auto ret = reinterpret_cast<Table*>(Allocator::allocate(size));
     memset(ret, 0, size);
     ret->capac = capacity;
     ret->size = 0;
@@ -265,14 +266,12 @@ private:
   }
 
   void freeTable(Table* t) {
-    m_alloc.deallocate(reinterpret_cast<char*>(t), allocSize(t->capac));
+    Allocator::deallocate(reinterpret_cast<char*>(t), allocSize(t->capac));
   }
 
 private:
   std::atomic<Table*> m_table;
   uint32_t m_initialSize;
-  HashFunc m_hash;
-  Allocator m_alloc;
 };
 
 //////////////////////////////////////////////////////////////////////

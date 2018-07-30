@@ -24,21 +24,23 @@ namespace HPHP { namespace req {
 
 // Special allocator for TinyVector using request heap allocation.
 template <typename T, typename Element = T> struct TinyVectorReqAllocator {
+  using value_type = T;
+  using pointer = T*;
+  using size_type = std::size_t;
+
   template <typename U> struct rebind {
-    using type = TinyVectorReqAllocator<U, Element>;
+    using other = TinyVectorReqAllocator<U, Element>;
   };
 
-  void* allocate(std::size_t size) const {
-    return req::malloc(
-      size,
-      type_scan::getIndexForMalloc<
-        T, type_scan::Action::Conservative<Element>
-      >()
+  pointer allocate(size_type size) {
+    return reinterpret_cast<pointer>(
+        req::malloc(size,
+                    type_scan::getIndexForMalloc<
+                    T, type_scan::Action::Conservative<Element>>())
     );
   }
-  void deallocate(void* ptr) const { req::free(ptr); }
-  std::size_t usable_size(void* /*ptr*/, std::size_t size) const {
-    return size;
+  void deallocate(pointer ptr, size_type /* size */) {
+    req::free(ptr);
   }
 };
 

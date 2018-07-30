@@ -2535,20 +2535,29 @@ bool HHVM_FUNCTION(openssl_x509_export, const Variant& x509, VRefParam output,
  */
 static time_t asn1_time_to_time_t(ASN1_UTCTIME *timestr) {
 
-  if (ASN1_STRING_type(timestr) != V_ASN1_UTCTIME) {
+  auto const timestr_type = ASN1_STRING_type(timestr);
+
+  if (timestr_type != V_ASN1_UTCTIME && timestr_type != V_ASN1_GENERALIZEDTIME) {
     raise_warning("illegal ASN1 data type for timestamp");
     return (time_t)-1;
   }
 
+  auto const timestr_len = (size_t)ASN1_STRING_length(timestr);
+
   // Binary safety
-  if (ASN1_STRING_length(timestr) != strlen((char*)ASN1_STRING_data(timestr))) {
+  if (timestr_len != strlen((char*)ASN1_STRING_data(timestr))) {
     raise_warning("illegal length in timestamp");
     return (time_t)-1;
   }
 
-  if (ASN1_STRING_length(timestr) < 13 && ASN1_STRING_length(timestr) != 11) {
+  if (timestr_len < 13 && timestr_len != 11) {
     raise_warning("unable to parse time string %s correctly",
                     timestr->data);
+    return (time_t)-1;
+  }
+
+  if (timestr_type == V_ASN1_GENERALIZEDTIME && timestr_len < 15) {
+    raise_warning("unable to parse time string %s correctly", timestr->data);
     return (time_t)-1;
   }
 
@@ -2567,10 +2576,17 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME *timestr) {
   thetime.tm_min  = atoi(thestr);   *thestr = '\0';  thestr -= 2;
   thetime.tm_hour = atoi(thestr);   *thestr = '\0';  thestr -= 2;
   thetime.tm_mday = atoi(thestr);   *thestr = '\0';  thestr -= 2;
-  thetime.tm_mon  = atoi(thestr)-1; *thestr = '\0';  thestr -= 2;
-  thetime.tm_year = atoi(thestr);
-  if (thetime.tm_year < 68) {
-    thetime.tm_year += 100;
+  thetime.tm_mon  = atoi(thestr)-1; *thestr = '\0';
+
+  if (ASN1_STRING_type(timestr) == V_ASN1_UTCTIME) {
+    thestr -= 2;
+    thetime.tm_year = atoi(thestr);
+    if (thetime.tm_year < 68) {
+      thetime.tm_year += 100;
+    }
+  } else if (ASN1_STRING_type(timestr) == V_ASN1_GENERALIZEDTIME) {
+    thestr -= 4;
+    thetime.tm_year = atoi(thestr) - 1900;
   }
 
   thetime.tm_isdst = -1;

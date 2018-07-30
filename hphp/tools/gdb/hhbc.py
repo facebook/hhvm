@@ -152,9 +152,9 @@ class HHBC(object):
         op_count = V('HPHP::Op_count')
 
         table_name = 'HPHP::immType(HPHP::Op, int)::argTypes'
-        # This looks like an int8_t[4][op_count], but in fact, it's actually an
-        # int8_t[op_count][4], as desired.
-        table_type = T('int8_t').array(4 - 1).array(op_count - 1).pointer()
+        # This looks like an int8_t[5][op_count], but in fact, it's actually an
+        # int8_t[op_count][5], as desired.
+        table_type = T('int8_t').array(5 - 1).array(op_count - 1).pointer()
         table = op_table(table_name).cast(table_type).dereference()
 
         immtype = table[as_idx(op)][arg]

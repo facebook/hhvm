@@ -87,7 +87,6 @@
 
 #include "hphp/util/md5.h"
 
-#include "hphp/parser/parser.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/repo-auth-type.h"
@@ -2996,7 +2995,7 @@ void parse_class(AsmState& as) {
   if (!as.in.readname(name)) {
     as.error(".class must have a name");
   }
-  if (ParserBase::IsAnonymousClassName(name)) {
+  if (PreClassEmitter::IsAnonymousClassName(name)) {
     // assign unique numbers to anonymous classes
     // they must not be pre-numbered in the hhas
     auto p = name.find(';');

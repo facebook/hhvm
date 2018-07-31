@@ -36,7 +36,6 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/extension-registry.h"
 
-#include "hphp/parser/parser.h"
 #include "hphp/system/systemlib.h"
 
 #include "hphp/runtime/vm/native-prop-handler.h"

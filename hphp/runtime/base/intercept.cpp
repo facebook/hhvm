@@ -26,7 +26,6 @@
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/event-hook.h"
-#include "hphp/parser/parser.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/trace.h"
 

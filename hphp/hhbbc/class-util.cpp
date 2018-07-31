@@ -15,11 +15,12 @@
 */
 #include "hphp/hhbbc/class-util.h"
 
-#include "hphp/parser/parser.h"
-#include "hphp/runtime/base/collections.h"
-#include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
+
+#include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -81,7 +82,7 @@ bool is_used_trait(const php::Class& c) {
 
 std::string normalized_class_name(const php::Class& cls) {
   auto const name = cls.name->toCppString();
-  if (!ParserBase::IsAnonymousClassName(name)) return name;
+  if (!PreClassEmitter::IsAnonymousClassName(name)) return name;
   return name.substr(0, name.find_last_of(';'));
 }
 

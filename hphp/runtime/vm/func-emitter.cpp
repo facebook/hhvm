@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/vm/func-emitter.h"
 
-#include "hphp/parser/parser.h"
-
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/rds.h"
@@ -136,9 +134,7 @@ void FuncEmitter::commit(RepoTxn& txn) const {
 }
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
-  bool isGenerated = isdigit(name->data()[0]) ||
-    ParserBase::IsClosureName(name->toCppString()) ||
-    needsStripInOut(name);
+  bool isGenerated = isdigit(name->data()[0]) || needsStripInOut(name);
 
   Attr attrs = this->attrs;
   if (preClass && preClass->attrs() & AttrInterface) {

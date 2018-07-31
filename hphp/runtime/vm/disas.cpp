@@ -23,7 +23,6 @@
 
 #include <folly/String.h>
 
-#include "hphp/parser/parser.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -32,6 +31,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/util/match.h"
@@ -801,7 +801,7 @@ void print_cls_directives(Output& out, const PreClass* cls) {
 void print_cls(Output& out, const PreClass* cls) {
   out.indent();
   auto name = cls->name()->toCppString();
-  if (ParserBase::IsAnonymousClassName(name)) {
+  if (PreClassEmitter::IsAnonymousClassName(name)) {
     auto p = name.find(';');
     if (p != std::string::npos) {
       name = name.substr(0, p);

@@ -50,8 +50,6 @@
 #include "hphp/runtime/ext/fb/VariantController.h"
 #include "hphp/runtime/vm/unwind.h"
 
-#include "hphp/parser/parser.h"
-
 namespace HPHP {
 
 // fb_serialize options

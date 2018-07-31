@@ -19,8 +19,6 @@
 
 #include <folly/Memory.h>
 
-#include "hphp/parser/parser.h"
-
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/repo.h"
@@ -38,7 +36,7 @@ std::string NewAnonymousClassName(const std::string& name) {
 namespace {
 
 const StringData* preClassName(const std::string& name) {
-  if (ParserBase::IsAnonymousClassName(name)) {
+  if (PreClassEmitter::IsAnonymousClassName(name)) {
     if (name.find(';') == std::string::npos) {
       return makeStaticString(NewAnonymousClassName(name));
     }

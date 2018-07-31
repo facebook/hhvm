@@ -193,6 +193,9 @@ struct PreClassEmitter {
   const ConstMap::Builder& constMap() const { return m_constMap; }
   const StringData* docComment() const { return m_docComment; }
   const StringData* parentName() const { return m_parent; }
+  static bool IsAnonymousClassName(const std::string& name) {
+    return name.find('$') != std::string::npos;
+  }
 
   void setDocComment(const StringData* sd) { m_docComment = sd; }
 

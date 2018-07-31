@@ -10,26 +10,27 @@
 open Typing_defs
 open Nast
 open Ast_defs
-open List
 module Reason = Typing_reason
 
 let internal_error s =
   failwith ("Something (internal) went wrong while typing a regex string: " ^ s)
 
+(*  bottom is non-inclusive *)
 let rec int_keys p top bottom acc_i =
   if top <= bottom then acc_i
   else int_keys p (top - 1) bottom ((SFlit_int (p, string_of_int top)) :: acc_i)
 
-let rec keys' p count names name_numbers acc =
-  match name_numbers with
-  | [] -> (int_keys p count 0 []) @ acc
-  | head :: _ ->
-    keys' p (head - 1) (tl names) (tl name_numbers)
-      ((SFlit_str (p, hd names)) :: acc)
+(* Assumes that names_numbers is sorted in DECREASING order of numbers *)
+let rec keys_aux p top names_numbers acc =
+  match names_numbers with
+  | [] -> (int_keys p top 0 []) @ acc
+  | (name, number) :: t ->
+    keys_aux p (number - 1) t
+      (SFlit_str (p, name) :: ((int_keys p top number []) @ acc))
 
 (*
- *  Shape keys for our match type. For re"Hel(\D)(?'o'\D)", this is
- * [ SFlit_int (p, "0"); SFlit_int (p, "1"); SFlit_int (p, 'o') ].
+ *  Any shape keys for our match type except 0. For re"Hel(\D)(?'o'\D)", this is
+ * [ SFlit_int (p, "1"); SFlit_int (p, 'o') ].
  *
  *)
 let keys p s =
@@ -41,23 +42,32 @@ let keys p s =
     with Pcre.Error (Pcre.InternalError s) -> internal_error s in
   (* For re"Hel(\D)(?'o'\D)", this is ['o']. *)
   let names =
-    try List.rev (Array.to_list (Pcre.names pattern)) (* Shape field order! *)
+    try Array.to_list (Pcre.names pattern)
     with Pcre.Error (Pcre.InternalError s) -> internal_error s in
   (*  For re"Hel(\D)(?'o'\D)", this is [2] *)
-  let name_numbers =
+  let numbers =
     try List.map (Pcre.get_stringnumber pattern) names
     with Invalid_argument s -> internal_error s in
-
-  (* Any Regex\Match will contain the entire matched substring at key 0. *)
-  SFlit_int (p, "0") :: (keys' p count names name_numbers [])
+  let names_numbers = List.combine names numbers in
+  let names_numbers_sorted =
+    List.sort (fun nn1 nn2 -> ~- (Pervasives.compare (snd nn1) (snd nn2)))
+      names_numbers in
+  keys_aux p count names_numbers_sorted []
 
 let type_match p s =
-  let sft =
+  let sft_0 =
     { sft_optional = false; sft_ty = Reason.Rregex p, Tprim Tstring; } in
+  let sft =
+    { sft_optional = true; sft_ty = Reason.Rregex p, Tprim Tstring; } in
   let keys = keys p s in
-  let shape_map = List.fold_left (fun acc name -> ShapeMap.add name sft acc)
+  let shape_map = List.fold_left (fun acc key -> ShapeMap.add key sft acc)
     ShapeMap.empty keys in
+  (* Any Regex\Match will contain the entire matched substring at key 0.
+    For now, as the native impl omits non-matching captures,
+    all fields but the 0 field will be optional. *)
+  let shape_map = ShapeMap.add (SFlit_int (p, "0")) sft_0 shape_map in
   Reason.Rregex p, Tshape (FieldsFullyKnown, shape_map)
+
 
 let type_pattern (p, e_) =
   match e_ with

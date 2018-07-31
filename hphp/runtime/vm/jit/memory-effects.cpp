@@ -2138,8 +2138,7 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
       }
     },
     [&] (PureLoad x)         { check(x.src); },
-    [&] (PureStore x)        { check(x.dst);
-                               always_assert(x.value != nullptr); },
+    [&] (PureStore x)        { check(x.dst); },
     [&] (PureSpillFrame x)   { check(x.stk); check(x.ctx); check(x.callee);
                                always_assert(x.ctx <= x.stk);
                                always_assert(x.callee <= x.stk); },

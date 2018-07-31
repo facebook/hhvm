@@ -557,7 +557,7 @@ void visit(Local& env, IRInstruction& inst) {
         if (env.reStores[*bit]) {
           auto const st = memory_effects(*env.global.reStores[*bit]);
           auto const pst = boost::get<PureStore>(&st);
-          if (pst && pst->value == inst.dst()) {
+          if (pst && pst->value && pst->value == inst.dst()) {
             FTRACE(4, "Killing self-store: {}\n",
                    env.global.reStores[*bit]->toString());
             removeDead(env, *env.global.reStores[*bit], false);
@@ -624,7 +624,7 @@ void visit(Local& env, IRInstruction& inst) {
         }
         mayStore(env, l.dst);
         mustStore(env, *bit);
-        if (l.value->inst()->block() != inst.block()) return;
+        if (!l.value || l.value->inst()->block() != inst.block()) return;
         auto const le = memory_effects(*l.value->inst());
         auto pl = boost::get<PureLoad>(&le);
         if (!pl) return;

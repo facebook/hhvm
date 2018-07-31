@@ -91,7 +91,9 @@ struct PureLoad       { AliasClass src; };
  * The effect of definitely storing `value' to a location, without performing
  * any other work.  Instructions with these memory effects can be removed if we
  * know the value being stored does not change the value of the location, or if
- * we know the location can never be loaded from again.
+ * we know the location can never be loaded from again. `value' can be a
+ * nullptr, in which case the store can still be elided if it is known to never
+ * be loaded afterwards.
  */
 struct PureStore    { AliasClass dst; SSATmp* value; };
 

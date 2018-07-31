@@ -964,7 +964,7 @@ void mrinfo_step_impl(Env& env,
      * invariants on a memory location, but only if the value being stored is
      * possibly counted.
      */
-    if (value->type().maybe(TCounted)) {
+    if (!value || value->type().maybe(TCounted)) {
       kill(env.ainfo.may_alias(canonicalize(dst)));
     }
   };
@@ -2064,7 +2064,7 @@ void pure_store(Env& env,
    * Now handle the effects of the store on the aset for the value being
    * stored.
    */
-  create_store_support(env, state, dst, tmp, add_node);
+  if (tmp) create_store_support(env, state, dst, tmp, add_node);
 }
 
 void pure_spill_frame(Env& env,

@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/static-string-table.h"

@@ -36,8 +36,6 @@
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
-#include "hphp/compiler/builtin_symbols.h"
-
 #include "hphp/system/systemlib.h"
 
 #include "hphp/runtime/base/apc-stats.h"

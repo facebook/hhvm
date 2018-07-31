@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/compiler/builtin_symbols.h"
+#include "hphp/runtime/ext/vsdebug/command.h"
+#include "hphp/runtime/ext/vsdebug/debugger.h"
+
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/tv-variant.h"
-#include "hphp/runtime/ext/vsdebug/command.h"
-#include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -431,7 +431,19 @@ int VariablesCommand::addConstants(
 }
 
 bool VariablesCommand::isSuperGlobal(const std::string& name) {
-  return name == "GLOBALS" || BuiltinSymbols::IsSuperGlobal(name);
+  static const hphp_string_set superGlobals = []() {
+    hphp_string_set superGlobals;
+    superGlobals.insert("_SERVER");
+    superGlobals.insert("_GET");
+    superGlobals.insert("_POST");
+    superGlobals.insert("_COOKIE");
+    superGlobals.insert("_FILES");
+    superGlobals.insert("_ENV");
+    superGlobals.insert("_REQUEST");
+    superGlobals.insert("_SESSION");
+    return superGlobals;
+  }();
+  return name == "GLOBALS" || superGlobals.count(name);
 }
 
 int VariablesCommand::addSuperglobalVariables(

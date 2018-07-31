@@ -247,7 +247,10 @@ WorkItem work_item_for(DependencyContext d, AnalyzeMode mode) {
           !options.HardPrivatePropInference ||
           is_used_trait(*cls));
 
-  return WorkItem { WorkType::Func, Context { func->unit, func, cls } };
+  return WorkItem {
+    WorkType::Func,
+    Context { func->unit, const_cast<php::Func*>(func), cls }
+  };
 }
 
 /*
@@ -356,6 +359,9 @@ void analyze_iteratively(Index& index, php::Program& program,
                                  ca.privateProperties);
       index.refine_private_statics(ca.ctx.cls,
                                    ca.privateStatics);
+      index.refine_bad_initial_prop_values(ca.ctx.cls,
+                                           ca.badPropInitialValues,
+                                           deps);
       for (auto& fa : ca.methods)  update_func(fa);
       for (auto& fa : ca.closures) update_func(fa);
     };
@@ -578,6 +584,8 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
       try {
         assert(check(*program));
         prop_type_hint_pass(*index, *program);
+        index->rewrite_default_initial_values(*program);
+        index->init_public_static_prop_types();
         constant_pass(*index, *program);
         index->use_class_dependencies(options.HardPrivatePropInference);
         analyze_iteratively(*index, *program, AnalyzeMode::NormalPass);

@@ -250,6 +250,10 @@ bool PropertiesInfo::isNonSerialized(SString name) const {
   return m_nonSerializedProps.count(name) > 0;
 }
 
+void PropertiesInfo::setBadPropInitialValues() {
+  if (m_cls) m_cls->badPropInitialValues = true;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void merge_closure_use_vars_into(ClosureUseVarMap& dst,

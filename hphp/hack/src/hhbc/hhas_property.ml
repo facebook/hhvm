@@ -18,6 +18,9 @@ type t = {
   property_is_immutable : bool;
   property_is_lsb       : bool;
   property_is_no_bad_redeclare : bool;
+  property_has_system_initial : bool;
+  property_no_implicit_null : bool;
+  property_initial_satisfies_tc : bool;
   property_name         : Hhbc_id.Prop.t;
   property_initial_value  : Typed_value.t option;
   property_initializer_instrs : Instruction_sequence.t option;
@@ -36,6 +39,9 @@ let make
   property_is_immutable
   property_is_lsb
   property_is_no_bad_redeclare
+  property_has_system_initial
+  property_no_implicit_null
+  property_initial_satisfies_tc
   property_name
   property_initial_value
   property_initializer_instrs
@@ -51,6 +57,9 @@ let make
     property_is_immutable;
     property_is_lsb;
     property_is_no_bad_redeclare;
+    property_has_system_initial;
+    property_no_implicit_null;
+    property_initial_satisfies_tc;
     property_name;
     property_initial_value;
     property_initializer_instrs;
@@ -71,5 +80,8 @@ let no_serialize hhas_property = hhas_property.property_no_serialize
 let is_immutable hhas_property = hhas_property.property_is_immutable
 let is_lsb hhas_property = hhas_property.property_is_lsb
 let is_no_bad_redeclare hhas_property = hhas_property.property_is_no_bad_redeclare
+let has_system_initial hhas_property = hhas_property.property_has_system_initial
+let no_implicit_null hhas_property = hhas_property.property_no_implicit_null
+let initial_satisfies_tc hhas_property = hhas_property.property_initial_satisfies_tc
 let type_info hhas_property = hhas_property.property_type_info
 let doc_comment hhas_property = hhas_property.property_doc_comment

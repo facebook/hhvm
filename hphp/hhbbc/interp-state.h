@@ -346,6 +346,9 @@ struct PropertiesInfo {
   const PropState& privateStatics() const;
 
   bool isNonSerialized(SString name) const;
+
+  void setBadPropInitialValues();
+
 private:
   ClassAnalysis* const m_cls;
   PropState m_privateProperties;

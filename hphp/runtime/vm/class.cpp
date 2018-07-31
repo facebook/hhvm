@@ -737,6 +737,7 @@ bool Class::isCollectionClass() const {
 
 void Class::initialize() const {
   if (m_maybeRedefsPropTy) checkPropTypeRedefinitions();
+  if (m_needsPropInitialCheck) checkPropInitialValues();
 
   if (m_pinitVec.size() > 0 && getPropData() == nullptr) {
     initProps();
@@ -756,6 +757,11 @@ bool Class::initialized() const {
   if (m_maybeRedefsPropTy &&
       (!m_extra->m_checkedPropTypeRedefs.bound() ||
        !m_extra->m_checkedPropTypeRedefs.isInit())) {
+    return false;
+  }
+  if (m_needsPropInitialCheck &&
+      (!m_extra->m_checkedPropInitialValues.bound() ||
+       !m_extra->m_checkedPropInitialValues.isInit())) {
     return false;
   }
   return true;
@@ -843,6 +849,17 @@ void Class::initSProps() const {
 
     if ((sProp.cls == this && !m_sPropCache[slot].isPersistent()) ||
         sProp.attrs & AttrLSB) {
+      if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
+          !(sProp.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) &&
+          sProp.val.m_type != KindOfUninit &&
+          sProp.typeConstraint.isCheckable()) {
+        sProp.typeConstraint.verifyStaticProperty(
+          &sProp.val,
+          this,
+          sProp.cls,
+          sProp.name
+        );
+      }
       m_sPropCache[slot]->val = sProp.val;
     }
   }
@@ -881,6 +898,28 @@ Slot Class::lsbMemoSlot(const Func* func, bool forValue) const {
   auto it = slots.find(func->getFuncId());
   always_assert(it != slots.end());
   return it->second;
+}
+
+void Class::checkPropInitialValues() const {
+  assertx(m_needsPropInitialCheck);
+  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(m_extra.get() != nullptr);
+
+  auto extra = m_extra.get();
+  extra->m_checkedPropInitialValues.bind(rds::Mode::Normal);
+  if (extra->m_checkedPropInitialValues.isInit()) return;
+
+  for (Slot slot = 0; slot < m_declProperties.size(); ++slot) {
+    auto const& prop = m_declProperties[slot];
+    if (prop.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) continue;
+    auto const& tc = prop.typeConstraint;
+    if (!tc.isCheckable()) continue;
+    auto const& tv = m_declPropInit[slot];
+    if (tv.m_type == KindOfUninit) continue;
+    tc.verifyProperty(&tv, this, prop.cls, prop.name);
+  }
+
+  extra->m_checkedPropInitialValues.initWith(true);
 }
 
 void Class::checkPropTypeRedefinitions() const {
@@ -1182,8 +1221,31 @@ Class::PropValLookup Class::getSProp(
   }
 
   auto const sProp = getSPropData(lookup.slot);
-  assertx(sProp && sProp->m_type != KindOfUninit &&
-         "Static property initialization failed to initialize a property.");
+
+  if (debug) {
+    always_assert(
+      sProp && sProp->m_type != KindOfUninit &&
+      "Static property initialization failed to initialize a property."
+    );
+
+    if (RuntimeOption::RepoAuthoritative) {
+      auto const repoTy = staticPropRepoAuthType(lookup.slot);
+      always_assert(tvMatchesRepoAuthType(*sProp, repoTy));
+    }
+
+    if (RuntimeOption::EvalCheckPropTypeHints > 2) {
+      auto const& decl = m_staticProperties[lookup.slot];
+      auto const typeOk =
+        !decl.typeConstraint.isCheckable() ||
+        decl.typeConstraint.isSoft() ||
+        (!(decl.attrs & AttrNoImplicitNullable)
+         && sProp->m_type == KindOfNull) ||
+        (sProp->m_type != KindOfRef &&
+         decl.typeConstraint.assertCheck(sProp));
+      always_assert(typeOk);
+    }
+  }
+
   return PropValLookup { sProp, lookup.slot, lookup.accessible };
 }
 
@@ -1826,6 +1888,7 @@ Class::Class(PreClass* preClass, Class* parent,
 #endif
   , m_maybeRedefsPropTy{false}
   , m_selfMaybeRedefsPropTy{false}
+  , m_needsPropInitialCheck{false}
   , m_preClass(PreClassPtr(preClass))
   , m_classVecLen(always_safe_cast<decltype(m_classVecLen)>(classVecLen))
   , m_funcVecLen(always_safe_cast<decltype(m_funcVecLen)>(funcVecLen))
@@ -1841,7 +1904,7 @@ Class::Class(PreClass* preClass, Class* parent,
   setRTAttributes();
   setInterfaces();
   setConstants();
-  setProperties();
+  setProperties();    // must run before setInitializers
   setInitializers();
   setClassVec();
   setRequirements();
@@ -2309,6 +2372,7 @@ void Class::setProperties() {
       }
     }
     m_declPropInit = m_parent->m_declPropInit;
+    m_needsPropInitialCheck = m_parent->m_needsPropInitialCheck;
     for (auto const& parentProp : m_parent->staticProperties()) {
       if ((parentProp.attrs & AttrPrivate) &&
           !(parentProp.attrs & AttrLSB)) continue;
@@ -2394,8 +2458,24 @@ void Class::setProperties() {
         } else {
           prop.idx = slot + m_preClass->numProperties() + traitOffset;
         }
+
+        // Check if this property's initial value needs to be type checked at
+        // runtime.
+        auto const& tv = preProp->val();
+        auto const& tc = prop.typeConstraint;
+        if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
+            !(prop.attrs & AttrInitialSatisfiesTC) &&
+            tv.m_type != KindOfUninit) {
+          // System provided initial values should always be correct
+          if ((prop.attrs & AttrSystemInitialValue) || tc.alwaysPasses(&tv)) {
+            prop.attrs |= AttrInitialSatisfiesTC;
+          } else {
+            m_needsPropInitialCheck = true;
+          }
+        }
+
         curPropMap.add(preProp->name(), prop);
-        m_declPropInit.push_back(preProp->val());
+        m_declPropInit.push_back(tv);
       };
 
       switch (preProp->attrs() & (AttrPublic|AttrProtected|AttrPrivate)) {
@@ -2411,9 +2491,11 @@ void Class::setProperties() {
           auto& prop = curPropMap[it2->second];
           assertx((prop.attrs & (AttrPublic|AttrProtected|AttrPrivate)) ==
                  AttrProtected);
+          assertx(!(prop.attrs & AttrNoImplicitNullable) ||
+                  (preProp->attrs() & AttrNoImplicitNullable));
+          assertx(prop.attrs & AttrNoBadRedeclare);
           prop.cls = this;
           prop.docComment = preProp->docComment();
-          assertx(prop.attrs & AttrNoBadRedeclare);
 
           auto const& tc = preProp->typeConstraint();
           if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
@@ -2427,12 +2509,35 @@ void Class::setProperties() {
           }
           prop.typeConstraint = tc;
 
+          if (preProp->attrs() & AttrNoImplicitNullable) {
+            prop.attrs |= AttrNoImplicitNullable;
+          }
+          if (preProp->attrs() & AttrSystemInitialValue) {
+            prop.attrs |= AttrSystemInitialValue;
+          }
+          if (preProp->attrs() & AttrInitialSatisfiesTC) {
+            prop.attrs |= AttrInitialSatisfiesTC;
+          }
+
+          // Check if this property's initial value needs to be type checked at
+          // runtime.
+          auto const& tv = preProp->val();
+          if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
+              !(prop.attrs & AttrInitialSatisfiesTC) &&
+              tv.m_type != KindOfUninit) {
+            // System provided initial values should always be correct
+            if ((prop.attrs & AttrSystemInitialValue) || tc.alwaysPasses(&tv)) {
+              prop.attrs |= AttrInitialSatisfiesTC;
+            } else {
+              m_needsPropInitialCheck = true;
+            }
+          }
+
           if (slot < traitIdx) {
             prop.idx = slot;
           } else {
             prop.idx = slot + m_preClass->numProperties() + traitOffset;
           }
-          const TypedValue& tv = preProp->val();
           TypedValueAux& tvaux = m_declPropInit[it2->second];
           tvaux.m_data = tv.m_data;
           tvaux.m_type = tv.m_type;
@@ -2448,6 +2553,9 @@ void Class::setProperties() {
         auto it2 = curPropMap.find(preProp->name());
         if (it2 != curPropMap.end()) {
           auto& prop = curPropMap[it2->second];
+          assertx(!(prop.attrs & AttrNoImplicitNullable) ||
+                  (preProp->attrs() & AttrNoImplicitNullable));
+          assertx(prop.attrs & AttrNoBadRedeclare);
           prop.cls = this;
           prop.docComment = preProp->docComment();
           if ((prop.attrs & (AttrPublic|AttrProtected|AttrPrivate))
@@ -2464,9 +2572,7 @@ void Class::setProperties() {
             prop.idx = slot + m_preClass->numProperties() + traitOffset;
           }
 
-          assertx(prop.attrs & AttrNoBadRedeclare);
           auto const& tc = preProp->typeConstraint();
-
           if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
               !(preProp->attrs() & AttrNoBadRedeclare) &&
               tc.maybeInequivalentForProp(prop.typeConstraint)) {
@@ -2478,7 +2584,30 @@ void Class::setProperties() {
           }
           prop.typeConstraint = tc;
 
+          if (preProp->attrs() & AttrNoImplicitNullable) {
+            prop.attrs |= AttrNoImplicitNullable;
+          }
+          if (preProp->attrs() & AttrSystemInitialValue) {
+            prop.attrs |= AttrSystemInitialValue;
+          }
+          if (preProp->attrs() & AttrInitialSatisfiesTC) {
+            prop.attrs |= AttrInitialSatisfiesTC;
+          }
+
+          // Check if this property's initial value needs to be type checked at
+          // runtime.
           auto const& tv = preProp->val();
+          if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
+              !(prop.attrs & AttrInitialSatisfiesTC) &&
+              tv.m_type != KindOfUninit) {
+            // System provided initial values should always be correct
+            if ((prop.attrs & AttrSystemInitialValue) || tc.alwaysPasses(&tv)) {
+              prop.attrs |= AttrInitialSatisfiesTC;
+            } else {
+              m_needsPropInitialCheck = true;
+            }
+          }
+
           TypedValueAux& tvaux = m_declPropInit[it2->second];
           tvaux.m_data = tv.m_data;
           tvaux.m_type = tv.m_type;
@@ -2546,6 +2675,23 @@ void Class::setProperties() {
         sProp.idx = slot;
       } else {
         sProp.idx = slot + m_preClass->numProperties() + traitOffset;
+      }
+
+      // Check if this property's initial value needs to be type checked at
+      // runtime.
+      auto const& tv = preProp->val();
+      auto const& tc = sProp.typeConstraint;
+      if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
+          !(sProp.attrs & AttrInitialSatisfiesTC) &&
+          tv.m_type != KindOfUninit) {
+        // System provided initial values should always be correct
+        if ((sProp.attrs & AttrSystemInitialValue) || tc.alwaysPasses(&tv)) {
+          sProp.attrs |= AttrInitialSatisfiesTC;
+        } else {
+          // If the sprop needs an initial value check, force it to be
+          // non-persistent so we check it on every request.
+          sProp.attrs = Attr(sProp.attrs & ~AttrPersistent);
+        }
       }
     }
   }
@@ -2635,6 +2781,18 @@ bool Class::compatibleTraitPropInit(const TypedValue& tv1,
   not_reached();
 }
 
+namespace {
+
+const constexpr Attr kRedeclarePropAttrMask =
+  Attr(
+    ~(AttrNoBadRedeclare |
+      AttrSystemInitialValue |
+      AttrNoImplicitNullable |
+      AttrInitialSatisfiesTC)
+  );
+
+}
+
 void Class::importTraitInstanceProp(Class* trait, Prop& traitProp,
                                     TypedValue& traitPropVal,
                                     const int idxOffset,
@@ -2654,7 +2812,11 @@ void Class::importTraitInstanceProp(Class* trait, Prop& traitProp,
     if (prop.attrs & AttrDeepInit) {
       m_hasDeepInitProps = true;
     }
-    prop.attrs = prop.attrs | AttrNoBadRedeclare;
+    // Clear NoImplicitNullable on the property. HHBBC analyzed the property in
+    // the context of the trait, not this class, so we cannot predict what
+    // derived class' will do with it. Be conservative.
+    prop.attrs = Attr(prop.attrs & ~AttrNoImplicitNullable)
+                 | AttrNoBadRedeclare;
     prop.idx += idxOffset;
     curPropMap.add(prop.name, prop);
     m_declPropInit.push_back(traitPropVal);
@@ -2662,8 +2824,10 @@ void Class::importTraitInstanceProp(Class* trait, Prop& traitProp,
     // Redeclared prop, make sure it matches previous declarations
     auto& prevProp    = curPropMap[prevIt->second];
     auto& prevPropVal = m_declPropInit[prevIt->second];
-    if (((prevProp.attrs ^ traitProp.attrs) & ~AttrNoBadRedeclare) ||
-        !compatibleTraitPropInit(prevPropVal, traitPropVal)) {
+    if (((prevProp.attrs ^ traitProp.attrs) & kRedeclarePropAttrMask) ||
+        (!(prevProp.attrs & AttrSystemInitialValue) &&
+         !(traitProp.attrs & AttrSystemInitialValue) &&
+         !compatibleTraitPropInit(prevPropVal, traitPropVal))) {
       raise_error("trait declaration of property '%s' is incompatible with "
                     "previous declaration", traitProp.name->data());
     }
@@ -2711,9 +2875,10 @@ void Class::importTraitStaticProp(Class* /*trait*/, SProp& traitProp,
 
       prevPropVal = prevSProps[prevPropInd].val;
     }
-    if (((prevProp.attrs ^ traitProp.attrs) &
-         ~(AttrPersistent | AttrNoBadRedeclare)) ||
-        !compatibleTraitPropInit(traitProp.val, prevPropVal)) {
+    if (((prevProp.attrs ^ traitProp.attrs) & kRedeclarePropAttrMask) ||
+        (!(prevProp.attrs & AttrSystemInitialValue) &&
+         !(traitProp.attrs & AttrSystemInitialValue) &&
+         !compatibleTraitPropInit(traitProp.val, prevPropVal))) {
       raise_error("trait declaration of property '%s' is incompatible with "
                   "previous declaration", traitProp.name->data());
     }
@@ -2728,6 +2893,8 @@ void Class::importTraitProps(int idxOffset,
   if (attrs() & AttrNoExpandTrait) return;
   for (auto const& t : m_extra->m_usedTraits) {
     auto trait = t.get();
+
+    m_needsPropInitialCheck |= trait->m_needsPropInitialCheck;
 
     // instance properties
     for (Slot p = 0; p < trait->m_declProperties.size(); p++) {
@@ -2837,9 +3004,10 @@ void Class::setInitializers() {
   m_needInitialization =
     (m_pinitVec.size() > 0 ||
      m_staticProperties.size() > 0 ||
-     m_maybeRedefsPropTy);
+     m_maybeRedefsPropTy ||
+     m_needsPropInitialCheck);
 
-  if (m_maybeRedefsPropTy) allocExtraData();
+  if (m_maybeRedefsPropTy || m_needsPropInitialCheck) allocExtraData();
 
   // Implementations of Throwable get special treatment.
   if (m_parent.get() != nullptr) {

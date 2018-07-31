@@ -186,12 +186,15 @@ Array HHVM_FUNCTION(hphp_get_extension_info, const String& name) {
   return ret;
 }
 
-int get_modifiers(Attr attrs, bool cls) {
+int get_modifiers(Attr attrs, bool cls, bool prop) {
   int php_modifier = 0;
-  if (attrs & AttrAbstract)  php_modifier |= cls ? 0x20 : 0x02;
-  if (attrs & AttrFinal)     php_modifier |= cls ? 0x40 : 0x04;
-  if (attrs & AttrStatic)    php_modifier |= 0x01;
+  if (!prop) {
+    // These bits have different meanings with properties
+    if (attrs & AttrAbstract)  php_modifier |= cls ? 0x20 : 0x02;
+    if (attrs & AttrFinal)     php_modifier |= cls ? 0x40 : 0x04;
+  }
   if (!cls) {  // AttrPublic bits are not valid on class (have other meaning)
+    if (attrs & AttrStatic)    php_modifier |= 0x01;
     if (attrs & AttrPublic)    php_modifier |= 0x100;
     if (attrs & AttrProtected) php_modifier |= 0x200;
     if (attrs & AttrPrivate)   php_modifier |= 0x400;
@@ -265,7 +268,7 @@ static void set_instance_prop_info(Array& ret,
   ret.set(s_name, make_tv<KindOfPersistentString>(prop->name));
   ret.set(s_default, true_varNR.tv());
   ret.set(s_defaultValue, default_val);
-  set_attrs(ret, get_modifiers(prop->attrs, false) & ~0x66);
+  set_attrs(ret, get_modifiers(prop->attrs, false, true) & ~0x66);
   ret.set(s_class, make_tv<KindOfPersistentString>(prop->cls->name()));
   set_doc_comment(ret, prop->docComment, prop->cls->isBuiltin());
 
@@ -281,7 +284,7 @@ static void set_dyn_prop_info(
     const Variant& name,
     const StringData* className) {
   ret.set(s_name, name);
-  set_attrs(ret, get_modifiers(AttrPublic, false) & ~0x66);
+  set_attrs(ret, get_modifiers(AttrPublic, false, true) & ~0x66);
   ret.set(s_class, make_tv<KindOfPersistentString>(className));
   set_empty_doc_comment(ret);
   ret.set(s_type, false_varNR.tv());
@@ -291,7 +294,7 @@ static void set_static_prop_info(Array &ret, const Class::SProp* prop) {
   ret.set(s_name, make_tv<KindOfPersistentString>(prop->name));
   ret.set(s_default, true_varNR.tv());
   ret.set(s_defaultValue, prop->val);
-  set_attrs(ret, get_modifiers(prop->attrs, false) & ~0x66);
+  set_attrs(ret, get_modifiers(prop->attrs, false, true) & ~0x66);
   ret.set(s_class, make_tv<KindOfPersistentString>(prop->cls->name()));
   set_doc_comment(ret, prop->docComment, prop->cls->isBuiltin());
   if (prop->userType && prop->userType->size()) {
@@ -953,7 +956,7 @@ static bool HHVM_METHOD(ReflectionMethod, isConstructor) {
 
 static int HHVM_METHOD(ReflectionMethod, getModifiers) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
-  return get_modifiers(func->attrs(), false);
+  return get_modifiers(func->attrs(), false, false);
 }
 
 // private helper for getPrototype
@@ -1128,7 +1131,7 @@ static bool HHVM_METHOD(ReflectionClass, isEnum) {
 
 static int HHVM_METHOD(ReflectionClass, getModifiers) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  return get_modifiers(cls->attrs(), true);
+  return get_modifiers(cls->attrs(), true, false);
 }
 
 static Variant HHVM_METHOD(ReflectionClass, getFileName) {
@@ -1862,11 +1865,11 @@ static int HHVM_METHOD(ReflectionProperty, getModifiers) {
   auto const data = Native::data<ReflectionPropHandle>(this_);
   switch (data->getType()) {
     case ReflectionPropHandle::Type::Instance:
-      return get_modifiers(data->getProp()->attrs, false);
+      return get_modifiers(data->getProp()->attrs, false, true);
     case ReflectionPropHandle::Type::Static:
-      return get_modifiers(data->getSProp()->attrs, false);
+      return get_modifiers(data->getSProp()->attrs, false, true);
     case ReflectionPropHandle::Type::Dynamic:
-      return get_modifiers(AttrPublic, false);
+      return get_modifiers(AttrPublic, false, true);
     default:
       reflection_property_internal_error();
   }
@@ -2281,7 +2284,7 @@ static void set_debugger_reflection_function_info(Array& ret,
 static void set_debugger_reflection_method_info(Array& ret, const Func* func,
                                                 const Class* cls) {
   ret.set(s_name, make_tv<KindOfPersistentString>(func->name()));
-  set_attrs(ret, get_modifiers(func->attrs(), false));
+  set_attrs(ret, get_modifiers(func->attrs(), false, false));
 
   if (isConstructor(func)) {
     ret.set(s_constructor, true_varNR.tv());
@@ -2376,7 +2379,7 @@ Array get_class_info(const String& name) {
       ret.set(s_trait,     true_varNR.tv());
     }
     ret.set(s_modifiers, make_tv<KindOfInt64>(
-      get_modifiers(cls->attrs(), true))
+      get_modifiers(cls->attrs(), true, false))
     );
 
     if (cls->getCtor()->attrs() & AttrPublic &&

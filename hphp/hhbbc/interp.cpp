@@ -4465,23 +4465,33 @@ void in(ISS& env, const bc::InitProp& op) {
       mergeThisProp(env, op.str1, t);
       break;
   }
-  auto const v = tv(t);
-  if (v || !could_contain_objects(t)) {
-    for (auto& prop : env.ctx.func->cls->properties) {
-      if (prop.name == op.str1) {
-        ITRACE(1, "InitProp: {} = {}\n", op.str1, show(t));
-        prop.attrs = (Attr)(prop.attrs & ~AttrDeepInit);
-        if (!v) break;
-        prop.val = *v;
-        if (op.subop2 == InitPropOp::Static &&
-            !env.collect.publicStatics &&
-            !env.index.frozen()) {
-          env.index.fixup_public_static(env.ctx.func->cls, prop.name, t);
-        }
-        return reduce(env, bc::PopC {});
+
+  for (auto& prop : env.ctx.func->cls->properties) {
+    if (prop.name != op.str1) continue;
+
+    ITRACE(1, "InitProp: {} = {}\n", op.str1, show(t));
+
+    if (env.index.satisfies_constraint(env.ctx, t, prop.typeConstraint)) {
+      prop.attrs |= AttrInitialSatisfiesTC;
+    } else {
+      badPropInitialValue(env);
+      prop.attrs = (Attr)(prop.attrs & ~AttrInitialSatisfiesTC);
+    }
+
+    auto const v = tv(t);
+    if (v || !could_contain_objects(t)) {
+      prop.attrs = (Attr)(prop.attrs & ~AttrDeepInit);
+      if (!v) break;
+      prop.val = *v;
+      if (op.subop2 == InitPropOp::Static &&
+          !env.collect.publicStatics &&
+          !env.index.frozen()) {
+        env.index.fixup_public_static(env.ctx.func->cls, prop.name, t);
       }
+      return reduce(env, bc::PopC {});
     }
   }
+
   popC(env);
 }
 

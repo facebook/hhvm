@@ -290,6 +290,18 @@ struct TypeConstraint {
                           bool extra = false) const;
 
   /*
+   * Obtain an initial value suitable for this type-constraint. Where possible,
+   * the initial value is chosen to satisfy the type-constraint, but this isn't
+   * always possible (for example, for objects).
+   */
+  Cell defaultValue() const {
+    // Nullable type-constraints should always default to null, as Hack
+    // guarantees this.
+    if (!isCheckable() || isNullable()) return make_tv<KindOfNull>();
+    return annotDefaultValue(m_type);
+  }
+
+  /*
    * Returns whether this and another type-constraint might not be equivalent at
    * runtime. Two type-constraints are equivalent if they allow exactly the same
    * values. This function is conservative and will return true if not
@@ -346,6 +358,7 @@ struct TypeConstraint {
    * checked at run-time.
    */
   bool alwaysPasses(const TypedValue* tv) const {
+    if (!isCheckable()) return true;
     return checkImpl<CheckMode::AlwaysPasses>(tv, nullptr);
   }
 

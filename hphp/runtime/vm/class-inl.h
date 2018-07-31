@@ -321,6 +321,10 @@ inline bool Class::maybeRedefinesPropTypes() const {
   return m_maybeRedefsPropTy;
 }
 
+inline bool Class::needsPropInitialValueCheck() const {
+  return m_needsPropInitialCheck;
+}
+
 inline const Class::PropInitVec& Class::declPropInit() const {
   return m_declPropInit;
 }
@@ -333,6 +337,12 @@ inline rds::Handle Class::checkedPropTypeRedefinesHandle() const {
   assertx(m_maybeRedefsPropTy);
   m_extra->m_checkedPropTypeRedefs.bind(rds::Mode::Normal);
   return m_extra->m_checkedPropTypeRedefs.handle();
+}
+
+inline rds::Handle Class::checkedPropInitialValuesHandle() const {
+  assertx(m_needsPropInitialCheck);
+  m_extra->m_checkedPropInitialValues.bind(rds::Mode::Normal);
+  return m_extra->m_checkedPropInitialValues.handle();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

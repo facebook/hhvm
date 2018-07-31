@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-incdec.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/irgen-types.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -371,8 +372,25 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
     {
       // For sinit, the context class is always the same as the late-bound
       // class, so we can just use curClass().
-      auto const handle = ctx->sPropHandle(ctx->lookupSProp(propName));
+      auto const slot = ctx->lookupSProp(propName);
+      assertx(slot != kInvalidSlot);
+      auto const handle = ctx->sPropHandle(slot);
       assertx(!rds::isNormalHandle(handle));
+
+      auto const& prop = ctx->staticProperties()[slot];
+      assertx(!(prop.attrs & AttrSystemInitialValue));
+      if (!(prop.attrs & AttrInitialSatisfiesTC)) {
+        verifyPropType(
+          env,
+          cns(env, ctx),
+          &prop.typeConstraint,
+          slot,
+          val,
+          cns(env, propName),
+          true
+        );
+      }
+
       base = gen(
         env,
         LdRDSAddr,
@@ -388,8 +406,22 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
       auto const cctx = gen(env, LdCctx, fp(env));
       auto const cls = gen(env, LdClsCtx, cctx);
 
-      base = gen(env, LdClsInitData, cls);
       idx = ctx->lookupDeclProp(propName);
+      auto const& prop = ctx->declProperties()[idx];
+      assertx(!(prop.attrs & AttrSystemInitialValue));
+      if (!(prop.attrs & AttrInitialSatisfiesTC)) {
+        verifyPropType(
+          env,
+          cls,
+          &prop.typeConstraint,
+          idx,
+          val,
+          cns(env, propName),
+          false
+        );
+      }
+
+      base = gen(env, LdClsInitData, cls);
     }
     break;
   }

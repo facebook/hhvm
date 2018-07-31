@@ -74,7 +74,6 @@ State pseudomain_entry_state(borrowed_ptr<const php::Func> func) {
 }
 
 State entry_state(const Index& index, Context const ctx,
-                  ClassAnalysis* /*clsAnalysis*/,
                   const std::vector<Type>* knownArgs) {
   auto ret = State{};
   ret.initialized = true;
@@ -192,7 +191,6 @@ State entry_state(const Index& index, Context const ctx,
 dataflow_worklist<uint32_t>
 prepare_incompleteQ(const Index& index,
                     FuncAnalysis& ai,
-                    ClassAnalysis* clsAnalysis,
                     const std::vector<Type>* knownArgs) {
   auto incompleteQ     = dataflow_worklist<uint32_t>(ai.rpoBlocks.size());
   auto const ctx       = ai.ctx;
@@ -200,10 +198,10 @@ prepare_incompleteQ(const Index& index,
 
   auto const entryState = [&] {
     if (!is_pseudomain(ctx.func)) {
-      return entry_state(index, ctx, clsAnalysis, knownArgs);
+      return entry_state(index, ctx, knownArgs);
     }
 
-    assert(!knownArgs && !clsAnalysis);
+    assert(!knownArgs);
     assert(numParams == 0);
     return pseudomain_entry_state(ctx.func);
   }();
@@ -269,7 +267,6 @@ Context adjust_closure_context(Context ctx) {
 FuncAnalysis do_analyze_collect(const Index& index,
                                 Context const ctx,
                                 CollectedInfo& collect,
-                                ClassAnalysis* clsAnalysis,
                                 const std::vector<Type>* knownArgs) {
   assertx(ctx.cls == adjust_closure_context(ctx).cls);
   FuncAnalysis ai{ctx};
@@ -297,7 +294,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
    * back edges---when state merges cause a change to the block
    * stateIn, we will add it to this queue so it gets visited again.
    */
-  auto incompleteQ = prepare_incompleteQ(index, ai, clsAnalysis, knownArgs);
+  auto incompleteQ = prepare_incompleteQ(index, ai, knownArgs);
 
   /*
    * There are potentially infinitely growing types when we're using union_of to
@@ -481,7 +478,7 @@ FuncAnalysis do_analyze(const Index& index,
     index, ctx, clsAnalysis, nullptr, opts
   };
 
-  auto ret = do_analyze_collect(index, ctx, collect, clsAnalysis, knownArgs);
+  auto ret = do_analyze_collect(index, ctx, collect, knownArgs);
   if (ctx.func->name == s_86cinit.get() && !knownArgs) {
     // We need to try to resolve any dynamic constants
     size_t idx = 0;
@@ -591,7 +588,7 @@ FuncAnalysis analyze_func(const Index& index, Context const ctx,
 FuncAnalysis analyze_func_collect(const Index& index,
                                   Context const ctx,
                                   CollectedInfo& collect) {
-  return do_analyze_collect(index, ctx, collect, nullptr, nullptr);
+  return do_analyze_collect(index, ctx, collect, nullptr);
 }
 
 FuncAnalysis analyze_func_inline(const Index& index,
@@ -630,10 +627,22 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
    * Also, set Uninit properties to TBottom, so that analysis
    * of 86pinit methods sets them to the correct type.
    */
-  for (auto& prop : ctx.cls->properties) {
+  for (auto& prop : const_cast<php::Class*>(ctx.cls)->properties) {
+    auto const cellTy = from_cell(prop.val);
+
+    if (is_closure(*ctx.cls) ||
+        (prop.attrs & AttrSystemInitialValue) ||
+        (!cellTy.subtypeOf(TUninit) &&
+         index.satisfies_constraint(ctx, cellTy, prop.typeConstraint))) {
+      prop.attrs |= AttrInitialSatisfiesTC;
+    } else {
+      prop.attrs = (Attr)(prop.attrs & ~AttrInitialSatisfiesTC);
+      // If Uninit, it will be determined in the 86[s,p]init function.
+      if (!cellTy.subtypeOf(TUninit)) clsAnalysis.badPropInitialValues = true;
+    }
+
     if (!(prop.attrs & AttrPrivate)) continue;
 
-    auto const cellTy = from_cell(prop.val);
     if (isHNIBuiltin) {
       auto const hniTy = from_hni_constraint(prop.userType);
       if (!cellTy.subtypeOf(hniTy)) {

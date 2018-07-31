@@ -258,4 +258,44 @@ bool interface_supports_double(const std::string& n) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+Cell annotDefaultValue(AnnotType at) {
+  switch (at) {
+    case AnnotType::Mixed:
+    case AnnotType::Self:
+    case AnnotType::Parent:
+    case AnnotType::This:
+    case AnnotType::Callable:
+    case AnnotType::Resource:
+    case AnnotType::Object:
+    case AnnotType::NoReturn:
+    case AnnotType::Null:     return make_tv<KindOfNull>();
+    case AnnotType::Nonnull:
+    case AnnotType::Number:
+    case AnnotType::ArrayKey:
+    case AnnotType::Int:      return make_tv<KindOfInt64>(0);
+    case AnnotType::Bool:     return make_tv<KindOfBoolean>(false);
+    case AnnotType::Float:    return make_tv<KindOfDouble>(0);
+    case AnnotType::DArray:
+      return make_tv<KindOfPersistentArray>(staticEmptyDArray());
+    case AnnotType::VArray:
+    case AnnotType::VArrOrDArr:
+      return make_tv<KindOfPersistentArray>(staticEmptyVArray());
+    case AnnotType::ArrayLike:
+    case AnnotType::VecOrDict:
+    case AnnotType::Vec:
+      return make_tv<KindOfPersistentVec>(staticEmptyVecArray());
+    case AnnotType::String:
+      return make_tv<KindOfPersistentString>(staticEmptyString());
+    case AnnotType::Array:
+      return make_tv<KindOfPersistentArray>(staticEmptyArray());
+    case AnnotType::Dict:
+      return make_tv<KindOfPersistentDict>(staticEmptyDictArray());
+    case AnnotType::Keyset:
+      return make_tv<KindOfPersistentKeyset>(staticEmptyKeysetArray());
+  }
+  always_assert(false);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }

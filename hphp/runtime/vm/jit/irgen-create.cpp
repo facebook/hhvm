@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
+#include "hphp/runtime/vm/jit/irgen-types.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -175,6 +176,52 @@ void checkPropTypeRedefs(IRGS& env, const Class* cls) {
   );
 }
 
+void checkPropInitialValues(IRGS& env, const Class* cls) {
+  assertx(cls->needsPropInitialValueCheck());
+  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      gen(
+        env,
+        CheckRDSInitialized,
+        taken,
+        RDSHandleData { cls->checkedPropInitialValuesHandle() }
+      );
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
+
+      auto const& props = cls->declProperties();
+      for (Slot slot = 0; slot < props.size(); ++slot) {
+        auto const& prop = props[slot];
+        if (prop.attrs & AttrInitialSatisfiesTC) continue;
+        auto const& tc = prop.typeConstraint;
+        if (!tc.isCheckable()) continue;
+        const TypedValue& tv = cls->declPropInit()[slot];
+        if (tv.m_type == KindOfUninit) continue;
+        verifyPropType(
+          env,
+          cns(env, cls),
+          &tc,
+          slot,
+          cns(env, tv),
+          cns(env, makeStaticString(prop.name)),
+          false
+        );
+      }
+
+      gen(
+        env,
+        MarkRDSInitialized,
+        RDSHandleData { cls->checkedPropInitialValuesHandle() }
+      );
+    }
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -206,11 +253,13 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
   auto const props = cls->pinitVec().size() > 0;
   auto const sprops = cls->numStaticProperties() > 0;
   auto const redefine = cls->maybeRedefinesPropTypes();
+  auto const propVal = cls->needsPropInitialValueCheck();
   assertx(
-    (props || sprops || redefine) == cls->needInitialization()
+    (props || sprops || redefine || propVal) == cls->needInitialization()
   );
   if (cls->needInitialization()) {
     if (redefine) checkPropTypeRedefs(env, cls);
+    if (propVal) checkPropInitialValues(env, cls);
     if (props) initProps(env, cls);
     if (sprops) initSProps(env, cls);
   }

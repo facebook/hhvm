@@ -116,9 +116,9 @@ let from_ast
        else tc
   in
   let env = Emit_env.make_class_env ast_class in
-  let initial_value, is_deep_init, initializer_instrs =
+  let initial_value, is_deep_init, has_system_initial, initializer_instrs =
     match initial_value with
-    | None -> None, false, None
+    | None -> None, false, true, None
     | Some expr ->
       let is_collection_map =
         match snd expr with
@@ -129,7 +129,7 @@ let from_ast
       match Ast_constant_folder.expr_to_opt_typed_value
         ast_class.Ast.c_namespace expr with
       | Some v when not deep_init && not is_collection_map ->
-        Some v, false, None
+        Some v, false, false, None
       | _ ->
         let label = Label.next_regular () in
         let prolog, epilog =
@@ -150,7 +150,7 @@ let from_ast
               instr (IMutator (InitProp (pid, NonStatic)));
               instr_label label;
             ] in
-        Some Typed_value.Uninit, deep_init,
+        Some Typed_value.Uninit, deep_init, false,
           Some (gather [
             prolog;
             Emit_expression.emit_expr ~need_ref:false env expr;
@@ -166,6 +166,9 @@ let from_ast
     is_immutable
     is_lsb
     false (*no_bad_redeclare*)
+    has_system_initial
+    false (*no_implicit_null*)
+    false (*initial_satisfies_tc*)
     pid
     initial_value
     initializer_instrs

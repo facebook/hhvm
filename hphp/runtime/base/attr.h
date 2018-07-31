@@ -57,7 +57,15 @@ enum Attr {
   // same things.
   // Is this class an enum?
   AttrEnum                 = (1u <<  4), //    X  |          |         //
-  // Was this declared static, abstract, or final?           |         //
+  // Was this property's initial value supplied by the emitter (rather than a
+  // user). System provided initial values can be modified to match the
+  // property's type-hint.
+  AttrSystemInitialValue   = (1u <<  5), //       |    X     |         //
+  // Normally properties might contain KindOfNull values, even if their
+  // type-hint doesn't allow this (because of initial values). This indicates
+  // the property won't contain KindOfNull if its type-hint doesn't allow it.
+  AttrNoImplicitNullable   = (1u <<  6), //       |    X     |         //
+  // Was this declared static, abstract, or final?
   AttrStatic               = (1u <<  4), //       |    X     |    X    //
   AttrAbstract             = (1u <<  5), //    X  |          |    X    //
   AttrFinal                = (1u <<  6), //    X  |          |    X    //
@@ -77,6 +85,9 @@ enum Attr {
   // Indicates a class has no derived classes that have a magic __unset method.
   AttrNoOverrideMagicUnset = (1u <<  9), //   X   |          |         //
                                          //       |          |         //
+  // Indicates this property's initial value satisfies its type-constraint and
+  // no runtime check needs to be done.
+  AttrInitialSatisfiesTC   = (1u <<  9), //       |    X     |         //
   // Indicates that the function or class is uniquely named among functions or
   // classes across the codebase.  Note that function and class names are in
   // separate namespaces, so it is possible to have a Func and Class which

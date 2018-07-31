@@ -6795,15 +6795,31 @@ OPTBLD_INLINE void iopInitProp(const StringData* propName, InitPropOp propOp) {
   auto* fr = vmStack().topC();
 
   switch (propOp) {
-    case InitPropOp::Static:
-      tv = cls->getSPropData(ctx->lookupSProp(propName));
+    case InitPropOp::Static: {
+      auto const slot = ctx->lookupSProp(propName);
+      assertx(slot != kInvalidSlot);
+      tv = cls->getSPropData(slot);
+      if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+        auto const& sprop = cls->staticProperties()[slot];
+        auto const& tc = sprop.typeConstraint;
+        if (tc.isCheckable()) {
+          tc.verifyStaticProperty(fr, cls, sprop.cls, sprop.name);
+        }
+      }
       break;
+    }
 
     case InitPropOp::NonStatic: {
       auto* propVec = cls->getPropData();
       always_assert(propVec);
-      Slot idx = ctx->lookupDeclProp(propName);
+      auto const idx = ctx->lookupDeclProp(propName);
+      assertx(idx != kInvalidSlot);
       tv = &(*propVec)[idx];
+      if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+        auto const& prop = cls->declProperties()[idx];
+        auto const& tc = prop.typeConstraint;
+        if (tc.isCheckable()) tc.verifyProperty(fr, cls, prop.cls, prop.name);
+      }
     } break;
   }
 

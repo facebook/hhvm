@@ -124,6 +124,8 @@ bool interface_supports_vec(std::string const&);
 bool interface_supports_dict(std::string const&);
 bool interface_supports_keyset(std::string const&);
 
+Cell annotDefaultValue(AnnotType at);
+
 enum class AnnotAction {
   Pass,
   Fail,

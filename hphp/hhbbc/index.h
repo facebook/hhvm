@@ -78,7 +78,7 @@ struct Program;
  * dependency - either a php::Func, or, if we're doing private
  * property analysis and its a suitable class, a php::Class
  */
-using DependencyContext = Either<borrowed_ptr<php::Func>,
+using DependencyContext = Either<borrowed_ptr<const php::Func>,
                                  borrowed_ptr<const php::Class>>;
 
 struct DependencyContextLess {
@@ -92,6 +92,13 @@ struct DependencyContextHash {
   size_t operator()(const DependencyContext& d) const {
     return pointer_hash<void>{}(reinterpret_cast<void*>(d.toOpaque()));
   }
+};
+
+struct DependencyContextHashCompare : DependencyContextHash {
+  bool equal(const DependencyContext& a, const DependencyContext& b) const {
+    return a.toOpaque() == b.toOpaque();
+  }
+  size_t hash(const DependencyContext& d) const { return (*this)(d); }
 };
 
 using DependencyContextSet = hphp_hash_set<DependencyContext,
@@ -736,6 +743,12 @@ struct Index {
   Type lookup_public_static(borrowed_ptr<const php::Class>, SString name) const;
 
   /*
+   * Lookup if initializing (which is a side-effect of several bytecodes) the
+   * given class might raise.
+   */
+  bool lookup_class_init_might_raise(Context, res::Class) const;
+
+  /*
    * If we resolve a public static initializer to a constant, and eliminate the
    * 86pinit, we need to update the initializer in the index.
    *
@@ -775,6 +788,12 @@ struct Index {
    * Must be called in single-threaded context.
    */
   void use_class_dependencies(bool f);
+
+  /*
+   * Initialize the initial types for public static properties. This should be
+   * done after rewriting initial property values, as that affects the types.
+   */
+  void init_public_static_prop_types();
 
   /*
    * Refine the types of the class constants defined by an 86cinit,
@@ -873,6 +892,17 @@ struct Index {
   void refine_public_statics(const PublicSPropIndexer&);
 
   /*
+   * Refine whether the given class has properties with initial values which
+   * might violate their type-hints.
+   *
+   * No other threads should be calling functions on this Index when this
+   * function is called.
+   */
+  void refine_bad_initial_prop_values(borrowed_ptr<const php::Class> cls,
+                                      bool value,
+                                      DependencyContextSet& deps);
+
+  /*
    * Identify the persistent classes, functions and typeAliases.
    */
   void mark_persistent_classes_and_functions(php::Program& program);
@@ -882,6 +912,16 @@ struct Index {
    * the parent, which has an inequivalent type-hint.
    */
   void mark_no_bad_redeclare_props(php::Class& cls) const;
+
+  /*
+   * Rewrite the initial values of any AttrSystemInitialValue properties to
+   * something more suitable for its type-hint, and add AttrNoImplicitNullable
+   * where appropriate.
+   *
+   * This must be done before any analysis is done, as the initial values
+   * affects the analysis.
+   */
+  void rewrite_default_initial_values(php::Program&) const;
 
   /*
    * Return true if the resolved function is an async

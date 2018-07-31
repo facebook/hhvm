@@ -197,6 +197,10 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
   if (m_attrs & AttrNoSerialize) { out << "(no-serialize) "; }
   if (m_attrs & AttrIsImmutable) { out << "(immutable) "; }
   if (m_attrs & AttrNoBadRedeclare) { out << "(no-bad-redeclare) "; }
+  if (m_attrs & AttrNoOverride) { out << "(no-override) "; }
+  if (m_attrs & AttrSystemInitialValue) { out << "(system-initial-val) "; }
+  if (m_attrs & AttrNoImplicitNullable) { out << "(no-implicit-nullable) "; }
+  if (m_attrs & AttrInitialSatisfiesTC) { out << "(initial-satisfies-tc) "; }
   out << preClass->name()->data() << "::" << m_name->data() << " = ";
   if (m_val.m_type == KindOfUninit) {
     out << "<non-scalar>";

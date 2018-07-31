@@ -729,6 +729,12 @@ public:
   bool maybeRedefinesPropTypes() const;
 
   /*
+   * Whether this Class has properties that require a runtime initial value
+   * check.
+   */
+  bool needsPropInitialValueCheck() const;
+
+  /*
    * Perform request-local initialization.
    *
    * For declared instance properties, this means creating a request-local copy
@@ -775,6 +781,12 @@ public:
    * been performed for this class in this request yet.
    */
   rds::Handle checkedPropTypeRedefinesHandle() const;
+
+  /*
+   * RDS handle which marks whether the initial value check has been performed
+   * for this class in this request yet.
+   */
+  rds::Handle checkedPropInitialValuesHandle() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Property storage.                                                  [const]
@@ -1286,6 +1298,12 @@ private:
      * type-hint redefinition check.
      */
     mutable rds::Link<bool, rds::Mode::Normal> m_checkedPropTypeRedefs;
+
+    /*
+     * If initialized, then this class has already performed an initial value
+     * check.
+     */
+    mutable rds::Link<bool, rds::Mode::Normal> m_checkedPropInitialValues;
   };
 
   /*
@@ -1451,6 +1469,7 @@ private:
 
   void initLSBMemoHandles();
   void checkPropTypeRedefinitions() const;
+  void checkPropInitialValues() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Static data members.
@@ -1509,7 +1528,10 @@ private:
   /* This class (and not any of its transitive parents) has a property which
    * maybe redefines an existing property in an incompatible way. */
   bool m_selfMaybeRedefsPropTy   : 1;
-  // NB: 22 bits available here (in USE_LOWPTR builds).
+  /* This class has a property with an initial value which might not satisfy its
+   * type-hint (and therefore requires a check when initialized). */
+  bool m_needsPropInitialCheck   : 1;
+  // NB: 21 bits available here (in USE_LOWPTR builds).
 
   /*
    * Vector of 86pinit() methods that need to be called to complete instance

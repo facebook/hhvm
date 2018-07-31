@@ -165,6 +165,9 @@ struct ClassAnalysis {
   PropState privateProperties;
   PropState privateStatics;
   bool anyInterceptable;
+
+  // Whether this class might have a bad initial value for a property.
+  bool badPropInitialValues{false};
 };
 
 //////////////////////////////////////////////////////////////////////

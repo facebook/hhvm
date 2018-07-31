@@ -673,6 +673,12 @@ let property_no_serialize_comparer =
   wrap Hhas_property.no_serialize (fun _f s -> s) (flag_comparer "no_serialize")
 let property_no_bad_redeclare_comparer =
   wrap Hhas_property.no_serialize (fun _f s -> s) (flag_comparer "no_bad_redeclare")
+let property_has_system_initial_comparer =
+  wrap Hhas_property.has_system_initial (fun _f s -> s) (flag_comparer "sys_initial_val")
+let property_no_implicit_null_comparer =
+  wrap Hhas_property.no_implicit_null (fun _f s -> s) (flag_comparer "no_implicit_null")
+let property_initial_satisfies_tc_comparer =
+  wrap Hhas_property.initial_satisfies_tc (fun _f s -> s) (flag_comparer "initial_satisfies_tc")
 let prop_comparer =
   wrap Hhbc_id.Prop.to_raw_string (fun _ s -> s) string_comparer
 
@@ -696,6 +702,9 @@ let property_comparer =
      property_initial_value_comparer;
      property_no_serialize_comparer;
      property_no_bad_redeclare_comparer;
+     property_has_system_initial_comparer;
+     property_no_implicit_null_comparer;
+     property_initial_satisfies_tc_comparer;
      property_type_info_comparer]
 
 (* apply a permutation to the trailing elements of a list

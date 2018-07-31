@@ -149,6 +149,9 @@ enum class Dep : uintptr_t {
   ConstVal = 0x2,
   /* This dependency should trigger when a class constant is resolved */
   ClsConst = 0x4,
+  /* This dependency should trigger when the bad initial prop value bit for a
+   * class changes */
+  PropBadInitialValues = 0x8,
 };
 
 Dep operator|(Dep a, Dep b) {
@@ -167,8 +170,9 @@ bool has_dep(Dep m, Dep t) {
  */
 using DepMap =
   tbb::concurrent_hash_map<
-    borrowed_ptr<const php::Func>,
-    std::map<DependencyContext,Dep,DependencyContextLess>
+    DependencyContext,
+    std::map<DependencyContext,Dep,DependencyContextLess>,
+    DependencyContextHashCompare
   >;
 
 //////////////////////////////////////////////////////////////////////
@@ -506,6 +510,12 @@ struct ClassInfo {
   bool hasBadRedeclareProp{true};
 
   /*
+   * Track if this class has any properties with initial values that might
+   * violate their type-hints.
+   */
+  bool hasBadInitialPropValues{true};
+
+  /*
    * Flags about the existence of various magic methods, or whether
    * any derived classes may have those methods.  The non-derived
    * flags imply the derived flags, even if the class is final, so you
@@ -665,21 +675,6 @@ bool Class::couldBeMocked() const {
     [] (SString) { return true;},
     [] (borrowed_ptr<ClassInfo> cinfo) {
       return cinfo->isMocked;
-    }
-  );
-}
-
-bool Class::initMightRaise() const {
-  return val.match(
-    [] (SString) { return true; },
-    [] (borrowed_ptr<ClassInfo> cinfo) {
-      // Check this class and all of its parents for possible inequivalent
-      // redeclarations.
-      do {
-        if (cinfo->hasBadRedeclareProp) return true;
-        cinfo = cinfo->parent;
-      } while (cinfo);
-      return false;
     }
   );
 }
@@ -1063,7 +1058,7 @@ DependencyContext dep_context(IndexData& data, const Context& ctx) {
 }
 
 void add_dependency(IndexData& data,
-                    borrowed_ptr<const php::Func> src,
+                    DependencyContext src,
                     const Context& dst,
                     Dep newMask) {
   if (data.frozen) return;
@@ -1106,7 +1101,7 @@ borrowed_ptr<FuncInfo> func_info(IndexData& data,
 }
 
 void find_deps(IndexData& data,
-               borrowed_ptr<const php::Func> src,
+               DependencyContext src,
                Dep mask,
                DependencyContextSet& deps) {
   DepMap::const_accessor acc;
@@ -1352,14 +1347,16 @@ bool build_class_properties(BuildClsInfo& info,
     auto res = info.pbuilder.emplace(p.name, ent);
     if (res.second) {
       if (add) info.rleaf->traitProps.push_back(p);
-      return true;;
+      return true;
     }
     auto& prevProp = res.first->second.first;
     if (rparent == res.first->second.second) {
       assertx(rparent == info.rleaf);
       if ((prevProp.attrs ^ p.attrs) &
           (AttrStatic | AttrPublic | AttrProtected | AttrPrivate) ||
-          !Class::compatibleTraitPropInit(prevProp.val, p.val)) {
+          (!(p.attrs & AttrSystemInitialValue) &&
+           !(prevProp.attrs & AttrSystemInitialValue) &&
+           !Class::compatibleTraitPropInit(prevProp.val, p.val))) {
         ITRACE(2,
                "build_class_properties failed for `{}' because "
                "two declarations of `{}' at the same level had "
@@ -1820,25 +1817,7 @@ bool find_constructor(borrowed_ptr<ClassInfo> cinfo) {
 bool build_cls_info(IndexData& index, borrowed_ptr<ClassInfo> cinfo) {
   auto info = BuildClsInfo{ index, cinfo };
   if (!build_cls_info_rec(info, cinfo, false)) return false;
-
   if (!find_constructor(cinfo)) return false;
-
-  for (auto& prop : cinfo->cls->properties) {
-    if (!(prop.attrs & AttrPublic) || !(prop.attrs & AttrStatic)) {
-      continue;
-    }
-
-    /*
-     * If the initializer type is TUninit, it means an 86sinit provides the
-     * actual initialization type.  So we don't want to include the Uninit
-     * (which isn't really a user-visible type for the property) or by the time
-     * we union things in we'll have inferred nothing much.
-     */
-    auto const tyRaw = from_cell(prop.val);
-    auto const ty = tyRaw.subtypeOf(BUninit) ? TBottom : tyRaw;
-    cinfo->publicStaticProps[prop.name] = PublicSPropEntry { ty, ty, false };
-  }
-
   return true;
 }
 
@@ -3626,6 +3605,154 @@ void Index::mark_no_bad_redeclare_props(php::Class& cls) const {
   }
 }
 
+/*
+ * Rewrite the initial values for any AttrSystemInitialValue properties. If the
+ * properties' type-hint does not admit null values, change the initial value to
+ * one (if possible) to one that is not null. This is only safe to do so if the
+ * property is not redeclared in a derived class or if the redeclaration does
+ * not have a null system provided default value. Otherwise, a property can have
+ * a null value (even if its type-hint doesn't allow it) without the JIT
+ * realizing that its possible.
+ *
+ * Note that this ignores any unflattened traits. This is okay because
+ * properties pulled in from traits which match an already existing property
+ * can't change the initial value. The runtime will clear AttrNoImplicitNullable
+ * on any property pulled from the trait if it doesn't match an existing
+ * property.
+ */
+void Index::rewrite_default_initial_values(php::Program& program) const {
+  trace_time tracer("rewrite default initial values");
+
+  /*
+   * Use dataflow across the whole program class hierarchy. Start from the
+   * classes which have no derived classes and flow up the hierarchy. We flow
+   * the set of properties which have been assigned a null system provided
+   * default value. If a property with such a null value flows into a class
+   * which declares a property with the same name (and isn't static or private),
+   * than that property is forced to be null as well.
+   */
+  using PropSet = folly::F14FastSet<SString>;
+  using OutState = folly::F14FastMap<const ClassInfo*, PropSet>;
+  using Worklist = folly::F14FastSet<const ClassInfo*>;
+
+  OutState outStates;
+  outStates.reserve(m_data->allClassInfos.size());
+
+  // List of Class' still to process this iteration
+  using WorkList = std::vector<const ClassInfo*>;
+  using WorkSet = folly::F14FastSet<const ClassInfo*>;
+
+  WorkList workList;
+  WorkSet workSet;
+  auto const enqueue = [&] (const ClassInfo& cls) {
+    auto const result = workSet.insert(&cls);
+    if (!result.second) return;
+    workList.emplace_back(&cls);
+  };
+
+  // Start with all the leaf classes
+  for (auto const& cinfo : m_data->allClassInfos) {
+    auto const isLeaf = [&] {
+      for (auto const& sub : cinfo->subclassList) {
+        if (sub != cinfo.get()) return false;
+      }
+      return true;
+    }();
+    if (isLeaf) enqueue(*cinfo);
+  }
+
+  WorkList oldWorkList;
+  int iter = 1;
+  while (!workList.empty()) {
+    FTRACE(
+      4, "rewrite_default_initial_values round #{}: {} items\n",
+      iter, workList.size()
+    );
+    ++iter;
+
+    std::swap(workList, oldWorkList);
+    workList.clear();
+    workSet.clear();
+    for (auto const& cinfo : oldWorkList) {
+      // Retrieve the set of properties which are flowing into this Class and
+      // have to be null.
+      auto inState = [&] () -> folly::Optional<PropSet> {
+        PropSet in;
+        for (auto const& sub : cinfo->subclassList) {
+          if (sub == cinfo || sub->parent != cinfo) continue;
+          auto const it = outStates.find(sub);
+          if (it == outStates.end()) return folly::none;
+          in.insert(it->second.begin(), it->second.end());
+        }
+        return in;
+      }();
+      if (!inState) continue;
+
+      // Modify the in-state depending on the properties declared on this Class
+      auto const cls = cinfo->cls;
+      for (auto const& prop : cls->properties) {
+        if (prop.attrs & (AttrStatic | AttrPrivate)) {
+          // Private or static properties can't be redeclared
+          inState->erase(prop.name);
+          continue;
+        }
+        // Ignore properties which have actual user provided initial values
+        if (!(prop.attrs & AttrSystemInitialValue)) continue;
+        // Forced to be null, nothing to do
+        if (inState->count(prop.name) > 0) continue;
+
+        // Its not forced to be null. Find a better default value. If its null
+        // anyways, force any properties this redeclares to be null as well.
+        auto const defaultValue = prop.typeConstraint.defaultValue();
+        if (defaultValue.m_type == KindOfNull) inState->insert(prop.name);
+      }
+
+      // Push the in-state to the out-state.
+      auto const result = outStates.emplace(std::make_pair(cinfo, *inState));
+      if (result.second) {
+        if (cinfo->parent) enqueue(*cinfo->parent);
+      } else {
+        // There shouldn't be cycles in the inheritance tree, so the out state
+        // of Class', once set, should never change.
+        assertx(result.first->second == *inState);
+      }
+    }
+  }
+
+  // Now that we've processed all the classes, rewrite the property initial
+  // values, unless they are forced to be nullable.
+  for (auto& unit : program.units) {
+    for (auto& c : unit->classes) {
+      if (is_closure(*c)) continue;
+
+      auto const out = [&] () -> folly::Optional<PropSet> {
+        folly::Optional<PropSet> props;
+        auto const range = m_data->classInfo.equal_range(c->name);
+        for (auto it = range.first; it != range.second; ++it) {
+          if (it->second->cls != c.get()) continue;
+          auto const outStateIt = outStates.find(it->second);
+          if (outStateIt == outStates.end()) return folly::none;
+          if (!props) props.emplace();
+          props->insert(outStateIt->second.begin(), outStateIt->second.end());
+        }
+        return props;
+      }();
+
+      for (auto& prop : c->properties) {
+        auto const nullable =
+          !(prop.attrs & (AttrStatic | AttrPrivate)) &&
+          (!out || out->count(prop.name) > 0);
+        attribute_setter(prop.attrs, !nullable, AttrNoImplicitNullable);
+        if (!(prop.attrs & AttrSystemInitialValue)) continue;
+        assertx(prop.val.m_type != KindOfUninit);
+        prop.val = nullable
+          ? make_tv<KindOfNull>()
+          : prop.typeConstraint.defaultValue();
+      }
+    }
+  }
+}
+
 bool Index::register_class_alias(SString orig, SString alias) const {
   auto check = [&] (SString name) {
     if (m_data->classAliases.count(name)) return true;
@@ -4764,6 +4891,27 @@ void Index::fixup_public_static(borrowed_ptr<const php::Class> cls,
   }
 }
 
+bool Index::lookup_class_init_might_raise(Context ctx, res::Class cls) const {
+  return cls.val.match(
+    []  (SString) { return true; },
+    [&] (borrowed_ptr<ClassInfo> cinfo) {
+      // Check this class and all of its parents for possible inequivalent
+      // redeclarations or bad initial values.
+      do {
+        // Be conservative for now if we have unflattened traits.
+        if (!cinfo->traitProps.empty()) return true;
+        if (cinfo->hasBadRedeclareProp) return true;
+        if (cinfo->hasBadInitialPropValues) {
+          add_dependency(*m_data, cinfo->cls, ctx, Dep::PropBadInitialValues);
+          return true;
+        }
+        cinfo = cinfo->parent;
+      } while (cinfo);
+      return false;
+    }
+  );
+}
+
 Slot
 Index::lookup_iface_vtable_slot(borrowed_ptr<const php::Class> cls) const {
   return folly::get_default(m_data->ifaceSlotMap, cls, kInvalidSlot);
@@ -4779,6 +4927,26 @@ void Index::use_class_dependencies(bool f) {
   if (f != m_data->useClassDependencies) {
     m_data->dependencyMap.clear();
     m_data->useClassDependencies = f;
+  }
+}
+
+void Index::init_public_static_prop_types() {
+  for (auto const& cinfo : m_data->allClassInfos) {
+    for (auto const& prop : cinfo->cls->properties) {
+      if (!(prop.attrs & AttrPublic) || !(prop.attrs & AttrStatic)) {
+        continue;
+      }
+
+      /*
+       * If the initializer type is TUninit, it means an 86sinit provides the
+       * actual initialization type.  So we don't want to include the Uninit
+       * (which isn't really a user-visible type for the property) or by the
+       * time we union things in we'll have inferred nothing much.
+       */
+      auto const tyRaw = from_cell(prop.val);
+      auto const ty = tyRaw.subtypeOf(BUninit) ? TBottom : tyRaw;
+      cinfo->publicStaticProps[prop.name] = PublicSPropEntry { ty, ty, false };
+    }
   }
 }
 
@@ -5171,6 +5339,27 @@ void Index::refine_public_statics(const PublicSPropIndexer& indexer) {
 
     it->second.inferredType = effectiveType;
     it->second.everModified = true;
+  }
+}
+
+void Index::refine_bad_initial_prop_values(borrowed_ptr<const php::Class> cls,
+                                           bool value,
+                                           DependencyContextSet& deps) {
+   assertx(!is_used_trait(*cls));
+
+   for (auto& info : find_range(m_data->classInfo, cls->name)) {
+    auto const cinfo = info.second;
+    if (cinfo->cls != cls) continue;
+    always_assert_flog(
+      cinfo->hasBadInitialPropValues || !value,
+      "Bad initial prop values going from false to true on {}",
+      cls->name->data()
+    );
+
+    if (cinfo->hasBadInitialPropValues && !value) {
+      cinfo->hasBadInitialPropValues = false;
+      find_deps(*m_data, cls, Dep::PropBadInitialValues, deps);
+    }
   }
 }
 

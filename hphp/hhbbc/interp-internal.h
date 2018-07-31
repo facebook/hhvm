@@ -1233,7 +1233,12 @@ bool classInitMightRaise(ISS& env, const Type& cls) {
   if (!is_specialized_cls(cls)) return true;
   auto const dcls = dcls_of(cls);
   if (dcls.type != DCls::Exact) return true;
-  return dcls.cls.initMightRaise();
+  return env.index.lookup_class_init_might_raise(env.ctx, dcls.cls);
+}
+
+void badPropInitialValue(ISS& env) {
+  FTRACE(2, "    badPropInitialValue\n");
+  env.collect.props.setBadPropInitialValues();
 }
 
 #ifdef __clang__

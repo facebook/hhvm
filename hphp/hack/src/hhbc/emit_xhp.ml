@@ -141,7 +141,7 @@ let properties_for_cache ~ns ast_class class_is_immutable =
     []
     ns
     None
-    (p, (p, "__xhpAttributeDeclarationCache"), None)
+    (p, (p, "__xhpAttributeDeclarationCache"), Some (p, A.Null))
   in
   [prop]
 

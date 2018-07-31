@@ -2300,7 +2300,7 @@ TEST(Type, LoosenValues) {
   }
 
   auto const cls = index.resolve_class(ctx, s_TestClass.get());
-  if (!cls) EXPECT_TRUE(false);
+  EXPECT_TRUE(!!cls);
 
   EXPECT_TRUE(loosen_values(objExact(*cls)) == objExact(*cls));
   EXPECT_TRUE(loosen_values(subObj(*cls)) == subObj(*cls));

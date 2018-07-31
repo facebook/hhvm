@@ -147,7 +147,12 @@ struct ResourceData : type_scan::MarkCollectable<ResourceData> {
   virtual bool isInvalid() const { return false; }
 
   template <typename T>
-  bool instanceof() const { return dynamic_cast<const T*>(this) != nullptr; }
+  typename std::enable_if<!std::is_same<ResourceData,T>::value, bool>::type
+  instanceof() const { return dynamic_cast<const T*>(this) != nullptr; }
+
+  template <typename T>
+  typename std::enable_if<std::is_same<ResourceData,T>::value, bool>::type
+  instanceof() const { return true; }
 
   bool o_toBoolean() const { return true; }
   int64_t o_toInt64() const { return hdr()->getId(); }

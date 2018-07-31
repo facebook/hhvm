@@ -193,8 +193,8 @@ TEST(AliasClass, Basic) {
   // == implies <=, and <= implies maybe
   for (auto c1 : joined) {
     for (auto c2 : joined) {
-      if (c1 == c2) EXPECT_TRUE(c1 <= c2);
-      if (c1 <= c2) EXPECT_TRUE(c1.maybe(c2));
+      EXPECT_TRUE(!(c1 == c2) || c1 <= c2);
+      EXPECT_TRUE(!(c1 <= c2) || c1.maybe(c2));
     }
   }
 

@@ -33,7 +33,8 @@ void emitAllHHBC(std::shared_ptr<AnalysisResult>&&);
 
 extern "C" {
   Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
-                            const char* filename, Unit** releaseUnit);
+                            const char* filename, Unit** releaseUnit,
+                            bool forDebuggerEval);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

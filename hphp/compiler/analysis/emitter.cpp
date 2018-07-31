@@ -302,7 +302,8 @@ extern "C" {
  */
 
 Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
-                          const char* filename, Unit** releaseUnit) {
+                          const char* filename, Unit** releaseUnit,
+                          bool forDebuggerEval) {
   if (UNLIKELY(!code)) {
     // Do initialization when code is null; see above.
     Option::RecordErrors = false;
@@ -355,7 +356,8 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     // If ue != nullptr then we assembled it above, so don't feed it into
     // the extern compiler
     if (!ue) {
-      auto uc = UnitCompiler::create(code, codeLen, filename, md5);
+      auto uc = UnitCompiler::create(code, codeLen, filename, md5,
+                                     forDebuggerEval);
       assertx(uc);
       try {
         ue = uc->compile();

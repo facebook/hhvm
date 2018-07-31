@@ -28,8 +28,14 @@ struct MD5;
 Unit* compile_file(const char* s, size_t sz, const MD5& md5, const char* fname,
                    Unit** releaseUnit = nullptr);
 
+// If forDebuggerEval is true, and the unit contains a single expression
+// statement, then we will turn the statement into a return statement while
+// compiling so that eval-ing this unit will return the value.
+// forDebuggerEval is only meant to be used by debuggers, where humans may
+// enter a statement and we wish to eval it and display the resulting value,
+// if any.
 Unit* compile_string(const char* s, size_t sz, const char* fname = nullptr,
-                     Unit** releaseUnit = nullptr);
+                     bool forDebuggerEval = false);
 
 Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname);
 
@@ -42,7 +48,7 @@ Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname);
  */
 
 using CompileStringFn = Unit* (*)(const char*, int, const MD5&, const char*,
-                                  Unit**);
+                                  Unit**, bool);
 
 extern CompileStringFn g_hphp_compiler_parse;
 

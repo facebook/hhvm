@@ -378,7 +378,7 @@ bool Package::parseImpl(const std::string* fileName) {
   // Invoke external compiler. If it fails to compile the file we log an
   // error and and skip it.
   auto uc = UnitCompiler::create(
-    content.data(), content.size(), fileName->c_str(), md5);
+    content.data(), content.size(), fileName->c_str(), md5, false);
   assertx(uc);
   try {
     auto ue = uc->compile(m_ar->getParseOnDemandCallBacks());

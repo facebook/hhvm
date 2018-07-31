@@ -534,9 +534,7 @@ struct EvaluateCommand : public VSCommand {
   request_id_t targetThreadId(DebuggerSession* session) override;
 
 public:
-  static void preparseEvalExpression(
-    std::string* expr
-  );
+  static std::string prepareEvalExpression(const std::string& expr);
 
 private:
 

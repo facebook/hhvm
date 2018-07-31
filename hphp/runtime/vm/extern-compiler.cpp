@@ -236,6 +236,7 @@ struct ExternCompiler {
     const char* filename,
     const MD5& md5,
     folly::StringPiece code,
+    bool forDebuggerEval,
     AsmCallbacks* callbacks
   ) {
     if (!isRunning()) {
@@ -249,7 +250,7 @@ struct ExternCompiler {
       StructuredLogEntry log;
       log.setStr("filename", filename);
       int64_t t = logTime(log, 0, nullptr, true);
-      writeProgram(filename, md5, code);
+      writeProgram(filename, md5, code, forDebuggerEval);
       t = logTime(log, t, "send_source");
       prog = readResult(&log);
       t = logTime(log, t, "receive_hhas");
@@ -320,7 +321,8 @@ private:
 
   void writeMessage(folly::dynamic& header, folly::StringPiece body);
   void writeConfigs();
-  void writeProgram(const char* filename, MD5 md5, folly::StringPiece code);
+  void writeProgram(const char* filename, MD5 md5, folly::StringPiece code,
+                    bool forDebuggerEval);
   void writeExtractFacts(const std::string& filename, folly::StringPiece code);
 
   std::string readVersion() const;
@@ -354,6 +356,7 @@ struct CompilerPool {
                          int len,
                          const char* filename,
                          const MD5& md5,
+                         bool forDebuggerEval,
                          AsmCallbacks* callbacks,
                          bool& internal_error);
   ParseFactsResult extract_facts(const CompilerGuard& compiler,
@@ -523,6 +526,7 @@ CompilerResult CompilerPool::compile(const char* code,
                                      int len,
                                      const char* filename,
                                      const MD5& md5,
+                                     bool forDebuggerEval,
                                      AsmCallbacks* callbacks,
                                      bool& internal_error
 ) {
@@ -530,6 +534,7 @@ CompilerResult CompilerPool::compile(const char* code,
     return c->compile(filename,
                       md5,
                       folly::StringPiece(code, len),
+                      forDebuggerEval,
                       callbacks);
   };
   return run_compiler(
@@ -681,13 +686,15 @@ void ExternCompiler::writeConfigs() {
 void ExternCompiler::writeProgram(
   const char* filename,
   MD5 md5,
-  folly::StringPiece code
+  folly::StringPiece code,
+  bool forDebuggerEval
 ) {
   folly::dynamic header = folly::dynamic::object
     ("type", "code")
     ("md5", md5.toString())
     ("file", filename)
-    ("is_systemlib", !SystemLib::s_inited);
+    ("is_systemlib", !SystemLib::s_inited)
+    ("for_debugger_eval", forDebuggerEval);
   writeMessage(header, code);
 }
 
@@ -910,11 +917,12 @@ CompilerResult hackc_compile(
   int len,
   const char* filename,
   const MD5& md5,
+  bool forDebuggerEval,
   AsmCallbacks* callbacks,
   bool& internal_error
 ) {
   return s_manager.get_hackc_pool().compile(
-    code, len, filename,md5, callbacks, internal_error
+    code, len, filename, md5, forDebuggerEval, callbacks, internal_error
   );
 }
 
@@ -1057,10 +1065,12 @@ bool isFileHack(const char* code, size_t codeLen) {
 std::unique_ptr<UnitCompiler> UnitCompiler::create(const char* code,
                                                    int codeLen,
                                                    const char* filename,
-                                                   const MD5& md5
+                                                   const MD5& md5,
+                                                   bool forDebuggerEval
 ) {
   s_manager.ensure_started();
-  return std::make_unique<HackcUnitCompiler>(code, codeLen, filename, md5);
+  return std::make_unique<HackcUnitCompiler>(code, codeLen, filename, md5,
+                                             forDebuggerEval);
 }
 
 std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
@@ -1070,6 +1080,7 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
                            m_codeLen,
                            m_filename,
                            m_md5,
+                           m_forDebuggerEval,
                            callbacks,
                            ice);
   std::unique_ptr<UnitEmitter> unitEmitter;

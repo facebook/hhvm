@@ -705,11 +705,9 @@ bool BreakpointManager::isBreakConditionSatisified(
   HPHP::Unit* unit = bp->getCachedConditionUnit(requestId);
   if (unit == nullptr && !condition.empty()) {
     try {
-      EvaluateCommand::preparseEvalExpression(&condition);
-      if (!condition.empty()) {
-        unit = compile_string(condition.c_str(), condition.size());
-        bp->cacheConditionUnit(requestId, unit);
-      }
+      auto const cond = EvaluateCommand::prepareEvalExpression(condition);
+      unit = compile_string(cond.c_str(), cond.size(), nullptr, true);
+      bp->cacheConditionUnit(requestId, unit);
     } catch (...) {
       // Errors will be printed to stderr already, and we'll err on the side
       // of breaking when the bp is hit.

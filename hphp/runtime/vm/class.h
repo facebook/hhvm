@@ -797,9 +797,14 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Property lookup and accessibility.                                 [const]
 
-  template <class T>
-  struct PropLookup {
-    T prop;
+  struct PropValLookup {
+    TypedValue* val;
+    Slot slot;
+    bool accessible;
+  };
+
+  struct PropSlotLookup {
+    Slot slot;
     bool accessible;
   };
 
@@ -814,12 +819,12 @@ public:
    * this class or any ancestor.  Note that if the return is marked as
    * accessible, then the property must exist.
    */
-  PropLookup<Slot> getDeclPropIndex(const Class*, const StringData*) const;
+  PropSlotLookup getDeclPropIndex(const Class*, const StringData*) const;
 
   /*
    * The equivalent of getDeclPropIndex(), but for static properties.
    */
-  PropLookup<Slot> findSProp(const Class*, const StringData*) const;
+  PropSlotLookup findSProp(const Class*, const StringData*) const;
 
   /*
    * Get the request-local value of the static property `sPropName', as well as
@@ -830,7 +835,7 @@ public:
    *
    * May perform initialization.
    */
-  PropLookup<TypedValue*> getSProp(const Class*, const StringData*) const;
+  PropValLookup getSProp(const Class*, const StringData*) const;
 
   /*
    * Return whether or not a declared instance property is accessible from the

@@ -23,6 +23,54 @@
 namespace HPHP {
 
 /*
+ * Member instruction property state. If we're checking property type-hints,
+ * this indicates whether the current base is a property. This is needed so we
+ * can forbid the base promoting to a type which isn't allowed by the
+ * type-hint. This state is only live in situations where we have not proven
+ * that promotion cannot happen.
+ *
+ * We use the lower bit of the Class* to store whether this property is static
+ * or not. Furthermore, in LOWPTR builds we can pack everything into 64-bits,
+ * which allows for efficient initialization from the TC.
+ */
+struct MInstrPropState {
+  MInstrPropState(): m_cls{0} {}
+  MInstrPropState(const Class* cls, Slot slot, bool isStatic)
+    : m_cls{
+       static_cast<decltype(m_cls)>(
+         reinterpret_cast<uintptr_t>(cls) | (isStatic ? 0x1 : 0x0)
+       )
+      }
+    , m_slot{slot}
+    {}
+
+  const Class* getClass() const {
+    return reinterpret_cast<const Class*>(
+      m_cls & ~static_cast<decltype(m_cls)>(0x1)
+    );
+  }
+  Slot getSlot() const { return m_slot; }
+  bool isStatic() const { return m_cls & 0x1; }
+
+  static constexpr ptrdiff_t slotOff() {
+    return offsetof(MInstrPropState, m_slot);
+  }
+  static constexpr ptrdiff_t clsOff() {
+    return offsetof(MInstrPropState, m_cls);
+  }
+
+  static constexpr size_t slotSize() {
+    return sizeof(m_slot);
+  }
+  static constexpr size_t clsSize() {
+    return sizeof(m_cls);
+  }
+private:
+  LowPtr<const Class>::storage_type m_cls;
+  Slot m_slot;
+};
+
+/*
  * MInstrState contains VM registers used while executing member instructions.
  * It lives with the other VM registers in the RDS header, and is also saved and
  * restored with them when we reenter the VM.
@@ -54,6 +102,8 @@ struct MInstrState {
 
   // type-scan driven scanner
   TYPE_SCAN_IGNORE_FIELD(base);
+
+  MInstrPropState propState;
 };
 
 }

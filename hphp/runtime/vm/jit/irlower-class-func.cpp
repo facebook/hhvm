@@ -167,6 +167,19 @@ IMPL_OPCODE_CALL(InitSProps)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void cgLookupSPropSlot(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::method(&Class::lookupSProp),
+    callDest(env, inst),
+    SyncOptions::None,
+    argGroup(env, inst).ssa(0).ssa(1)
+  );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void cgLdFuncNumParams(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const func = srcLoc(env, inst, 0).reg();

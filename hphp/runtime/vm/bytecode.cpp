@@ -1856,8 +1856,8 @@ static inline void lookup_sprop(ActRec* fp,
 
   auto const lookup = cls->getSProp(ctx, name);
 
-  val = lookup.prop;
-  visible = lookup.prop != nullptr;
+  val = lookup.val;
+  visible = lookup.val != nullptr;
   accessible = lookup.accessible;
 }
 
@@ -3441,6 +3441,7 @@ static inline MInstrState& initMState() {
   auto& mstate = vmMInstrState();
   tvWriteUninit(mstate.tvRef);
   tvWriteUninit(mstate.tvRef2);
+  mstate.propState = MInstrPropState{};
   return mstate;
 }
 
@@ -3494,29 +3495,34 @@ OPTBLD_INLINE void iopBaseGL(local_var loc, MOpMode mode) {
 }
 
 static inline tv_lval baseSImpl(TypedValue* key,
-                                    clsref_slot slot) {
+                                clsref_slot slot,
+                                MOpMode mode) {
   auto const class_ = slot.take();
 
   auto const name = lookup_name(key);
   SCOPE_EXIT { decRefStr(name); };
   auto const lookup = class_->getSProp(arGetContextClass(vmfp()), name);
-  if (!lookup.prop || !lookup.accessible) {
+  if (!lookup.val || !lookup.accessible) {
     raise_error("Invalid static property access: %s::%s",
                 class_->name()->data(),
                 name->data());
   }
 
-  return tv_lval(lookup.prop);
+  if (RuntimeOption::EvalCheckPropTypeHints > 0 && mode == MOpMode::Define) {
+    vmMInstrState().propState = MInstrPropState{class_, lookup.slot, true};
+  }
+
+  return tv_lval(lookup.val);
 }
 
-OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx, clsref_slot slot, MOpMode) {
+OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx, clsref_slot slot, MOpMode mode) {
   auto& mstate = initMState();
-  mstate.base = baseSImpl(vmStack().indTV(keyIdx), slot);
+  mstate.base = baseSImpl(vmStack().indTV(keyIdx), slot, mode);
 }
 
-OPTBLD_INLINE void iopBaseSL(local_var keyLoc, clsref_slot slot, MOpMode) {
+OPTBLD_INLINE void iopBaseSL(local_var keyLoc, clsref_slot slot, MOpMode mode) {
   auto& mstate = initMState();
-  mstate.base = baseSImpl(tvToCell(keyLoc.ptr), slot);
+  mstate.base = baseSImpl(tvToCell(keyLoc.ptr), slot, mode);
 }
 
 OPTBLD_INLINE void baseLImpl(local_var loc, MOpMode mode) {
@@ -3551,27 +3557,32 @@ OPTBLD_INLINE void iopBaseH() {
 static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key,
                                        bool reffy) {
   auto& mstate = vmMInstrState();
+  auto pState = &mstate.propState;
   auto ctx = arGetContextClass(vmfp());
 
   auto const result = [&]{
     switch (mode) {
       case MOpMode::None:
         assertx(!reffy);
-        return Prop<MOpMode::None>(mstate.tvRef, ctx, mstate.base, key);
+        return Prop<MOpMode::None>(mstate.tvRef, ctx, mstate.base, key, pState);
       case MOpMode::Warn:
         assertx(!reffy);
-        return Prop<MOpMode::Warn>(mstate.tvRef, ctx, mstate.base, key);
+        return Prop<MOpMode::Warn>(mstate.tvRef, ctx, mstate.base, key, pState);
       case MOpMode::Define:
         if (reffy) {
           return Prop<MOpMode::Define,KeyType::Any,true>(
-            mstate.tvRef, ctx, mstate.base, key);
+            mstate.tvRef, ctx, mstate.base, key, pState
+          );
         } else {
           return Prop<MOpMode::Define,KeyType::Any,false>(
-            mstate.tvRef, ctx, mstate.base, key);
+            mstate.tvRef, ctx, mstate.base, key, pState
+          );
         }
       case MOpMode::Unset:
         assertx(!reffy);
-        return Prop<MOpMode::Unset>(mstate.tvRef, ctx, mstate.base, key);
+        return Prop<MOpMode::Unset>(
+          mstate.tvRef, ctx, mstate.base, key, pState
+        );
       case MOpMode::InOut:
         always_assert_flog(false, "MOpMode::InOut can only occur on Elem");
     }
@@ -3631,12 +3642,20 @@ void elemDispatch(MOpMode mode, TypedValue key, bool reffy) {
       case MOpMode::Define:
         if (UNLIKELY(checkHACIntishCast())) {
           return reffy
-            ? ElemD<MOpMode::Define, true, true>(mstate.tvRef, b, key)
-            : ElemD<MOpMode::Define, false, true>(mstate.tvRef, b, key);
+            ? ElemD<MOpMode::Define, true, true>(
+                mstate.tvRef, b, key, &mstate.propState
+              )
+            : ElemD<MOpMode::Define, false, true>(
+                mstate.tvRef, b, key, &mstate.propState
+              );
         } else {
           return reffy
-            ? ElemD<MOpMode::Define, true, false>(mstate.tvRef, b, key)
-            : ElemD<MOpMode::Define, false, false>(mstate.tvRef, b, key);
+            ? ElemD<MOpMode::Define, true, false>(
+                mstate.tvRef, b, key, &mstate.propState
+              )
+            : ElemD<MOpMode::Define, false, false>(
+                mstate.tvRef, b, key, &mstate.propState
+              );
         }
       case MOpMode::Unset:
         return UNLIKELY(checkHACIntishCast())
@@ -3646,6 +3665,7 @@ void elemDispatch(MOpMode mode, TypedValue key, bool reffy) {
     always_assert(false);
   }().as_lval();
 
+  if (mode == MOpMode::Define) mstate.propState = MInstrPropState{};
   mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
 }
 
@@ -3690,11 +3710,12 @@ static OPTBLD_INLINE void dimDispatch(MOpMode mode, MemberKey mk,
         if (UNLIKELY(isHackArrayType(type(base)))) {
           throwRefInvalidArrayValueException(val(base).parr);
         }
-        return NewElem<true>(mstate.tvRef, base);
+        return NewElem<true>(mstate.tvRef, base, &mstate.propState);
       } else {
-        return NewElem<false>(mstate.tvRef, base);
+        return NewElem<false>(mstate.tvRef, base, &mstate.propState);
       }
     }();
+    if (mode == MOpMode::Define) mstate.propState = MInstrPropState{};
     mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
   }
 }
@@ -3778,13 +3799,13 @@ OPTBLD_FLT_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
   auto const topC = vmStack().topC();
 
   if (mk.mcode == MW) {
-    SetNewElem<true>(mstate.base, topC);
+    SetNewElem<true>(mstate.base, topC, &mstate.propState);
   } else {
     auto const key = key_tv(mk);
     if (mcodeIsElem(mk.mcode)) {
       auto const result = UNLIKELY(checkHACIntishCast())
-        ? SetElem<true, true>(mstate.base, key, topC)
-        : SetElem<true, false>(mstate.base, key, topC);
+        ? SetElem<true, true>(mstate.base, key, topC, &mstate.propState)
+        : SetElem<true, false>(mstate.base, key, topC, &mstate.propState);
       if (result) {
         tvDecRefGen(topC);
         topC->m_type = KindOfString;
@@ -3792,7 +3813,7 @@ OPTBLD_FLT_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
       }
     } else {
       auto const ctx = arGetContextClass(vmfp());
-      SetProp<true>(ctx, mstate.base, key, topC);
+      SetProp<true>(ctx, mstate.base, key, topC, &mstate.propState);
     }
   }
 
@@ -3807,13 +3828,15 @@ OPTBLD_INLINE void iopIncDecM(uint32_t nDiscard, IncDecOp subop, MemberKey mk) {
   auto& mstate = vmMInstrState();
   Cell result;
   if (mcodeIsProp(mk.mcode)) {
-    result = IncDecProp(arGetContextClass(vmfp()), subop, mstate.base, key);
+    result = IncDecProp(
+      arGetContextClass(vmfp()), subop, mstate.base, key, &mstate.propState
+    );
   } else if (mcodeIsElem(mk.mcode)) {
     result = UNLIKELY(checkHACIntishCast())
-      ? IncDecElem<true>(subop, mstate.base, key)
-      : IncDecElem<false>(subop, mstate.base, key);
+      ? IncDecElem<true>(subop, mstate.base, key, &mstate.propState)
+      : IncDecElem<false>(subop, mstate.base, key, &mstate.propState);
   } else {
-    result = IncDecNewElem(mstate.tvRef, subop, mstate.base);
+    result = IncDecNewElem(mstate.tvRef, subop, mstate.base, &mstate.propState);
   }
 
   mFinal(mstate, nDiscard, result);
@@ -3827,13 +3850,18 @@ OPTBLD_INLINE void iopSetOpM(uint32_t nDiscard, SetOpOp subop, MemberKey mk) {
   tv_lval result;
   if (mcodeIsProp(mk.mcode)) {
     result = SetOpProp(mstate.tvRef, arGetContextClass(vmfp()), subop,
-                       mstate.base, key, rhs);
+                       mstate.base, key, rhs, &mstate.propState);
   } else if (mcodeIsElem(mk.mcode)) {
     result = UNLIKELY(checkHACIntishCast())
-      ? SetOpElem<true>(mstate.tvRef, subop, mstate.base, key, rhs)
-      : SetOpElem<false>(mstate.tvRef, subop, mstate.base, key, rhs);
+      ? SetOpElem<true>(
+          mstate.tvRef, subop, mstate.base, key, rhs, &mstate.propState
+        )
+      : SetOpElem<false>(
+          mstate.tvRef, subop, mstate.base, key, rhs, &mstate.propState
+        );
   } else {
-    result = SetOpNewElem(mstate.tvRef, subop, mstate.base, rhs);
+    result =
+      SetOpNewElem(mstate.tvRef, subop, mstate.base, rhs, &mstate.propState);
   }
 
   vmStack().popC();
@@ -3878,7 +3906,7 @@ static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
       if (LIKELY(!isRefType(value->m_type))) {
         SuppressHackArrCompatNotices shacn;
         return ElemD<MOpMode::Define, false, false>(
-          mstate.tvRef, mstate.base, key
+          mstate.tvRef, mstate.base, key, &mstate.propState
         );
       }
 
@@ -3891,13 +3919,17 @@ static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
 
       SuppressHackArrCompatNotices shacn;
       return ElemD<MOpMode::Define, true, false>(
-        mstate.tvRef, mstate.base, key
+        mstate.tvRef, mstate.base, key, &mstate.propState
       );
     }();
   } else {
     mstate.base = UNLIKELY(isRefType(value->m_type))
-      ? ElemD<MOpMode::Define, true, false>(mstate.tvRef, mstate.base, key)
-      : ElemD<MOpMode::Define, false, false>(mstate.tvRef, mstate.base, key);
+      ? ElemD<MOpMode::Define, true, false>(
+          mstate.tvRef, mstate.base, key, &mstate.propState
+        )
+      : ElemD<MOpMode::Define, false, false>(
+          mstate.tvRef, mstate.base, key, &mstate.propState
+        );
   }
   tvSetWithRef(*value, mstate.base);
 

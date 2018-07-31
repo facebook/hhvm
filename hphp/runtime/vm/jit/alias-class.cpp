@@ -74,6 +74,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   case A::BMITvRef:        break;
   case A::BMITvRef2:       break;
   case A::BMIBase:         break;
+  case A::BMIPropS:        break;
   case A::BRef:            break;
   case A::BClsRefSlot:     break;
   case A::BRds:            break;
@@ -111,6 +112,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
     case A::BMITvRef:        ret += "MiT1"; break;
     case A::BMITvRef2:       ret += "MiT2"; break;
     case A::BMIBase:         ret += "MiB"; break;
+    case A::BMIPropS:        ret += "MiP"; break;
     case A::BRef:            ret += "Ref"; break;
     case A::BClsRefSlot:     ret += "Cls"; break;
     case A::BRds:            ret += "Rds"; break;

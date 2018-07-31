@@ -472,7 +472,7 @@ Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
     force ? class_ : arGetContextClass(vmfp()),
     prop.get()
   );
-  if (!lookup.prop) {
+  if (!lookup.val) {
     raise_error("Class %s does not have a property named %s",
                 sd->data(), prop.get()->data());
   }
@@ -480,7 +480,7 @@ Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
     raise_error("Invalid access to class %s's property %s",
                 sd->data(), prop.get()->data());
   }
-  return tvAsVariant(lookup.prop);
+  return tvAsVariant(lookup.val);
 }
 
 void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
@@ -502,7 +502,7 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
     force ? class_ : arGetContextClass(vmfp()),
     prop.get()
   );
-  if (!lookup.prop) {
+  if (!lookup.val) {
     raise_error("Class %s does not have a property named %s",
                 cls.get()->data(), prop.get()->data());
   }
@@ -511,7 +511,7 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
                 sd->data(), prop.get()->data());
   }
 
-  tvAsVariant(lookup.prop) = value;
+  tvAsVariant(lookup.val) = value;
 }
 
 /*
@@ -1737,7 +1737,7 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
 
   // is there a declared instance property?
   auto lookup = cls->getDeclPropIndex(cls, prop_name.get());
-  auto propIdx = lookup.prop;
+  auto propIdx = lookup.slot;
   if (propIdx != kInvalidSlot) {
     auto const prop = &cls->declProperties()[propIdx];
     data->setInstanceProp(prop);
@@ -1750,7 +1750,7 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
 
   // is there a declared static property?
   lookup = cls->findSProp(cls, prop_name.get());
-  propIdx = lookup.prop;
+  propIdx = lookup.slot;
   if (propIdx != kInvalidSlot) {
     auto const prop = &cls->staticProperties()[propIdx];
     data->setStaticProp(prop);
@@ -1928,7 +1928,7 @@ static TypedValue HHVM_METHOD(ReflectionProperty, getDefaultValue) {
       // it was declared in); so if we don't want to store propIdx we have to
       // look it up by name.
       auto lookup = prop->cls->getDeclPropIndex(prop->cls, prop->name);
-      auto propIdx = lookup.prop;
+      auto propIdx = lookup.slot;
       assertx(propIdx != kInvalidSlot);
       prop->cls->initialize();
       auto const& propInitVec = prop->cls->getPropData()

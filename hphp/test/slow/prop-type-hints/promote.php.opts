@@ -1,0 +1,3 @@
+-vEval.CheckPropTypeHints=1
+-vEval.PromoteEmptyObject=1
+-vEval.EnableHipHopSyntax=1

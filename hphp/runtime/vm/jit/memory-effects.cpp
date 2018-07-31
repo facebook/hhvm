@@ -174,16 +174,38 @@ AliasClass pointee(
       // src. Otherwise they can only return pointers to properties or
       // &immutable_null_base.
       if (sinst->is(PropX, PropDX, PropQ)) {
-        assertx(sinst->srcs().back()->isA(TMemToMISGen));
-        return APropAny | pointee(sinst->srcs().back(), visited_labels);
+        auto const src = [&]{
+          if (sinst->is(PropDX)) {
+            assertx(sinst->src(sinst->numSrcs() - 2)->isA(TMemToMISGen));
+            assertx(
+              sinst->src(sinst->numSrcs() - 1)->isA(TMIPropSPtr | TNullptr)
+            );
+            return sinst->src(sinst->numSrcs() - 2);
+          } else {
+            assertx(sinst->srcs().back()->isA(TPtrToMISGen));
+            return sinst->srcs().back();
+          }
+        }();
+        return APropAny | pointee(src, visited_labels);
       }
 
       // Like the Prop* instructions, but for array elements. These could also
       // return pointers to collection elements but those don't exist in
       // AliasClass yet.
       if (sinst->is(ElemX, ElemDX, ElemUX)) {
-        assertx(sinst->srcs().back()->isA(TMemToMISGen));
-        return AElemAny | pointee(sinst->srcs().back(), visited_labels);
+        auto const src = [&]{
+          if (sinst->is(ElemDX)) {
+            assertx(sinst->src(sinst->numSrcs() - 2)->isA(TMemToMISGen));
+            assertx(
+              sinst->src(sinst->numSrcs() - 1)->isA(TMIPropSPtr | TNullptr)
+            );
+            return sinst->src(sinst->numSrcs() - 2);
+          } else {
+            assertx(sinst->srcs().back()->isA(TPtrToMISGen));
+            return sinst->srcs().back();
+          }
+        }();
+        return AElemAny | pointee(src, visited_labels);
       }
 
       return folly::none;
@@ -492,15 +514,59 @@ GeneralEffects interp_one_effects(const IRInstruction& inst) {
  * These instructions never load tvRef, but they might store to it.
  */
 MemEffects minstr_with_tvref(const IRInstruction& inst) {
+  auto loads = AHeapAny;
+  auto stores = AHeapAny | all_pointees(inst);
+  auto kills = AEmpty;
+
   auto const srcs = inst.srcs();
-  assertx(srcs.back()->isA(TMemToMISGen));
-  return may_load_store(
-    AHeapAny | all_pointees(srcs.subpiece(0, srcs.size() - 1)),
-    AHeapAny | all_pointees(inst)
+  if (inst.is(ElemDX, PropDX)) {
+    assertx(inst.src(inst.numSrcs() - 2)->isA(TMemToMISGen));
+    assertx(inst.src(inst.numSrcs() - 1)->isA(TMIPropSPtr | TNullptr));
+    loads |= all_pointees(srcs.subpiece(0, srcs.size() - 2));
+
+    auto const propPtr = inst.src(inst.numSrcs() - 1);
+    if (RuntimeOption::EvalCheckPropTypeHints <= 0 || propPtr->isA(TNullptr)) {
+      kills = AMIStatePropS;
+    } else if (inst.is(ElemDX)) {
+      loads |= AMIStatePropS;
+    } else {
+      assertx(inst.is(PropDX));
+      if (RuntimeOption::EvalPromoteEmptyObject) loads |= AMIStatePropS;
+      stores |= AMIStatePropS;
+    }
+  } else {
+    assertx(srcs.back()->isA(TMemToMISGen));
+    loads |= all_pointees(srcs.subpiece(0, srcs.size() - 1));
+    kills = AMIStatePropS;
+  }
+
+  return may_load_store_kill(loads, stores, kills);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+MemEffects minstr_final_with_prop_state(const IRInstruction& inst) {
+  auto const propSLoads = [&]{
+    auto const propPtr = inst.srcs().back();
+    assertx(propPtr->isA(TMIPropSPtr | TNullptr));
+    if (RuntimeOption::EvalCheckPropTypeHints <= 0) return AEmpty;
+    if (propPtr->isA(TNullptr)) return AEmpty;
+    if (!RuntimeOption::EvalPromoteEmptyObject &&
+        inst.is(BindProp, IncDecProp, SetOpProp, SetProp, VGetProp)) {
+      return AEmpty;
+    }
+    return AMIStatePropS;
+  }();
+
+  return may_load_store_kill(
+    AHeapAny | propSLoads | all_pointees(inst),
+    AHeapAny | all_pointees(inst),
+    AMIStatePropS
   );
 }
 
 //////////////////////////////////////////////////////////////////////
+
 MemEffects memory_effects_impl(const IRInstruction& inst) {
   switch (inst.op()) {
 
@@ -611,7 +677,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     );
     return ExitEffects {
       AUnknown,
-      stack_kills | AMIStateTempBase | AMIStateBase
+      stack_kills | AMIStateTempBase | AMIStateBase | AMIStatePropS
     };
   }
 
@@ -1097,6 +1163,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StMBase:
     return PureStore { AMIStateBase, inst.src(0) };
 
+  case StMIPropState:
+    return PureStore { AMIStatePropS, nullptr };
+
   case FinishMemberOp:
     return may_load_store_kill(AEmpty, AEmpty, AMIStateAny);
 
@@ -1334,23 +1403,31 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CGetPropQ:
   case EmptyProp:
   case IssetProp:
-    return may_load_store(
+    return may_load_store_kill(
       AHeapAny | all_pointees(inst),
-      AHeapAny
+      AHeapAny,
+      AMIStatePropS
     );
 
-  case VGetElem:
+  case BindElem:
+  case BindNewElem:
+  case BindProp:
+  case IncDecElem:
+  case IncDecProp:
   case SetElem:
+  case SetNewElem:
+  case SetOpElem:
+  case SetOpProp:
+  case SetProp:
+  case SetWithRefElem:
+  case VGetElem:
+  case VGetProp:
+    return minstr_final_with_prop_state(inst);
+
   case SetNewElemArray:
   case SetNewElemVec:
   case SetNewElemKeyset:
-  case SetNewElem:
-  case SetOpElem:
-  case SetWithRefElem:
   case UnsetElem:
-  case BindElem:
-  case BindNewElem:
-  case IncDecElem:
   case ElemArrayD:
   case ElemArrayU:
   case ElemVecD:
@@ -1358,17 +1435,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ElemDictD:
   case ElemDictU:
   case ElemKeysetU:
-  case VGetProp:
   case UnsetProp:
-  case IncDecProp:
-  case SetProp:
-  case SetOpProp:
-  case BindProp:
     // Right now we generally can't limit any of these better than general
     // re-entry rules, since they can raise warnings and re-enter.
-    return may_load_store(
+    return may_load_store_kill(
       AHeapAny | all_pointees(inst),
-      AHeapAny | all_pointees(inst)
+      AHeapAny | all_pointees(inst),
+      AMIStatePropS
     );
 
   case ReservePackedArrayDataNewElem:
@@ -1612,6 +1685,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvDblToBool:
   case ConvDblToInt:
   case DblAsBits:
+  case LdMIPropStateAddr:
   case LdMIStateAddr:
   case LdPairBase:
   case CheckStaticLoc:
@@ -1643,6 +1717,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case GetTimeNs:
   case ProfileInstanceCheck:
   case Select:
+  case LookupSPropSlot:
     return IrrelevantEffects {};
 
   case StClosureArg:

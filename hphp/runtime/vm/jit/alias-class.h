@@ -71,9 +71,14 @@ struct SSATmp;
  *      |         |          /    \          |         |        |
  *     ...       ...   ElemIAny  ElemSAny   ...       ...       |
  *                        |         |                           |
- *                       ...       ...       +---------+--------+---------+
- *                                           |         |        |         |
- *                                      MITempBase  MITvRef  MITvRef2  MIBase**
+ *                       ...       ...    +---------+--------+--+------+
+ *                                        |         |        |         |
+ *                                   MITempBase  MITvRef  MITvRef2     |
+ *                                                                     |
+ *                                                                     |
+ *                                                  +--------+---------+
+ *                                                  |        |
+ *                                               MIBase**  MIPropS**
  *
  *
  *   (*) AHeapAny contains some things other than ElemAny, PropAny and RefAny
@@ -81,8 +86,9 @@ struct SSATmp;
  *       lvalBlackhole, etc.)  It's hard for this to matter to client code for
  *       now because we don't expose an intersection or difference operation.
  *
- *  (**) MIBase is a pointer, so isn't UnknownTV, but its hard to find
- *       the right spot in this diagram.
+ *  (**) MIBase is a pointer, and MIPropS is an encoded value, so neither is
+ *       UnknownTV, but its hard to find the right spot for them in this
+ *       diagram.
  */
 struct AliasClass;
 
@@ -236,17 +242,18 @@ struct AliasClass {
     BMITvRef    = 1U << 15,
     BMITvRef2   = 1U << 16,
     BMIBase     = 1U << 17,
+    BMIPropS    = 1U << 18,
 
     BElem      = BElemI | BElemS,
     BHeap      = BElem | BProp | BRef,
     BMIStateTV = BMITempBase | BMITvRef | BMITvRef2,
-    BMIState   = BMIStateTV | BMIBase,
+    BMIState   = BMIStateTV | BMIBase | BMIPropS,
 
     BIter      = BIterPos | BIterBase,
     BCufIter   = BCufIterFunc | BCufIterCtx | BCufIterInvName | BCufIterDynamic,
     BIterSlot  = BIter | BCufIter,
 
-    BUnknownTV = ~(BIterSlot | BMIBase | BClsRefSlot),
+    BUnknownTV = ~(BIterSlot | BMIBase | BMIPropS | BClsRefSlot),
 
     BUnknown   = static_cast<uint32_t>(-1),
   };
@@ -473,6 +480,7 @@ auto const AMIStateTempBase   = AliasClass{AliasClass::BMITempBase};
 auto const AMIStateTvRef      = AliasClass{AliasClass::BMITvRef};
 auto const AMIStateTvRef2     = AliasClass{AliasClass::BMITvRef2};
 auto const AMIStateBase       = AliasClass{AliasClass::BMIBase};
+auto const AMIStatePropS      = AliasClass{AliasClass::BMIPropS};
 
 //////////////////////////////////////////////////////////////////////
 

@@ -34,6 +34,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct MInstrPropState;
 struct TypedValue;
 
 #define INVOKE_FEW_ARGS_COUNT 6
@@ -466,7 +467,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
  private:
   struct PropLookup {
-    tv_lval prop;
+    tv_lval val;
+    const Class::Prop* prop;
     Slot slot;
     bool accessible;
     bool immutable;
@@ -484,7 +486,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   };
 
   template<PropMode mode>
-  tv_lval propImpl(TypedValue* tvRef, const Class* ctx, const StringData* key);
+  tv_lval propImpl(TypedValue* tvRef, const Class* ctx,
+                   const StringData* key, MInstrPropState* pState);
 
   bool propEmptyImpl(const Class* ctx, const StringData* key);
 
@@ -509,8 +512,11 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
  public:
   tv_lval prop(TypedValue* tvRef, const Class* ctx, const StringData* key);
   tv_lval propW(TypedValue* tvRef, const Class* ctx, const StringData* key);
-  tv_lval propD(TypedValue* tvRef, const Class* ctx, const StringData* key);
-  tv_lval propB(TypedValue* tvRef, const Class* ctx, const StringData* key);
+  tv_lval propU(TypedValue* tvRef, const Class* ctx, const StringData* key);
+  tv_lval propD(TypedValue* tvRef, const Class* ctx,
+                const StringData* key, MInstrPropState* pState);
+  tv_lval propB(TypedValue* tvRef, const Class* ctx,
+                const StringData* key, MInstrPropState* pState);
 
   bool propIsset(const Class* ctx, const StringData* key);
   bool propEmpty(const Class* ctx, const StringData* key);

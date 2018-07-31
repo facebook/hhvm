@@ -846,10 +846,21 @@ bool simplify(Env& env, const setcc& vsetcc, Vlabel b, size_t i) {
  */
 
 bool simplify(Env& env, const orqi& inst, Vlabel b, size_t i) {
-  if (inst.s0.q() == 0 && env.use_counts[inst.sf] == 0) {
-    return simplify_impl(env, b, i, copy{inst.s1, inst.d});
-  }
-  return false;
+  if (env.use_counts[inst.sf] != 0) return false;
+
+  auto const immed = inst.s0.q();
+  if (immed == 0) return simplify_impl(env, b, i, copy{inst.s1, inst.d});
+
+  auto const it = env.unit.regToConst.find(inst.s1);
+  if (it == env.unit.regToConst.end() || it->second.isUndef) return false;
+  return simplify_impl(
+    env, b, i,
+    [&] (Vout& v) {
+      auto const s = v.cns(immed | it->second.val);
+      v << copy{s, inst.d};
+      return 1;
+    }
+  );
 }
 
 bool simplify(Env& env, const orq& inst, Vlabel b, size_t i) {

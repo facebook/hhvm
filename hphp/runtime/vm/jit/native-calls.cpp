@@ -492,11 +492,11 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}}},
 
     /* MInstrTranslator helpers */
-    {SetNewElem, setNewElem, DNone, SSync, {{SSA, 0}, {TV, 1}}},
+    {SetNewElem, setNewElem, DNone, SSync, {{SSA, 0}, {TV, 1}, {SSA, 2}}},
     {SetNewElemArray, setNewElemArray, DNone, SSync, {{SSA, 0}, {TV, 1}}},
     {SetNewElemVec, setNewElemVec, DNone, SSync, {{SSA, 0}, {TV, 1}}},
     {BindNewElem, MInstrHelpers::bindNewElem, DNone, SSync,
-                  {{SSA, 0}, {SSA, 1}}},
+                  {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
     {StringGet, MInstrHelpers::stringGetI, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
 
     {PairIsset, MInstrHelpers::pairIsset, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},

@@ -1367,6 +1367,11 @@ To string conversions:
   accessing the property. If class S0 does not have a visible and accessible
   static property named S1, throw a fatal error.
 
+| LookupSPropSlot, D(Int), S(Cls) S(Str), NF
+
+  Lookup the slot index of the static property with the name S1 on the class
+  S0, returning -1 if not found.
+
 | LdObjMethod<offset,methodName,fatal>, ND, S(Cls) S(StkPtr), NF
 
   Stores a pointer to an object's method into an activation record. S0 points
@@ -2715,6 +2720,14 @@ To string conversions:
   instruction other than StMBase or InterpOne (when interpreting a member
   instruction) to modify the member base register.
 
+| LdMIPropStateAddr, D(MIPropSPtr), NA, NF
+
+  Load an address to the current MInstrPropState.
+
+| StMIPropState, ND, S(Cls|Nullptr) S(Int) C(Bool), NF
+
+  Write to the current MInstrPropState.
+
 | FinishMemberOp, ND, NA, NF
 
   Mark the end of a member operation. This has no effect at runtime but exists
@@ -2774,7 +2787,7 @@ fields of that struct for holding intermediate values.
 
   A nullsafe version of PropX, returns null if the base S0 is null.
 
-| PropDX, D(PtrToMembGen), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), MProp
+| PropDX, D(PtrToMembGen), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen) S(MIPropSPtr,Nullptr), MProp
 
   Like PropX, but used for intermediate element lookups that may modify the
   base.
@@ -2787,17 +2800,17 @@ fields of that struct for holding intermediate values.
 
   A nullsafe version of CGetProp, returns null if the base S0 is null.
 
-| VGetProp, D(BoxedInitCell), S(Obj,PtrToGen) S(Cell), MProp|PRc
+| VGetProp, D(BoxedInitCell), S(Obj,PtrToGen) S(Cell) S(MIPropSPtr,Nullptr), MProp|PRc
 
   Get property with key S1 from base S0 as a reference.
 
 | BindProp, ND,
-|           S(Obj,PtrToGen) S(Cell) S(BoxedCell),
+|           S(Obj,PtrToGen) S(Cell) S(BoxedCell) S(MIPropSPtr,Nullptr),
 |           MProp
 
   Bind property with key S1 in base S0 to the reference in S2.
 
-| SetProp, ND, S(Obj,PtrToGen) S(Cell) S(Cell), MProp
+| SetProp, ND, S(Obj,PtrToGen) S(Cell) S(Cell) S(MIPropSPtr,Nullptr), MProp
 
   Set property with key S1 in S0 to S2.
 
@@ -2806,13 +2819,13 @@ fields of that struct for holding intermediate values.
   Unset an object property.
 
 | SetOpProp<op>, D(Cell),
-|                S(Obj,PtrToGen) S(Cell) S(Cell),
+|                S(Obj,PtrToGen) S(Cell) S(Cell) S(MIPropSPtr,Nullptr),
 |                MProp|PRc
 
   Set op propery with key S1 in base S0, using S2 as the right hand side.
 
 | IncDecProp<op>, D(Cell),
-|                 S(Obj,PtrToGen) S(Cell),
+|                 S(Obj,PtrToGen) S(Cell) S(MIPropSPtr,Nullptr),
 |                 MProp|PRc
 
   Increment/decrement property with key S1 in base S0.
@@ -2925,7 +2938,7 @@ fields of that struct for holding intermediate values.
 
   Like ElemKeyset, but the element for S1 is at a known position `pos' in S0.
 
-| ElemDX, D(PtrToMembGen), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem
+| ElemDX, D(PtrToMembGen), S(PtrToGen) S(Cell) S(PtrToMISGen) S(MIPropSPtr,Nullptr), MElem
 
   Like ElemX, but used for intermediate element lookups that may modify the
   base.
@@ -2982,7 +2995,7 @@ fields of that struct for holding intermediate values.
 
   Get element with key S1 from S0.
 
-| VGetElem, D(BoxedInitCell), S(PtrToGen) S(Cell), MElem|PRc
+| VGetElem, D(BoxedInitCell), S(PtrToGen) S(Cell) S(MIPropSPtr,Nullptr), MElem|PRc
 
   Get element with key S1 from base S0 as a reference.
 
@@ -3068,7 +3081,7 @@ fields of that struct for holding intermediate values.
   overwriting any previous value, with appropriate ref-count
   manipulations. This op can only be used inside a memoize wrapper.
 
-| BindElem, ND, S(PtrToGen) S(Cell) S(BoxedCell), MElem
+| BindElem, ND, S(PtrToGen) S(Cell) S(BoxedCell) S(MIPropSPtr,Nullptr), MElem
 
   Bind element with key S1 in base S0 to the reference S2.
 
@@ -3109,7 +3122,7 @@ fields of that struct for holding intermediate values.
 
   Set element with key S1 in S0 to S2.
 
-| SetElem, DSetElem, S(PtrToGen) S(Cell) S(Cell), MElem|PRc
+| SetElem, DSetElem, S(PtrToGen) S(Cell) S(Cell) S(MIPropSPtr,Nullptr), MElem|PRc
 
   Set element with key S1 in S0 to S2. SetElem returns a Nullptr in the common
   case, where the logical result of the hhbc SetM is its right hand side. In
@@ -3120,7 +3133,7 @@ fields of that struct for holding intermediate values.
   Furthermore, in the case of "invalid offsets", SetElem may throw an
   InvalidSetMException (see discussion above).
 
-| SetWithRefElem, ND, S(PtrToGen) S(Gen) S(Gen), MElem
+| SetWithRefElem, ND, S(PtrToGen) S(Gen) S(Gen) S(MIPropSPtr,Nullptr), MElem
 
   Set element with key S1 in S0 to S2.
 
@@ -3129,16 +3142,16 @@ fields of that struct for holding intermediate values.
   Unsets the element at key S1 in the base S0.
 
 | SetOpElem<op>, D(Cell),
-|                S(PtrToGen) S(Cell) S(Cell),
+|                S(PtrToGen) S(Cell) S(Cell) S(MIPropSPtr,Nullptr),
 |                MElem|PRc
 
   Set op elem with key S1 in base S0, using S2 as the right hand side.
 
-| IncDecElem, D(Cell), S(PtrToGen) S(Cell), MElem|PRc
+| IncDecElem, D(Cell), S(PtrToGen) S(Cell) S(MIPropSPtr,Nullptr), MElem|PRc
 
   Increment/decrement element with key S1 in base S0.
 
-| SetNewElem, ND, S(PtrToGen) S(Cell), MElem
+| SetNewElem, ND, S(PtrToGen) S(Cell) S(MIPropSPtr,Nullptr), MElem
 
   Append the value in S1 to S0.
 
@@ -3154,7 +3167,7 @@ fields of that struct for holding intermediate values.
 
   Append the value in S1 to S0, where S0 must be a pointer to a keyset.
 
-| BindNewElem, ND, S(PtrToGen) S(BoxedCell), MElem
+| BindNewElem, ND, S(PtrToGen) S(BoxedCell) S(MIPropSPtr,Nullptr), MElem
 
   Append the reference in S1 to S0.
 

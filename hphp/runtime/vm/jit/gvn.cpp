@@ -310,6 +310,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case CountKeyset:
   case Select:
   case StrictlyIntegerConv:
+  case LookupSPropSlot:
     return true;
 
   case SameArr:

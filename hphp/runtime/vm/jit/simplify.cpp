@@ -3396,6 +3396,13 @@ SSATmp* simplifyLookupClsRDS(State& /*env*/, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyLookupSPropSlot(State& env, const IRInstruction* inst) {
+  auto const cls = inst->src(0);
+  auto const name = inst->src(1);
+  if (!cls->hasConstVal(TCls) || !name->hasConstVal(TStr)) return nullptr;
+  return cns(env, cls->clsVal()->lookupSProp(name->strVal()));
+}
+
 SSATmp* simplifyLdStrLen(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   return src->hasConstVal(TStr) ? cns(env, src->strVal()->size()) : nullptr;
@@ -3762,6 +3769,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LdClsCctx)
   X(LdClsName)
   X(LookupClsRDS)
+  X(LookupSPropSlot)
   X(LdClsMethod)
   X(LdStrLen)
   X(LdVecElem)

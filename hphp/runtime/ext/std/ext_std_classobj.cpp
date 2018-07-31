@@ -180,7 +180,7 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
     if (lookup.accessible) {
       arr.set(
         const_cast<StringData*>(sprop.name.get()),
-        tvAsCVarRef(lookup.prop)
+        tvAsCVarRef(lookup.val)
       );
     }
   }
@@ -307,7 +307,7 @@ Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
   }
 
   auto const lookup = cls->getDeclPropIndex(cls, property.get());
-  if (lookup.prop != kInvalidSlot) return true;
+  if (lookup.slot != kInvalidSlot) return true;
 
   if (obj &&
       UNLIKELY(obj->getAttribute(ObjectData::HasDynPropArr)) &&

@@ -233,6 +233,7 @@ bool canDCE(IRInstruction* inst) {
   case LdWHResult:
   case LdWHNotDone:
   case LdAFWHActRec:
+  case LdMIPropStateAddr:
   case LdMIStateAddr:
   case StringIsset:
   case ColIsEmpty:
@@ -271,6 +272,7 @@ bool canDCE(IRInstruction* inst) {
   case IsFuncDynCallable:
   case StrictlyIntegerConv:
   case GetMemoKeyScalar:
+  case LookupSPropSlot:
     assertx(!inst->isControlFlow());
     return true;
 
@@ -691,6 +693,7 @@ bool canDCE(IRInstruction* inst) {
   case ThrowArithmeticError:
   case ThrowDivisionByZeroError:
   case StMBase:
+  case StMIPropState:
   case FinishMemberOp:
   case InlineReturnNoFrame:
   case BeginInlining:

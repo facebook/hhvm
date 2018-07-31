@@ -83,13 +83,26 @@ void implProp(IRLS& env, const IRInstruction* inst) {
   auto const key     = inst->src(1);
   auto const keyType = getKeyTypeNoInt(key);
 
-  BUILD_OPTAB2(base->isA(TObj),
-               PROP_OBJ_HELPER_TABLE, PROP_HELPER_TABLE,
-               mode, keyType);
-
-  auto const args = propArgs(env, inst)
+  auto args = propArgs(env, inst)
     .memberKeyS(1)
     .ssa(2);
+
+  auto const target = [&] {
+    if (inst->is(PropDX)) {
+      BUILD_OPTAB2(base->isA(TObj),
+                   PROPD_OBJ_HELPER_TABLE,
+                   PROPD_HELPER_TABLE,
+                   keyType);
+      args.ssa(3);
+      return target;
+    } else {
+      BUILD_OPTAB2(base->isA(TObj),
+                   PROP_OBJ_HELPER_TABLE,
+                   PROP_HELPER_TABLE,
+                   mode, keyType);
+      return target;
+    }
+  }();
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
@@ -174,7 +187,7 @@ void cgVGetProp(IRLS& env, const IRInstruction* inst) {
                VGET_PROP_HELPER_TABLE,
                keyType);
 
-  auto const args = propArgs(env, inst).memberKeyS(1);
+  auto const args = propArgs(env, inst).memberKeyS(1).ssa(2);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
@@ -187,7 +200,7 @@ void cgBindProp(IRLS& env, const IRInstruction* inst) {
     ? CallSpec::direct(MInstrHelpers::bindPropCO)
     : CallSpec::direct(MInstrHelpers::bindPropC);
 
-  auto const args = propArgs(env, inst).typedValue(1).ssa(2);
+  auto const args = propArgs(env, inst).typedValue(1).ssa(2).ssa(3);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, helper, callDest(env, inst), SyncOptions::Sync, args);
@@ -198,14 +211,20 @@ void cgSetProp(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
   auto const keyType = getKeyTypeNoInt(key);
 
-  BUILD_OPTAB2(base->isA(TObj),
-               SETPROP_OBJ_HELPER_TABLE,
-               SETPROP_HELPER_TABLE,
-               keyType);
-
-  auto const args = propArgs(env, inst)
+  auto args = propArgs(env, inst)
     .memberKeyS(1)
     .typedValue(2);
+
+  auto const target = [&] {
+    if (base->isA(TObj)) {
+      BUILD_OPTAB(SETPROP_OBJ_HELPER_TABLE, keyType);
+      return target;
+    } else {
+      BUILD_OPTAB(SETPROP_HELPER_TABLE, keyType);
+      args.ssa(3);
+      return target;
+    }
+  }();
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
@@ -232,10 +251,11 @@ void cgSetOpProp(IRLS& env, const IRInstruction* inst) {
     ? CallSpec::direct(MInstrHelpers::setOpPropCO)
     : CallSpec::direct(MInstrHelpers::setOpPropC);
 
-  auto const args = propArgs(env, inst)
+  auto args = propArgs(env, inst)
     .typedValue(1)
     .typedValue(2)
     .imm(static_cast<int32_t>(extra->op));
+  if (!base->isA(TObj)) args.ssa(3);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, helper, callDestTV(env, inst), SyncOptions::Sync, args);
@@ -249,9 +269,10 @@ void cgIncDecProp(IRLS& env, const IRInstruction* inst) {
     ? CallSpec::direct(MInstrHelpers::incDecPropCO)
     : CallSpec::direct(MInstrHelpers::incDecPropC);
 
-  auto const args = propArgs(env, inst)
+  auto args = propArgs(env, inst)
     .typedValue(1)
     .imm(static_cast<int32_t>(extra->op));
+  if (!base->isA(TObj)) args.ssa(2);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, helper, callDestTV(env, inst),
@@ -284,9 +305,21 @@ ArgGroup elemArgs(IRLS& env, const IRInstruction* inst) {
 void implElem(IRLS& env, const IRInstruction* inst) {
   auto const mode  = inst->extra<MOpModeData>()->mode;
   auto const key   = inst->src(1);
-  BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key), mode, checkHACIntishCast());
 
-  auto const args = elemArgs(env, inst).ssa(2);
+  auto args = elemArgs(env, inst).ssa(2);
+
+  auto const target = [&] {
+    if (inst->is(ElemDX)) {
+      assertx(mode == MOpMode::Define);
+      BUILD_OPTAB(ELEMD_HELPER_TABLE, getKeyType(key), checkHACIntishCast());
+      args.ssa(3);
+      return target;
+    } else {
+      BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key),
+                  mode, checkHACIntishCast());
+      return target;
+    }
+  }();
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
@@ -329,7 +362,7 @@ void cgVGetElem(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst),
-               SyncOptions::Sync, elemArgs(env, inst));
+               SyncOptions::Sync, elemArgs(env, inst).ssa(2));
 }
 
 void cgSetElem(IRLS& env, const IRInstruction* inst) {
@@ -339,7 +372,7 @@ void cgSetElem(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst),
-               SyncOptions::Sync, elemArgs(env, inst).typedValue(2));
+               SyncOptions::Sync, elemArgs(env, inst).typedValue(2).ssa(3));
 }
 
 IMPL_OPCODE_CALL(SetNewElem);
@@ -355,7 +388,8 @@ void cgSetWithRefElem(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst)
     .ssa(0)
     .typedValue(1)
-    .typedValue(2);
+    .typedValue(2)
+    .ssa(3);
 
   cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
 }
@@ -370,7 +404,8 @@ void cgBindElem(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst)
     .ssa(0)
     .typedValue(1)
-    .ssa(2);
+    .ssa(2)
+    .ssa(3);
 
   cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
 }
@@ -386,7 +421,8 @@ void cgSetOpElem(IRLS& env, const IRInstruction* inst) {
     .ssa(0)
     .typedValue(1)
     .typedValue(2)
-    .imm(uint32_t(inst->extra<SetOpElem>()->op));
+    .imm(uint32_t(inst->extra<SetOpElem>()->op))
+    .ssa(3);
 
   cgCallHelper(v, env, target, callDestTV(env, inst),
                SyncOptions::Sync, args);
@@ -402,7 +438,8 @@ void cgIncDecElem(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst)
     .ssa(0)
     .typedValue(1)
-    .imm(uint32_t(inst->extra<IncDecElem>()->op));
+    .imm(uint32_t(inst->extra<IncDecElem>()->op))
+    .ssa(2);
 
   cgCallHelper(v, env, target, callDestTV(env, inst),
                SyncOptions::Sync, args);

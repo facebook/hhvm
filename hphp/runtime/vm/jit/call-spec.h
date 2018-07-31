@@ -69,7 +69,8 @@ namespace detail {
   T(unsigned int, U(Int, RDSHandle)) \
   /* tv_[rl]val will be TLvalToGen once we have proper JIT support for them */ \
   T(tv_lval, TPtrToGen)          \
-  T(tv_rval, TPtrToGen)
+  T(tv_rval, TPtrToGen)          \
+  T(MInstrPropState*, U(MIPropSPtr, Nullptr))
 
 /*
  * jit_cpp_type<> handles all types that are the same for parameters and return

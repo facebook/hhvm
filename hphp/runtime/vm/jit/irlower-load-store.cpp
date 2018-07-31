@@ -290,6 +290,11 @@ void cgLdMIStateAddr(IRLS& env, const IRInstruction* inst) {
   vmain(env) << lea{rvmtl()[off], dstLoc(env, inst, 0).reg()};
 }
 
+void cgLdMIPropStateAddr(IRLS& env, const IRInstruction* inst) {
+  auto const off = rds::kVmMInstrStateOff + offsetof(MInstrState, propState);
+  vmain(env) << lea{rvmtl()[off], dstLoc(env, inst, 0).reg()};
+}
+
 void cgLdMBase(IRLS& env, const IRInstruction* inst) {
   auto const off = rds::kVmMInstrStateOff + offsetof(MInstrState, base);
   vmain(env) << load{rvmtl()[off], dstLoc(env, inst, 0).reg()};
@@ -298,6 +303,48 @@ void cgLdMBase(IRLS& env, const IRInstruction* inst) {
 void cgStMBase(IRLS& env, const IRInstruction* inst) {
   auto const off = rds::kVmMInstrStateOff + offsetof(MInstrState, base);
   vmain(env) << store{srcLoc(env, inst, 0).reg(), rvmtl()[off]};
+}
+
+void cgStMIPropState(IRLS& env, const IRInstruction* inst) {
+  auto const cls = srcLoc(env, inst, 0).reg();
+  auto const slot = srcLoc(env, inst, 1).reg();
+  auto const isStatic = inst->src(2)->boolVal();
+  auto const off = rds::kVmMInstrStateOff + offsetof(MInstrState, propState);
+  auto& v = vmain(env);
+
+  using M = MInstrPropState;
+
+  static_assert(sizeof(M::slotSize() == 4), "");
+  static_assert(sizeof(M::clsSize()) == 4 || sizeof(M::clsSize()) == 8, "");
+
+  if (inst->src(0)->isA(TNullptr)) {
+    // If the Class* field is null, none of the other fields matter.
+    emitStLowPtr(v, v.cns(0), rvmtl()[off + M::clsOff()], M::clsSize());
+    return;
+  }
+
+  if (inst->src(0)->hasConstVal(TCls) &&
+      inst->src(1)->hasConstVal(TInt)) {
+    // If everything is a constant, and this is a LowPtr build, we can store the
+    // values with a single 64-bit immediate.
+    if (M::clsOff() + M::clsSize() == M::slotOff() && M::clsSize() == 4) {
+      auto const clsVal = inst->src(0)->clsVal();
+      auto const slotVal = inst->src(1)->intVal();
+      auto raw = reinterpret_cast<uint64_t>(clsVal);
+      raw |= (static_cast<uint64_t>(slotVal) << 32);
+      if (isStatic) raw |= 0x1;
+      emitImmStoreq(v, raw, rvmtl()[off + M::clsOff()]);
+      return;
+    }
+  }
+
+  auto markedCls = cls;
+  if (isStatic) {
+    markedCls = v.makeReg();
+    v << orqi{0x1, cls, markedCls, v.makeReg()};
+  }
+  emitStLowPtr(v, markedCls, rvmtl()[off + M::clsOff()], M::clsSize());
+  v << storel{slot, rvmtl()[off + M::slotOff()]};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

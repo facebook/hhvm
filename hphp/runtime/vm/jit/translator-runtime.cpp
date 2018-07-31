@@ -189,8 +189,8 @@ ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {
   return a1;
 }
 
-void setNewElem(TypedValue* base, Cell val) {
-  HPHP::SetNewElem<false>(base, &val);
+void setNewElem(TypedValue* base, Cell val, const MInstrPropState* pState) {
+  HPHP::SetNewElem<false>(base, &val, pState);
 }
 
 void setNewElemArray(TypedValue* base, Cell val) {
@@ -744,9 +744,9 @@ TypedValue* getSPropOrNull(const Class* cls,
                            Class* ctx) {
   auto const lookup = cls->getSProp(ctx, name);
 
-  if (UNLIKELY(!lookup.prop || !lookup.accessible)) return nullptr;
+  if (UNLIKELY(!lookup.val || !lookup.accessible)) return nullptr;
 
-  return lookup.prop;
+  return lookup.val;
 }
 
 TypedValue* getSPropOrRaise(const Class* cls,
@@ -991,15 +991,18 @@ namespace MInstrHelpers {
 
 template <bool intishWarn>
 TypedValue setOpElem(TypedValue* base, TypedValue key,
-                     Cell val, SetOpOp op) {
+                     Cell val, SetOpOp op, const MInstrPropState* pState) {
   TypedValue localTvRef;
-  auto result = HPHP::SetOpElem<intishWarn>(localTvRef, op, base, key, &val);
+  auto result =
+    HPHP::SetOpElem<intishWarn>(localTvRef, op, base, key, &val, pState);
 
   return cGetRefShuffle(localTvRef, result);
 }
 
-template TypedValue setOpElem<true>(TypedValue*, TypedValue, Cell, SetOpOp);
-template TypedValue setOpElem<false>(TypedValue*, TypedValue, Cell, SetOpOp);
+template TypedValue setOpElem<true>(TypedValue*, TypedValue, Cell, SetOpOp,
+                                    const MInstrPropState*);
+template TypedValue setOpElem<false>(TypedValue*, TypedValue, Cell, SetOpOp,
+                                     const MInstrPropState*);
 
 StringData* stringGetI(StringData* base, uint64_t x) {
   if (LIKELY(x < base->size())) {
@@ -1021,10 +1024,12 @@ uint64_t vectorIsset(c_Vector* vec, int64_t index) {
 }
 
 template <bool intishWarn>
-void bindElemC(TypedValue* base, TypedValue key, RefData* val) {
+void bindElemC(TypedValue* base, TypedValue key, RefData* val,
+               const MInstrPropState* pState) {
   TypedValue localTvRef;
-  auto elem =
-    HPHP::ElemD<MOpMode::Define, true, intishWarn>(localTvRef, base, key);
+  auto elem = HPHP::ElemD<MOpMode::Define, true, intishWarn>(
+    localTvRef, base, key, pState
+  );
 
   if (UNLIKELY(elem == &localTvRef)) {
     // Skip binding a TypedValue that's about to be destroyed and just destroy
@@ -1036,43 +1041,53 @@ void bindElemC(TypedValue* base, TypedValue key, RefData* val) {
   tvBindRef(val, elem);
 }
 
-template void bindElemC<true>(TypedValue*, TypedValue, RefData*);
-template void bindElemC<false>(TypedValue*, TypedValue, RefData*);
+template void bindElemC<true>(TypedValue*, TypedValue, RefData*,
+                              const MInstrPropState*);
+template void bindElemC<false>(TypedValue*, TypedValue, RefData*,
+                               const MInstrPropState*);
 
 template <bool intishWarn>
-void setWithRefElem(TypedValue* base, TypedValue keyTV, TypedValue val) {
+void setWithRefElem(TypedValue* base, TypedValue keyTV, TypedValue val,
+                    const MInstrPropState* pState) {
   TypedValue localTvRef;
   auto const keyC = tvToCell(keyTV);
 
   if (UNLIKELY(isRefType(val.m_type))) {
     HPHP::SetWithRefMLElem<MOpMode::Define, true, intishWarn>(
-      localTvRef, base, keyC, val);
+      localTvRef, base, keyC, val, pState);
   } else {
     HPHP::SetWithRefMLElem<MOpMode::Define, false, intishWarn>(
-      localTvRef, base, keyC, val);
+      localTvRef, base, keyC, val, pState);
   }
 }
 
-template void setWithRefElem<true>(TypedValue*, TypedValue, TypedValue);
-template void setWithRefElem<false>(TypedValue*, TypedValue, TypedValue);
+template void setWithRefElem<true>(TypedValue*, TypedValue, TypedValue,
+                                   const MInstrPropState*);
+template void setWithRefElem<false>(TypedValue*, TypedValue, TypedValue,
+                                    const MInstrPropState*);
 
 template <bool intishWarn>
-TypedValue incDecElem(TypedValue* base, TypedValue key, IncDecOp op) {
-  auto const result = HPHP::IncDecElem<intishWarn>(op, base, key);
+TypedValue incDecElem(TypedValue* base, TypedValue key,
+                      IncDecOp op, const MInstrPropState* pState) {
+  auto const result = HPHP::IncDecElem<intishWarn>(op, base, key, pState);
   assertx(!isRefType(result.m_type));
   return result;
 }
 
-template TypedValue incDecElem<true>(TypedValue*, TypedValue, IncDecOp);
-template TypedValue incDecElem<false>(TypedValue*, TypedValue, IncDecOp);
+template TypedValue incDecElem<true>(TypedValue*, TypedValue, IncDecOp,
+                                     const MInstrPropState* pState);
+template TypedValue incDecElem<false>(TypedValue*, TypedValue, IncDecOp,
+                                      const MInstrPropState* pState);
 
-void bindNewElem(TypedValue* base, RefData* val) {
+void bindNewElem(TypedValue* base,
+                 RefData* val,
+                 const MInstrPropState* pState) {
   if (UNLIKELY(isHackArrayType(base->m_type))) {
     throwRefInvalidArrayValueException(base->m_data.parr);
   }
 
   TypedValue localTvRef;
-  auto elem = HPHP::NewElem<true>(localTvRef, base);
+  auto elem = HPHP::NewElem<true>(localTvRef, base, pState);
 
   if (UNLIKELY(elem == &localTvRef)) {
     // Skip binding a TypedValue that's about to be destroyed and just destroy

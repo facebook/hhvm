@@ -90,7 +90,7 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key,
 ArrayData* dictAddElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
 ArrayData* dictAddElemStringKeyHelper(ArrayData* ad, StringData* key,
                                       TypedValue val);
-void setNewElem(TypedValue* base, Cell val);
+void setNewElem(TypedValue* base, Cell val, const MInstrPropState*);
 void setNewElemArray(TypedValue* base, Cell val);
 void setNewElemVec(TypedValue* base, Cell val);
 RefData* boxValue(TypedValue tv);
@@ -224,17 +224,20 @@ void asTypeStructHelper(ArrayData*, Cell);
 
 namespace MInstrHelpers {
 template<bool intishWarn>
-TypedValue setOpElem(TypedValue* base, TypedValue key, Cell val, SetOpOp op);
+TypedValue setOpElem(TypedValue* base, TypedValue key, Cell val, SetOpOp op,
+                     const MInstrPropState*);
 StringData* stringGetI(StringData*, uint64_t);
 uint64_t pairIsset(c_Pair*, int64_t);
 uint64_t vectorIsset(c_Vector*, int64_t);
 template <bool intishWarn>
-void bindElemC(TypedValue*, TypedValue, RefData*);
+void bindElemC(TypedValue*, TypedValue, RefData*, const MInstrPropState*);
 template <bool intishWarn>
-void setWithRefElem(TypedValue*, TypedValue, TypedValue);
+void setWithRefElem(TypedValue*, TypedValue, TypedValue,
+                    const MInstrPropState*);
 template<bool intishWarn>
-TypedValue incDecElem(TypedValue* base, TypedValue key, IncDecOp op);
-void bindNewElem(TypedValue* base, RefData* val);
+TypedValue incDecElem(TypedValue* base, TypedValue key, IncDecOp op,
+                      const MInstrPropState*);
+void bindNewElem(TypedValue* base, RefData* val, const MInstrPropState*);
 tv_lval elemVecID(tv_lval base, int64_t key);
 tv_lval elemVecIU(tv_lval base, int64_t key);
 }

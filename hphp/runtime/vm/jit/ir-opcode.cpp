@@ -794,6 +794,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdLocPseudoMain:
   case LdMBase:
   case LdMem:
+  case LdMIPropStateAddr:
   case LdMIStateAddr:
   case LdObjClass:
   case LdObjInvoke:
@@ -826,6 +827,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LIterNext:
   case LIterNextK:
   case LookupClsRDS:
+  case LookupSPropSlot:
   case LtBool:
   case LtDbl:
   case LteBool:
@@ -940,6 +942,7 @@ bool opcodeMayRaise(Opcode opc) {
   case StLocRange:
   case StMBase:
   case StMem:
+  case StMIPropState:
   case StOutValue:
   case StRef:
   case StrictlyIntegerConv:

@@ -179,7 +179,29 @@ void raise_inout_undefined_index(const StringData* sd);
 
 namespace detail {
 
-ALWAYS_INLINE void checkPromotion(tv_rval base) {
+ALWAYS_INLINE void checkPromotion(tv_rval base, const MInstrPropState* pState) {
+  if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+    assertx(pState != nullptr);
+    auto const cls = pState->getClass();
+    if (UNLIKELY(cls != nullptr)) {
+      auto const slot = pState->getSlot();
+      auto const tv = make_tv<KindOfArray>(staticEmptyArray());
+      if (pState->isStatic()) {
+        assertx(slot < cls->numStaticProperties());
+        auto const& sprop = cls->staticProperties()[slot];
+        auto const& tc = sprop.typeConstraint;
+        if (tc.isCheckable()) {
+          tc.verifyStaticProperty(&tv, cls, sprop.cls, sprop.name);
+        }
+      } else {
+        assertx(slot < cls->numDeclProperties());
+        auto const& prop = cls->declProperties()[slot];
+        auto const& tc = prop.typeConstraint;
+        if (tc.isCheckable()) tc.verifyProperty(&tv, cls, prop.cls, prop.name);
+      }
+    }
+  }
+
   if (LIKELY(!checkHACFalseyPromote())) return;
 
   if (tvIsNull(base)) {
@@ -775,8 +797,10 @@ inline tv_lval ElemDKeyset(tv_lval base, key_type<keyType> key) {
  * ElemD when base is Null
  */
 template<MOpMode mode, KeyType keyType>
-inline tv_lval ElemDEmptyish(tv_lval base, key_type<keyType> key) {
-  detail::checkPromotion(base);
+inline tv_lval ElemDEmptyish(tv_lval base,
+                             key_type<keyType> key,
+                             const MInstrPropState* pState) {
+  detail::checkPromotion(base, pState);
   auto scratchKey = initScratchKey(key);
 
   tvMove(make_tv<KindOfArray>(ArrayData::Create()), base);
@@ -803,20 +827,23 @@ inline tv_lval ElemDScalar(TypedValue& tvRef) {
  */
 template<MOpMode mode, KeyType keyType>
 inline tv_lval ElemDBoolean(TypedValue& tvRef,
-                                tv_lval base,
-                                key_type<keyType> key) {
+                            tv_lval base,
+                            key_type<keyType> key,
+                            const MInstrPropState* pState) {
   return base.val().num
     ? ElemDScalar(tvRef)
-    : ElemDEmptyish<mode, keyType>(base, key);
+    : ElemDEmptyish<mode, keyType>(base, key, pState);
 }
 
 /**
  * ElemD when base is a String
  */
 template<MOpMode mode, KeyType keyType>
-inline tv_lval ElemDString(tv_lval base, key_type<keyType> key) {
+inline tv_lval ElemDString(tv_lval base,
+                           key_type<keyType> key,
+                           const MInstrPropState* pState) {
   if (base.val().pstr->size() == 0) {
-    return ElemDEmptyish<mode, keyType>(base, key);
+    return ElemDEmptyish<mode, keyType>(base, key, pState);
   }
   raise_error("Operator not supported for strings");
   return tv_lval(nullptr);
@@ -827,7 +854,7 @@ inline tv_lval ElemDString(tv_lval base, key_type<keyType> key) {
  */
 template<MOpMode mode, bool reffy, KeyType keyType>
 inline tv_lval ElemDObject(TypedValue& tvRef, tv_lval base,
-                               key_type<keyType> key) {
+                           key_type<keyType> key) {
   auto scratchKey = initScratchKey(key);
   auto obj = base.val().pobj;
 
@@ -842,6 +869,13 @@ inline tv_lval ElemDObject(TypedValue& tvRef, tv_lval base,
                                     s_storage.get());
     // ArrayObject should always have the 'storage' property...
     assertx(storage);
+    // We shouldn't have a type-hint on the storage property.
+    assertx(
+      !obj->getVMClass()->declPropTypeConstraint(
+        obj->getVMClass()->getDeclPropIndex(SystemLib::s_ArrayObjectClass,
+                                            s_storage.get()).slot
+      ).isCheckable()
+    );
     return UNLIKELY(checkHACIntishCast())
       ? ElemDArray<mode, reffy, true, keyType>(storage, key)
       : ElemDArray<mode, reffy, false, keyType>(storage, key);
@@ -859,7 +893,8 @@ inline tv_lval ElemDObject(TypedValue& tvRef, tv_lval base,
  */
 template<MOpMode mode, bool reffy, bool intishWarn,
          KeyType keyType = KeyType::Any>
-tv_lval ElemD(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
+tv_lval ElemD(TypedValue& tvRef, tv_lval base,
+              key_type<keyType> key, const MInstrPropState* pState) {
   assertx(mode == MOpMode::Define);
 
   base = base.unboxed();
@@ -868,9 +903,9 @@ tv_lval ElemD(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
   switch (base.type()) {
     case KindOfUninit:
     case KindOfNull:
-      return ElemDEmptyish<mode, keyType>(base, key);
+      return ElemDEmptyish<mode, keyType>(base, key, pState);
     case KindOfBoolean:
-      return ElemDBoolean<mode, keyType>(tvRef, base, key);
+      return ElemDBoolean<mode, keyType>(tvRef, base, key, pState);
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
@@ -879,7 +914,7 @@ tv_lval ElemD(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
       return ElemDScalar(tvRef);
     case KindOfPersistentString:
     case KindOfString:
-      return ElemDString<mode, keyType>(base, key);
+      return ElemDString<mode, keyType>(base, key, pState);
     case KindOfPersistentVec:
     case KindOfVec:
       return ElemDVec<reffy, keyType>(base, key);
@@ -906,7 +941,8 @@ tv_lval ElemD(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
 template<MOpMode mode, bool reffy, bool intishWarn,
          KeyType keyType = KeyType::Any>
 void SetWithRefMLElem(TypedValue& tvRef, tv_lval base,
-                      key_type<keyType> key, TypedValue val) {
+                      key_type<keyType> key, TypedValue val,
+                      const MInstrPropState* pState) {
   assertx(mode == MOpMode::Define);
 
   base = tvToCell(base);
@@ -916,9 +952,9 @@ void SetWithRefMLElem(TypedValue& tvRef, tv_lval base,
     switch (type(base)) {
       case KindOfUninit:
       case KindOfNull:
-        return ElemDEmptyish<mode, keyType>(base, key);
+        return ElemDEmptyish<mode, keyType>(base, key, pState);
       case KindOfBoolean:
-        return ElemDBoolean<mode, keyType>(tvRef, base, key);
+        return ElemDBoolean<mode, keyType>(tvRef, base, key, pState);
       case KindOfInt64:
       case KindOfDouble:
       case KindOfResource:
@@ -927,7 +963,7 @@ void SetWithRefMLElem(TypedValue& tvRef, tv_lval base,
         return ElemDScalar(tvRef);
       case KindOfPersistentString:
       case KindOfString:
-        return ElemDString<mode, keyType>(base, key);
+        return ElemDString<mode, keyType>(base, key, pState);
       case KindOfPersistentVec:
       case KindOfVec:
         return ElemDVec<reffy, keyType>(base, key);
@@ -1231,8 +1267,8 @@ tv_lval ElemU(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
 /**
  * NewElem when base is Null
  */
-inline tv_lval NewElemEmptyish(tv_lval base) {
-  detail::checkPromotion(base);
+inline tv_lval NewElemEmptyish(tv_lval base, const MInstrPropState* pState) {
+  detail::checkPromotion(base, pState);
   tvMove(make_tv<KindOfArray>(ArrayData::Create()), base);
   return asArrRef(base).lvalAt();
 }
@@ -1250,18 +1286,22 @@ inline tv_lval NewElemInvalid(TypedValue& tvRef) {
 /**
  * NewElem when base is a Boolean
  */
-inline tv_lval NewElemBoolean(TypedValue& tvRef, tv_lval base) {
+inline tv_lval NewElemBoolean(TypedValue& tvRef,
+                              tv_lval base,
+                              const MInstrPropState* pState) {
   return val(base).num
     ? NewElemInvalid(tvRef)
-    : NewElemEmptyish(base);
+    : NewElemEmptyish(base, pState);
 }
 
 /**
  * NewElem when base is a String
  */
-inline tv_lval NewElemString(TypedValue& tvRef, tv_lval base) {
+inline tv_lval NewElemString(TypedValue& tvRef,
+                             tv_lval base,
+                             const MInstrPropState* pState) {
   if (val(base).pstr->size() == 0) {
-    return NewElemEmptyish(base);
+    return NewElemEmptyish(base, pState);
   }
   return NewElemInvalid(tvRef);
 }
@@ -1292,16 +1332,18 @@ inline tv_lval NewElemObject(TypedValue& tvRef, tv_lval base) {
  * $result = ($base[] = ...);
  */
 template <bool reffy>
-inline tv_lval NewElem(TypedValue& tvRef, tv_lval base) {
+inline tv_lval NewElem(TypedValue& tvRef,
+                       tv_lval base,
+                       const MInstrPropState* pState) {
   base = base.unboxed();
   assertx(cellIsPlausible(base.tv()));
 
   switch (base.type()) {
     case KindOfUninit:
     case KindOfNull:
-      return NewElemEmptyish(base);
+      return NewElemEmptyish(base, pState);
     case KindOfBoolean:
-      return NewElemBoolean(tvRef, base);
+      return NewElemBoolean(tvRef, base, pState);
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
@@ -1310,7 +1352,7 @@ inline tv_lval NewElem(TypedValue& tvRef, tv_lval base) {
       return NewElemInvalid(tvRef);
     case KindOfPersistentString:
     case KindOfString:
-      return NewElemString(tvRef, base);
+      return NewElemString(tvRef, base, pState);
     case KindOfPersistentVec:
     case KindOfVec:
       throw_cannot_use_newelem_for_lval_read_vec();
@@ -1336,8 +1378,8 @@ inline tv_lval NewElem(TypedValue& tvRef, tv_lval base) {
  */
 template <KeyType keyType>
 inline void SetElemEmptyish(tv_lval base, key_type<keyType> key,
-                            Cell* value) {
-  detail::checkPromotion(base);
+                            Cell* value, const MInstrPropState* pState) {
+  detail::checkPromotion(base, pState);
   auto const& scratchKey = initScratchKey(key);
   cellMove(make_tv<KindOfArray>(staticEmptyArray()), base);
   asArrRef(base).set(tvAsCVarRef(&scratchKey), tvAsCVarRef(value));
@@ -1361,11 +1403,11 @@ inline void SetElemScalar(Cell* value) {
  */
 template <bool setResult, KeyType keyType>
 inline void SetElemBoolean(tv_lval base, key_type<keyType> key,
-                           Cell* value) {
+                           Cell* value, const MInstrPropState* pState) {
   if (val(base).num) {
     SetElemScalar<setResult>(value);
   } else {
-    SetElemEmptyish<keyType>(base, key, value);
+    SetElemEmptyish<keyType>(base, key, value, pState);
   }
 }
 
@@ -1387,10 +1429,10 @@ inline int64_t castKeyToInt<KeyType::Int>(int64_t key) {
  */
 template <bool setResult, KeyType keyType>
 inline StringData* SetElemString(tv_lval base, key_type<keyType> key,
-                                 Cell* value) {
+                                 Cell* value, const MInstrPropState* pState) {
   int baseLen = val(base).pstr->size();
   if (baseLen == 0) {
-    SetElemEmptyish<keyType>(base, key, value);
+    SetElemEmptyish<keyType>(base, key, value, pState);
     if (!setResult) {
       tvIncRefGen(*value);
       throw InvalidSetMException(*value);
@@ -1714,17 +1756,20 @@ inline void SetElemDict(tv_lval base, key_type<keyType> key,
  */
 template <bool setResult, KeyType keyType, bool intishWarn>
 NEVER_INLINE
-StringData* SetElemSlow(tv_lval base, key_type<keyType> key, Cell* value) {
+StringData* SetElemSlow(tv_lval base,
+                        key_type<keyType> key,
+                        Cell* value,
+                        const MInstrPropState* pState) {
   base = tvToCell(base);
   assertx(cellIsPlausible(*base));
 
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
-      SetElemEmptyish<keyType>(base, key, value);
+      SetElemEmptyish<keyType>(base, key, value, pState);
       return nullptr;
     case KindOfBoolean:
-      SetElemBoolean<setResult, keyType>(base, key, value);
+      SetElemBoolean<setResult, keyType>(base, key, value, pState);
       return nullptr;
     case KindOfInt64:
     case KindOfDouble:
@@ -1735,7 +1780,7 @@ StringData* SetElemSlow(tv_lval base, key_type<keyType> key, Cell* value) {
       return nullptr;
     case KindOfPersistentString:
     case KindOfString:
-      return SetElemString<setResult, keyType>(base, key, value);
+      return SetElemString<setResult, keyType>(base, key, value, pState);
     case KindOfPersistentVec:
     case KindOfVec:
       SetElemVec<setResult, keyType>(base, key, value);
@@ -1765,7 +1810,7 @@ StringData* SetElemSlow(tv_lval base, key_type<keyType> key, Cell* value) {
  */
 template <bool setResult, bool intishWarn, KeyType keyType = KeyType::Any>
 inline StringData* SetElem(tv_lval base, key_type<keyType> key,
-                           Cell* value) {
+                           Cell* value, const MInstrPropState* pState) {
   assertx(tvIsPlausible(*base));
 
   if (LIKELY(tvIsArray(base))) {
@@ -1780,14 +1825,16 @@ inline StringData* SetElem(tv_lval base, key_type<keyType> key,
     SetElemDict<setResult, keyType>(base, key, value);
     return nullptr;
   }
-  return SetElemSlow<setResult, keyType, intishWarn>(base, key, value);
+  return SetElemSlow<setResult, keyType, intishWarn>(base, key, value, pState);
 }
 
 /**
  * SetNewElem when base is Null
  */
-inline void SetNewElemEmptyish(tv_lval base, Cell* value) {
-  detail::checkPromotion(base);
+inline void SetNewElemEmptyish(tv_lval base,
+                               Cell* value,
+                               const MInstrPropState* pState) {
+  detail::checkPromotion(base, pState);
   Array a = Array::Create();
   a.append(cellAsCVarRef(*value));
   cellMove(make_tv<KindOfArray>(a.detach()), base);
@@ -1810,21 +1857,25 @@ inline void SetNewElemScalar(Cell* value) {
  * SetNewElem when base is a Boolean
  */
 template <bool setResult>
-inline void SetNewElemBoolean(tv_lval base, Cell* value) {
+inline void SetNewElemBoolean(tv_lval base,
+                              Cell* value,
+                              const MInstrPropState* pState) {
   if (val(base).num) {
     SetNewElemScalar<setResult>(value);
   } else {
-    SetNewElemEmptyish(base, value);
+    SetNewElemEmptyish(base, value, pState);
   }
 }
 
 /**
  * SetNewElem when base is a String
  */
-inline void SetNewElemString(tv_lval base, Cell* value) {
+inline void SetNewElemString(tv_lval base,
+                             Cell* value,
+                             const MInstrPropState* pState) {
   int baseLen = val(base).pstr->size();
   if (baseLen == 0) {
-    SetNewElemEmptyish(base, value);
+    SetNewElemEmptyish(base, value, pState);
   } else {
     raise_error("[] operator not supported for strings");
   }
@@ -1920,16 +1971,18 @@ inline void SetNewElemObject(tv_lval base, Cell* value) {
  * $base[] = ...
  */
 template <bool setResult>
-inline void SetNewElem(tv_lval base, Cell* value) {
+inline void SetNewElem(tv_lval base,
+                       Cell* value,
+                       const MInstrPropState* pState) {
   base = tvToCell(base);
   assertx(cellIsPlausible(*base));
 
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
-      return SetNewElemEmptyish(base, value);
+      return SetNewElemEmptyish(base, value, pState);
     case KindOfBoolean:
-      return SetNewElemBoolean<setResult>(base,  value);
+      return SetNewElemBoolean<setResult>(base, value, pState);
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
@@ -1938,7 +1991,7 @@ inline void SetNewElem(tv_lval base, Cell* value) {
       return SetNewElemScalar<setResult>(value);
     case KindOfPersistentString:
     case KindOfString:
-      return SetNewElemString(base, value);
+      return SetNewElemString(base, value, pState);
     case KindOfPersistentVec:
     case KindOfVec:
       return SetNewElemVec(base, value);
@@ -1963,10 +2016,11 @@ inline void SetNewElem(tv_lval base, Cell* value) {
  * SetOpElem when base is Null
  */
 inline tv_lval SetOpElemEmptyish(SetOpOp op, tv_lval base,
-                                 TypedValue key, Cell* rhs) {
+                                 TypedValue key, Cell* rhs,
+                                 const MInstrPropState* pState) {
   assertx(cellIsPlausible(*base));
 
-  detail::checkPromotion(base);
+  detail::checkPromotion(base, pState);
 
   cellMove(make_tv<KindOfArray>(staticEmptyArray()), base);
   auto const lval = asArrRef(base).lvalAt(tvAsCVarRef(&key));
@@ -1993,20 +2047,21 @@ inline tv_lval SetOpElemScalar(TypedValue& tvRef) {
 template <bool intishWarn>
 inline tv_lval SetOpElem(TypedValue& tvRef,
                          SetOpOp op, tv_lval base,
-                         TypedValue key, Cell* rhs) {
+                         TypedValue key, Cell* rhs,
+                         const MInstrPropState* pState) {
   base = tvToCell(base);
   assertx(cellIsPlausible(*base));
 
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
-      return SetOpElemEmptyish(op, base, key, rhs);
+      return SetOpElemEmptyish(op, base, key, rhs, pState);
 
     case KindOfBoolean:
       if (val(base).num) {
         return SetOpElemScalar(tvRef);
       }
-      return SetOpElemEmptyish(op, base, key, rhs);
+      return SetOpElemEmptyish(op, base, key, rhs, pState);
 
     case KindOfInt64:
     case KindOfDouble:
@@ -2021,7 +2076,7 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
         raise_error("Cannot use assign-op operators with overloaded "
           "objects nor string offsets");
       }
-      return SetOpElemEmptyish(op, base, key, rhs);
+      return SetOpElemEmptyish(op, base, key, rhs, pState);
 
     case KindOfPersistentVec:
     case KindOfVec: {
@@ -2079,8 +2134,9 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
   unknownBaseType(type(base));
 }
 
-inline tv_lval SetOpNewElemEmptyish(SetOpOp op, tv_lval base, Cell* rhs) {
-  detail::checkPromotion(base);
+inline tv_lval SetOpNewElemEmptyish(SetOpOp op, tv_lval base, Cell* rhs,
+                                    const MInstrPropState* pState) {
+  detail::checkPromotion(base, pState);
   cellMove(make_tv<KindOfArray>(staticEmptyArray()), base);
   auto result = asArrRef(base).lvalAt();
   setopBody(tvToCell(result), op, rhs);
@@ -2092,21 +2148,21 @@ inline tv_lval SetOpNewElemScalar(TypedValue& tvRef) {
   return &tvRef;
 }
 inline tv_lval SetOpNewElem(TypedValue& tvRef,
-                                SetOpOp op, tv_lval base,
-                                Cell* rhs) {
+                            SetOpOp op, tv_lval base,
+                            Cell* rhs, const MInstrPropState* pState) {
   base = tvToCell(base);
   assertx(cellIsPlausible(*base));
 
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
-      return SetOpNewElemEmptyish(op, base, rhs);
+      return SetOpNewElemEmptyish(op, base, rhs, pState);
 
     case KindOfBoolean:
       if (val(base).num) {
         return SetOpNewElemScalar(tvRef);
       }
-      return SetOpNewElemEmptyish(op, base, rhs);
+      return SetOpNewElemEmptyish(op, base, rhs, pState);
 
     case KindOfInt64:
     case KindOfDouble:
@@ -2120,7 +2176,7 @@ inline tv_lval SetOpNewElem(TypedValue& tvRef,
       if (val(base).pstr->size() != 0) {
         raise_error("[] operator not supported for strings");
       }
-      return SetOpNewElemEmptyish(op, base, rhs);
+      return SetOpNewElemEmptyish(op, base, rhs, pState);
 
     case KindOfPersistentVec:
     case KindOfVec:
@@ -2194,9 +2250,10 @@ inline Cell IncDecBody(IncDecOp op, tv_lval fr) {
 inline Cell IncDecElemEmptyish(
   IncDecOp op,
   tv_lval base,
-  TypedValue key
+  TypedValue key,
+  const MInstrPropState* pState
 ) {
-  detail::checkPromotion(base);
+  detail::checkPromotion(base, pState);
 
   cellMove(make_tv<KindOfArray>(staticEmptyArray()), base);
   auto const lval = asArrRef(base).lvalAt(tvAsCVarRef(&key));
@@ -2217,7 +2274,8 @@ template <bool intishWarn>
 inline Cell IncDecElem(
   IncDecOp op,
   tv_lval base,
-  TypedValue key
+  TypedValue key,
+  const MInstrPropState* pState
 ) {
   base = tvToCell(base);
   assertx(cellIsPlausible(*base));
@@ -2225,13 +2283,13 @@ inline Cell IncDecElem(
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
-      return IncDecElemEmptyish(op, base, key);
+      return IncDecElemEmptyish(op, base, key, pState);
 
     case KindOfBoolean:
       if (val(base).num) {
         return IncDecElemScalar();
       }
-      return IncDecElemEmptyish(op, base, key);
+      return IncDecElemEmptyish(op, base, key, pState);
 
     case KindOfInt64:
     case KindOfDouble:
@@ -2246,7 +2304,7 @@ inline Cell IncDecElem(
         raise_error("Cannot increment/decrement overloaded objects "
           "nor string offsets");
       }
-      return IncDecElemEmptyish(op, base, key);
+      return IncDecElemEmptyish(op, base, key, pState);
 
     case KindOfPersistentVec:
     case KindOfVec: {
@@ -2303,9 +2361,10 @@ inline Cell IncDecElem(
 
 inline Cell IncDecNewElemEmptyish(
   IncDecOp op,
-  tv_lval base
+  tv_lval base,
+  const MInstrPropState* pState
 ) {
-  detail::checkPromotion(base);
+  detail::checkPromotion(base, pState);
   cellMove(make_tv<KindOfArray>(staticEmptyArray()), base);
   auto result = asArrRef(base).lvalAt();
   assertx(type(result) == KindOfNull);
@@ -2320,7 +2379,8 @@ inline Cell IncDecNewElemScalar() {
 inline Cell IncDecNewElem(
   TypedValue& tvRef,
   IncDecOp op,
-  tv_lval base
+  tv_lval base,
+  const MInstrPropState* pState
 ) {
   base = tvToCell(base);
   assertx(cellIsPlausible(*base));
@@ -2328,13 +2388,13 @@ inline Cell IncDecNewElem(
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
-      return IncDecNewElemEmptyish(op, base);
+      return IncDecNewElemEmptyish(op, base, pState);
 
     case KindOfBoolean:
       if (val(base).num) {
         return IncDecNewElemScalar();
       }
-      return IncDecNewElemEmptyish(op, base);
+      return IncDecNewElemEmptyish(op, base, pState);
 
     case KindOfInt64:
     case KindOfDouble:
@@ -2348,7 +2408,7 @@ inline Cell IncDecNewElem(
       if (val(base).pstr->size() != 0) {
         raise_error("[] operator not supported for strings");
       }
-      return IncDecNewElemEmptyish(op, base);
+      return IncDecNewElemEmptyish(op, base, pState);
 
     case KindOfPersistentVec:
     case KindOfVec:
@@ -2843,16 +2903,20 @@ bool IssetEmptyElem(tv_rval base, key_type<keyType> key) {
 }
 
 template<MOpMode mode>
-inline tv_lval propPreNull(TypedValue& tvRef) {
+inline tv_lval propPreNull(TypedValue& tvRef, MInstrPropState* pState) {
   tvWriteNull(tvRef);
   if (mode == MOpMode::Warn) {
     raise_notice("Cannot access property on non-object");
   }
+  if (mode == MOpMode::Define && pState) *pState = MInstrPropState{};
   return tv_lval(&tvRef);
 }
 
 template <class F>
-inline void promoteToStdClass(tv_lval base, bool warn, F fun) {
+inline void promoteToStdClass(tv_lval base,
+                              bool warn,
+                              F fun,
+                              const MInstrPropState* pState) {
   if (!RuntimeOption::EvalPromoteEmptyObject) {
     // note that the whole point here is to guarantee that the property
     // never auto updates to a stdclass - so we must do this before
@@ -2867,6 +2931,29 @@ inline void promoteToStdClass(tv_lval base, bool warn, F fun) {
   }
 
   Object obj { ObjectData::newInstance(SystemLib::s_stdclassClass) };
+
+  if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+    assertx(pState != nullptr);
+    auto const cls = pState->getClass();
+    if (UNLIKELY(cls != nullptr)) {
+      auto const slot = pState->getSlot();
+      auto const tv = make_tv<KindOfObject>(obj.get());
+      if (pState->isStatic()) {
+        assertx(slot < cls->numStaticProperties());
+        auto const& sprop = cls->staticProperties()[slot];
+        auto const& tc = sprop.typeConstraint;
+        if (tc.isCheckable()) {
+          tc.verifyStaticProperty(&tv, cls, sprop.cls, sprop.name);
+        }
+      } else {
+        assertx(slot < cls->numDeclProperties());
+        auto const& prop = cls->declProperties()[slot];
+        auto const& tc = prop.typeConstraint;
+        if (tc.isCheckable()) tc.verifyProperty(&tv, cls, prop.cls, prop.name);
+      }
+    }
+  }
+
   if (base.type() == KindOfString) {
     decRefStr(base.val().pstr);
   } else {
@@ -2903,18 +2990,21 @@ inline void promoteToStdClass(tv_lval base, bool warn, F fun) {
 }
 
 template<MOpMode mode>
-tv_lval propPreStdclass(TypedValue& tvRef, tv_lval base) {
+tv_lval propPreStdclass(TypedValue& tvRef,
+                        tv_lval base,
+                        MInstrPropState* pState) {
   if (mode != MOpMode::Define) {
-    return propPreNull<mode>(tvRef);
+    return propPreNull<mode>(tvRef, pState);
   }
 
   promoteToStdClass(base, RuntimeOption::EnableHipHopSyntax,
-                    [] (ObjectData*) {});
+                    [] (ObjectData*) {}, pState);
   if (UNLIKELY(base.type() != KindOfObject)) {
     // See the comments above. Although promoteToStdClass will have
     // either thrown an exception, or promoted base to an object, an
     // installed error handler might have caused it to be overwritten
     tvWriteNull(tvRef);
+    if (pState) *pState = MInstrPropState{};
     return tv_lval(&tvRef);
   }
 
@@ -2922,32 +3012,32 @@ tv_lval propPreStdclass(TypedValue& tvRef, tv_lval base) {
 }
 
 template<MOpMode mode>
-tv_lval propPre(TypedValue& tvRef, tv_lval base) {
+tv_lval propPre(TypedValue& tvRef, tv_lval base, MInstrPropState* pState) {
   base = base.unboxed();
   switch (base.type()) {
     case KindOfUninit:
     case KindOfNull:
-      return propPreStdclass<mode>(tvRef, base);
+      return propPreStdclass<mode>(tvRef, base, pState);
 
     case KindOfBoolean:
       if (base.val().num) {
-        return propPreNull<mode>(tvRef);
+        return propPreNull<mode>(tvRef, pState);
       }
-      return propPreStdclass<mode>(tvRef, base);
+      return propPreStdclass<mode>(tvRef, base, pState);
 
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
-      return propPreNull<mode>(tvRef);
+      return propPreNull<mode>(tvRef, pState);
 
     case KindOfPersistentString:
     case KindOfString:
       if (base.val().pstr->size() != 0) {
-        return propPreNull<mode>(tvRef);
+        return propPreNull<mode>(tvRef, pState);
       }
-      return propPreStdclass<mode>(tvRef, base);
+      return propPreStdclass<mode>(tvRef, base, pState);
 
     case KindOfPersistentVec:
     case KindOfVec:
@@ -2957,7 +3047,7 @@ tv_lval propPre(TypedValue& tvRef, tv_lval base) {
     case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
-      return propPreNull<mode>(tvRef);
+      return propPreNull<mode>(tvRef, pState);
 
     case KindOfObject:
       return base;
@@ -3013,16 +3103,17 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
  */
 template<MOpMode mode, KeyType keyType = KeyType::Any, bool reffy = false>
 inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
-                       ObjectData* instance, key_type<keyType> key) {
+                       ObjectData* instance, key_type<keyType> key,
+                       MInstrPropState* pState) {
   auto keySD = prepareKey(key);
   SCOPE_EXIT { releaseKey<keyType>(keySD); };
 
   // Get property.
   if (mode == MOpMode::Define) {
     if (reffy) {
-      return instance->propB(&tvRef, ctx, keySD);
+      return instance->propB(&tvRef, ctx, keySD, pState);
     } else {
-      return instance->propD(&tvRef, ctx, keySD);
+      return instance->propD(&tvRef, ctx, keySD, pState);
     }
   }
   assertx(!reffy);
@@ -3033,18 +3124,21 @@ inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
     return instance->propW(&tvRef, ctx, keySD);
   }
   assertx(mode == MOpMode::Unset);
-  return instance->propD(&tvRef, ctx, keySD);
+  return instance->propU(&tvRef, ctx, keySD);
 }
 
 template<MOpMode mode, KeyType keyType = KeyType::Any, bool reffy = false>
 inline tv_lval Prop(TypedValue& tvRef,
                     const Class* ctx,
                     tv_lval base,
-                    key_type<keyType> key) {
-  auto result = propPre<mode>(tvRef, base);
+                    key_type<keyType> key,
+                    MInstrPropState* pState) {
+  auto result = propPre<mode>(tvRef, base, pState);
   if (result.type() == KindOfNull) return result;
 
-  return PropObj<mode,keyType,reffy>(tvRef, ctx, instanceFromTv(result), key);
+  return PropObj<mode,keyType,reffy>(
+    tvRef, ctx, instanceFromTv(result), key, pState
+  );
 }
 
 template <bool useEmpty, KeyType kt>
@@ -3078,7 +3172,10 @@ inline void SetPropNull(Cell* val) {
   }
 }
 
-inline void SetPropStdclass(tv_lval base, TypedValue key, Cell* val) {
+inline void SetPropStdclass(tv_lval base,
+                            TypedValue key,
+                            Cell* val,
+                            const MInstrPropState* pState) {
   promoteToStdClass(
     base,
     true,
@@ -3086,7 +3183,9 @@ inline void SetPropStdclass(tv_lval base, TypedValue key, Cell* val) {
       auto const keySD = prepareKey(key);
       SCOPE_EXIT { decRefStr(keySD); };
       obj->setProp(nullptr, keySD, *val);
-    });
+    },
+    pState
+  );
 }
 
 template <KeyType keyType>
@@ -3102,18 +3201,18 @@ inline void SetPropObj(Class* ctx, ObjectData* instance,
 // $base->$key = $val
 template <bool setResult, KeyType keyType = KeyType::Any>
 inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
-                    Cell* val) {
+                    Cell* val, const MInstrPropState* pState) {
   base = tvToCell(base);
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
-      return SetPropStdclass(base, initScratchKey(key), val);
+      return SetPropStdclass(base, initScratchKey(key), val, pState);
 
     case KindOfBoolean:
       if (HPHP::val(base).num) {
         return SetPropNull<setResult>(val);
       }
-      return SetPropStdclass(base, initScratchKey(key), val);
+      return SetPropStdclass(base, initScratchKey(key), val, pState);
 
     case KindOfInt64:
     case KindOfDouble:
@@ -3135,7 +3234,7 @@ inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
       if (HPHP::val(base).pstr->size() != 0) {
         return SetPropNull<setResult>(val);
       }
-      return SetPropStdclass(base, initScratchKey(key), val);
+      return SetPropStdclass(base, initScratchKey(key), val, pState);
 
     case KindOfObject:
       return SetPropObj<keyType>(ctx, HPHP::val(base).pobj, key, val);
@@ -3154,7 +3253,7 @@ inline tv_lval SetOpPropNull(TypedValue& tvRef) {
 
 inline tv_lval SetOpPropStdclass(TypedValue& tvRef, SetOpOp op,
                                  tv_lval base, TypedValue key,
-                                 Cell* rhs) {
+                                 Cell* rhs, const MInstrPropState* pState) {
   promoteToStdClass(
     base,
     true,
@@ -3164,7 +3263,9 @@ inline tv_lval SetOpPropStdclass(TypedValue& tvRef, SetOpOp op,
       tvWriteNull(tvRef);
       setopBody(tvAssertCell(&tvRef), op, rhs);
       obj->setProp(nullptr, keySD, tvAssertCell(tvRef));
-    });
+    },
+    pState
+  );
 
   return &tvRef;
 }
@@ -3181,18 +3282,18 @@ inline tv_lval SetOpPropObj(TypedValue& tvRef, Class* ctx,
 inline tv_lval SetOpProp(TypedValue& tvRef,
                          Class* ctx, SetOpOp op,
                          tv_lval base, TypedValue key,
-                         Cell* rhs) {
+                         Cell* rhs, const MInstrPropState* pState) {
   base = tvToCell(base);
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
-      return SetOpPropStdclass(tvRef, op, base, key, rhs);
+      return SetOpPropStdclass(tvRef, op, base, key, rhs, pState);
 
     case KindOfBoolean:
       if (val(base).num) {
         return SetOpPropNull(tvRef);
       }
-      return SetOpPropStdclass(tvRef, op, base, key, rhs);
+      return SetOpPropStdclass(tvRef, op, base, key, rhs, pState);
 
     case KindOfInt64:
     case KindOfDouble:
@@ -3214,7 +3315,7 @@ inline tv_lval SetOpProp(TypedValue& tvRef,
       if (val(base).pstr->size() != 0) {
         return SetOpPropNull(tvRef);
       }
-      return SetOpPropStdclass(tvRef, op, base, key, rhs);
+      return SetOpPropStdclass(tvRef, op, base, key, rhs, pState);
 
     case KindOfObject:
       return SetOpPropObj(tvRef, ctx, op, instanceFromTv(base), key, rhs);
@@ -3231,7 +3332,7 @@ inline Cell IncDecPropNull() {
 }
 
 inline Cell IncDecPropStdclass(IncDecOp op, tv_lval base,
-                               TypedValue key) {
+                               TypedValue key, const MInstrPropState* pState) {
   Cell dest;
   promoteToStdClass(
     base,
@@ -3244,7 +3345,9 @@ inline Cell IncDecPropStdclass(IncDecOp op, tv_lval base,
       dest = IncDecBody(op, &tv);
       obj->setProp(nullptr, keySD, dest);
       assertx(!isRefcountedType(tv.m_type));
-    });
+    },
+    pState
+  );
 
   return dest;
 }
@@ -3262,19 +3365,20 @@ inline Cell IncDecProp(
   Class* ctx,
   IncDecOp op,
   tv_lval base,
-  TypedValue key
+  TypedValue key,
+  const MInstrPropState* pState
 ) {
   base = tvToCell(base);
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
-      return IncDecPropStdclass(op, base, key);
+      return IncDecPropStdclass(op, base, key, pState);
 
     case KindOfBoolean:
       if (val(base).num) {
         return IncDecPropNull();
       }
-      return IncDecPropStdclass(op, base, key);
+      return IncDecPropStdclass(op, base, key, pState);
 
     case KindOfInt64:
     case KindOfDouble:
@@ -3296,7 +3400,7 @@ inline Cell IncDecProp(
       if (val(base).pstr->size() != 0) {
         return IncDecPropNull();
       }
-      return IncDecPropStdclass(op, base, key);
+      return IncDecPropStdclass(op, base, key, pState);
 
     case KindOfObject:
       return IncDecPropObj(ctx, op, instanceFromTv(base), key);

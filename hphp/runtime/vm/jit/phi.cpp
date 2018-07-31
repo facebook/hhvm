@@ -50,7 +50,8 @@ const IRInstruction* findSinkablePhiSrc(
   const IRInstruction* inst = nullptr;
 
   for (auto val : values) {
-    if (!val->inst()->is(LdLocAddr, LdStkAddr, LdMIStateAddr, LdStaticLoc)) {
+    if (!val->inst()->is(LdLocAddr, LdStkAddr, LdMIStateAddr,
+                         LdMIPropStateAddr, LdStaticLoc)) {
       return nullptr;
     }
     assertx(val->inst()->numSrcs() <= 1);

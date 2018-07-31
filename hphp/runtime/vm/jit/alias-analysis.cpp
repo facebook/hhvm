@@ -257,6 +257,7 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
     add_mis(AMIStateTvRef);
     add_mis(AMIStateTvRef2);
     add_mis(AMIStateBase);
+    add_mis(AMIStatePropS);
   }
 
   ret |= may_alias_part(*this, acls, acls.prop(), APropAny, all_props);
@@ -317,6 +318,7 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
     add_mis(AMIStateTvRef);
     add_mis(AMIStateTvRef2);
     add_mis(AMIStateBase);
+    add_mis(AMIStatePropS);
   }
 
   ret |= expand_part(*this, acls, acls.prop(), APropAny, all_props);

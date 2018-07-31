@@ -562,7 +562,7 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
 
   auto const cls = obj->getVMClass();
   auto const lookup = cls->getDeclPropIndex(ctx, key.get());
-  auto const slot = lookup.prop;
+  auto const slot = lookup.slot;
   tv_lval t;
 
   if (slot == kInvalidSlot || !lookup.accessible) {

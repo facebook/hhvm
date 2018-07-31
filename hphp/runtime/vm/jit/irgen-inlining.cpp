@@ -390,7 +390,7 @@ void inlSingletonSProp(IRGS& env,
 
   // Make sure the sprop is accessible from the singleton method's context.
   auto const lookup = cls->findSProp(func->cls(), propName);
-  if (UNLIKELY(lookup.prop == kInvalidSlot || !lookup.accessible)) {
+  if (UNLIKELY(lookup.slot == kInvalidSlot || !lookup.accessible)) {
     PUNT(SingletonSProp-Accessibility);
   }
 

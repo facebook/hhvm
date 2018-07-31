@@ -362,7 +362,8 @@ constexpr bool operator>(Mem a, Mem b) {
   IRT(ABC,         1ULL << 56) /* AsioBlockableChain */                 \
   IRT(RDSHandle,   1ULL << 57) /* rds::Handle */                        \
   IRT(Nullptr,     1ULL << 58)                                          \
-  /* bits 59-64 are unused */
+  IRT(MIPropSPtr,  1ULL << 59) /* Ptr to MInstrPropState */             \
+  /* bits 60-63 are unused */
 
 /*
  * Gen, Counted, Init, PtrToGen, etc... are here instead of IRT_PHP_UNIONS

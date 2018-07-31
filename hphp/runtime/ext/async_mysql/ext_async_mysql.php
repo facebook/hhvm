@@ -156,7 +156,7 @@ final class AsyncMysqlClient {
    */
   <<__HipHopSpecific, __Native>>
     public static function connectAndQuery(
-                                        array $queries,
+                                        arraylike<arraykey, string> $queries,
                                         string $host,
                                         int $port,
                                         string $dbname,
@@ -248,7 +248,7 @@ class AsyncMysqlConnectionPool {
    *                        depending on the option.
    */
   <<__Native>>
-  public function __construct(array $pool_options): void;
+  public function __construct(darray<string, mixed> $pool_options): void;
 
   /**
    * Returns statistical information for the current pool.
@@ -267,7 +267,7 @@ class AsyncMysqlConnectionPool {
    * @return - A string-keyed `array` with the statistical information above.
    */
   <<__HipHopSpecific, __Native>>
-  public function getPoolStats(): array;
+  public function getPoolStats(): darray<string, mixed>;
 
   /**
    * Begin an async connection to a MySQL instance.
@@ -425,7 +425,7 @@ final class AsyncMysqlConnection {
    */
   <<__HipHopSpecific, __Native>>
   function multiQuery(
-    array $queries,
+    arraylike<arraykey, mixed> $queries,
     int $timeout_micros = -1): Awaitable<Vector<AsyncMysqlQueryResult>>;
 
   /**
@@ -650,7 +650,7 @@ class AsyncMysqlConnectionOptions {
   // Sets a map of connection attributes that will be sent to Mysql in the
   // Connection Attributes Handshake field
   <<__HipHopSpecific, __Native>>
-  public function setConnectionAttributes(array<string,string> $attrs): void;
+  public function setConnectionAttributes(darray<string,string> $attrs): void;
 
   // SSL Configuration if SSL is to be used for connection
   <<__HipHopSpecific, __Native>>

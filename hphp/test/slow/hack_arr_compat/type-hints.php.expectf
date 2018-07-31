@@ -1,342 +1,342 @@
-Notice: Hack Array Compat: Argument 1 to fun1() must be of type varray, darray given in %s/type-hints.php on line 4
+Notice: Hack Array Compat: Argument 1 to fun1() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from fun1() must be of type varray, darray given in %s/type-hints.php on line 4
+Notice: Hack Array Compat: Value returned from fun1() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to fun1() must be of type varray, darray given in %s/type-hints.php on line 4
+Notice: Hack Array Compat: Argument 1 to fun1() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from fun1() must be of type varray, darray given in %s/type-hints.php on line 4
+Notice: Hack Array Compat: Value returned from fun1() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to fun1() must be of type varray, array given in %s/type-hints.php on line 4
+Notice: Hack Array Compat: Argument 1 to fun1() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from fun1() must be of type varray, array given in %s/type-hints.php on line 4
+Notice: Hack Array Compat: Value returned from fun1() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to fun2() must be of type darray, varray given in %s/type-hints.php on line 5
+Notice: Hack Array Compat: Argument 1 to fun2() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from fun2() must be of type darray, varray given in %s/type-hints.php on line 5
+Notice: Hack Array Compat: Value returned from fun2() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to fun2() must be of type darray, varray given in %s/type-hints.php on line 5
+Notice: Hack Array Compat: Argument 1 to fun2() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from fun2() must be of type darray, varray given in %s/type-hints.php on line 5
+Notice: Hack Array Compat: Value returned from fun2() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to fun2() must be of type darray, array given in %s/type-hints.php on line 5
+Notice: Hack Array Compat: Argument 1 to fun2() must be of type darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from fun2() must be of type darray, array given in %s/type-hints.php on line 5
+Notice: Hack Array Compat: Value returned from fun2() must be of type darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to fun3() must be of type varray_or_darray, array given in %s/type-hints.php on line 6
+Notice: Hack Array Compat: Argument 1 to fun3() must be of type varray_or_darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from fun3() must be of type varray_or_darray, array given in %s/type-hints.php on line 6
+Notice: Hack Array Compat: Value returned from fun3() must be of type varray_or_darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to fun4() must be of type array, varray given in %s/type-hints.php on line 7
+Notice: Hack Array Compat: Argument 1 to fun4() must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from fun4() must be of type array, varray given in %s/type-hints.php on line 7
+Notice: Hack Array Compat: Value returned from fun4() must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to fun4() must be of type array, darray given in %s/type-hints.php on line 7
+Notice: Hack Array Compat: Argument 1 to fun4() must be of type array, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from fun4() must be of type array, darray given in %s/type-hints.php on line 7
+Notice: Hack Array Compat: Value returned from fun4() must be of type array, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to fun4() must be of type array, varray given in %s/type-hints.php on line 7
+Notice: Hack Array Compat: Argument 1 to fun4() must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from fun4() must be of type array, varray given in %s/type-hints.php on line 7
+Notice: Hack Array Compat: Value returned from fun4() must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to fun4() must be of type array, darray given in %s/type-hints.php on line 7
+Notice: Hack Array Compat: Argument 1 to fun4() must be of type array, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from fun4() must be of type array, darray given in %s/type-hints.php on line 7
+Notice: Hack Array Compat: Value returned from fun4() must be of type array, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_fun1() must be of type varray, darray given in %s/type-hints.php on line 9
+Notice: Hack Array Compat: Argument 1 to opt_fun1() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_fun1() must be of type varray, darray given in %s/type-hints.php on line 9
+Notice: Hack Array Compat: Value returned from opt_fun1() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_fun1() must be of type varray, darray given in %s/type-hints.php on line 9
+Notice: Hack Array Compat: Argument 1 to opt_fun1() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_fun1() must be of type varray, darray given in %s/type-hints.php on line 9
+Notice: Hack Array Compat: Value returned from opt_fun1() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_fun1() must be of type varray, array given in %s/type-hints.php on line 9
+Notice: Hack Array Compat: Argument 1 to opt_fun1() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_fun1() must be of type varray, array given in %s/type-hints.php on line 9
+Notice: Hack Array Compat: Value returned from opt_fun1() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_fun2() must be of type darray, varray given in %s/type-hints.php on line 10
+Notice: Hack Array Compat: Argument 1 to opt_fun2() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_fun2() must be of type darray, varray given in %s/type-hints.php on line 10
+Notice: Hack Array Compat: Value returned from opt_fun2() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_fun2() must be of type darray, varray given in %s/type-hints.php on line 10
+Notice: Hack Array Compat: Argument 1 to opt_fun2() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_fun2() must be of type darray, varray given in %s/type-hints.php on line 10
+Notice: Hack Array Compat: Value returned from opt_fun2() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_fun2() must be of type darray, array given in %s/type-hints.php on line 10
+Notice: Hack Array Compat: Argument 1 to opt_fun2() must be of type darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_fun2() must be of type darray, array given in %s/type-hints.php on line 10
+Notice: Hack Array Compat: Value returned from opt_fun2() must be of type darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_fun3() must be of type varray_or_darray, array given in %s/type-hints.php on line 11
+Notice: Hack Array Compat: Argument 1 to opt_fun3() must be of type varray_or_darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_fun3() must be of type varray_or_darray, array given in %s/type-hints.php on line 11
+Notice: Hack Array Compat: Value returned from opt_fun3() must be of type varray_or_darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_fun4() must be of type array, varray given in %s/type-hints.php on line 12
+Notice: Hack Array Compat: Argument 1 to opt_fun4() must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_fun4() must be of type array, varray given in %s/type-hints.php on line 12
+Notice: Hack Array Compat: Value returned from opt_fun4() must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_fun4() must be of type array, darray given in %s/type-hints.php on line 12
+Notice: Hack Array Compat: Argument 1 to opt_fun4() must be of type array, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_fun4() must be of type array, darray given in %s/type-hints.php on line 12
+Notice: Hack Array Compat: Value returned from opt_fun4() must be of type array, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_fun4() must be of type array, varray given in %s/type-hints.php on line 12
+Notice: Hack Array Compat: Argument 1 to opt_fun4() must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_fun4() must be of type array, varray given in %s/type-hints.php on line 12
+Notice: Hack Array Compat: Value returned from opt_fun4() must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_fun4() must be of type array, darray given in %s/type-hints.php on line 12
+Notice: Hack Array Compat: Argument 1 to opt_fun4() must be of type array, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_fun4() must be of type array, darray given in %s/type-hints.php on line 12
+Notice: Hack Array Compat: Value returned from opt_fun4() must be of type array, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to tuple_fun() must be of type varray, darray given in %s/type-hints.php on line 14
+Notice: Hack Array Compat: Argument 1 to tuple_fun() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from tuple_fun() must be of type varray, darray given in %s/type-hints.php on line 14
+Notice: Hack Array Compat: Value returned from tuple_fun() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to tuple_fun() must be of type varray, darray given in %s/type-hints.php on line 14
+Notice: Hack Array Compat: Argument 1 to tuple_fun() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from tuple_fun() must be of type varray, darray given in %s/type-hints.php on line 14
+Notice: Hack Array Compat: Value returned from tuple_fun() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to tuple_fun() must be of type varray, array given in %s/type-hints.php on line 14
+Notice: Hack Array Compat: Argument 1 to tuple_fun() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from tuple_fun() must be of type varray, array given in %s/type-hints.php on line 14
+Notice: Hack Array Compat: Value returned from tuple_fun() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to shape_fun() must be of type darray, varray given in %s/type-hints.php on line 15
+Notice: Hack Array Compat: Argument 1 to shape_fun() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from shape_fun() must be of type darray, varray given in %s/type-hints.php on line 15
+Notice: Hack Array Compat: Value returned from shape_fun() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to shape_fun() must be of type darray, varray given in %s/type-hints.php on line 15
+Notice: Hack Array Compat: Argument 1 to shape_fun() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from shape_fun() must be of type darray, varray given in %s/type-hints.php on line 15
+Notice: Hack Array Compat: Value returned from shape_fun() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to shape_fun() must be of type darray, array given in %s/type-hints.php on line 15
+Notice: Hack Array Compat: Argument 1 to shape_fun() must be of type darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from shape_fun() must be of type darray, array given in %s/type-hints.php on line 15
+Notice: Hack Array Compat: Value returned from shape_fun() must be of type darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_tuple_fun() must be of type varray, darray given in %s/type-hints.php on line 17
+Notice: Hack Array Compat: Argument 1 to opt_tuple_fun() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_tuple_fun() must be of type varray, darray given in %s/type-hints.php on line 17
+Notice: Hack Array Compat: Value returned from opt_tuple_fun() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_tuple_fun() must be of type varray, darray given in %s/type-hints.php on line 17
+Notice: Hack Array Compat: Argument 1 to opt_tuple_fun() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_tuple_fun() must be of type varray, darray given in %s/type-hints.php on line 17
+Notice: Hack Array Compat: Value returned from opt_tuple_fun() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_tuple_fun() must be of type varray, array given in %s/type-hints.php on line 17
+Notice: Hack Array Compat: Argument 1 to opt_tuple_fun() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_tuple_fun() must be of type varray, array given in %s/type-hints.php on line 17
+Notice: Hack Array Compat: Value returned from opt_tuple_fun() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_shape_fun() must be of type darray, varray given in %s/type-hints.php on line 18
+Notice: Hack Array Compat: Argument 1 to opt_shape_fun() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_shape_fun() must be of type darray, varray given in %s/type-hints.php on line 18
+Notice: Hack Array Compat: Value returned from opt_shape_fun() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_shape_fun() must be of type darray, varray given in %s/type-hints.php on line 18
+Notice: Hack Array Compat: Argument 1 to opt_shape_fun() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_shape_fun() must be of type darray, varray given in %s/type-hints.php on line 18
+Notice: Hack Array Compat: Value returned from opt_shape_fun() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_shape_fun() must be of type darray, array given in %s/type-hints.php on line 18
+Notice: Hack Array Compat: Argument 1 to opt_shape_fun() must be of type darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_shape_fun() must be of type darray, array given in %s/type-hints.php on line 18
+Notice: Hack Array Compat: Value returned from opt_shape_fun() must be of type darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun1() must be of type varray, darray given in %s/type-hints.php on line 38
+Notice: Hack Array Compat: Argument 1 to alias_fun1() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun1() must be of type varray, darray given in %s/type-hints.php on line 38
+Notice: Hack Array Compat: Value returned from alias_fun1() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun1() must be of type varray, darray given in %s/type-hints.php on line 38
+Notice: Hack Array Compat: Argument 1 to alias_fun1() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun1() must be of type varray, darray given in %s/type-hints.php on line 38
+Notice: Hack Array Compat: Value returned from alias_fun1() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun1() must be of type varray, array given in %s/type-hints.php on line 38
+Notice: Hack Array Compat: Argument 1 to alias_fun1() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun1() must be of type varray, array given in %s/type-hints.php on line 38
+Notice: Hack Array Compat: Value returned from alias_fun1() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun2() must be of type darray, varray given in %s/type-hints.php on line 39
+Notice: Hack Array Compat: Argument 1 to alias_fun2() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun2() must be of type darray, varray given in %s/type-hints.php on line 39
+Notice: Hack Array Compat: Value returned from alias_fun2() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun2() must be of type darray, varray given in %s/type-hints.php on line 39
+Notice: Hack Array Compat: Argument 1 to alias_fun2() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun2() must be of type darray, varray given in %s/type-hints.php on line 39
+Notice: Hack Array Compat: Value returned from alias_fun2() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun2() must be of type darray, array given in %s/type-hints.php on line 39
+Notice: Hack Array Compat: Argument 1 to alias_fun2() must be of type darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun2() must be of type darray, array given in %s/type-hints.php on line 39
+Notice: Hack Array Compat: Value returned from alias_fun2() must be of type darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun3() must be of type varray_or_darray, array given in %s/type-hints.php on line 40
+Notice: Hack Array Compat: Argument 1 to alias_fun3() must be of type varray_or_darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun3() must be of type varray_or_darray, array given in %s/type-hints.php on line 40
+Notice: Hack Array Compat: Value returned from alias_fun3() must be of type varray_or_darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun4() must be of type array, varray given in %s/type-hints.php on line 41
+Notice: Hack Array Compat: Argument 1 to alias_fun4() must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun4() must be of type array, varray given in %s/type-hints.php on line 41
+Notice: Hack Array Compat: Value returned from alias_fun4() must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun4() must be of type array, darray given in %s/type-hints.php on line 41
+Notice: Hack Array Compat: Argument 1 to alias_fun4() must be of type array, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun4() must be of type array, darray given in %s/type-hints.php on line 41
+Notice: Hack Array Compat: Value returned from alias_fun4() must be of type array, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun4() must be of type array, varray given in %s/type-hints.php on line 41
+Notice: Hack Array Compat: Argument 1 to alias_fun4() must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun4() must be of type array, varray given in %s/type-hints.php on line 41
+Notice: Hack Array Compat: Value returned from alias_fun4() must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun4() must be of type array, darray given in %s/type-hints.php on line 41
+Notice: Hack Array Compat: Argument 1 to alias_fun4() must be of type array, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun4() must be of type array, darray given in %s/type-hints.php on line 41
+Notice: Hack Array Compat: Value returned from alias_fun4() must be of type array, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun5() must be of type varray, darray given in %s/type-hints.php on line 42
+Notice: Hack Array Compat: Argument 1 to alias_fun5() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun5() must be of type varray, darray given in %s/type-hints.php on line 42
+Notice: Hack Array Compat: Value returned from alias_fun5() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun5() must be of type varray, darray given in %s/type-hints.php on line 42
+Notice: Hack Array Compat: Argument 1 to alias_fun5() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun5() must be of type varray, darray given in %s/type-hints.php on line 42
+Notice: Hack Array Compat: Value returned from alias_fun5() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun5() must be of type varray, array given in %s/type-hints.php on line 42
+Notice: Hack Array Compat: Argument 1 to alias_fun5() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun5() must be of type varray, array given in %s/type-hints.php on line 42
+Notice: Hack Array Compat: Value returned from alias_fun5() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun6() must be of type darray, varray given in %s/type-hints.php on line 43
+Notice: Hack Array Compat: Argument 1 to alias_fun6() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun6() must be of type darray, varray given in %s/type-hints.php on line 43
+Notice: Hack Array Compat: Value returned from alias_fun6() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun6() must be of type darray, varray given in %s/type-hints.php on line 43
+Notice: Hack Array Compat: Argument 1 to alias_fun6() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun6() must be of type darray, varray given in %s/type-hints.php on line 43
+Notice: Hack Array Compat: Value returned from alias_fun6() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun6() must be of type darray, array given in %s/type-hints.php on line 43
+Notice: Hack Array Compat: Argument 1 to alias_fun6() must be of type darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun6() must be of type darray, array given in %s/type-hints.php on line 43
+Notice: Hack Array Compat: Value returned from alias_fun6() must be of type darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun7() must be of type varray, darray given in %s/type-hints.php on line 44
+Notice: Hack Array Compat: Argument 1 to alias_fun7() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun7() must be of type varray, darray given in %s/type-hints.php on line 44
+Notice: Hack Array Compat: Value returned from alias_fun7() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun7() must be of type varray, darray given in %s/type-hints.php on line 44
+Notice: Hack Array Compat: Argument 1 to alias_fun7() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun7() must be of type varray, darray given in %s/type-hints.php on line 44
+Notice: Hack Array Compat: Value returned from alias_fun7() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to alias_fun7() must be of type varray, array given in %s/type-hints.php on line 44
+Notice: Hack Array Compat: Argument 1 to alias_fun7() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from alias_fun7() must be of type varray, array given in %s/type-hints.php on line 44
+Notice: Hack Array Compat: Value returned from alias_fun7() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun1() must be of type varray, darray given in %s/type-hints.php on line 46
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun1() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun1() must be of type varray, darray given in %s/type-hints.php on line 46
+Notice: Hack Array Compat: Value returned from opt_alias_fun1() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun1() must be of type varray, darray given in %s/type-hints.php on line 46
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun1() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun1() must be of type varray, darray given in %s/type-hints.php on line 46
+Notice: Hack Array Compat: Value returned from opt_alias_fun1() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun1() must be of type varray, array given in %s/type-hints.php on line 46
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun1() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun1() must be of type varray, array given in %s/type-hints.php on line 46
+Notice: Hack Array Compat: Value returned from opt_alias_fun1() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun2() must be of type darray, varray given in %s/type-hints.php on line 47
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun2() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun2() must be of type darray, varray given in %s/type-hints.php on line 47
+Notice: Hack Array Compat: Value returned from opt_alias_fun2() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun2() must be of type darray, varray given in %s/type-hints.php on line 47
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun2() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun2() must be of type darray, varray given in %s/type-hints.php on line 47
+Notice: Hack Array Compat: Value returned from opt_alias_fun2() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun2() must be of type darray, array given in %s/type-hints.php on line 47
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun2() must be of type darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun2() must be of type darray, array given in %s/type-hints.php on line 47
+Notice: Hack Array Compat: Value returned from opt_alias_fun2() must be of type darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun3() must be of type varray_or_darray, array given in %s/type-hints.php on line 48
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun3() must be of type varray_or_darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun3() must be of type varray_or_darray, array given in %s/type-hints.php on line 48
+Notice: Hack Array Compat: Value returned from opt_alias_fun3() must be of type varray_or_darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun4() must be of type array, varray given in %s/type-hints.php on line 49
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun4() must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun4() must be of type array, varray given in %s/type-hints.php on line 49
+Notice: Hack Array Compat: Value returned from opt_alias_fun4() must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun4() must be of type array, darray given in %s/type-hints.php on line 49
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun4() must be of type array, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun4() must be of type array, darray given in %s/type-hints.php on line 49
+Notice: Hack Array Compat: Value returned from opt_alias_fun4() must be of type array, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun4() must be of type array, varray given in %s/type-hints.php on line 49
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun4() must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun4() must be of type array, varray given in %s/type-hints.php on line 49
+Notice: Hack Array Compat: Value returned from opt_alias_fun4() must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun4() must be of type array, darray given in %s/type-hints.php on line 49
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun4() must be of type array, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun4() must be of type array, darray given in %s/type-hints.php on line 49
+Notice: Hack Array Compat: Value returned from opt_alias_fun4() must be of type array, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun5() must be of type varray, darray given in %s/type-hints.php on line 50
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun5() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun5() must be of type varray, darray given in %s/type-hints.php on line 50
+Notice: Hack Array Compat: Value returned from opt_alias_fun5() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun5() must be of type varray, darray given in %s/type-hints.php on line 50
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun5() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun5() must be of type varray, darray given in %s/type-hints.php on line 50
+Notice: Hack Array Compat: Value returned from opt_alias_fun5() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun5() must be of type varray, array given in %s/type-hints.php on line 50
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun5() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun5() must be of type varray, array given in %s/type-hints.php on line 50
+Notice: Hack Array Compat: Value returned from opt_alias_fun5() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun6() must be of type darray, varray given in %s/type-hints.php on line 51
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun6() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun6() must be of type darray, varray given in %s/type-hints.php on line 51
+Notice: Hack Array Compat: Value returned from opt_alias_fun6() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun6() must be of type darray, varray given in %s/type-hints.php on line 51
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun6() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun6() must be of type darray, varray given in %s/type-hints.php on line 51
+Notice: Hack Array Compat: Value returned from opt_alias_fun6() must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun6() must be of type darray, array given in %s/type-hints.php on line 51
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun6() must be of type darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun6() must be of type darray, array given in %s/type-hints.php on line 51
+Notice: Hack Array Compat: Value returned from opt_alias_fun6() must be of type darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun7() must be of type varray, darray given in %s/type-hints.php on line 52
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun7() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun7() must be of type varray, darray given in %s/type-hints.php on line 52
+Notice: Hack Array Compat: Value returned from opt_alias_fun7() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun7() must be of type varray, darray given in %s/type-hints.php on line 52
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun7() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun7() must be of type varray, darray given in %s/type-hints.php on line 52
+Notice: Hack Array Compat: Value returned from opt_alias_fun7() must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 to opt_alias_fun7() must be of type varray, array given in %s/type-hints.php on line 52
+Notice: Hack Array Compat: Argument 1 to opt_alias_fun7() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Value returned from opt_alias_fun7() must be of type varray, array given in %s/type-hints.php on line 52
+Notice: Hack Array Compat: Value returned from opt_alias_fun7() must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from inout_fun1() as an inout parameter must be of type varray, darray given in %s/type-hints.php on line 20
+Notice: Hack Array Compat: Argument 1 returned from inout_fun1() as an inout parameter must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from inout_fun1() as an inout parameter must be of type varray, darray given in %s/type-hints.php on line 20
+Notice: Hack Array Compat: Argument 1 returned from inout_fun1() as an inout parameter must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from inout_fun1() as an inout parameter must be of type varray, array given in %s/type-hints.php on line 20
+Notice: Hack Array Compat: Argument 1 returned from inout_fun1() as an inout parameter must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from inout_fun2() as an inout parameter must be of type darray, varray given in %s/type-hints.php on line 21
+Notice: Hack Array Compat: Argument 1 returned from inout_fun2() as an inout parameter must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from inout_fun2() as an inout parameter must be of type darray, varray given in %s/type-hints.php on line 21
+Notice: Hack Array Compat: Argument 1 returned from inout_fun2() as an inout parameter must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from inout_fun2() as an inout parameter must be of type darray, array given in %s/type-hints.php on line 21
+Notice: Hack Array Compat: Argument 1 returned from inout_fun2() as an inout parameter must be of type darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from inout_fun3() as an inout parameter must be of type varray_or_darray, array given in %s/type-hints.php on line 22
+Notice: Hack Array Compat: Argument 1 returned from inout_fun3() as an inout parameter must be of type varray_or_darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from inout_fun4() as an inout parameter must be of type array, varray given in %s/type-hints.php on line 23
+Notice: Hack Array Compat: Argument 1 returned from inout_fun4() as an inout parameter must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from inout_fun4() as an inout parameter must be of type array, darray given in %s/type-hints.php on line 23
+Notice: Hack Array Compat: Argument 1 returned from inout_fun4() as an inout parameter must be of type array, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from inout_fun4() as an inout parameter must be of type array, varray given in %s/type-hints.php on line 23
+Notice: Hack Array Compat: Argument 1 returned from inout_fun4() as an inout parameter must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from inout_fun4() as an inout parameter must be of type array, darray given in %s/type-hints.php on line 23
+Notice: Hack Array Compat: Argument 1 returned from inout_fun4() as an inout parameter must be of type array, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun1() as an inout parameter must be of type varray, darray given in %s/type-hints.php on line 25
+Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun1() as an inout parameter must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun1() as an inout parameter must be of type varray, darray given in %s/type-hints.php on line 25
+Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun1() as an inout parameter must be of type varray, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun1() as an inout parameter must be of type varray, array given in %s/type-hints.php on line 25
+Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun1() as an inout parameter must be of type varray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun2() as an inout parameter must be of type darray, varray given in %s/type-hints.php on line 26
+Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun2() as an inout parameter must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun2() as an inout parameter must be of type darray, varray given in %s/type-hints.php on line 26
+Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun2() as an inout parameter must be of type darray, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun2() as an inout parameter must be of type darray, array given in %s/type-hints.php on line 26
+Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun2() as an inout parameter must be of type darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun3() as an inout parameter must be of type varray_or_darray, array given in %s/type-hints.php on line 27
+Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun3() as an inout parameter must be of type varray_or_darray, array given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun4() as an inout parameter must be of type array, varray given in %s/type-hints.php on line 28
+Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun4() as an inout parameter must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun4() as an inout parameter must be of type array, darray given in %s/type-hints.php on line 28
+Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun4() as an inout parameter must be of type array, darray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun4() as an inout parameter must be of type array, varray given in %s/type-hints.php on line 28
+Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun4() as an inout parameter must be of type array, varray given in %s/type-hints.php on line %d
 
-Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun4() as an inout parameter must be of type array, darray given in %s/type-hints.php on line 28
+Notice: Hack Array Compat: Argument 1 returned from opt_inout_fun4() as an inout parameter must be of type array, darray given in %s/type-hints.php on line %d
 Exception: Hack Array Compat: Argument 1 to throws1() must be of type varray, darray given
 Exception: Hack Array Compat: Value returned from throws2() must be of type varray, darray given
 Exception: Hack Array Compat: Argument 1 returned from throws3() as an inout parameter must be of type varray, darray given

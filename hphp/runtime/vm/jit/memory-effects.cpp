@@ -762,6 +762,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyRetFailHard:
     return may_load_store(AHeapAny | AStackAny, AHeapAny);
 
+  case VerifyPropCls:
+  case VerifyPropFail:
+  case VerifyPropFailHard:
+  case VerifyProp:
+    return may_load_store(AHeapAny, AHeapAny);
+
   case CallUnpack:
     {
       auto const extra = inst.extra<CallUnpack>();
@@ -1893,6 +1899,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseVarEnvDynCall:
   case RaiseHackArrCompatNotice:
   case RaiseHackArrParamNotice:
+  case RaiseHackArrPropNotice:
   case RaiseParamRefMismatchForFunc:
   case RaiseParamRefMismatchForFuncName:
   case RaiseForbiddenDynCall:

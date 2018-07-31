@@ -132,6 +132,7 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     case ThrowDivisionByZeroError:
     case VerifyParamFailHard:
     case VerifyRetFailHard:
+    case VerifyPropFailHard:
     case Unreachable:
     case EndBlock:
     case FatalMissingThis:

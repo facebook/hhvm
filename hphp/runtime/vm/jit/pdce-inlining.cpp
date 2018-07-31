@@ -266,8 +266,7 @@ struct BlockInfo {
  */
 bool isDangerousActRecInst(IRInstruction& inst) {
   return inst.is(VerifyParamCls, VerifyParamCallable,
-                 VerifyParamFail, VerifyRetFail,
-                 RaiseHackArrParamNotice);
+                 VerifyParamFail, VerifyRetFail);
 }
 
 /*

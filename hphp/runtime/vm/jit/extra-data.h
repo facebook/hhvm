@@ -1429,19 +1429,28 @@ struct ParamData : IRExtraData {
   int32_t paramId;
 };
 
-struct RaiseHackArrParamNoticeData : IRExtraData {
+struct RaiseHackArrNoticeData : IRExtraData {
+  explicit RaiseHackArrNoticeData(AnnotType type)
+    : type{type} {}
+
+  std::string show() const {
+    if (type == AnnotType::VArray) return "varray";
+    if (type == AnnotType::DArray) return "darray";
+    if (type == AnnotType::VArrOrDArr) return "varray_or_darray";
+    return "array";
+  }
+
+  AnnotType type;
+};
+
+struct RaiseHackArrParamNoticeData : RaiseHackArrNoticeData {
   RaiseHackArrParamNoticeData(AnnotType type, int32_t id, bool isReturn)
-    : type{type}
+    : RaiseHackArrNoticeData{type}
     , id{id}
     , isReturn{isReturn} {}
 
   std::string show() const {
-    auto const typeStr = [&]{
-      if (type == AnnotType::VArray) return "varray";
-      if (type == AnnotType::DArray) return "darray";
-      if (type == AnnotType::VArrOrDArr) return "varray_or_darray";
-      return "array";
-    }();
+    auto const typeStr = RaiseHackArrNoticeData::show();
     return folly::to<std::string>(
       typeStr, ",",
       id, ",",
@@ -1449,7 +1458,6 @@ struct RaiseHackArrParamNoticeData : IRExtraData {
     );
   }
 
-  AnnotType type;
   int32_t id;
   bool isReturn;
 };
@@ -1705,6 +1713,7 @@ X(LdTVAux,                      LdTVAuxData);
 X(CheckRefs,                    CheckRefsData);
 X(FuncGuard,                    FuncGuardData);
 X(RaiseHackArrParamNotice,      RaiseHackArrParamNoticeData);
+X(RaiseHackArrPropNotice,       RaiseHackArrNoticeData);
 X(DbgAssertRefCount,            AssertReason);
 X(Unreachable,                  AssertReason);
 X(EndBlock,                     AssertReason);

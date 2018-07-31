@@ -456,6 +456,7 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseForbiddenDynCall:
   case RaiseHackArrCompatNotice:
   case RaiseHackArrParamNotice:
+  case RaiseHackArrPropNotice:
   case RaiseMissingArg:
   case RaiseMissingThis:
   case RaiseNotice:
@@ -496,6 +497,10 @@ bool opcodeMayRaise(Opcode opc) {
   case VerifyParamCls:
   case VerifyParamFail:
   case VerifyParamFailHard:
+  case VerifyProp:
+  case VerifyPropCls:
+  case VerifyPropFail:
+  case VerifyPropFailHard:
   case VerifyRetCallable:
   case VerifyRetCls:
   case VerifyRetFail:

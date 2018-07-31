@@ -2011,11 +2011,43 @@ To string conversions:
   Terminal version of VerifyRetFail, to be used when the compiler can prove
   that this failure will result in a fatal error.
 
+| VerifyPropCls, ND, S(Cls) S(Int) S(Cls|Nullptr) S(Obj) C(Bool), NF
+
+  Verify a property type hint with AnnotType::Object against an object
+  value. S0 is the class of the object containing the property. S1 is the slot
+  of the property on the class. S3 is the object which is being set in the
+  property. If S2 is not nullptr, than the type-hint refers to that Class, and
+  S3 will be checked to see if its an instance of S2. Otherwise, the type-hint
+  refers to a type-alias, and the alias will be resolved and checked against
+  S3. S4 is true if this is a static property, false otherwise.
+
+| VerifyPropFail, ND, S(Cls) S(Int) S(Cell) C(Bool), NF
+
+  Failure to verify a property type hint. S0 is the class of the object
+  containing the property. S1 is the slot of the property on the class. S2 is
+  the value which was being set in the property. S3 is true if this is a static
+  property, false otherwise.
+
+| VerifyPropFailHard, ND, S(Cls) S(Int) S(Cell) C(Bool), T
+
+  Terminal version of VerifyPropFail, to be used when the compiler can prove
+  that this failure will result in a fatal error.
+
+| VerifyProp, ND, S(Cls) S(Int) S(Cell) C(Bool), NF
+
+  Verify that S2 is compatible with the type hint for the property at slot S1
+  on S0. S3 is true if this is a static property, false otherwise.
+
 | RaiseHackArrParamNotice<type,id,isReturn>, ND, S(Arr) S(Func), NF
 
   Raise a HackArrCompatNotice corresponding to a parameter or return type-hint
   d/varray mismatch. S0 is the array being passed in. S1 is the function being
   called.
+
+| RaiseHackArrPropNotice<type>, ND, S(Cls) S(Arr) S(Int) C(Bool), NF
+
+  Raise a HackArrCompatNotice corresponding to a property type-hint d/varray
+  mismatch.
 
 | RaiseUninitLoc<localId>, ND, S(Str), NF
 

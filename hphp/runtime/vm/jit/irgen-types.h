@@ -16,12 +16,15 @@
 #ifndef incl_HPHP_JIT_IRGEN_TYPES_H_
 #define incl_HPHP_JIT_IRGEN_TYPES_H_
 
+#include "hphp/runtime/vm/jit/types.h"
+
 #include <folly/Optional.h>
 
 namespace HPHP {
 
 struct RepoAuthType;
 struct StringData;
+struct TypeConstraint;
 
 namespace jit {
 
@@ -31,6 +34,16 @@ struct Type;
 namespace irgen {
 
 struct IRGS;
+
+//////////////////////////////////////////////////////////////////////
+
+void verifyPropType(IRGS& env,
+                    SSATmp* cls,
+                    const HPHP::TypeConstraint* tc,
+                    Slot slot,
+                    SSATmp* val,
+                    SSATmp* name,
+                    bool isSProp);
 
 //////////////////////////////////////////////////////////////////////
 

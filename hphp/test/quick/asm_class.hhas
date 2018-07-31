@@ -92,7 +92,7 @@
     PopC
 
     This
-    BaseC 0
+    BaseC 0 Warn
     QueryM 1 CGet PL:$name
     String "\n"
     Concat
@@ -106,7 +106,7 @@
 
   .method [public] print_defaulted {
     This
-    BaseC 0
+    BaseC 0 Warn
     QueryM 1 CGet PT:"defaulted"
     String "\n"
     Concat
@@ -114,7 +114,7 @@
     PopC
 
     This
-    BaseC 0
+    BaseC 0 Warn
     QueryM 1 CGet PT:"badstring"
     String "bad string\"\"\"has triple quotes"
     Eq

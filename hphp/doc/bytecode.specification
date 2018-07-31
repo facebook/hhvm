@@ -3418,8 +3418,8 @@ BaseGL <local id>    <member op mode>    []  ->  []
 
   BaseG{C,L}{,W,D} member operation.
 
-BaseSC <stack index> <class-ref slot>    []  ->  []
-BaseSL <local id>    <class-ref slot>    []  ->  []
+BaseSC <stack index> <class-ref slot> <member op mode>   []  ->  []
+BaseSL <local id>    <class-ref slot> <member op mode>   []  ->  []
 
   BaseS{C,L} member operation. %1 gives the location of the static property
   name, and %2 gives the class input. The class is consumed.
@@ -3428,8 +3428,8 @@ BaseL <local id> <member op mode>    []  ->  []
 
   BaseL{,W,D} member operation.
 
-BaseC <stack index>    []  ->  []
-BaseR <stack index>    []  ->  []
+BaseC <stack index> <member op mode>   []  ->  []
+BaseR <stack index> <member op mode>   []  ->  []
 
   Base{C,R} member operation.
 

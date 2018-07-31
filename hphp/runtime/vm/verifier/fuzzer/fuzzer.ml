@@ -372,12 +372,16 @@ let mut_imms (is : IS.t) : IS.t =
                                        mutate_mode         mode)
     | BaseL     (id,  mode) -> BaseL  (mutate_local_id id  !mag,
                                        mutate_mode         mode)
-    | BaseSC      (idx,  i) -> BaseSC         (mutate_int      idx !mag,
-                                               mutate_int      i   !mag)
-    | BaseSL      (id, idx) -> BaseSL         (mutate_local_id id  !mag,
-                                               mutate_int      idx !mag)
-    | BaseC        idx      -> BaseC    (mutate_int idx !mag)
-    | BaseR        idx      -> BaseR    (mutate_int idx !mag)
+    | BaseSC    (idx, i, mode)  -> BaseSC   (mutate_int      idx !mag,
+                                             mutate_int      i   !mag,
+                                             mutate_mode     mode)
+    | BaseSL    (id, idx, mode) -> BaseSL   (mutate_local_id id  !mag,
+                                             mutate_int      idx !mag,
+                                             mutate_mode     mode)
+    | BaseC     (idx, mode)     -> BaseC    (mutate_int idx !mag,
+                                             mutate_mode     mode)
+    | BaseR     (idx, mode)     -> BaseR    (mutate_int idx !mag,
+                                             mutate_mode     mode)
     | Dim       (mode, key) -> Dim      (mutate_mode  mode, mutate_key key !mag)
     | _ -> s in
   let mutate_ctrl_flow data s =

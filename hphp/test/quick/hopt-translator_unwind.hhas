@@ -60,7 +60,7 @@
 
     This
     CGetL $id
-    BaseC 1
+    BaseC 1 Define
     SetM 1 PT:"x"
     PopC
     Int 1
@@ -70,7 +70,7 @@
   .method [public] __destruct() {
     String "dtor: "
     This
-    BaseC 0
+    BaseC 0 Warn
     QueryM 1 CGet PT:"x"
     Concat
     String "\n"

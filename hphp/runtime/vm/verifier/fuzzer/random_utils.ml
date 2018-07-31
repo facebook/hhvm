@@ -305,14 +305,14 @@ let base_instrs (fn : IS.t) : lazy_instruct list =
    (fun () -> IBase (BaseGC (Random.int 10, random_mode ())));
    (fun () -> IBase (BaseGL (random_local (), random_mode ())));
    (fun () -> IBase (BaseL (random_local (), random_mode ())));
-   (fun () -> IBase (BaseC (Random.int 10)));
-   (fun () -> IBase (BaseR (Random.int 10)));
+   (fun () -> IBase (BaseC (Random.int 10, random_mode ())));
+   (fun () -> IBase (BaseR (Random.int 10, random_mode ())));
    (fun () -> IBase BaseH);
    (fun () -> IBase (Dim (random_mode(), random_key ())))] @
    begin
      if cls_ref_slts <= 0 then [] else
-     [(fun () -> IBase (BaseSC (Random.int 10, Random.int 10)));
-     (fun () -> IBase (BaseSL (random_local (), Random.int 10)))]
+     [(fun () -> IBase (BaseSC (Random.int 10, Random.int 10, random_mode ())));
+     (fun () -> IBase (BaseSL (random_local (), Random.int 10, random_mode ())))]
     end
 
 (* Generators for final instructions *)

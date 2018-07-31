@@ -1850,13 +1850,13 @@ void emitBaseGL(IRGS& env, int32_t locId, MOpMode mode) {
   baseGImpl(env, name, mode);
 }
 
-void emitBaseSC(IRGS& env, uint32_t propIdx, uint32_t slot) {
+void emitBaseSC(IRGS& env, uint32_t propIdx, uint32_t slot, MOpMode mode) {
   initTvRefs(env);
   auto name = top(env, BCSPRelOffset{safe_cast<int32_t>(propIdx)});
   baseSImpl(env, name, slot);
 }
 
-void emitBaseSL(IRGS& env, int32_t locId, uint32_t slot) {
+void emitBaseSL(IRGS& env, int32_t locId, uint32_t slot, MOpMode mode) {
   initTvRefs(env);
   auto name = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
                          DataTypeSpecific);
@@ -1878,7 +1878,7 @@ void emitBaseL(IRGS& env, int32_t locId, MOpMode mode) {
   simpleBaseImpl(env, base, Location::Local { safe_cast<uint32_t>(locId) });
 }
 
-void emitBaseC(IRGS& env, uint32_t idx) {
+void emitBaseC(IRGS& env, uint32_t idx, MOpMode mode) {
   initTvRefs(env);
 
   auto const bcOff = BCSPRelOffset{safe_cast<int32_t>(idx)};
@@ -1889,8 +1889,8 @@ void emitBaseC(IRGS& env, uint32_t idx) {
   simpleBaseImpl(env, base, Location::Stack { offsetFromFP(env, irOff) });
 }
 
-void emitBaseR(IRGS& env, uint32_t idx) {
-  emitBaseC(env, idx);
+void emitBaseR(IRGS& env, uint32_t idx, MOpMode mode) {
+  emitBaseC(env, idx, mode);
 }
 
 void emitBaseH(IRGS& env) {

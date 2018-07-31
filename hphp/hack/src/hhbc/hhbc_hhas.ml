@@ -397,16 +397,18 @@ let string_of_base x =
     sep ["BaseGC"; string_of_stack_index si; MemberOpMode.to_string m]
   | BaseGL (id, m) ->
     sep ["BaseGL"; string_of_local_id id; MemberOpMode.to_string m]
-  | BaseSC (si, id) ->
-    sep ["BaseSC"; string_of_stack_index si; string_of_classref id]
-  | BaseSL (lid, si) ->
-    sep ["BaseSL"; string_of_local_id lid; string_of_stack_index si]
+  | BaseSC (si, id, m) ->
+    sep ["BaseSC";
+         string_of_stack_index si; string_of_classref id; MemberOpMode.to_string m]
+  | BaseSL (lid, si, m) ->
+    sep ["BaseSL";
+         string_of_local_id lid; string_of_stack_index si; MemberOpMode.to_string m]
   | BaseL (lid, m) ->
     sep ["BaseL"; string_of_local_id lid; MemberOpMode.to_string m]
-  | BaseC si ->
-    sep ["BaseC"; string_of_stack_index si]
-  | BaseR si ->
-    sep ["BaseR"; string_of_stack_index si]
+  | BaseC (si, m) ->
+    sep ["BaseC"; string_of_stack_index si; MemberOpMode.to_string m]
+  | BaseR (si, m) ->
+    sep ["BaseR"; string_of_stack_index si; MemberOpMode.to_string m]
   | BaseH ->
     "BaseH"
   | Dim (m, mk) ->

@@ -2679,7 +2679,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
      emit_default
        (emit_local ~notice ~need_ref:false env id)
        empty
-       (instr (IBase (BaseC base_offset)))
+       (instr (IBase (BaseC (base_offset, base_mode))))
        1
 
    | A.Array_get((_, A.Lvar (_, x)), Some (_, A.Lvar y))
@@ -2788,7 +2788,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
        emit_default
          (emit_xhp_obj_get_raw env pos base_expr s null_flavor)
          empty
-         (gather [ instr_baser base_offset ])
+         (gather [ instr_baser base_offset base_mode ])
          1
      | _ ->
        let mk, prop_expr_instrs, prop_stack_size =
@@ -2823,7 +2823,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
        (emit_load_class_ref env pos cexpr)
        empty
        (emit_pos_then pos @@
-       instr_basesl (get_local env id))
+       instr_basesl (get_local env id) base_mode)
        0
    | A.Class_get(cid, prop) ->
      let cexpr = expr_to_class_expr ~resolve_self:false
@@ -2832,7 +2832,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
      emit_default
        cexpr_begin
        cexpr_end
-       (instr_basesc base_offset)
+       (instr_basesc base_offset base_mode)
        1
    | A.Dollar (_, A.Lvar id as e) ->
      check_non_pipe_local e;
@@ -2858,7 +2858,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
        empty
        (emit_pos_then pos @@
        instr (IBase (if flavor = Flavor.ReturnVal
-                     then BaseR base_offset else BaseC base_offset)))
+                     then BaseR (base_offset, base_mode) else BaseC (base_offset, base_mode))))
        1
 
 and use_pass_by_ref_hint () =
@@ -3488,7 +3488,7 @@ and emit_array_get_fixed last_usage local indices =
   let base, stack_count =
     if last_usage then gather [
       instr_pushl local;
-      instr_basec 0;
+      instr_basec 0 MemberOpMode.Warn;
     ], 1
     else instr_basel local MemberOpMode.Warn, 0 in
   let indices =

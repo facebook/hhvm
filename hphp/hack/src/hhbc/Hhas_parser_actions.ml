@@ -939,10 +939,6 @@ let makeunaryinst s arg = match s with
    | "ResolveFunc" -> IOp(ResolveFunc (function_id_of_iarg arg))
    | "ResolveObjMethod" -> IOp (ResolveObjMethod)
 
-   (* instruct_base *)
-   | "BaseC" -> IBase(BaseC (intofiarg arg))
-   | "BaseR" -> IBase(BaseR (intofiarg arg))
-
    (* instruct_final *)
    | "SetWithRefRML" -> IFinal(SetWithRefRML(localidofiarg arg))
 
@@ -1031,8 +1027,8 @@ match s with
  | "BaseNL" -> IBase (BaseNL (localidofiarg arg1, memberopmodeofiarg arg2))
  | "BaseGC" -> IBase (BaseGC (intofiarg arg1, memberopmodeofiarg arg2))
  | "BaseGL" -> IBase (BaseGL (localidofiarg arg1, memberopmodeofiarg arg2))
- | "BaseSC" -> IBase(BaseSC (intofiarg arg1, intofiarg arg2))
- | "BaseSL" -> IBase (BaseSL (localidofiarg arg1, intofiarg arg2))
+ | "BaseC" -> IBase(BaseC (intofiarg arg1, memberopmodeofiarg arg2))
+ | "BaseR" -> IBase(BaseR (intofiarg arg1, memberopmodeofiarg arg2))
  | "BaseL" -> IBase (BaseL (localidofiarg arg1, memberopmodeofiarg arg2))
  | "Dim" -> IBase (Dim (memberopmodeofiarg arg1, memberkeyofiarg arg2))
 
@@ -1109,6 +1105,10 @@ let maketernaryinst s arg1 arg2 arg3 =
     ICall(FCallBuiltin (intofiarg arg1, intofiarg arg2, stringofiarg arg3))
  | "FHandleRefMismatch" ->
     ICall (FHandleRefMismatch (intofiarg arg1, fpasshintof arg2, stringofiarg arg3))
+
+ (* instruct_base *)
+ | "BaseSC" -> IBase(BaseSC (intofiarg arg1, intofiarg arg2, memberopmodeofiarg arg3))
+ | "BaseSL" -> IBase (BaseSL (localidofiarg arg1, intofiarg arg2, memberopmodeofiarg arg3))
 
 (* instruct_final *)
  | "QueryM" ->

@@ -37,7 +37,7 @@
     String "arr"
     Int 2
     ClsRefGetL $x 0
-    BaseSC 1 0
+    BaseSC 1 0 Warn
     QueryM 2 CGet EC:0
   FCall 1 0 1 "" ""
   PopR
@@ -82,7 +82,7 @@
 
   # Test that it's unset
   CGetL $arr
-  BaseC 0
+  BaseC 0 Warn
   QueryM 1 Isset EL:$key
   JmpZ unset_label
 

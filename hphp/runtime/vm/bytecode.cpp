@@ -3509,12 +3509,12 @@ static inline tv_lval baseSImpl(TypedValue* key,
   return tv_lval(lookup.prop);
 }
 
-OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx, clsref_slot slot) {
+OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx, clsref_slot slot, MOpMode) {
   auto& mstate = initMState();
   mstate.base = baseSImpl(vmStack().indTV(keyIdx), slot);
 }
 
-OPTBLD_INLINE void iopBaseSL(local_var keyLoc, clsref_slot slot) {
+OPTBLD_INLINE void iopBaseSL(local_var keyLoc, clsref_slot slot, MOpMode) {
   auto& mstate = initMState();
   mstate.base = baseSImpl(tvToCell(keyLoc.ptr), slot);
 }
@@ -3533,13 +3533,13 @@ OPTBLD_INLINE void iopBaseL(local_var loc, MOpMode mode) {
   baseLImpl(loc, mode);
 }
 
-OPTBLD_INLINE void iopBaseC(uint32_t idx) {
+OPTBLD_INLINE void iopBaseC(uint32_t idx, MOpMode) {
   auto& mstate = initMState();
   mstate.base = vmStack().indTV(idx);
 }
 
-OPTBLD_INLINE void iopBaseR(uint32_t idx) {
-  iopBaseC(idx);
+OPTBLD_INLINE void iopBaseR(uint32_t idx, MOpMode mode) {
+  iopBaseC(idx, mode);
 }
 
 OPTBLD_INLINE void iopBaseH() {

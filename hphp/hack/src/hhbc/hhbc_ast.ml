@@ -426,11 +426,11 @@ type instruct_base =
   | BaseNL of local_id * MemberOpMode.t
   | BaseGC of stack_index * MemberOpMode.t
   | BaseGL of local_id * MemberOpMode.t
-  | BaseSC of stack_index * classref_id
-  | BaseSL of local_id * stack_index
+  | BaseSC of stack_index * classref_id * MemberOpMode.t
+  | BaseSL of local_id * stack_index * MemberOpMode.t
   | BaseL of local_id * MemberOpMode.t
-  | BaseC of stack_index
-  | BaseR of stack_index
+  | BaseC of stack_index * MemberOpMode.t
+  | BaseR of stack_index * MemberOpMode.t
   | BaseH
   | Dim of MemberOpMode.t * MemberKey.t
 

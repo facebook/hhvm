@@ -686,12 +686,16 @@ constexpr uint32_t kMaxConcatN = 4;
                                        NOV,             NOV,        NF) \
   O(BaseGL,          TWO(LA, OA(MOpMode)),                              \
                                        NOV,             NOV,        NF) \
-  O(BaseSC,          TWO(IVA, CAR),    NOV,             NOV,        NF) \
-  O(BaseSL,          TWO(LA, CAR),     NOV,             NOV,        NF) \
+  O(BaseSC,          THREE(IVA, CAR, OA(MOpMode)),                      \
+                                       NOV,             NOV,        NF) \
+  O(BaseSL,          THREE(LA, CAR, OA(MOpMode)),                       \
+                                       NOV,             NOV,        NF) \
   O(BaseL,           TWO(LA, OA(MOpMode)),                              \
                                        NOV,             NOV,        NF) \
-  O(BaseC,           ONE(IVA),         NOV,             NOV,        NF) \
-  O(BaseR,           ONE(IVA),         NOV,             NOV,        NF) \
+  O(BaseC,           TWO(IVA, OA(MOpMode)),                             \
+                                       NOV,             NOV,        NF) \
+  O(BaseR,           TWO(IVA, OA(MOpMode)),                             \
+                                       NOV,             NOV,        NF) \
   O(BaseH,           NA,               NOV,             NOV,        NF) \
   O(Dim,             TWO(OA(MOpMode), KA),                              \
                                        NOV,             NOV,        NF) \

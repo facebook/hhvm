@@ -446,7 +446,7 @@ let check_instruct_base asn i i' =
   | BaseGL (l,mode), BaseGL(l',mode') ->
     if mode = mode' then reads asn l l'
     else None (* don't really know if this is right *)
-  | BaseSL (l,n), BaseSL (l',n') ->
+  | BaseSL (l,n,_), BaseSL (l',n',_) ->
     if n=n' then reads asn l l'
     else None
   | BaseL (l,mode), BaseL (l',mode') ->

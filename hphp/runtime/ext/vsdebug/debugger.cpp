@@ -46,9 +46,17 @@ void Debugger::runSessionCleanupThread() {
   while (true) {
     {
       std::unique_lock<std::mutex> lock(m_sessionCleanupLock);
-      m_sessionCleanupCondition.wait(lock);
 
+      // Read m_sessionCleanupTerminating while the lock is held.
       terminating = m_sessionCleanupTerminating;
+
+      if (!terminating) {
+        // Wait for signal
+        m_sessionCleanupCondition.wait(lock);
+
+        // Re-check terminating flag while the lock is still re-acquired.
+        terminating = m_sessionCleanupTerminating;
+      }
 
       // Make a local copy of the session pointers to delete and drop
       // the lock.

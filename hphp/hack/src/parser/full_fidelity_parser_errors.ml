@@ -2103,6 +2103,60 @@ let check_type_name syntax_tree name namespace_name name_text location names err
     names, errors
   end
 
+let get_type_params_and_emit_shadowing_errors l errors =
+  syntax_to_list_no_separators l
+  |> Hh_core.List.fold_right ~init:(SSet.empty, errors)
+      ~f:(fun p (s, e) -> match syntax p with
+        | TypeParameter { type_reified; type_name; _}
+          when not @@ is_missing type_reified ->
+          let name = text type_name in
+          if SSet.mem name s then
+            (s, make_error_from_node p SyntaxError.shadowing_reified :: e)
+          else (SSet.add name s, e)
+        | _ -> s, e)
+
+let reified_parameter_errors node errors =
+  match syntax node with
+  | FunctionDeclarationHeader {
+    function_type_parameter_list = {
+      syntax = TypeParameters {
+        type_parameters_parameters; _}; _}; _} ->
+        snd @@ get_type_params_and_emit_shadowing_errors
+          type_parameters_parameters errors
+  | _ -> errors
+
+let class_reified_param_errors node errors =
+  match syntax node with
+  | ClassishDeclaration cd ->
+    let reified_params, errors = match syntax cd.classish_type_parameters with
+      | TypeParameters { type_parameters_parameters; _ } ->
+        get_type_params_and_emit_shadowing_errors
+          type_parameters_parameters errors
+      | _ -> SSet.empty, errors in
+    let add_error e acc = match syntax e with
+      | TypeParameter { type_reified; type_name; _}
+        when not @@ is_missing type_reified &&
+          SSet.mem (text type_name) reified_params ->
+          make_error_from_node e SyntaxError.shadowing_reified :: acc
+      |_ -> acc in
+    let check_method e acc = match syntax e with
+      | MethodishDeclaration {
+          methodish_function_decl_header =  {
+            syntax = FunctionDeclarationHeader {
+              function_type_parameter_list = {
+                syntax = TypeParameters {
+                  type_parameters_parameters; _}; _}; _}; _}; _} ->
+        syntax_to_list_no_separators type_parameters_parameters
+        |> Hh_core.List.fold_right ~init:acc ~f:add_error
+      | _ -> acc in
+    let errors = match syntax cd.classish_body with
+      | ClassishBody { classish_body_elements; _} ->
+        syntax_to_list_no_separators classish_body_elements
+        |> Hh_core.List.fold_right ~init:errors ~f:check_method
+      | _ -> errors in
+    errors
+  | _ -> errors
+
 let classish_errors env node parents namespace_name names errors =
   match syntax node with
   | ClassishDeclaration cd ->
@@ -2256,6 +2310,7 @@ let classish_errors env node parents namespace_name names errors =
         check_type_name env.syntax_tree cd.classish_name namespace_name name location names errors
       | _ ->
         names, errors in
+    let errors = class_reified_param_errors node errors in
     names, errors
   | _ -> names, errors
 
@@ -2988,6 +3043,7 @@ let find_syntax_errors env =
         trait_require_clauses, names, errors
       | MethodishDeclaration _
       | FunctionDeclarationHeader _ ->
+        let errors = reified_parameter_errors node errors in
         let names, errors =
           redeclaration_errors env node parents namespace_name names errors in
         let errors =

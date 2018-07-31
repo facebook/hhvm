@@ -543,6 +543,8 @@ let toplevel_statements =
   "Toplevel statements besides requires are not allowed in strict files"
 let invalid_reified =
   "Invalid place to put reified"
+let shadowing_reified =
+  "You may not shadow a reified parameter"
 
 let dollar_unary = "The dollar sign ('$') cannot be used as a unary operator"
 

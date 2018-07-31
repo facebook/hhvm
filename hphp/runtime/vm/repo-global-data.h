@@ -70,6 +70,11 @@ struct Repo::GlobalData {
   bool HardReturnTypeHints = false;
 
   /*
+   * Indicates whether the repo was compiled with CheckPropTypeHints.
+   */
+  int32_t CheckPropTypeHints = 0;
+
+  /*
    * Indicates whether a repo was compiled assumming that `this` types will be
    * verified by Verify*Type instructions at runtime.
    *
@@ -218,6 +223,7 @@ struct Repo::GlobalData {
       (HardTypeHints)
       (ThisTypeHintLevel)
       (HardReturnTypeHints)
+      (CheckPropTypeHints)
       (HardPrivatePropInference)
       (DisallowDynamicVarEnvFuncs)
       (ElideAutoloadInvokes)

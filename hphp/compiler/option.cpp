@@ -198,6 +198,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   static bool HardReturnTypeHints;
   Config::Bind(HardReturnTypeHints, ini, config, "HardReturnTypeHints", true);
 
+  Config::Bind(RuntimeOption::EvalCheckPropTypeHints, ini, config,
+               "CheckPropTypeHints", RuntimeOption::EvalCheckPropTypeHints);
+
   // This option takes precedence over RuntimeOption. We test to see if the
   // option has been set (by the user) or not.
   auto is_set = [&](const std::string& key) {

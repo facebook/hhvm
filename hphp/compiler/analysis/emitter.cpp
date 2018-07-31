@@ -140,6 +140,7 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.EnableHipHopSyntax          = RuntimeOption::EnableHipHopSyntax;
   gd.HardTypeHints               = RuntimeOption::EvalHardTypeHints;
   gd.HardReturnTypeHints         = RuntimeOption::EvalCheckReturnTypeHints >= 3;
+  gd.CheckPropTypeHints          = RuntimeOption::EvalCheckPropTypeHints;
   gd.HardPrivatePropInference    = true;
   gd.DisallowDynamicVarEnvFuncs  = RuntimeOption::DisallowDynamicVarEnvFuncs;
   gd.ElideAutoloadInvokes        = HHBBC::options.ElideAutoloadInvokes;

@@ -595,6 +595,21 @@ struct RuntimeOption {
          error handler returns something other than boolean false,
          the runtime will throw a fatal error. */                       \
   F(int32_t, CheckReturnTypeHints,     2)                               \
+  /*
+    CheckPropTypeHints:
+    0 - No checks or enforcement of property type hints.
+    1 - Raises E_WARNING if a property type hint fails.
+    2 - Raises E_RECOVERABLE_ERROR if regular property type hint fails, raises
+        E_WARNING if soft property type hint fails. If a regular property type
+        hint fails, it's possible for execution to resume normally if the user
+        error handler doesn't throw and returns something other than boolean
+        false.
+    3 - Same as 2, except if a regular property type hint fails the runtime will
+        not allow execution to resume normally; if the user error handler
+        returns something other than boolean false, the runtime will throw a
+        fatal error.
+  */                                                                    \
+  F(int32_t, CheckPropTypeHints,       0)                               \
   /* Whether or not to assume that VerifyParamType instructions must
      throw if the parameter does not match the associated type
      constraint. This changes program behavior because parameter type
@@ -606,7 +621,8 @@ struct RuntimeOption {
         to hhbbc/hhvm runtime will only load it from the GlobalData.
      2) In non-repo mode, we set this option to the runtime as usual.
      3) Both HHBBC and the runtime should query only this option
-        instead of the GlobalData. */                                   \
+        instead of the GlobalData.
+  */                                                                    \
   F(bool, HardTypeHints,               RepoAuthoritative)               \
   F(bool, PromoteEmptyObject,          !EnableHipHopSyntax)             \
   F(bool, AllowObjectDestructors,      !one_bit_refcount)               \

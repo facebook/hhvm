@@ -101,7 +101,7 @@ struct ParseUnitState {
    *
    * TODO_4: if we don't end up with a use for this, remove it.
    */
-  std::vector<borrowed_ptr<php::Func>> defClsMap;
+  std::vector<php::Func*> defClsMap;
 
   /*
    * Map from Closure index to the function(s) containing their
@@ -109,7 +109,7 @@ struct ParseUnitState {
    */
   hphp_fast_map<
     int32_t,
-    hphp_fast_set<borrowed_ptr<php::Func>>
+    hphp_fast_set<php::Func*>
   > createClMap;
 
   struct SrcLocHash {
@@ -129,7 +129,7 @@ struct ParseUnitState {
    * pinit and sinit functions are added to improve overall
    * performance.
    */
-  hphp_fast_map<borrowed_ptr<php::Func>, int> constPassFuncs;
+  hphp_fast_map<php::Func*, int> constPassFuncs;
 
   /*
    * List of class aliases defined by this unit
@@ -230,7 +230,7 @@ struct ExnTreeInfo {
    * Map from EHEnt to the ExnNode that will represent exception
    * behavior in that region.
    */
-  hphp_fast_map<const EHEnt*,borrowed_ptr<php::ExnNode>> ehMap;
+  hphp_fast_map<const EHEnt*,php::ExnNode*> ehMap;
 
   /*
    * Keep track of the start offsets for all fault funclets.  This is
@@ -281,7 +281,7 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
       break;
     }
 
-    ret.ehMap[&eh] = borrow(node);
+    ret.ehMap[&eh] = node.get();
 
     if (eh.m_parentIndex != -1) {
       auto it = ret.ehMap.find(&fe.ehtab[eh.m_parentIndex]);
@@ -385,15 +385,15 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
   // Map of exceptional regions that can be entered from other exceptional
   // regions via throws.
   folly::sorted_vector_map<
-    borrowed_ptr<const php::ExnNode>,
-    folly::sorted_vector_set<borrowed_ptr<const php::ExnNode>>
+    const php::ExnNode*,
+    folly::sorted_vector_set<const php::ExnNode*>
   > throws;
 
   // Map of blocks to the exceptional regions that block belongs to (a block can
   // belong to multiple exceptional regions at once).
   folly::sorted_vector_map<
     BlockId,
-    folly::sorted_vector_set<borrowed_ptr<const php::ExnNode>>
+    folly::sorted_vector_set<const php::ExnNode*>
   > blocksToNodes;
 
   auto const add = [&] (const php::Block& blk, const php::ExnNode* node) {
@@ -463,12 +463,12 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
 
   // The unwinder's state is a stack of regions (the current region is just the
   // top of the stack).
-  using State = std::vector<borrowed_ptr<const php::ExnNode>>;
+  using State = std::vector<const php::ExnNode*>;
 
   DEBUG_ONLY auto const showState = [&](const State& state) {
     using namespace folly::gen;
     return from(state)
-    | map([&] (borrowed_ptr<const php::ExnNode> n) {
+    | map([&] (const php::ExnNode* n) {
         return folly::sformat("E{}", n->id);
       })
     | unsplit<std::string>("->");
@@ -477,8 +477,8 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
   folly::sorted_vector_set<State> states;
   folly::sorted_vector_set<State> newStates;
   folly::sorted_vector_map<
-    borrowed_ptr<const php::ExnNode>,
-    folly::sorted_vector_set<borrowed_ptr<const php::ExnNode>>
+    const php::ExnNode*,
+    folly::sorted_vector_set<const php::ExnNode*>
   > unwindEdges;
 
   auto iters = 0;
@@ -1068,7 +1068,7 @@ void build_cfg(ParseUnitState& puState,
       ptr->section      = php::Block::Section::Main;
       ptr->exnNode      = nullptr;
     }
-    return borrow(ptr);
+    return ptr.get();
   };
 
   auto exnTreeInfo = build_exn_tree(fe, func, findBlock);
@@ -1139,8 +1139,8 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
 }
 
 std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
-                                      borrowed_ptr<php::Unit> unit,
-                                      borrowed_ptr<php::Class> cls,
+                                      php::Unit* unit,
+                                      php::Class* cls,
                                       const FuncEmitter& fe) {
   FTRACE(2, "  func: {}\n",
     fe.name->data() && *fe.name->data() ? fe.name->data() : "pseudomain");
@@ -1257,20 +1257,20 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
 }
 
 void parse_methods(ParseUnitState& puState,
-                   borrowed_ptr<php::Class> ret,
-                   borrowed_ptr<php::Unit> unit,
+                   php::Class* ret,
+                   php::Unit* unit,
                    const PreClassEmitter& pce) {
   std::unique_ptr<php::Func> cinit;
   for (auto& me : pce.methods()) {
     auto f = parse_func(puState, unit, ret, *me);
     if (f->name == s_86cinit.get()) {
-      puState.constPassFuncs[borrow(f)] |= php::Program::ForAnalyze;
+      puState.constPassFuncs[f.get()] |= php::Program::ForAnalyze;
       cinit = std::move(f);
     } else {
       if (f->name == s_86pinit.get() ||
           f->name == s_86sinit.get() ||
           f->name == s_86linit.get()) {
-        puState.constPassFuncs[borrow(f)] |= php::Program::ForAnalyze;
+        puState.constPassFuncs[f.get()] |= php::Program::ForAnalyze;
       }
       ret->methods.push_back(std::move(f));
     }
@@ -1278,7 +1278,7 @@ void parse_methods(ParseUnitState& puState,
   if (cinit) ret->methods.push_back(std::move(cinit));
 }
 
-void add_stringish(borrowed_ptr<php::Class> cls) {
+void add_stringish(php::Class* cls) {
   // The runtime adds Stringish to any class providing a __toString() function,
   // so we mirror that here to make sure analysis of interfaces is correct.
   // All Stringish are also XHPChild, so handle it here as well.
@@ -1305,7 +1305,7 @@ void add_stringish(borrowed_ptr<php::Class> cls) {
 }
 
 std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
-                                        borrowed_ptr<php::Unit> unit,
+                                        php::Unit* unit,
                                         const PreClassEmitter& pce) {
   FTRACE(2, "  class: {}\n", pce.name()->data());
 
@@ -1331,8 +1331,8 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   copy(ret->traitAliasRules, pce.traitAliasRules());
   copy(ret->requirements,    pce.requirements());
 
-  parse_methods(puState, borrow(ret), unit, pce);
-  add_stringish(borrow(ret));
+  parse_methods(puState, ret.get(), unit, pce);
+  add_stringish(ret.get());
 
   auto& propMap = pce.propMap();
   for (size_t idx = 0; idx < propMap.size(); ++idx) {
@@ -1356,7 +1356,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
     ret->constants.push_back(
       php::Const {
         cconst.name(),
-        borrow(ret),
+        ret.get(),
         cconst.valOption(),
         cconst.phpCode(),
         cconst.typeConstraint(),
@@ -1374,7 +1374,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
         ret->constants.push_back(
           php::Const {
             cnsMap.first,
-            borrow(ret),
+            ret.get(),
             tvaux,
             staticEmptyString(),
             staticEmptyString(),
@@ -1392,11 +1392,11 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
 
 //////////////////////////////////////////////////////////////////////
 
-void assign_closure_context(const ParseUnitState&, borrowed_ptr<php::Class>);
+void assign_closure_context(const ParseUnitState&, php::Class*);
 
-borrowed_ptr<php::Class>
+php::Class*
 find_closure_context(const ParseUnitState& puState,
-                     borrowed_ptr<php::Func> createClFunc) {
+                     php::Func* createClFunc) {
   if (auto const cls = createClFunc->cls) {
     if (cls->parentName &&
         cls->parentName->isame(s_Closure.get())) {
@@ -1412,7 +1412,7 @@ find_closure_context(const ParseUnitState& puState,
 }
 
 void assign_closure_context(const ParseUnitState& puState,
-                            borrowed_ptr<php::Class> clo) {
+                            php::Class* clo) {
   if (clo->closureContextCls) return;
 
   auto clIt = puState.createClMap.find(clo->id);
@@ -1441,12 +1441,12 @@ void assign_closure_context(const ParseUnitState& puState,
 }
 
 void find_additional_metadata(const ParseUnitState& puState,
-                              borrowed_ptr<php::Unit> unit) {
+                              php::Unit* unit) {
   for (auto& c : unit->classes) {
     if (!c->parentName || !c->parentName->isame(s_Closure.get())) {
       continue;
     }
-    assign_closure_context(puState, borrow(c));
+    assign_closure_context(puState, c.get());
   }
 }
 
@@ -1488,12 +1488,12 @@ std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
   puState.defClsMap.resize(ue.numPreClasses(), nullptr);
 
   for (size_t i = 0; i < ue.numPreClasses(); ++i) {
-    auto cls = parse_class(puState, borrow(ret), *ue.pce(i));
+    auto cls = parse_class(puState, ret.get(), *ue.pce(i));
     ret->classes.push_back(std::move(cls));
   }
 
   for (auto& fe : ue.fevec()) {
-    auto func = parse_func(puState, borrow(ret), nullptr, *fe);
+    auto func = parse_func(puState, ret.get(), nullptr, *fe);
     assert(!fe->pce());
     if (fe->isPseudoMain()) {
       ret->pseudomain = std::move(func);
@@ -1515,7 +1515,7 @@ std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
 
   ret->classAliases = std::move(puState.classAliases);
 
-  find_additional_metadata(puState, borrow(ret));
+  find_additional_metadata(puState, ret.get());
 
   for (auto const item : puState.constPassFuncs) {
     auto encoded_val = reinterpret_cast<uintptr_t>(item.first) | item.second;

@@ -56,7 +56,7 @@ std::string indent(int level, const std::string& s) {
 }
 
 void appendExnTreeString(std::string& ret,
-                         borrowed_ptr<const php::ExnNode> p) {
+                         const php::ExnNode* p) {
   ret += " " + folly::to<std::string>(p->id);
   if (p->parent) appendExnTreeString(ret, p->parent);
 }

@@ -374,7 +374,7 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
 
 }
 
-bool can_emit_builtin(borrowed_ptr<const php::Func> func,
+bool can_emit_builtin(const php::Func* func,
                       int numArgs, bool hasUnpack) {
   if (func->attrs & (AttrInterceptable | AttrNoFCallBuiltin |
                      AttrTakesInOutParams) ||
@@ -435,7 +435,7 @@ bool can_emit_builtin(borrowed_ptr<const php::Func> func,
 }
 
 void finish_builtin(ISS& env,
-                    borrowed_ptr<const php::Func> func,
+                    const php::Func* func,
                     uint32_t numArgs,
                     bool unpack) {
   std::vector<Bytecode> repl;

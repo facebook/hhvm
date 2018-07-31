@@ -61,7 +61,7 @@ uint32_t rpoId(const FuncAnalysis& ai, BlockId blk) {
   return ai.bdata[blk].rpoId;
 }
 
-State pseudomain_entry_state(borrowed_ptr<const php::Func> func) {
+State pseudomain_entry_state(const php::Func* func) {
   auto ret = State{};
   ret.initialized = true;
   ret.thisAvailable = false;
@@ -317,7 +317,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
 
   // Used to force blocks that depended on the types of local statics
   // to be re-analyzed when the local statics change.
-  hphp_fast_map<borrowed_ptr<const php::Block>, hphp_fast_map<LocalId, Type>>
+  hphp_fast_map<const php::Block*, hphp_fast_map<LocalId, Type>>
     usedLocalStatics;
 
   /*
@@ -762,7 +762,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       methodResults.push_back(
         do_analyze(
           index,
-          Context { ctx.unit, borrow(f), ctx.cls },
+          Context { ctx.unit, f.get(), ctx.cls },
           &clsAnalysis,
           nullptr,
           CollectionOpts::TrackConstantArrays
@@ -772,7 +772,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
 
     if (associatedClosures) {
       for (auto const c : *associatedClosures) {
-        auto const invoke = borrow(c->methods[0]);
+        auto const invoke = c->methods[0].get();
         closureResults.push_back(
           do_analyze(
             index,
@@ -873,7 +873,7 @@ std::vector<std::pair<State,StepFlags>>
 locally_propagated_states(const Index& index,
                           const FuncAnalysis& fa,
                           CollectedInfo& collect,
-                          borrowed_ptr<const php::Block> blk,
+                          const php::Block* blk,
                           State state) {
   Trace::Bump bumper{Trace::hhbbc, 10};
 

@@ -45,8 +45,7 @@ bool has_magic_bool_conversion(SString clsName);
 /*
  * Returns method named "name" if it exists.
  */
-borrowed_ptr<php::Func> find_method(borrowed_ptr<const php::Class>,
-                                    SString name);
+php::Func* find_method(const php::Class*, SString name);
 
 /*
  * Returns true if `name' is the name of an internal VM special class
@@ -58,7 +57,7 @@ bool is_special_method_name(SString name);
  * Returns true if a class has the __MockClass user attribute.  This
  * attribute allows final methods and final classes to be overridden.
  */
-bool is_mock_class(borrowed_ptr<const php::Class>);
+bool is_mock_class(const php::Class*);
 
 /*
  * Returns true if cls is a trait which will not be imported into any

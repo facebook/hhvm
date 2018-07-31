@@ -313,7 +313,7 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
 void insert_assertions(const Index& index,
                        const FuncAnalysis& ainfo,
                        CollectedInfo& collect,
-                       borrowed_ptr<php::Block> const blk,
+                       php::Block* const blk,
                        State state) {
   std::vector<Bytecode> newBCs;
   newBCs.reserve(blk->hhbcs.size());
@@ -375,7 +375,7 @@ void insert_assertions(const Index& index,
   blk->hhbcs = std::move(newBCs);
 }
 
-bool persistence_check(borrowed_ptr<php::Block> const blk) {
+bool persistence_check(php::Block* const blk) {
   for (auto& op : blk->hhbcs) {
     switch (op.op) {
       case Op::Nop:
@@ -488,8 +488,8 @@ bool propagate_constants(const Bytecode& bc, const State& state,
 /*
  * Create a block similar to another block (but with no bytecode in it yet).
  */
-borrowed_ptr<php::Block> make_block(FuncAnalysis& ainfo,
-                                    borrowed_ptr<const php::Block> srcBlk,
+php::Block* make_block(FuncAnalysis& ainfo,
+                                    const php::Block* srcBlk,
                                     const State& state) {
   FTRACE(1, " ++ new block {}\n", ainfo.ctx.func->blocks.size());
   assert(ainfo.bdata.size() == ainfo.ctx.func->blocks.size());
@@ -500,7 +500,7 @@ borrowed_ptr<php::Block> make_block(FuncAnalysis& ainfo,
   newBlk->exnNode       = srcBlk->exnNode;
   newBlk->throwExits    = srcBlk->throwExits;
   newBlk->unwindExits   = srcBlk->unwindExits;
-  auto const blk        = borrow(newBlk);
+  auto const blk        = newBlk.get();
   ainfo.ctx.func->blocks.push_back(std::move(newBlk));
 
   ainfo.rpoBlocks.push_back(blk);
@@ -512,8 +512,8 @@ borrowed_ptr<php::Block> make_block(FuncAnalysis& ainfo,
   return blk;
 }
 
-borrowed_ptr<php::Block> make_fatal_block(FuncAnalysis& ainfo,
-                                          borrowed_ptr<const php::Block> srcBlk,
+php::Block* make_fatal_block(FuncAnalysis& ainfo,
+                                          const php::Block* srcBlk,
                                           const State& state) {
   auto blk = make_block(ainfo, srcBlk, state);
   auto const srcLoc = srcBlk->hhbcs.back().srcLoc;
@@ -531,7 +531,7 @@ borrowed_ptr<php::Block> make_fatal_block(FuncAnalysis& ainfo,
 void first_pass(const Index& index,
                 FuncAnalysis& ainfo,
                 CollectedInfo& collect,
-                borrowed_ptr<php::Block> const blk,
+                php::Block* const blk,
                 State state) {
   auto const ctx = ainfo.ctx;
 
@@ -811,7 +811,7 @@ struct OptimizeIterState {
   void operator()(const Index& index,
                   const FuncAnalysis& ainfo,
                   CollectedInfo& collect,
-                  borrowed_ptr<php::Block> const blk,
+                  php::Block* const blk,
                   State state) {
     auto const ctx = ainfo.ctx;
     auto interp = Interp { index, ctx, collect, blk, state };
@@ -1197,7 +1197,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
                  [&] (const Index&,
                       const FuncAnalysis&,
                       CollectedInfo&,
-                      borrowed_ptr<php::Block> blk,
+                      php::Block* blk,
                       const State&) {
                    if (persistent && !persistence_check(blk)) {
                      persistent = false;

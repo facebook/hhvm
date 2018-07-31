@@ -971,7 +971,7 @@ struct WriteClsRefSlotVisitor : boost::static_visitor<ClsRefSlotId> {
 //////////////////////////////////////////////////////////////////////
 
 std::string show(const php::Func&, const Bytecode& bc);
-inline std::string show(borrowed_ptr<const php::Func> func,
+inline std::string show(const php::Func* func,
                         const Bytecode& bc) {
   return show(*func, bc);
 }

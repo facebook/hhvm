@@ -47,11 +47,10 @@ bool is_collection(res::Class cls) {
   return collections::isTypeName(name);
 }
 
-borrowed_ptr<php::Func> find_method(borrowed_ptr<const php::Class> cls,
-                                    SString name) {
+php::Func* find_method(const php::Class* cls, SString name) {
   for (auto& m : cls->methods) {
     if (m->name->isame(name)) {
-      return borrow(m);
+      return m.get();
     }
   }
   return nullptr;
@@ -62,7 +61,7 @@ bool is_special_method_name(SString name) {
   return p && p[0] == '8' && p[1] == '6';
 }
 
-bool is_mock_class(borrowed_ptr<const php::Class> cls) {
+bool is_mock_class(const php::Class* cls) {
   return cls->userAttributes.count(s_MockClass.get());
 }
 

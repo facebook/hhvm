@@ -27,13 +27,13 @@ namespace php { struct Func; }
 //////////////////////////////////////////////////////////////////////
 
 bool method_map_contains(const MethodMap&,
-                         borrowed_ptr<const php::Class>,
-                         borrowed_ptr<const php::Func>);
-bool is_trace_function(borrowed_ptr<const php::Class>,
-                       borrowed_ptr<const php::Func>);
+                         const php::Class*,
+                         const php::Func*);
+bool is_trace_function(const php::Class*,
+                       const php::Func*);
 
-int trace_bump_for(borrowed_ptr<const php::Class>,
-                   borrowed_ptr<const php::Func>);
+int trace_bump_for(const php::Class*,
+                   const php::Func*);
 
 //////////////////////////////////////////////////////////////////////
 

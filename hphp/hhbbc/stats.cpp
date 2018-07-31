@@ -437,7 +437,7 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
       CollectedInfo collect {
         index, ctx, nullptr, nullptr, CollectionOpts {}, &fa
       };
-      Interp interp { index, ctx, collect, borrow(blk), state };
+      Interp interp { index, ctx, collect, blk.get(), state };
       for (auto& bc : blk->hhbcs) {
         auto noop    = [] (BlockId, const State*) {};
         auto flags   = StepFlags {};

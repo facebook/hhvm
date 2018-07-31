@@ -479,7 +479,7 @@ std::string DEBUG_ONLY show(const UseInfo& ui) {
   return folly::sformat("{}({})", show(ui.usage), show(ui.actions));
 }
 
-std::string DEBUG_ONLY loc_bits_string(borrowed_ptr<const php::Func> func,
+std::string DEBUG_ONLY loc_bits_string(const php::Func* func,
                                        std::bitset<kMaxTrackedLocals> locs) {
   std::ostringstream out;
   if (func->locals.size() < kMaxTrackedLocals) {
@@ -493,7 +493,7 @@ std::string DEBUG_ONLY loc_bits_string(borrowed_ptr<const php::Func> func,
 }
 
 std::string DEBUG_ONLY
-slot_bits_string(borrowed_ptr<const php::Func> func,
+slot_bits_string(const php::Func* func,
                  std::bitset<kMaxTrackedClsRefSlots> slots) {
   std::ostringstream out;
   if (func->numClsRefSlots < kMaxTrackedClsRefSlots) {
@@ -1902,7 +1902,7 @@ folly::Optional<DceState>
 dce_visit(const Index& index,
           const FuncAnalysis& fa,
           CollectedInfo& collect,
-          borrowed_ptr<const php::Block> const blk,
+          const php::Block* const blk,
           const State& stateIn,
           const DceOutState& dceOutState) {
   if (!stateIn.initialized) {
@@ -2069,7 +2069,7 @@ struct DceAnalysis {
 DceAnalysis analyze_dce(const Index& index,
                         const FuncAnalysis& fa,
                         CollectedInfo& collect,
-                        borrowed_ptr<php::Block> const blk,
+                        php::Block* const blk,
                         const State& stateIn,
                         const DceOutState& dceOutState) {
   if (auto dceState = dce_visit(index, fa, collect,
@@ -2100,7 +2100,7 @@ void dce_perform(const php::Func& func,
   };
   for (auto const& elm : actionMap) {
     auto const& id = elm.first;
-    auto const b = borrow(func.blocks[id.blk]);
+    auto const b = func.blocks[id.blk].get();
     FTRACE(1, "{} {}\n", show(elm), show(func, b->hhbcs[id.idx]));
     switch (elm.second.action) {
       case DceAction::PopInputs:
@@ -2185,7 +2185,7 @@ DceOptResult
 optimize_dce(const Index& index,
              const FuncAnalysis& fa,
              CollectedInfo& collect,
-             borrowed_ptr<php::Block> const blk,
+             php::Block* const blk,
              const State& stateIn,
              const DceOutState& dceOutState) {
   auto dceState = dce_visit(index, fa, collect, blk, stateIn, dceOutState);
@@ -2321,7 +2321,7 @@ void remove_unused_clsref_slots(Context const ctx,
 void local_dce(const Index& index,
                const FuncAnalysis& ainfo,
                CollectedInfo& collect,
-               borrowed_ptr<php::Block> const blk,
+               php::Block* const blk,
                const State& stateIn) {
   // For local DCE, we have to assume all variables are in the
   // live-out set for the block.

@@ -38,7 +38,7 @@ namespace php { struct Block; }
  * Perform DCE on a single basic block.
  */
 void local_dce(const Index&, const FuncAnalysis&, CollectedInfo& collect,
-               borrowed_ptr<php::Block>, const State&);
+               php::Block*, const State&);
 
 /*
  * Eliminate dead code in a function, across basic blocks, based on

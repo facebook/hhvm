@@ -94,7 +94,7 @@ struct EmitUnitState {
 };
 
 Id recordClass(EmitUnitState& euState, UnitEmitter& ue, Id id) {
-  auto cls = borrow(euState.unit->classes[id]);
+  auto cls = euState.unit->classes[id].get();
   euState.pceInfo.push_back(
     { ue.newPreClassEmitter(cls->name->toCppString(), cls->hoistability), id }
   );
@@ -102,7 +102,7 @@ Id recordClass(EmitUnitState& euState, UnitEmitter& ue, Id id) {
 }
 
 Id recordFunc(EmitUnitState& euState, UnitEmitter& ue, Id id) {
-  auto func = borrow(euState.unit->funcs[id - 1]);
+  auto func = euState.unit->funcs[id - 1].get();
   euState.feInfo.push_back({ ue.newFuncEmitter(func->name), id });
   return euState.feInfo.back().fe->id();
 }
@@ -128,7 +128,7 @@ php::SrcLoc srcLoc(const php::Func& func, int32_t ix) {
  * regions, and insert "fake" edges to the block containing the
  * corresponding call.
  */
-std::vector<borrowed_ptr<php::Block>> initial_sort(const php::Func& f) {
+std::vector<php::Block*> initial_sort(const php::Func& f) {
   auto sorted = rpoSortFromMain(f);
 
   FTRACE(4, "Initial sort {}\n", f.name);
@@ -137,10 +137,10 @@ std::vector<borrowed_ptr<php::Block>> initial_sort(const php::Func& f) {
   auto nextFpi = 0;
   // Map from fpi region id to the block containing its FCall.
   // Needs value stability because extraEdges holds pointers into this map.
-  hphp_hash_map<int, borrowed_ptr<php::Block>> fpiToCallBlkMap;
+  hphp_hash_map<int, php::Block*> fpiToCallBlkMap;
   // Map from the ids of terminal blocks within fpi regions to the
   // entries in fpiToCallBlkMap corresponding to the active fpi regions.
-  hphp_fast_map<BlockId, std::vector<borrowed_ptr<php::Block>*>> extraEdges;
+  hphp_fast_map<BlockId, std::vector<php::Block**>> extraEdges;
   // The fpi state at the start of each block
   std::vector<folly::Optional<std::vector<int>>> blkFpiState(f.blocks.size());
   for (auto blk : sorted) {
@@ -194,7 +194,7 @@ std::vector<borrowed_ptr<php::Block>> initial_sort(const php::Func& f) {
   if (!extraEdges.empty()) {
     auto changes = false;
     for (auto& elm : extraEdges) {
-      auto const blk = borrow(f.blocks[elm.first]);
+      auto const blk = f.blocks[elm.first].get();
       for (auto const blkPtr : elm.second) {
         if (!*blkPtr) {
           // There was no FCall, so no need to do anything
@@ -211,7 +211,7 @@ std::vector<borrowed_ptr<php::Block>> initial_sort(const php::Func& f) {
       sorted = rpoSortFromMain(f);
       // Remove all the extra edges
       for (auto& elm : extraEdges) {
-        auto const blk = borrow(f.blocks[elm.first]);
+        auto const blk = f.blocks[elm.first].get();
         for (auto const blkPtr : elm.second) {
           if (*blkPtr) {
             blk->throwExits.pop_back();
@@ -246,7 +246,7 @@ std::vector<borrowed_ptr<php::Block>> initial_sort(const php::Func& f) {
  * case for DV initializers is that each one falls through to the
  * next, with the block jumping back to the main entry point.
  */
-std::vector<borrowed_ptr<php::Block>> order_blocks(const php::Func& f) {
+std::vector<php::Block*> order_blocks(const php::Func& f) {
   auto sorted = initial_sort(f);
 
   // Get the DV blocks, without the rest of the primary function body,
@@ -266,7 +266,7 @@ std::vector<borrowed_ptr<php::Block>> order_blocks(const php::Func& f) {
   // after all that.
   std::stable_sort(
     begin(sorted), end(sorted),
-    [&] (borrowed_ptr<php::Block> a, borrowed_ptr<php::Block> b) {
+    [&] (php::Block* a, php::Block* b) {
       using T = std::underlying_type<php::Block::Section>::type;
       return static_cast<T>(a->section) < static_cast<T>(b->section);
     }
@@ -344,7 +344,7 @@ struct EmitBcInfo {
     folly::Optional<uint32_t> expectedFPIDepth;
   };
 
-  std::vector<borrowed_ptr<php::Block>> blockOrder;
+  std::vector<php::Block*> blockOrder;
   uint32_t maxStackDepth;
   uint32_t maxFpiDepth;
   bool containsCalls;
@@ -352,7 +352,7 @@ struct EmitBcInfo {
   std::vector<BlockInfo> blockInfo;
 };
 
-using ExnNodePtr = borrowed_ptr<php::ExnNode>;
+using ExnNodePtr = php::ExnNode*;
 
 bool handleEquivalent (ExnNodePtr eh1, ExnNodePtr eh2) {
   if (!eh1 && !eh2) return true;
@@ -953,15 +953,15 @@ void emit_locals_and_params(FuncEmitter& fe,
 }
 
 struct EHRegion {
-  borrowed_ptr<const php::ExnNode> node;
-  borrowed_ptr<EHRegion> parent;
+  const php::ExnNode* node;
+  EHRegion* parent;
   Offset start;
   Offset past;
 };
 
 template<class BlockInfo, class ParentIndexMap>
 void emit_eh_region(FuncEmitter& fe,
-                    borrowed_ptr<const EHRegion> region,
+                    const EHRegion* region,
                     const BlockInfo& blockInfo,
                     ParentIndexMap& parentIndexMap) {
   FTRACE(2,  "    func {}: ExnNode {}\n", fe.name, region->node->id);
@@ -1062,7 +1062,7 @@ size_t shared_prefix(ForwardRange1& r1, ForwardRange2& r2) {
 void emit_ehent_tree(FuncEmitter& fe, const php::Func& /*func*/,
                      const EmitBcInfo& info) {
   hphp_fast_map<
-    borrowed_ptr<const php::ExnNode>,
+    const php::ExnNode*,
     std::vector<std::unique_ptr<EHRegion>>
   > exnMap;
 
@@ -1072,7 +1072,7 @@ void emit_ehent_tree(FuncEmitter& fe, const php::Func& /*func*/,
    * from each other.  When a new active node is pushed, begin an
    * EHEnt, and when it's popped, it's done.
    */
-  std::vector<borrowed_ptr<const php::ExnNode>> activeList;
+  std::vector<const php::ExnNode*> activeList;
 
   auto pop_active = [&] (Offset past) {
     auto p = activeList.back();
@@ -1083,7 +1083,7 @@ void emit_ehent_tree(FuncEmitter& fe, const php::Func& /*func*/,
   auto push_active = [&] (const php::ExnNode* p, Offset start) {
     auto const parent = activeList.empty()
       ? nullptr
-      : borrow(exnMap[activeList.back()].back());
+      : exnMap[activeList.back()].back().get();
     exnMap[p].push_back(
       std::make_unique<EHRegion>(
         EHRegion { p, parent, start, kInvalidOffset }
@@ -1106,7 +1106,7 @@ void emit_ehent_tree(FuncEmitter& fe, const php::Func& /*func*/,
       continue;
     }
 
-    std::vector<borrowed_ptr<const php::ExnNode>> current;
+    std::vector<const php::ExnNode*> current;
     exn_path(current, b->exnNode);
 
     auto const prefix = shared_prefix(current, activeList);
@@ -1149,15 +1149,15 @@ void emit_ehent_tree(FuncEmitter& fe, const php::Func& /*func*/,
    *   - a starts at the same place, but encloses b entirely
    *   - a has the same extents as b, but is a parent of b
    */
-  std::vector<borrowed_ptr<EHRegion>> regions;
+  std::vector<EHRegion*> regions;
   for (auto& mapEnt : exnMap) {
     for (auto& region : mapEnt.second) {
-      regions.push_back(borrow(region));
+      regions.push_back(region.get());
     }
   }
   std::sort(
     begin(regions), end(regions),
-    [&] (borrowed_ptr<const EHRegion> a, borrowed_ptr<const EHRegion> b) {
+    [&] (const EHRegion* a, const EHRegion* b) {
       if (a == b) return false;
       if (a->start == b->start) {
         if (a->past == b->past) {
@@ -1181,7 +1181,7 @@ void emit_ehent_tree(FuncEmitter& fe, const php::Func& /*func*/,
     }
   );
 
-  hphp_fast_map<borrowed_ptr<const EHRegion>,uint32_t> parentIndexMap;
+  hphp_fast_map<const EHRegion*,uint32_t> parentIndexMap;
   for (auto& r : regions) {
     emit_eh_region(fe, r, info.blockInfo, parentIndexMap);
   }
@@ -1548,8 +1548,8 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
    * don't have a DefFunc bytecode. Process them up front.
    */
   for (size_t id = 0; id < unit.funcs.size(); ++id) {
-    auto const f = borrow(unit.funcs[id]);
-    assertx(f != borrow(unit.pseudomain));
+    auto const f = unit.funcs[id].get();
+    assertx(f != unit.pseudomain.get());
     if (!f->top) continue;
     auto const fe = new FuncEmitter(*ue, -1, -1, f->name);
     top_fes.push_back(fe);
@@ -1563,7 +1563,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
    */
   for (size_t id = 0; id < unit.classes.size(); ++id) {
     if (state.classOffsets[id] != kInvalidOffset) continue;
-    auto const c = borrow(unit.classes[id]);
+    auto const c = unit.classes[id].get();
     if (c->hoistability != PreClass::MaybeHoistable &&
         c->hoistability != PreClass::AlwaysHoistable) {
       continue;

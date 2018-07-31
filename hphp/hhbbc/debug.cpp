@@ -44,7 +44,7 @@ namespace {
 const StaticString s_invoke("__invoke");
 
 template<class Operation>
-void with_file(fs::path dir, borrowed_ptr<const php::Unit> u, Operation op) {
+void with_file(fs::path dir, const php::Unit* u, Operation op) {
   auto const file = dir / fs::path(u->filename->data());
   fs::create_directories(fs::path(file).remove_filename());
 
@@ -66,7 +66,7 @@ void dump_representation(fs::path dir, const php::Program& program) {
   parallel::for_each(
     program.units,
     [&] (const std::unique_ptr<php::Unit>& u) {
-      with_file(dir, borrow(u), [&] (std::ostream& out) {
+      with_file(dir, u.get(), [&] (std::ostream& out) {
         out << show(*u, true);
       });
     }
@@ -85,7 +85,7 @@ std::vector<NameTy> sorted_prop_state(const PropState& ps) {
 
 void dump_class_state(std::ostream& out,
                       const Index& index,
-                      borrowed_ptr<const php::Class> c) {
+                      const php::Class* c) {
   auto const clsName = normalized_class_name(*c);
 
   if (is_closure(*c)) {
@@ -129,7 +129,7 @@ void dump_class_state(std::ostream& out,
 
 void dump_func_state(std::ostream& out,
                      const Index& index,
-                     borrowed_ptr<const php::Func> f) {
+                     const php::Func* f) {
   if (f->unit->pseudomain.get() == f) return;
 
   auto const name = f->cls
@@ -161,16 +161,16 @@ void dump_index(fs::path dir,
         return;
       }
 
-      with_file(dir, borrow(u), [&] (std::ostream& out) {
+      with_file(dir, u.get(), [&] (std::ostream& out) {
         for (auto& c : u->classes) {
-          dump_class_state(out, index, borrow(c));
+          dump_class_state(out, index, c.get());
           for (auto& m : c->methods) {
-            dump_func_state(out, index, borrow(m));
+            dump_func_state(out, index, m.get());
           }
         }
 
         for (auto& f : u->funcs) {
-          dump_func_state(out, index, borrow(f));
+          dump_func_state(out, index, f.get());
         }
       });
     }

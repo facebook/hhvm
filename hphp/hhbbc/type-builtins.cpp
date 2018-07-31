@@ -38,8 +38,8 @@ const StaticString s_setall("setall");
 
 //////////////////////////////////////////////////////////////////////
 
-bool is_collection_method_returning_this(borrowed_ptr<const php::Class> cls,
-                                         borrowed_ptr<const php::Func> func) {
+bool is_collection_method_returning_this(const php::Class* cls,
+                                         const php::Func* func) {
   if (!cls) return false;
 
   if (cls->name->isame(s_Vector.get())) {
@@ -75,7 +75,7 @@ bool is_collection_method_returning_this(borrowed_ptr<const php::Class> cls,
   return false;
 }
 
-Type native_function_return_type(borrowed_ptr<const php::Func> f,
+Type native_function_return_type(const php::Func* f,
                                  bool include_coercion_failures) {
   assert(f->nativeInfo);
 

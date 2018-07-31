@@ -115,7 +115,7 @@ struct FuncAnalysisResult {
   /*
    * A set of pair of functions and their push blocks that we failed to fold.
    */
-  hphp_fast_set<std::pair<borrowed_ptr<const php::Func>, BlockId>>
+  hphp_fast_set<std::pair<const php::Func*, BlockId>>
     unfoldableFuncs;
 
   /*
@@ -137,7 +137,7 @@ struct FuncAnalysis : FuncAnalysisResult {
   FuncAnalysis& operator=(FuncAnalysis&&) = default;
 
   // Blocks in a reverse post order, with DV initializers.
-  std::vector<borrowed_ptr<php::Block>> rpoBlocks;
+  std::vector<php::Block*> rpoBlocks;
 
   // Block data is indexed by Block::id.
   std::vector<BlockData> bdata;
@@ -229,7 +229,7 @@ std::vector<std::pair<State,StepFlags>>
 locally_propagated_states(const Index&,
                           const FuncAnalysis&,
                           CollectedInfo& collect,
-                          borrowed_ptr<const php::Block>,
+                          const php::Block*,
                           State stateIn);
 
 //////////////////////////////////////////////////////////////////////

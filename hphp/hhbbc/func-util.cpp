@@ -30,17 +30,17 @@ const StaticString s_86metadata("86metadata");
 
 //////////////////////////////////////////////////////////////////////
 
-uint32_t closure_num_use_vars(borrowed_ptr<const php::Func> f) {
+uint32_t closure_num_use_vars(const php::Func* f) {
   // Properties on the closure object are either use vars, or storage
   // for static locals.  The first N are the use vars.
   return f->cls->properties.size() - f->staticLocals.size();
 }
 
-bool is_pseudomain(borrowed_ptr<const php::Func> f) {
-  return borrow(f->unit->pseudomain) == f;
+bool is_pseudomain(const php::Func* f) {
+  return f->unit->pseudomain.get() == f;
 }
 
-bool is_volatile_local(borrowed_ptr<const php::Func> func,
+bool is_volatile_local(const php::Func* func,
                        LocalId lid) {
   if (is_pseudomain(func)) return true;
   // Note: unnamed locals in a pseudomain probably are safe (i.e. can't be
@@ -52,12 +52,12 @@ bool is_volatile_local(borrowed_ptr<const php::Func> func,
          l.name->same(s_86metadata.get());
 }
 
-SString memoize_impl_name(borrowed_ptr<const php::Func> func) {
+SString memoize_impl_name(const php::Func* func) {
   always_assert(func->isMemoizeWrapper);
   return Func::genMemoizeImplName(func->name);
 }
 
-bool check_nargs_in_range(borrowed_ptr<const php::Func> func, uint32_t nArgs) {
+bool check_nargs_in_range(const php::Func* func, uint32_t nArgs) {
   while (nArgs < func->dvEntries.size()) {
     if (func->dvEntries[nArgs++] == NoBlockId) return false;
   }
@@ -71,20 +71,20 @@ namespace {
 using ExnNode = php::ExnNode;
 
 std::unique_ptr<ExnNode> cloneExnTree(
-  borrowed_ptr<ExnNode> in,
+  ExnNode* in,
   BlockId delta,
-  hphp_fast_map<borrowed_ptr<ExnNode>, borrowed_ptr<ExnNode>>& processed) {
+  hphp_fast_map<ExnNode*, ExnNode*>& processed) {
 
   auto clone = std::make_unique<ExnNode>();
   always_assert(!processed.count(in));
-  processed[in] = borrow(clone);
+  processed[in] = clone.get();
 
   clone->id = in->id;
   clone->depth = in->depth;
   clone->parent = in->parent ? processed[in->parent] : nullptr;
   clone->info = in->info;
   for (auto& child : in->children) {
-    clone->children.push_back(cloneExnTree(borrow(child), delta, processed));
+    clone->children.push_back(cloneExnTree(child.get(), delta, processed));
   }
   if (delta) {
     match<void>(clone->info,
@@ -130,11 +130,11 @@ void fixupBlockIds(Bytecode& bc, BlockId delta) {
 }
 
 void copy_into(php::FuncBase* dst, const php::FuncBase& other) {
-  hphp_fast_map<borrowed_ptr<ExnNode>, borrowed_ptr<ExnNode>> processed;
+  hphp_fast_map<ExnNode*, ExnNode*> processed;
 
   BlockId delta = dst->blocks.size();
   for (auto& theirs : other.exnNodes) {
-    auto ours = cloneExnTree(borrow(theirs), delta, processed);
+    auto ours = cloneExnTree(theirs.get(), delta, processed);
     dst->exnNodes.push_back(std::move(ours));
   }
 

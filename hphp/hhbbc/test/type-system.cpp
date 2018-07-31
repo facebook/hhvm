@@ -421,7 +421,7 @@ std::vector<Type> all_with_waithandles(const Index& index) {
 
 TEST(Type, Top) {
   auto const program = make_program();
-  Index index { borrow(program) };
+  Index index { program.get() };
 
   // Everything is a subtype of Top, couldBe Top, and the union of Top
   // with anything is Top.
@@ -435,7 +435,7 @@ TEST(Type, Top) {
 
 TEST(Type, Bottom) {
   auto const program = make_program();
-  Index index { borrow(program) };
+  Index index { program.get() };
 
   // Bottom is a subtype of everything, nothing couldBe Bottom, and
   // the union_of anything with Bottom is itself.
@@ -449,7 +449,7 @@ TEST(Type, Bottom) {
 
 TEST(Type, Prims) {
   auto const program = make_program();
-  Index index { borrow(program) };
+  Index index { program.get() };
 
   // All pairs of non-equivalent primitives are not related by either
   // subtypeOf or couldBe, including if you wrap them in wait handles.
@@ -472,7 +472,7 @@ TEST(Type, Prims) {
 
 TEST(Type, Relations) {
   auto const program = make_program();
-  Index index { borrow(program) };
+  Index index { program.get() };
 
   // couldBe is symmetric and reflexive
   for (auto& t1 : all_with_waithandles(index)) {
@@ -639,7 +639,7 @@ TEST(Type, DblNan) {
 
 TEST(Type, Option) {
   auto const program = make_program();
-  Index index { borrow(program) };
+  Index index { program.get() };
 
   EXPECT_TRUE(TTrue.subtypeOf(BOptTrue));
   EXPECT_TRUE(TInitNull.subtypeOf(BOptTrue));
@@ -750,7 +750,7 @@ TEST(Type, OptUnionOf) {
   EXPECT_EQ(TOptNum, union_of(TInitNull, union_of(dval(1), ival(0))));
 
   auto const program = make_program();
-  Index index { borrow(program) };
+  Index index { program.get() };
   auto const rcls = index.builtin_class(s_Awaitable.get());
 
   EXPECT_TRUE(union_of(TObj, opt(objExact(rcls))) == TOptObj);
@@ -912,17 +912,17 @@ TEST(Type, SpecificExamples) {
 
 TEST(Type, IndexBased) {
   auto const program = make_program();
-  auto const unit = borrow(program->units.back());
-  auto const func = [&]() -> borrowed_ptr<php::Func> {
+  auto const unit = program->units.back().get();
+  auto const func = [&]() -> php::Func* {
     for (auto& f : unit->funcs) {
-      if (f->name->isame(s_test.get())) return borrow(f);
+      if (f->name->isame(s_test.get())) return f.get();
     }
     return nullptr;
   }();
   EXPECT_TRUE(func != nullptr);
 
   auto const ctx = Context { unit, func };
-  Index idx{borrow(program)};
+  Index idx{program.get()};
 
   auto const cls = idx.resolve_class(ctx, s_TestClass.get());
   if (!cls) ADD_FAILURE();
@@ -1012,17 +1012,17 @@ TEST(Type, IndexBased) {
 
 TEST(Type, Hierarchies) {
   auto const program = make_program();
-  auto const unit = borrow(program->units.back());
-  auto const func = [&]() -> borrowed_ptr<php::Func> {
+  auto const unit = program->units.back().get();
+  auto const func = [&]() -> php::Func* {
     for (auto& f : unit->funcs) {
-      if (f->name->isame(s_test.get())) return borrow(f);
+      if (f->name->isame(s_test.get())) return f.get();
     }
     return nullptr;
   }();
   EXPECT_TRUE(func != nullptr);
 
   auto const ctx = Context { unit, func };
-  Index idx{borrow(program)};
+  Index idx{program.get()};
 
   // load classes in hierarchy
   auto const clsBase = idx.resolve_class(ctx, s_Base.get());
@@ -1368,17 +1368,17 @@ TEST(Type, Hierarchies) {
 
 TEST(Type, Interface) {
   auto const program = make_program();
-  auto const unit = borrow(program->units.back());
-  auto const func = [&]() -> borrowed_ptr<php::Func> {
+  auto const unit = program->units.back().get();
+  auto const func = [&]() -> php::Func* {
     for (auto& f : unit->funcs) {
-      if (f->name->isame(s_test.get())) return borrow(f);
+      if (f->name->isame(s_test.get())) return f.get();
     }
     return nullptr;
   }();
   EXPECT_TRUE(func != nullptr);
 
   auto const ctx = Context { unit, func };
-  Index idx{borrow(program)};
+  Index idx{program.get()};
 
   // load classes in hierarchy
   auto const clsIA = idx.resolve_class(ctx, s_IA.get());
@@ -1436,17 +1436,17 @@ TEST(Type, Interface) {
 
 TEST(Type, NonUnique) {
   auto const program = make_program();
-  auto const unit = borrow(program->units.back());
-  auto const func = [&]() -> borrowed_ptr<php::Func> {
+  auto const unit = program->units.back().get();
+  auto const func = [&]() -> php::Func* {
     for (auto& f : unit->funcs) {
-      if (f->name->isame(s_test.get())) return borrow(f);
+      if (f->name->isame(s_test.get())) return f.get();
     }
     return nullptr;
   }();
   EXPECT_TRUE(func != nullptr);
 
   auto const ctx = Context { unit, func };
-  Index idx{borrow(program)};
+  Index idx{program.get()};
 
   auto const clsA = idx.resolve_class(ctx, s_A.get());
   if (!clsA) ADD_FAILURE();
@@ -1472,7 +1472,7 @@ TEST(Type, NonUnique) {
 
 TEST(Type, WaitH) {
   auto const program = make_program();
-  Index index { borrow(program) };
+  Index index { program.get() };
 
   for (auto& t : wait_handles_of(index, all())) {
     EXPECT_TRUE(is_specialized_wait_handle(t));
@@ -2144,7 +2144,7 @@ TEST(Type, ArrKey) {
 
 TEST(Type, LoosenStaticness) {
   auto const program = make_program();
-  Index index{ borrow(program) };
+  Index index{ program.get() };
 
   for (auto const& t : all_with_waithandles(index)) {
     if (t == TUncArrKey || t == TOptUncArrKey ||
@@ -2201,7 +2201,7 @@ TEST(Type, LoosenStaticness) {
 
 TEST(Type, LoosenEmptiness) {
   auto const program = make_program();
-  Index index{ borrow(program) };
+  Index index{ program.get() };
 
   for (auto const& t : all_with_waithandles(index)) {
     if (t.subtypeOfAny(TOptArrE, TOptArrN,
@@ -2256,17 +2256,17 @@ TEST(Type, LoosenEmptiness) {
 
 TEST(Type, LoosenValues) {
   auto const program = make_program();
-  auto const unit = borrow(program->units.back());
-    auto const func = [&]() -> borrowed_ptr<php::Func> {
+  auto const unit = program->units.back().get();
+    auto const func = [&]() -> php::Func* {
     for (auto& f : unit->funcs) {
-      if (f->name->isame(s_test.get())) return borrow(f);
+      if (f->name->isame(s_test.get())) return f.get();
     }
     return nullptr;
   }();
   EXPECT_TRUE(func != nullptr);
 
   auto const ctx = Context { unit, func };
-  Index index{ borrow(program) };
+  Index index{ program.get() };
 
   for (auto const& t : all_no_data_with_waithandles(index)) {
     if (t == TTrue || t == TFalse) continue;
@@ -2313,7 +2313,7 @@ TEST(Type, LoosenValues) {
 
 TEST(Type, AddNonEmptiness) {
   auto const program = make_program();
-  Index index{ borrow(program) };
+  Index index{ program.get() };
 
   for (auto const& t : all_with_waithandles(index)) {
     if (t.subtypeOfAny(TOptArrE, TOptVecE, TOptDictE, TOptKeysetE)
@@ -2345,7 +2345,7 @@ TEST(Type, AddNonEmptiness) {
 
 TEST(Type, LoosenDVArrayness) {
   auto const program = make_program();
-  Index index{ borrow(program) };
+  Index index{ program.get() };
 
   for (auto const& t : all_with_waithandles(index)) {
     if (t.subtypeOfAny(TOptPArr, TOptVArr, TOptDArr) && t != TInitNull) {
@@ -2386,17 +2386,17 @@ TEST(Type, ContextDependent) {
   // This only covers basic cases involving objects.  More testing should
   // be added for non object types, and nested types.
   auto const program = make_program();
-  auto const unit = borrow(program->units.back());
-  auto const func = [&]() -> borrowed_ptr<php::Func> {
+  auto const unit = program->units.back().get();
+  auto const func = [&]() -> php::Func* {
     for (auto& f : unit->funcs) {
-      if (f->name->isame(s_test.get())) return borrow(f);
+      if (f->name->isame(s_test.get())) return f.get();
     }
     return nullptr;
   }();
   EXPECT_TRUE(func != nullptr);
 
   auto const ctx = Context { unit, func };
-  Index idx{borrow(program)};
+  Index idx{program.get()};
 
   // load classes in hierarchy  Base -> B -> BB
   auto const clsBase = idx.resolve_class(ctx, s_Base.get());

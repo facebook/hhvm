@@ -174,7 +174,7 @@ struct Interp {
   const Index& index;
   Context ctx;
   CollectedInfo& collect;
-  borrowed_ptr<const php::Block> blk;
+  const php::Block* blk;
   State& state;
 };
 
@@ -213,11 +213,11 @@ void default_dispatch(ISS&, const Bytecode&);
 /*
  * Can this call be converted to an FCallBuiltin
  */
-bool can_emit_builtin(borrowed_ptr<const php::Func> func,
+bool can_emit_builtin(const php::Func* func,
                       int numParams, bool hasUnpack);
 
 void finish_builtin(ISS& env,
-                    borrowed_ptr<const php::Func> func,
+                    const php::Func* func,
                     uint32_t numParams,
                     bool unpack);
 

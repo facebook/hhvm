@@ -30,7 +30,7 @@ namespace {
  * classes. postOrderWalk was originall written as:
  *
  * void postorderWalk(const php::Func& func,
- *                    std::vector<borrowed_ptr<php::Block>>& out,
+ *                    std::vector<php::Block*>& out,
  *                    boost::dynamic_bitset<>& visited,
  *                    php::Block& blk) {
  *   if (visited[blk.id]) return;
@@ -50,13 +50,13 @@ namespace {
  */
 struct PostOrderWalker {
   const php::Func& func;
-  std::vector<borrowed_ptr<php::Block>>& out;
+  std::vector<php::Block*>& out;
   boost::dynamic_bitset<>& visited;
 
   void walk(BlockId blk) {
     if (visited[blk]) return;
     visited[blk] = true;
-    auto const blkPtr = borrow(func.blocks[blk]);
+    auto const blkPtr = func.blocks[blk].get();
     forEachSuccessor(*blkPtr, [this] (BlockId next) {
         walk(next);
       });
@@ -65,7 +65,7 @@ struct PostOrderWalker {
 };
 
 void postorderWalk(const php::Func& func,
-                   std::vector<borrowed_ptr<php::Block>>& out,
+                   std::vector<php::Block*>& out,
                    boost::dynamic_bitset<>& visited,
                    php::Block& blk) {
   auto walker = PostOrderWalker { func, out, visited };
@@ -76,23 +76,23 @@ void postorderWalk(const php::Func& func,
 
 //////////////////////////////////////////////////////////////////////
 
-std::vector<borrowed_ptr<php::Block>> rpoSortFromBlock(const php::Func& func,
+std::vector<php::Block*> rpoSortFromBlock(const php::Func& func,
                                                        BlockId start) {
   boost::dynamic_bitset<> visited(func.blocks.size());
-  std::vector<borrowed_ptr<php::Block>> ret;
+  std::vector<php::Block*> ret;
   ret.reserve(func.blocks.size());
   postorderWalk(func, ret, visited, *func.blocks[start]);
   std::reverse(begin(ret), end(ret));
   return ret;
 }
 
-std::vector<borrowed_ptr<php::Block>> rpoSortFromMain(const php::Func& func) {
+std::vector<php::Block*> rpoSortFromMain(const php::Func& func) {
   return rpoSortFromBlock(func, func.mainEntry);
 }
 
-std::vector<borrowed_ptr<php::Block>> rpoSortAddDVs(const php::Func& func) {
+std::vector<php::Block*> rpoSortAddDVs(const php::Func& func) {
   boost::dynamic_bitset<> visited(func.blocks.size());
-  std::vector<borrowed_ptr<php::Block>> ret;
+  std::vector<php::Block*> ret;
   ret.reserve(func.blocks.size());
   postorderWalk(func, ret, visited, *func.blocks[func.mainEntry]);
 
@@ -112,7 +112,7 @@ std::vector<borrowed_ptr<php::Block>> rpoSortAddDVs(const php::Func& func) {
 }
 
 BlockToBlocks
-computeNonThrowPreds(const std::vector<borrowed_ptr<php::Block>>& rpoBlocks) {
+computeNonThrowPreds(const std::vector<php::Block*>& rpoBlocks) {
   auto preds = BlockToBlocks{};
   preds.reserve(rpoBlocks.size());
   for (auto& b : rpoBlocks) {
@@ -130,7 +130,7 @@ computeNonThrowPreds(const std::vector<borrowed_ptr<php::Block>>& rpoBlocks) {
 }
 
 BlockToBlocks
-computeThrowPreds(const std::vector<borrowed_ptr<php::Block>>& rpoBlocks) {
+computeThrowPreds(const std::vector<php::Block*>& rpoBlocks) {
   auto preds = BlockToBlocks{};
   preds.reserve(rpoBlocks.size());
   for (auto& b : rpoBlocks) {
@@ -154,7 +154,7 @@ computeThrowPreds(const std::vector<borrowed_ptr<php::Block>>& rpoBlocks) {
  * because we don't expect long cyclic chains of no-op blocks).
  */
 BlockId next_real_block(const php::Func& func, BlockId id) {
-  auto blk = borrow(func.blocks[id]);
+  auto blk = func.blocks[id].get();
   auto min = id;
   while (is_single_nop(*blk)) {
     if (blk->fallthrough == id || blk->fallthrough == NoBlockId) break;
@@ -168,7 +168,7 @@ BlockId next_real_block(const php::Func& func, BlockId id) {
       min = blk->fallthrough;
     }
     id = blk->fallthrough;
-    blk = borrow(func.blocks[id]);
+    blk = func.blocks[id].get();
   }
   return id;
 }

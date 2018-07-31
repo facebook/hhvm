@@ -36,20 +36,6 @@ namespace HPHP { namespace HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Self-documenting type alias for pointers that aren't owned.
- *
- * This type is intended to imply that someone else has an owning
- * pointer on this value which is guaranteed to live longer than this
- * pointer.
- */
-template<class T> using borrowed_ptr = T*;
-
-template<class T>
-borrowed_ptr<T> borrow(const std::unique_ptr<T>& p) {
-  return p.get();
-}
-
-/*
  * String that must be a static string, and Array that must be a
  * static array.
  */

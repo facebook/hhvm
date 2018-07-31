@@ -257,7 +257,7 @@ void PropertiesInfo::setBadPropInitialValues() {
 //////////////////////////////////////////////////////////////////////
 
 void merge_closure_use_vars_into(ClosureUseVarMap& dst,
-                                 borrowed_ptr<php::Class> clo,
+                                 php::Class* clo,
                                  std::vector<Type> types) {
   auto& current = dst[clo];
   if (current.empty()) {

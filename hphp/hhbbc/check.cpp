@@ -117,8 +117,8 @@ bool has_edge_linear(const Container& c,
 }
 
 void checkExnTreeBasic(boost::dynamic_bitset<>& seenIds,
-                       borrowed_ptr<const ExnNode> node,
-                       borrowed_ptr<const ExnNode> expectedParent) {
+                       const ExnNode* node,
+                       const ExnNode* expectedParent) {
   // All exnNode ids must be unique.
   if (seenIds.size() < node->id + 1) {
     seenIds.resize(node->id + 1);
@@ -131,7 +131,7 @@ void checkExnTreeBasic(boost::dynamic_bitset<>& seenIds,
   assert(node->parent == expectedParent);
 
   for (auto& c : node->children) {
-    checkExnTreeBasic(seenIds, borrow(c), node);
+    checkExnTreeBasic(seenIds, c.get(), node);
   }
 }
 
@@ -164,7 +164,7 @@ void checkFaultEntryRec(const php::Func& func,
   });
 }
 
-void checkExnTreeMore(const php::Func& func, borrowed_ptr<const ExnNode> node) {
+void checkExnTreeMore(const php::Func& func, const ExnNode* node) {
   match<void>(
     node->info,
     [&](const FaultRegion& fr) {
@@ -174,19 +174,19 @@ void checkExnTreeMore(const php::Func& func, borrowed_ptr<const ExnNode> node) {
     [] (const CatchRegion&) {}
   );
 
-  for (auto& c : node->children) checkExnTreeMore(func, borrow(c));
+  for (auto& c : node->children) checkExnTreeMore(func, c.get());
 }
 
 bool DEBUG_ONLY checkExnTree(const php::Func& f) {
   boost::dynamic_bitset<> seenIds;
-  for (auto& n : f.exnNodes) checkExnTreeBasic(seenIds, borrow(n), nullptr);
+  for (auto& n : f.exnNodes) checkExnTreeBasic(seenIds, n.get(), nullptr);
 
   // ExnNode ids are contiguous.
   for (size_t i = 0; i < seenIds.size(); ++i) assert(seenIds[i] == true);
 
   // The following assertions come after the above, because if the
   // tree is totally clobbered it's easy for the wrong ones to fire.
-  for (auto& n : f.exnNodes) checkExnTreeMore(f, borrow(n));
+  for (auto& n : f.exnNodes) checkExnTreeMore(f, n.get());
   return true;
 }
 

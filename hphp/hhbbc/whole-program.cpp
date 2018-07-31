@@ -137,14 +137,14 @@ std::vector<Context> all_function_contexts(const php::Program& program) {
   for (auto& u : program.units) {
     for (auto& c : u->classes) {
       for (auto& m : c->methods) {
-        ret.push_back(Context { borrow(u), borrow(m), borrow(c)});
+        ret.push_back(Context { u.get(), m.get(), c.get()});
       }
     }
     for (auto& f : u->funcs) {
-      ret.push_back(Context { borrow(u), borrow(f) });
+      ret.push_back(Context { u.get(), f.get() });
     }
     if (options.AnalyzePseudomains) {
-      ret.push_back(Context { borrow(u), borrow(u->pseudomain) });
+      ret.push_back(Context { u.get(), u->pseudomain.get() });
     }
   }
   return ret;
@@ -199,20 +199,20 @@ std::vector<WorkItem> initial_work(const php::Program& program,
       if (is_used_trait(*c)) {
         for (auto& f : c->methods) {
           ret.emplace_back(WorkType::Func,
-                           Context { borrow(u), borrow(f), f->cls });
+                           Context { u.get(), f.get(), f->cls });
         }
       } else {
         ret.emplace_back(WorkType::Class,
-                         Context { borrow(u), nullptr, borrow(c) });
+                         Context { u.get(), nullptr, c.get() });
       }
     }
     for (auto& f : u->funcs) {
-      ret.emplace_back(WorkType::Func, Context { borrow(u), borrow(f) });
+      ret.emplace_back(WorkType::Func, Context { u.get(), f.get() });
     }
     if (options.AnalyzePseudomains) {
       ret.emplace_back(
         WorkType::Func,
-        Context { borrow(u), borrow(u->pseudomain) }
+        Context { u.get(), u->pseudomain.get() }
       );
     }
   }
@@ -223,7 +223,7 @@ std::vector<Context> opt_prop_type_hints_contexts(const php::Program& program) {
   std::vector<Context> ret;
   for (auto& u : program.units) {
     for (auto& c : u->classes) {
-      ret.emplace_back(Context { borrow(u), nullptr, borrow(c) });
+      ret.emplace_back(Context { u.get(), nullptr, c.get() });
     }
   }
   return ret;
@@ -435,7 +435,7 @@ void mark_persistent_static_properties(const Index& index,
   for (auto& unit : program.units) {
     for (auto& cls : unit->classes) {
       for (auto& prop : cls->properties) {
-        if (index.lookup_public_static_immutable(borrow(cls), prop.name)) {
+        if (index.lookup_public_static_immutable(cls.get(), prop.name)) {
           prop.attrs |= AttrPersistent;
         }
       }
@@ -578,7 +578,7 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
   state_after("parse", *program);
 
   folly::Optional<Index> index;
-  index.emplace(borrow(program));
+  index.emplace(program.get());
   if (!options.NoOptimizations) {
     while (true) {
       try {
@@ -600,7 +600,7 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
         break;
       } catch (Index::rebuild& rebuild) {
         FTRACE(1, "whole_program: rebuilding index\n");
-        index.emplace(borrow(program), &rebuild);
+        index.emplace(program.get(), &rebuild);
         continue;
       }
     }

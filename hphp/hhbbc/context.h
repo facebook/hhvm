@@ -36,9 +36,9 @@ struct ContextHash;
  * need a "context", to allow recording dependencies.
  */
 struct Context {
-  borrowed_ptr<const php::Unit> unit;
-  borrowed_ptr<php::Func> func;
-  borrowed_ptr<const php::Class> cls;
+  const php::Unit* unit;
+  php::Func* func;
+  const php::Class* cls;
 
   using Hash = ContextHash;
 };

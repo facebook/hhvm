@@ -38,7 +38,7 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
     FTRACE(2, "Remove unreachable blocks: {}\n", ainfo.ctx.func->name);
   };
 
-  auto make_unreachable = [&](borrowed_ptr<php::Block> blk) {
+  auto make_unreachable = [&](php::Block* blk) {
     if (blk->id == NoBlockId) return false;
     auto const& state = ainfo.bdata[blk->id].stateIn;
     if (!state.initialized) return true;
@@ -48,7 +48,7 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
   };
 
   for (auto const& blk : ainfo.ctx.func->blocks) {
-    if (!make_unreachable(borrow(blk))) continue;
+    if (!make_unreachable(blk.get())) continue;
     header();
     FTRACE(2, "Marking {} unreachable\n", blk->id);
     auto const srcLoc = blk->hhbcs.front().srcLoc;
@@ -276,7 +276,7 @@ Bytecode buildStringSwitch(SwitchInfo& switchInfo) {
 }
 
 bool buildSwitches(php::Func& func,
-                   borrowed_ptr<php::Block> blk,
+                   php::Block* blk,
                    std::vector<MergeBlockInfo>& blkInfos) {
   SwitchInfo switchInfo;
   std::vector<BlockId> blocks;
@@ -285,7 +285,7 @@ bool buildSwitches(php::Func& func,
   blkInfos[blk->id].onlySwitch = false;
   while (true) {
     auto const& bInfo = blkInfos[switchInfo.defaultBlock];
-    auto const nxt = borrow(func.blocks[switchInfo.defaultBlock]);
+    auto const nxt = func.blocks[switchInfo.defaultBlock].get();
     if (bInfo.onlySwitch && !bInfo.multiplePreds &&
         analyzeSwitch(*nxt, blkInfos, &switchInfo)) {
       blocks.push_back(switchInfo.defaultBlock);
@@ -317,7 +317,7 @@ bool buildSwitches(php::Func& func,
         blk->fallthrough = NoBlockId;
         for (auto id : blocks) {
           if (blkInfos[id].multiplePreds) continue;
-          auto const removed = borrow(func.blocks[id]);
+          auto const removed = func.blocks[id].get();
           removed->id = NoBlockId;
           removed->hhbcs = { bc::Nop {} };
           removed->fallthrough = NoBlockId;
@@ -334,11 +334,11 @@ bool buildSwitches(php::Func& func,
 
 bool strip_exn_tree(const php::Func& func,
                     CompactVector<std::unique_ptr<php::ExnNode>>& nodes,
-                    const hphp_fast_set<borrowed_ptr<php::ExnNode>>& seenNodes,
+                    const hphp_fast_set<php::ExnNode*>& seenNodes,
                     uint32_t& nextId) {
   auto it = std::remove_if(nodes.begin(), nodes.end(),
                            [&] (const std::unique_ptr<php::ExnNode>& node) {
-                             if (seenNodes.count(borrow(node))) return false;
+                             if (seenNodes.count(node.get())) return false;
                              FTRACE(2, "Stripping ExnNode {}\n", node->id);
                              return true;
                            });
@@ -371,7 +371,7 @@ bool rebuild_exn_tree(const FuncAnalysis& ainfo) {
     auto const& state = ainfo.bdata[id].stateIn;
     return state.initialized && !state.unreachable;
   };
-  hphp_fast_set<borrowed_ptr<php::ExnNode>> seenNodes;
+  hphp_fast_set<php::ExnNode*> seenNodes;
 
   for (auto const& blk : ainfo.rpoBlocks) {
     if (!reachable(blk->id)) {
@@ -458,7 +458,7 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
   for (auto& blk : func.blocks) {
     if (blk->id == NoBlockId) continue;
     while (blk->fallthrough != NoBlockId) {
-      auto nxt = borrow(func.blocks[blk->fallthrough]);
+      auto nxt = func.blocks[blk->fallthrough].get();
       if (blockInfo[blk->id].multipleSuccs ||
           blockInfo[nxt->id].multiplePreds ||
           blk->exnNode != nxt->exnNode ||
@@ -492,7 +492,7 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
         (bInfo.multiplePreds || !bInfo.onlySwitch || !bInfo.followsSwitch)) {
       // This block looks like it could be part of a switch, and it's
       // not in the middle of a sequence of such blocks.
-      if (buildSwitches(func, borrow(blk), blockInfo)) {
+      if (buildSwitches(func, blk.get(), blockInfo)) {
         anyChanges = true;
       }
     }

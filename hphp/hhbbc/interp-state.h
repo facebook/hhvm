@@ -363,7 +363,7 @@ private:
  * Shows up in a few different interpreter structures.
  */
 using ClosureUseVarMap = hphp_hash_map<
-  borrowed_ptr<php::Class>,
+  php::Class*,
   std::vector<Type>
 >;
 
@@ -372,7 +372,7 @@ using ClosureUseVarMap = hphp_hash_map<
  * `clo' into the destination map.
  */
 void merge_closure_use_vars_into(ClosureUseVarMap& dst,
-                                 borrowed_ptr<php::Class> clo,
+                                 php::Class* clo,
                                  std::vector<Type>);
 
 //////////////////////////////////////////////////////////////////////
@@ -412,7 +412,7 @@ struct CollectedInfo {
   PropertiesInfo props;
   PublicSPropIndexer* const publicStatics;
   ConstantMap cnsMap;
-  hphp_fast_set<std::pair<borrowed_ptr<const php::Func>, BlockId>>
+  hphp_fast_set<std::pair<const php::Func*, BlockId>>
     unfoldableFuncs;
   bool mayUseVV{false};
   bool effectFree{true};

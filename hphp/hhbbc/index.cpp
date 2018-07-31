@@ -95,12 +95,12 @@ const StaticString s_Generator("Generator");
 
 /*
  * One-to-many case insensitive map, where the keys are static strings
- * and the values are some kind of borrowed_ptr.
+ * and the values are some kind of pointer.
  */
 template<class T> using ISStringToMany =
   std::unordered_multimap<
     SString,
-    borrowed_ptr<T>,
+    T*,
     string_data_hash,
     string_data_isame
   >;
@@ -119,9 +119,9 @@ template<class T> using ISStringToOneT =
 
 /*
  * One-to-one case insensitive map, where the keys are static strings
- * and the values are some kind of borrowed_ptr.
+ * and the values are some kind of pointer.
  */
-template<class T> using ISStringToOne = ISStringToOneT<borrowed_ptr<T>>;
+template<class T> using ISStringToOne = ISStringToOneT<T*>;
 
 template<class MultiMap>
 folly::Range<typename MultiMap::const_iterator>
@@ -202,9 +202,9 @@ struct PublicSPropEntry {
  * class hierarchy.
  */
 struct MethTabEntry {
-  MethTabEntry(borrowed_ptr<const php::Func> func, Attr a, bool hpa, bool tl) :
+  MethTabEntry(const php::Func* func, Attr a, bool hpa, bool tl) :
       func(func), attrs(a), hasPrivateAncestor(hpa), topLevel(tl) {}
-  borrowed_ptr<const php::Func> func = nullptr;
+  const php::Func* func = nullptr;
   // A method could be imported from a trait, and its attributes changed
   Attr attrs {};
   bool hasAncestor = false;
@@ -268,7 +268,7 @@ using ContextRetTyMap = tbb::concurrent_hash_map<
 //////////////////////////////////////////////////////////////////////
 
 template<class Filter>
-PropState make_unknown_propstate(borrowed_ptr<const php::Class> cls,
+PropState make_unknown_propstate(const php::Class* cls,
                                  Filter filter) {
   auto ret = PropState{};
   for (auto& prop : cls->properties) {
@@ -290,7 +290,7 @@ PropState make_unknown_propstate(borrowed_ptr<const php::Class> cls,
  * on it.
  */
 struct res::Func::FuncInfo {
-  borrowed_ptr<const php::Func> func = nullptr;
+  const php::Func* func = nullptr;
   /*
    * The best-known return type of the function, if we have any
    * information.  May be TBottom if the function is known to never
@@ -352,7 +352,7 @@ namespace {
  */
 
 struct ConstInfo {
-  borrowed_ptr<const php::Func> func;
+  const php::Func* func;
   Type                          type;
   bool                          system;
   bool                          readonly;
@@ -395,38 +395,38 @@ struct ClassInfo {
    * A pointer to the underlying php::Class that we're storing
    * information about.
    */
-  borrowed_ptr<const php::Class> cls = nullptr;
+  const php::Class* cls = nullptr;
 
   /*
    * The info for the parent of this Class.
    */
-  borrowed_ptr<ClassInfo> parent = nullptr;
+  ClassInfo* parent = nullptr;
 
   /*
    * A vector of the declared interfaces class info structures.  This is in
    * declaration order mirroring the php::Class interfaceNames vector, and does
    * not include inherited interfaces.
    */
-  std::vector<borrowed_ptr<const ClassInfo>> declInterfaces;
+  std::vector<const ClassInfo*> declInterfaces;
 
   /*
    * A (case-insensitive) map from interface names supported by this class to
    * their ClassInfo structures, flattened across the hierarchy.
    */
-  ISStringToOneT<borrowed_ptr<const ClassInfo>> implInterfaces;
+  ISStringToOneT<const ClassInfo*> implInterfaces;
 
   /*
    * A (case-sensitive) map from class constant name to the php::Const
    * that it came from.  This map is flattened across the inheritance
    * hierarchy.
    */
-  hphp_fast_map<SString,borrowed_ptr<const php::Const>> clsConstants;
+  hphp_fast_map<SString,const php::Const*> clsConstants;
 
   /*
    * A vector of the used traits, in class order, mirroring the
    * php::Class usedTraitNames vector.
    */
-  CompactVector<borrowed_ptr<const ClassInfo>> usedTraits;
+  CompactVector<const ClassInfo*> usedTraits;
 
   /*
    * A list of extra properties supplied by this class's used traits.
@@ -469,7 +469,7 @@ struct ClassInfo {
    * Note, unlike baseList, the order of the elements in this vector
    * is unspecified.
    */
-  std::vector<borrowed_ptr<ClassInfo>> subclassList;
+  std::vector<ClassInfo*> subclassList;
 
   /*
    * A vector of ClassInfo that encodes the inheritance hierarchy,
@@ -478,7 +478,7 @@ struct ClassInfo {
    * This is the list of base classes for this class in inheritance
    * order.
    */
-  std::vector<borrowed_ptr<ClassInfo>> baseList;
+  std::vector<ClassInfo*> baseList;
 
   /*
    * Property types for public static properties, declared on this exact class
@@ -554,8 +554,8 @@ const std::vector<std::pair<SString,MagicMapInfo>> magicMethodMap {
 
 namespace res {
 
-Class::Class(borrowed_ptr<const Index> idx,
-             Either<SString,borrowed_ptr<ClassInfo>> val)
+Class::Class(const Index* idx,
+             Either<SString,ClassInfo*> val)
   : index(idx)
   , val(val)
 {}
@@ -612,14 +612,14 @@ bool Class::couldBe(const Class& o) const {
 SString Class::name() const {
   return val.match(
     [] (SString s) { return s; },
-    [] (borrowed_ptr<ClassInfo> ci) { return ci->cls->name.get(); }
+    [] (ClassInfo* ci) { return ci->cls->name.get(); }
   );
 }
 
 bool Class::couldBeInterfaceOrTrait() const {
   return val.match(
     [] (SString) { return true; },
-    [] (borrowed_ptr<ClassInfo> cinfo) {
+    [] (ClassInfo* cinfo) {
       return (cinfo->cls->attrs & (AttrInterface | AttrTrait));
     }
   );
@@ -628,7 +628,7 @@ bool Class::couldBeInterfaceOrTrait() const {
 bool Class::couldBeInterface() const {
   return val.match(
     [] (SString) { return true; },
-    [] (borrowed_ptr<ClassInfo> cinfo) {
+    [] (ClassInfo* cinfo) {
       return cinfo->cls->attrs & AttrInterface;
     }
   );
@@ -637,7 +637,7 @@ bool Class::couldBeInterface() const {
 bool Class::couldBeOverriden() const {
   return val.match(
     [] (SString) { return true; },
-    [] (borrowed_ptr<ClassInfo> cinfo) {
+    [] (ClassInfo* cinfo) {
       return !(cinfo->cls->attrs & AttrNoOverride);
     }
   );
@@ -646,7 +646,7 @@ bool Class::couldBeOverriden() const {
 bool Class::couldHaveMagicGet() const {
   return val.match(
     [] (SString) { return true; },
-    [] (borrowed_ptr<ClassInfo> cinfo) {
+    [] (ClassInfo* cinfo) {
       return cinfo->magicGet.derivedHas;
     }
   );
@@ -655,7 +655,7 @@ bool Class::couldHaveMagicGet() const {
 bool Class::couldHaveMagicBool() const {
   return val.match(
     [] (SString) { return true; },
-    [] (borrowed_ptr<ClassInfo> cinfo) {
+    [] (ClassInfo* cinfo) {
       return cinfo->magicBool.derivedHas;
     }
   );
@@ -664,7 +664,7 @@ bool Class::couldHaveMagicBool() const {
 bool Class::couldHaveMockedDerivedClass() const {
   return val.match(
     [] (SString) { return true;},
-    [] (borrowed_ptr<ClassInfo> cinfo) {
+    [] (ClassInfo* cinfo) {
       return cinfo->isDerivedMocked;
     }
   );
@@ -673,7 +673,7 @@ bool Class::couldHaveMockedDerivedClass() const {
 bool Class::couldBeMocked() const {
   return val.match(
     [] (SString) { return true;},
-    [] (borrowed_ptr<ClassInfo> cinfo) {
+    [] (ClassInfo* cinfo) {
       return cinfo->isMocked;
     }
   );
@@ -706,7 +706,7 @@ folly::Optional<res::Class> Class::parent() const {
   return res::Class { index, parent };
 }
 
-borrowed_ptr<const php::Class> Class::cls() const {
+const php::Class* Class::cls() const {
   return val.right() ? val.right()->cls : nullptr;
 }
 
@@ -715,13 +715,13 @@ std::string show(const Class& c) {
     [] (SString s) -> std::string {
       return s->data();
     },
-    [] (borrowed_ptr<ClassInfo> cinfo) {
+    [] (ClassInfo* cinfo) {
       return folly::sformat("{}*", cinfo->cls->name);
     }
   );
 }
 
-Func::Func(borrowed_ptr<const Index> idx, Rep val)
+Func::Func(const Index* idx, Rep val)
   : index(idx)
   , val(val)
 {}
@@ -739,9 +739,9 @@ SString Func::name() const {
     val,
     [&] (FuncName s) { return s.name; },
     [&] (MethodName s) { return s.name; },
-    [&] (borrowed_ptr<FuncInfo> fi) { return fi->func->name; },
-    [&] (borrowed_ptr<const MethTabEntryPair> mte) { return mte->first; },
-    [&] (borrowed_ptr<FuncFamily> fa) -> SString {
+    [&] (FuncInfo* fi) { return fi->func->name; },
+    [&] (const MethTabEntryPair* mte) { return mte->first; },
+    [&] (FuncFamily* fa) -> SString {
       if (fa->isCtor) return s_construct.get();
       auto const name = fa->possibleFuncs.front()->first;
       if (debug) {
@@ -754,15 +754,15 @@ SString Func::name() const {
   );
 }
 
-borrowed_ptr<const php::Func> Func::exactFunc() const {
-  using Ret = borrowed_ptr<const php::Func>;
+const php::Func* Func::exactFunc() const {
+  using Ret = const php::Func*;
   return match<Ret>(
     val,
     [&](FuncName /*s*/)                           { return Ret{}; },
     [&](MethodName /*s*/)                         { return Ret{}; },
-    [&](borrowed_ptr<FuncInfo> fi)                { return fi->func; },
-    [&](borrowed_ptr<const MethTabEntryPair> mte) { return mte->second.func; },
-    [&](borrowed_ptr<FuncFamily> /*fa*/)          { return Ret{}; }
+    [&](FuncInfo* fi)                { return fi->func; },
+    [&](const MethTabEntryPair* mte) { return mte->second.func; },
+    [&](FuncFamily* /*fa*/)          { return Ret{}; }
   );
 }
 
@@ -771,9 +771,9 @@ bool Func::cantBeMagicCall() const {
     val,
     [&](FuncName)                             { return true; },
     [&](MethodName)                           { return false; },
-    [&](borrowed_ptr<FuncInfo>)               { return true; },
-    [&](borrowed_ptr<const MethTabEntryPair>) { return true; },
-    [&](borrowed_ptr<FuncFamily>)             { return true; }
+    [&](FuncInfo*)               { return true; },
+    [&](const MethTabEntryPair*) { return true; },
+    [&](FuncFamily*)             { return true; }
   );
 }
 
@@ -786,11 +786,11 @@ bool Func::mightReadCallerFrame() const {
       return !RuntimeOption::RepoAuthoritative;
     },
     [&](MethodName /*s*/) { return false; },
-    [&](borrowed_ptr<FuncInfo> fi) {
+    [&](FuncInfo* fi) {
       return fi->func->attrs & AttrReadsCallerFrame;
     },
-    [&](borrowed_ptr<const MethTabEntryPair>) { return false; },
-    [&](borrowed_ptr<FuncFamily> fa) {
+    [&](const MethTabEntryPair*) { return false; },
+    [&](FuncFamily* fa) {
       for (auto const pf : fa->possibleFuncs) {
         if (pf->second.func->attrs & AttrReadsCallerFrame) return true;
       }
@@ -807,11 +807,11 @@ bool Func::mightWriteCallerFrame() const {
       return !RuntimeOption::RepoAuthoritative;
     },
     [&](MethodName /*s*/) { return false; },
-    [&](borrowed_ptr<FuncInfo> fi) {
+    [&](FuncInfo* fi) {
       return fi->func->attrs & AttrWritesCallerFrame;
     },
-    [&](borrowed_ptr<const MethTabEntryPair>) { return false; },
-    [&](borrowed_ptr<FuncFamily> fa) {
+    [&](const MethTabEntryPair*) { return false; },
+    [&](FuncFamily* fa) {
       for (auto const pf : fa->possibleFuncs) {
         if (pf->second.func->attrs & AttrWritesCallerFrame) return true;
       }
@@ -822,13 +822,13 @@ bool Func::mightWriteCallerFrame() const {
 bool Func::isFoldable() const {
   return match<bool>(val, [&](FuncName /*s*/) { return false; },
                      [&](MethodName /*s*/) { return false; },
-                     [&](borrowed_ptr<FuncInfo> fi) {
+                     [&](FuncInfo* fi) {
                        return fi->func->attrs & AttrIsFoldable;
                      },
-                     [&](borrowed_ptr<const MethTabEntryPair> mte) {
+                     [&](const MethTabEntryPair* mte) {
                        return mte->second.func->attrs & AttrIsFoldable;
                      },
-                     [&](borrowed_ptr<FuncFamily> fa) {
+                     [&](FuncFamily* fa) {
                        return false;
                      });
 }
@@ -840,11 +840,11 @@ bool Func::mightBeSkipFrame() const {
     // uniquely resolvable. Methods are more complicated though.
     [&](FuncName /*s*/) { return false; },
     [&](MethodName /*s*/) { return true; },
-    [&](borrowed_ptr<FuncInfo> fi) { return fi->func->attrs & AttrSkipFrame; },
-    [&](borrowed_ptr<const MethTabEntryPair> mte) {
+    [&](FuncInfo* fi) { return fi->func->attrs & AttrSkipFrame; },
+    [&](const MethTabEntryPair* mte) {
       return mte->second.func->attrs & AttrSkipFrame;
     },
-    [&](borrowed_ptr<FuncFamily> fa) {
+    [&](FuncFamily* fa) {
       for (auto const pf : fa->possibleFuncs) {
         if (pf->second.func->attrs & AttrSkipFrame) return true;
       }
@@ -862,13 +862,13 @@ bool Func::mightCareAboutDynCalls() const {
       val,
       [&](FuncName) { return true; },
       [&](MethodName) { return true; },
-      [&](borrowed_ptr<FuncInfo> fi) {
+      [&](FuncInfo* fi) {
         return !(fi->func->attrs & AttrDynamicallyCallable);
       },
-      [&](borrowed_ptr<const MethTabEntryPair> mte) {
+      [&](const MethTabEntryPair* mte) {
         return !(mte->second.func->attrs & AttrDynamicallyCallable);
       },
-      [&](borrowed_ptr<FuncFamily> fa) {
+      [&](FuncFamily* fa) {
         for (auto const pf : fa->possibleFuncs) {
           if (!(pf->second.func->attrs & AttrDynamicallyCallable)) return true;
         }
@@ -886,11 +886,11 @@ bool Func::mightBeBuiltin() const {
     // Builtins are always uniquely resolvable in repo mode.
     [&](FuncName) { return !RuntimeOption::RepoAuthoritative; },
     [&](MethodName) { return true; },
-    [&](borrowed_ptr<FuncInfo> fi) { return fi->func->attrs & AttrBuiltin; },
-    [&](borrowed_ptr<const MethTabEntryPair> mte) {
+    [&](FuncInfo* fi) { return fi->func->attrs & AttrBuiltin; },
+    [&](const MethTabEntryPair* mte) {
       return mte->second.func->attrs & AttrBuiltin;
     },
-    [&](borrowed_ptr<FuncFamily> fa) {
+    [&](FuncFamily* fa) {
       for (auto const pf : fa->possibleFuncs) {
         if (pf->second.func->attrs & AttrBuiltin) return true;
       }
@@ -903,9 +903,9 @@ std::string show(const Func& f) {
   std::string ret = f.name()->data();
   match<void>(f.val,
               [&](Func::FuncName) {}, [&](Func::MethodName) {},
-              [&](borrowed_ptr<FuncInfo> /*fi*/) { ret += "*"; },
-              [&](borrowed_ptr<const MethTabEntryPair> /*mte*/) { ret += "*"; },
-              [&](borrowed_ptr<FuncFamily> /*fa*/) { ret += "+"; });
+              [&](FuncInfo* /*fi*/) { ret += "*"; },
+              [&](const MethTabEntryPair* /*mte*/) { ret += "*"; },
+              [&](FuncFamily* /*fa*/) { ret += "+"; });
   return ret;
 }
 
@@ -913,7 +913,7 @@ std::string show(const Func& f) {
 
 //////////////////////////////////////////////////////////////////////
 
-using IfaceSlotMap = hphp_hash_map<borrowed_ptr<const php::Class>, Slot>;
+using IfaceSlotMap = hphp_hash_map<const php::Class*, Slot>;
 
 struct Index::IndexData {
   IndexData() = default;
@@ -939,20 +939,20 @@ struct Index::IndexData {
   // Map from each class to all the closures that are allocated in
   // functions of that class.
   hphp_hash_map<
-    borrowed_ptr<const php::Class>,
-    CompactVector<borrowed_ptr<const php::Class>>
+    const php::Class*,
+    CompactVector<const php::Class*>
   > classClosureMap;
 
   hphp_hash_map<
-    borrowed_ptr<const php::Class>,
-    hphp_fast_set<borrowed_ptr<php::Func>>
+    const php::Class*,
+    hphp_fast_set<php::Func*>
   > classExtraMethodMap;
 
   // Map from every interface to the list of instantiable classes which can
   // implement it.
   hphp_fast_map<
-    borrowed_ptr<const php::Class>,
-    CompactVector<borrowed_ptr<ClassInfo>>
+    const php::Class*,
+    CompactVector<ClassInfo*>
   > ifaceImplementerMap;
 
   /*
@@ -983,11 +983,11 @@ struct Index::IndexData {
   // from ClassInfo, because you don't need to resolve a class to get
   // at them.
   hphp_hash_map<
-    borrowed_ptr<const php::Class>,
+    const php::Class*,
     PropState
   > privatePropInfo;
   hphp_hash_map<
-    borrowed_ptr<const php::Class>,
+    const php::Class*,
     PropState
   > privateStaticPropInfo;
 
@@ -1015,7 +1015,7 @@ struct Index::IndexData {
   IfaceSlotMap ifaceSlotMap;
 
   hphp_hash_map<
-    borrowed_ptr<const php::Class>,
+    const php::Class*,
     std::vector<Type>
   > closureUseVars;
 
@@ -1072,8 +1072,7 @@ void add_dependency(IndexData& data,
 
 std::mutex func_info_mutex;
 
-borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
-                                        borrowed_ptr<const php::Func> f) {
+FuncInfo* create_func_info(IndexData& data, const php::Func* f) {
   auto fi = &data.funcInfo[f->idx];
   if (UNLIKELY(fi->func == nullptr)) {
     if (f->nativeInfo) {
@@ -1094,8 +1093,7 @@ borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
   return fi;
 }
 
-borrowed_ptr<FuncInfo> func_info(IndexData& data,
-                                 borrowed_ptr<const php::Func> f) {
+FuncInfo* func_info(IndexData& data, const php::Func* f) {
   auto const fi = &data.funcInfo[f->idx];
   return fi;
 }
@@ -1279,8 +1277,8 @@ using TMIData = TraitMethodImportData<TraitMethod,
 
 struct BuildClsInfo {
   IndexData& index;
-  borrowed_ptr<ClassInfo> rleaf;
-  hphp_hash_map<SString, std::pair<php::Prop, borrowed_ptr<const ClassInfo>>,
+  ClassInfo* rleaf;
+  hphp_hash_map<SString, std::pair<php::Prop, const ClassInfo*>,
                 string_data_hash, string_data_same> pbuilder;
 };
 
@@ -1288,7 +1286,7 @@ struct BuildClsInfo {
  * Make a flattened table of the constants on this class.
  */
 bool build_class_constants(BuildClsInfo& info,
-                           borrowed_ptr<const ClassInfo> rparent,
+                           const ClassInfo* rparent,
                            bool fromTrait) {
   for (auto& c : rparent->cls->constants) {
     auto& cptr = info.rleaf->clsConstants[c.name];
@@ -1334,7 +1332,7 @@ bool build_class_constants(BuildClsInfo& info,
 }
 
 bool build_class_properties(BuildClsInfo& info,
-                            borrowed_ptr<const ClassInfo> rparent) {
+                            const ClassInfo* rparent) {
   // There's no need to do this work if traits have been flattened
   // already, or if the top level class has no traits.  In those
   // cases, we might be able to rule out some ClassInfo
@@ -1419,7 +1417,7 @@ bool build_class_properties(BuildClsInfo& info,
   return true;
 }
 
-auto build_methods_for_iface(IndexData& data, borrowed_ptr<ClassInfo> iface) {
+auto build_methods_for_iface(IndexData& data, ClassInfo* iface) {
   std::vector<SString> names;
   CompactVector<std::unique_ptr<res::Func::FuncFamily>> ret;
   auto const impls = data.ifaceImplementerMap.find(iface->cls);
@@ -1447,7 +1445,7 @@ auto build_methods_for_iface(IndexData& data, borrowed_ptr<ClassInfo> iface) {
 
   auto add_method = [&] (SString name) {
     res::Func::FuncFamily ff;
-    hphp_hash_set<borrowed_ptr<const php::Func>> seen;
+    hphp_hash_set<const php::Func*> seen;
     auto& funcs = ff.possibleFuncs;
     for (auto cinfo : impls->second) {
       assertx(!(cinfo->cls->attrs & AttrInterface));
@@ -1479,7 +1477,7 @@ auto build_methods_for_iface(IndexData& data, borrowed_ptr<ClassInfo> iface) {
 
     if (!funcs.empty()) {
       auto ffp = std::make_unique<FuncFamily>(std::move(ff));
-      iface->methodFamilies.emplace(name, borrow(ffp));
+      iface->methodFamilies.emplace(name, ffp.get());
       added.emplace(name);
       ret.push_back(std::move(ffp));
     }
@@ -1493,7 +1491,7 @@ auto build_methods_for_iface(IndexData& data, borrowed_ptr<ClassInfo> iface) {
     if (added.count(m->name)) {
       iface->methods.emplace(
         m->name,
-        MethTabEntry { borrow(m), m->attrs, false, true }
+        MethTabEntry { m.get(), m->attrs, false, true }
       );
     }
   }
@@ -1507,7 +1505,7 @@ void build_iface_methods(IndexData& data) {
     [&] (const std::unique_ptr<ClassInfo>& info) ->
       CompactVector<std::unique_ptr<res::Func::FuncFamily>> {
       if (info->cls->attrs & AttrInterface) {
-        return build_methods_for_iface(data, borrow(info));
+        return build_methods_for_iface(data, info.get());
       }
       return {};
     }
@@ -1589,7 +1587,7 @@ bool build_class_methods(BuildClsInfo& info) {
   for (auto& m : info.rleaf->cls->methods) {
     auto res = info.rleaf->methods.emplace(
       m->name,
-      MethTabEntry { borrow(m), m->attrs, false, true }
+      MethTabEntry { m.get(), m->attrs, false, true }
     );
     if (res.second) {
       res.first->second.idx = idx++;
@@ -1603,7 +1601,7 @@ bool build_class_methods(BuildClsInfo& info) {
       // abstract methods from traits never override anything.
       continue;
     }
-    if (!methodOverride(res.first, borrow(m), m->attrs, m->name)) return false;
+    if (!methodOverride(res.first, m.get(), m->attrs, m->name)) return false;
   }
 
   // If our traits were previously flattened, we're done.
@@ -1681,11 +1679,11 @@ bool build_class_methods(BuildClsInfo& info) {
 }
 
 bool enforce_in_maybe_sealed_parent_whitelist(
-  const borrowed_ptr<const ClassInfo> cls,
-  const borrowed_ptr<const ClassInfo> parent);
+  const ClassInfo* cls,
+  const ClassInfo* parent);
 
 bool build_cls_info_rec(BuildClsInfo& info,
-                        borrowed_ptr<const ClassInfo> rparent,
+                        const ClassInfo* rparent,
                         bool fromTrait) {
   if (!rparent) return true;
   if (!enforce_in_maybe_sealed_parent_whitelist(rparent, rparent->parent)) {
@@ -1738,8 +1736,8 @@ bool build_cls_info_rec(BuildClsInfo& info,
 
 const StaticString s___Sealed("__Sealed");
 bool enforce_in_maybe_sealed_parent_whitelist(
-  const borrowed_ptr<const ClassInfo> cls,
-  const borrowed_ptr<const ClassInfo> parent) {
+  const ClassInfo* cls,
+  const ClassInfo* parent) {
   // if our parent isn't sealed, then we're fine.
   if (!parent || !(parent->cls->attrs & AttrSealed)) return true;
   const UserAttributeMap& parent_attrs = parent->cls->userAttributes;
@@ -1757,7 +1755,7 @@ bool enforce_in_maybe_sealed_parent_whitelist(
   return in_sealed_whitelist;
 }
 
-bool find_constructor(borrowed_ptr<ClassInfo> cinfo) {
+bool find_constructor(ClassInfo* cinfo) {
   if (cinfo->cls->attrs & (AttrInterface|AttrTrait)) {
     return true;
   }
@@ -1814,7 +1812,7 @@ bool find_constructor(borrowed_ptr<ClassInfo> cinfo) {
  * This function return false if we are certain instantiating cinfo
  * would be a fatal at runtime.
  */
-bool build_cls_info(IndexData& index, borrowed_ptr<ClassInfo> cinfo) {
+bool build_cls_info(IndexData& index, ClassInfo* cinfo) {
   auto info = BuildClsInfo{ index, cinfo };
   if (!build_cls_info_rec(info, cinfo, false)) return false;
   if (!find_constructor(cinfo)) return false;
@@ -1850,20 +1848,20 @@ void attribute_setter(const Attr& attrs, bool set, Attr attr) {
 
 void add_unit_to_index(IndexData& index, const php::Unit& unit) {
   hphp_hash_map<
-    borrowed_ptr<const php::Class>,
-    hphp_hash_set<borrowed_ptr<const php::Class>>
+    const php::Class*,
+    hphp_hash_set<const php::Class*>
   > closureMap;
 
   for (auto& c : unit.classes) {
     if (c->attrs & AttrEnum) {
-      index.enums.insert({c->name, borrow(c)});
+      index.enums.insert({c->name, c.get()});
     }
 
-    index.classes.insert({c->name, borrow(c)});
+    index.classes.insert({c->name, c.get()});
 
     for (auto& m : c->methods) {
       attribute_setter(m->attrs, false, AttrNoOverride);
-      index.methods.insert({m->name, borrow(m)});
+      index.methods.insert({m->name, m.get()});
       if (m->attrs & AttrInterceptable) {
         index.any_interceptable_functions = true;
       }
@@ -1891,7 +1889,7 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
     }
 
     if (c->closureContextCls) {
-      closureMap[c->closureContextCls].insert(borrow(c));
+      closureMap[c->closureContextCls].insert(c.get());
     }
   }
 
@@ -1923,11 +1921,11 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
       if (f->attrs & AttrBuiltin) index.funcs.erase(funcs.first, funcs.second);
     }
     if (f->attrs & AttrInterceptable) index.any_interceptable_functions = true;
-    index.funcs.insert({f->name, borrow(f)});
+    index.funcs.insert({f->name, f.get()});
   }
 
   for (auto& ta : unit.typeAliases) {
-    index.typeAliases.insert({ta->name, borrow(ta)});
+    index.typeAliases.insert({ta->name, ta.get()});
   }
 
   for (auto& ca : unit.classAliases) {
@@ -1943,12 +1941,12 @@ struct NamingEnv {
   struct Define;
   struct Seen;
 
-  borrowed_ptr<ClassInfo> try_lookup(SString name) const {
+  ClassInfo* try_lookup(SString name) const {
     auto const it = names.find(name);
     return it == end(names) ? nullptr : it->second;
   }
 
-  borrowed_ptr<ClassInfo> lookup(SString name) const {
+  ClassInfo* lookup(SString name) const {
     auto ret = try_lookup(name);
     always_assert(ret && "NamingEnv::lookup failed unexpectedly");
     return ret;
@@ -1996,8 +1994,8 @@ private:
 };
 
 struct NamingEnv::Define {
-  explicit Define(NamingEnv& env, SString n, borrowed_ptr<ClassInfo> ci,
-                  borrowed_ptr<const php::Class> cls)
+  explicit Define(NamingEnv& env, SString n, ClassInfo* ci,
+                  const php::Class* cls)
       : env(env), n(n) {
     ITRACE(2, "defining {} for {}\n", n, cls->name);
     always_assert(!env.names.count(n));
@@ -2040,8 +2038,8 @@ std::unique_ptr<php::Class> clone_closure(php::Class* newContext,
   clone->unit = newContext->unit;
   auto i = 0;
   for (auto& cloneMeth : clone->methods) {
-    cloneMeth = clone_meth_helper(borrow(clone),
-                                  borrow(cls->methods[i++]),
+    cloneMeth = clone_meth_helper(clone.get(),
+                                  cls->methods[i++].get(),
                                   std::move(cloneMeth),
                                   nextFuncId,
                                   nextClass,
@@ -2070,7 +2068,7 @@ std::unique_ptr<php::Func> clone_meth_helper(
   cloneMeth->unit = newContext->unit;
 
   auto const recordClosure = [&] (uint32_t* clsId) {
-    auto const cls = borrow(origMeth->unit->classes[*clsId]);
+    auto const cls = origMeth->unit->classes[*clsId].get();
     auto& elm = clonedClosures[cls];
     if (!elm.first) {
       elm.first = clone_closure(newContext->closureContextCls ?
@@ -2198,7 +2196,7 @@ bool merge_xinits(Attr attr,
     assertx(&empty == &xinit);
     DEBUG_ONLY auto res = cinfo->methods.emplace(
       xinit->name,
-      MethTabEntry { borrow(xinit), xinit->attrs, false, true }
+      MethTabEntry { xinit.get(), xinit->attrs, false, true }
     );
     assertx(res.second);
     clones.push_back(std::move(xinit));
@@ -2279,7 +2277,7 @@ void flatten_traits(NamingEnv& env, ClassInfo* cinfo) {
 
     clone->attrs |= AttrTrait;
     ent->second.attrs |= AttrTrait;
-    ent->second.func = borrow(clone);
+    ent->second.func = clone.get();
     clones.push_back(std::move(clone));
   }
 
@@ -2313,7 +2311,7 @@ void flatten_traits(NamingEnv& env, ClassInfo* cinfo) {
     if (cinit) cls->methods.pop_back();
     for (auto& clone : clones) {
       ITRACE(5, "  - meth {}\n", clone->name);
-      cinfo->methods.find(clone->name)->second.func = borrow(clone);
+      cinfo->methods.find(clone->name)->second.func = clone.get();
       cls->methods.push_back(std::move(clone));
     }
     if (cinit) cls->methods.push_back(std::move(cinit));
@@ -2322,7 +2320,7 @@ void flatten_traits(NamingEnv& env, ClassInfo* cinfo) {
       auto& classClosures = env.index.classClosureMap[cls];
       cls->unit->classes.resize(nextClassId);
       for (auto& ent : clonedClosures) {
-        auto const clo = borrow(ent.second.first);
+        auto const clo = ent.second.first.get();
         rename_closure(env, clo);
         ITRACE(5, "  - closure {} as {}\n", ent.first->name, clo->name);
         assertx(clo->closureContextCls == cls);
@@ -2361,7 +2359,7 @@ void flatten_traits(NamingEnv& env, ClassInfo* cinfo) {
 }
 
 void resolve_combinations(NamingEnv& env,
-                          borrowed_ptr<const php::Class> cls) {
+                          const php::Class* cls) {
 
   auto resolve_one = [&] (SString name) {
     if (env.try_lookup(name)) return true;
@@ -2408,7 +2406,7 @@ void resolve_combinations(NamingEnv& env,
       return;
     }
   }
-  cinfo->baseList.push_back(borrow(cinfo));
+  cinfo->baseList.push_back(cinfo.get());
 
   for (auto& iname : cls->interfaceNames) {
     auto const iface = env.lookup(iname);
@@ -2434,7 +2432,7 @@ void resolve_combinations(NamingEnv& env,
     cinfo->usedTraits.push_back(trait);
   }
 
-  if (!build_cls_info(env.index, borrow(cinfo))) return;
+  if (!build_cls_info(env.index, cinfo.get())) return;
 
   ITRACE(2, "  resolved: {}\n", cls->name);
   if (Trace::moduleEnabled(Trace::hhbbc_index, 3)) {
@@ -2445,7 +2443,7 @@ void resolve_combinations(NamingEnv& env,
       ITRACE(3, "          uses: {}\n", trait->cls->name);
     }
   }
-  env.index.classInfo.emplace(cls->name, borrow(cinfo));
+  env.index.classInfo.emplace(cls->name, cinfo.get());
   env.index.allClassInfos.push_back(std::move(cinfo));
 }
 
@@ -2521,12 +2519,12 @@ void compute_subclass_list(IndexData& index) {
   auto fixupTraits = false;
   for (auto& cinfo : index.allClassInfos) {
     for (auto& cparent : cinfo->baseList) {
-      cparent->subclassList.push_back(borrow(cinfo));
+      cparent->subclassList.push_back(cinfo.get());
     }
     if (!(cinfo->cls->attrs & AttrNoExpandTrait) &&
         cinfo->usedTraits.size()) {
       fixupTraits = true;
-      compute_subclass_list_rec(index, borrow(cinfo), borrow(cinfo));
+      compute_subclass_list_rec(index, cinfo.get(), cinfo.get());
     }
   }
   if (fixupTraits) {
@@ -2545,10 +2543,10 @@ void compute_subclass_list(IndexData& index) {
   }
 }
 
-void define_func_family(IndexData& index, borrowed_ptr<ClassInfo> cinfo,
+void define_func_family(IndexData& index, ClassInfo* cinfo,
                         SString name, const MethTabEntryPair* mte) {
   index.funcFamilies.push_back(std::make_unique<FuncFamily>());
-  auto const family = borrow(index.funcFamilies.back());
+  auto const family = index.funcFamilies.back().get();
   family->isCtor = mte == cinfo->ctor;
   auto& funcs = family->possibleFuncs;
   for (auto& cleaf : cinfo->subclassList) {
@@ -2618,17 +2616,17 @@ void define_func_families(IndexData& index) {
 
       if (mte->second.attrs & AttrNoOverride) continue;
       if (mte == cinfo->ctor) {
-        define_func_family(index, borrow(cinfo), s_construct.get(), mte);
+        define_func_family(index, cinfo.get(), s_construct.get(), mte);
         didCtor = true;
         continue;
       }
       if (mte->second.attrs & AttrPrivate) continue;
       if (is_special_method_name(mte->first)) continue;
 
-      define_func_family(index, borrow(cinfo), mte->first, mte);
+      define_func_family(index, cinfo.get(), mte->first, mte);
     }
     if (cinfo->ctor && !didCtor) {
-      define_func_family(index, borrow(cinfo), s_construct.get(), cinfo->ctor);
+      define_func_family(index, cinfo.get(), s_construct.get(), cinfo->ctor);
     }
   }
 }
@@ -2638,7 +2636,7 @@ void define_func_families(IndexData& index) {
  * due to being implemented by the same class.
  */
 struct ConflictGraph {
-  void add(borrowed_ptr<const php::Class> i, borrowed_ptr<const php::Class> j) {
+  void add(const php::Class* i, const php::Class* j) {
     if (i == j) return;
     auto& conflicts = map[i];
     if (std::find(conflicts.begin(), conflicts.end(), j) != conflicts.end()) {
@@ -2647,8 +2645,8 @@ struct ConflictGraph {
     conflicts.push_back(j);
   }
 
-  hphp_hash_map<borrowed_ptr<const php::Class>,
-                     std::vector<borrowed_ptr<const php::Class>>> map;
+  hphp_hash_map<const php::Class*,
+                     std::vector<const php::Class*>> map;
 };
 
 /*
@@ -2672,7 +2670,7 @@ void trace_interfaces(const IndexData& index, const ConflictGraph& cg) {
     }
     if (cinfo->cls->attrs & (AttrTrait | AttrEnum | AttrAbstract)) continue;
 
-    classes.emplace_back(Cls{borrow(cinfo)});
+    classes.emplace_back(Cls{cinfo.get()});
     auto& vtable = classes.back().vtable;
     for (auto& pair : cinfo->implInterfaces) {
       auto it = index.ifaceSlotMap.find(pair.second->cls);
@@ -2746,7 +2744,7 @@ void trace_interfaces(const IndexData& index, const ConflictGraph& cg) {
  * Find the lowest Slot that doesn't conflict with anything in the conflict set
  * for iface.
  */
-Slot find_min_slot(borrowed_ptr<const php::Class> iface,
+Slot find_min_slot(const php::Class* iface,
                    const IfaceSlotMap& slots,
                    const ConflictGraph& cg) {
   auto const& conflicts = cg.map.at(iface);
@@ -2778,8 +2776,8 @@ void compute_iface_vtables(IndexData& index) {
   trace_time tracer("compute interface vtables");
 
   ConflictGraph cg;
-  std::vector<borrowed_ptr<const php::Class>>             ifaces;
-  hphp_hash_map<borrowed_ptr<const php::Class>, int> iface_uses;
+  std::vector<const php::Class*>             ifaces;
+  hphp_hash_map<const php::Class*, int> iface_uses;
 
   // Build up the conflict sets.
   for (auto& cinfo : index.allClassInfos) {
@@ -2873,7 +2871,7 @@ void mark_magic_on_parents(ClassInfo& cinfo, ClassInfo& derived) {
   }
 }
 
-bool has_magic_method(borrowed_ptr<const ClassInfo> cinfo, SString name) {
+bool has_magic_method(const ClassInfo* cinfo, SString name) {
   if (name == s_toBoolean.get()) {
     // note that "having" a magic method includes the possibility that
     // a parent class has it. This can't happen for the collection
@@ -2889,7 +2887,7 @@ void find_magic_methods(IndexData& index) {
   for (auto& cinfo : index.allClassInfos) {
     bool any = false;
     for (auto& kv : magicMethodMap) {
-      bool const found = has_magic_method(borrow(cinfo), kv.first);
+      bool const found = has_magic_method(cinfo.get(), kv.first);
       any = any || found;
       (cinfo.get()->*kv.second.pmem).thisHas = found;
     }
@@ -2998,7 +2996,7 @@ void mark_unique_entities(ISStringToMany<T>& entities, F marker) {
 
 //////////////////////////////////////////////////////////////////////
 
-void check_invariants(borrowed_ptr<const ClassInfo> cinfo) {
+void check_invariants(const ClassInfo* cinfo) {
   // All the following invariants only apply to classes
   if (cinfo->cls->attrs & AttrInterface) return;
 
@@ -3010,7 +3008,7 @@ void check_invariants(borrowed_ptr<const ClassInfo> cinfo) {
       auto const it = cinfo->methods.find(m->name);
       always_assert(it != cinfo->methods.end());
       if (it->second.attrs & (AttrNoOverride|AttrPrivate)) continue;
-      if (cinfo->ctor && borrow(m) == cinfo->ctor->second.func) {
+      if (cinfo->ctor && m.get() == cinfo->ctor->second.func) {
         always_assert(cinfo->methodFamilies.count(s_construct.get()));
         continue;
       }
@@ -3078,14 +3076,14 @@ void check_invariants(IndexData& data) {
   }
 
   for (auto& cinfo : data.allClassInfos) {
-    check_invariants(borrow(cinfo));
+    check_invariants(cinfo.get());
   }
 }
 
 //////////////////////////////////////////////////////////////////////
 
 Type context_sensitive_return_type(const Index& index,
-                                   borrowed_ptr<FuncInfo> finfo,
+                                   FuncInfo* finfo,
                                    CallContext callCtx) {
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
@@ -3164,7 +3162,7 @@ Type context_sensitive_return_type(const Index& index,
 
     auto const calleeCtx = Context {
       finfo->func->unit,
-      const_cast<borrowed_ptr<php::Func>>(finfo->func),
+      const_cast<php::Func*>(finfo->func),
       finfo->func->cls
     };
     auto const ty =
@@ -3196,7 +3194,7 @@ Type context_sensitive_return_type(const Index& index,
 
 //////////////////////////////////////////////////////////////////////
 
-PrepKind func_param_prep(borrowed_ptr<const php::Func> func,
+PrepKind func_param_prep(const php::Func* func,
                          uint32_t paramId) {
   if (func->attrs & AttrInterceptable) return PrepKind::Unknown;
   if (paramId >= func->params.size()) {
@@ -3232,7 +3230,7 @@ PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
   }
 
   struct FuncFind {
-    using F = borrowed_ptr<const php::Func>;
+    using F = const php::Func*;
     static F get(std::pair<SString,F> p) { return p.second; }
     static F get(const MethTabEntryPair* mte) { return mte->second.func; }
   };
@@ -3271,7 +3269,7 @@ visit_public_statics(const ClassInfo* cinfo, F fun) -> decltype(fun(cinfo)) {
 
 PublicSPropEntry lookup_public_static_impl(
   const IndexData& data,
-  borrowed_ptr<const ClassInfo> cinfo,
+  const ClassInfo* cinfo,
   SString prop
 ) {
   auto const noInfo = PublicSPropEntry{TInitGen, TInitGen, true};
@@ -3291,7 +3289,7 @@ PublicSPropEntry lookup_public_static_impl(
     }
   );
 
-  auto const unkPart = [&]() -> borrowed_ptr<const Type> {
+  auto const unkPart = [&]() -> const Type* {
     auto unkIt = data.unknownClassSProps.find(prop);
     if (unkIt != end(data.unknownClassSProps)) {
       return &unkIt->second;
@@ -3320,7 +3318,7 @@ PublicSPropEntry lookup_public_static_impl(
 
 PublicSPropEntry lookup_public_static_impl(
   const IndexData& data,
-  borrowed_ptr<const php::Class> cls,
+  const php::Class* cls,
   SString name
 ) {
   auto const classes = find_range(data.classInfo, cls->name);
@@ -3337,7 +3335,7 @@ PublicSPropEntry lookup_public_static_impl(
 
 //////////////////////////////////////////////////////////////////////
 
-Index::Index(borrowed_ptr<php::Program> program,
+Index::Index(php::Program* program,
              rebuild* rebuild_exception)
   : m_data(std::make_unique<IndexData>())
 {
@@ -3367,7 +3365,7 @@ Index::Index(borrowed_ptr<php::Program> program,
       // end of u->classes via flatten_traits (which need to be
       // visited after they're added).
       for (size_t idx = 0; idx < u->classes.size(); idx++) {
-        auto const c = borrow(u->classes[idx]);
+        auto const c = u->classes[idx].get();
         // Classes with no possible resolutions won't get visited in the
         // mark_persistent pass; make sure everything starts off with
         // the attributes clear.
@@ -3439,7 +3437,7 @@ Index::Index(borrowed_ptr<php::Program> program,
 
   if (RuntimeOption::EvalCheckReturnTypeHints == 3) {
     trace_time tracer("initialize return types");
-    std::vector<borrowed_ptr<const php::Func>> all_funcs;
+    std::vector<const php::Func*> all_funcs;
     all_funcs.reserve(m_data->funcs.size() + m_data->methods.size());
     for (auto const fn : m_data->funcs) {
       all_funcs.push_back(fn.second);
@@ -3448,7 +3446,7 @@ Index::Index(borrowed_ptr<php::Program> program,
       all_funcs.push_back(fn.second);
     }
 
-    parallel::for_each(all_funcs, [&] (borrowed_ptr<const php::Func> f) {
+    parallel::for_each(all_funcs, [&] (const php::Func* f) {
       init_return_type(f);
     });
   }
@@ -3779,8 +3777,8 @@ void Index::update_class_aliases() {
   throw rebuild { std::move(m_data->pending_class_aliases) };
 }
 
-const CompactVector<borrowed_ptr<const php::Class>>*
-Index::lookup_closures(borrowed_ptr<const php::Class> cls) const {
+const CompactVector<const php::Class*>*
+Index::lookup_closures(const php::Class* cls) const {
   auto const it = m_data->classClosureMap.find(cls);
   if (it != end(m_data->classClosureMap)) {
     return &it->second;
@@ -3788,8 +3786,8 @@ Index::lookup_closures(borrowed_ptr<const php::Class> cls) const {
   return nullptr;
 }
 
-const hphp_fast_set<borrowed_ptr<php::Func>>*
-Index::lookup_extra_methods(borrowed_ptr<const php::Class> cls) const {
+const hphp_fast_set<php::Func*>*
+Index::lookup_extra_methods(const php::Class* cls) const {
   if (cls->attrs & AttrNoExpandTrait) return nullptr;
   auto const it = m_data->classExtraMethodMap.find(cls);
   if (it != end(m_data->classExtraMethodMap)) {
@@ -3800,7 +3798,7 @@ Index::lookup_extra_methods(borrowed_ptr<const php::Class> cls) const {
 
 //////////////////////////////////////////////////////////////////////
 
-res::Class Index::resolve_class(borrowed_ptr<const php::Class> cls) const {
+res::Class Index::resolve_class(const php::Class* cls) const {
 
   ClassInfo* result = nullptr;
 
@@ -3994,9 +3992,9 @@ folly::Optional<Type> Index::resolve_class_or_type_alias(
                                      res.value.left(), candidate);
 }
 
-std::pair<res::Class,borrowed_ptr<php::Class>>
+std::pair<res::Class,php::Class*>
 Index::resolve_closure_class(Context ctx, int32_t idx) const {
-  auto const cls = borrow(ctx.unit->classes[idx]);
+  auto const cls = ctx.unit->classes[idx].get();
   auto const rcls = resolve_class(cls);
 
   // Closure classes must be unique and defined in the unit that uses
@@ -4479,13 +4477,13 @@ bool Index::is_async_func(res::Func rfunc) const {
   return match<bool>(
     rfunc.val, [&](res::Func::FuncName /*s*/) { return false; },
     [&](res::Func::MethodName /*s*/) { return false; },
-    [&](borrowed_ptr<FuncInfo> finfo) {
+    [&](FuncInfo* finfo) {
       return finfo->func->isAsync && !finfo->func->isGenerator;
     },
-    [&](borrowed_ptr<const MethTabEntryPair> mte) {
+    [&](const MethTabEntryPair* mte) {
       return mte->second.func->isAsync && !mte->second.func->isGenerator;
     },
-    [&](borrowed_ptr<FuncFamily> fam) {
+    [&](FuncFamily* fam) {
       for (auto const pf : fam->possibleFuncs) {
         // Abstract functions will always be overridden by concrete base
         // classes, and in practice are not marked as async even when all of
@@ -4505,13 +4503,13 @@ bool Index::is_effect_free(res::Func rfunc) const {
     rfunc.val,
     [&](res::Func::FuncName /*s*/) { return false; },
     [&](res::Func::MethodName /*s*/) { return false; },
-    [&](borrowed_ptr<FuncInfo> finfo) {
+    [&](FuncInfo* finfo) {
       return finfo->effectFree;
     },
-    [&](borrowed_ptr<const MethTabEntryPair> mte) {
+    [&](const MethTabEntryPair* mte) {
       return func_info(*m_data, mte->second.func)->effectFree;
     },
-    [&](borrowed_ptr<FuncFamily> fam) {
+    [&](FuncFamily* fam) {
       return false;
     });
 }
@@ -4536,7 +4534,7 @@ Type Index::lookup_class_constant(Context ctx,
       // This is a class constant that needs an 86cinit to run.
       // We'll add a dependency to make sure we're re-run if it
       // resolves anything.
-      auto const cinit = borrow(it->second->cls->methods.back());
+      auto const cinit = it->second->cls->methods.back().get();
       assert(cinit->name == s_86cinit.get());
       add_dependency(*m_data, cinit, ctx, Dep::ClsConst);
       return TInitCell;
@@ -4583,7 +4581,7 @@ folly::Optional<Cell> Index::lookup_persistent_constant(SString cnsName) const {
 }
 
 Type Index::lookup_foldable_return_type(Context ctx,
-                                        borrowed_ptr<const php::Func> func,
+                                        const php::Func* func,
                                         std::vector<Type> args) const {
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
@@ -4667,17 +4665,17 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
   return match<Type>(
     rfunc.val, [&](res::Func::FuncName /*s*/) { return TInitGen; },
     [&](res::Func::MethodName /*s*/) { return TInitGen; },
-    [&](borrowed_ptr<FuncInfo> finfo) {
+    [&](FuncInfo* finfo) {
       add_dependency(*m_data, finfo->func, ctx, Dep::ReturnTy);
       return unctx(finfo->returnTy);
     },
-    [&](borrowed_ptr<const MethTabEntryPair> mte) {
+    [&](const MethTabEntryPair* mte) {
       add_dependency(*m_data, mte->second.func, ctx, Dep::ReturnTy);
       auto const finfo = func_info(*m_data, mte->second.func);
       if (!finfo->func) return TInitGen;
       return unctx(finfo->returnTy);
     },
-    [&](borrowed_ptr<FuncFamily> fam) {
+    [&](FuncFamily* fam) {
       auto ret = TBottom;
       for (auto const pf : fam->possibleFuncs) {
         add_dependency(*m_data, pf->second.func, ctx, Dep::ReturnTy);
@@ -4698,17 +4696,17 @@ Type Index::lookup_return_type(CallContext callCtx, res::Func rfunc) const {
     [&](res::Func::MethodName) {
       return lookup_return_type(callCtx.caller, rfunc);
     },
-    [&](borrowed_ptr<FuncInfo> finfo) {
+    [&](FuncInfo* finfo) {
       add_dependency(*m_data, finfo->func, callCtx.caller, Dep::ReturnTy);
       return context_sensitive_return_type(*this, finfo, callCtx);
     },
-    [&](borrowed_ptr<const MethTabEntryPair> mte) {
+    [&](const MethTabEntryPair* mte) {
       add_dependency(*m_data, mte->second.func, callCtx.caller, Dep::ReturnTy);
       auto const finfo = func_info(*m_data, mte->second.func);
       if (!finfo->func) return TInitGen;
       return context_sensitive_return_type(*this, finfo, callCtx);
     },
-    [&] (borrowed_ptr<FuncFamily> fam) {
+    [&] (FuncFamily* fam) {
       auto ret = TBottom;
       for (auto& pf : fam->possibleFuncs) {
         add_dependency(*m_data, pf->second.func, callCtx.caller, Dep::ReturnTy);
@@ -4722,7 +4720,7 @@ Type Index::lookup_return_type(CallContext callCtx, res::Func rfunc) const {
 }
 
 std::vector<Type>
-Index::lookup_closure_use_vars(borrowed_ptr<const php::Func> func,
+Index::lookup_closure_use_vars(const php::Func* func,
                                bool move) const {
   assert(func->isClosureBody);
 
@@ -4736,7 +4734,7 @@ Index::lookup_closure_use_vars(borrowed_ptr<const php::Func> func,
   return it->second;
 }
 
-Type Index::lookup_return_type_raw(borrowed_ptr<const php::Func> f) const {
+Type Index::lookup_return_type_raw(const php::Func* f) const {
   auto it = func_info(*m_data, f);
   if (it->func) {
     assertx(it->func == f);
@@ -4746,7 +4744,7 @@ Type Index::lookup_return_type_raw(borrowed_ptr<const php::Func> f) const {
 }
 
 Type Index::lookup_return_type_and_clear(
-  borrowed_ptr<const php::Func> f) const {
+  const php::Func* f) const {
   auto it = func_info(*m_data, f);
 
   it->contextualReturnTypes = ContextRetTyMap{};
@@ -4756,7 +4754,7 @@ Type Index::lookup_return_type_and_clear(
 }
 
 CompactVector<Type>
-Index::lookup_local_static_types(borrowed_ptr<const php::Func> f) const {
+Index::lookup_local_static_types(const php::Func* f) const {
   auto it = func_info(*m_data, f);
   if (it->func) {
     assertx(it->func == f);
@@ -4765,7 +4763,7 @@ Index::lookup_local_static_types(borrowed_ptr<const php::Func> f) const {
   return {};
 }
 
-bool Index::lookup_this_available(borrowed_ptr<const php::Func> f) const {
+bool Index::lookup_this_available(const php::Func* f) const {
   return (f->attrs & AttrRequiresThis) && !f->isClosureBody;
 }
 
@@ -4801,13 +4799,13 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
       );
       return kind == PrepKind::Ref ? PrepKind::Unknown : kind;
     },
-    [&] (borrowed_ptr<FuncInfo> finfo) {
+    [&] (FuncInfo* finfo) {
       return func_param_prep(finfo->func, paramId);
     },
-    [&] (borrowed_ptr<const MethTabEntryPair> mte) {
+    [&] (const MethTabEntryPair* mte) {
       return func_param_prep(mte->second.func, paramId);
     },
-    [&] (borrowed_ptr<FuncFamily> fam) {
+    [&] (FuncFamily* fam) {
       assert(RuntimeOption::RepoAuthoritative);
       return prep_kind_from_set(fam->possibleFuncs, paramId);
     }
@@ -4815,7 +4813,7 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
 }
 
 PropState
-Index::lookup_private_props(borrowed_ptr<const php::Class> cls,
+Index::lookup_private_props(const php::Class* cls,
                             bool move) const {
   auto it = m_data->privatePropInfo.find(cls);
   if (it != end(m_data->privatePropInfo)) {
@@ -4831,7 +4829,7 @@ Index::lookup_private_props(borrowed_ptr<const php::Class> cls,
 }
 
 PropState
-Index::lookup_private_statics(borrowed_ptr<const php::Class> cls,
+Index::lookup_private_statics(const php::Class* cls,
                               bool move) const {
   auto it = m_data->privateStaticPropInfo.find(cls);
   if (it != end(m_data->privateStaticPropInfo)) {
@@ -4847,7 +4845,7 @@ Index::lookup_private_statics(borrowed_ptr<const php::Class> cls,
 }
 
 Type Index::lookup_public_static(const Type& cls, const Type& name) const {
-  auto const cinfo = [&] () -> borrowed_ptr<const ClassInfo> {
+  auto const cinfo = [&] () -> const ClassInfo* {
     if (!is_specialized_cls(cls)) {
       return nullptr;
     }
@@ -4868,17 +4866,17 @@ Type Index::lookup_public_static(const Type& cls, const Type& name) const {
   return lookup_public_static_impl(*m_data, cinfo, sname).inferredType;
 }
 
-Type Index::lookup_public_static(borrowed_ptr<const php::Class> cls,
+Type Index::lookup_public_static(const php::Class* cls,
                                  SString name) const {
   return lookup_public_static_impl(*m_data, cls, name).inferredType;
 }
 
-bool Index::lookup_public_static_immutable(borrowed_ptr<const php::Class> cls,
+bool Index::lookup_public_static_immutable(const php::Class* cls,
                                            SString name) const {
   return !lookup_public_static_impl(*m_data, cls, name).everModified;
 }
 
-void Index::fixup_public_static(borrowed_ptr<const php::Class> cls,
+void Index::fixup_public_static(const php::Class* cls,
                                 SString name, const Type& ty) const {
   auto const classes = find_range(m_data->classInfo, cls->name);
   for (auto& cinfo : classes) {
@@ -4894,7 +4892,7 @@ void Index::fixup_public_static(borrowed_ptr<const php::Class> cls,
 bool Index::lookup_class_init_might_raise(Context ctx, res::Class cls) const {
   return cls.val.match(
     []  (SString) { return true; },
-    [&] (borrowed_ptr<ClassInfo> cinfo) {
+    [&] (ClassInfo* cinfo) {
       // Check this class and all of its parents for possible inequivalent
       // redeclarations or bad initial values.
       do {
@@ -4913,7 +4911,7 @@ bool Index::lookup_class_init_might_raise(Context ctx, res::Class cls) const {
 }
 
 Slot
-Index::lookup_iface_vtable_slot(borrowed_ptr<const php::Class> cls) const {
+Index::lookup_iface_vtable_slot(const php::Class* cls) const {
   return folly::get_default(m_data->ifaceSlotMap, cls, kInvalidSlot);
 }
 
@@ -5024,7 +5022,7 @@ void Index::refine_constants(const FuncAnalysisResult& fa,
   if (fa.readsUntrackedConstants) deps.emplace(dep_context(*m_data, fa.ctx));
 }
 
-void Index::fixup_return_type(borrowed_ptr<const php::Func> func,
+void Index::fixup_return_type(const php::Func* func,
                               Type& retTy) const {
   if (func->isGenerator) {
     if (func->isAsync) {
@@ -5041,7 +5039,7 @@ void Index::fixup_return_type(borrowed_ptr<const php::Func> func,
   }
 }
 
-void Index::refine_effect_free(borrowed_ptr<const php::Func> func, bool flag) {
+void Index::refine_effect_free(const php::Func* func, bool flag) {
   auto const finfo = create_func_info(*m_data, func);
   always_assert_flog(
     !finfo->effectFree || flag,
@@ -5055,7 +5053,7 @@ void Index::refine_effect_free(borrowed_ptr<const php::Func> func, bool flag) {
 }
 
 void Index::refine_local_static_types(
-  borrowed_ptr<const php::Func> func,
+  const php::Func* func,
   const CompactVector<Type>& localStaticTypes) {
 
   auto const finfo = create_func_info(*m_data, func);
@@ -5144,7 +5142,7 @@ void Index::init_return_type(const php::Func* func) {
   finfo->returnTy = std::move(tcT);
 }
 
-void Index::refine_return_type(borrowed_ptr<const php::Func> func,
+void Index::refine_return_type(const php::Func* func,
                                Type t, LocalId param,
                                DependencyContextSet& deps) {
   auto const finfo = create_func_info(*m_data, func);
@@ -5182,7 +5180,7 @@ void Index::refine_return_type(borrowed_ptr<const php::Func> func,
          func->unit->filename, func->name);
 }
 
-bool Index::refine_closure_use_vars(borrowed_ptr<const php::Class> cls,
+bool Index::refine_closure_use_vars(const php::Class* cls,
                                     const std::vector<Type>& vars) {
   assert(is_closure(*cls));
 
@@ -5214,7 +5212,7 @@ bool Index::refine_closure_use_vars(borrowed_ptr<const php::Class> cls,
 
 template<class Container>
 void refine_private_propstate(Container& cont,
-                              borrowed_ptr<const php::Class> cls,
+                              const php::Class* cls,
                               const PropState& state) {
   assertx(!is_used_trait(*cls));
   auto it = cont.find(cls);
@@ -5236,12 +5234,12 @@ void refine_private_propstate(Container& cont,
   }
 }
 
-void Index::refine_private_props(borrowed_ptr<const php::Class> cls,
+void Index::refine_private_props(const php::Class* cls,
                                  const PropState& state) {
   refine_private_propstate(m_data->privatePropInfo, cls, state);
 }
 
-void Index::refine_private_statics(borrowed_ptr<const php::Class> cls,
+void Index::refine_private_statics(const php::Class* cls,
                                    const PropState& state) {
   // We can't store context dependent types in private statics since they
   // could be accessed using different contexts.
@@ -5342,7 +5340,7 @@ void Index::refine_public_statics(const PublicSPropIndexer& indexer) {
   }
 }
 
-void Index::refine_bad_initial_prop_values(borrowed_ptr<const php::Class> cls,
+void Index::refine_bad_initial_prop_values(const php::Class* cls,
                                            bool value,
                                            DependencyContextSet& deps) {
    assertx(!is_used_trait(*cls));
@@ -5421,15 +5419,15 @@ std::unique_ptr<ArrayTypeTable::Builder>& Index::array_table_builder() const {
 
 //////////////////////////////////////////////////////////////////////
 
-res::Func Index::do_resolve(borrowed_ptr<const php::Func> f) const {
+res::Func Index::do_resolve(const php::Func* f) const {
   auto const finfo = create_func_info(*m_data, f);
   return res::Func { this, finfo };
 };
 
 // Return true if we know for sure that one php::Class must derive
 // from another at runtime, in all possible instantiations.
-bool Index::must_be_derived_from(borrowed_ptr<const php::Class> cls,
-                                 borrowed_ptr<const php::Class> parent) const {
+bool Index::must_be_derived_from(const php::Class* cls,
+                                 const php::Class* parent) const {
   if (cls == parent) return true;
   auto const clsClasses    = find_range(m_data->classInfo, cls->name);
   auto const parentClasses = find_range(m_data->classInfo, parent->name);
@@ -5446,8 +5444,8 @@ bool Index::must_be_derived_from(borrowed_ptr<const php::Class> cls,
 // Return true if any possible definition of one php::Class could
 // derive from another at runtime, or vice versa.
 bool
-Index::could_be_related(borrowed_ptr<const php::Class> cls,
-                        borrowed_ptr<const php::Class> parent) const {
+Index::could_be_related(const php::Class* cls,
+                        const php::Class* parent) const {
   if (cls == parent) return true;
   auto const clsClasses    = find_range(m_data->classInfo, cls->name);
   auto const parentClasses = find_range(m_data->classInfo, parent->name);

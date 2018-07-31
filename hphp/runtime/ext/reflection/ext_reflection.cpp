@@ -269,8 +269,8 @@ static void set_instance_prop_info(Array& ret,
   ret.set(s_class, make_tv<KindOfPersistentString>(prop->cls->name()));
   set_doc_comment(ret, prop->docComment, prop->cls->isBuiltin());
 
-  if (prop->typeConstraint && prop->typeConstraint->size()) {
-    ret.set(s_type, make_tv<KindOfPersistentString>(prop->typeConstraint));
+  if (prop->userType && prop->userType->size()) {
+    ret.set(s_type, make_tv<KindOfPersistentString>(prop->userType));
   } else {
     ret.set(s_type, false_varNR.tv());
   }
@@ -294,8 +294,8 @@ static void set_static_prop_info(Array &ret, const Class::SProp* prop) {
   set_attrs(ret, get_modifiers(prop->attrs, false) & ~0x66);
   ret.set(s_class, make_tv<KindOfPersistentString>(prop->cls->name()));
   set_doc_comment(ret, prop->docComment, prop->cls->isBuiltin());
-  if (prop->typeConstraint && prop->typeConstraint->size()) {
-    ret.set(s_type, make_tv<KindOfPersistentString>(prop->typeConstraint));
+  if (prop->userType && prop->userType->size()) {
+    ret.set(s_type, make_tv<KindOfPersistentString>(prop->userType));
   } else {
     ret.set(s_type, false_varNR.tv());
   }
@@ -1900,10 +1900,10 @@ static String HHVM_METHOD(ReflectionProperty, getTypeText) {
   const StringData *type = nullptr;
   switch (data->getType()) {
     case ReflectionPropHandle::Type::Instance:
-      type = data->getProp()->typeConstraint;
+      type = data->getProp()->userType;
       break;
     case ReflectionPropHandle::Type::Static:
-      type = data->getSProp()->typeConstraint;
+      type = data->getSProp()->userType;
       break;
     case ReflectionPropHandle::Type::Dynamic:
       break;

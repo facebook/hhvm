@@ -116,7 +116,8 @@ struct PreClass : AtomicCountable {
     Prop(PreClass* preClass,
          const StringData* name,
          Attr attrs,
-         const StringData* typeConstraint,
+         const StringData* userType,
+         const TypeConstraint& typeConstraint,
          const StringData* docComment,
          const TypedValue& val,
          RepoAuthType repoAuthType,
@@ -127,7 +128,8 @@ struct PreClass : AtomicCountable {
     const StringData* name()           const { return m_name; }
     const StringData* mangledName()    const { return m_mangledName; }
     Attr              attrs()          const { return m_attrs; }
-    const StringData* typeConstraint() const { return m_typeConstraint; }
+    const StringData* userType()       const { return m_userType; }
+    const TypeConstraint& typeConstraint() const { return m_typeConstraint; }
     const StringData* docComment()     const { return m_docComment; }
     const TypedValue& val()            const { return m_val; }
     RepoAuthType      repoAuthType()   const { return m_repoAuthType; }
@@ -138,10 +140,11 @@ struct PreClass : AtomicCountable {
     LowStringPtr m_name;
     LowStringPtr m_mangledName;
     Attr m_attrs;
-    LowStringPtr m_typeConstraint;
+    LowStringPtr m_userType;
     LowStringPtr m_docComment;
     TypedValue m_val;
     RepoAuthType m_repoAuthType;
+    TypeConstraint m_typeConstraint;
     UserAttributeMap m_userAttributes;
   };
 

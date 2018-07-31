@@ -152,7 +152,9 @@ struct Class : AtomicCountable {
     LowPtr<Class> cls;
 
     Attr attrs;
-    LowStringPtr typeConstraint;
+    LowStringPtr userType;
+    TypeConstraint typeConstraint;
+
     /*
      * When built in RepoAuthoritative mode, this is a control-flow insensitive,
      * always-true type assertion for this property.  (It may be Gen if there
@@ -169,8 +171,9 @@ struct Class : AtomicCountable {
   struct SProp {
     LowStringPtr name;
     Attr attrs;
-    LowStringPtr typeConstraint;
+    LowStringPtr userType;
     LowStringPtr docComment;
+    TypeConstraint typeConstraint;
 
     /* Most derived class that declared this property. */
     LowPtr<Class> cls;
@@ -672,6 +675,9 @@ public:
    */
   RepoAuthType declPropRepoAuthType(Slot index) const;
   RepoAuthType staticPropRepoAuthType(Slot index) const;
+
+  const TypeConstraint& declPropTypeConstraint(Slot index) const;
+  const TypeConstraint& staticPropTypeConstraint(Slot index) const;
 
   /*
    * Whether this class has any properties that require deep initialization.

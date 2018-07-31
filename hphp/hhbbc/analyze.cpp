@@ -534,7 +534,7 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
       RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON ||
       clsAnalysis.anyInterceptable
         ? TGen
-        : from_hni_constraint(prop.typeConstraint);
+        : from_hni_constraint(prop.userType);
     if (it->second.subtypeOf(hniTy)) {
       it->second = hniTy;
       return;
@@ -635,7 +635,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
 
     auto const cellTy = from_cell(prop.val);
     if (isHNIBuiltin) {
-      auto const hniTy = from_hni_constraint(prop.typeConstraint);
+      auto const hniTy = from_hni_constraint(prop.userType);
       if (!cellTy.subtypeOf(hniTy)) {
         std::fprintf(stderr, "hni %s::%s has impossible type. "
                      "The annotation says it is type (%s) "

@@ -1577,8 +1577,15 @@ StatementPtr Parser::onClassHelper(int type, const std::string &name,
       BlockScopePtr(), range);
     expList->addElement(svar);
     ClassVariablePtr var = std::make_shared<ClassVariable>(
-      BlockScopePtr(), getLabelScope(), range, modifier, type, expList,
-      dynamic_pointer_cast<ExpressionList>(param->userAttributeList()));
+      BlockScopePtr(),
+      getLabelScope(),
+      range,
+      modifier,
+      !param->isVariadic() ? type : "",
+      expList,
+      !param->isVariadic() ? param->annotation() : TypeAnnotationPtr{},
+      dynamic_pointer_cast<ExpressionList>(param->userAttributeList())
+    );
     cls->getStmts()->addElement(var);
   }
 
@@ -1768,7 +1775,9 @@ void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
       ClassVariable, exp,
       (type) ? type->typeAnnotationName() : "",
       dynamic_pointer_cast<ExpressionList>(decl->exp),
-      attrList);
+      type ? type->typeAnnotation : TypeAnnotationPtr{},
+      attrList
+    );
   } else {
     out->stmt = NEW_STMT(
       ClassConstant,

@@ -280,6 +280,14 @@ inline RepoAuthType Class::staticPropRepoAuthType(Slot index) const {
   return m_staticProperties[index].repoAuthType;
 }
 
+inline const TypeConstraint& Class::declPropTypeConstraint(Slot index) const {
+  return m_declProperties[index].typeConstraint;
+}
+
+inline const TypeConstraint& Class::staticPropTypeConstraint(Slot index) const {
+  return m_staticProperties[index].typeConstraint;
+}
+
 inline bool Class::hasDeepInitProps() const {
   return m_hasDeepInitProps;
 }

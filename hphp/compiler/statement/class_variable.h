@@ -18,6 +18,7 @@
 #define incl_HPHP_CLASS_VARIABLE_H_
 
 #include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/type_annotation.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,6 +33,7 @@ struct ClassVariable : Statement, IParseHandler {
                 ModifierExpressionPtr modifiers,
                 std::string typeConstraint,
                 ExpressionListPtr declaration,
+                TypeAnnotationPtr typeAnnot,
                 ExpressionListPtr attrList);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
@@ -44,10 +46,12 @@ struct ClassVariable : Statement, IParseHandler {
   ExpressionListPtr getVarList() const { return m_declaration; }
   ModifierExpressionPtr getModifiers() const { return m_modifiers; }
   ExpressionListPtr userAttributeList() { return m_attributeList; }
+  TypeAnnotationPtr getTypeAnnotation() const { return m_typeAnnotation; }
 private:
   ModifierExpressionPtr m_modifiers;
   std::string m_typeConstraint;
   ExpressionListPtr m_declaration;
+  TypeAnnotationPtr m_typeAnnotation;
   ExpressionListPtr m_attributeList;
 };
 

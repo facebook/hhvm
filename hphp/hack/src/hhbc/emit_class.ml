@@ -141,10 +141,8 @@ let from_class_elt_classvars
   | A.ClassVars cv ->
     (* TODO: we need to emit doc comments for each property,
      * not one per all properties on the same line *)
-    let hint = if cv.A.cv_is_promoted_variadic then
-      let hint_list = Option.value_map ~f:(fun h -> [h]) ~default:[] cv.A.cv_hint in
-      Some (Pos.none, A.Happly((Pos.none, "array"), hint_list))
-      else cv.A.cv_hint
+    let hint =
+      if cv.A.cv_is_promoted_variadic then None else cv.A.cv_hint
     in
     let emit_prop = Emit_property.from_ast
       ast_class

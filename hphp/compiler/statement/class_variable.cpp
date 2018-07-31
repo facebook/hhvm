@@ -34,10 +34,12 @@ using namespace HPHP;
 ClassVariable::ClassVariable
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  ModifierExpressionPtr modifiers, std::string typeConstraint,
- ExpressionListPtr declaration, ExpressionListPtr attrList)
+ ExpressionListPtr declaration, TypeAnnotationPtr typeAnnot,
+ ExpressionListPtr attrList)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ClassVariable)),
     m_modifiers(modifiers), m_typeConstraint(typeConstraint),
-    m_declaration(declaration), m_attributeList(attrList) {
+    m_declaration(declaration), m_typeAnnotation(typeAnnot),
+    m_attributeList(attrList) {
 }
 
 StatementPtr ClassVariable::clone() {

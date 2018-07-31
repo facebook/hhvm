@@ -24,9 +24,6 @@ type t = {
   property_doc_comment : string option;
 }
 
-(* Interestingly, HHAS does not represent the declared types of properties,
-unlike formal parameters and return types. We might consider fixing this. *)
-
 let make
   property_attributes
   property_is_private

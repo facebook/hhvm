@@ -267,14 +267,11 @@ let hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams ~namespace h =
   | Param ->
     param_hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams ~namespace h
   | _ ->
-    let tc =
-      if kind = Property then TC.make None []
-      else hint_to_type_constraint ~kind ~tparams ~skipawaitable ~namespace h
-    in
+    let tc = hint_to_type_constraint ~kind ~tparams ~skipawaitable ~namespace h in
     let tc_name = TC.name tc in
     let tc_flags = TC.flags tc in
     let tc_flags =
-      if kind = Return && tc_name <> None
+      if (kind = Return || kind = Property) && tc_name <> None
       then List.dedup (TC.ExtendedHint :: tc_flags)
       else tc_flags in
     let tc_flags =

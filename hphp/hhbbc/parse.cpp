@@ -1343,6 +1343,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
         prop.attrs(),
         prop.userAttributes(),
         prop.docComment(),
+        prop.userType(),
         prop.typeConstraint(),
         prop.val()
       }

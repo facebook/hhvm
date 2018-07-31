@@ -2216,6 +2216,7 @@ void Class::setProperties() {
       prop.originalMangledName = parentProp.originalMangledName;
       prop.attrs               = parentProp.attrs;
       prop.docComment          = parentProp.docComment;
+      prop.userType            = parentProp.userType;
       prop.typeConstraint      = parentProp.typeConstraint;
       prop.name                = parentProp.name;
       prop.repoAuthType        = parentProp.repoAuthType;
@@ -2243,6 +2244,7 @@ void Class::setProperties() {
       SProp sProp;
       sProp.name           = parentProp.name;
       sProp.attrs          = parentProp.attrs;
+      sProp.userType       = parentProp.userType;
       sProp.typeConstraint = parentProp.typeConstraint;
       sProp.docComment     = parentProp.docComment;
       sProp.cls            = parentProp.cls;
@@ -2309,6 +2311,7 @@ void Class::setProperties() {
         prop.attrs               = Attr(preProp->attrs() & ~AttrTrait);
         // This is the first class to declare this property
         prop.cls                 = this;
+        prop.userType            = preProp->userType();
         prop.typeConstraint      = preProp->typeConstraint();
         prop.docComment          = preProp->docComment();
         prop.repoAuthType        = preProp->repoAuthType();
@@ -2365,6 +2368,7 @@ void Class::setProperties() {
             prop.mangledName = preProp->mangledName();
             prop.originalMangledName = preProp->mangledName();
             prop.attrs = Attr(prop.attrs ^ (AttrProtected|AttrPublic));
+            prop.userType = preProp->userType();
             prop.typeConstraint = preProp->typeConstraint();
           }
           if (slot < traitIdx) {
@@ -2430,6 +2434,7 @@ void Class::setProperties() {
       // Finish initializing.
       auto& sProp = curSPropMap[sPropInd];
       sProp.attrs          = preProp->attrs();
+      sProp.userType       = preProp->userType();
       sProp.typeConstraint = preProp->typeConstraint();
       sProp.docComment     = preProp->docComment();
       sProp.cls            = this;

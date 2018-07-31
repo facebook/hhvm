@@ -52,16 +52,18 @@ const StringData* preClassName(const std::string& name) {
 PreClassEmitter::Prop::Prop(const PreClassEmitter* pce,
                             const StringData* n,
                             Attr attrs,
-                            const StringData* typeConstraint,
+                            const StringData* userType,
+                            const TypeConstraint& typeConstraint,
                             const StringData* docComment,
                             const TypedValue* val,
                             RepoAuthType repoAuthType,
                             UserAttributeMap userAttributes)
   : m_name(n)
   , m_attrs(attrs)
-  , m_typeConstraint(typeConstraint)
+  , m_userType(userType)
   , m_docComment(docComment)
   , m_repoAuthType(repoAuthType)
+  , m_typeConstraint(typeConstraint)
   , m_userAttributes(userAttributes)
 {
   m_mangledName = PreClass::manglePropName(pce->name(), n, attrs);
@@ -129,7 +131,8 @@ void PreClassEmitter::renameMethod(const StringData* oldName,
 }
 
 bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
-                                  const StringData* typeConstraint,
+                                  const StringData* userType,
+                                  const TypeConstraint& typeConstraint,
                                   const StringData* docComment,
                                   const TypedValue* val,
                                   RepoAuthType repoAuthType,
@@ -138,8 +141,17 @@ bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
   if (it != m_propMap.end()) {
     return false;
   }
-  PreClassEmitter::Prop prop(this, n, attrs, typeConstraint, docComment, val,
-    repoAuthType, userAttributes);
+  PreClassEmitter::Prop prop{
+    this,
+    n,
+    attrs,
+    userType,
+    typeConstraint,
+    docComment,
+    val,
+    repoAuthType,
+    userAttributes
+  };
   m_propMap.add(prop.name(), prop);
   return true;
 }
@@ -285,6 +297,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     propBuild.add(prop.name(), PreClass::Prop(pc.get(),
                                               prop.name(),
                                               prop.attrs(),
+                                              prop.userType(),
                                               prop.typeConstraint(),
                                               prop.docComment(),
                                               prop.val(),

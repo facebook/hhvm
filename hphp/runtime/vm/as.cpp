@@ -2684,7 +2684,10 @@ void parse_property(AsmState& as) {
   Attr attrs = parse_attribute_list(as, AttrContext::Prop, &userAttributes);
 
   auto const heredoc = makeStaticString(parse_maybe_long_string(as));
-  auto const userTy = parse_type_info(as, false).first;
+
+  const StringData* userTy;
+  TypeConstraint typeConstraint;
+  std::tie(userTy, typeConstraint) = parse_type_info(as, false);
   auto const userTyStr = userTy ? userTy : staticEmptyString();
 
   std::string name;
@@ -2699,6 +2702,7 @@ void parse_property(AsmState& as) {
   as.pce->addProperty(makeStaticString(name),
                       attrs,
                       userTyStr,
+                      typeConstraint,
                       heredoc,
                       &tvInit,
                       RepoAuthType{},

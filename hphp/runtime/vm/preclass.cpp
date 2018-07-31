@@ -169,7 +169,8 @@ void PreClass::enforceInMaybeSealedParentWhitelist(
 PreClass::Prop::Prop(PreClass* preClass,
                      const StringData* name,
                      Attr attrs,
-                     const StringData* typeConstraint,
+                     const StringData* userType,
+                     const TypeConstraint& typeConstraint,
                      const StringData* docComment,
                      const TypedValue& val,
                      RepoAuthType repoAuthType,
@@ -177,10 +178,11 @@ PreClass::Prop::Prop(PreClass* preClass,
   : m_name(name)
   , m_mangledName(manglePropName(preClass->name(), name, attrs))
   , m_attrs(attrs)
-  , m_typeConstraint(typeConstraint)
+  , m_userType{userType}
   , m_docComment(docComment)
   , m_val(val)
   , m_repoAuthType{repoAuthType}
+  , m_typeConstraint{typeConstraint}
   , m_userAttributes(userAttributes)
 {}
 
@@ -203,8 +205,8 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
     out << ss;
   }
   out << " (RAT = " << show(m_repoAuthType) << ")";
-  if (m_typeConstraint && !m_typeConstraint->empty()) {
-    out << " (tc = " << m_typeConstraint->data() << ")";
+  if (m_userType && !m_userType->empty()) {
+    out << " (user-type = " << m_userType->data() << ")";
   }
   out << std::endl;
 }

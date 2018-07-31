@@ -428,11 +428,8 @@ struct Prop {
   UserAttributeMap userAttributes;
   LSString docComment;
 
-  /*
-   * Properties can have string type constraints, which we need to
-   * propagate through just for reflection purposes.
-   */
-  LSString typeConstraint;
+  LSString userType;
+  TypeConstraint typeConstraint;
 
   /*
    * The default value of the property, for properties with scalar

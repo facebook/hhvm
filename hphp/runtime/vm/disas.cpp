@@ -685,7 +685,7 @@ void print_property(Output& out, const PreClass::Prop* prop) {
     RuntimeOption::EvalDisassemblerPropDocComments
       ? opt_escaped_long(prop->docComment())
       : std::string(""),
-    opt_type_info(prop->typeConstraint(), TypeConstraint{}),
+    opt_type_info(prop->userType(), prop->typeConstraint()),
     prop->name()->data());
   indented(out, [&] {
     out.fmtln("{};", member_tv_initializer(prop->val()));

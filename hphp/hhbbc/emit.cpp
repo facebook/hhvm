@@ -1498,6 +1498,7 @@ void emit_class(EmitUnitState& state,
     pce->addProperty(
       prop.name,
       prop.attrs,
+      prop.userType,
       prop.typeConstraint,
       prop.docComment,
       &prop.val,

@@ -1724,7 +1724,6 @@ void Debugger::onBreakpointHit(
   int line
 ) {
   std::string stopReason;
-  int matchingBpId = -1;
   const std::string filePath = getFilePathForUnit(compilationUnit);
 
   if (prepareToPauseTarget(ri) != PrepareToPauseResult::ReadyToPause) {
@@ -1756,12 +1755,10 @@ void Debugger::onBreakpointHit(
     bool lineInRange = line >= bp->m_resolvedLocation.m_startLine &&
         line <= bp->m_resolvedLocation.m_endLine;
 
-    bool conditionSatisfied = bpMgr->isBreakConditionSatisified(ri, bp);
     if (lineInRange) {
-      if (conditionSatisfied) {
-        matchingBpId = bpId;
+      if (bpMgr->isBreakConditionSatisified(ri, bp)) {
         stopReason = getStopReasonForBp(
-          matchingBpId,
+          bpId,
           !bp->m_resolvedLocation.m_path.empty()
             ? bp->m_resolvedLocation.m_path
             : bp->m_path,
@@ -1771,7 +1768,16 @@ void Debugger::onBreakpointHit(
         // Breakpoint hit!
         pauseTarget(ri, stopReason.c_str());
         bpMgr->onBreakpointHit(bpId);
-        break;
+
+        processCommandQueue(
+          getCurrentThreadId(),
+          ri,
+          "breakpoint",
+          stopReason.c_str(),
+          true
+        );
+
+        return;
       } else {
         VSDebugLogger::Log(
           VSDebugLogger::LogLevelInfo,
@@ -1783,17 +1789,8 @@ void Debugger::onBreakpointHit(
     }
   }
 
-  if (matchingBpId >= 0) {
-    // If an active breakpoint was found at this location, enter the debugger.
-    processCommandQueue(
-      getCurrentThreadId(),
-      ri,
-      "breakpoint",
-      stopReason.c_str(),
-      true
-    );
-  } else if (ri->m_runToLocationInfo.path == filePath &&
-             line == ri->m_runToLocationInfo.line) {
+  if (ri->m_runToLocationInfo.path == filePath &&
+      line == ri->m_runToLocationInfo.line) {
 
     // Hit our run to location destination!
     stopReason = "Run to location";
@@ -1824,19 +1821,6 @@ void Debugger::onBreakpointHit(
       "step",
       stopReason.c_str(),
       true
-    );
-  } else {
-    // This breakpoint no longer exists. Remove it from the VM.
-    VSDebugLogger::Log(
-      VSDebugLogger::LogLevelInfo,
-      "Request hit bp that no longer exists, removing from VM. %s:%d",
-      filePath.c_str(),
-      line
-    );
-    removeBreakpoint(
-      func != nullptr
-        ? BreakpointType::Function
-        : BreakpointType::Source
     );
   }
 }

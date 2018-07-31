@@ -269,7 +269,7 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
             | (pos, Nast.Happly ((_, id), [])) when id = SN.Typehints.wildcard ->
               let reason = Reason.Rwitness pos in
               TUtils.in_var env (reason, Tunresolved [])
-            | _ -> hint_locl env hint in
+            | _ -> localize_hint_with_self env hint in
           List.map_env env explicit_tparams type_argument
       in
       let ft_subst = Subst.make ft.ft_tparams tvarl in
@@ -435,7 +435,7 @@ and localize_with_dty_validator env ty validate_dty =
   let ety_env = {(env_with_self env) with validate_dty = Some validate_dty;} in
   localize ~ety_env env ty
 
-and hint_locl env h =
+and localize_hint_with_self env h =
   let h = Decl_hint.hint env.Env.decl_env h in
   localize_with_self env h
 

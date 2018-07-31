@@ -103,7 +103,7 @@ let check_param : Env.env -> Nast.fun_param -> unit =
   match param_hint with
   | None -> ()
   | Some hint ->
-    let env, ty = Typing_phase.hint_locl env hint in
+    let env, ty = Typing_phase.localize_hint_with_self env hint in
     check_memoizable env ty
 
 let check: Env.env -> Nast.user_attribute list ->

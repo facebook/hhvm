@@ -2298,7 +2298,7 @@ and expr_
         let (r, ty2) = ty2 in
         Errors.nullable_cast p (Typing_print.error ty2) (Reason.to_pos r)
       end;
-      let env, ty = Phase.hint_locl env hint in
+      let env, ty = Phase.localize_hint_with_self env hint in
       make_result env (T.Cast (hint, te)) ty
   | InstanceOf (e, (pos, cid)) ->
       let env, te, _ = expr env e in
@@ -2739,7 +2739,7 @@ and anon_check_param env param =
   match param.param_hint with
   | None -> env
   | Some hty ->
-      let env, hty = Phase.hint_locl env hty in
+      let env, hty = Phase.localize_hint_with_self env hty in
       let paramty = Env.get_local env (Local_id.get param.param_name) in
       let hint_pos = Reason.to_pos (fst hty) in
       let env = Type.sub_type hint_pos Reason.URhint env paramty hty in
@@ -3800,7 +3800,7 @@ and is_abstract_ft fty = match fty with
                   ~f:(fun env _ -> Env.fresh_unresolved_type env) in
                 env, vars, tr end
               else
-              let env, vars_and_tr = List.map_env env hl Phase.hint_locl in
+              let env, vars_and_tr = List.map_env env hl Phase.localize_hint_with_self in
               let vars, trl = List.split_n vars_and_tr (List.length vars_and_tr - 1) in
               (* Since we split the arguments and return type at the last index and the length is
                  non-zero this is safe. *)
@@ -5090,7 +5090,7 @@ and resolve_type_arguments env p class_id tparaml hintl =
     | (_, Happly((_, id), [])) when id = SN.Typehints.wildcard  ->
       Env.fresh_unresolved_type env
     | _ ->
-      Phase.hint_locl env hint in
+      Phase.localize_hint_with_self env hint in
   let length_hintl = List.length hintl in
   let length_tparaml = List.length tparaml in
   if length_hintl <> length_tparaml
@@ -6701,8 +6701,8 @@ and typeconst_def env {
   c_tconst_constraint;
   c_tconst_type;
 } =
-  let env, cstr = opt Phase.hint_locl env c_tconst_constraint in
-  let env, ty = opt Phase.hint_locl env c_tconst_type in
+  let env, cstr = opt Phase.localize_hint_with_self env c_tconst_constraint in
+  let env, ty = opt Phase.localize_hint_with_self env c_tconst_type in
   ignore (
     Option.map2 ty cstr ~f:(Type.sub_type pos Reason.URtypeconst_cstr env)
   );
@@ -6717,7 +6717,7 @@ and class_const_def env (h, id, e) =
     match h with
     | None -> env, Env.fresh_type(), None
     | Some h ->
-      let env, ty = Phase.hint_locl env h in
+      let env, ty = Phase.localize_hint_with_self env h in
       env, ty, Some (fst id, Reason.URhint, ty)
   in
   match e with

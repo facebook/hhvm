@@ -126,7 +126,7 @@ struct TypeAliasReq {
   // Data members.
 
   // The aliased type.
-  AnnotType type{AnnotType::Uninit};
+  AnnotType type{AnnotType::NoReturn};
   // Overrides `type' if the alias is invalid (e.g., for a nonexistent class).
   bool invalid{false};
   // For option types, like ?Foo.

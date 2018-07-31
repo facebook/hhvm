@@ -4111,7 +4111,6 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
       auto const dt = getAnnotDataType(annot);
 
       switch (dt) {
-      case KindOfUninit:       return TBottom;
       case KindOfNull:         return TNull;
       case KindOfBoolean:      return TBool;
       case KindOfInt64:        return TInt;
@@ -4129,6 +4128,7 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
       case KindOfResource:     return TRes;
       case KindOfObject:
         return resolve_class_or_type_alias(ctx, name, candidate);
+      case KindOfUninit:
       case KindOfRef:
       case KindOfFunc:
       case KindOfClass:
@@ -4143,6 +4143,8 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
        * typehints (ex. "(function(..): ..)" typehints).
        */
       return TGen;
+    case AnnotMetaType::NoReturn:
+      return TBottom;
     case AnnotMetaType::Nonnull:
       if (candidate.subtypeOf(BInitNull)) return TBottom;
       if (!candidate.couldBe(BInitNull))  return candidate;

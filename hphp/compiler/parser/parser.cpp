@@ -1476,7 +1476,7 @@ void Parser::checkClassDeclName(const std::string& name) {
   );
   if (at) {
     switch (*at) {
-      case AnnotType::Uninit:
+      case AnnotType::NoReturn:
       case AnnotType::Null:
       case AnnotType::Bool:
       case AnnotType::Int:

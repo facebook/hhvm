@@ -66,7 +66,7 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
       const char* name;
       AnnotType type;
     } pairs[] = {
-      { "HH\\noreturn", AnnotType::Uninit },
+      { "HH\\noreturn", AnnotType::NoReturn },
       { "HH\\void",     AnnotType::Null },
       { "HH\\bool",     AnnotType::Bool },
       { "HH\\int",      AnnotType::Int },

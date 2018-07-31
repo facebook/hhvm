@@ -48,10 +48,10 @@ enum class AnnotMetaType : uint8_t {
   VecOrDict = 11,
   ArrayLike = 12,
   Nonnull = 13,
+  NoReturn = 14
 };
 
 enum class AnnotType : uint16_t {
-  Uninit   = (uint8_t)KindOfUninit   | (uint16_t)AnnotMetaType::Precise << 8,
   Null     = (uint8_t)KindOfNull     | (uint16_t)AnnotMetaType::Precise << 8,
   Bool     = (uint8_t)KindOfBoolean  | (uint16_t)AnnotMetaType::Precise << 8,
   Int      = (uint8_t)KindOfInt64    | (uint16_t)AnnotMetaType::Precise << 8,
@@ -77,6 +77,7 @@ enum class AnnotType : uint16_t {
   VArrOrDArr = (uint16_t)AnnotMetaType::VArrOrDArr << 8 | (uint8_t)KindOfUninit,
   VecOrDict  = (uint16_t)AnnotMetaType::VecOrDict << 8  | (uint8_t)KindOfUninit,
   ArrayLike  = (uint16_t)AnnotMetaType::ArrayLike << 8  | (uint8_t)KindOfUninit,
+  NoReturn   = (uint16_t)AnnotMetaType::NoReturn << 8   | (uint8_t)KindOfUninit
 };
 
 inline AnnotMetaType getAnnotMetaType(AnnotType at) {
@@ -89,7 +90,7 @@ inline DataType getAnnotDataType(AnnotType at) {
 }
 
 inline AnnotType dataTypeToAnnotType(DataType dt) {
-  assertx(dt == KindOfUninit || dt == KindOfBoolean || dt == KindOfInt64 ||
+  assertx(dt == KindOfBoolean || dt == KindOfInt64 ||
          dt == KindOfDouble || dt == KindOfString || dt == KindOfArray ||
          dt == KindOfVec || dt == KindOfDict || dt == KindOfKeyset ||
          dt == KindOfObject || dt == KindOfResource);
@@ -236,6 +237,8 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
               isDictType(dt) || isKeysetType(dt))
         ? AnnotAction::Pass
         : AnnotAction::Fail;
+    case AnnotMetaType::NoReturn:
+      return AnnotAction::Fail;
     case AnnotMetaType::Precise:
       if (UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices) &&
           at == AnnotType::Array && isArrayType(dt)) {

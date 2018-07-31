@@ -137,6 +137,7 @@ bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
                                   const TypedValue* val,
                                   RepoAuthType repoAuthType,
                                   UserAttributeMap userAttributes) {
+  assertx(typeConstraint.validForProp());
   PropMap::Builder::const_iterator it = m_propMap.find(n);
   if (it != m_propMap.end()) {
     return false;

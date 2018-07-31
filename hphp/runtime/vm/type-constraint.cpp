@@ -129,7 +129,7 @@ std::string TypeConstraint::displayName(const Func* func /*= nullptr*/,
   if (extra && m_flags & Flags::Resolved && m_type != AnnotType::Object) {
     const char* str = nullptr;
     switch (m_type) {
-      case AnnotType::Uninit:   str = "uninit"; break;
+      case AnnotType::NoReturn: str = "noreturn"; break;
       case AnnotType::Null:     str = "null"; break;
       case AnnotType::Bool:     str = "bool"; break;
       case AnnotType::Int:      str = "int";  break;
@@ -386,8 +386,7 @@ bool TypeConstraint::checkTypeAliasObj(const Class* cls) const {
       return true;
     case AnnotMetaType::Callable:
       return cls->lookupMethod(s___invoke.get()) != nullptr;
-    case AnnotMetaType::Self:
-    case AnnotMetaType::Parent:
+    case AnnotMetaType::NoReturn:
     case AnnotMetaType::Number:
     case AnnotMetaType::ArrayKey:
     case AnnotMetaType::This:
@@ -396,9 +395,12 @@ bool TypeConstraint::checkTypeAliasObj(const Class* cls) const {
     case AnnotMetaType::VArrOrDArr:
     case AnnotMetaType::VecOrDict:
     case AnnotMetaType::ArrayLike:
-      // Self and Parent should never happen, because type
-      // aliases are not allowed to use those MetaTypes
       return false;
+    case AnnotMetaType::Self:
+    case AnnotMetaType::Parent:
+      // These should never happen, because type aliases are not allowed to use
+      // those MetaTypes
+      always_assert(false);
   }
   not_reached();
 }
@@ -473,6 +475,7 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
         case MetaType::Callable:
           return is_callable(tvAsCVarRef(tv));
         case MetaType::Precise:
+        case MetaType::NoReturn:
         case MetaType::Number:
         case MetaType::ArrayKey:
         case MetaType::VArray:
@@ -938,6 +941,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
     case AnnotMetaType::ArrayKey:
       return tc.isNullable() ? MK::None : MK::IntOrStr;
     case AnnotMetaType::Mixed:
+    case AnnotMetaType::NoReturn:
     case AnnotMetaType::Nonnull:
     case AnnotMetaType::Self:
     case AnnotMetaType::This:

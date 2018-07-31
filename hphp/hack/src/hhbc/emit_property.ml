@@ -9,10 +9,12 @@
 
 open Instruction_sequence
 open Hhbc_ast
+open Hhbc_string_utils
 open Hh_core
 module A = Ast
 module SN = Naming_special_names
 module SU = Hhbc_string_utils
+module TC = Hhas_type_constraint
 
 (* Follow HHVM rules here: see EmitterVisitor::requiresDeepInit *)
 let rec expr_requires_deep_init (_, expr_) =
@@ -57,6 +59,15 @@ and aexpr_requires_deep_init aexpr =
   | A.AFkvalue (expr1, expr2) ->
     expr_requires_deep_init expr1 || expr_requires_deep_init expr2
 
+let valid_tc_for_prop tc =
+  match (TC.name tc) with
+  | None -> true
+  | Some name ->
+     not (is_self name) &&
+     not (is_parent name) &&
+     not (String.lowercase_ascii name = "callable") &&
+     not (String.lowercase_ascii name = "hh\\noreturn")
+
 let from_ast
     ast_class
     cv_user_attributes
@@ -92,9 +103,18 @@ let from_ast
     | None ->
       Hhas_type_info.make (Some "") (Hhas_type_constraint.make None [])
     | Some h ->
-      Emit_type_hint.(hint_to_type_info
-        ~kind:Property ~nullable:false
-        ~skipawaitable:false ~tparams ~namespace h) in
+       let tc =
+         Emit_type_hint.(hint_to_type_info
+                         ~kind:Property ~nullable:false
+                         ~skipawaitable:false ~tparams ~namespace h)
+       in
+       if not (valid_tc_for_prop (Hhas_type_info.type_constraint tc))
+       then Emit_fatal.raise_fatal_parse pos
+         (Printf.sprintf "Invalid property type hint for '%s::$%s'"
+                         (Utils.strip_ns (snd ast_class.Ast.c_name))
+                         (Hhbc_id.Prop.to_raw_string pid))
+       else tc
+  in
   let env = Emit_env.make_class_env ast_class in
   let initial_value, is_deep_init, initializer_instrs =
     match initial_value with

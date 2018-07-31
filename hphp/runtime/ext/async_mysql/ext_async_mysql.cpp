@@ -1229,11 +1229,13 @@ Object AsyncMysqlQueryResult::buildRows(bool as_maps, bool typed_values) {
 FieldIndex::FieldIndex(const am::RowFields* row_fields) {
   if (row_fields == nullptr)
     return;
-  field_names_.reserve(row_fields->numFields());
-  for (int i = 0; i < row_fields->numFields(); ++i) {
+  auto n = row_fields->numFields();
+  field_names_.reserve(n);
+  field_name_map_.reserve(n);
+  for (int i = 0; i < n; ++i) {
     auto name = String(row_fields->fieldName(i).str());
     field_names_.push_back(name);
-    field_name_map_[name] = i;
+    field_name_map_[name] = i; // last duplicate field name wins
   }
 }
 

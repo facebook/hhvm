@@ -229,12 +229,12 @@ struct FieldIndex {
   String getFieldString(size_t field_index) const;
 
  private:
+  // NB: It's possible to just use a req::vector_map<String> for names,
+  // and rely on insertion order to compute indexes, but sometimes this
+  // FieldIndex has duplicate names. last-name-wins, requiring the map.
   req::vector<String> field_names_;
-  req::hash_map<
-    String,
-    size_t,
-    hphp_string_hash,
-    hphp_string_same> field_name_map_;
+  req::fast_map<String, size_t, hphp_string_hash, hphp_string_same>
+    field_name_map_;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

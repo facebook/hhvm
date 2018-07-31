@@ -72,8 +72,8 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrReference,            F,       "reference");        \
   X(AttrInterceptable,        F,       "interceptable");    \
   X(AttrDynamicallyCallable,  F,       "dyn_callable");     \
-  X(AttrLSB,                  P,       "lsb");
-
+  X(AttrLSB,                  P,       "lsb");              \
+  X(AttrNoBadRedeclare,       P,       "no_bad_redeclare");
   /* */
 
 #define HHAS_TYPE_FLAGS                                     \

@@ -1222,6 +1222,20 @@ void loseNonRefSelfPropTypes(ISS& env) {
   }
 }
 
+//////////////////////////////////////////////////////////////////////
+// misc
+
+/*
+ * Check whether the class given by the type might raise when initialized.
+ */
+bool classInitMightRaise(ISS& env, const Type& cls) {
+  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return false;
+  if (!is_specialized_cls(cls)) return true;
+  auto const dcls = dcls_of(cls);
+  if (dcls.type != DCls::Exact) return true;
+  return dcls.cls.initMightRaise();
+}
+
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif

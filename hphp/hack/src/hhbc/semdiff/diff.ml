@@ -671,6 +671,8 @@ let property_is_deep_init_comparer =
   wrap Hhas_property.is_deep_init (fun _f s -> s) (flag_comparer "deep_init")
 let property_no_serialize_comparer =
   wrap Hhas_property.no_serialize (fun _f s -> s) (flag_comparer "no_serialize")
+let property_no_bad_redeclare_comparer =
+  wrap Hhas_property.no_serialize (fun _f s -> s) (flag_comparer "no_bad_redeclare")
 let prop_comparer =
   wrap Hhbc_id.Prop.to_raw_string (fun _ s -> s) string_comparer
 
@@ -693,6 +695,7 @@ let property_comparer =
      property_name_comparer;
      property_initial_value_comparer;
      property_no_serialize_comparer;
+     property_no_bad_redeclare_comparer;
      property_type_info_comparer]
 
 (* apply a permutation to the trailing elements of a list

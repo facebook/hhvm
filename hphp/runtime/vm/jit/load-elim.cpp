@@ -106,11 +106,10 @@ struct State {
   ALocBits avail;
 
   /*
-   * If we know a class' sprops or props are already initialized at this
+   * If we know whether various RDS entries have been initialized at this
    * position.
    */
-  jit::flat_set<const Class*> initSProps{};
-  jit::flat_set<const Class*> initProps{};
+  jit::flat_set<rds::Handle> initRDS{};
 };
 
 struct BlockInfo {
@@ -224,23 +223,10 @@ DEBUG_ONLY std::string show(const State& state) {
 
   folly::format(
     &ret,
-    "  initSProps: {}\n",
+    "  initRDS : {}\n",
     [&] {
       using namespace folly::gen;
-      return from(state.initSProps)
-        | map([&] (const Class* cls) { return cls->name()->toCppString(); })
-        | unsplit<std::string>(",");
-    }()
-  );
-
-  folly::format(
-    &ret,
-    "  initProps: {}\n",
-    [&] {
-      using namespace folly::gen;
-      return from(state.initProps)
-        | map([&] (const Class* cls) { return cls->name()->toCppString(); })
-        | unsplit<std::string>(",");
+      return from(state.initRDS) | unsplit<std::string>(",");
     }()
   );
 
@@ -284,6 +270,11 @@ struct FRefinableLoad { Type refinedType; };
 struct FResolvable { const Func* callee; };
 
 /*
+ * The instruction can be replaced with a nop.
+ */
+struct FRemovable {};
+
+/*
  * The instruction can be legally replaced with a Jmp to either its next or
  * taken edge.
  */
@@ -291,7 +282,7 @@ struct FJmpNext {};
 struct FJmpTaken {};
 
 using Flags = boost::variant<FNone,FRedundant,FReducible,FRefinableLoad,
-                             FResolvable,FJmpNext,FJmpTaken>;
+                             FResolvable,FRemovable,FJmpNext,FJmpTaken>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -491,25 +482,30 @@ Flags handle_general_effects(Local& env,
     }
     break;
 
-  case CheckInitSProps:
   case InitSProps: {
-    auto cls = inst.extra<ClassData>()->cls;
-    if (env.state.initSProps.count(cls) > 0) return FJmpNext{};
-    do {
-      // If we initialized a class' sprops, then it implies that all of its
-      // parent's sprops are initialized as well.
-      env.state.initSProps.insert(cls);
-      cls = cls->parent();
-    } while (cls);
+    auto const handle = inst.extra<ClassData>()->cls->sPropInitHandle();
+    if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
+    env.state.initRDS.insert(handle);
     break;
   }
 
-  case CheckInitProps:
   case InitProps: {
-    auto cls = inst.extra<ClassData>()->cls;
-    if (env.state.initProps.count(cls) > 0) return FJmpNext{};
-    // Unlike InitSProps, InitProps implies nothing about the class' parent.
-    env.state.initProps.insert(cls);
+    auto const handle = inst.extra<ClassData>()->cls->propHandle();
+    if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
+    env.state.initRDS.insert(handle);
+    break;
+  }
+
+  case CheckRDSInitialized: {
+    auto const handle = inst.extra<CheckRDSInitialized>()->handle;
+    if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
+    break;
+  }
+
+  case MarkRDSInitialized: {
+    auto const handle = inst.extra<MarkRDSInitialized>()->handle;
+    if (env.state.initRDS.count(handle) > 0) return FRemovable{};
+    env.state.initRDS.insert(handle);
     break;
   }
 
@@ -949,6 +945,12 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
 
     [&] (FResolvable f) { resolve_call(env, inst, f); },
 
+    [&] (FRemovable) {
+      FTRACE(2, "      removable\n");
+      assertx(!inst.isControlFlow());
+      inst.convertToNop();
+    },
+
     [&] (FJmpNext) {
       FTRACE(2, "      unnecessary\n");
       env.unit.replace(&inst, Jmp, inst.next());
@@ -1071,18 +1073,9 @@ void merge_into(Global& genv, Block* target, State& dst, const State& src) {
     }
   );
 
-  // Properties must be initialized along both paths
-  for (auto it = dst.initSProps.begin(); it != dst.initSProps.end();) {
-    if (!src.initSProps.count(*it)) {
-      it = dst.initSProps.erase(it);
-    } else {
-      ++it;
-    }
-  }
-
-  for (auto it = dst.initProps.begin(); it != dst.initProps.end();) {
-    if (!src.initProps.count(*it)) {
-      it = dst.initProps.erase(it);
+  for (auto it = dst.initRDS.begin(); it != dst.initRDS.end();) {
+    if (!src.initRDS.count(*it)) {
+      it = dst.initRDS.erase(it);
     } else {
       ++it;
     }

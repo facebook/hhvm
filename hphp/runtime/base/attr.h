@@ -83,6 +83,10 @@ enum Attr {
   // share a name but both of which are unique.   |          |         //
   AttrUnique               = (1u << 10), //    X  |          |    X    //
                                          //       |          |         //
+  // Indicates that this property is definitely not redeclaring a property in a
+  // parent, or if it is, the type-hints of the two properties are equivalent
+  // (and therefore requires no runtime check).
+  AttrNoBadRedeclare       = (1u << 10), //       |    X     |         //
   // Indicates that a function can be used with fb_rename_function---even if
   // JitEnableRenameFunction is false --- and can be used with fb_intercept.
   // (Note: we could split this into two bits, since you can technically

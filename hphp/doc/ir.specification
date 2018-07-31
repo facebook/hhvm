@@ -1479,22 +1479,29 @@ To string conversions:
   to call their destructors when a request exists.  This instruction is
   conditionally emitted to implement that.
 
-| CheckInitProps<class>, ND, NA, B
-
-  Check if the properties for class are initialized and branches if not.
-
 | InitProps<class>, ND, NA, NF
 
   Calls the property initializer function (86pinit) for class.  May throw.
-
-| CheckInitSProps<class>, ND, NA, B
-
-  Check if static properties for class are initialized and branches if not.
 
 | InitSProps<class>, ND, NA, NF
 
   Calls the static property initializer functions (86sinit and/or 86linit)
   for class. May throw.
+
+| CheckRDSInitialized<RDSHandle>, ND, NA, B
+
+  Check if the RDS entry at the specified handle is initialized, and branches
+  if not.
+
+| MarkRDSInitialized<RDSHandle>, ND, NA, NF
+
+  Mark the given RDS entry as being initialized.
+
+| PropTypeRedefineCheck, ND, C(Cls) C(Int), NF
+
+  Check that the specified property at the slot S1 on S0, which redeclares a
+  property in the parent, has a declared type equivalent to the parent
+  declaration.
 
 | DebugBacktrace, D(Arr), S(Int), PRc
 

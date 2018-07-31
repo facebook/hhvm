@@ -725,6 +725,7 @@ let mutate_metadata (input : HP.t)  =
         (prop |> Hhas_property.no_serialize       |> mutate_bool)
         (prop |> Hhas_property.is_immutable       |> mutate_bool)
         (prop |> Hhas_property.is_lsb             |> mutate_bool)
+        (prop |> Hhas_property.is_no_bad_redeclare |> mutate_bool)
         (prop |> Hhas_property.name)
         (prop |> Hhas_property.initial_value |> option_lift mutate_typed_value)
         (prop |> Hhas_property.initializer_instrs |> mutate_option)

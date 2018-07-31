@@ -219,6 +219,16 @@ std::vector<WorkItem> initial_work(const php::Program& program,
   return ret;
 }
 
+std::vector<Context> opt_prop_type_hints_contexts(const php::Program& program) {
+  std::vector<Context> ret;
+  for (auto& u : program.units) {
+    for (auto& c : u->classes) {
+      ret.emplace_back(Context { borrow(u), nullptr, borrow(c) });
+    }
+  }
+  return ret;
+}
+
 WorkItem work_item_for(DependencyContext d, AnalyzeMode mode) {
   if (auto const cls = d.right()) {
     assertx(mode != AnalyzeMode::ConstPass &&
@@ -427,6 +437,23 @@ void mark_persistent_static_properties(const Index& index,
   }
 }
 
+void prop_type_hint_pass(Index& index, php::Program& program) {
+  trace_time tracer("optimize prop type-hints");
+
+  auto const contexts = opt_prop_type_hints_contexts(program);
+  parallel::for_each(
+    contexts,
+    [&] (Context ctx) { optimize_class_prop_type_hints(index, ctx); }
+  );
+
+  parallel::for_each(
+    contexts,
+    [&] (Context ctx) {
+      index.mark_no_bad_redeclare_props(const_cast<php::Class&>(*ctx.cls));
+    }
+  );
+}
+
 /*
  * Finally, use the results of all these iterations to perform
  * optimization.  This reanalyzes every function using our
@@ -550,6 +577,7 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
     while (true) {
       try {
         assert(check(*program));
+        prop_type_hint_pass(*index, *program);
         constant_pass(*index, *program);
         index->use_class_dependencies(options.HardPrivatePropInference);
         analyze_iteratively(*index, *program, AnalyzeMode::NormalPass);

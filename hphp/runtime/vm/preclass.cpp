@@ -196,6 +196,7 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
   if (m_attrs & AttrPersistent) { out << "(persistent) "; }
   if (m_attrs & AttrNoSerialize) { out << "(no-serialize) "; }
   if (m_attrs & AttrIsImmutable) { out << "(immutable) "; }
+  if (m_attrs & AttrNoBadRedeclare) { out << "(no-bad-redeclare) "; }
   out << preClass->name()->data() << "::" << m_name->data() << " = ";
   if (m_val.m_type == KindOfUninit) {
     out << "<non-scalar>";

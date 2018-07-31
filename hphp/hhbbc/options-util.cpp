@@ -40,8 +40,9 @@ bool is_trace_function(borrowed_ptr<const php::Class> cls,
 
 int trace_bump_for(borrowed_ptr<const php::Class> cls,
                    borrowed_ptr<const php::Func> func) {
+  auto const unit = func ? func->unit : cls->unit;
   return is_trace_function(cls, func) ? kTraceFuncBump :
-    (is_systemlib_part(*func->unit) ? kSystemLibBump : 0);
+    (is_systemlib_part(*unit) ? kSystemLibBump : 0);
 }
 
 //////////////////////////////////////////////////////////////////////

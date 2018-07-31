@@ -736,6 +736,8 @@ bool Class::isCollectionClass() const {
 // Property initialization.
 
 void Class::initialize() const {
+  if (m_maybeRedefsPropTy) checkPropTypeRedefinitions();
+
   if (m_pinitVec.size() > 0 && getPropData() == nullptr) {
     initProps();
   }
@@ -749,6 +751,11 @@ bool Class::initialized() const {
     return false;
   }
   if (numStaticProperties() > 0 && needsInitSProps()) {
+    return false;
+  }
+  if (m_maybeRedefsPropTy &&
+      (!m_extra->m_checkedPropTypeRedefs.bound() ||
+       !m_extra->m_checkedPropTypeRedefs.isInit())) {
     return false;
   }
   return true;
@@ -874,6 +881,69 @@ Slot Class::lsbMemoSlot(const Func* func, bool forValue) const {
   auto it = slots.find(func->getFuncId());
   always_assert(it != slots.end());
   return it->second;
+}
+
+void Class::checkPropTypeRedefinitions() const {
+  assertx(m_maybeRedefsPropTy);
+  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(m_parent);
+  assertx(m_extra.get() != nullptr);
+
+  auto extra = m_extra.get();
+  extra->m_checkedPropTypeRedefs.bind(rds::Mode::Normal);
+  if (extra->m_checkedPropTypeRedefs.isInit()) return;
+
+  if (m_parent->m_maybeRedefsPropTy) m_parent->checkPropTypeRedefinitions();
+
+  if (m_selfMaybeRedefsPropTy) {
+    for (Slot slot = 0; slot < m_declProperties.size(); slot++) {
+      auto const& prop = m_declProperties[slot];
+      if (prop.attrs & AttrNoBadRedeclare) continue;
+      checkPropTypeRedefinition(slot);
+    }
+  }
+
+  extra->m_checkedPropTypeRedefs.initWith(true);
+}
+
+void Class::checkPropTypeRedefinition(Slot slot) const {
+  assertx(m_maybeRedefsPropTy);
+  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(m_parent);
+  assertx(slot != kInvalidSlot);
+  assertx(slot < numDeclProperties());
+
+  auto const& prop = m_declProperties[slot];
+  assertx(!(prop.attrs & AttrNoBadRedeclare));
+
+  auto const& oldProp = m_parent->m_declProperties[slot];
+
+  auto const& oldTC = oldProp.typeConstraint;
+  auto const& newTC = prop.typeConstraint;
+
+  auto const result = oldTC.equivalentForProp(newTC);
+  if (result == TypeConstraint::EquivalentResult::Pass) return;
+
+  auto const oldTCName =
+    oldTC.hasConstraint() ? oldTC.displayName() : "mixed";
+  auto const newTCName =
+    newTC.hasConstraint() ? newTC.displayName() : "mixed";
+
+  auto const msg = folly::sformat(
+    "Type-hint of '{}::{}' must be {} (as in class {}), not {}",
+    prop.cls->name(),
+    prop.name,
+    oldTCName,
+    oldProp.cls->name(),
+    newTCName
+  );
+
+  if (result == TypeConstraint::EquivalentResult::DVArray) {
+    assertx(RuntimeOption::EvalHackArrCompatTypeHintNotices);
+    raise_hackarr_compat_notice(msg);
+  } else {
+    raise_property_typehint_error(msg, oldTC.isSoft() && newTC.isSoft());
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1410,6 +1480,7 @@ void Class::setParent() {
       }
     }
     m_preClass->enforceInMaybeSealedParentWhitelist(m_parent->preClass());
+    if (m_parent->m_maybeRedefsPropTy) m_maybeRedefsPropTy = true;
   }
 
   // Handle stuff specific to cppext classes
@@ -1753,6 +1824,8 @@ Class::Class(PreClass* preClass, Class* parent,
 #else
   : m_parent(parent)
 #endif
+  , m_maybeRedefsPropTy{false}
+  , m_selfMaybeRedefsPropTy{false}
   , m_preClass(PreClassPtr(preClass))
   , m_classVecLen(always_safe_cast<decltype(m_classVecLen)>(classVecLen))
   , m_funcVecLen(always_safe_cast<decltype(m_funcVecLen)>(funcVecLen))
@@ -2214,7 +2287,7 @@ void Class::setProperties() {
       prop.cls                 = parentProp.cls;
       prop.mangledName         = parentProp.mangledName;
       prop.originalMangledName = parentProp.originalMangledName;
-      prop.attrs               = parentProp.attrs;
+      prop.attrs               = parentProp.attrs | AttrNoBadRedeclare;
       prop.docComment          = parentProp.docComment;
       prop.userType            = parentProp.userType;
       prop.typeConstraint      = parentProp.typeConstraint;
@@ -2243,7 +2316,7 @@ void Class::setProperties() {
       // Alias parent's static property.
       SProp sProp;
       sProp.name           = parentProp.name;
-      sProp.attrs          = parentProp.attrs;
+      sProp.attrs          = parentProp.attrs | AttrNoBadRedeclare;
       sProp.userType       = parentProp.userType;
       sProp.typeConstraint = parentProp.typeConstraint;
       sProp.docComment     = parentProp.docComment;
@@ -2308,7 +2381,8 @@ void Class::setProperties() {
         prop.name                = preProp->name();
         prop.mangledName         = preProp->mangledName();
         prop.originalMangledName = preProp->mangledName();
-        prop.attrs               = Attr(preProp->attrs() & ~AttrTrait);
+        prop.attrs               = Attr(preProp->attrs() & ~AttrTrait)
+                                   | AttrNoBadRedeclare;
         // This is the first class to declare this property
         prop.cls                 = this;
         prop.userType            = preProp->userType();
@@ -2339,6 +2413,20 @@ void Class::setProperties() {
                  AttrProtected);
           prop.cls = this;
           prop.docComment = preProp->docComment();
+          assertx(prop.attrs & AttrNoBadRedeclare);
+
+          auto const& tc = preProp->typeConstraint();
+          if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
+              !(preProp->attrs() & AttrNoBadRedeclare) &&
+              tc.maybeInequivalentForProp(prop.typeConstraint)) {
+            // If this property isn't obviously not redeclaring a property in
+            // the parent, we need to check that when we initialize the class.
+            prop.attrs = Attr(prop.attrs & ~AttrNoBadRedeclare);
+            m_selfMaybeRedefsPropTy = true;
+            m_maybeRedefsPropTy = true;
+          }
+          prop.typeConstraint = tc;
+
           if (slot < traitIdx) {
             prop.idx = slot;
           } else {
@@ -2369,13 +2457,27 @@ void Class::setProperties() {
             prop.originalMangledName = preProp->mangledName();
             prop.attrs = Attr(prop.attrs ^ (AttrProtected|AttrPublic));
             prop.userType = preProp->userType();
-            prop.typeConstraint = preProp->typeConstraint();
           }
           if (slot < traitIdx) {
             prop.idx = slot;
           } else {
             prop.idx = slot + m_preClass->numProperties() + traitOffset;
           }
+
+          assertx(prop.attrs & AttrNoBadRedeclare);
+          auto const& tc = preProp->typeConstraint();
+
+          if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
+              !(preProp->attrs() & AttrNoBadRedeclare) &&
+              tc.maybeInequivalentForProp(prop.typeConstraint)) {
+            // If this property isn't obviously not redeclaring a property in
+            // the parent, we need to check that when we initialize the class.
+            prop.attrs = Attr(prop.attrs & ~AttrNoBadRedeclare);
+            m_selfMaybeRedefsPropTy = true;
+            m_maybeRedefsPropTy = true;
+          }
+          prop.typeConstraint = tc;
+
           auto const& tv = preProp->val();
           TypedValueAux& tvaux = m_declPropInit[it2->second];
           tvaux.m_data = tv.m_data;
@@ -2433,7 +2535,7 @@ void Class::setProperties() {
       }
       // Finish initializing.
       auto& sProp = curSPropMap[sPropInd];
-      sProp.attrs          = preProp->attrs();
+      sProp.attrs          = preProp->attrs() | AttrNoBadRedeclare;
       sProp.userType       = preProp->userType();
       sProp.typeConstraint = preProp->typeConstraint();
       sProp.docComment     = preProp->docComment();
@@ -2533,7 +2635,7 @@ bool Class::compatibleTraitPropInit(const TypedValue& tv1,
   not_reached();
 }
 
-void Class::importTraitInstanceProp(Class* /*trait*/, Prop& traitProp,
+void Class::importTraitInstanceProp(Class* trait, Prop& traitProp,
                                     TypedValue& traitPropVal,
                                     const int idxOffset,
                                     PropMap::Builder& curPropMap) {
@@ -2552,6 +2654,7 @@ void Class::importTraitInstanceProp(Class* /*trait*/, Prop& traitProp,
     if (prop.attrs & AttrDeepInit) {
       m_hasDeepInitProps = true;
     }
+    prop.attrs = prop.attrs | AttrNoBadRedeclare;
     prop.idx += idxOffset;
     curPropMap.add(prop.name, prop);
     m_declPropInit.push_back(traitPropVal);
@@ -2559,7 +2662,7 @@ void Class::importTraitInstanceProp(Class* /*trait*/, Prop& traitProp,
     // Redeclared prop, make sure it matches previous declarations
     auto& prevProp    = curPropMap[prevIt->second];
     auto& prevPropVal = m_declPropInit[prevIt->second];
-    if (prevProp.attrs != traitProp.attrs ||
+    if (((prevProp.attrs ^ traitProp.attrs) & ~AttrNoBadRedeclare) ||
         !compatibleTraitPropInit(prevPropVal, traitPropVal)) {
       raise_error("trait declaration of property '%s' is incompatible with "
                     "previous declaration", traitProp.name->data());
@@ -2583,6 +2686,7 @@ void Class::importTraitStaticProp(Class* /*trait*/, SProp& traitProp,
     SProp prop = traitProp;
     prop.cls = this; // set current class as the first declaring prop
     prop.idx += idxOffset;
+    prop.attrs |= AttrNoBadRedeclare;
     curSPropMap.add(prop.name, prop);
   } else {
     // Redeclared prop, make sure it matches previous declaration
@@ -2607,7 +2711,8 @@ void Class::importTraitStaticProp(Class* /*trait*/, SProp& traitProp,
 
       prevPropVal = prevSProps[prevPropInd].val;
     }
-    if ((prevProp.attrs ^ traitProp.attrs) & ~AttrPersistent ||
+    if (((prevProp.attrs ^ traitProp.attrs) &
+         ~(AttrPersistent | AttrNoBadRedeclare)) ||
         !compatibleTraitPropInit(traitProp.val, prevPropVal)) {
       raise_error("trait declaration of property '%s' is incompatible with "
                   "previous declaration", traitProp.name->data());
@@ -2729,8 +2834,12 @@ void Class::setInitializers() {
   m_sinitVec = sinits;
   m_linitVec = linits;
 
-  m_needInitialization = (m_pinitVec.size() > 0 ||
-    m_staticProperties.size() > 0);
+  m_needInitialization =
+    (m_pinitVec.size() > 0 ||
+     m_staticProperties.size() > 0 ||
+     m_maybeRedefsPropTy);
+
+  if (m_maybeRedefsPropTy) allocExtraData();
 
   // Implementations of Throwable get special treatment.
   if (m_parent.get() != nullptr) {

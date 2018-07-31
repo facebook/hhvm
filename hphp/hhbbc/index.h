@@ -204,6 +204,12 @@ struct Class {
   bool couldBeMocked() const;
 
   /*
+   * Whether initializing this class (which sets up the class' properties and is
+   * a side-effect of several different bytecodes) can potentially raise.
+   */
+  bool initMightRaise() const;
+
+  /*
    * Returns the Class that is the first common ancestor between 'this' and 'o'.
    * If there is no common ancestor folly::none is returned
    */
@@ -870,6 +876,12 @@ struct Index {
    * Identify the persistent classes, functions and typeAliases.
    */
   void mark_persistent_classes_and_functions(php::Program& program);
+
+  /*
+   * Mark any properties in cls that definitely do not redeclare a property in
+   * the parent, which has an inequivalent type-hint.
+   */
+  void mark_no_bad_redeclare_props(php::Class& cls) const;
 
   /*
    * Return true if the resolved function is an async

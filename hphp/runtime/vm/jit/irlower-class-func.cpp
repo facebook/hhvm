@@ -137,29 +137,21 @@ void cgLdClsInitData(IRLS& env, const IRInstruction* inst) {
   v << load{vec[Class::PropInitVec::dataOff()], dst};
 }
 
-void cgCheckInitProps(IRLS& env, const IRInstruction* inst) {
-  auto const cls = inst->extra<CheckInitProps>()->cls;
-  auto& v = vmain(env);
-
-  auto const sf = checkRDSHandleInitialized(v, cls->propHandle());
-  v << jcc{CC_NE, sf, {label(env, inst->next()), label(env, inst->taken())}};
-}
-
-void cgCheckInitSProps(IRLS& env, const IRInstruction* inst) {
-  auto const cls = inst->extra<CheckInitSProps>()->cls;
-  auto& v = vmain(env);
-
-  auto const handle = cls->sPropInitHandle();
-  if (rds::isNormalHandle(handle)) {
-    auto const sf = checkRDSHandleInitialized(v, handle);
-    v << jcc{CC_NE, sf, {label(env, inst->next()), label(env, inst->taken())}};
-  } else {
-    // Always initialized; just fall through to inst->next().
-    assertx(rds::isPersistentHandle(handle));
-    DEBUG_ONLY bool initialized =
-      rds::handleToRef<bool, rds::Mode::Persistent>(handle);
-    assertx(initialized);
-  }
+void cgPropTypeRedefineCheck(IRLS& env, const IRInstruction* inst) {
+  auto const cls = inst->src(0)->clsVal();
+  auto const slot = inst->src(1)->intVal();
+  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(cls->maybeRedefinesPropTypes());
+  assertx(slot != kInvalidSlot);
+  assertx(slot < cls->numDeclProperties());
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::method(&Class::checkPropTypeRedefinition),
+    kVoidDest,
+    SyncOptions::Sync,
+    argGroup(env, inst).immPtr(cls).imm(slot)
+  );
 }
 
 IMPL_OPCODE_CALL(InitProps)

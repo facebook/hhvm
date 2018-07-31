@@ -317,12 +317,22 @@ inline bool Class::needInitialization() const {
   return m_needInitialization;
 }
 
+inline bool Class::maybeRedefinesPropTypes() const {
+  return m_maybeRedefsPropTy;
+}
+
 inline const Class::PropInitVec& Class::declPropInit() const {
   return m_declPropInit;
 }
 
 inline const FixedVector<const Func*>& Class::pinitVec() const {
   return m_pinitVec;
+}
+
+inline rds::Handle Class::checkedPropTypeRedefinesHandle() const {
+  assertx(m_maybeRedefsPropTy);
+  m_extra->m_checkedPropTypeRedefs.bind(rds::Mode::Normal);
+  return m_extra->m_checkedPropTypeRedefs.handle();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

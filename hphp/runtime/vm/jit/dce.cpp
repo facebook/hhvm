@@ -436,9 +436,8 @@ bool canDCE(IRInstruction* inst) {
   case LookupFuncCached:
   case AllocObj:
   case RegisterLiveObj:
-  case CheckInitProps:
   case InitProps:
-  case CheckInitSProps:
+  case PropTypeRedefineCheck:
   case InitSProps:
   case InitObjProps:
   case DebugBacktrace:
@@ -721,6 +720,8 @@ bool canDCE(IRInstruction* inst) {
   case BoxPtr:
   case AsTypeStruct:
   case ResolveTypeStruct:
+  case CheckRDSInitialized:
+  case MarkRDSInitialized:
     return false;
 
   case AKExistsArr:

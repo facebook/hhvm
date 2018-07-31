@@ -715,9 +715,18 @@ public:
 
   /*
    * Whether this Class requires initialization, either because of nonscalar
-   * instance property initializers, or simply due to having static properties.
+   * instance property initializers, simply due to having static properties, or
+   * possible property type invariance violations.
    */
   bool needInitialization() const;
+
+  /*
+   * Whether this Class potentially has properties which redefine properties in
+   * a parent class, and the properties might have inequivalent type-hints. If
+   * so, a runtime check is needed during class initialization to possibly raise
+   * an error.
+   */
+  bool maybeRedefinesPropTypes() const;
 
   /*
    * Perform request-local initialization.
@@ -734,6 +743,12 @@ public:
   void initialize() const;
   void initProps() const;
   void initSProps() const;
+
+  /*
+   * Perform a property type-hint redefinition check for the property at a
+   * particular slot.
+   */
+  void checkPropTypeRedefinition(Slot) const;
 
   /*
    * Check if class has been initialized.
@@ -755,6 +770,11 @@ public:
    */
   const FixedVector<const Func*>& pinitVec() const;
 
+  /*
+   * RDS handle which marks whether a property type-hint redefinition check has
+   * been performed for this class in this request yet.
+   */
+  rds::Handle checkedPropTypeRedefinesHandle() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Property storage.                                                  [const]
@@ -1260,6 +1280,12 @@ private:
      * MemoizeLSB extra data
      */
     mutable LSBMemoExtra m_lsbMemoExtra;
+
+    /*
+     * If initialized, then this class has already performed a property
+     * type-hint redefinition check.
+     */
+    mutable rds::Link<bool, rds::Mode::Normal> m_checkedPropTypeRedefs;
   };
 
   /*
@@ -1424,6 +1450,7 @@ private:
   void addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const;
 
   void initLSBMemoHandles();
+  void checkPropTypeRedefinitions() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Static data members.
@@ -1475,7 +1502,14 @@ private:
    * to the closure's context class.
    */
   std::atomic<bool> m_scoped{false};
-  // NB: 24 bits available here (in USE_LOWPTR builds).
+
+  /* This class, or one of its transitive parents, has a property which maybe
+   * redefines an existing property in an incompatible way. */
+  bool m_maybeRedefsPropTy       : 1;
+  /* This class (and not any of its transitive parents) has a property which
+   * maybe redefines an existing property in an incompatible way. */
+  bool m_selfMaybeRedefsPropTy   : 1;
+  // NB: 22 bits available here (in USE_LOWPTR builds).
 
   /*
    * Vector of 86pinit() methods that need to be called to complete instance
@@ -1556,7 +1590,8 @@ private:
 
   /*
    * Whether the Class requires initialization, because it has either
-   * {p,s}init() methods or static members.
+   * {p,s}init() methods or static members, or possibly has prop type invariance
+   * violations.
    */
   bool m_needInitialization : 1;
 

@@ -500,6 +500,12 @@ struct ClassInfo {
   bool isDerivedMocked{false};
 
   /*
+   * Track if this class has a property which might redeclare a property in a
+   * parent class with an inequivalent type-hint.
+   */
+  bool hasBadRedeclareProp{true};
+
+  /*
    * Flags about the existence of various magic methods, or whether
    * any derived classes may have those methods.  The non-derived
    * flags imply the derived flags, even if the class is final, so you
@@ -659,6 +665,21 @@ bool Class::couldBeMocked() const {
     [] (SString) { return true;},
     [] (borrowed_ptr<ClassInfo> cinfo) {
       return cinfo->isMocked;
+    }
+  );
+}
+
+bool Class::initMightRaise() const {
+  return val.match(
+    [] (SString) { return true; },
+    [] (borrowed_ptr<ClassInfo> cinfo) {
+      // Check this class and all of its parents for possible inequivalent
+      // redeclarations.
+      do {
+        if (cinfo->hasBadRedeclareProp) return true;
+        cinfo = cinfo->parent;
+      } while (cinfo);
+      return false;
     }
   );
 }
@@ -3494,6 +3515,114 @@ void Index::mark_persistent_classes_and_functions(php::Program& program) {
                      (c->cls->attrs & AttrUnique) &&
                      check_persistent(*c),
                      AttrPersistent);
+  }
+}
+
+void Index::mark_no_bad_redeclare_props(php::Class& cls) const {
+  /*
+   * Keep a list of properties which have not yet been found to redeclare
+   * anything inequivalently. Start out by putting everything on the list. Then
+   * walk up the inheritance chain, removing collisions as we find them.
+   */
+  std::vector<php::Prop*> props;
+  for (auto& prop : cls.properties) {
+    if (prop.attrs & (AttrStatic | AttrPrivate)) {
+      // Static and private properties never redeclare anything so need not be
+      // considered.
+      attribute_setter(prop.attrs, true, AttrNoBadRedeclare);
+      continue;
+    }
+    attribute_setter(prop.attrs, false, AttrNoBadRedeclare);
+    props.emplace_back(&prop);
+  }
+
+  auto currentCls = [&]() -> const ClassInfo* {
+    auto const rcls = resolve_class(&cls);
+    if (rcls.val.left()) return nullptr;
+    return rcls.val.right();
+  }();
+  // If there's one more than one resolution for the class, be conservative and
+  // we'll treat everything as possibly redeclaring.
+  if (!currentCls) props.clear();
+
+  while (!props.empty()) {
+    auto const parent = currentCls->parent;
+    if (!parent) {
+      // No parent. We're done, so anything left on the prop list is
+      // AttrNoBadRedeclare.
+      for (auto& prop : props) {
+        attribute_setter(prop->attrs, true, AttrNoBadRedeclare);
+      }
+      break;
+    }
+
+    auto const findParentProp = [&] (SString name) -> const php::Prop* {
+      for (auto& prop : parent->cls->properties) {
+        if (prop.name == name) return &prop;
+      }
+      for (auto& prop : parent->traitProps) {
+        if (prop.name == name) return &prop;
+      }
+      return nullptr;
+    };
+
+    // Remove any properties which collide with the current class.
+
+    auto const propRedeclares = [&] (php::Prop* prop) {
+      auto const pprop = findParentProp(prop->name);
+      if (!pprop) return false;
+
+      // We found a property being redeclared. Check if the type-hints on
+      // the two are equivalent.
+      auto const equiv = [&] {
+        auto const& tc1 = prop->typeConstraint;
+        auto const& tc2 = pprop->typeConstraint;
+        // Try the cheap check first, use the index otherwise. Two
+        // type-constraints are equivalent if all the possible values of one
+        // satisfies the other, and vice-versa.
+        if (!tc1.maybeInequivalentForProp(tc2)) return true;
+        return
+          satisfies_constraint(
+            Context{},
+            lookup_constraint(Context{}, tc1),
+            tc2
+          ) && satisfies_constraint(
+            Context{},
+            lookup_constraint(Context{}, tc2),
+            tc1
+          );
+      };
+      // If the property in the parent is static or private, the property in
+      // the child isn't actually redeclaring anything. Otherwise, if the
+      // type-hints are equivalent, remove this property from further
+      // consideration and mark it as AttrNoBadRedeclare.
+      if ((pprop->attrs & (AttrStatic | AttrPrivate)) || equiv()) {
+        attribute_setter(prop->attrs, true, AttrNoBadRedeclare);
+      }
+      return true;
+    };
+
+    props.erase(
+      std::remove_if(props.begin(), props.end(), propRedeclares),
+      props.end()
+    );
+
+    currentCls = parent;
+  }
+
+  auto const possibleOverride =
+    std::any_of(
+      cls.properties.begin(),
+      cls.properties.end(),
+      [&](const php::Prop& prop) { return !(prop.attrs & AttrNoBadRedeclare); }
+    );
+
+  // Mark all resolutions of this class as having any possible bad redeclaration
+  // props, even if there's not an unique resolution.
+  for (auto& info : find_range(m_data->classInfo, cls.name)) {
+    auto const cinfo = info.second;
+    if (cinfo->cls != &cls) continue;
+    cinfo->hasBadRedeclareProp = possibleOverride;
   }
 }
 

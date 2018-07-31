@@ -282,8 +282,7 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
                    CheckMBase,
                    CheckInit,
                    CheckInitMem,
-                   CheckInitProps,
-                   CheckInitSProps,
+                   CheckRDSInitialized,
                    CheckPackedArrayDataBounds,
                    CheckMixedArrayOffset,
                    CheckDictOffset,
@@ -2486,12 +2485,16 @@ SSATmp* simplifyCheckInitMem(State& env, const IRInstruction* inst) {
   return mergeBranchDests(env, inst);
 }
 
-SSATmp* simplifyCheckInitProps(State& env, const IRInstruction* inst) {
+SSATmp* simplifyCheckRDSInitialized(State& env, const IRInstruction* inst) {
+  auto const handle = inst->extra<CheckRDSInitialized>()->handle;
+  if (!rds::isNormalHandle(handle)) return gen(env, Jmp, inst->next());
   return mergeBranchDests(env, inst);
 }
 
-SSATmp* simplifyCheckInitSProps(State& env, const IRInstruction* inst) {
-  return mergeBranchDests(env, inst);
+SSATmp* simplifyMarkRDSInitialized(State& env, const IRInstruction* inst) {
+  auto const handle = inst->extra<MarkRDSInitialized>()->handle;
+  if (!rds::isNormalHandle(handle)) return gen(env, Nop);
+  return nullptr;
 }
 
 SSATmp* simplifyInitObjProps(State& env, const IRInstruction* inst) {
@@ -3671,8 +3674,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(Ceil)
   X(CheckInit)
   X(CheckInitMem)
-  X(CheckInitProps)
-  X(CheckInitSProps)
+  X(CheckRDSInitialized)
+  X(MarkRDSInitialized)
   X(CheckLoc)
   X(CheckMBase)
   X(CheckRefs)

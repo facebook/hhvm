@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_OPTIMIZE_H_
 #define incl_HPHP_OPTIMIZE_H_
 
-#include "hphp/runtime/base/typed-value.h"
+#include "hphp/hhbbc/context.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -38,6 +38,11 @@ struct Bytecode;
  * php::Func itself.
  */
 void optimize_func(const Index&, FuncAnalysis&&, bool isFinal);
+
+/*
+ * Optimize property type hints for a particular class.
+ */
+void optimize_class_prop_type_hints(const Index& index, Context ctx);
 
 /*
  * Return a bytecode to generate the value in cell

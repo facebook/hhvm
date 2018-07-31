@@ -1183,6 +1183,29 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckInitMem:
     return may_load_store(pointee(inst.src(0)), AEmpty);
 
+  case CheckRDSInitialized:
+    return may_load_store(
+      ARds { inst.extra<CheckRDSInitialized>()->handle },
+      AEmpty
+    );
+  case MarkRDSInitialized:
+    return may_load_store(
+      AEmpty,
+      ARds { inst.extra<MarkRDSInitialized>()->handle }
+    );
+
+  case InitProps:
+    return may_load_store(
+      AHeapAny,
+      AHeapAny | ARds { inst.extra<InitProps>()->cls->propHandle() }
+    );
+
+  case InitSProps:
+    return may_load_store(
+      AHeapAny,
+      AHeapAny | ARds { inst.extra<InitSProps>()->cls->sPropInitHandle() }
+    );
+
   //////////////////////////////////////////////////////////////////////
   // Object/Ref loads/stores
 
@@ -1763,8 +1786,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ZeroErrorLevel:
   case RestoreErrorLevel:
   case CheckCold:
-  case CheckInitProps:
-  case CheckInitSProps:
   case ContArIncIdx:
   case ContArIncKey:
   case ContArUpdateIdx:
@@ -2009,8 +2030,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvObjToArr:   // decrefs src
   case ConvObjToVArr:  // can invoke PHP
   case ConvObjToDArr:  // can invoke PHP
-  case InitProps:
-  case InitSProps:
   case OODeclExists:
   case DefCls:         // autoload
   case LdCls:          // autoload
@@ -2079,6 +2098,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetOpCell:
   case AsTypeStruct:
   case ResolveTypeStruct:
+  case PropTypeRedefineCheck: // Can raise and autoload
     return may_load_store(AHeapAny, AHeapAny);
 
   case AddNewElemVec:

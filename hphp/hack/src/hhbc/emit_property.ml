@@ -165,6 +165,7 @@ let from_ast
     false (*no_serialize*)
     is_immutable
     is_lsb
+    false (*no_bad_redeclare*)
     pid
     initial_value
     initializer_instrs

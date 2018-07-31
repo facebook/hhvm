@@ -290,6 +290,27 @@ struct TypeConstraint {
                           bool extra = false) const;
 
   /*
+   * Returns whether this and another type-constraint might not be equivalent at
+   * runtime. Two type-constraints are equivalent if they allow exactly the same
+   * values. This function is conservative and will return true if not
+   * sure. This function will not autoload or check loaded classes of
+   * type-aliases. Only meant for property type-hints.
+   */
+  bool maybeInequivalentForProp(const TypeConstraint& other) const;
+
+  /*
+   * Returns whether this and another type-constraint are definitely
+   * equivalent. Unlike maybeInequivalentForProp(), this function is exact and
+   * can autoload. Only meant for property type-hints.
+   */
+  enum class EquivalentResult {
+    Pass,    // Equivalent
+    DVArray, // Not equivalent because of d/varray mismatch
+    Fail     // Not equivalent
+  };
+  EquivalentResult equivalentForProp(const TypeConstraint& other) const;
+
+  /*
    * Returns: whether two TypeConstraints are compatible, in the sense
    * required for PHP inheritance where a method with parameter
    * typehints is overridden.

@@ -1729,7 +1729,8 @@ void in(ISS& env, const bc::CGetS& op) {
     if (auto ty = selfPropAsCell(env, vname->m_data.pstr)) {
       // Only nothrow when we know it's a private declared property
       // (and thus accessible here).
-      nothrow(env);
+      auto const initMightRaise = classInitMightRaise(env, tcls);
+      if (!initMightRaise) nothrow(env);
 
       // We can only constprop here if we know for sure this is exactly the
       // correct class.  The reason for this is that you could have a LSB class
@@ -1737,7 +1738,7 @@ void in(ISS& env, const bc::CGetS& op) {
       // name as a private static in this class, which is supposed to fatal at
       // runtime (for an example see test/quick/static_sprop2.php).
       auto const selfExact = selfClsExact(env);
-      if (selfExact && tcls.subtypeOf(*selfExact)) {
+      if (selfExact && tcls.subtypeOf(*selfExact) && !initMightRaise) {
         constprop(env);
       }
 
@@ -1755,7 +1756,9 @@ void in(ISS& env, const bc::CGetS& op) {
      * back a constant type, it's because it found a public static and it must
      * be the property this would have read dynamically.
      */
-    if (options.HardConstProp) constprop(env);
+    if (options.HardConstProp && !classInitMightRaise(env, tcls)) {
+      constprop(env);
+    }
     return push(env, std::move(indexTy));
   }
 
@@ -2175,15 +2178,23 @@ void in(ISS& env, const bc::IssetS& op) {
   if (self && tcls.subtypeOf(*self) &&
       vname && vname->m_type == KindOfPersistentString) {
     if (auto const t = selfPropAsCell(env, vname->m_data.pstr)) {
-      if (t->subtypeOf(BNull))  { constprop(env); return push(env, TFalse); }
-      if (!t->couldBe(BNull))   { constprop(env); return push(env, TTrue); }
+      if (t->subtypeOf(BNull)) {
+        if (!classInitMightRaise(env, tcls)) constprop(env);
+        return push(env, TFalse);
+      }
+      if (!t->couldBe(BNull)) {
+        if (!classInitMightRaise(env, tcls)) constprop(env);
+        return push(env, TTrue);
+      }
     }
   }
 
   auto const indexTy = env.index.lookup_public_static(tcls, tname);
   if (indexTy.subtypeOf(BInitCell)) {
     // See the comments in CGetS about constprop for public statics.
-    if (options.HardConstProp) constprop(env);
+    if (options.HardConstProp && !classInitMightRaise(env, tcls)) {
+      constprop(env);
+    }
     if (indexTy.subtypeOf(BNull))  { return push(env, TFalse); }
     if (!indexTy.couldBe(BNull))   { return push(env, TTrue); }
   }
@@ -2594,7 +2605,7 @@ void in(ISS& env, const bc::SetS& op) {
 
   if (!self || tcls.couldBe(*self)) {
     if (vname && vname->m_type == KindOfPersistentString) {
-      nothrow(env);
+      if (!classInitMightRaise(env, tcls)) nothrow(env);
       mergeSelfProp(env, vname->m_data.pstr, t1);
     } else {
       mergeEachSelfPropRaw(env, [&] (Type) { return t1; });

@@ -390,6 +390,29 @@ void cgLdRDSAddr(IRLS& env, const IRInstruction* inst) {
   }
 }
 
+void cgCheckRDSInitialized(IRLS& env, const IRInstruction* inst) {
+  auto const handle = inst->extra<CheckRDSInitialized>()->handle;
+  auto& v = vmain(env);
+
+  if (rds::isNormalHandle(handle)) {
+    auto const sf = checkRDSHandleInitialized(v, handle);
+    v << jcc{CC_NE, sf, {label(env, inst->next()), label(env, inst->taken())}};
+  } else {
+    // Always initialized; just fall through to inst->next().
+    assertx(rds::isPersistentHandle(handle));
+    DEBUG_ONLY bool initialized =
+      rds::handleToRef<bool, rds::Mode::Persistent>(handle);
+    assertx(initialized);
+  }
+}
+
+void cgMarkRDSInitialized(IRLS& env, const IRInstruction* inst) {
+  auto const handle = inst->extra<MarkRDSInitialized>()->handle;
+  if (rds::isNormalHandle(handle)) markRDSHandleInitialized(vmain(env), handle);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void cgLdTVAux(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
 

@@ -326,6 +326,136 @@ MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
   return t;
 }
 
+bool
+TypeConstraint::maybeInequivalentForProp(const TypeConstraint& other) const {
+  assertx(validForProp());
+  assertx(other.validForProp());
+
+  if (isSoft() != other.isSoft()) return true;
+
+  if (!isCheckable()) return other.isCheckable();
+  if (!other.isCheckable()) return true;
+
+  if (isNullable() != other.isNullable()) return true;
+
+  if (isObject()) {
+    // Type-hints with the same name should always be the same thing
+    return !other.isObject() || !m_typeName->isame(other.m_typeName);
+  }
+  if (other.isObject()) return true;
+
+  if (type() == other.type()) return false;
+  if (!RuntimeOption::EvalHackArrCompatTypeHintNotices) {
+    return !isArray() || !other.isArray();
+  }
+  return true;
+}
+
+TypeConstraint::EquivalentResult
+TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
+  assertx(validForProp());
+  assertx(other.validForProp());
+
+  if (isSoft() != other.isSoft()) return EquivalentResult::Fail;
+
+  if (isObject() && other.isObject() &&
+      isNullable() == other.isNullable() &&
+      m_typeName->isame(other.m_typeName)) {
+    // We can avoid having to resolve the type-hint if they have the same name.
+    return EquivalentResult::Pass;
+  }
+
+  auto const resolve = [&] (const TypeConstraint& tc)
+    -> std::tuple<AnnotType, Class*, bool> {
+    if (!tc.isCheckable()) {
+      return std::make_tuple(AnnotType::Mixed, nullptr, false);
+    }
+
+    switch (tc.metaType()) {
+      case MetaType::This:
+      case MetaType::Number:
+      case MetaType::ArrayKey:
+      case MetaType::Nonnull:
+      case MetaType::VecOrDict:
+      case MetaType::VArray:
+      case MetaType::DArray:
+      case MetaType::VArrOrDArr:
+      case MetaType::ArrayLike:
+      case MetaType::Precise:
+        if (!tc.isObject()) {
+          return std::make_tuple(tc.type(), nullptr, tc.isNullable());
+        }
+        break;
+      case MetaType::NoReturn:
+      case MetaType::Self:
+      case MetaType::Parent:
+      case MetaType::Callable:
+      case MetaType::Mixed:
+        always_assert(false);
+    }
+
+    assertx(tc.isObject());
+
+    const TypeAliasReq* tyAlias;
+    Class* klass;
+    std::tie(tyAlias, klass) =
+      getTypeAliasOrClassWithAutoload(tc.m_namedEntity, tc.m_typeName);
+
+    auto nullable = tc.isNullable();
+    auto at = AnnotType::Object;
+    if (tyAlias) {
+      nullable |= tyAlias->nullable;
+      at = tyAlias->type;
+      klass = (at == Type::Object) ? tyAlias->klass : nullptr;
+    }
+
+    if (klass && isEnum(klass)) {
+      auto const maybeDt = klass->enumBaseTy();
+      at = maybeDt ? dataTypeToAnnotType(*maybeDt) : AnnotType::ArrayKey;
+      klass = nullptr;
+    }
+
+    if (at == AnnotType::Mixed) nullable = false;
+    return std::make_tuple(at, klass, nullable);
+  };
+
+  auto const resolved1 = resolve(*this);
+  auto const resolved2 = resolve(other);
+  if (resolved1 != resolved2) {
+    // The resolutions aren't the same. This still might be okay once you take
+    // into account d/varrays.
+    auto const resType1 = std::get<0>(resolved1);
+    auto const resType2 = std::get<0>(resolved2);
+    auto const isArray1 =
+      resType1 == AnnotType::Array ||
+      resType1 == AnnotType::VArray ||
+      resType1 == AnnotType::DArray ||
+      resType1 == AnnotType::VArrOrDArr;
+    auto const isArray2 =
+      resType2 == AnnotType::Array ||
+      resType2 == AnnotType::VArray ||
+      resType2 == AnnotType::DArray ||
+      resType2 == AnnotType::VArrOrDArr;
+    if (!isArray1 || !isArray2 ||
+        std::get<2>(resolved1) != std::get<2>(resolved2)) {
+      return EquivalentResult::Fail;
+    }
+    return RuntimeOption::EvalHackArrCompatTypeHintNotices
+      ? EquivalentResult::DVArray
+      : EquivalentResult::Pass;
+  }
+
+  // The resolutions are the same. However, both could have failed to resolve to
+  // anything. In that case, rely on their name.
+  auto const resType = std::get<0>(resolved1);
+  if (resType == AnnotType::Object && !std::get<1>(resolved1)) {
+    return m_typeName->isame(other.m_typeName)
+      ? EquivalentResult::Pass
+      : EquivalentResult::Fail;
+  }
+  return EquivalentResult::Pass;
+}
+
 template <bool Assert, bool ForProp>
 bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
   assertx(tv->m_type != KindOfObject);

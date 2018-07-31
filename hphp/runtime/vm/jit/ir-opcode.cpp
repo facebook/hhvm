@@ -449,6 +449,7 @@ bool opcodeMayRaise(Opcode opc) {
   case PrintStr:
   case PropDX:
   case PropQ:
+  case PropTypeRedefineCheck:
   case PropX:
   case RaiseArrayIndexNotice:
   case RaiseArrayKeyNotice:
@@ -548,8 +549,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckFuncStatic:
   case CheckInit:
   case CheckInitMem:
-  case CheckInitProps:
-  case CheckInitSProps:
   case CheckKeysetOffset:
   case CheckLoc:
   case CheckMBase:
@@ -558,6 +557,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckNullptr:
   case CheckPackedArrayDataBounds:
   case CheckRange:
+  case CheckRDSInitialized:
   case CheckRefInner:
   case CheckRefs:
   case CheckStaticLoc:
@@ -841,6 +841,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LtStr:
   case LtStrInt:
   case MapIsset:
+  case MarkRDSInitialized:
   case MemoGetInstanceCache:
   case MemoGetInstanceValue:
   case MemoGetStaticCache:

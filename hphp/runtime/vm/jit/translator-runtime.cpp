@@ -630,7 +630,7 @@ void VerifyParamTypeFail(int paramNum) {
   const Func* func = ar->m_func;
   auto const& tc = func->params()[paramNum].typeConstraint;
   TypedValue* tv = frame_local(ar, paramNum);
-  assertx(!tc.check(tv, func));
+  assertx(!tc.check(tv, func->cls()));
   tc.verifyParamFail(func, tv, paramNum);
 }
 
@@ -656,11 +656,11 @@ void VerifyRetTypeFail(int32_t id, TypedValue* tv) {
   const Func* func = ar->m_func;
   if (id == TypeConstraint::ReturnId) {
     auto const& tc = func->returnTypeConstraint();
-    assertx(!tc.check(tv, func));
+    assertx(!tc.check(tv, func->cls()));
     tc.verifyReturnFail(func, tv);
   } else {
     auto const& tc = func->params()[id].typeConstraint;
-    assertx(!tc.check(tv, func));
+    assertx(!tc.check(tv, func->cls()));
     tc.verifyOutParamFail(func, tv, id);
   }
 }

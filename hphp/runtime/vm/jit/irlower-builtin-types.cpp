@@ -260,17 +260,17 @@ void cgVerifyRetCls(IRLS& env, const IRInstruction* inst) {
 
 static void hackArrParamNoticeImpl(const Func* f, const ArrayData* a,
                                    int64_t type, int64_t param) {
-  raise_hackarr_type_hint_param_notice(f, a, AnnotType(type), param);
+  raise_hackarr_compat_type_hint_param_notice(f, a, AnnotType(type), param);
 }
 
 static void hackArrOutParamNoticeImpl(const Func* f, const ArrayData* a,
                                       int64_t type, int64_t param) {
-  raise_hackarr_type_hint_outparam_notice(f, a, AnnotType(type), param);
+  raise_hackarr_compat_type_hint_outparam_notice(f, a, AnnotType(type), param);
 }
 
 static void hackArrRetNoticeImpl(const Func* f, const ArrayData* a,
                                  int64_t type) {
-  raise_hackarr_type_hint_ret_notice(f, a, AnnotType(type));
+  raise_hackarr_compat_type_hint_ret_notice(f, a, AnnotType(type));
 }
 
 void cgRaiseHackArrParamNotice(IRLS& env, const IRInstruction* inst) {

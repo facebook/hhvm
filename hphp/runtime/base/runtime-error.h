@@ -134,6 +134,30 @@ void raise_typehint_error(const std::string& msg);
  */
 void raise_return_typehint_error(const std::string& msg);
 
+/*
+ * Raise the appropriate warning or error (with the given message) for some
+ * violation of a property type-hint. If isSoft is true, than a warning is
+ * always raised.
+ */
+void raise_property_typehint_error(const std::string& msg, bool isSoft);
+
+/*
+ * Raise the appropriate warning or error if we try to bind a property to a ref,
+ * and that property has a type-hint which we're enforcing.
+ */
+void raise_property_typehint_binding_error(const Class* declCls,
+                                           const StringData* propName,
+                                           bool isStatic,
+                                           bool isSoft);
+
+/*
+ * Raise the appropriate warning or error if we try to unset a property, and
+ * that property has a type-hint which we're enforcing.
+ */
+void raise_property_typehint_unset_error(const Class* declCls,
+                                         const StringData* propName,
+                                         bool isSoft);
+
 void raise_disallowed_dynamic_call(const Func* f);
 
 void raise_resolve_undefined(const StringData* name, const Class* c = nullptr);
@@ -141,24 +165,31 @@ void raise_call_to_undefined(const StringData* name, const Class* c = nullptr);
 
 void raise_intish_index_cast();
 
-void raise_hack_arr_compat_serialize_notice(const ArrayData*);
-
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * Hack arrays.
+ * Hack arrays compat notices.
  */
 
-void raise_hackarr_type_hint_param_notice(const Func* func,
-                                          const ArrayData* ad,
-                                          AnnotType at,
-                                          int param);
-void raise_hackarr_type_hint_ret_notice(const Func* func,
-                                        const ArrayData* ad,
-                                        AnnotType at);
-void raise_hackarr_type_hint_outparam_notice(const Func* func,
-                                             const ArrayData* ad,
-                                             AnnotType at,
-                                             int param);
+void raise_hack_arr_compat_serialize_notice(const ArrayData*);
+
+void raise_hackarr_compat_type_hint_param_notice(const Func* func,
+                                                 const ArrayData* ad,
+                                                 AnnotType at,
+                                                 int param);
+void raise_hackarr_compat_type_hint_ret_notice(const Func* func,
+                                               const ArrayData* ad,
+                                               AnnotType at);
+void raise_hackarr_compat_type_hint_outparam_notice(const Func* func,
+                                                    const ArrayData* ad,
+                                                    AnnotType at,
+                                                    int param);
+void raise_hackarr_compat_type_hint_property_notice(const Class* declCls,
+                                                    const ArrayData* ad,
+                                                    AnnotType at,
+                                                    const StringData* propName,
+                                                    bool isStatic);
+
+void raise_hackarr_compat_notice(const std::string& msg);
 
 /*
  * RAII mechanism to temporarily suppress Hack array compat notices within a
@@ -176,8 +207,6 @@ struct SuppressHackArrCompatNotices {
 private:
   bool old;
 };
-
-void raise_hackarr_compat_notice(const std::string& msg);
 
 ///////////////////////////////////////////////////////////////////////////////
 

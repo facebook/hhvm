@@ -333,9 +333,23 @@ DEBUG_ONLY bool is_throwable(ObjectData* throwable) {
 DEBUG_ONLY bool throwable_has_expected_props() {
   auto const erCls = SystemLib::s_ErrorClass;
   auto const exCls = SystemLib::s_ExceptionClass;
+  if (erCls->lookupDeclProp(s_previous.get()) != s_previousIdx ||
+      exCls->lookupDeclProp(s_previous.get()) != s_previousIdx) {
+    return false;
+  }
+
+  // Check that we have the expected type-hints on these props so we don't need
+  // to verify anything when setting. If someone changes the type-hint we want
+  // to know.
+  auto const isException = [&](const TypeConstraint& tc) {
+    if (!tc.isObject()) return false;
+    auto const cls = Unit::lookupClass(tc.namedEntity());
+    return cls && cls == SystemLib::s_ExceptionClass;
+  };
+
   return
-    erCls->lookupDeclProp(s_previous.get()) == s_previousIdx &&
-    exCls->lookupDeclProp(s_previous.get()) == s_previousIdx;
+    isException(erCls->declPropTypeConstraint(s_previousIdx)) &&
+    isException(exCls->declPropTypeConstraint(s_previousIdx));
 }
 
 bool chainFaults(Fault& fault) {

@@ -204,13 +204,23 @@ namespace {
   DEBUG_ONLY bool throwable_has_expected_props() {
     auto const erCls = SystemLib::s_ErrorClass;
     auto const exCls = SystemLib::s_ExceptionClass;
+    if (erCls->lookupDeclProp(s_file.get()) != s_fileIdx ||
+        exCls->lookupDeclProp(s_file.get()) != s_fileIdx ||
+        erCls->lookupDeclProp(s_line.get()) != s_lineIdx ||
+        exCls->lookupDeclProp(s_line.get()) != s_lineIdx ||
+        erCls->lookupDeclProp(s_trace.get()) != s_traceIdx ||
+        exCls->lookupDeclProp(s_trace.get()) != s_traceIdx) {
+      return false;
+    }
+    // Check that we don't have the expected type-hints on these props so we
+    // don't need to verify anything.
     return
-      erCls->lookupDeclProp(s_file.get()) == s_fileIdx &&
-      exCls->lookupDeclProp(s_file.get()) == s_fileIdx &&
-      erCls->lookupDeclProp(s_line.get()) == s_lineIdx &&
-      exCls->lookupDeclProp(s_line.get()) == s_lineIdx &&
-      erCls->lookupDeclProp(s_trace.get()) == s_traceIdx &&
-      exCls->lookupDeclProp(s_trace.get()) == s_traceIdx;
+      erCls->declPropTypeConstraint(s_fileIdx).isString() &&
+      exCls->declPropTypeConstraint(s_fileIdx).isString() &&
+      erCls->declPropTypeConstraint(s_lineIdx).isInt() &&
+      exCls->declPropTypeConstraint(s_lineIdx).isInt() &&
+      !erCls->declPropTypeConstraint(s_traceIdx).isCheckable() &&
+      !exCls->declPropTypeConstraint(s_traceIdx).isCheckable();
   }
 
   int64_t exception_get_trace_options() {

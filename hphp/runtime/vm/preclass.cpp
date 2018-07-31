@@ -208,6 +208,9 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
   if (m_userType && !m_userType->empty()) {
     out << " (user-type = " << m_userType->data() << ")";
   }
+  if (m_typeConstraint.hasConstraint()) {
+    out << " (tc = " << m_typeConstraint.displayName(nullptr, true) << ")";
+  }
   out << std::endl;
 }
 

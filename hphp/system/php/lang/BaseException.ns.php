@@ -20,7 +20,7 @@ trait BaseException {
   protected string $file;         // source filename of exception
   protected int $line;            // source line of exception
   private $trace = array();       // full stacktrace
-  private ?Exception $previous = null;
+  private ?\Exception $previous = null;
   protected $userMetadata = null;
 
   /*

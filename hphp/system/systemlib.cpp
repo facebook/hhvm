@@ -42,11 +42,19 @@ const Slot s_codeIdx{2};
 DEBUG_ONLY bool throwable_has_expected_props() {
   auto const erCls = s_ErrorClass;
   auto const exCls = s_ExceptionClass;
+  if (erCls->lookupDeclProp(s_message.get()) != s_messageIdx ||
+      exCls->lookupDeclProp(s_message.get()) != s_messageIdx ||
+      erCls->lookupDeclProp(s_code.get()) != s_codeIdx ||
+      exCls->lookupDeclProp(s_code.get()) != s_codeIdx) {
+    return false;
+  }
+  // Check that we have the expected type-hints on these props so we don't need
+  // to verify anything.
   return
-    erCls->lookupDeclProp(s_message.get()) == s_messageIdx &&
-    exCls->lookupDeclProp(s_message.get()) == s_messageIdx &&
-    erCls->lookupDeclProp(s_code.get()) == s_codeIdx &&
-    exCls->lookupDeclProp(s_code.get()) == s_codeIdx;
+    erCls->declPropTypeConstraint(s_messageIdx).isString() &&
+    exCls->declPropTypeConstraint(s_messageIdx).isString() &&
+    erCls->declPropTypeConstraint(s_codeIdx).isInt() &&
+    exCls->declPropTypeConstraint(s_codeIdx).isInt();
 }
 
 ALWAYS_INLINE

@@ -1176,7 +1176,7 @@ TypeAliasReq typeAliasFromClass(Unit* unit, const TypeAlias* thisType,
     if (auto const enumType = klass->enumBaseTy()) {
       req.type = dataTypeToAnnotType(*enumType);
     } else {
-      req.type = AnnotType::Mixed;
+      req.type = AnnotType::ArrayKey;
     }
   } else {
     req.type = AnnotType::Object;

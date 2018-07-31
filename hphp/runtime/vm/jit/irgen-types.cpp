@@ -360,10 +360,10 @@ void verifyTypeImpl(IRGS& env, int32_t const id, bool isReturnType,
   } else {
     if (tc.isSelf()
         || (tc.isThis() && RuntimeOption::EvalThisTypeHintLevel == 1)) {
-      tc.selfToClass(curFunc(env), &knownConstraint);
+      knownConstraint = curFunc(env)->cls();
     } else {
       assertx(tc.isParent());
-      tc.parentToClass(curFunc(env), &knownConstraint);
+      if (auto cls = curFunc(env)->cls()) knownConstraint = cls->parent();
     }
     if (!knownConstraint) {
       // The hint was self or parent and there's no corresponding

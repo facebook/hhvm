@@ -347,8 +347,12 @@ bool coerceFCallArgs(TypedValue* args,
         }
       }();
       if (raise) {
-        raise_hackarr_type_hint_param_notice(func, c->m_data.parr,
-                                             tc.type(), i);
+        raise_hackarr_compat_type_hint_param_notice(
+          func,
+          c->m_data.parr,
+          tc.type(),
+          i
+        );
       }
       continue;
     }

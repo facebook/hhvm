@@ -667,7 +667,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     auto const& param = params[i];
     out << " Param: " << localVarName(i)->data();
     if (param.typeConstraint.hasConstraint()) {
-      out << " " << param.typeConstraint.displayName(this, true);
+      out << " " << param.typeConstraint.displayName(cls(), true);
     }
     if (param.userType) {
       out << " (" << param.userType->data() << ")";
@@ -685,7 +685,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
       (returnUserType() && !returnUserType()->empty())) {
     out << " Ret: ";
     if (returnTypeConstraint().hasConstraint()) {
-      out << " " << returnTypeConstraint().displayName(this, true);
+      out << " " << returnTypeConstraint().displayName(cls(), true);
     }
     if (returnUserType() && !returnUserType()->empty()) {
       out << " (" << returnUserType()->data() << ")";

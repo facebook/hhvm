@@ -439,6 +439,10 @@ and hint_locl env h =
   let h = Decl_hint.hint env.Env.decl_env h in
   localize_with_self env h
 
+and localize_hint ~ety_env env hint =
+  let hint_ty = Decl_hint.hint env.Env.decl_env hint in
+  localize ~ety_env env hint_ty
+
 (* Add generic parameters to the environment, localize their bounds, and
  * transform these into a flat list of constraints of the form (ty1,ck,ty2)
  * where ck is as, super or =

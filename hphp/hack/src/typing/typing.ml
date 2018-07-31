@@ -2316,7 +2316,8 @@ and expr_
       else safely_refine_type env p reason lpos lty rty
     in
     let env, te, expr_ty = expr env e in
-    let env, hint_ty = Phase.hint_locl env hint in
+    let ety_env = { (Phase.env_with_self env) with from_class = Some CIstatic; } in
+    let env, hint_ty = Phase.localize_hint ~ety_env env hint in
     let env, hint_ty =
       if is_nullable then
         let env, hint_ty = refine_type env (fst e) expr_ty hint_ty in
@@ -6182,7 +6183,8 @@ and condition ?lhs_of_null_coalesce env tparamet =
     (* What is the local variable bound to the expression? *)
     let env, ((ivar_pos, _) as ivar) = get_instance_var env ivar in
     (* Resolve the typehint to a type *)
-    let env, hint_ty = Phase.hint_locl env h in
+    let ety_env = { (Phase.env_with_self env) with from_class = Some CIstatic; } in
+    let env, hint_ty = Phase.localize_hint ~ety_env env h in
     let reason = Reason.Ris ivar_pos in
     (* Expand so that we don't modify ivar *)
     let env, hint_ty = Env.expand_type env hint_ty in

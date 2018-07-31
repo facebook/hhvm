@@ -21,6 +21,7 @@
 namespace HPHP {
 
 struct TCPrintLogger {
+  virtual ~TCPrintLogger() {};
   // Standard printing (usually to std::cout).
   virtual void printGeneric(const char* format, ...) = 0;
   // Printing of the collected bytecode at the start of translations.
@@ -30,7 +31,7 @@ struct TCPrintLogger {
   // Printing of generated assembly.
   virtual void printAsm(const char* format, ...) = 0;
   // If relevant, pushing formatted output to database.
-  virtual bool flushTranslation(std::string) = 0;
+  virtual bool flushTranslation(std::string, bool transOpt) = 0;
 };
 
 } // namespace HPHP

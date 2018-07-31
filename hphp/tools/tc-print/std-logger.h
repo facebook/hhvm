@@ -28,7 +28,7 @@ struct StdLogger : TCPrintLogger {
   void printBytecode(std::string byteInfo) override;
   void printLine(std::string lineInfo) override;
   void printAsm(const char* format, ...) override;
-  bool flushTranslation(std::string) override;
+  bool flushTranslation(std::string, bool transOpt) override;
 };
 
 } // namespace HPHP

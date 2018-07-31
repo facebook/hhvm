@@ -42,7 +42,7 @@ void StdLogger::printAsm(const char* format, ...) {
   va_end(args);
 }
 
-bool StdLogger::flushTranslation(std::string) {
+bool StdLogger::flushTranslation(std::string, bool transOpt) {
   return true;
 }
 

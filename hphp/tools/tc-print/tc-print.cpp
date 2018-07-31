@@ -37,6 +37,9 @@
 #include "hphp/tools/tc-print/repo-wrapper.h"
 #include "hphp/tools/tc-print/std-logger.h"
 #include "hphp/tools/tc-print/tc-print-logger.h"
+#ifdef FACEBOOK
+#include "hphp/tools/tc-print/facebook/db-logger.h"
+#endif
 
 using namespace HPHP;
 using namespace HPHP::jit;
@@ -65,6 +68,9 @@ uint32_t        selectedFuncId  = INVALID_ID;
 TCA             minAddr         = 0;
 TCA             maxAddr         = (TCA)-1;
 uint32_t        annotationsVerbosity = 2;
+#ifdef FACEBOOK
+bool            printToDB       = false;
+#endif
 
 std::vector<uint32_t> transPrintOrder;
 
@@ -142,6 +148,9 @@ void usage() {
     "    -v <PERCENTAGE> : sets the minimum percentage to <PERCENTAGE> "
     "when printing the top helpers (implies -i). The lower the percentage,"
     " the more helpers that will show up.\n"
+    #ifdef FACEBOOK
+    "   -x               : log translations to database"
+    #endif
     "    -h              : prints help message\n",
     kListKeyword,
     kListKeyword);
@@ -166,7 +175,7 @@ void printValidEventTypes() {
 void parseOptions(int argc, char *argv[]) {
   int c;
   opterr = 0;
-  while ((c = getopt (argc, argv, "hc:Dd:f:g:ip:st:u:S:T:o:e:bB:v:k:a:A:n:"))
+  while ((c = getopt (argc, argv, "hc:Dd:f:g:ip:st:u:S:T:o:e:bB:v:k:a:A:n:x"))
          != -1) {
     switch (c) {
       case 'A':
@@ -288,6 +297,11 @@ void parseOptions(int argc, char *argv[]) {
       case 'o':
         hostOpcodes = true;
         break;
+      #ifdef FACEBOOK
+      case 'x':
+        printToDB = true;
+        break;
+      #endif
       default:
         usage();
         exit(1);
@@ -793,6 +807,14 @@ int main(int argc, char *argv[]) {
 
   StdLogger stdoutlogger{};
   g_logger = &stdoutlogger;
+  #ifdef FACEBOOK
+  folly::Optional<DBLogger> dblogger = folly::none;
+  if (printToDB) {
+    dblogger = DBLogger{};
+    g_logger = &dblogger.value();
+    g_logger->printGeneric("Printing to database");
+  }
+  #endif
   g_transData = new OfflineTransData(dumpDir);
   transCode = new OfflineCode(dumpDir,
                                  g_transData->getHotBase(),
@@ -848,8 +870,10 @@ int main(int argc, char *argv[]) {
       if (md5Filter && tRec->md5 != *md5Filter) continue;
 
       printTrans(t);
-      g_logger->flushTranslation(tRec->funcName);
-    }
+      bool opt = (tRec->kind == TransKind::OptPrologue
+                        || tRec->kind == TransKind::Optimize);
+      g_logger->flushTranslation(tRec->funcName, opt);
+  }
   }
 
   delete g_transData;

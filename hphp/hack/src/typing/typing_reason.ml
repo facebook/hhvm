@@ -82,6 +82,7 @@ type t =
   | Rcontravariant_generic of t * string
   | Rinvariant_generic of t * string
   | Rregex           of Pos.t
+  | Rimplicit_upper_bound of Pos.t
 
 and expr_dep_type_reason =
   | ERexpr of int
@@ -233,6 +234,8 @@ let rec to_string prefix r =
     [(p, "Considering that this type argument is invariant with respect to " ^ class_name)]
   | Rregex _ ->
     [(p, prefix ^ " resulting from this regex pattern")]
+  | Rimplicit_upper_bound _ ->
+    [(p, prefix ^ " arising from an implicit 'as ?nonnull' constraint on this type")]
 
 and to_pos = function
   | Rnone     -> Pos.none
@@ -303,6 +306,7 @@ and to_pos = function
   | Rcontravariant_generic (r, _) -> to_pos r
   | Rinvariant_generic (r, _) -> to_pos r
   | Rregex p -> p
+  | Rimplicit_upper_bound p -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -402,6 +406,7 @@ match r with
   | Rcontravariant_generic _ -> "Rcontravariant_generic"
   | Rinvariant_generic _ -> "Rinvariant_generic"
   | Rregex _ -> "Rregex"
+  | Rimplicit_upper_bound _ -> "Rimplicit_upper_bound"
 
 let pp fmt r =
   Format.pp_print_string fmt @@ to_constructor_string r

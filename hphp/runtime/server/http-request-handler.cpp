@@ -512,20 +512,25 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     Eval::Debugger::InterruptRequestEnded(transport->getUrl());
   }
 
-  std::unique_ptr<StructuredLogEntry> entry;
+  StructuredLogEntry* entry = nullptr;
   if (RuntimeOption::EvalProfileHWStructLog) {
-    entry = std::make_unique<StructuredLogEntry>();
+    entry = transport->createStructuredLogEntry();
     entry->setInt("response_code", code);
     auto queueBegin = transport->getQueueTime();
     auto const queueTimeUs = gettime_diff_us(queueBegin,
                                              transport->getWallTime());
     entry->setInt("queue-time-us", queueTimeUs);
+    StructuredLog::recordRequestGlobals(*entry);
+    tl_heap->recordStats(*entry);
   }
   HardwareCounter::UpdateServiceData(transport->getCpuTime(),
                                      transport->getWallTime(),
-                                     entry.get(),
+                                     entry,
                                      false /*psp*/);
-  if (entry) StructuredLog::log("hhvm_request_perf", *entry);
+  if (entry) {
+    StructuredLog::log("hhvm_request_perf", *entry);
+    transport->resetStructuredLogEntry();
+  }
 
   // If we have registered post-send shutdown functions, end the request before
   // executing them. If we don't, be compatible with Zend by allowing usercode
@@ -540,6 +545,11 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   hphp_context_shutdown();
   if (!hasPostSend) {
     transport->onSendEnd();
+  }
+  if (RuntimeOption::EvalProfileHWStructLog) {
+    // This step must be done before globals are torn down in hphp_context_exit.
+    entry = transport->createStructuredLogEntry();
+    StructuredLog::recordRequestGlobals(*entry);
   }
   hphp_context_exit(false);
   ServerStats::LogPage(file, code);

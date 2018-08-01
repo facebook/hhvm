@@ -306,6 +306,13 @@ void MemoryManager::refreshStats() {
   }
 }
 
+void MemoryManager::recordStats(StructuredLogEntry& entry) {
+  auto const stats = getStatsCopy();
+  entry.ints["mem-peak-usage"] =  stats.peakUsage;
+  entry.ints["mem-peak-capacity"] = stats.peakCap;
+  entry.ints["mem-total-alloc"] = stats.totalAlloc;
+}
+
 /*
  * Calculate how many bytes of allocation should happen before the next
  * time the fast path is interrupted.

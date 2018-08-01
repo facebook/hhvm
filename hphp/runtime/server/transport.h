@@ -38,6 +38,7 @@ namespace HPHP {
 
 struct Array;
 struct Variant;
+struct StructuredLogEntry;
 
 /**
  * For storing headers and cookies.
@@ -114,6 +115,10 @@ public:
     m_nsleepTimeS += seconds + (m_nsleepTimeN / 1000000000);
     m_nsleepTimeN %= 1000000000;
   }
+
+  StructuredLogEntry* createStructuredLogEntry();
+  StructuredLogEntry* getStructuredLogEntry();
+  void resetStructuredLogEntry();
 
   ///////////////////////////////////////////////////////////////////////////
   // Functions sub-classes have to implement.
@@ -446,7 +451,7 @@ protected:
   using ParamMap = hphp_hash_map<const char*, std::vector<const char*>,
                                  cstr_hash, eqstr>;
 
-  // timers
+  // timers and other perf data
   timespec m_queueTime;
   timespec m_wallTime;
   timespec m_cpuTime;
@@ -457,6 +462,8 @@ protected:
   int64_t m_usleepTime;
   int64_t m_nsleepTimeS;
   int32_t m_nsleepTimeN;
+
+  std::unique_ptr<StructuredLogEntry> m_structLogEntry;
 
   // input
   char *m_url;

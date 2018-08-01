@@ -2736,7 +2736,7 @@ void hphp_memory_cleanup() {
   mm.resetCouldOOM();
 }
 
-void hphp_session_exit(const Transport* transport) {
+void hphp_session_exit(Transport* transport) {
   assertx(s_sessionInitialized);
   // Server note and INI have to live long enough for the access log to fire.
   // RequestLocal is too early.
@@ -2758,9 +2758,12 @@ void hphp_session_exit(const Transport* transport) {
   perf_event_consume(record_perf_mem_event);
   perf_event_disable();
 
+  // Get some memory-related counters before tearing down the MemoryManager.
+  auto entry = transport ? transport->getStructuredLogEntry() : nullptr;
+  if (entry) tl_heap->recordStats(*entry);
+
   {
     ServerStatsHelper ssh("rollback");
-
     hphp_memory_cleanup();
   }
 
@@ -2770,16 +2773,15 @@ void hphp_session_exit(const Transport* transport) {
   s_extra_request_nanoseconds = 0;
 
   if (transport) {
-    std::unique_ptr<StructuredLogEntry> entry;
-    if (RuntimeOption::EvalProfileHWStructLog) {
-      entry = std::make_unique<StructuredLogEntry>();
-      entry->setInt("response_code", transport->getResponseCode());
-    }
     HardwareCounter::UpdateServiceData(transport->getCpuTime(),
                                        transport->getWallTime(),
-                                       entry.get(),
+                                       entry,
                                        true /*psp*/);
-    if (entry) StructuredLog::log("hhvm_request_perf", *entry);
+    if (entry) {
+      entry->setInt("response_code", transport->getResponseCode());
+      StructuredLog::log("hhvm_request_perf", *entry);
+      transport->resetStructuredLogEntry();
+    }
   }
 }
 

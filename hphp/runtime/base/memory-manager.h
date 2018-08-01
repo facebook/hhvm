@@ -29,6 +29,7 @@
 #include "hphp/util/alloc.h" // must be included before USE_JEMALLOC is used
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/radix-map.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/type-scan.h"
@@ -755,6 +756,11 @@ struct MemoryManager {
    * allocation counters passively.
    */
   MemoryUsageStats getStatsCopy();
+
+  /*
+   * Record a small set of important stats to the given StructuredLogEntry.
+   */
+  void recordStats(StructuredLogEntry&);
 
   /*
    * Get a reference to the current stats data. This does not require any

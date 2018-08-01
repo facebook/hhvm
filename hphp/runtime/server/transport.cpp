@@ -33,12 +33,14 @@
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/ext/openssl/ext_openssl.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+
 #include "hphp/util/brotli.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/compression.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/service-data.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/timer.h"
 
@@ -1180,6 +1182,24 @@ void Transport::debuggerInfo(InfoVec &info) {
     Add(info, "Post Data", FormatSize(size));
   }
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// StructuredLog
+
+StructuredLogEntry* Transport::createStructuredLogEntry() {
+  assertx(!m_structLogEntry);
+  m_structLogEntry = std::make_unique<StructuredLogEntry>();
+  return m_structLogEntry.get();
+}
+
+StructuredLogEntry* Transport::getStructuredLogEntry() {
+  return m_structLogEntry.get();
+}
+
+void Transport::resetStructuredLogEntry() {
+  m_structLogEntry.reset();
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

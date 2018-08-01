@@ -20,6 +20,7 @@
 
 #include <folly/Random.h>
 
+#include "hphp/util/assertions.h"
 #include "hphp/util/stack-trace.h"
 
 namespace HPHP {
@@ -78,25 +79,30 @@ void StructuredLogEntry::clear() {
 
 namespace StructuredLog {
 namespace {
-StructuredLogImpl s_impl = nullptr;
+LogFn s_log = nullptr;
+RecordGlobalsFn s_recordGlobals = nullptr;
 }
 
 bool enabled() {
-  return s_impl != nullptr;
+  return s_log != nullptr;
 }
 
 bool coinflip(uint32_t rate) {
   return enabled() && rate > 0 && folly::Random::rand32(rate) == 0;
 }
 
-void enable(StructuredLogImpl impl) {
-  s_impl = impl;
+void enable(LogFn log, RecordGlobalsFn globals) {
+  assertx(log && globals);
+  s_log = log;
+  s_recordGlobals = globals;
 }
 
 void log(const std::string& tableName, const StructuredLogEntry& cols) {
-  if (enabled()) {
-    s_impl(tableName, cols);
-  }
+  if (enabled()) s_log(tableName, cols);
+}
+
+void recordRequestGlobals(StructuredLogEntry& cols) {
+  if (enabled()) s_recordGlobals(cols);
 }
 }
 

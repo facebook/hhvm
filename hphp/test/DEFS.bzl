@@ -17,10 +17,10 @@ def verify_unittest(suite, repo, dir, mode='interp,jit',
   # hphp_skip_repo_test and hphp_skip_non_repo_test let us enable or disable
   # tests based on repo mode. This is useful to shard our tests into different
   # sets for CI runs.
-  if repo and read_config('fbcode', 'hphp_skip_repo_test'):
+  if repo and read_config('hhvm', 'skip_repo_test'):
     noop_rule = True
 
-  if not repo and read_config('fbcode', 'hphp_skip_non_repo_test'):
+  if not repo and read_config('hhvm', 'skip_non_repo_test'):
     noop_rule = True
 
   target_name = 'verify_' + suite + '_' + mode + \

@@ -5,11 +5,6 @@ if echo "$1" | grep -q -e 'install_dir='; then
   shift 1
 fi
 
-# The first 3 arguments are dummy values so Buck knows we depend on certain
-# environment variables. The remaining arguments are files to hash when
-# generating BUILD_ID.
-shift 3
-
 DIR=$(pwd -P)
 
 if git rev-parse --show-toplevel >& /dev/null; then

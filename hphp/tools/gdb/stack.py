@@ -74,11 +74,9 @@ The output backtrace has the following format:
             print('walkstk: Cannot find any frames: corrupt stack?')
             return
 
-        arch = native_frame.architecture().name()
-        frame_reg = 'x29' if arch == 'aarch64' else 'rbp'
         # Set fp = $rbp, rip = $rip.
         fp_type = T('uintptr_t').pointer()
-        fp = native_frame.read_register(frame_reg).cast(fp_type)
+        fp = native_frame.read_register(arch_regs()['fp']).cast(fp_type)
         rip = native_frame.pc()
 
         if len(argv) == 1:
@@ -195,19 +193,14 @@ The output backtrace has the following format:
             return
 
         fp_type = T('uintptr_t').pointer()
+        fp = gdb.parse_and_eval('$' + arch_regs()['fp']).cast(fp_type)
+        rip = gdb.parse_and_eval('$' + arch_regs()['ip']).cast(T('uintptr_t'))
 
-        try:
-            arch = gdb.newest_frame().architecture().name()
-        except:
-            arch = 'i386:x86-64'
+        if len(argv) >= 1:
+            fp = argv[0].cast(fp_type)
 
-        frame_reg = '$x29' if arch == 'aarch64' else '$rbp'
-        pc_reg = '$pc' if arch == 'aarch64' else '$rip'
-
-        fp = (argv[0] if len(argv) >= 1 else
-              gdb.parse_and_eval(frame_reg)).cast(fp_type)
-        rip = (argv[1] if len(argv) == 2 else
-               gdb.parse_and_eval(pc_reg)).cast(T('uintptr_t'))
+            if len(argv) == 2:
+                rip = argv[1].cast(T('uintptr_t'))
 
         i = 0
         fp = (fp, rip)

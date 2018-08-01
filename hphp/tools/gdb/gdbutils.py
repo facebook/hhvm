@@ -298,3 +298,31 @@ def deref(val):
         return val.cast(rawtype(val.type))
     else:
         return deref(p.referenced_value())
+
+
+#------------------------------------------------------------------------------
+# Architecture.
+
+@memoized
+def arch():
+    try:
+        return gdb.newest_frame().architecture().name()
+    except:
+        return None
+
+@memoized
+def arch_regs():
+    a = arch()
+
+    if a == 'aarch64':
+        return {
+            'fp': 'x29',
+            'sp': 'sp',
+            'ip': 'pc',
+        }
+    else:
+        return {
+            'fp': 'rbp',
+            'sp': 'rsp',
+            'ip': 'rip',
+        }

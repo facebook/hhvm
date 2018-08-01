@@ -26,20 +26,13 @@ falls back to the default GDB unwinder(s) otherwise.
 """
 
     def __init__(self):
-        try:
-            self.arch = gdb.newest_frame().architecture().name()
-        except:
-            self.arch = 'i386:x86-64'
-
-        self.frame_reg = 'x29' if self.arch == 'aarch64' else 'rbp'
-        self.stack_reg = 'sp' if self.arch == 'aarch64' else 'rsp'
-        self.pc_reg = 'pc' if self.arch == 'aarch64' else 'rip'
+        self.regs = arch_regs()
         super(HHVMUnwinder, self).__init__('hhvm_unwinder')
 
     def __call__(self, pending_frame):
-        fp = pending_frame.read_register(self.frame_reg)
-        sp = pending_frame.read_register(self.stack_reg)
-        ip = pending_frame.read_register(self.pc_reg)
+        fp = pending_frame.read_register(self.regs['fp'])
+        sp = pending_frame.read_register(self.regs['sp'])
+        ip = pending_frame.read_register(self.regs['ip'])
 
         if not frame.is_jitted(fp, ip):
             return None
@@ -58,18 +51,18 @@ falls back to the default GDB unwinder(s) otherwise.
 
         # Restore the saved frame pointer and instruction pointer.
         fp = fp.cast(T('uintptr_t').pointer())
-        unwind_info.add_saved_register(self.frame_reg, fp[0])
-        unwind_info.add_saved_register(self.pc_reg, fp[1])
+        unwind_info.add_saved_register(self.regs['fp'], fp[0])
+        unwind_info.add_saved_register(self.regs['ip'], fp[1])
 
         if frame.is_jitted(fp[0], fp[1]):
             # Our parent frame is jitted.  Again, we are unable to track %rsp
             # properly in the TC, so just preserve its value (just as we do in
             # the TC's custom .eh_frame section).
-            unwind_info.add_saved_register(self.stack_reg, sp)
+            unwind_info.add_saved_register(self.regs['sp'], sp)
         else:
             # Our parent frame is not jitted, so we're in enterTCHelper, and we
             # can restore our parent's %rsp as usual.
-            unwind_info.add_saved_register(self.stack_reg, fp + 16)
+            unwind_info.add_saved_register(self.regs['sp'], fp + 16)
 
         return unwind_info
 

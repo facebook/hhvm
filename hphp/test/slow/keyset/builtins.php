@@ -173,6 +173,10 @@ function with_keyset($k1) {
   var_dump(array_unshift(&$k, 'q'));
   var_dump($k);
 
+  echo "array_splice: ";
+  var_dump(array_splice(&$k, 2));
+  var_dump($k);
+
 }
 
 with_keyset(keyset['q', 'u', 'e', 'n', 't', 'i', 'n']);
@@ -193,9 +197,6 @@ var_dump(array_replace_recursive($ar1, ["colors" => ["green" => "blue"]]));
 // These functions should return false or null and emit a warning when passed a
 // hack array.
 //
-$k1 = keyset[];
-echo "array_splice: ";
-var_dump(array_splice(&$k1, 2));
 echo "array_multisort: ";
 var_dump(array_multisort(&$k1));
 echo "array_walk: ";

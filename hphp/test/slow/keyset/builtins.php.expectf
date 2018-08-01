@@ -412,6 +412,22 @@ keyset(6) {
   string(1) "t"
   string(1) "i"
 }
+array_splice: array(4) {
+  ["e"]=>
+  string(1) "e"
+  ["n"]=>
+  string(1) "n"
+  ["t"]=>
+  string(1) "t"
+  ["i"]=>
+  string(1) "i"
+}
+array(2) {
+  ["q"]=>
+  string(1) "q"
+  ["u"]=>
+  string(1) "u"
+}
 ---- running with_keyset with
 keyset(0) {
 }
@@ -559,6 +575,14 @@ keyset(2) {
   string(1) "q"
   string(1) "i"
 }
+array_splice: array(0) {
+}
+array(2) {
+  ["q"]=>
+  string(1) "q"
+  ["i"]=>
+  string(1) "i"
+}
 array_merge_recursive: array(3) {
   ["colors"]=>
   array(3) {
@@ -601,9 +625,6 @@ array_replace_recursive 2: array(2) {
   [0]=>
   int(5)
 }
-array_splice: 
-Warning: Invalid operand type was used: array_splice expects array(s) in %s/builtins.php on line %d
-NULL
 array_multisort: 
 Warning: Invalid operand type was used: array_multisort expects array(s) in %s/builtins.php on line %d
 bool(false)

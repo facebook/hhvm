@@ -137,11 +137,11 @@ void OfflineCode::disasm(FILE* file,
     dec.Decode(frontier);
 
     currBC = printBCMapping(bcMappingInfo, currBC, (TCA)ip);
-    if (printAddr) g_logger->printMetaData("%14p: ", ip);
+    if (printAddr) g_logger->printAsm("%14p: ", ip);
 
     if (printBinary) {
-      g_Logger->printAsm("%08" PRIx32, *reinterpret_cast<int32_t*>(frontier));
-      g_Logger->printAsm("%10s", "");
+      g_logger->printAsm("%08" PRIx32, *reinterpret_cast<int32_t*>(frontier));
+      g_logger->printAsm("%10s", "");
     }
 
     // Shadow potential call destinations based on fixed sequence.
@@ -174,7 +174,7 @@ void OfflineCode::disasm(FILE* file,
     if (! perfEvents.empty()) {
       printEventStats((TCA)ip, kInstructionSize, perfEvents);
     } else {
-      g_Logger->printAsm("%48s", "");
+      g_logger->printAsm("%48s", "");
     }
 
     g_logger->printAsm("%s%s\n", codeStr, callDest.c_str());

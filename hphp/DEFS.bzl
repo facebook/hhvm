@@ -2,10 +2,10 @@ with allow_unsafe_import():
     import subprocess
     import platform as platmod
 
-load("@fbcode_macros//build_defs:platform.bzl", "platform")
+load("@fbcode_macros//build_defs:platform_utils.bzl", "platform_utils")
 
 def get_fbcode_platform():
-    return platform.get_platform_for_base_path(get_base_path())
+    return platform_utils.get_platform_for_base_path(get_base_path())
 
 def is_opt_hhvm_build():
     buck_out = read_config('project', 'buck_out')

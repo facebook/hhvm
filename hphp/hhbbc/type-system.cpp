@@ -2781,6 +2781,7 @@ Type scalarize(Type t) {
     case DataTag::None:
       assertx(t.subtypeOfAny(TNull, TTrue, TFalse,
                              TArrE, TVecE, TDictE, TKeysetE));
+      t.m_bits &= BNull | BBool | BSArrE | BSVecE | BSDictE | BSKeysetE;
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Str:

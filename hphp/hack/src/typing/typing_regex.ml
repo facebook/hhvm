@@ -12,6 +12,8 @@ open Nast
 open Ast_defs
 module Reason = Typing_reason
 
+exception Missing_delimiter
+
 let internal_error s =
   failwith ("Something (internal) went wrong while typing a regex string: " ^ s)
 
@@ -68,10 +70,40 @@ let type_match p s =
   let shape_map = ShapeMap.add (SFlit_int (p, "0")) sft_0 shape_map in
   Reason.Rregex p, Tshape (FieldsFullyKnown, shape_map)
 
+let delimiters_match first last =
+  let desired =
+    match first with
+    | '(' -> ')'
+    | '[' -> ']'
+    | '{' -> '}'
+    | '<' -> '>'
+    | _ -> first
+  in
+  last = desired
+
+let valid_global_option c =
+  match c with
+  | 'i' | 'm' | 's' | 'x' | 'A' | 'D' | 'S' | 'U' | 'X' | 'u' -> true
+  | _ -> false
+
+let check_and_strip_delimiters s =
+  (*  Non-alphanumeric, non-whitespace, non-backslash characters are delimiter-eligible *)
+  let delimiter = Str.regexp "[^a-zA-Z0-9\t\n\r\x0b\x0c \\]" in
+  let length = String.length s in
+  let first, penultimate, last = s.[0], s.[length - 2], s.[length - 1] in
+  if Str.string_match delimiter (String.make 1 first) 0 &&
+    ((delimiters_match first penultimate && valid_global_option last) ||
+    (delimiters_match first last))
+  then begin (* Strip off delimiters *)
+    if Str.string_match delimiter (String.make 1 last) 0
+    then String.sub s 1 (length - 2)
+    else String.sub s 1 (length - 3)
+  end else raise Missing_delimiter
 
 let type_pattern (p, e_) =
   match e_ with
   | String s ->
+    let s = check_and_strip_delimiters s in
     let match_type = type_match p s in
     Reason.Rregex p,
       Tabstract (AKnewtype (Naming_special_names.Regex.tPattern,

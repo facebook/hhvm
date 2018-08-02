@@ -7,4 +7,6 @@
  *
  *)
 
- val type_pattern : Nast.expr -> Typing_defs.Reason.t * Typing_defs.locl Typing_defs.ty_
+exception Missing_delimiter
+
+val type_pattern : Nast.expr -> Typing_defs.Reason.t * Typing_defs.locl Typing_defs.ty_

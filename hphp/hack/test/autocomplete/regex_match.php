@@ -7,6 +7,6 @@ function match<T as Regex\Match>(Regex\Pattern<T> $_): T {
 }
 
 function main(): void {
-  $result = match(re"foo(?<bar>baz)(?<herp>derp)?");
+  $result = match(re"/foo(?<bar>baz)(?<herp>derp)?/");
   \var_dump($result[AUTO332]);
 }

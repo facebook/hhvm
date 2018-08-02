@@ -1670,10 +1670,14 @@ and expr_
         | String _ ->
             begin try make_result env (T.PrefixedString (n, te))
               (Typing_regex.type_pattern e)
-            with Pcre.Error (Pcre.BadPattern (s, i)) ->
-              let s = s ^ " [" ^ (string_of_int i) ^ "]" in
-              Errors.bad_regex_pattern p s;
-              expr_error env p (Reason.Rregex p)
+            with
+              | Pcre.Error (Pcre.BadPattern (s, i)) ->
+                let s = s ^ " [" ^ (string_of_int i) ^ "]" in
+                Errors.bad_regex_pattern p s;
+                expr_error env p (Reason.Rregex p)
+              | Typing_regex.Missing_delimiter ->
+                Errors.bad_regex_pattern p "Missing delimiter(s)";
+                expr_error env p (Reason.Rregex p)
             end
         | String2 _ ->
           Errors.re_prefixed_non_string p "Strings with embedded expressions";

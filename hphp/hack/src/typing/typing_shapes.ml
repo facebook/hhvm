@@ -143,9 +143,11 @@ let idx env _p fty shape_ty field default =
         {sft_optional = true; sft_ty = res} in
     match default with
     | None ->
-      Type.sub_type (fst field) Reason.URparam env
-        shape_ty
-        fake_super_shape_ty,
+      let env =
+        Type.sub_type (fst field) Reason.URparam env
+          shape_ty
+          fake_super_shape_ty in
+      env,
       if experiment_enabled env
            TypecheckerOptions.experimental_stronger_shape_idx_ret &&
          is_shape_field_required env field_name shape_ty

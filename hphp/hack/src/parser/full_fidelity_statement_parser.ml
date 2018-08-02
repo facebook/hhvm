@@ -135,7 +135,7 @@ module WithExpressionAndDeclAndTypeParser
     | Do -> parse_do_statement parser
     | While -> parse_while_statement parser
     | Declare -> parse_declare_statement parser
-    | Let when Env.hacksperimental (env parser) -> parse_let_statement parser
+    | Let when Env.is_experimental_mode (env parser) -> parse_let_statement parser
     | Using ->
       let (parser, missing) = Make.missing parser (pos parser) in
       parse_using_statement parser missing
@@ -921,7 +921,7 @@ module WithExpressionAndDeclAndTypeParser
   and parse_catch_clause_opt parser =
     (* SPEC
       catch  (  type-specification-opt variable-name  )  compound-statement
-      catch  (  type-specification-opt name  )  compound-statement [hacksperimental]
+      catch  (  type-specification-opt name  )  compound-statement [experimental-mode]
     *)
     if peek_token_kind parser = Catch then
       let (parser, catch_token) = assert_token parser Catch in
@@ -934,7 +934,7 @@ module WithExpressionAndDeclAndTypeParser
         | _ -> parse_type_specifier parser
       in
       let (parser, catch_var) =
-        if Env.hacksperimental (env parser)
+        if Env.is_experimental_mode (env parser)
           then require_name_or_variable parser
           else require_variable parser
         in

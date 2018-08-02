@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 let x = 42;
 {

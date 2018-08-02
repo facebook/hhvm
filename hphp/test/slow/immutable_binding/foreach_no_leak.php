@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 let x = 42;
 let arr = [1, 2, 3];

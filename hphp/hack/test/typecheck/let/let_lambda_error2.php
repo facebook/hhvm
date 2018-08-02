@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 function expect_string(string $s): void {}
 

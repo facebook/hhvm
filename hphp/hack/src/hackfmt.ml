@@ -36,7 +36,6 @@ module Env = struct
   type t = {
     debug: bool;
     test: bool;
-    hacksperimental: bool;
     mutable mode: string option;
     mutable text_source: text_source;
     mutable root: string;
@@ -63,7 +62,6 @@ let parse_options () =
   let diff_dry = ref false in
   let debug = ref false in
   let test = ref false in
-  let hacksperimental = ref false in
 
   let rec options = ref [
     "--range",
@@ -123,7 +121,6 @@ let parse_options () =
       "through stdin.";
 
     "--test", Arg.Set test, " Disable logging";
-    "--hacksperimental", Arg.Set hacksperimental, " Enable experimental features of Hack"
   ] in
   Arg.parse_dynamic options (fun file -> files := file :: !files) usage;
   let range =
@@ -141,7 +138,7 @@ let parse_options () =
   } in
   (!files, !filename_for_logging, range, !at_char, !inplace, !diff, !root,
     !diff_dry, config),
-  (!debug, !test, !hacksperimental)
+  (!debug, !test)
 
 let file_exists path = Option.is_some (Sys_utils.realpath path)
 
@@ -249,7 +246,7 @@ let read_stdin () =
   with End_of_file ->
     Buffer.contents buf
 
-let parse ~hacksperimental text_source =
+let parse text_source =
   let source_text =
     match text_source with
     | File filename ->
@@ -257,7 +254,8 @@ let parse ~hacksperimental text_source =
     | Stdin _ ->
       SourceText.make Relative_path.default @@ read_stdin ()
   in
-  let parser_env = Full_fidelity_parser_env.make ~hacksperimental () in
+  let _, mode = Full_fidelity_parser.get_language_and_mode source_text in
+  let parser_env = Full_fidelity_parser_env.make ?mode () in
   let tree = SyntaxTree.make ~env:parser_env source_text in
   if List.is_empty (SyntaxTree.all_errors tree)
     then tree
@@ -350,8 +348,8 @@ let format_diff_intervals ?config env intervals tree =
   with
   | Invalid_argument s -> raise (InvalidDiff s)
 
-let debug_print ~hacksperimental ?range ?config text_source =
-  let tree = parse ~hacksperimental text_source in
+let debug_print ?range ?config text_source =
+  let tree = parse text_source in
   let source_text = SyntaxTree.text tree in
   let range = Option.map range (expand_or_convert_range source_text) in
   let env = Libhackfmt.env_from_config config in
@@ -359,36 +357,36 @@ let debug_print ~hacksperimental ?range ?config text_source =
   let chunk_groups = Chunk_builder.build doc in
   Hackfmt_debug.debug env ~range source_text tree doc chunk_groups
 
-let main ~hacksperimental (env: Env.t) (options: format_options) =
+let main (env: Env.t) (options: format_options) =
   env.Env.mode <- Some (mode_string options);
   match options with
   | Print {text_source; range; config} ->
     env.Env.text_source <- text_source;
     if env.Env.debug then
-      debug_print ~hacksperimental ?range ~config text_source
+      debug_print ?range ~config text_source
     else
       text_source
-        |> parse ~hacksperimental
+        |> parse
         |> format ?range ~config env
         |> output
   | InPlace {filename; config} ->
     let text_source = File filename in
     env.Env.text_source <- text_source;
-    if env.Env.debug then debug_print ~hacksperimental ~config text_source;
+    if env.Env.debug then debug_print ~config text_source;
     text_source
-      |> parse ~hacksperimental
+      |> parse
       |> format ~config env
       |> output ~text_source
   | AtChar {text_source; pos; config} ->
     env.Env.text_source <- text_source;
-    let tree = parse ~hacksperimental text_source in
+    let tree = parse text_source in
     let range, formatted =
       try
         logging_time_taken env Logger.format_at_offset_end
           (fun () -> format_at_offset ~config tree pos)
       with
       | Invalid_argument s -> raise (InvalidCliArg s) in
-    if env.Env.debug then debug_print ~hacksperimental text_source ~range:(Byte range) ~config;
+    if env.Env.debug then debug_print text_source ~range:(Byte range) ~config;
     Printf.printf "%d %d\n" (fst range) (snd range);
     output formatted;
   | Diff {root; dry; config} ->
@@ -416,7 +414,7 @@ let main ~hacksperimental (env: Env.t) (options: format_options) =
         try
           let contents =
             text_source
-            |> parse ~hacksperimental
+            |> parse
             |> format_diff_intervals ~config env intervals in
           Some (text_source, rel_path, contents)
         with
@@ -440,14 +438,13 @@ let () =
      HackfmtEventLogger) to behave correctly *)
   Daemon.check_entry_point ();
 
-  let options, (debug, test, hacksperimental) = parse_options () in
+  let options, (debug, test) = parse_options () in
   let env = { Env.
     debug;
     test;
     mode = None;
     text_source = Stdin None;
     root = Sys.getcwd ();
-    hacksperimental;
   } in
 
   let start_time = Unix.gettimeofday () in
@@ -455,7 +452,7 @@ let () =
 
   try
     let options = validate_options env options in
-    main ~hacksperimental env options;
+    main env options;
 
     let time_taken = Unix.gettimeofday () -. start_time in
     if not env.Env.test then

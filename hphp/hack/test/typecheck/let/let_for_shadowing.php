@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 function foo(int $count): void {
   let twice : string = "2x";

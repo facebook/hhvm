@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 function foo(Map<int, string> $map): void {
   let it : KeyedIterable<int, string> = $map;

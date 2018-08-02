@@ -91,7 +91,7 @@ type t = {
 }
 
 let make env text =
-  { lexer = Lexer.make ~hacksperimental:(Env.hacksperimental env) text
+  { lexer = Lexer.make ~is_experimental_mode:(Env.is_experimental_mode env) text
   ; errors = []
   ; context = Context.empty
   ; env

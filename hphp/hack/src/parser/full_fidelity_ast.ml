@@ -3229,7 +3229,6 @@ let parse_text
         ~php5_compat_mode:env.php5_compat_mode
         ~lang:lang
         ~mode
-        ~hacksperimental:env.hacksperimental
         ()
     in
     if env.quick_mode then

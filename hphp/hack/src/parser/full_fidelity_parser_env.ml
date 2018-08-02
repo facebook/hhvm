@@ -14,7 +14,6 @@ type t = {
   lang: FileInfo.file_type option;
   mode: FileInfo.mode option;
   stats: Stats_container.t option;
-  hacksperimental: bool;
 } [@@deriving show]
 
 let default = {
@@ -24,7 +23,6 @@ let default = {
   lang = None;
   mode = None;
   stats = None;
-  hacksperimental = false;
 }
 
 let make
@@ -34,9 +32,8 @@ let make
   ?lang
   ?mode
   ?stats
-  ?(hacksperimental = default.hacksperimental)
   () =
-  { hhvm_compat_mode; php5_compat_mode; lang; mode; stats; codegen; hacksperimental }
+  { hhvm_compat_mode; php5_compat_mode; lang; mode; stats; codegen; }
 
 let hhvm_compat_mode e = e.hhvm_compat_mode
 let php5_compat_mode e = e.php5_compat_mode
@@ -44,4 +41,4 @@ let codegen e = e.codegen
 let lang e = e.lang
 let mode e = e.mode
 let stats e = e.stats
-let hacksperimental e = e.hacksperimental
+let is_experimental_mode e = e.mode = Some FileInfo.Mexperimental

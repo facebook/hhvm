@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 let max = 10;
 $i = 0;

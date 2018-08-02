@@ -36,11 +36,11 @@ module Lexer : sig
     start : int; (* set once when creating the lexer. *)
     offset : int; (* the thing that is incremented when we advance the lexer *)
     errors : SyntaxError.t list;
-    hacksperimental : bool;
+    is_experimental_mode : bool;
   } [@@deriving show]
   [@@@warning "+32"]
-  val make : ?hacksperimental:bool -> SourceText.t -> t
-  val make_at : ?hacksperimental:bool -> SourceText.t -> int -> t
+  val make : ?is_experimental_mode:bool -> SourceText.t -> t
+  val make_at : ?is_experimental_mode:bool -> SourceText.t -> int -> t
   val start : t -> int
   val source : t -> SourceText.t
   val errors : t -> SyntaxError.t list
@@ -53,7 +53,7 @@ module Lexer : sig
   val advance : t -> int -> t
   val with_start_offset : t -> int -> int -> t
 
-  val hacksperimental : t -> bool
+  val is_experimental_mode : t -> bool
 end = struct
 
   (* text consists of a pair consisting of a string, padded by a certain, fixed
@@ -64,11 +64,11 @@ end = struct
     start : int; (* set once when creating the lexer. *)
     offset : int; (* the thing that is incremented when we advance the lexer *)
     errors : SyntaxError.t list;
-    hacksperimental : bool; (* write-once: record updates should not update this field *)
+    is_experimental_mode : bool; (* write-once: record updates should not update this field *)
   } [@@deriving show]
 
-  let make ?(hacksperimental = false) text =
-    { text; start = 0; offset = 0; errors = []; hacksperimental }
+  let make ?(is_experimental_mode = false) text =
+    { text; start = 0; offset = 0; errors = []; is_experimental_mode }
 
   let start  x = x.start
   let source x = x.text
@@ -83,8 +83,8 @@ end = struct
 
   let with_start_offset lexer start offset = {lexer with start = start; offset = offset}
 
-  let make_at ?hacksperimental text start_offset =
-    with_start_offset (make ?hacksperimental text) start_offset start_offset
+  let make_at ?is_experimental_mode text start_offset =
+    with_start_offset (make ?is_experimental_mode text) start_offset start_offset
 
   let with_offset_errors lexer offset errors = {
     lexer with offset = offset; errors = errors
@@ -96,7 +96,7 @@ end = struct
   let advance lexer index =
     { lexer with offset = lexer.offset + index }
 
-  let hacksperimental lexer = lexer.hacksperimental
+  let is_experimental_mode lexer = lexer.is_experimental_mode
 end
 
 module WithToken(Token: Lexable_token_sig.LexableToken_S) = struct
@@ -120,7 +120,7 @@ let start_new_lexeme = Lexer.start_new_lexeme
 let advance = Lexer.advance
 let with_offset_errors = Lexer.with_offset_errors
 let with_start_offset = Lexer.with_start_offset
-let hacksperimental = Lexer.hacksperimental
+let is_experimental_mode = Lexer.is_experimental_mode
 
 let start_offset = start
 let end_offset = offset
@@ -1438,7 +1438,7 @@ let as_keyword kind lexer =
     let text = as_case_insensitive_keyword (current_text lexer) in
     let is_hack = Env.is_hh () and allow_xhp = Env.enable_xhp () in
     match TokenKind.from_string text ~is_hack ~allow_xhp with
-    | Some TokenKind.Let when (not (hacksperimental lexer)) -> TokenKind.Name
+    | Some TokenKind.Let when (not (is_experimental_mode lexer)) -> TokenKind.Name
     | Some keyword -> keyword
     | _ -> TokenKind.Name
   else

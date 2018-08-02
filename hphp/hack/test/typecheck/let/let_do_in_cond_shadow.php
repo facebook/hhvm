@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 function string_predicate(string $s): bool {
   return false;

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 function foo(Map<int, string> $map, string $prefix): string {
   $out = '';

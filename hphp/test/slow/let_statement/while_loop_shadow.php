@@ -1,4 +1,5 @@
-<?hh
+<?hh // experimental
+
 $b = true;
 let x = "x";
 while ($b) {

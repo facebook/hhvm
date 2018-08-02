@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 function foo(int $i): int {
   let add_one = $x ==> $x + 1;

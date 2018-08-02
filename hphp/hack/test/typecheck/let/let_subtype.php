@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 interface I {}
 class A implements I {}

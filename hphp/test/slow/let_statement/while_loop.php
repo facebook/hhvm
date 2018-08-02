@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 let count = 5;
 $i = 0;
 while ($i < count) {

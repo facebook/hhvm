@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 function foo(KeyedIterable<int, string> $map): void {
   foreach ($map as $key => $val) {

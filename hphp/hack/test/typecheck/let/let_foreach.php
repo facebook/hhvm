@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 function foo(Iterable<int> $arr): void {
   foreach ($arr as $elem) {

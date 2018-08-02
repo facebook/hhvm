@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 class D implements IDisposable {
   public function __dispose(): void {}

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 let f = ($x) ==> $x + 1;
 let twice = ($f) ==> (($x) ==> $f($f($x)));

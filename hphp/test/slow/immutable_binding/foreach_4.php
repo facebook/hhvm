@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 function foo(Map<int, int> $arr): void {
   $sum = 0;

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 $count = 0;
 do {
   let x = $count + 1;

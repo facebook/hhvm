@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 let identical = ($x) ==> {
   let y = $x;

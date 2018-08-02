@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 class ExA extends Exception {}
 class ExB extends Exception {}

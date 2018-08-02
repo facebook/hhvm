@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 function foo(int $i): void {
   let ret = -1;

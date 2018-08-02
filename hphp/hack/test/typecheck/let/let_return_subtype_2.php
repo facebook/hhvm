@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 class Base {}
 class Subclass extends Base {}

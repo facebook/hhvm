@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 function foo(array<int> $arr): void {
   let it : Iterable<int> = $arr;

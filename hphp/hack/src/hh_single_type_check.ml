@@ -574,11 +574,7 @@ let parse_name_and_decl popt files_contents tcopt parser =
         Errors.run_in_context fn Errors.Parsing begin fun () ->
           match parser with
           | Legacy -> Parser_hack.program popt fn contents
-          | FFP ->
-            let hacksperimental =
-              GlobalOptions.tco_experimental_feature_enabled tcopt GlobalOptions.tco_hacksperimental
-            in
-            Full_fidelity_ast.defensive_program ~hacksperimental popt fn contents
+          | FFP -> Full_fidelity_ast.defensive_program popt fn contents
         end
       end
     in

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 function foo(array<int, int> $arr): void {
   $sum = 0;

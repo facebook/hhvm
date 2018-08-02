@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh // experimental
 
 function foo(): void {
   let x = 10;

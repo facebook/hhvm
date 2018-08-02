@@ -1349,8 +1349,12 @@ module Make (GetLocals : GetLocals) = struct
     | AbsConst _ -> acc
     | ClassUse h ->
       hint ~allow_typedef:false env h :: acc
-    | ClassUseAlias _ -> acc
-    | ClassUsePrecedence _ -> acc
+    | ClassUseAlias (_, (p, _), _, _) ->
+      Errors.unsupported_feature p "Trait use aliasing";
+      acc
+    | ClassUsePrecedence (_, (p, _), _) ->
+      Errors.unsupported_feature p "The insteadof keyword";
+      acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire _ -> acc
     | ClassVars _ -> acc

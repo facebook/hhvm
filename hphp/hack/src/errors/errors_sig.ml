@@ -393,7 +393,7 @@ module type S = sig
   val invalid_disposable_hint : Pos.t -> string -> unit
   val invalid_disposable_return_hint : Pos.t -> string -> unit
   val invalid_return_disposable : Pos.t -> unit
-
+  val unsupported_feature : Pos.t -> string -> unit
   val to_json : Pos.absolute error_ -> Hh_json.json
   val to_string : ?indent:bool -> Pos.absolute error_ -> string
   val try_ : (unit -> 'a) -> (error -> 'a) -> 'a

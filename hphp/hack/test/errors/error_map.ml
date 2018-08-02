@@ -143,6 +143,7 @@ ReferenceInRx = 2088
 DeclareStatement = 2089
 MisplacedRxOfScope = 2090
 RxOfScopeAndExplicitRx = 2091
+UnsupportedFeature = 2092
 
 NastCheck Errors:
 AbstractBody = 3001

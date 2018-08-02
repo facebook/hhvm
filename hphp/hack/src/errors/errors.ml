@@ -1112,6 +1112,9 @@ let goto_label_defined_in_finally pos =
     pos
     "It is illegal to define a goto label within a finally block."
 
+let unsupported_feature pos name =
+  add (Naming.err_code Naming.UnsupportedFeature) pos (name ^ " is not supported in Hack.")
+
 let goto_invoked_in_finally pos =
   add (Naming.err_code Naming.GotoInvokedInFinally)
     pos

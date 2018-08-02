@@ -61,7 +61,7 @@ let construct_deprecated_wrapper_stub
       of the function, and insert whitespace accordingly *)
   let base_indentation = String.make col_start ' ' in
   let deprecated_header =
-    base_indentation ^ "<<__Deprecated(\"Deprecated: Use `" ^ new_name ^ "` instead\")>>"
+    base_indentation ^ "<<__Deprecated(\"Use `" ^ new_name ^ "` instead\")>>"
   in
   let func_decl = base_indentation ^ func_decl_text in
   (* The immediate body of a function is indented by 2 extra spaces *)

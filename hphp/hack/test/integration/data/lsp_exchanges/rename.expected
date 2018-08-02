@@ -246,7 +246,7 @@
                 "character": 0
               }
             },
-            "newText": "\n  <<__Deprecated(\"Deprecated: Use `some_other_method` instead\")>>\n  public function test_method(): int {\n    return $this->some_other_method();\n  }\n"
+            "newText": "\n  <<__Deprecated(\"Use `some_other_method` instead\")>>\n  public function test_method(): int {\n    return $this->some_other_method();\n  }\n"
           }
         ]
       }
@@ -481,7 +481,7 @@
                 "character": 0
               }
             },
-            "newText": "\n  <<__Deprecated(\"Deprecated: Use `new_and_improved` instead\")>>\n  public function deprecated_method(int $x, string $y, int $v, ...): int {\n    return $this->new_and_improved($x, $y, $v, ...Vec\\drop(func_get_args(), 3));\n  }\n"
+            "newText": "\n  <<__Deprecated(\"Use `new_and_improved` instead\")>>\n  public function deprecated_method(int $x, string $y, int $v, ...): int {\n    return $this->new_and_improved($x, $y, $v, ...Vec\\drop(func_get_args(), 3));\n  }\n"
           }
         ]
       }
@@ -517,7 +517,7 @@
                 "character": 0
               }
             },
-            "newText": "\n  <<__Deprecated(\"Deprecated: Use `new_static_method` instead\")>>\n  public static function depr_static(int $x, string $y, int $v, ...): int {\n    return self::new_static_method($x, $y, $v, ...Vec\\drop(func_get_args(), 3));\n  }\n"
+            "newText": "\n  <<__Deprecated(\"Use `new_static_method` instead\")>>\n  public static function depr_static(int $x, string $y, int $v, ...): int {\n    return self::new_static_method($x, $y, $v, ...Vec\\drop(func_get_args(), 3));\n  }\n"
           }
         ]
       }
@@ -553,7 +553,7 @@
                 "character": 0
               }
             },
-            "newText": "\n  <<__Deprecated(\"Deprecated: Use `new_async_method` instead\")>>\n  public async function depr_async(int $x, int $v, ...): Awaitable<int> {\n    return await $this->new_async_method($x, $v, ...Vec\\drop(func_get_args(), 2));\n  }\n"
+            "newText": "\n  <<__Deprecated(\"Use `new_async_method` instead\")>>\n  public async function depr_async(int $x, int $v, ...): Awaitable<int> {\n    return await $this->new_async_method($x, $v, ...Vec\\drop(func_get_args(), 2));\n  }\n"
           }
         ]
       }
@@ -589,7 +589,7 @@
                 "character": 0
               }
             },
-            "newText": "\n  <<__Deprecated(\"Deprecated: Use `new_static_async_method` instead\")>>\n  public static async function depr_static_async(int $x): Awaitable<\n    void,\n  > {\n    await self::new_static_async_method($x);\n  }\n"
+            "newText": "\n  <<__Deprecated(\"Use `new_static_async_method` instead\")>>\n  public static async function depr_static_async(int $x): Awaitable<\n    void,\n  > {\n    await self::new_static_async_method($x);\n  }\n"
           }
         ]
       }
@@ -638,7 +638,7 @@
                 "character": 0
               }
             },
-            "newText": "\n<<__Deprecated(\"Deprecated: Use `new_test_rename_method` instead\")>>\nfunction test_rename(): void {\n  new_test_rename_method();\n}\n"
+            "newText": "\n<<__Deprecated(\"Use `new_test_rename_method` instead\")>>\nfunction test_rename(): void {\n  new_test_rename_method();\n}\n"
           }
         ]
       }
@@ -687,7 +687,7 @@
                 "character": 0
               }
             },
-            "newText": "\n<<__Deprecated(\"Deprecated: Use `new_async_test_rename_method` instead\")>>\nasync function async_test_rename(): Awaitable<int> {\n  return await new_async_test_rename_method();\n}\n"
+            "newText": "\n<<__Deprecated(\"Use `new_async_test_rename_method` instead\")>>\nasync function async_test_rename(): Awaitable<int> {\n  return await new_async_test_rename_method();\n}\n"
           }
         ]
       }

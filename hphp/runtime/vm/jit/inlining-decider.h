@@ -114,7 +114,8 @@ struct InliningDecider {
    * NOTE: Inlining will fail during translation if the FPush was interpreted.
    * It is up to the client to ensure that this is not the case.
    */
-  bool canInlineAt(SrcKey callSK, const Func* callee) const;
+  bool canInlineAt(SrcKey callSK, const Func* callee,
+                  Annotations& annotations) const;
 
   /*
    * Check that `region' of `callee' can be inlined (possibly via other inlined
@@ -129,7 +130,7 @@ struct InliningDecider {
    * must be called immediately to correctly reset the internal inlining costs.
    */
   bool shouldInline(SrcKey callerSk, Op callerFPushOp, const Func* callee,
-                    const RegionDesc& region, uint32_t maxTotalCost);
+    const RegionDesc& region, uint32_t maxTotalCost, Annotations& annotations);
 
   /*
    * Update our context to account for the beginning of an inlined call.
@@ -138,7 +139,8 @@ struct InliningDecider {
                          Op callerFPushOp,
                          const Func* callee,
                          const RegionDesc& region,
-                         const irgen::IRGS& irgs);
+                         const irgen::IRGS& irgs,
+                         Annotations& annotations);
 
   /*
    * Update context to begin inlining of callee with cost zero.
@@ -177,7 +179,8 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
                                  const Func* callee,
                                  const irgen::IRGS& irgs,
                                  InliningDecider& inl,
-                                 int32_t maxBCInstrs);
+                                 int32_t maxBCInstrs,
+                                 Annotations& annotations);
 
 void setBaseInliningProfCount(uint64_t value);
 

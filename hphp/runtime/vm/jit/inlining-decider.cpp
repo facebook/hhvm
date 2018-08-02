@@ -42,6 +42,7 @@
 #include <folly/Synchronized.h>
 #include <cmath>
 #include <vector>
+#include <sstream>
 
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,12 +52,23 @@ TRACE_SET_MOD(inlining);
 namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool traceRefusal(const Func* caller, const Func* callee, const char* why) {
+std::string nameAndReason(std::string caller, std::string callee,
+    std::string why) {
+  return caller + " -> " + callee + " " + why;
+}
+
+bool traceRefusal(const Func* caller, const Func* callee, const char* why,
+    Annotations& annotations) {
+  // This is not under Trace::enabled so that we can collect the data in prod.
+  if (RuntimeOption::EvalDumpInlRefuse) {
+    annotations.emplace_back("NoInline ",
+      nameAndReason(caller->fullName()->data(),
+                    callee->fullName()->data(), why));
+  }
   if (Trace::enabled) {
     UNUSED auto calleeName = callee ? callee->fullName()->data()
                                     : "(unknown)";
     assertx(caller);
-
     FTRACE(2, "InliningDecider: refusing {}() <- {}{}\t<reason: {}>\n",
            caller->fullName()->data(), calleeName, callee ? "()" : "", why);
   }
@@ -76,9 +88,10 @@ const StaticString
  * Check if the funcd of `inst' has any characteristics which prevent inlining,
  * without peeking into its bytecode or regions.
  */
-bool isCalleeInlinable(SrcKey callSK, const Func* callee) {
+bool isCalleeInlinable(SrcKey callSK, const Func* callee,
+                      Annotations& annotations) {
   auto refuse = [&] (const char* why) {
-    return traceRefusal(callSK.func(), callee, why);
+    return traceRefusal(callSK.func(), callee, why, annotations);
   };
 
   if (!callee) {
@@ -122,11 +135,11 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee) {
 /*
  * Check that we don't have any missing or extra arguments.
  */
-bool checkNumArgs(SrcKey callSK, const Func* callee) {
+bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations& annotations) {
   assertx(callee);
 
   auto refuse = [&] (const char* why) {
-    return traceRefusal(callSK.func(), callee, why);
+    return traceRefusal(callSK.func(), callee, why, annotations);
   };
 
   auto pc = callSK.pc();
@@ -163,30 +176,36 @@ bool checkNumArgs(SrcKey callSK, const Func* callee) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee) const {
+bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee,
+                                  Annotations& annotations) const {
   if (m_disabled ||
       !callee ||
       !RuntimeOption::EvalHHIREnableGenTimeInlining ||
       RuntimeOption::EvalJitEnableRenameFunction ||
       callee->attrs() & AttrInterceptable) {
-    return false;
+    return traceRefusal(callSK.func(), callee, "trivial", annotations);
   }
 
   // We can only inline at normal FCalls.
   if (callSK.op() != Op::FCall) {
-    return false;
+    return traceRefusal(callSK.func(), callee, "Not FCall", annotations);
   }
 
   // Don't inline from resumed functions.  The inlining mechanism doesn't have
   // support for these---it has no way to redefine stack pointers relative to
   // the frame pointer, because in a resumed function the frame pointer points
   // into the heap instead of into the eval stack.
-  if (callSK.resumeMode() != ResumeMode::None) return false;
+  if (callSK.resumeMode() != ResumeMode::None) {
+    return traceRefusal(callSK.func(), callee, "Resumed", annotations);
+  }
 
   // TODO(#4238160): Inlining into pseudomain callsites is still buggy.
-  if (callSK.func()->isPseudoMain()) return false;
+  if (callSK.func()->isPseudoMain()) {
+    return traceRefusal(callSK.func(), callee, "PseudoMain", annotations);
+  }
 
-  if (!isCalleeInlinable(callSK, callee) || !checkNumArgs(callSK, callee)) {
+  if (!isCalleeInlinable(callSK, callee, annotations) ||
+      !checkNumArgs(callSK, callee, annotations)) {
     return false;
   }
 
@@ -336,7 +355,7 @@ using InlineCostCache = jit::fast_map<
 >;
 
 Vcost computeTranslationCostSlow(SrcKey at, Op callerFPushOp,
-                                 const RegionDesc& region) {
+                         const RegionDesc& region, Annotations& annotations) {
   TransContext ctx {
     kInvalidTransID,
     TransKind::Optimize,
@@ -349,7 +368,7 @@ Vcost computeTranslationCostSlow(SrcKey at, Op callerFPushOp,
     callerFPushOp
   };
 
-  auto const unit = irGenInlineRegion(ctx, region);
+  auto const unit = irGenInlineRegion(ctx, region, annotations);
   if (!unit) return {0, true};
 
   SCOPE_ASSERT_DETAIL("Inline-IRUnit") { return show(*unit); };
@@ -359,14 +378,16 @@ Vcost computeTranslationCostSlow(SrcKey at, Op callerFPushOp,
 folly::Synchronized<InlineCostCache, folly::RWSpinLock> s_inlCostCache;
 
 int computeTranslationCost(SrcKey at, Op callerFPushOp,
-                           const RegionDesc& region) {
+                           const RegionDesc& region,
+                           Annotations& annotations) {
   InlineRegionKey irk{region};
   SYNCHRONIZED_CONST(s_inlCostCache) {
     auto f = s_inlCostCache.find(irk);
     if (f != s_inlCostCache.end()) return f->second;
   }
 
-  auto const info = computeTranslationCostSlow(at, callerFPushOp, region);
+  auto const info = computeTranslationCostSlow(at, callerFPushOp, region,
+                                              annotations);
   auto cost = info.cost;
 
   // We normally store the computed cost into the cache.  However, if the region
@@ -445,7 +466,8 @@ int InliningDecider::accountForInlining(SrcKey callerSk,
                                         Op callerFPushOp,
                                         const Func* callee,
                                         const RegionDesc& region,
-                                        const irgen::IRGS& irgs) {
+                                        const irgen::IRGS& irgs,
+                                        Annotations& annotations) {
   auto const alwaysInl =
     !RuntimeOption::EvalHHIRInliningIgnoreHints &&
     callee->userAttributes().count(s_AlwaysInline.get());
@@ -453,7 +475,7 @@ int InliningDecider::accountForInlining(SrcKey callerSk,
   // Functions marked as always inline don't contribute to overall cost
   int cost = alwaysInl
     ? 0
-    : computeTranslationCost(callerSk, callerFPushOp, region);
+    : computeTranslationCost(callerSk, callerFPushOp, region, annotations);
 
   m_costStack.push_back(cost);
   m_cost       += cost;
@@ -473,7 +495,8 @@ bool InliningDecider::shouldInline(SrcKey callerSk,
                                    Op callerFPushOp,
                                    const Func* callee,
                                    const RegionDesc& region,
-                                   uint32_t maxTotalCost) {
+                                   uint32_t maxTotalCost,
+                                   Annotations& annotations) {
   auto sk = region.empty() ? SrcKey() : region.start();
   assertx(callee);
   assertx(sk.func() == callee);
@@ -481,7 +504,7 @@ bool InliningDecider::shouldInline(SrcKey callerSk,
   // Tracing return lambdas.
   auto refuse = [&] (const char* why) {
     FTRACE(2, "shouldInline: rejecting callee region: {}", show(region));
-    return traceRefusal(m_topFunc, callee, why);
+    return traceRefusal(m_topFunc, callee, why, annotations);
   };
 
   auto accept = [&, this] (const char* kind) {
@@ -561,7 +584,8 @@ bool InliningDecider::shouldInline(SrcKey callerSk,
   // certain threshold.  (Note that we do not measure the total cost of all the
   // inlined calls for a given caller---just the cost of each nested stack.)
   const int maxCost = maxTotalCost - m_cost;
-  const int cost = computeTranslationCost(callerSk, callerFPushOp, region);
+  const int cost = computeTranslationCost(callerSk, callerFPushOp, region,
+                                          annotations);
   if (cost > maxCost) {
     return refuse("too expensive");
   }
@@ -705,7 +729,8 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
                                  const Func* callee,
                                  const irgen::IRGS& irgs,
                                  InliningDecider& inl,
-                                 int32_t maxBCInstrs) {
+                                 int32_t maxBCInstrs,
+                                 Annotations& annotations) {
   auto const op = sk.pc();
   auto const numArgs = getImm(op, 0).u_IVA;
 
@@ -749,7 +774,8 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
                                     maxBCInstrs);
       if (region && inl.shouldInline(sk, fpiInfo.fpushOpc,
                                      callee, *region,
-                                     adjustedMaxVasmCost(irgs, *region))) {
+                                     adjustedMaxVasmCost(irgs, *region),
+                                     annotations)) {
         return region;
       }
     }
@@ -766,8 +792,8 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
   );
 
   if (region && inl.shouldInline(sk, fpiInfo.fpushOpc,
-                                 callee, *region,
-                                 adjustedMaxVasmCost(irgs, *region))) {
+                             callee, *region,
+                             adjustedMaxVasmCost(irgs, *region), annotations)) {
     return region;
   }
 

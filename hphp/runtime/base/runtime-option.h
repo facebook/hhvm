@@ -766,6 +766,7 @@ struct RuntimeOption {
   F(bool, DumpTCAnchors,               false)                           \
   F(uint32_t, DumpIR,                  0)                               \
   F(bool, DumpTCAnnotationsForAllTrans,debug)                           \
+  F(bool, DumpInlRefuse,               false)                           \
   F(uint32_t, DumpRegion,              0)                               \
   F(bool, DumpAst,                     false)                           \
   F(bool, DumpTargetProfiles,          false)                           \

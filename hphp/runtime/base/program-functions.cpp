@@ -762,6 +762,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   if (RuntimeOption::EvalDumpTC ||
       RuntimeOption::EvalDumpIR ||
+      RuntimeOption::EvalDumpInlRefuse ||
       RuntimeOption::EvalDumpRegion) {
     jit::mcgen::joinWorkerThreads();
     jit::tc::dump();

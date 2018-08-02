@@ -34,7 +34,7 @@
                           (NamedBody
                              { Aast.AnnotatedAST.fnb_nast =
                                [(Return ([15:15-22],
-                                   (Some (([15:15-22], int),
+                                   (Some (([15:15-22], _),
                                           (Binop (Plus,
                                              (([15:15-17], int),
                                               (Lvar ([15:15-17], $y))),
@@ -80,7 +80,7 @@
                           (NamedBody
                              { Aast.AnnotatedAST.fnb_nast =
                                [(Return ([19:5-20],
-                                   (Some (([19:12-19], int),
+                                   (Some (([19:12-19], _),
                                           (Binop (Plus,
                                              (([19:12-14], int),
                                               (Lvar ([19:12-14], $y))),

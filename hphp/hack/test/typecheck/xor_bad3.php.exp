@@ -1,6 +1,6 @@
 File "xor_bad3.php", line 13, characters 3-9:
 Typing error (Typing[4110])
 File "xor_bad3.php", line 13, characters 3-4:
-This is an int because this is used in an arithmetic operation
+This is an int because this is used in a bitwise operation
 File "xor_bad3.php", line 12, characters 14-19:
 It is incompatible with a string

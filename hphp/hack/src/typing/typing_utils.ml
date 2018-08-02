@@ -198,6 +198,16 @@ let is_dynamic env ty =
   find_dynamic env [ty] <> None
 
 (*****************************************************************************)
+(* Check if type is any or a variant thereof  *)
+(*****************************************************************************)
+
+let rec is_any env ty =
+  match Env.expand_type env ty with
+  | (_, (_, (Tany | Terr))) -> true
+  | (_, (_, Tunresolved tyl)) -> List.for_all tyl (is_any env)
+  | _ -> false
+
+(*****************************************************************************)
 (* Gets the base type of an abstract type *)
 (*****************************************************************************)
 

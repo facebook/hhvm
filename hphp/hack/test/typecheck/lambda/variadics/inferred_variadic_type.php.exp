@@ -14,8 +14,8 @@ File "inferred_variadic_type.php", line 37, characters 14-26:
 Invalid return type (Typing[4110])
   File "inferred_variadic_type.php", line 15, characters 48-50:
   This is an int
-  File "inferred_variadic_type.php", line 15, characters 36-36:
-  It is incompatible with an object of type D
+  File "inferred_variadic_type.php", line 37, characters 14-26:
+  It is incompatible with a dynamic value because this is used in an arithmetic operation
 File "inferred_variadic_type.php", line 41, characters 38-40:
 You are trying to access the member foo but this is not an object, it is an int (Typing[4062])
   File "inferred_variadic_type.php", line 15, characters 42-44:

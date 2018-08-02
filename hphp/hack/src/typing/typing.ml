@@ -2050,7 +2050,7 @@ and expr_
       let env, te2, ty2 = raw_expr in_cond env e2 in
       let env = save_and_merge_next_in_catch env in
       let env, te3, ty =
-        binop in_cond p env bop (fst e1) te1 ty1 (fst e2) te2 ty2 in
+        binop p env bop (fst e1) te1 ty1 (fst e2) te2 ty2 in
       env, te3, ty
   | Pipe (e0, e1, e2) ->
       let env, te1, ty = expr env e1 in
@@ -5619,57 +5619,100 @@ and call_untyped_unpack env uel = match uel with
 and bad_call p ty =
   Errors.bad_call p (Typing_print.error ty)
 
+(* to be used to throw typing error if failing to satisfy subtype relation *)
+and enforce_sub_ty env p ty1 ty2 =
+  let env = Type.sub_type p Reason.URnone env ty1 ty2 in
+  Env.expand_type env ty1
+
+(* throws typing error if neither t <: ty nor t <: dynamic, and adds appropriate
+ * constraint to env otherwise *)
+and check_type ty p r env t =
+  if TUtils.is_dynamic env t (* TODO: when dynamic is no longer top-ish, replace using subtyping *)
+  then enforce_sub_ty env p t (r, Tdynamic)
+  else enforce_sub_ty env p t (r, ty)
+
+(* does check_type with num and then gives back normalized type and env *)
+and check_num env p t r =
+  let env2, t2 = check_type (Tprim Tnum) p r env t in
+  env2, if SubType.is_sub_type env2 t (fst t2, Tprim Tint)
+    then (fst t2, Tprim Tint)
+    else if SubType.is_sub_type env2 t (fst t2, Tprim Tfloat)
+    then (fst t2, Tprim Tfloat)
+    else if SubType.is_sub_type env2 t (fst t2, Tprim Tnum)
+    then (fst t2, Tprim Tnum)
+    else (fst t2, Tdynamic)
+
+(* does check_type with int and then gives back normalized type and env *)
+and check_int env p t r =
+  let env2, t2 = check_type (Tprim Tint) p r env t in
+  env2, if SubType.is_sub_type env2 t (fst t2, Tprim Tint)
+    then (fst t2, Tprim Tint)
+    else (fst t2, Tdynamic)
+
 and unop ~is_func_arg ~forbid_uref p env uop te ty =
-  let check_dynamic env ty ~f =
-    if TUtils.is_dynamic env ty then
-      env, (fst ty, Tdynamic)
-    else f()
-  in
   let make_result env te result_ty =
     env, T.make_typed_expr p result_ty (T.Unop(uop, te)), result_ty in
-  let check_arithmetic env ty =
-    check_dynamic env ty ~f:begin fun () ->
-      Type.sub_type p Reason.URnone env ty (Reason.Rarith p, Tprim Tnum), ty
-    end
-  in
+  let is_any = TUtils.is_any env in
   match uop with
+  (* TODO: is a check like "Async.enforce_nullable_or_not_awaitable env p ty;"
+   * necessary or desired anywhere here? And if so, don't binops need it as well?
+   *)
   | Ast.Unot ->
-      Async.enforce_nullable_or_not_awaitable env p ty;
+    if is_any ty
+    then make_result env te ty
+    else (* args isn't any or a variant thereof so can actually do stuff *)
       (* !$x (logical not) works with any type, so we just return Tbool *)
       make_result env te (Reason.Rlogic_ret p, Tprim Tbool)
   | Ast.Utild ->
-      (* ~$x (bitwise not) only works with int *)
-      let env, ty =
-        check_dynamic env ty ~f:begin fun () ->
-          let int_ty = (Reason.Rarith p, Tprim Tint) in
-          Type.sub_type p Reason.URnone env ty int_ty, int_ty
-        end
-      in
-      make_result env te ty
+      if is_any ty
+      then make_result env te ty
+      else (* args isn't any or a variant thereof so can actually do stuff *)
+      let env, t = check_int env p ty (Reason.Rbitwise p) in
+      begin
+        match snd t with
+        | Tdynamic -> make_result env te (Reason.Rbitwise_ret p, Tdynamic)
+        | _ -> make_result env te (Reason.Rbitwise_ret p, Tprim Tint)
+      end
   | Ast.Uincr
   | Ast.Upincr
   | Ast.Updecr
   | Ast.Udecr ->
       (* increment and decrement operators modify the value,
        * check for immutability violation here *)
-      begin match te with
-      | _, T.ImmutableVar (p, x) ->
-          Errors.let_var_immutability_violation p (Local_id.get_name x);
-          expr_error env p (Reason.Rwitness p)
-      | _ ->
-      let env, ty = check_arithmetic env ty in
-      let env =
-        if Env.env_local_reactive env then
-        Typing_mutability.handle_assignment_mutability env te te
-        else env
-      in
-      make_result env te ty
-      end (* match *)
+      begin
+        match te with
+        | _, T.ImmutableVar (p, x) ->
+            Errors.let_var_immutability_violation p (Local_id.get_name x);
+            expr_error env p (Reason.Rwitness p)
+        | _ ->
+        if is_any ty
+        then make_result env te ty
+        else (* args isn't any or a variant thereof so can actually do stuff *)
+        let env, t = check_num env p ty (Reason.Rarith p) in
+        let env =
+          if Env.env_local_reactive env then
+          Typing_mutability.handle_assignment_mutability env te te
+          else env
+        in
+        match snd t with
+        | Tprim Tfloat -> make_result env te (Reason.Rarith_ret p, Tprim Tfloat)
+        | Tprim Tint -> make_result env te (Reason.Rarith_ret p, Tprim Tint)
+        | Tdynamic -> make_result env te (Reason.Rarith_ret p, Tdynamic)
+        (*TODO: give better reason why increments of dynamic yield dynamic*)
+        | _ ->  make_result env te (Reason.Rarith_ret p, Tprim Tnum)
+      end
   | Ast.Uplus
   | Ast.Uminus ->
-      (* math operators work with int or floats, so we call sub_type *)
-      let env, ty = check_arithmetic env ty in
-      make_result env te ty
+      if is_any ty
+      then make_result env te ty
+      else (* args isn't any or a variant thereof so can actually do stuff *)
+      let env, t = check_num env p ty (Reason.Rarith p) in
+      begin
+        match snd t with
+        | Tprim Tfloat -> make_result env te (Reason.Rarith_ret p, Tprim Tfloat)
+        | Tprim Tint -> make_result env te (Reason.Rarith_ret p, Tprim Tint)
+        | _ -> make_result env te (Reason.Rarith_ret p, Tprim Tnum)
+      end
   | Ast.Uref ->
       if Env.env_local_reactive env
          && not (TypecheckerOptions.unsafe_rx (Env.get_options env))
@@ -5687,227 +5730,110 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
         end
       else if Env.is_strict env
       then Errors.reference_expr p;
+      (* any check omitted because would return the same anyway *)
       make_result env te ty
   | Ast.Usilence ->
       (* Silencing does not change the type *)
+      (* any check omitted because would return the same anyway *)
       make_result env te ty
 
-and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
-  let rec is_any ty =
-    match Env.expand_type env ty with
-    | (_, (_, (Tany | Terr))) -> true
-    | (_, (_, Tunresolved tyl)) -> List.for_all tyl is_any
-    | _ -> false in
-  (* Test if `ty` is *not* the any type (or a variant thereof) and
-   * is a subtype of the primitive type `prim`. *)
-  let is_sub_prim env ty prim =
-    let ty_prim = (Reason.Rarith p, Tprim prim) in
-    if not (is_any ty) && SubType.is_sub_type env ty ty_prim
-    then Some (fst ty) else None in
-  (* Test if `ty` is *not* the any type (or a variant thereof) and
-   * is a subtype of `num` but is not a subtype of `int` *)
-  let is_sub_num_not_sub_int env ty =
-    let ty_num = (Reason.Rarith p, Tprim Tnum) in
-    let ty_int = (Reason.Rarith p, Tprim Tint) in
-    if not (is_any ty) && SubType.is_sub_type env ty ty_num
-       && not (SubType.is_sub_type env ty ty_int)
-    then Some (fst ty) else None in
-  (* Force ty1 to be a subtype of ty2 (unless it is any) *)
-  let enforce_sub_ty env ty1 ty2 =
-    let env = Type.sub_type p Reason.URnone env ty1 ty2 in
-    Env.expand_type env ty1 in
+and binop p env bop p1 te1 ty1 p2 te2 ty2 =
   let make_result env te1 te2 ty =
-    env, T.make_typed_expr p ty (T.Binop(bop, te1, te2)), ty in
-  let check_dynamic f =
-    if TUtils.is_dynamic env ty1 then
-      let result_prim =
-        match is_sub_prim env ty2 Tfloat with
-        | Some r ->
-          (* dynamic op float = float *)
-          (r, Tprim Tfloat)
-        | _ ->
-          (* dynamic op _ = num *)
-          (fst ty2, Tprim Tnum)
-        in
-      make_result env te1 te2 result_prim
-    else if TUtils.is_dynamic env ty2 then
-      let result_prim =
-        match is_sub_prim env ty1 Tfloat with
-        | Some r ->
-          (* dynamic op float = float *)
-          (r, Tprim Tfloat)
-        | _ ->
-          (* dynamic op _ = num *)
-          (fst ty1, Tprim Tnum)
-        in
-      make_result env te1 te2 result_prim
-    else f ()
-  in
+    env, T.make_typed_expr p ty (T.Binop (bop, te1, te2)), ty in
+  let is_any = TUtils.is_any env in
+  if is_any ty1
+  then make_result env te1 te2 ty1
+  else if is_any ty2
+  then make_result env te1 te2 ty2
+  else (* args aren't any or a variant thereof so can actually do stuff *)
   match bop with
   | Ast.Plus ->
-      let env, ty1 = TUtils.fold_unresolved env ty1 in
-      let env, ty2 = TUtils.fold_unresolved env ty2 in
-      let env, ety1 = Env.expand_type env ty1 in
-      let env, ety2 = Env.expand_type env ty2 in
-      (match ety1, ety2 with
-      (* For array<V1>+array<V2> and array<K1,V1>+array<K2,V2>, allow
-       * the addition to produce a supertype. (We could also handle
-       * when they have mismatching annotations, but we get better error
-       * messages if we just let those get unified in the next case. *)
-      (* The general types are:
-       *   function<Tk,Tv>(array<Tk,Tv>, array<Tk,Tv>): array<Tk,Tv>
-       *   function<T>(array<T>, array<T>): array<T>
-       * and subtyping on the arguments deals with everything
-       *)
-      | (_, Tarraykind (AKmap _ as ak)), (_, Tarraykind (AKmap _))
-      | (_, Tarraykind (AKvec _ as ak)), (_, Tarraykind (AKvec _)) ->
-          let env, a_sup = Env.fresh_unresolved_type env in
-          let env, b_sup = Env.fresh_unresolved_type env in
-          let res_ty = Reason.Rarray_plus_ret p, Tarraykind (
-            match ak with
-              | AKvec _ -> AKvec a_sup
-              | AKmap _ -> AKmap (a_sup, b_sup)
-              | _ -> assert false
-          ) in
-          let env = Type.sub_type p1 Reason.URnone env ety1 res_ty in
-          let env = Type.sub_type p2 Reason.URnone env ety2 res_ty in
-          make_result env te1 te2 res_ty
-      | (_, Tarraykind _), (_, Tarraykind (AKshape _)) ->
-        let env, ty2 = Typing_arrays.downcast_aktypes env ty2 in
-        binop in_cond p env bop p1 te1 ty1 p2 te2 ty2
-      | (_, Tarraykind (AKshape _)), (_, Tarraykind _) ->
-        let env, ty1 = Typing_arrays.downcast_aktypes env ty1 in
-        binop in_cond p env bop p1 te1 ty1 p2 te2 ty2
-      | (_, Tarraykind _), (_, Tarraykind _)
-      | (_, (Tany | Terr)), (_, Tarraykind _)
-      | (_, Tarraykind _), (_, Tany) ->
-          let env, ty = Type.unify p Reason.URnone env ty1 ty2 in
-          make_result env te1 te2 ty
-      | (_, Tdynamic), (_, Tdynamic) ->
-          make_result env te1 te2 (Reason.Rarith p, Tdynamic)
-      | (_, (Tany | Terr | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tdynamic
-        | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _)
-        | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
-            )
-        ), _ ->
-        let env, texpr, ty =
-          binop in_cond p env Ast.Minus p1 te1 ty1 p2 te2 ty2 in
-        match snd texpr with
-          | T.Binop (_, te1, te2) -> make_result env te1 te2 ty
-          | _ -> assert false
-      )
-  | Ast.Minus | Ast.Star -> check_dynamic begin fun () ->
-      let env, ty1 = enforce_sub_ty env ty1 (Reason.Rarith p1, Tprim Tnum) in
-      let env, ty2 = enforce_sub_ty env ty2 (Reason.Rarith p2, Tprim Tnum) in
-      (* If either side is a float then float: 1.0 - 1 -> float *)
-      (* These have types
-       *   function(float, num): float
-       *   function(num, float): float
-       *)
-      match is_sub_prim env ty1 Tfloat, is_sub_prim env ty2 Tfloat with
-      | (Some r, _) | (_, Some r) ->
-        make_result env te1 te2 (r, Tprim Tfloat)
-      | _, _ ->
-      (* Both sides are integers, then integer: 1 - 1 -> int *)
-      (* This has type
-       *   function(int, int): int
-       *)
-        match is_sub_prim env ty1 Tint, is_sub_prim env ty2 Tint with
-        | (Some _, Some _) ->
-          make_result env te1 te2 (Reason.Rarith_ret p, Tprim Tint)
-        | _, _ ->
-          (* Either side is a non-int num then num *)
-          (* This has type
-           *   function(num, num): num
-           *)
-          match is_sub_num_not_sub_int env ty1,
-                is_sub_num_not_sub_int env ty2 with
-          | (Some r, _) | (_, Some r) ->
-            make_result env te1 te2 (r, Tprim Tnum)
-          (* Otherwise? *)
-          | _, _ -> make_result env te1 te2 ty1
+    let env, t1 = check_num env p ty1 (Reason.Rarith p1) in
+    let env, t2 = check_num env p ty2 (Reason.Rarith p2) in
+    (* postcondition: t1 and t2 are dynamic or subtypes of num and
+      annotated as such *)
+    begin
+      match snd t1, snd t2 with
+      | Tprim Tint, Tprim Tint -> make_result env te1 te2 (Reason.Rarith_ret p, Tprim Tint)
+      | Tprim Tfloat, _ -> make_result env te1 te2 (fst t1, Tprim Tfloat)
+      | _, Tprim Tfloat -> make_result env te1 te2 (fst t2, Tprim Tfloat)
+      | Tprim Tnum, _ -> make_result env te1 te2 (fst t1, Tprim Tnum)
+      | _, Tprim Tnum -> make_result env te1 te2 (fst t2, Tprim Tnum)
+       (*TODO: should these reasons be Rarith_ret rather than Rarith?*)
+      | Tdynamic, Tdynamic -> make_result env te1 te2 (Reason.Rarith p, Tdynamic)
+        (*TODO: give better reason for 2 dynamics yielding dynamic*)
+      | _ -> make_result env te1 te2 (Reason.Rarith p, Tprim Tnum)
     end
-  | Ast.Slash | Ast.Starstar -> check_dynamic begin fun () ->
-      let env, ty1 = enforce_sub_ty env ty1 (Reason.Rarith p1, Tprim Tnum) in
-      let env, ty2 = enforce_sub_ty env ty2 (Reason.Rarith p2, Tprim Tnum) in
-      (* If either side is a float then float *)
-      (* These have types
-       *   function(float, num) : float
-       *   function(num, float) : float
-       * [Actually, for division result can be false if second arg is zero]
-       *)
-      match is_sub_prim env ty1 Tfloat, is_sub_prim env ty2 Tfloat with
-      | (Some r, _) | (_, Some r) ->
-        make_result env te1 te2 (r, Tprim Tfloat)
-      (* Otherwise it has type
-       *   function(num, num) : num
-       * [Actually, for division result can be false if second arg is zero]
-       *)
-      | _, _ ->
-      let r = match bop with
-        | Ast.Slash -> Reason.Rret_div p
-        | _ -> Reason.Rarith_ret p in
-      make_result env te1 te2 (r, Tprim Tnum)
+  | Ast.Minus | Ast.Star ->
+    let env, t1 = check_num env p ty1 (Reason.Rarith p1) in
+    let env, t2 = check_num env p ty2 (Reason.Rarith p2) in
+    (* postcondition: t1 and t2 are dynamic or subtypes of num and
+      annotated as such *)
+    begin
+      match snd t1, snd t2 with
+      | Tprim Tint, Tprim Tint -> make_result env te1 te2 (Reason.Rarith_ret p, Tprim Tint)
+      | Tprim Tfloat, _ -> make_result env te1 te2 (fst t1, Tprim Tfloat)
+      | _, Tprim Tfloat -> make_result env te1 te2 (fst t2, Tprim Tfloat)
+      | Tprim Tnum, _ -> make_result env te1 te2 (fst t1, Tprim Tnum)
+      | _, Tprim Tnum -> make_result env te1 te2 (fst t2, Tprim Tnum)
+      (*TODO: should this reason be Rarith_ret rather than Rarith?*)
+      | _ -> make_result env te1 te2 (Reason.Rarith p, Tprim Tnum)
     end
-  | Ast.Percent -> check_dynamic begin fun () ->
-     (* Integer remainder function has type
-      *   function(int, int) : int
-      * [Actually, result can be false if second arg is zero]
-      *)
-      let env, _ = enforce_sub_ty env ty1 (Reason.Rarith p1, Tprim Tint) in
-      let env, _ = enforce_sub_ty env ty2 (Reason.Rarith p1, Tprim Tint) in
-      make_result env te1 te2 (Reason.Rarith_ret p, Tprim Tint)
+  | Ast.Slash | Ast.Starstar ->
+    let env, t1 = check_num env p ty1 (Reason.Rarith p1) in
+    let env, t2 = check_num env p ty2 (Reason.Rarith p2) in
+    (* postcondition: t1 and t2 are dynamic or subtypes of num and
+      annotated as such *)
+    let r = match bop with
+      | Ast.Slash -> Reason.Rret_div p
+      | _ -> Reason.Rarith_ret p in
+    begin
+      match snd t1, snd t2 with
+      | Tprim Tfloat, _ -> make_result env te1 te2 (fst t1, Tprim Tfloat)
+      | _, Tprim Tfloat -> make_result env te1 te2 (fst t2, Tprim Tfloat)
+      | _ -> make_result env te1 te2 (r, Tprim Tnum)
     end
-  | Ast.Xor ->
-      if TUtils.is_dynamic env ty1 && TUtils.is_dynamic env ty2 then
-        make_result env te1 te2 (Reason.Rbitwise p, Tdynamic) else
-        begin match is_sub_prim env ty1 Tbool, is_sub_prim env ty2 Tbool with
-        | (Some _, _)
-        | (_, Some _) ->
-          (* Logical xor:
-           *   function(bool, bool) : bool
-           *)
-          let env, _ = if TUtils.is_dynamic env ty1 then env, ty1 else
-            enforce_sub_ty env ty1 (Reason.Rlogic_ret p1, Tprim Tbool) in
-          let env, _ = if TUtils.is_dynamic env ty2 then env, ty2 else
-            enforce_sub_ty env ty2 (Reason.Rlogic_ret p1, Tprim Tbool) in
-          make_result env te1 te2 (Reason.Rlogic_ret p, Tprim Tbool)
-        | _, _ ->
-          (* Arithmetic xor:
-           *   function(int, int) : int
-           *)
-          let env, _ = if TUtils.is_dynamic env ty1 then env, ty1 else
-            enforce_sub_ty env ty1 (Reason.Rarith p1, Tprim Tint) in
-          let env, _ = if TUtils.is_dynamic env ty2 then env, ty2 else
-            enforce_sub_ty env ty2 (Reason.Rarith p1, Tprim Tint) in
-          make_result env te1 te2 (Reason.Rarith_ret p, Tprim Tint)
-        end
-  (* Equality and disequality:
-   *   function<T>(T, T): bool
-   *)
+  | Ast.Percent | Ast.Ltlt | Ast.Gtgt ->
+    let env, _ = check_int env p ty1 (Reason.Rarith p1) in
+    let env, _ = check_int env p ty2 (Reason.Rarith p2) in
+    (* postcondition: t1 and t2 are dynamic or int and
+      annotated as such *)
+    let r = match bop with
+      | Ast.Percent -> Reason.Rarith_ret p
+      | _ -> Reason.Rbitwise_ret p in
+    make_result env te1 te2 (r, Tprim Tint)
+  | Ast.Xor | Ast.Amp | Ast.Bar ->
+    let env, t1 = check_int env p ty1 (Reason.Rbitwise p1) in
+    let env, t2 = check_int env p ty2 (Reason.Rbitwise p2) in
+    (* postcondition: t1 and t2 are dynamic or int and
+      annotated as such *)
+    begin
+      match snd t1, snd t2 with
+      | Tdynamic, Tdynamic -> make_result env te1 te2 (Reason.Rbitwise_ret p, Tdynamic)
+      | _ -> make_result env te1 te2 (Reason.Rbitwise_ret p, Tprim Tint)
+    end
   | Ast.Eqeq  | Ast.Diff  ->
       make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
   | Ast.EQeqeq | Ast.Diff2 ->
       make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
   | Ast.Lt | Ast.Lte | Ast.Gt | Ast.Gte | Ast.Cmp ->
       let ty_result = match bop with Ast.Cmp -> Tprim Tint | _ -> Tprim Tbool in
-      let ty_num = (Reason.Rcomp p, Tprim Nast.Tnum) in
-      let ty_string = (Reason.Rcomp p, Tprim Nast.Tstring) in
+      let ty_num = (Reason.Rcomp p, Tprim Tnum) in
+      let ty_string = (Reason.Rcomp p, Tprim Tstring) in
       let ty_datetime =
         (Reason.Rcomp p, Tclass ((p, SN.Classes.cDateTime), [])) in
       let ty_datetimeimmutable =
         (Reason.Rcomp p, Tclass ((p, SN.Classes.cDateTimeImmutable), [])) in
-      let both_sub tyl =
-        List.exists tyl ~f:(SubType.is_sub_type env ty1) &&
-        List.exists tyl ~f:(SubType.is_sub_type env ty2) in
+      let both_sub tyl = (*TODO: update to use subtyping on dynamic, not TUtils *)
+        (List.exists tyl ~f:(SubType.is_sub_type env ty1) || TUtils.is_dynamic env ty1)
+        && (List.exists tyl ~f:(SubType.is_sub_type env ty2) || TUtils.is_dynamic env ty2) in
       (* So we have three different types here:
        *   function(num, num): bool
        *   function(string, string): bool
        *   function(DateTime | DateTimeImmutable, DateTime | DateTimeImmutable): bool
        *)
       if not (both_sub [ty_num] || both_sub [ty_string] ||
-                both_sub [ty_datetime; ty_datetimeimmutable] ||
-                  TUtils.is_dynamic env ty1 || TUtils.is_dynamic env ty2)
+                both_sub [ty_datetime; ty_datetimeimmutable])
       then begin
         let ty1 = Typing_expand.fully_expand env ty1 in
         let ty2 = Typing_expand.fully_expand env ty2 in
@@ -5925,22 +5851,8 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
       let env = SubType.sub_string p1 env ty1 in
       let env = SubType.sub_string p2 env ty2 in
       make_result env te1 te2 (Reason.Rconcat_ret p, Tprim Tstring)
-  | Ast.LogXor
-  | Ast.AMpamp
-  | Ast.BArbar ->
+  | Ast.BArbar | Ast.AMpamp | Ast.LogXor ->
       make_result env te1 te2 (Reason.Rlogic_ret p, Tprim Tbool)
-  | Ast.Amp | Ast.Bar | Ast.Ltlt | Ast.Gtgt ->
-      (* If both are dynamic, we can only return dynamic *)
-      if TUtils.is_dynamic env ty1 && TUtils.is_dynamic env ty2 then
-        make_result env te1 te2 (Reason.Rbitwise_ret p, Tdynamic) else
-      (* Otherwise at least one of these is an int, so the result is an int *)
-      let env, _ = if TUtils.is_dynamic env ty1
-                   then env, ty1
-                   else enforce_sub_ty env ty1 (Reason.Rbitwise p1, Tprim Tint) in
-      let env, _ = if TUtils.is_dynamic env ty2
-                   then env, ty2 else
-                   enforce_sub_ty env ty2 (Reason.Rbitwise p2, Tprim Tint) in
-      make_result env te1 te2 (Reason.Rbitwise_ret p, Tprim Tint)
   | Ast.QuestionQuestion
   | Ast.Eq _ ->
       assert false

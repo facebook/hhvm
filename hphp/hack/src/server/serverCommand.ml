@@ -224,6 +224,7 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
             | None | Some FileInfo.Mphp -> "php"
             | Some FileInfo.Mdecl -> "decl"
             | Some FileInfo.Mpartial -> "partial"
+            | Some FileInfo.Mexperimental -> "experimental"
             | Some FileInfo.Mstrict -> "strict" in
           Printf.fprintf oc "%s\t%s\n" mode (Relative_path.to_absolute fn)
         | _ -> ()

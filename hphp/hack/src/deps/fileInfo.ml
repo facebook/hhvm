@@ -33,31 +33,35 @@ let string_of_file_type = function
   | HhFile  -> "hh"
 
 type mode =
-  | Mphp     (* Do the best you can to support legacy PHP *)
-  | Mdecl    (* just declare signatures, don't check anything *)
-  | Mstrict  (* check everything! *)
-  | Mpartial (* Don't fail if you see a function/class you don't know *)
+  | Mphp          (* Do the best you can to support legacy PHP *)
+  | Mdecl         (* just declare signatures, don't check anything *)
+  | Mstrict       (* check everything! *)
+  | Mpartial      (* Don't fail if you see a function/class you don't know *)
+  | Mexperimental (* Strict mode + experimental features *)
 [@@deriving show]
 
 let parse_mode = function
   | "strict" -> Some Mstrict
   | "decl" | "only-headers" -> Some Mdecl
   | "" | "partial" -> Some Mpartial
+  | "experimental" -> Some Mexperimental
   | _ -> None
 
 let string_of_mode = function
-  | Mphp     -> "php"
-  | Mdecl    -> "decl"
-  | Mstrict  -> "strict"
-  | Mpartial -> "partial"
+  | Mphp          -> "php"
+  | Mdecl         -> "decl"
+  | Mstrict       -> "strict"
+  | Mpartial      -> "partial"
+  | Mexperimental -> "experimental"
 
 let pp_mode fmt mode =
   Format.pp_print_string fmt @@
     match mode with
-    | Mphp     -> "Mphp"
-    | Mdecl    -> "Mdecl"
-    | Mstrict  -> "Mstrict"
-    | Mpartial -> "Mpartial"
+    | Mphp          -> "Mphp"
+    | Mdecl         -> "Mdecl"
+    | Mstrict       -> "Mstrict"
+    | Mpartial      -> "Mpartial"
+    | Mexperimental -> "Mexperimental"
 
 (*****************************************************************************)
 (* We define two types of positions establishing the location of a given name:

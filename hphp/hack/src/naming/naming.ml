@@ -343,7 +343,7 @@ end = struct
     match v with
     | None ->
       (match genv.in_mode with
-        | FileInfo.Mstrict -> unbound_name_error genv p x `const
+        | FileInfo.Mstrict | FileInfo.Mexperimental -> unbound_name_error genv p x `const
         | FileInfo.Mpartial | FileInfo.Mdecl when not
             (TypecheckerOptions.assume_php genv.tcopt) ->
           unbound_name_error genv p x `const
@@ -374,7 +374,7 @@ end = struct
               when TypecheckerOptions.assume_php genv.tcopt
               || name = SN.Classes.cUnknown -> ()
           | FileInfo.Mphp -> ()
-          | FileInfo.Mstrict -> unbound_name_error genv p name kind
+          | FileInfo.Mstrict | FileInfo.Mexperimental -> unbound_name_error genv p name kind
           | FileInfo.Mpartial | FileInfo.Mdecl ->
               unbound_name_error genv p name kind
         );
@@ -1746,7 +1746,7 @@ module Make (GetLocals : GetLocals) = struct
           N.fnb_nast = [];
           fnb_unsafe = true;
         }
-      | FileInfo.Mstrict | FileInfo.Mpartial ->
+      | FileInfo.Mstrict | FileInfo.Mpartial | FileInfo.Mexperimental ->
         N.UnnamedBody {
           N.fub_ast = m.m_body;
           fub_tparams = m.m_tparams;
@@ -1849,7 +1849,7 @@ module Make (GetLocals : GetLocals) = struct
           N.fnb_nast = [];
           fnb_unsafe = true;
         }
-      | FileInfo.Mstrict | FileInfo.Mpartial ->
+      | FileInfo.Mstrict | FileInfo.Mpartial | FileInfo.Mexperimental ->
         N.UnnamedBody {
           N.fub_ast = f.f_body;
           fub_tparams = f.f_tparams;

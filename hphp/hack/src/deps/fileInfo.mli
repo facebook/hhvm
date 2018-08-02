@@ -31,10 +31,11 @@ type file_type =
 val string_of_file_type : file_type -> string
 
 type mode =
-  | Mphp     (* Do the best you can to support legacy PHP *)
-  | Mdecl    (* just declare signatures, don't check anything *)
-  | Mstrict  (* check everything! *)
-  | Mpartial (* Don't fail if you see a function/class you don't know *)
+  | Mphp          (* Do the best you can to support legacy PHP *)
+  | Mdecl         (* just declare signatures, don't check anything *)
+  | Mstrict       (* check everything! *)
+  | Mpartial      (* Don't fail if you see a function/class you don't know *)
+  | Mexperimental (* Experimental mode - strict mode plus experimental features *)
 [@@deriving show]
 
 val parse_mode : string -> mode option

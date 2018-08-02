@@ -112,7 +112,7 @@ let check_consistent_fields x l =
 
 let unbound_name env (pos, name) =
   match Env.get_mode env with
-  | FileInfo.Mstrict ->
+  | FileInfo.Mstrict | FileInfo.Mexperimental ->
     (Errors.unbound_name_typing pos name;
     expr_error env pos (Reason.Rwitness pos))
 

@@ -159,7 +159,6 @@ let parse_options () =
   let allow_array_as_tuple = ref false in
   let allow_return_by_ref = ref false in
   let allow_array_cell_pass_by_ref = ref false in
-  let hacksperimental = ref false in
   let void_is_type_of_null = ref false in
   let parser = ref Legacy in
   let auto_namespace_map = ref [] in
@@ -326,9 +325,6 @@ let parse_options () =
     "--allow-array-cell-pass-by-ref",
         Arg.Set allow_array_cell_pass_by_ref,
         " Allow binding of array cells by reference as arguments to function calls";
-    "--hacksperimental",
-        Arg.Set hacksperimental,
-        " Enable experimental Hack features";
     "--void-is-type-of-null",
         Arg.Set void_is_type_of_null,
         " Make void the type of null";
@@ -364,8 +360,6 @@ let parse_options () =
         then !forbid_nullable_cast
         else if x = GlobalOptions.tco_experimental_disable_optional_and_unknown_shape_fields
         then !disable_optional_and_unknown_shape_fields
-        else if x = GlobalOptions.tco_hacksperimental
-        then !hacksperimental
         else if x = GlobalOptions.tco_experimental_reified_generics
         then not (!disallow_reified_generics)
         else if x = GlobalOptions.tco_experimental_void_is_type_of_null

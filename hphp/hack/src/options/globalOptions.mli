@@ -199,5 +199,4 @@ val tco_experimental_re_prefixed_strings : string
 val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t
-val tco_hacksperimental: string
 val forward_compatibility_level : t -> ForwardCompatibilityLevel.t

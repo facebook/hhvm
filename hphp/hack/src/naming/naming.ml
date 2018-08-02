@@ -792,11 +792,6 @@ end
  * phase.
  *)
 module Make (GetLocals : GetLocals) = struct
-  let hacksperimental (genv, _) =
-    let tcopt = genv.tcopt in
-    TypecheckerOptions.experimental_feature_enabled tcopt
-      GlobalOptions.tco_hacksperimental
-
   (************************************************************************)
   (* Naming of type hints *)
   (************************************************************************)
@@ -2038,7 +2033,7 @@ module Make (GetLocals : GetLocals) = struct
 
   and as_expr env aw =
     let handle_v ev = match ev with
-    | p, Id x when hacksperimental env ->
+    | p, Id x when (fst env).in_mode = FileInfo.Mexperimental ->
       let x = Env.new_let_local env x in
       let ev = (p, N.ImmutableVar x) in
       ev
@@ -2056,7 +2051,7 @@ module Make (GetLocals : GetLocals) = struct
     let handle_k ek = match ek with
     | p, Lvar x ->
       p, N.Lvar (Env.new_lvar env x)
-    | p, Id x when hacksperimental env ->
+    | p, Id x when (fst env).in_mode = FileInfo.Mexperimental ->
         p, N.ImmutableVar (Env.new_let_local env x)
     | p, _ ->
       Errors.expected_variable p;
@@ -2730,7 +2725,7 @@ module Make (GetLocals : GetLocals) = struct
     fun env ->
       (* If the variable does not begin with $, it is an immutable binding *)
       let x2 = if (snd x2) <> ""
-        && (snd x2).[0] = '$' (* This is always true if hacksperimental is off *)
+        && (snd x2).[0] = '$' (* This is always true if not in experimental mode *)
         then Env.new_lvar env x2
         else Env.new_let_local env x2
       in

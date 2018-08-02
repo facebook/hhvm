@@ -312,6 +312,9 @@ Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
   if (obj &&
       UNLIKELY(obj->getAttribute(ObjectData::HasDynPropArr)) &&
       obj->dynPropArray()->rval(property.get())) {
+    if (RuntimeOption::EvalNoticeOnReadDynamicProp) {
+      obj->raiseReadDynamicProp(property.get());
+    }
     return true;
   }
   auto const propInd = cls->lookupSProp(property.get());

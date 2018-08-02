@@ -474,7 +474,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
     bool immutable;
   };
 
-  template <bool forWrite>
+  template <bool forWrite, bool forRead>
   ALWAYS_INLINE
   PropLookup getPropImpl(const Class*, const StringData*);
 
@@ -534,8 +534,9 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   static void raiseObjToIntNotice(const char*);
   static void raiseObjToDoubleNotice(const char*);
   static void raiseAbstractClassError(Class*);
-  void raiseUndefProp(const StringData*);
-  void raiseCreateDynamicProp(const StringData*);
+  void raiseUndefProp(const StringData*) const;
+  void raiseCreateDynamicProp(const StringData*) const;
+  void raiseReadDynamicProp(const StringData*) const;
 
   static constexpr ptrdiff_t getVMClassOffset() {
     return offsetof(ObjectData, m_cls);

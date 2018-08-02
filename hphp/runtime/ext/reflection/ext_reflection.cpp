@@ -281,7 +281,7 @@ static void set_instance_prop_info(Array& ret,
 
 static void set_dyn_prop_info(
     Array &ret,
-    const Variant& name,
+    Cell name,
     const StringData* className) {
   ret.set(s_name, name);
   set_attrs(ret, get_modifiers(AttrPublic, false, true) & ~0x66);
@@ -1575,13 +1575,17 @@ static Array HHVM_METHOD(ReflectionClass, getDynamicPropertyInfos,
     return empty_array();
   }
 
-  auto const dynPropArrayData = obj_data->dynPropArray().get();
-  ArrayInit ret(dynPropArrayData->size(), ArrayInit::Mixed{});
-  for (ArrayIter it(dynPropArrayData); !it.end(); it.next()) {
+  auto const dynPropArray = obj_data->dynPropArray();
+  ArrayInit ret(dynPropArray->size(), ArrayInit::Mixed{});
+  IterateKV(dynPropArray.get(), [&](Cell k, TypedValue) {
+    if (RuntimeOption::EvalNoticeOnReadDynamicProp) {
+      auto const key = tvCastToString(k);
+      obj_data->raiseReadDynamicProp(key.get());
+    }
     Array info = Array::Create();
-    set_dyn_prop_info(info, it.first(), cls->name());
-    ret.setValidKey(*it.first().asTypedValue(), VarNR(info).tv());
-  }
+    set_dyn_prop_info(info, k, cls->name());
+    ret.setValidKey(k, VarNR(info).tv());
+  });
   return ret.toArray();
 }
 
@@ -1770,6 +1774,9 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
     assertx(cls == obj->getVMClass());
     if (obj->getAttribute(ObjectData::HasDynPropArr) &&
         obj->dynPropArray().exists(prop_name)) {
+      if (RuntimeOption::EvalNoticeOnReadDynamicProp) {
+        obj->raiseReadDynamicProp(prop_name.get());
+      }
       data->setDynamicProp();
       this_->setProp(nullptr, s_class.get(),
                      make_tv<KindOfPersistentString>(cls->name()));

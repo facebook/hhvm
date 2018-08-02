@@ -106,10 +106,12 @@ std::string Type::toString() const {
  * control which implementation gets returned.
  */
 
-std::unique_ptr<TypeParser> TypeParser::make(const std::string& filename) {
+std::unique_ptr<TypeParser> TypeParser::make(const std::string& filename,
+                                             int num_threads) {
 #if defined(__linux__) || defined(__FreeBSD__)
-  std::unique_ptr<TypeParser> make_dwarf_type_parser(const std::string&);
-  return make_dwarf_type_parser(filename);
+  std::unique_ptr<TypeParser> make_dwarf_type_parser(const std::string&,
+                                                     int);
+  return make_dwarf_type_parser(filename, num_threads);
 #else
   return nullptr;
 #endif

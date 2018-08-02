@@ -167,7 +167,7 @@ struct Scope {
  */
 
 struct TypeParserImpl : TypeParser {
-  explicit TypeParserImpl(const std::string& filename);
+  explicit TypeParserImpl(const std::string& filename, int num_threads);
 
   Object getObject(ObjectTypeKey key) override;
 
@@ -265,11 +265,7 @@ ObjectTypeName Scope::name() const {
   return ObjectTypeName{std::move(str), linkage()};
 }
 
-// Number of threads to use for building up state. More isn't necessarily
-// better.
-constexpr size_t kNumThreads = 24;
-
-TypeParserImpl::TypeParserImpl(const std::string& filename)
+TypeParserImpl::TypeParserImpl(const std::string& filename, int num_threads)
   : m_dwarf{filename}
 {
   // Processing each compiliation unit is very expensive, as it involves walking
@@ -387,7 +383,7 @@ TypeParserImpl::TypeParserImpl(const std::string& filename)
   // Fire up the thread pool
   Context context{filename, m_states, m_state_map};
   HPHP::JobQueueDispatcher<Worker> dispatcher{
-    kNumThreads, kNumThreads, 0, false, &context
+    num_threads, num_threads, 0, false, &context
   };
   dispatcher.start();
 
@@ -1864,8 +1860,8 @@ private:
 }
 
 std::unique_ptr<TypeParser>
-make_dwarf_type_parser(const std::string& filename) {
-  return std::make_unique<TypeParserImpl>(filename);
+make_dwarf_type_parser(const std::string& filename, int num_threads) {
+  return std::make_unique<TypeParserImpl>(filename, num_threads);
 }
 
 std::unique_ptr<Printer> make_dwarf_printer(const std::string& filename) {

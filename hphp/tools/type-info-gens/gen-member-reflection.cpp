@@ -129,6 +129,8 @@ void generate_entry(const Object& object, std::ostream& o,
     << "  }";
 }
 
+size_t NumThreads = 24;
+
 void generate(const std::string& source_executable, std::ostream& o) {
   o << "#include <string>\n";
   o << "#include <unordered_map>\n\n";
@@ -148,7 +150,7 @@ void generate(const std::string& source_executable, std::ostream& o) {
 #undef X
     };
 
-    auto const parser = TypeParser::make(source_executable);
+    auto const parser = TypeParser::make(source_executable, NumThreads);
     auto first = true;
 
     parser->forEachObject(
@@ -194,7 +196,8 @@ int main(int argc, char** argv) {
        "filename to read debug-info from")
     ("output_file",
        po::value<std::string>()->required(),
-       "filename of generated code");
+       "filename of generated code")
+    ("num_threads", po::value<int>(), "number of parallel threads");
 
   try {
     po::variables_map vm;
@@ -204,6 +207,16 @@ int main(int argc, char** argv) {
       std::cout << kProgramDescription << "\n\n"
                 << desc << std::endl;
       return 1;
+    }
+
+    if (vm.count("num_threads")) {
+      auto n = vm["num_threads"].as<int>();
+      if (n > 0) {
+        NumThreads = n;
+      } else {
+        std::cerr << "\nIllegal num_threads=" << n << "\n";
+        return 1;
+      }
     }
 
     po::notify(vm);

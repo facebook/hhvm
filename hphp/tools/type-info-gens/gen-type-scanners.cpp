@@ -629,7 +629,7 @@ Generator::Generator(const std::string& filename, bool skip) {
   // runtime.
   if (skip) return;
 
-  m_parser = TypeParser::make(filename);
+  m_parser = TypeParser::make(filename, NumThreads);
 
   tbb::concurrent_vector<ObjectType> indexer_types;
   tbb::concurrent_vector<ObjectType> collectable_markers;

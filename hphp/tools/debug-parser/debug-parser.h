@@ -481,7 +481,13 @@ struct TypeParser {
   // of the parser. Run the parser on the given filename, which may be an
   // executable or some form of object file. If the platform doesn't have a
   // supported debug info parser, this function will return null.
-  static std::unique_ptr<TypeParser> make(const std::string& filename);
+  // The number of threads controls parallelism when building up state if the
+  // implementation supports it. More isn't necessarily better, and the dwarf
+  // implementation will allocate memory proportional to the size of the input
+  // binary and the number of threads. If the binary is very large, it may
+  // exhaust memory resources in some systems.
+  static std::unique_ptr<TypeParser> make(const std::string& filename,
+                                          int num_threads);
 
   // Iterate over the list of all object types defined in the file. This is safe
   // to call from multiple threads concurrently.

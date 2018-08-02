@@ -6402,29 +6402,27 @@ and check_parent_sealed child_type parent_type =
   match parent_type.dc_sealed_whitelist with
     | None -> ()
     | Some whitelist ->
-      begin match child_type.tc_kind with
-        | Ast.Cabstract
-        | Ast.Cnormal
-        | Ast.Cinterface ->
-          if not (SSet.mem child_type.tc_name whitelist)
-          then begin
-            let error = Errors.extend_sealed
-              child_type.tc_pos parent_type.dc_pos parent_type.dc_name in
-            match parent_type.dc_kind, child_type.tc_kind with
-              | Ast.Cabstract, _
-              | Ast.Cnormal, _ -> error "class" "extend"
-              | Ast.Cinterface, Ast.Cinterface -> error "interface" "extend"
-              | Ast.Cinterface, _ -> error "interface" "implement"
-              | _ -> ()
-          end
-        | Ast.Ctrait ->
-          Errors.trait_implement_sealed
-            child_type.tc_pos parent_type.dc_pos parent_type.dc_name
-        | Ast.Cenum -> ()
+      let parent_pos = parent_type.dc_pos in
+      let parent_name = parent_type.dc_name in
+      let child_pos = child_type.tc_pos in
+      let child_name = child_type.tc_name in
+      let check kind action =
+        if not (SSet.mem child_name whitelist)
+        then Errors.extend_sealed child_pos parent_pos parent_name kind action in
+      begin match parent_type.dc_kind, child_type.tc_kind with
+        | Ast.Cinterface, Ast.Ctrait ->
+          Errors.trait_implement_sealed child_pos parent_pos parent_name
+        | Ast.Cinterface, Ast.Cinterface -> check "interface" "extend"
+        | Ast.Cinterface, _ -> check "interface" "implement"
+        | Ast.Ctrait, _ -> check "trait" "use"
+        | Ast.Cabstract, _
+        | Ast.Cnormal, _ -> check "class" "extend"
+        | Ast.Cenum, _ -> ()
       end
 
 and check_parents_sealed env child_def child_type =
-  List.iter (child_def.c_extends @ child_def.c_implements) begin function
+  let parents = child_def.c_extends @ child_def.c_implements @ child_def.c_uses in
+  List.iter parents begin function
     | _, Happly ((_, name), _) ->
       begin match Decl_env.get_class_dep env.Env.decl_env name with
         | Some parent_type -> check_parent_sealed child_type parent_type

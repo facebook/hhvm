@@ -1,2 +1,4 @@
+File "trait3.php", line 10, characters 16-16:
+You cannot use sealed trait T (Typing[4238])
 File "trait3.php", line 4, characters 7-7:
-A trait cannot be sealed (Typing[4245])
+Declaration is here

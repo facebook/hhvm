@@ -539,6 +539,8 @@ module WithParser(Parser : Parser_S) = struct
   let require_right_angle parser =
     require_token parser TokenKind.GreaterThan SyntaxError.error1013
 
+  let require_comma parser =
+    require_token parser TokenKind.Comma SyntaxError.error1054
 
   let require_right_bracket parser =
     require_token parser TokenKind.RightBracket SyntaxError.error1032

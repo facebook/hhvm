@@ -488,7 +488,7 @@ and parse_array_type_specifier parser =
     else
       let parser, left_angle = assert_token parser LessThan in
       let parser, key_type = parse_type_specifier parser in
-      let parser, comma = fetch_token parser in
+      let parser, comma = require_comma parser in
       let parser, value_type = parse_type_specifier parser in
       let parser, optional_comma = optional_token parser Comma in
       let parser, right_angle = require_right_angle parser in

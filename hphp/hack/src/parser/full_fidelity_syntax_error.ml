@@ -549,3 +549,6 @@ let shadowing_reified =
 let dollar_unary = "The dollar sign ('$') cannot be used as a unary operator"
 
 let decl_outside_global_scope = "Declarations are not supported outside global scope"
+
+let experimental_in_codegen_without_hacksperimental =
+  "Experimental mode files are not allowed during codegen unless the hacksperimental flag is set"

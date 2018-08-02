@@ -3213,6 +3213,14 @@ let parse_text
          | FileInfo.Mphp -> true
          | _ -> env.quick_mode
          ) } in
+  if mode = FileInfo.Mexperimental && env.codegen && (not env.hacksperimental) then begin
+    let e = SyntaxError.make 0 0 SyntaxError.experimental_in_codegen_without_hacksperimental in
+    let p =
+      SourceText.relative_pos env.file source_text
+        (Full_fidelity_syntax_error.start_offset e)
+        (Full_fidelity_syntax_error.end_offset e) in
+    raise @@ SyntaxError.ParserFatal (e, p)
+  end;
   let tree =
     let env' =
       Full_fidelity_parser_env.make

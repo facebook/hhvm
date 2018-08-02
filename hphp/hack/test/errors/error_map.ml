@@ -493,4 +493,5 @@ PPLMethPointer = 4272
 InvalidTruthinessTest = 4273
 RePrefixedNonString = 4274
 BadRegexPattern = 4275
+SketchyTruthinessTest = 4276
   |}]

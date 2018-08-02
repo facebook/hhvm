@@ -1517,7 +1517,7 @@ and sub_generic_params
   (ty_super: locl ty) : Env.env =
   let env, ety_super = Env.expand_type env ty_super in
   let env, ety_sub = Env.expand_type env ty_sub in
-  let fail _ =
+  let fail () =
     TUtils.uerror (fst ety_super) (snd ety_super) (fst ety_sub) (snd ety_sub);
     env in
   match ety_sub, ety_super with
@@ -1548,18 +1548,7 @@ and sub_generic_params
       let rec try_bounds tyl =
         match tyl with
         | [] ->
-          (* Try an implicit mixed = ?nonnull bound before giving up.
-             This can be useful when checking T <: t, where type t is
-             equivalent to but syntactically different from ?nonnull.
-             E.g., if t is a generic type parameter T with nonnull as
-             a lower bound.
-           *)
-          let r = Reason.Rimplicit_upper_bound (Reason.to_pos r_sub) in
-          let tmixed = (r, Toption (r, Tnonnull)) in
-          Errors.try_
-            (fun () ->
-              sub_generic_params seen env ~this_ty ~unwrappedToption_super tmixed ty_super)
-            fail
+          fail ()
 
         | ty::tyl ->
           Errors.try_

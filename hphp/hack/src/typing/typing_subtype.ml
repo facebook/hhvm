@@ -1377,16 +1377,9 @@ and sub_type_unwrapped_helper env ~this_ty
   (* If t1 <: ?t2, where t1 is guaranteed not to contain null, then
    * t1 <: t2, and the converse is obviously true as well.
    *)
-  | (_, (Tprim Nast.Tvoid | Tabstract (AKdependent _, None))),
+  | (_, (Tprim Nast.Tvoid | Tabstract ((AKdependent _ | AKnewtype _), None))),
     (_, Toption ty_super) ->
     sub_type_unwrapped env ~this_ty ~unwrappedToption_super:true ty_sub ty_super
-
-  | (r_sub, Tabstract (AKnewtype _ as ak, None)),
-    (_, Toption _) ->
-    let r = Reason.Rimplicit_upper_bound (Reason.to_pos r_sub) in
-    let ty = (r, Toption (r, Tnonnull)) in
-    let ty_sub' = (r_sub, Tabstract (ak, Some ty)) in
-    sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty_sub' ty_super
 
   (* If t1 <: ?t2 and t1 is an abstract type constrained as t1',
    * then t1 <: t2 or t1' <: ?t2.  The converse is obviously

@@ -72,7 +72,7 @@ class SetTVRecurseCommand(gdb.Command):
         elif argv[0] == 'false':
             _tv_recurse = False
         else:
-            print('Undefined item: "%s"'.format(argv[0]))
+            print('Undefined item: "{}"'.format(argv[0]))
 
 
 SetTVRecurseCommand()

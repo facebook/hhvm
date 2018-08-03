@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
 
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/array-kind-profile.h"
 #include "hphp/runtime/vm/jit/array-offset-profile.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
@@ -238,13 +239,19 @@ folly::Optional<GuardConstraint> simpleOpConstraint(SimpleOp op) {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Obtain the member base pointer.
+ * Load or store the member base pointer.
  *
  * Note that the LdMBase may get preOptimize'd away, or might have its type
  * refined, based on earlier tracked updates to the member base.
  */
 SSATmp* ldMBase(IRGS& env) {
-  return gen(env, LdMBase, TPtrToGen);
+  return gen(env, LdMBase, TLvalToGen);
+}
+void stMBase(IRGS& env, SSATmp* base) {
+  if (base->isA(TPtrToGen)) base = gen(env, ConvPtrToLval, base);
+  assert_flog(base->isA(TLvalToGen), "Unexpected mbase: {}", *base->inst());
+
+  gen(env, StMBase, base);
 }
 
 /*
@@ -272,13 +279,13 @@ SSATmp* tvRef2Ptr(IRGS& env) {
 SSATmp* ptrToInitNull(IRGS& env) {
   // Nothing is allowed to write anything to the init null variant, so this
   // inner type is always true.
-  return cns(env, Type::cns(&immutable_null_base, TPtrToOtherInitNull));
+  return cns(env, Type::cns(&immutable_null_base, TLvalToOtherInitNull));
 }
 
 SSATmp* ptrToUninit(IRGS& env) {
   // Nothing can write to the uninit null variant either, so the inner type
   // here is also always true.
-  return cns(env, Type::cns(&immutable_uninit_base, TPtrToOtherUninit));
+  return cns(env, Type::cns(&immutable_uninit_base, TLvalToOtherUninit));
 }
 
 bool baseMightPromote(const SSATmp* base) {
@@ -384,7 +391,7 @@ SSATmp* checkInitProp(IRGS& env,
                       bool doDefine) {
   assertx(key->isA(TStaticStr));
   assertx(baseAsObj->isA(TObj));
-  assertx(propAddr->type() <= TPtrToGen);
+  assertx(propAddr->type() <= TLvalToGen);
   assertx(!doWarn || !doDefine);
 
   auto const needsCheck = doWarn && propAddr->type().deref().maybe(TUninit);
@@ -439,7 +446,7 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
       env,
       LdPropAddr,
       ByteOffsetData { propInfo.offset },
-      typeFromRAT(propInfo.repoAuthType, curClass(env)).ptr(Ptr::Prop),
+      typeFromRAT(propInfo.repoAuthType, curClass(env)).lval(Ptr::Prop),
       base
     );
     return {
@@ -472,7 +479,7 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
         env,
         LdPropAddr,
         ByteOffsetData { propInfo.offset },
-        typeFromRAT(propInfo.repoAuthType, curClass(env)).ptr(Ptr::Prop),
+        typeFromRAT(propInfo.repoAuthType, curClass(env)).lval(Ptr::Prop),
         obj
       );
       return checkInitProp(env, obj, propAddr, key, doWarn, doDefine);
@@ -1162,7 +1169,7 @@ SSATmp* ratchetRefs(IRGS& env, SSATmp* base) {
       // Adjust base pointer.  Don't use 'tvRef2' here so that we don't reuse
       // the temp.  This will let us elide uses of the register for 'tvRef2',
       // until the Jmp we're going to emit here.
-      return tvRef2Ptr(env);
+      return gen(env, ConvPtrToLval, tvRef2Ptr(env));
     }
   );
 }
@@ -1196,7 +1203,7 @@ void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
   if (!name->isA(TStr)) PUNT(BaseG-non-string-name);
   auto base_mode = mode != MOpMode::Unset ? mode : MOpMode::None;
   auto gblPtr = gen(env, BaseG, MOpModeData{base_mode}, name);
-  gen(env, StMBase, gblPtr);
+  stMBase(env, gblPtr);
   setEmptyMIPropState(env, gblPtr, mode);
 }
 
@@ -1204,7 +1211,7 @@ void baseSImpl(IRGS& env, SSATmp* name, uint32_t clsRefSlot, MOpMode mode) {
   if (!name->isA(TStr)) PUNT(BaseS-non-string-name);
   auto const cls = takeClsRef(env, clsRefSlot);
   auto const spropPtr = ldClsPropAddr(env, cls, name, true);
-  gen(env, StMBase, spropPtr);
+  stMBase(env, spropPtr);
   setClsMIPropState(env, spropPtr, mode, cls, name);
 }
 
@@ -1388,7 +1395,7 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
         base->type(),
         key->type(),
         curClass(env)
-      ).first.ptr(Ptr::Elem);
+      ).first.lval(Ptr::Elem);
       return gen(env, LdPackedArrayDataElemAddr, elemType, base, key);
     }
     return invalid_key();
@@ -1406,7 +1413,7 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
           base->type(),
           key->type(),
           curClass(env)
-        ).first.ptr(Ptr::Elem);
+        ).first.lval(Ptr::Elem);
         return gen(env, LdPackedArrayDataElemAddr, elemType, base, key);
       },
       [&] { return ptrToInitNull(env); }
@@ -1732,7 +1739,7 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
 
   auto const baseLoc = [&]() -> folly::Optional<Location> {
     auto const basePtr = ldMBase(env);
-    auto const ptrInst = basePtr->inst();
+    auto const ptrInst = canonical(basePtr)->inst();
 
     switch (ptrInst->op()) {
       case LdLocAddr: {
@@ -1817,7 +1824,7 @@ void setNewElemPackedArrayDataImpl(IRGS& env, SSATmp* basePtr, Type baseType,
       auto const elemPtr = gen(
         env,
         LdPackedArrayDataElemAddr,
-        TPtrToElemUninit,
+        TLvalToElemUninit,
         base,
         offset
       );
@@ -1994,7 +2001,7 @@ void emitBaseSL(IRGS& env, int32_t locId, uint32_t slot, MOpMode mode) {
 
 void emitBaseL(IRGS& env, int32_t locId, MOpMode mode) {
   initTvRefs(env);
-  gen(env, StMBase, ldLocAddr(env, locId));
+  stMBase(env, ldLocAddr(env, locId));
 
   auto base = ldLoc(env, locId, makePseudoMainExit(env), DataTypeGeneric);
 
@@ -2014,7 +2021,7 @@ void emitBaseC(IRGS& env, uint32_t idx, MOpMode mode) {
 
   auto const bcOff = BCSPRelOffset{safe_cast<int32_t>(idx)};
   auto const irOff = offsetFromIRSP(env, bcOff);
-  gen(env, StMBase, ldStkAddr(env, bcOff));
+  stMBase(env, ldStkAddr(env, bcOff));
 
   auto base = top(env, bcOff);
   simpleBaseImpl(env, base, mode, Location::Stack { offsetFromFP(env, irOff) });
@@ -2031,7 +2038,7 @@ void emitBaseH(IRGS& env) {
   auto base = ldThis(env);
   auto scratchPtr = misLea(env, offsetof(MInstrState, tvTempBase));
   gen(env, StMem, scratchPtr, base);
-  gen(env, StMBase, scratchPtr);
+  stMBase(env, scratchPtr);
   env.irb->fs().setMemberBase(base);
   // Never write to MInstrPropState here since a base from BaseH will never
   // promote
@@ -2056,7 +2063,7 @@ void emitDim(IRGS& env, MOpMode mode, MemberKey mk) {
   }();
 
   newBase = ratchetRefs(env, newBase);
-  gen(env, StMBase, newBase);
+  stMBase(env, newBase);
 }
 
 void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {

@@ -83,6 +83,7 @@ bool canDCE(IRInstruction* inst) {
   case ConvIntToStr:
   case ConvClsToCctx:
   case DblAsBits:
+  case ConvPtrToLval:
   case NewColFromArray:
   case GtInt:
   case GteInt:

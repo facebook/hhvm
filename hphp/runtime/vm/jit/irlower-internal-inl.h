@@ -44,12 +44,16 @@ inline Vout& vcold(IRLS& env) { assertx(env.vcold); return *env.vcold; }
 
 inline Vlabel label(IRLS& env, Block* b) { return env.labels[b]; }
 
+inline Vloc tmpLoc(IRLS& env, const SSATmp* tmp) {
+  return env.locs[tmp];
+}
+
 inline Vloc srcLoc(IRLS& env, const IRInstruction* inst, unsigned i) {
-  return env.locs[inst->src(i)];
+  return tmpLoc(env, inst->src(i));
 }
 
 inline Vloc dstLoc(IRLS& env, const IRInstruction* inst, unsigned i) {
-  return env.locs[inst->dst(i)];
+  return tmpLoc(env, inst->dst(i));
 }
 
 inline ArgGroup argGroup(IRLS& env, const IRInstruction* inst) {
@@ -69,14 +73,15 @@ inline CallDest callDest(IRLS& env, const IRInstruction* inst) {
   assertx(inst->numDsts() == 1);
 
   auto const loc = dstLoc(env, inst, 0);
-  assertx(loc.numAllocated() == 1);
+  assertx(loc.numAllocated() == 1 ||
+          (inst->dst()->isA(TLvalToGen) && loc.numAllocated() == 2));
 
   auto const dst = inst->dst();
   auto const kind = dst->isA(TBool) ? DestType::Byte :
                     dst->isA(TDbl) ? DestType::Dbl :
                     DestType::SSA;
 
-  return { kind, dst->type(), loc.reg(0) };
+  return { kind, dst->type(), loc.reg(0), loc.reg(1) };
 }
 
 inline CallDest callDestTV(IRLS& env, const IRInstruction* inst) {

@@ -218,8 +218,6 @@ void cgCallNative(Vout& v, IRLS& env, const IRInstruction* inst) {
       case DestType::Byte:
       case DestType::Dbl:
         return callDest(env, inst);
-      case DestType::SSAPair:
-        always_assert(false && "SSAPair not implemented for cgCallNative");
     }
     not_reached();
   }();

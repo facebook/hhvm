@@ -227,17 +227,17 @@ Type thisTypeFromFunc(const Func* func) {
 namespace {
 
 Type unboxPtr(Type t) {
-  assertx(t <= TPtrToGen);
-  auto const pcell = t & TPtrToCell;
-  auto const pref = t & TPtrToBoxedInitCell;
-  return pref.deref().inner().ptr(Ptr::Ref) | pcell;
+  assertx(t <= TPtrToGen || t <= TLvalToGen);
+  auto const mcell = t & TMemToCell;
+  auto const mref = t & TMemToBoxedInitCell;
+  return mref.deref().inner().mem(t.memKind(), Ptr::Ref) | mcell;
 }
 
 Type boxPtr(Type t) {
-  assertx(t <= TPtrToGen);
+  assertx(t <= TPtrToGen || t <= TLvalToGen);
   auto const rawBoxed = t.deref().unbox().box();
   auto const noNull = rawBoxed - TBoxedUninit;
-  return noNull.ptr(t.ptrKind() - Ptr::Ref);
+  return noNull.mem(t.memKind(), t.ptrKind() - Ptr::Ref);
 }
 
 Type allocObjReturn(const IRInstruction* inst) {
@@ -432,6 +432,12 @@ Type memoKeyReturn(const IRInstruction* inst) {
   return TInt | TStr;
 }
 
+Type ptrToLvalReturn(const IRInstruction* inst) {
+  auto const ptr = inst->src(0)->type();
+  assertx(ptr <= TPtrToGen);
+  return ptr.deref().mem(Mem::Lval, ptr.ptrKind());
+}
+
 template <uint32_t...> struct IdxSeq {};
 
 inline Type unionReturn(const IRInstruction* /*inst*/, IdxSeq<>) {
@@ -455,8 +461,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DRefineS(n)     return inst->src(n)->type() & inst->typeParam();
 #define DParamMayRelax(t) return inst->typeParam();
 #define DParam(t)       return inst->typeParam();
-#define DParamPtr(k)    assertx(inst->typeParam() <= TGen.ptr(Ptr::k)); \
-                        return inst->typeParam();
 #define DLdObjCls {                                                \
   if (auto spec = inst->src(0)->type().clsSpec()) {                \
     auto const cls = spec.cls();                                   \
@@ -494,6 +498,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
                                TVec | TDict | TKeyset | TRes;
 #define DUnion(...)     return unionReturn(inst, IdxSeq<__VA_ARGS__>{});
 #define DMemoKey        return memoKeyReturn(inst);
+#define DLvalOfPtr      return ptrToLvalReturn(inst);
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -510,7 +515,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DRefineS
 #undef DParamMayRelax
 #undef DParam
-#undef DParamPtr
 #undef DLdObjCls
 #undef DUnboxPtr
 #undef DBoxPtr
@@ -536,6 +540,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DCns
 #undef DUnion
 #undef DMemoKey
+#undef DLvalOfPtr
 }
 
 }}

@@ -721,6 +721,7 @@ public:
   ConstCctx cctxVal() const;
   rds::Handle rdsHandleVal() const;
   jit::TCA tcaVal() const;
+  const TypedValue* ptrVal() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -842,11 +843,14 @@ public:
    * Get a pointer to, or dereference, a Type.
    *
    * @requires:
-   *    ptr:        *this <= Gen && kind <= Ptr::Ptr
+   *    ptr, lval:  *this <= Gen && kind <= Ptr::Ptr
+   *    mem:        *this <= Gen && kind <= Ptr::Ptr && mem <= Mem::Mem
    *    deref:      *this <= MemToGen
    *    derefIfPtr: *this <= (Gen | MemToGen)
    */
   Type ptr(Ptr kind) const;
+  Type lval(Ptr kind) const;
+  Type mem(Mem mem, Ptr kind) const;
   Type deref() const;
   Type derefIfPtr() const;
 
@@ -861,7 +865,6 @@ public:
   Ptr ptrKind() const;
   Mem memKind() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Internal methods.
 
@@ -869,7 +872,7 @@ private:
   /*
    * Internal constructors.
    */
-  Type(bits_t bits, Ptr ptr, Mem mem, uintptr_t extra);
+  Type(bits_t bits, Ptr ptr, Mem mem, bool hasConstVal, uintptr_t extra);
   Type(Type t, ArraySpec arraySpec);
   Type(Type t, ClassSpec classSpec);
 

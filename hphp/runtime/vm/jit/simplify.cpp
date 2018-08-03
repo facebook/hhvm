@@ -2460,14 +2460,14 @@ SSATmp* simplifyCeil(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyUnboxPtr(State& /*env*/, const IRInstruction* inst) {
-  if (inst->src(0)->isA(TPtrToCell)) {
+  if (inst->src(0)->isA(TMemToCell)) {
     return inst->src(0);
   }
   return nullptr;
 }
 
 SSATmp* simplifyBoxPtr(State& /*env*/, const IRInstruction* inst) {
-  if (inst->src(0)->isA(TPtrToBoxedCell)) {
+  if (inst->src(0)->isA(TMemToBoxedCell)) {
     return inst->src(0);
   }
   return nullptr;

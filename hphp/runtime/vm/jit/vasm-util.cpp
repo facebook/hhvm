@@ -138,17 +138,17 @@ bool splitCriticalEdges(Vunit& unit) {
   return changed;
 }
 
-Vreg make_const(Vunit& unit, Type type) {
+Vloc make_const(Vunit& unit, Type type) {
   if (type.subtypeOfAny(TUninit, TInitNull)) {
     // Return undefined value.
-    return unit.makeConst(Vconst::Quad);
+    return Vloc{unit.makeConst(Vconst::Quad)};
   }
-  if (type <= TNullptr) return unit.makeConst(0);
+  if (type <= TNullptr) return Vloc{unit.makeConst(0)};
 
   assertx(type.hasConstVal());
-  if (type <= TBool) return unit.makeConst(type.boolVal());
-  if (type <= TDbl) return unit.makeConst(type.dblVal());
-  return unit.makeConst(type.rawVal());
+  if (type <= TBool) return Vloc{unit.makeConst(type.boolVal())};
+  if (type <= TDbl) return Vloc{unit.makeConst(type.dblVal())};
+  return Vloc{unit.makeConst(type.rawVal())};
 }
 
 //////////////////////////////////////////////////////////////////////

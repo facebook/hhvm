@@ -189,18 +189,6 @@ ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {
   return a1;
 }
 
-void setNewElem(TypedValue* base, Cell val, const MInstrPropState* pState) {
-  HPHP::SetNewElem<false>(base, &val, pState);
-}
-
-void setNewElemArray(TypedValue* base, Cell val) {
-  HPHP::SetNewElemArray(base, &val);
-}
-
-void setNewElemVec(TypedValue* base, Cell val) {
-  HPHP::SetNewElemVec(base, &val);
-}
-
 RefData* boxValue(TypedValue tv) {
   assertx(!isRefType(tv.m_type));
   if (tv.m_type == KindOfUninit) tv = make_tv<KindOfNull>();
@@ -988,9 +976,20 @@ void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key) {
 }
 
 namespace MInstrHelpers {
+void setNewElem(tv_lval base, Cell val, const MInstrPropState* pState) {
+  HPHP::SetNewElem<false>(base, &val, pState);
+}
+
+void setNewElemArray(tv_lval base, Cell val) {
+  HPHP::SetNewElemArray(base, &val);
+}
+
+void setNewElemVec(tv_lval base, Cell val) {
+  HPHP::SetNewElemVec(base, &val);
+}
 
 template <bool intishWarn>
-TypedValue setOpElem(TypedValue* base, TypedValue key,
+TypedValue setOpElem(tv_lval base, TypedValue key,
                      Cell val, SetOpOp op, const MInstrPropState* pState) {
   TypedValue localTvRef;
   auto result =
@@ -999,9 +998,9 @@ TypedValue setOpElem(TypedValue* base, TypedValue key,
   return cGetRefShuffle(localTvRef, result);
 }
 
-template TypedValue setOpElem<true>(TypedValue*, TypedValue, Cell, SetOpOp,
+template TypedValue setOpElem<true>(tv_lval, TypedValue, Cell, SetOpOp,
                                     const MInstrPropState*);
-template TypedValue setOpElem<false>(TypedValue*, TypedValue, Cell, SetOpOp,
+template TypedValue setOpElem<false>(tv_lval, TypedValue, Cell, SetOpOp,
                                      const MInstrPropState*);
 
 StringData* stringGetI(StringData* base, uint64_t x) {
@@ -1024,7 +1023,7 @@ uint64_t vectorIsset(c_Vector* vec, int64_t index) {
 }
 
 template <bool intishWarn>
-void bindElemC(TypedValue* base, TypedValue key, RefData* val,
+void bindElemC(tv_lval base, TypedValue key, RefData* val,
                const MInstrPropState* pState) {
   TypedValue localTvRef;
   auto elem = HPHP::ElemD<MOpMode::Define, true, intishWarn>(
@@ -1041,13 +1040,13 @@ void bindElemC(TypedValue* base, TypedValue key, RefData* val,
   tvBindRef(val, elem);
 }
 
-template void bindElemC<true>(TypedValue*, TypedValue, RefData*,
+template void bindElemC<true>(tv_lval, TypedValue, RefData*,
                               const MInstrPropState*);
-template void bindElemC<false>(TypedValue*, TypedValue, RefData*,
+template void bindElemC<false>(tv_lval, TypedValue, RefData*,
                                const MInstrPropState*);
 
 template <bool intishWarn>
-void setWithRefElem(TypedValue* base, TypedValue keyTV, TypedValue val,
+void setWithRefElem(tv_lval base, TypedValue keyTV, TypedValue val,
                     const MInstrPropState* pState) {
   TypedValue localTvRef;
   auto const keyC = tvToCell(keyTV);
@@ -1061,29 +1060,29 @@ void setWithRefElem(TypedValue* base, TypedValue keyTV, TypedValue val,
   }
 }
 
-template void setWithRefElem<true>(TypedValue*, TypedValue, TypedValue,
+template void setWithRefElem<true>(tv_lval, TypedValue, TypedValue,
                                    const MInstrPropState*);
-template void setWithRefElem<false>(TypedValue*, TypedValue, TypedValue,
+template void setWithRefElem<false>(tv_lval, TypedValue, TypedValue,
                                     const MInstrPropState*);
 
 template <bool intishWarn>
-TypedValue incDecElem(TypedValue* base, TypedValue key,
+TypedValue incDecElem(tv_lval base, TypedValue key,
                       IncDecOp op, const MInstrPropState* pState) {
   auto const result = HPHP::IncDecElem<intishWarn>(op, base, key, pState);
   assertx(!isRefType(result.m_type));
   return result;
 }
 
-template TypedValue incDecElem<true>(TypedValue*, TypedValue, IncDecOp,
+template TypedValue incDecElem<true>(tv_lval, TypedValue, IncDecOp,
                                      const MInstrPropState* pState);
-template TypedValue incDecElem<false>(TypedValue*, TypedValue, IncDecOp,
+template TypedValue incDecElem<false>(tv_lval, TypedValue, IncDecOp,
                                       const MInstrPropState* pState);
 
-void bindNewElem(TypedValue* base,
+void bindNewElem(tv_lval base,
                  RefData* val,
                  const MInstrPropState* pState) {
-  if (UNLIKELY(isHackArrayType(base->m_type))) {
-    throwRefInvalidArrayValueException(base->m_data.parr);
+  if (UNLIKELY(tvIsHackArray(base))) {
+    throwRefInvalidArrayValueException(HPHP::val(base).parr);
   }
 
   TypedValue localTvRef;

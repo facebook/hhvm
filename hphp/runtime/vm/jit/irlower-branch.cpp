@@ -21,8 +21,6 @@
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 
-#include "hphp/runtime/vm/resumable.h"
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
@@ -35,10 +33,12 @@
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-data.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/resumable.h"
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
@@ -267,11 +267,12 @@ void cgCheckInitMem(IRLS& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (!src->type().deref().maybe(TUninit)) return;
 
-  auto const ptr = srcLoc(env, inst, 0).reg();
+  auto const ptrLoc = srcLoc(env, inst, 0);
   auto& v = vmain(env);
 
   auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfUninit, ptr[TVOFF(m_type)]);
+  emitCmpTVType(v, sf, KindOfUninit, memTVTypePtr(src, ptrLoc));
+
   v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 

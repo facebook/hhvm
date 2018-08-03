@@ -654,7 +654,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   case CastMem:
   case CoerceMem: {
-    auto addr = inst->src(0);
+    auto addr = canonical(inst->src(0));
     if (!addr->inst()->is(LdLocAddr)) break;
     auto locId = addr->inst()->extra<LdLocAddr>()->locId;
     setValue(loc(locId), nullptr);
@@ -905,7 +905,7 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
   auto const isPM = cur().curFunc->isPseudoMain();
 
   auto const baseTmp = inst->src(minstrBaseIdx(inst->op()));
-  if (!baseTmp->type().maybe(TPtrToGen)) return;
+  if (!baseTmp->type().maybe(TLvalToGen)) return;
 
   auto const base = pointee(baseTmp);
   auto const mbase = cur().mbr.pointee;
@@ -949,7 +949,7 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
     // only to `l'.  Returns the base value type if `inst' had an effect.
     auto const apply_one = [&] (Location l, Ptr kind) -> folly::Optional<Type> {
       auto const oldTy = typeOf(l) & TGen;  // exclude TCls from ptr()
-      if (auto const ptrTy = effect_on(oldTy.ptr(kind))) {
+      if (auto const ptrTy = effect_on(oldTy.lval(kind))) {
         auto const baseTy = ptrTy->derefIfPtr();
         setType(l, baseTy <= TBoxedCell ? TBoxedInitCell : baseTy);
         return baseTy;

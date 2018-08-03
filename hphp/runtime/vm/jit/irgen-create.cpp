@@ -68,7 +68,7 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
       env,
       LdPropAddr,
       ByteOffsetData { (ptrdiff_t)rootCls->declPropOffset(idx) },
-      TInitNull.ptr(Ptr::Prop),
+      TInitNull.lval(Ptr::Prop),
       throwable
     );
   };

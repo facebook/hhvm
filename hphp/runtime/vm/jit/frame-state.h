@@ -162,7 +162,7 @@ using CSlotState = LocationState<LTag::CSlot>;
 struct MBRState {
   SSATmp* ptr{nullptr};
   AliasClass pointee{AEmpty}; // defaults to "invalid", not "Top"
-  Type ptrType{TPtrToGen};
+  Type ptrType{TLvalToGen};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -490,15 +490,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     }
   };
 
-  auto requireTypeParamPtr = [&] (Ptr kind) {
-    checkDst(inst->hasTypeParam(),
-      "Missing paramType for DParamPtr instruction");
-    if (inst->hasTypeParam()) {
-      checkDst(inst->typeParam() <= TGen.ptr(kind),
-               "Invalid paramType for DParamPtr instruction");
-    }
-  };
-
   auto checkVariadic = [&] (Type super) {
     for (; curSrc < inst->numSrcs(); ++curSrc) {
       auto const valid = (inst->src(curSrc)->type() <= super);
@@ -550,7 +541,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
                       requireTypeParam(Top);
 #define DParamMayRelax(t) requireTypeParam(t);
 #define DParam(t)         requireTypeParam(t);
-#define DParamPtr(k)   requireTypeParamPtr(Ptr::k);
 #define DUnion(...)    forEachSrcIdx(                                          \
                          [&](uint32_t idx) {                                   \
                            checkDst(idx < inst->numSrcs(), "invalid src num"); \
@@ -575,6 +565,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 #define DCtxCls
 #define DCns
 #define DMemoKey
+#define DLvalOfPtr
 
 #define O(opcode, dstinfo, srcinfo, flags) \
   case opcode: dstinfo srcinfo countCheck(); return true;
@@ -607,7 +598,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 #undef DRefineS
 #undef DParamMayRelax
 #undef DParam
-#undef DParamPtr
 #undef DLdObjCls
 #undef DUnboxPtr
 #undef DBoxPtr
@@ -627,7 +617,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 #undef DCns
 #undef DUnion
 #undef DMemoKey
-
+#undef DLvalOfPtr
   return true;
 }
 

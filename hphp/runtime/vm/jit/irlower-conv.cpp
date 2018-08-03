@@ -24,7 +24,6 @@
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
 
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
@@ -33,6 +32,7 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -538,6 +538,11 @@ void cgStrictlyIntegerConv(IRLS& env, const IRInstruction* inst) {
     SyncOptions::None,
     args
   );
+}
+
+void cgConvPtrToLval(IRLS& env, const IRInstruction* inst) {
+  static_assert(tv_lval::is_tv_ptr, "Copies single ptr");
+  vmain(env) << copy{srcLoc(env, inst, 0).reg(), dstLoc(env, inst, 0).reg()};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

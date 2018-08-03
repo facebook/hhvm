@@ -1741,6 +1741,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ProfileInstanceCheck:
   case Select:
   case LookupSPropSlot:
+  case ConvPtrToLval:
     return IrrelevantEffects {};
 
   case StClosureArg:

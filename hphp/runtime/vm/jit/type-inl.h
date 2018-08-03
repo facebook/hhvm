@@ -385,6 +385,7 @@ IMPLEMENT_CNS_VAL(TCls,        cls,  const Class*)
 IMPLEMENT_CNS_VAL(TCctx,       cctx, ConstCctx)
 IMPLEMENT_CNS_VAL(TTCA,        tca,  jit::TCA)
 IMPLEMENT_CNS_VAL(TRDSHandle,  rdsHandle,  rds::Handle)
+IMPLEMENT_CNS_VAL(TMemToGen,   ptr, const TypedValue*)
 
 #undef IMPLEMENT_CNS_VAL
 
@@ -542,7 +543,7 @@ inline Type Type::box() const {
 
 inline Type Type::inner() const {
   assertx(*this <= TBoxedCell);
-  return Type(m_bits >> kBoxShift, ptrKind(), memKind(), m_extra);
+  return Type(m_bits >> kBoxShift, ptrKind(), memKind(), false, m_extra);
 }
 
 inline Type Type::unbox() const {
@@ -551,18 +552,27 @@ inline Type Type::unbox() const {
 }
 
 inline Type Type::ptr(Ptr kind) const {
+  return mem(Mem::Ptr, kind);
+}
+
+inline Type Type::lval(Ptr kind) const {
+  return mem(Mem::Lval, kind);
+}
+
+inline Type Type::mem(Mem mem, Ptr ptr) const {
   assertx(*this <= TGen);
-  assertx(kind <= Ptr::Ptr);
+  assertx(ptr <= Ptr::Ptr);
+  assertx(mem <= Mem::Mem);
   // Enforce a canonical representation for Bottom.
   if (m_bits == kBottom) return TBottom;
-  return Type(m_bits, kind, Mem::Ptr).specialize(spec());
+  return Type(m_bits, ptr, mem).specialize(spec());
 }
 
 inline Type Type::deref() const {
   assertx(*this <= TMemToGen);
   if (m_bits == kBottom) return TBottom;
   auto const extra = isSpecialized() ? m_extra : 0;
-  return Type(m_bits, Ptr::NotPtr, Mem::NotMem, extra);
+  return Type(m_bits, Ptr::NotPtr, Mem::NotMem, false, extra);
 }
 
 inline Type Type::derefIfPtr() const {
@@ -585,11 +595,12 @@ inline Mem Type::memKind() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Private constructors.
 
-inline Type::Type(bits_t bits, Ptr ptr, Mem mem, uintptr_t extra)
+inline Type::Type(bits_t bits, Ptr ptr, Mem mem, bool hasConstVal,
+                  uintptr_t extra)
   : m_bits(bits)
   , m_ptr(ptr)
   , m_mem(mem)
-  , m_hasConstVal(false)
+  , m_hasConstVal(hasConstVal)
   , m_extra(extra)
 {
   assertx(checkValid());

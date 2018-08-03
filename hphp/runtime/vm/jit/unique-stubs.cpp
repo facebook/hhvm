@@ -157,7 +157,7 @@ Vinstr simplecall(Vout& v, F helper, Vreg arg, Vreg d1, Vreg d2) {
     v.makeVcallArgs({{arg}}),
     v.makeTuple({d1, d2}),
     Fixup{},
-    DestType::SSAPair
+    DestType::SSA
   };
 }
 

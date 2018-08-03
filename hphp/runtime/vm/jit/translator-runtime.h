@@ -90,9 +90,6 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key,
 ArrayData* dictAddElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
 ArrayData* dictAddElemStringKeyHelper(ArrayData* ad, StringData* key,
                                       TypedValue val);
-void setNewElem(TypedValue* base, Cell val, const MInstrPropState*);
-void setNewElemArray(TypedValue* base, Cell val);
-void setNewElemVec(TypedValue* base, Cell val);
 RefData* boxValue(TypedValue tv);
 ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2);
 /* Helper functions for conversion instructions that are too
@@ -223,21 +220,24 @@ void asTypeStructHelper(ArrayData*, Cell);
 [[noreturn]] void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key);
 
 namespace MInstrHelpers {
+void setNewElem(tv_lval base, Cell val, const MInstrPropState*);
+void setNewElemArray(tv_lval base, Cell val);
+void setNewElemVec(tv_lval base, Cell val);
 template<bool intishWarn>
-TypedValue setOpElem(TypedValue* base, TypedValue key, Cell val, SetOpOp op,
+TypedValue setOpElem(tv_lval base, TypedValue key, Cell val, SetOpOp op,
                      const MInstrPropState*);
 StringData* stringGetI(StringData*, uint64_t);
 uint64_t pairIsset(c_Pair*, int64_t);
 uint64_t vectorIsset(c_Vector*, int64_t);
 template <bool intishWarn>
-void bindElemC(TypedValue*, TypedValue, RefData*, const MInstrPropState*);
+void bindElemC(tv_lval, TypedValue, RefData*, const MInstrPropState*);
 template <bool intishWarn>
-void setWithRefElem(TypedValue*, TypedValue, TypedValue,
+void setWithRefElem(tv_lval, TypedValue, TypedValue,
                     const MInstrPropState*);
 template<bool intishWarn>
-TypedValue incDecElem(TypedValue* base, TypedValue key, IncDecOp op,
+TypedValue incDecElem(tv_lval base, TypedValue key, IncDecOp op,
                       const MInstrPropState*);
-void bindNewElem(TypedValue* base, RefData* val, const MInstrPropState*);
+void bindNewElem(tv_lval base, RefData* val, const MInstrPropState*);
 tv_lval elemVecID(tv_lval base, int64_t key);
 tv_lval elemVecIU(tv_lval base, int64_t key);
 }

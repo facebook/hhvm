@@ -48,7 +48,6 @@ TRACE_SET_MOD(hhir);
 #define DRefineS(n)    HasDest
 #define DParamMayRelax(t) HasDest
 #define DParam(t)      HasDest
-#define DParamPtr(k)   HasDest
 #define DLdObjCls      HasDest
 #define DUnboxPtr      HasDest
 #define DBoxPtr        HasDest
@@ -75,6 +74,7 @@ TRACE_SET_MOD(hhir);
 #define DCns           HasDest
 #define DUnion(...)    HasDest
 #define DMemoKey       HasDest
+#define DLvalOfPtr     HasDest
 
 namespace {
 template<Opcode op, uint64_t flags>
@@ -117,7 +117,6 @@ OpInfo g_opInfo[] = {
 #undef DRefineS
 #undef DParamMayRelax
 #undef DParam
-#undef DParamPtr
 #undef DLdObjCls
 #undef DUnboxPtr
 #undef DBoxPtr
@@ -144,6 +143,7 @@ OpInfo g_opInfo[] = {
 #undef DCns
 #undef DUnion
 #undef DMemoKey
+#undef DLvalOfPtr
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -619,6 +619,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvVecToDArr:
   case ConvVecToDict:
   case ConvVecToVArr:
+  case ConvPtrToLval:
   case CountArray:
   case CountArrayFast:
   case CountCollection:

@@ -99,7 +99,7 @@ void checkTypeMBase(IRGS& env, Type type, Offset dest, bool outerOnly) {
   auto exit = env.irb->guardFailBlock();
   if (exit == nullptr) exit = makeExit(env, dest);
 
-  auto const mbr = gen(env, LdMBase, TPtrToGen);
+  auto const mbr = gen(env, LdMBase, TLvalToGen);
 
   if (type <= TCell) {
     gen(env, CheckMBase, type, exit, mbr);
@@ -116,7 +116,7 @@ void checkTypeMBase(IRGS& env, Type type, Offset dest, bool outerOnly) {
   auto const innerType = env.irb->predictedMBaseInnerType();
   if (!outerOnly && innerType < TInitCell) {
     env.irb->constrainLocation(Location::MBase{}, DataTypeSpecific);
-    auto const basePtr = gen(env, LdMBase, TPtrToGen);
+    auto const basePtr = gen(env, LdMBase, TLvalToGen);
     auto const base = gen(env, LdMem, TBoxedInitCell, basePtr);
     gen(env, CheckRefInner, innerType, exit, base);
   }

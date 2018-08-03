@@ -64,6 +64,14 @@ struct CompactTaggedPtr {
     return reinterpret_cast<T*>(m_data & (-1ull >> 16));
   }
 
+  T* operator->() const {
+    return ptr();
+  }
+
+  explicit operator bool() const {
+    return ptr();
+  }
+
 private:
   uintptr_t m_data;
 

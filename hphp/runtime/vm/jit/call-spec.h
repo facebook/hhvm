@@ -67,9 +67,8 @@ namespace detail {
   T(unsigned long, TInt)         \
   T(unsigned long long, TInt)    \
   T(unsigned int, U(Int, RDSHandle)) \
-  /* tv_[rl]val will be TLvalToGen once we have proper JIT support for them */ \
-  T(tv_lval, TPtrToGen)          \
-  T(tv_rval, TPtrToGen)          \
+  T(tv_lval, TLvalToGen)         \
+  T(tv_rval, TLvalToGen)         \
   T(MInstrPropState*, U(MIPropSPtr, Nullptr))
 
 /*

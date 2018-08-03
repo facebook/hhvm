@@ -47,7 +47,6 @@ enum class DestType : uint8_t {
   None,      // return void (no valid registers)
   Indirect,  // return struct/object to the address in the first arg
   SSA,       // return a single-register value
-  SSAPair,   // return a pair of registers
   Byte,      // return a single-byte register value
   TV,        // return a TypedValue packed in two registers
   Dbl,       // return scalar double in a single FP register
@@ -233,6 +232,7 @@ struct ArgGroup {
         push_arg(ArgDesc(ArgDesc::Kind::Imm, 0)); // Push a dummy parameter
       }
     } else {
+      static_assert(tv_lval::is_tv_ptr, "Single arg pushed for tv_lval");
       push_arg(arg, s->type());
     }
     return *this;

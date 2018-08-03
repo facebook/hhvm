@@ -25,9 +25,9 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/type-profile.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/type-profile.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -147,9 +147,11 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgCheckTypeMem(IRLS& env, const IRInstruction* inst) {
-  auto const src = srcLoc(env, inst, 0).reg();
+  auto const src = inst->src(0);
+  auto const srcLoc = tmpLoc(env, src);
   emitTypeCheck(vmain(env), env, inst->typeParam(),
-                src[TVOFF(m_type)], src[TVOFF(m_data)], inst->taken());
+                memTVTypePtr(src, srcLoc), memTVValPtr(src, srcLoc),
+                inst->taken());
 }
 
 void cgCheckLoc(IRLS& env, const IRInstruction* inst) {

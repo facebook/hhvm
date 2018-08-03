@@ -224,20 +224,17 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
 
     case DestType::SSA:
     case DestType::Byte:
-      assertx(dests.size() == 1);
+      assertx(dests.size() == 1 || dests.size() == 2);
       assertx(dests[0].isValid());
 
-      // Copy the single-register result to dests[0].
-      v << copy{rret(0), dests[0]};
-      break;
-
-    case DestType::SSAPair:
-      assertx(dests.size() == 2);
-      assertx(dests[0].isValid());
-      assertx(dests[1].isValid());
-
-      // Copy the result pair to dests.
-      v << copy2{rret(0), rret(1), dests[0], dests[1]};
+      if (dests.size() == 1) {
+        // Copy the single-register result to dests[0].
+        v << copy{rret(0), dests[0]};
+      } else {
+        assertx(dests[1].isValid());
+        // Copy the result pair to dests.
+        v << copy2{rret(0), rret(1), dests[0], dests[1]};
+      }
       break;
 
     case DestType::Dbl:

@@ -30,6 +30,16 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+inline Vptr memTVTypePtr(SSATmp* ptr, Vloc loc) {
+  assertx(ptr->isA(TPtrToGen) || ptr->isA(TLvalToGen));
+  return loc.reg()[TVOFF(m_type)];
+}
+
+inline Vptr memTVValPtr(SSATmp* ptr, Vloc loc) {
+  assertx(ptr->isA(TPtrToGen) || ptr->isA(TLvalToGen));
+  return loc.reg()[TVOFF(m_data)];
+}
+
 inline void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vreg s1) {
   v << testbi{s0, s1, sf};
 }

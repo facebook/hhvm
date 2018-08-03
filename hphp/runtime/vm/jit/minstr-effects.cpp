@@ -116,7 +116,7 @@ bool MInstrEffects::supported(const IRInstruction* inst) {
 MInstrEffects::MInstrEffects(const Opcode rawOp, const Type origBase) {
   // Note: MInstrEffects wants to manipulate pointer types in some situations
   // for historical reasons.  We'll eventually change that.
-  bool const is_ptr = origBase <= TPtrToGen;
+  bool const is_ptr = origBase <= TLvalToGen;
   auto const basePtr = is_ptr ? origBase.ptrKind() : Ptr::Bottom;
   baseType = origBase.derefIfPtr();
 
@@ -132,7 +132,7 @@ MInstrEffects::MInstrEffects(const Opcode rawOp, const Type origBase) {
   getBaseType(rawOp, true, inner, baseValChanged);
 
   baseType = inner.box() | outer;
-  baseType = is_ptr ? baseType.ptr(basePtr) : baseType;
+  baseType = is_ptr ? baseType.lval(basePtr) : baseType;
 
   baseTypeChanged = baseType != origBase;
 

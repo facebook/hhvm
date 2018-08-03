@@ -84,6 +84,12 @@ public:
   using type_t = maybe_const_t<DataType>;
   using tv_t = maybe_const_t<TypedValue>;
 
+  /*
+   * This value should only be inspected in codegen that works directly with
+   * tv_lvals.
+   */
+  static constexpr bool is_tv_ptr = true;
+
   tv_val();
   /* implicit */ tv_val(tv_t* lval);
 

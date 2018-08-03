@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/ref-data.h"
 
-#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
@@ -36,6 +35,7 @@
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
@@ -225,13 +225,22 @@ void cgKillClsRef(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgLdMem(IRLS& env, const IRInstruction* inst) {
-  auto const ptr = srcLoc(env, inst, 0).reg();
-  loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), *ptr);
+  auto const ptr    = inst->src(0);
+  auto const ptrLoc = tmpLoc(env, ptr);
+  auto const dstLoc = tmpLoc(env, inst->dst());
+
+  loadTV(vmain(env), inst->dst()->type(), dstLoc,
+         memTVTypePtr(ptr, ptrLoc), memTVValPtr(ptr, ptrLoc));
 }
 
 void cgStMem(IRLS& env, const IRInstruction* inst) {
-  auto const ptr = srcLoc(env, inst, 0).reg();
-  storeTV(vmain(env), *ptr, srcLoc(env, inst, 1), inst->src(1));
+  auto const ptr    = inst->src(0);
+  auto const ptrLoc = tmpLoc(env, ptr);
+  auto const src    = inst->src(1);
+  auto const srcLoc = tmpLoc(env, src);
+
+  storeTV(vmain(env), src->type(), srcLoc,
+          memTVTypePtr(ptr, ptrLoc), memTVValPtr(ptr, ptrLoc));
 }
 
 void cgDbgTrashMem(IRLS& env, const IRInstruction* inst) {
@@ -370,6 +379,7 @@ IMPL_OPCODE_CALL(LdGblAddrDef)
 void cgLdPropAddr(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const obj = srcLoc(env, inst, 0).reg();
+  static_assert(tv_lval::is_tv_ptr, "Single-pointer lval");
   vmain(env) << lea{obj[inst->extra<LdPropAddr>()->offsetBytes], dst};
 }
 

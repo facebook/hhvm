@@ -66,8 +66,11 @@ void DebugTransport::shutdownOutputThread() {
   // message thread so that it exits.
   std::unique_lock<std::mutex> lock(m_outgoingMsgLock);
   m_terminating = true;
-  m_outgoingMessages.clear();
   m_outgoingMsgCondition.notify_all();
+}
+
+void DebugTransport::cleanupFd(int fd) {
+  close(fd);
 }
 
 void DebugTransport::shutdown() {
@@ -89,7 +92,7 @@ void DebugTransport::shutdown() {
   // Cleanup all fds.
   {
     Lock lock(m_mutex);
-    close(m_transportFd);
+    cleanupFd(m_transportFd);
     m_transportFd = -1;
   }
 }
@@ -186,12 +189,12 @@ void DebugTransport::processOutgoingMessages() {
       // Take a local copy of any messages waiting to be sent under the
       // lock and clear the queue.
       std::unique_lock<std::mutex> lock(m_outgoingMsgLock);
-      while (!m_terminating && m_outgoingMessages.size() == 0) {
-        m_outgoingMsgCondition.wait(lock);
-      }
-
       if (m_terminating) {
         return;
+      }
+
+      while (!m_terminating && m_outgoingMessages.size() == 0) {
+        m_outgoingMsgCondition.wait(lock);
       }
 
       messagesToSend = std::list<std::string>(m_outgoingMessages);

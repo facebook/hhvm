@@ -32,6 +32,7 @@ struct SocketTransport : public DebugTransport {
 
   void onClientDisconnected() override;
   bool clientConnected() const override;
+  void cleanupFd(int fd) override;
 
 private:
 
@@ -51,6 +52,7 @@ private:
   void stopConnectionThread();
 
   static void rejectClientWithMsg(int newFd, int abortFd);
+  static void shutdownSocket(int sockFd, int abortFd);
 
   mutable Mutex m_lock;
   bool m_terminating;

@@ -273,12 +273,19 @@ void SocketTransport::rejectClientWithMsg(int newFd, int abortFd) {
   refusedEvent["type"] = MessageTypeEvent;
   const char* refusedEventOutput = folly::toJson(refusedEvent).c_str();
   write(newFd, refusedEventOutput, strlen(refusedEventOutput) + 1);
+  shutdownSocket(newFd, abortFd);
+}
 
+void SocketTransport::cleanupFd(int fd) {
+  shutdownSocket(fd, m_abortPipeFd[0]);
+}
+
+void SocketTransport::shutdownSocket(int sockFd, int abortFd) {
   // Perform an orderly shutdown of the socket so that the message is actually
   // sent and received. This requires us to shutdown the write end of the socket
   // and then drain the receive buffer before closing the socket. If abortFd
   // is signalled before this is complete, we just close the socket and bail.
-  ::shutdown(newFd, SHUT_WR);
+  ::shutdown(sockFd, SHUT_WR);
 
   int result;
   size_t size = sizeof(struct pollfd) * 2;
@@ -289,7 +296,7 @@ void SocketTransport::rejectClientWithMsg(int newFd, int abortFd) {
       free(fds);
     }
 
-    close(newFd);
+    close(sockFd);
 
     if (buffer != nullptr) {
       free(buffer);
@@ -307,7 +314,7 @@ void SocketTransport::rejectClientWithMsg(int newFd, int abortFd) {
   memset(fds, 0, size);
   fds[abortIdx].fd = abortFd;
   fds[abortIdx].events = eventMask;
-  fds[readIdx].fd = newFd;
+  fds[readIdx].fd = sockFd;
   fds[readIdx].events = eventMask;
 
   while (true) {
@@ -322,7 +329,7 @@ void SocketTransport::rejectClientWithMsg(int newFd, int abortFd) {
 
       break;
     } else if (fds[readIdx].revents & POLLIN) {
-      result = read(newFd, buffer, 1024);
+      result = read(sockFd, buffer, 1024);
       if (result <= 0) {
         break;
       }

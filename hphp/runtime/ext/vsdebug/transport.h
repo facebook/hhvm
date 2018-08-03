@@ -41,6 +41,7 @@ struct DebugTransport {
   }
 
   virtual void shutdown();
+  virtual void cleanupFd(int fd);
 
   // Enqueues an outgoing message to be sent to the client. This routine will
   // put the message into the outgoing message queue and then return. A worker

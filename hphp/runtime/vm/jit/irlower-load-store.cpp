@@ -306,12 +306,20 @@ void cgLdMIPropStateAddr(IRLS& env, const IRInstruction* inst) {
 
 void cgLdMBase(IRLS& env, const IRInstruction* inst) {
   auto const off = rds::kVmMInstrStateOff + offsetof(MInstrState, base);
-  vmain(env) << load{rvmtl()[off], dstLoc(env, inst, 0).reg()};
+  auto const dstLoc = irlower::dstLoc(env, inst, 0);
+  vmain(env) << load{rvmtl()[off], dstLoc.reg(0)};
+  if (wide_tv_val) {
+    vmain(env) << load{rvmtl()[off + sizeof(intptr_t)], dstLoc.reg(1)};
+  }
 }
 
 void cgStMBase(IRLS& env, const IRInstruction* inst) {
   auto const off = rds::kVmMInstrStateOff + offsetof(MInstrState, base);
-  vmain(env) << store{srcLoc(env, inst, 0).reg(), rvmtl()[off]};
+  auto const srcLoc = irlower::srcLoc(env, inst, 0);
+  vmain(env) << store{srcLoc.reg(0), rvmtl()[off]};
+  if (wide_tv_val) {
+    vmain(env) << store{srcLoc.reg(1), rvmtl()[off + sizeof(intptr_t)]};
+  }
 }
 
 void cgStMIPropState(IRLS& env, const IRInstruction* inst) {
@@ -377,10 +385,17 @@ void cgLdGblAddr(IRLS& env, const IRInstruction* inst) {
 IMPL_OPCODE_CALL(LdGblAddrDef)
 
 void cgLdPropAddr(IRLS& env, const IRInstruction* inst) {
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const obj = srcLoc(env, inst, 0).reg();
-  static_assert(tv_lval::is_tv_ptr, "Single-pointer lval");
-  vmain(env) << lea{obj[inst->extra<LdPropAddr>()->offsetBytes], dst};
+  auto& v = vmain(env);
+  auto const dstLoc = irlower::dstLoc(env, inst, 0);
+  auto const valReg = dstLoc.reg(tv_lval::val_idx);
+  auto const propPtr =
+    srcLoc(env, inst, 0).reg()[inst->extra<LdPropAddr>()->offsetBytes];
+
+  v << lea{propPtr, valReg};
+  if (wide_tv_val) {
+    static_assert(TVOFF(m_data) == 0, "");
+    v << lea{propPtr + TVOFF(m_type), dstLoc.reg(tv_lval::type_idx)};
+  }
 }
 
 IMPL_OPCODE_CALL(LdClsPropAddrOrNull)

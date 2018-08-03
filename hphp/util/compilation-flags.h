@@ -63,6 +63,14 @@ constexpr bool one_bit_refcount =
 #endif
   ;
 
+constexpr bool wide_tv_val =
+#ifdef HHVM_WIDE_TV_VAL
+  true
+#else
+  false
+#endif
+  ;
+
 constexpr bool facebook =
 #ifdef FACEBOOK
   true

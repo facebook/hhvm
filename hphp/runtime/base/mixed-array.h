@@ -151,7 +151,10 @@ struct MixedArrayElm {
     return offsetof(MixedArrayElm, ikey);
   }
   static constexpr ptrdiff_t dataOff() {
-    return offsetof(MixedArrayElm, data);
+    return offsetof(MixedArrayElm, data) + offsetof(TypedValue, m_data);
+  }
+  static constexpr ptrdiff_t typeOff() {
+    return offsetof(MixedArrayElm, data) + offsetof(TypedValue, m_type);
   }
   static constexpr ptrdiff_t hashOff() {
     return offsetof(MixedArrayElm, data) + offsetof(TypedValue, m_aux);

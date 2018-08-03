@@ -22,7 +22,7 @@
     !defined(_MSC_VER)
 
         .file     "hphp/runtime/base/hash-table-x64.S"
-.macro implement_nvgetstr MANGLED_NAME SCALE DATA ELM_HASH ELM_KEY ELM_DATA ELM_QUADWORDS
+.macro implement_nvgetstr MANGLED_NAME SCALE DATA ELM_HASH ELM_KEY ELM_DATA ELM_TYPE ELM_QUADWORDS
 ETCH_SECTION(\MANGLED_NAME)
         .globl   \MANGLED_NAME
 
@@ -114,7 +114,12 @@ ETCH_LABEL(cmphash\MANGLED_NAME):
         cmp       %rsi, %r11            // Same pointer?
         jne       ETCH_LABEL(cmplength\MANGLED_NAME)
 ETCH_LABEL(found\MANGLED_NAME):
+#ifdef HHVM_WIDE_TV_VAL
+        lea       \ELM_TYPE(%r8), %rax
+        lea       \ELM_DATA(%r8), %rdx
+#else
         lea       \ELM_DATA(%r8), %rax
+#endif
         pop       %rbx
         pop       %rbp
         ret
@@ -125,6 +130,9 @@ ETCH_LABEL(fail\MANGLED_NAME):
  */
         jnp       ETCH_LABEL(nextprobe\MANGLED_NAME) // Tombstone
         xor       %eax, %eax
+#ifdef HHVM_WIDE_TV_VAL
+        xor       %edx, %edx
+#endif
         pop       %rbx
         pop       %rbp
         ret
@@ -164,7 +172,12 @@ ETCH_LABEL(tail\MANGLED_NAME):                       // assert(ecx >= 0)
         pop       %rdi
         jnz       ETCH_LABEL(nextprobe\MANGLED_NAME)
 
+#ifdef HHVM_WIDE_TV_VAL
+        lea       \ELM_TYPE(%r8), %rax
+        lea       \ELM_DATA(%r8), %rdx
+#else
         lea       \ELM_DATA(%r8), %rax
+#endif
         pop       %rbx
         pop       %rbp
         ret
@@ -174,7 +187,7 @@ ETCH_LABEL(tail\MANGLED_NAME):                       // assert(ecx >= 0)
 .endm
 
 #define IMPLEMENT_NV_GET_STR(MangledName, ArrayType, ElmType) \
-  implement_nvgetstr MangledName ArrayType ## _SCALE ArrayType ## _DATA ElmType ## _HASH ElmType ## _KEY  ElmType ## _DATA ElmType ## _QUADWORDS
+  implement_nvgetstr MangledName ArrayType ## _SCALE ArrayType ## _DATA ElmType ## _HASH ElmType ## _KEY  ElmType ## _DATA ElmType ## _TYPE ElmType ## _QUADWORDS
 
 IMPLEMENT_NV_GET_STR(_ZN4HPHP5array9HashTableINS_10MixedArrayENS_13MixedArrayElmEE8NvGetStrEPKNS_9ArrayDataEPKNS_10StringDataE, MixedArray, MixedArrayElm)
 

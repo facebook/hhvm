@@ -26,25 +26,30 @@ inline tv_val<is_const, tag_t>::tv_val()
 {}
 
 template<bool is_const, typename tag_t>
-inline tv_val<is_const, tag_t>::tv_val(tv_t* lval)
-  : m_tv{lval}
+inline tv_val<is_const, tag_t>::tv_val(type_t* type, value_t* val)
+  : m_s{type, val}
+{}
+
+template<bool is_const, typename tag_t>
+inline tv_val<is_const, tag_t>::tv_val(tv_t* tv)
+  : tv_val{&tv->m_type, &tv->m_data}
 {}
 
 template<bool is_const, typename tag_t>
 template<typename Tag>
 inline tv_val<is_const, tag_t>::tv_val(
     tv_val<is_const> lval, with_tag_t<Tag> t
-) : m_tv{t, lval.m_tv}
+) : m_s{lval.m_s.type(), lval.m_s.val(), t}
 {}
 
 template<bool is_const, typename tag_t>
 inline bool tv_val<is_const, tag_t>::operator==(tv_val other) const {
-  return m_tv == other.m_tv;
+  return m_s == other.m_s;
 }
 
 template<bool is_const, typename tag_t>
 inline bool tv_val<is_const, tag_t>::is_set() const {
-  return m_tv;
+  return m_s.val();
 }
 
 template<bool is_const, typename tag_t>
@@ -64,24 +69,26 @@ inline bool tv_val<is_const, tag_t>::operator!=(std::nullptr_t) const {
 
 template<bool is_const, typename tag_t>
 inline tv_val<is_const, tag_t>::operator tv_val<true>() const {
-  return tv_val<true>{m_tv};
+  return tv_val<true>{m_s.type(), m_s.val()};
 }
 
 template<bool is_const, typename tag_t>
 inline tv_val<false> tv_val<is_const, tag_t>::as_lval() const {
-  return tv_val<false>{const_cast<TypedValue*>(m_tv)};
+  return tv_val<false>{
+    const_cast<DataType*>(m_s.type()), const_cast<Value*>(m_s.val())
+  };
 }
 
 template<bool is_const, typename tag_t>
 inline auto tv_val<is_const, tag_t>::val() const -> value_t& {
   assertx(is_set());
-  return m_tv->m_data;
+  return *m_s.val();
 }
 
 template<bool is_const, typename tag_t>
 inline auto tv_val<is_const, tag_t>::type() const -> type_t& {
   assertx(is_set());
-  return m_tv->m_type;
+  return *m_s.type();
 }
 
 template<bool is_const, typename tag_t>
@@ -99,14 +106,14 @@ inline TypedValue tv_val<is_const, tag_t>::operator*() const {
 template<bool is_const, typename tag_t>
 template<typename Tag>
 inline auto tv_val<is_const, tag_t>::tag() const -> with_tag_t<Tag> {
-  return m_tv.tag();
+  return m_s.tag();
 }
 
 template<bool is_const, typename tag_t>
 template<typename Tag>
 inline auto tv_val<is_const, tag_t>::drop_tag() const ->
   with_tag_t<Tag, tv_val<is_const>> {
-  return tv_val<is_const>{m_tv.ptr()};
+  return tv_val<is_const>{m_s.type(), m_s.val()};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

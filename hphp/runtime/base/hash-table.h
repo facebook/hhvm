@@ -33,6 +33,7 @@
   static_assert(ElmType::keyOff() == ElmType ## _KEY, ""); \
   static_assert(ElmType::hashOff() == ElmType ## _HASH, ""); \
   static_assert(ElmType::dataOff() == ElmType ## _DATA, ""); \
+  static_assert(ElmType::typeOff() == ElmType ## _TYPE, ""); \
   static_assert(sizeof(ElmType) == ElmType ## _QUADWORDS * 8, "");
 
 #else

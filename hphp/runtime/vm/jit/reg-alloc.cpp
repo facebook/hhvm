@@ -26,6 +26,8 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
 
+#include "hphp/runtime/base/packed-array.h"
+
 #include "hphp/util/arch.h"
 
 #include <boost/dynamic_bitset.hpp>
@@ -57,9 +59,11 @@ bool loadsCell(const IRInstruction& inst) {
 
   switch (inst.op()) {
   case LdMem:
+    return arch_allows && (!wide_tv_val || inst.src(0)->isA(TPtrToGen));
+
   case LdVecElem:
   case LdPackedElem:
-    static_assert(tv_lval::is_tv_ptr, "");
+    static_assert(PackedArray::stores_typed_values, "");
     return arch_allows;
 
   case LdStk:

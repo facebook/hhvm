@@ -46,7 +46,7 @@ namespace NativeCalls { struct CallInfo; }
 enum class DestType : uint8_t {
   None,      // return void (no valid registers)
   Indirect,  // return struct/object to the address in the first arg
-  SSA,       // return a single-register value
+  SSA,       // return an SSA value in 1 or 2 integer registers
   Byte,      // return a single-byte register value
   TV,        // return a TypedValue packed in two registers
   Dbl,       // return scalar double in a single FP register
@@ -222,21 +222,7 @@ struct ArgGroup {
     return *this;
   }
 
-  ArgGroup& ssa(int i, bool allowFP = true) {
-    auto s = m_inst->src(i);
-    ArgDesc arg(s, m_locs[s]);
-    if (s->isA(TDbl) && allowFP) {
-      push_SIMDarg(arg, s->type());
-      if (arch() == Arch::PPC64) {
-        // PPC64 ABIv2 compliant: reserve the aligned GP if FP is used
-        push_arg(ArgDesc(ArgDesc::Kind::Imm, 0)); // Push a dummy parameter
-      }
-    } else {
-      static_assert(tv_lval::is_tv_ptr, "Single arg pushed for tv_lval");
-      push_arg(arg, s->type());
-    }
-    return *this;
-  }
+  ArgGroup& ssa(int i, bool allowFP = true);
 
   /*
    * Pass tmp as a TypedValue passed by value.

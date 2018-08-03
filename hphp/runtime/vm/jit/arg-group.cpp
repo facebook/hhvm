@@ -80,17 +80,41 @@ ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+ArgGroup& ArgGroup::ssa(int i, bool allowFP) {
+  auto s = m_inst->src(i);
+  ArgDesc arg(s, m_locs[s]);
+  if (s->isA(TDbl) && allowFP) {
+    push_SIMDarg(arg, s->type());
+    if (arch() == Arch::PPC64) {
+      // PPC64 ABIv2 compliant: reserve the aligned GP if FP is used
+      push_arg(ArgDesc(ArgDesc::Kind::Imm, 0)); // Push a dummy parameter
+    }
+  } else {
+    if (wide_tv_val && s->isA(TLvalToGen)) {
+      // If there's exactly one register argument slot left, the whole tv_lval
+      // goes on the stack instead of being split between a register and the
+      // stack.
+      if (m_gpArgs.size() == num_arg_regs() - 1) m_override = &m_stkArgs;
+      SCOPE_EXIT { m_override = nullptr; };
+
+      push_arg(arg, s->type());
+      push_arg(ArgDesc{ArgDesc::Kind::Reg, m_locs[s].reg(1), -1});
+    } else {
+      push_arg(arg, s->type());
+    }
+  }
+  return *this;
+}
+
 ArgGroup& ArgGroup::typedValue(int i) {
   // If there's exactly one register argument slot left, the whole TypedValue
-  // goes on the stack instead of being split between a register and the
-  // stack.
-  if (m_gpArgs.size() == num_arg_regs() - 1) {
-    m_override = &m_stkArgs;
-  }
+  // goes on the stack instead of being split between a register and the stack.
+  if (m_gpArgs.size() == num_arg_regs() - 1) m_override = &m_stkArgs;
+  SCOPE_EXIT { m_override = nullptr; };
+
   static_assert(offsetof(TypedValue, m_data) == 0, "");
   static_assert(offsetof(TypedValue, m_type) == 8, "");
   ssa(i, false).type(i);
-  m_override = nullptr;
   return *this;
 }
 

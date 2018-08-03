@@ -148,6 +148,15 @@ Vloc make_const(Vunit& unit, Type type) {
   assertx(type.hasConstVal());
   if (type <= TBool) return Vloc{unit.makeConst(type.boolVal())};
   if (type <= TDbl) return Vloc{unit.makeConst(type.dblVal())};
+  if (wide_tv_val && type <= TLvalToGen) {
+    auto const rval = tv_rval{type.ptrVal()};
+    auto const typeReg = unit.makeConst(&rval.type());
+    auto const valReg = unit.makeConst(&rval.val());
+    return Vloc{
+      tv_lval::type_idx == 0 ? typeReg : valReg,
+      tv_lval::val_idx == 1 ? valReg : typeReg,
+    };
+  }
   return Vloc{unit.makeConst(type.rawVal())};
 }
 

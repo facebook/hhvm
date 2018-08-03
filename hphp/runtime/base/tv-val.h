@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/typed-value.h"
 
 #include "hphp/util/compact-tagged-ptrs.h"
+#include "hphp/util/compilation-flags.h"
 
 #include <cstddef>
 #include <type_traits>
@@ -49,6 +50,16 @@ struct with_dummy {
   static T dummy() { return T { &immutable_uninit_base }; }
   bool is_dummy() const { return static_cast<const T&>(*this) == dummy(); }
 };
+
+template<typename T>
+T* get_ptr(T* ptr) {
+  return ptr;
+}
+
+template<typename T, typename Tag>
+T* get_ptr(CompactTaggedPtr<T, Tag> ptr) {
+  return ptr.ptr();
+}
 }
 
 /*
@@ -85,13 +96,19 @@ public:
   using tv_t = maybe_const_t<TypedValue>;
 
   /*
-   * This value should only be inspected in codegen that works directly with
-   * tv_lvals.
+   * These values expose details about the internal representation of a tv_val,
+   * and should only be inspected while generating code that works with
+   * tv_vals.
+   *
+   * If you do change these, you must also update the return registers used in
+   * runtime/base/hash-table-*.S.
    */
-  static constexpr bool is_tv_ptr = true;
+  static constexpr int type_idx = wide_tv_val ? 0 : -1;
+  static constexpr int val_idx = wide_tv_val ? 1 : 0;
 
   tv_val();
   /* implicit */ tv_val(tv_t* lval);
+  tv_val(type_t* type, value_t* val);
 
   /*
    * Construct from a tv_val without a tag and a tag.
@@ -154,11 +171,79 @@ public:
 private:
   template<bool, typename> friend struct tv_val;
 
-  using storage_t = typename std::conditional<
-    std::is_same<tag_t, void>::value, tv_t*, CompactTaggedPtr<tv_t, tag_t>
-  >::type;
+  template<typename T>
+  using maybe_tagged_t = std::conditional_t<
+    std::is_same<tag_t, void>::value, T*, CompactTaggedPtr<T, tag_t>
+  >;
 
-  storage_t m_tv;
+  /*
+   * Default storage type: a single TypedValue*.
+   */
+  struct storage {
+    storage(type_t* type, value_t* val)
+      : m_tv{reinterpret_cast<tv_t*>(val)}
+    {
+      assertx(val == nullptr || &m_tv->m_type == type);
+    }
+
+    template<typename Tag = tag_t>
+    storage(type_t* type, value_t* val, with_tag_t<Tag> tag)
+      : m_tv{tag, reinterpret_cast<tv_t*>(val)}
+    {
+      assertx(val == nullptr || &m_tv->m_type == type);
+    }
+
+    bool operator==(const storage& o) const {
+      return m_tv == o.m_tv;
+    }
+
+    type_t* type() const { return &m_tv->m_type; }
+    value_t* val() const { return &m_tv->m_data; }
+
+    template<typename Tag = tag_t>
+    with_tag_t<Tag> tag() const { return m_tv.tag(); }
+
+   private:
+    maybe_tagged_t<tv_t> m_tv;
+  };
+
+  /*
+   * Wide storage type: separate pointers for the type and the value. m_type is
+   * only meangingful is m_val != nullptr.
+   */
+  struct wide_storage {
+    wide_storage(type_t* type, value_t* val)
+      : m_type{type}
+      , m_val{val}
+    {
+      assertx((type && val) || val == nullptr);
+    }
+
+    template<typename Tag = tag_t>
+    wide_storage(type_t* type, value_t* val, with_tag_t<Tag> tag)
+      : m_type{tag, type}
+      , m_val{val}
+    {
+      assertx((type && val) || val == nullptr);
+    }
+
+    bool operator==(const wide_storage& o) const {
+      return m_val == o.m_val && (m_type == o.m_type || m_val == nullptr);
+    }
+
+    type_t* type() const { return tv_val_detail::get_ptr(m_type); }
+    value_t* val() const { return m_val; }
+
+    template<typename Tag = tag_t>
+    with_tag_t<Tag> tag() const { return m_type.tag(); }
+
+   private:
+    maybe_tagged_t<type_t> m_type;
+    value_t* m_val;
+  };
+
+  using storage_t = std::conditional_t<wide_tv_val, wide_storage, storage>;
+  storage_t m_s;
 };
 
 /*

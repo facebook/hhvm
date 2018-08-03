@@ -135,7 +135,10 @@ struct SetArrayElm {
     return offsetof(SetArrayElm, tv) + offsetof(TypedValue, m_data.pstr);
   }
   static constexpr ptrdiff_t dataOff() {
-    return offsetof(SetArrayElm, tv);
+    return offsetof(SetArrayElm, tv) + offsetof(TypedValue, m_data);
+  }
+  static constexpr ptrdiff_t typeOff() {
+    return offsetof(SetArrayElm, tv) + offsetof(TypedValue, m_type);
   }
   static constexpr ptrdiff_t hashOff() {
     return offsetof(SetArrayElm, tv) + offsetof(TypedValue, m_aux);

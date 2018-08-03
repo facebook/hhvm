@@ -99,18 +99,19 @@ bool CallSpec::verifySignature(const CallDest& dest,
   for (; parami < type->params.size() && argi < args.size();
        ++parami, ++argi) {
     auto const param = type->params[parami];
-    // TGen (for a TypedValue parameter) special: the value and type are passed
-    // as two separate entries. Make sure both are present.
-    if (param == TGen) {
-      if (!(args[argi] <= TGen)) {
-        fail("Incompatible type {} for Value half of TypedValue parameter {}",
-             args[argi], parami);
+    // TGen (for a TypedValue parameter) and wide TLvalToGen are special: one
+    // SSATmp represents two argument registers, and the latter is passed as a
+    // dummy TBottom argument. Make sure both are present.
+    if (param == TGen || (wide_tv_val && param == TLvalToGen)) {
+      if (!(args[argi] <= param)) {
+        fail("Incompatible type {} for first half of {} parameter {}",
+             args[argi], param, parami);
       }
       if (++argi == args.size()) break;
       if (args[argi] != TBottom) {
         fail(
-          "Incompatible type {} for DataType half of TypedValue parameter {}",
-          args[argi], parami
+          "Incompatible type {} for second half of {} parameter {}",
+          args[argi], param, parami
         );
       }
     } else if (!(args[argi] <= param)) {

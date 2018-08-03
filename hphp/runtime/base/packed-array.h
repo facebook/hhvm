@@ -48,13 +48,17 @@ struct APCHandle;
 /*
  * Packed arrays are a specialized array layout for vector-like data.  That is,
  * php arrays with zero-based contiguous integer keys, and values of mixed
- * types.  The TypedValue's are placed right after the array header.
+ * types.  The TypedValues are placed right after the array header.
  */
 struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr uint32_t SmallSize = 3;
   // the smallest and largest MM size classes we use for allocating PackedArrays
   static constexpr size_t SmallSizeIndex = 3;
   static constexpr size_t MaxSizeIndex = 121;
+
+  // Used in static_asserts near code that will have to change if/when we
+  // disaggregate the TypedValues in PackedArray.
+  static constexpr bool stores_typed_values = true;
 
   static_assert(MaxSizeIndex <= std::numeric_limits<uint8_t>::max(),
                 "Size index must fit into 8-bits");

@@ -76,8 +76,14 @@ void cgBoxPtr(IRLS& env, const IRInstruction* inst) {
 
 void cgUnboxPtr(IRLS& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
+  auto const dst = inst->dst();
+  auto const wide = wide_tv_val && dst->isA(TLvalToGen);
+  assertx((src->isA(TPtrToGen) && dst->isA(TPtrToGen)) ||
+          (src->isA(TLvalToGen) && dst->isA(TLvalToGen)));
+
   auto const srcLoc = irlower::srcLoc(env, inst, 0);
-  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const dstLoc = irlower::dstLoc(env, inst, 0);
+  auto const valIdx = wide ? tv_lval::val_idx : 0;
   auto& v = vmain(env);
 
   auto const sf = v.makeReg();
@@ -86,8 +92,14 @@ void cgUnboxPtr(IRLS& env, const IRInstruction* inst) {
 
   auto const val_ptr = memTVValPtr(src, srcLoc);
   if (RefData::tvOffset() == 0) {
-    static_assert(tv_lval::is_tv_ptr, "UnboxPtr loads one pointer");
-    v << cloadq{CC_E, sf, srcLoc.reg(), val_ptr, dst};
+    v << cloadq{CC_E, sf, srcLoc.reg(valIdx), val_ptr, dstLoc.reg(valIdx)};
+    if (wide) {
+      static_assert(TVOFF(m_data) == 0, "");
+      auto const ref_type = v.makeReg();
+      v << lea{dstLoc.reg(valIdx)[TVOFF(m_type)], ref_type};
+      v << cmovq{CC_E, sf, srcLoc.reg(tv_lval::type_idx),
+                 ref_type, dstLoc.reg(tv_lval::type_idx)};
+    }
     return;
   }
 
@@ -95,8 +107,14 @@ void cgUnboxPtr(IRLS& env, const IRInstruction* inst) {
   auto const cell_ptr = v.makeReg();
   v << load{val_ptr, ref_ptr};
   v << lea{ref_ptr[RefData::tvOffset()], cell_ptr};
-  static_assert(tv_lval::is_tv_ptr, "UnboxPtr loads one pointer");
-  v << cmovq{CC_E, sf, srcLoc.reg(), cell_ptr, dst};
+  v << cmovq{CC_E, sf, srcLoc.reg(valIdx), cell_ptr, dstLoc.reg(valIdx)};
+  if (wide) {
+    static_assert(TVOFF(m_data) == 0, "");
+    auto const ref_type = v.makeReg();
+    v << lea{cell_ptr[TVOFF(m_type)], ref_type};
+    v << cmovq{CC_E, sf, srcLoc.reg(tv_lval::type_idx),
+               ref_type, dstLoc.reg(tv_lval::type_idx)};
+  }
 }
 
 IMPL_OPCODE_CALL(Box)

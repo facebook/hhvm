@@ -1605,14 +1605,18 @@ and is_sub_type
   (env : Env.env)
   (ty_sub : locl ty)
   (ty_super : locl ty) : bool =
-  let f = !Errors.is_hh_fixme in
-  Errors.is_hh_fixme := (fun _ _ -> false);
-  let result =
-    Errors.try_
-      (fun () -> ignore(sub_type env ty_sub ty_super); true)
-      (fun _ -> false) in
-  Errors.is_hh_fixme := f;
-  result
+  (* quick short circuit to help perf *)
+  ty_equal ty_sub ty_super ||
+  begin
+    let f = !Errors.is_hh_fixme in
+    Errors.is_hh_fixme := (fun _ _ -> false);
+    let result =
+      Errors.try_
+        (fun () -> ignore(sub_type env ty_sub ty_super); true)
+        (fun _ -> false) in
+    Errors.is_hh_fixme := f;
+    result
+  end
 
 (* Non-side-effecting test for subtypes, using simplify_subtype.
  * Result is

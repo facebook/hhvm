@@ -22,7 +22,17 @@ File "re_prefixed_string.php", line 48, characters 13-20:
 Bad regex pattern; Missing delimiter(s). (Typing[4275])
 File "re_prefixed_string.php", line 51, characters 13-21:
 Bad regex pattern; Missing delimiter(s). (Typing[4275])
-File "re_prefixed_string.php", line 54, characters 14-24:
+File "re_prefixed_string.php", line 53, characters 14-24:
 Bad regex pattern; Missing delimiter(s). (Typing[4275])
-File "re_prefixed_string.php", line 55, characters 14-21:
+File "re_prefixed_string.php", line 54, characters 14-21:
 Bad regex pattern; Missing delimiter(s). (Typing[4275])
+File "re_prefixed_string.php", line 64, characters 13-23:
+Bad regex pattern; Invalid global option(s). (Typing[4275])
+File "re_prefixed_string.php", line 65, characters 13-30:
+Bad regex pattern; Invalid global option(s). (Typing[4275])
+File "re_prefixed_string.php", line 72, characters 13-62:
+Bad regex pattern; Invalid global option(s). (Typing[4275])
+File "re_prefixed_string.php", line 73, characters 13-68:
+Bad regex pattern; missing ) [52]. (Typing[4275])
+File "re_prefixed_string.php", line 77, characters 14-15:
+Bad regex pattern; This pattern is empty. (Typing[4275])

@@ -12,7 +12,9 @@ open Nast
 open Ast_defs
 module Reason = Typing_reason
 
+exception Empty_regex_pattern
 exception Missing_delimiter
+exception Invalid_global_option
 
 let internal_error s =
   failwith ("Something (internal) went wrong while typing a regex string: " ^ s)
@@ -70,34 +72,41 @@ let type_match p s =
   let shape_map = ShapeMap.add (SFlit_int (p, "0")) sft_0 shape_map in
   Reason.Rregex p, Tshape (FieldsFullyKnown, shape_map)
 
-let delimiters_match first last =
-  let desired =
-    match first with
-    | '(' -> ')'
-    | '[' -> ']'
-    | '{' -> '}'
-    | '<' -> '>'
-    | _ -> first
-  in
-  last = desired
+let check_global_options s =
+  String.iter (fun c ->
+    match c with
+    | 'i' | 'm' | 's' | 'x' | 'A' | 'D' | 'S' | 'U' | 'X' | 'u' -> ()
+    | _ -> raise Invalid_global_option) s
 
-let valid_global_option c =
-  match c with
-  | 'i' | 'm' | 's' | 'x' | 'A' | 'D' | 'S' | 'U' | 'X' | 'u' -> true
-  | _ -> false
+let rec find_delimiter s desired from_i =
+  match String.index_from_opt s from_i desired with
+  | Some i ->
+    if i <> 0 && s.[i - 1] = '\\'
+    then find_delimiter s desired (i + 1)
+    else Some i
+  | None -> None
 
 let check_and_strip_delimiters s =
   (*  Non-alphanumeric, non-whitespace, non-backslash characters are delimiter-eligible *)
   let delimiter = Str.regexp "[^a-zA-Z0-9\t\n\r\x0b\x0c \\]" in
   let length = String.length s in
-  let first, penultimate, last = s.[0], s.[length - 2], s.[length - 1] in
-  if Str.string_match delimiter (String.make 1 first) 0 &&
-    ((delimiters_match first penultimate && valid_global_option last) ||
-    (delimiters_match first last))
-  then begin (* Strip off delimiters *)
-    if Str.string_match delimiter (String.make 1 last) 0
-    then String.sub s 1 (length - 2)
-    else String.sub s 1 (length - 3)
+  if length = 0 then raise Empty_regex_pattern else
+  let first = s.[0] in
+  if Str.string_match delimiter (String.make 1 first) 0
+  then begin
+    let desired =
+      match first with
+      | '(' -> ')'
+      | '[' -> ']'
+      | '{' -> '}'
+      | '<' -> '>'
+      | _ -> first
+    in
+    match find_delimiter (String.sub s 1 (length - 1)) desired 0 with
+    | Some i -> (* i is 0-indexed from the second character in s *)
+      check_global_options (String.sub s (i + 2) ((length - 2) - i));
+      String.sub s 1 i
+    | None -> raise Missing_delimiter
   end else raise Missing_delimiter
 
 let type_pattern (p, e_) =

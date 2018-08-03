@@ -7,8 +7,8 @@ Errors:
   [51:13-22] Bad regex pattern; Missing delimiter(s).
   [52:13-21] Bad regex pattern; Missing delimiter(s).
   [55:13-22] Bad regex pattern; Missing delimiter(s).
-  [58:14-25] Bad regex pattern; Missing delimiter(s).
-  [59:14-22] Bad regex pattern; Missing delimiter(s).
+  [57:14-25] Bad regex pattern; Missing delimiter(s).
+  [58:14-22] Bad regex pattern; Missing delimiter(s).
 [(Fun
     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([3:15-19], (Hprim Tvoid))); f_name = ([3:10-11], "\\f");
@@ -345,27 +345,38 @@ Errors:
                          (([56:14-23], string), (String "[Hello]")))))
                      ))));
               (Expr
-                 (([57:3-65], HH\Lib\Regex\Pattern<shape('0' => string, ?'2' => string, ?'4' => string, ?'5' => string, ?'one' => string, ?'six' => string, ?'three' => string)>),
+                 (([57:3-25], _),
                   (Binop ((Eq None),
-                     (([57:3-10], HH\Lib\Regex\Pattern<shape('0' => string, ?'2' => string, ?'4' => string, ?'5' => string, ?'one' => string, ?'six' => string, ?'three' => string)>),
-                      (Lvar ([57:3-10], $good10))),
-                     (([57:13-65], HH\Lib\Regex\Pattern<shape('0' => string, ?'2' => string, ?'4' => string, ?'5' => string, ?'one' => string, ?'six' => string, ?'three' => string)>),
-                      (PrefixedString ("re",
-                         (([57:15-65], string),
-                          (String
-                             "(He(?'one'\\D)(\\D)(?'three'\\D)(\\D)(\\D)(?'six'\\D))"))
-                         )))
-                     ))));
+                     (([57:3-9], _), (Lvar ([57:3-9], $bad10))),
+                     (([57:14-25], _), Any)))));
               (Expr
-                 (([58:3-25], _),
+                 (([58:3-22], _),
                   (Binop ((Eq None),
                      (([58:3-9], _), (Lvar ([58:3-9], $bad11))),
-                     (([58:14-25], _), Any)))));
-              (Expr
-                 (([59:3-22], _),
-                  (Binop ((Eq None),
-                     (([59:3-9], _), (Lvar ([59:3-9], $bad12))),
-                     (([59:14-22], _), Any)))))
+                     (([58:14-22], _), Any)))))
+              ];
+            fnb_unsafe = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
+  (Fun
+     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([61:35-39], (Hprim Tvoid)));
+       f_name = ([61:10-31], "\\parentheses_are_weird"); f_tparams = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+       f_body =
+       (NamedBody
+          { Aast.AnnotatedAST.fnb_nast =
+            [(Expr
+                (([64:3-76], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                 (Binop ((Eq None),
+                    (([64:3-9], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (Lvar ([64:3-9], $good0))),
+                    (([64:12-76], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (PrefixedString ("re",
+                        (([64:14-76], string),
+                         (String
+                            "(He\\(?'one'\\D\\)\\(\\D\\)\\(?'three'\\D\\)\\(\\D\\)\\(\\D\\)\\(?'six'\\D\\))"))
+                        )))
+                    ))))
               ];
             fnb_unsafe = false });
        f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })

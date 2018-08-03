@@ -1691,8 +1691,14 @@ and expr_
                 let s = s ^ " [" ^ (string_of_int i) ^ "]" in
                 Errors.bad_regex_pattern p s;
                 expr_error env p (Reason.Rregex p)
+              | Typing_regex.Empty_regex_pattern ->
+                Errors.bad_regex_pattern p "This pattern is empty";
+                expr_error env p (Reason.Rregex p)
               | Typing_regex.Missing_delimiter ->
                 Errors.bad_regex_pattern p "Missing delimiter(s)";
+                expr_error env p (Reason.Rregex p)
+              | Typing_regex.Invalid_global_option ->
+                Errors.bad_regex_pattern p "Invalid global option(s)";
                 expr_error env p (Reason.Rregex p)
             end
         | String2 _ ->

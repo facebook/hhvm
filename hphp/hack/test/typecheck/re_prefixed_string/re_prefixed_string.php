@@ -50,7 +50,29 @@ function missing_delimiter(): void {
   $good7 = re")Hello)";
   $bad8 = re"(Hello(";
   $good9 = re"[Hello]";
-  $good10 = re"(He(?'one'\D)(\D)(?'three'\D)(\D)(\D)(?'six'\D))";
-  $bad11 = re"\\Hello\\";
-  $bad12 = re"HelloH";
+  $bad10 = re"\\Hello\\";
+  $bad11 = re"HelloH";
+}
+
+/* Only certain characters may appear as global options at the end of delimited
+   patterns. Within a pattern, a character that matches the first delimiter must
+   be escaped with a backslash to not to be seen as ending the pattern. In the
+   case of a bracket-style first delimiter, both the left and right varieties of
+   that delimiter must be escaped. */
+function invalid_global_option(): void {
+  $good0 = re"#Hello#imsxADSUXu";
+  $bad1 = re"#Hello#42";
+  $bad2 = re"#What # are you#";
+  $good3 = re"#What \# are you#";
+}
+
+function parentheses_are_weird(): void {
+  // $good0 is good in the typechecker but confuses the parser for some reason
+  $good0 = re"(He\(?'one'\D\)\(\D\)\(?'three'\D\)\(\D\)\(\D\)\(?'six'\D\))";
+  $bad1 = re"(He(?'one'\D)(\D)(?'three'\D)(\D)(\D)(?'six'\D))";
+  $bad2 = re"(He(?'one'\D\)(\D\)(?'three'\D\)(\D\)(\D\)(?'six'\D\))";
+}
+
+function empty_pattern(): void {
+  $empty = re"";
 }

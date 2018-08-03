@@ -54,7 +54,12 @@ function missing_delimiter(): void {
   $good7 = re")Hello)";
   $bad8 = re"(Hello(";
   $good9 = re"[Hello]";
-  $good10 = re"(He(?'one'\D)(\D)(?'three'\D)(\D)(\D)(?'six'\D))";
-  $bad11 = re"\\Hello\\";
-  $bad12 = re"HelloH";
+  $bad10 = re"\\Hello\\";
+  $bad11 = re"HelloH";
+}
+
+function parentheses_are_weird(): void {
+  // $good0 is good in the typechecker but useless capture groups-wise and
+  // confuses the parser for some reason
+  $good0 = re"(He\(?'one'\D\)\(\D\)\(?'three'\D\)\(\D\)\(\D\)\(?'six'\D\))";
 }

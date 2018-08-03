@@ -64,6 +64,8 @@ struct Breakpoint {
     const std::string& hitCondition
   );
 
+  virtual ~Breakpoint();
+
   void updateConditions(
     const std::string& condition,
     const std::string& hitCondition
@@ -93,12 +95,7 @@ struct Breakpoint {
     return it == m_unitCache.end() ? nullptr : it->second;
   }
 
-  void clearCachedConditionUnit(request_id_t requestId) {
-    auto it = m_unitCache.find(requestId);
-    if (it != m_unitCache.end()) {
-      m_unitCache.erase(it);
-    }
-  }
+  void clearCachedConditionUnit(request_id_t requestId);
 
 private:
 

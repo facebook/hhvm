@@ -72,6 +72,22 @@ Breakpoint::Breakpoint(
     updateConditions(condition, hitCondition);
 }
 
+Breakpoint::~Breakpoint() {
+  for (const auto& pair : m_unitCache) {
+    clearCachedConditionUnit(pair.first);
+  }
+}
+
+void Breakpoint::clearCachedConditionUnit(request_id_t requestId) {
+  auto it = m_unitCache.find(requestId);
+  if (it != m_unitCache.end()) {
+    if (it->second != nullptr) {
+      delete it->second;
+    }
+    m_unitCache.erase(it);
+  }
+}
+
 void Breakpoint::updateConditions(
   const std::string& condition,
   const std::string& hitCondition

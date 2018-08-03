@@ -139,8 +139,8 @@ bool EvaluateCommand::executeImpl(
     session->clearCachedVariable(DebuggerSession::kCachedVariableKeyAll);
   };
 
-  Unit* unit = compile_string(evalExpression.c_str(), evalExpression.size(),
-                              nullptr, true);
+  std::unique_ptr<Unit> unit(compile_string(evalExpression.c_str(),
+                              evalExpression.size(), nullptr, true));
   if (unit == nullptr) {
     // The compiler will already have printed more detailed error messages
     // to stderr, which is redirected to the debugger client's console.
@@ -179,7 +179,7 @@ bool EvaluateCommand::executeImpl(
   bool evalSilent = evalContext == "watch" || evalContext == "hover";
   m_debugger->executeWithoutLock(
     [&]() {
-        result = evaluate(m_debugger, ri, unit, frameDepth, evalSilent);
+        result = evaluate(m_debugger, ri, unit.get(), frameDepth, evalSilent);
     });
 
   if (previousPauseCount != ri->m_totalPauseCount &&

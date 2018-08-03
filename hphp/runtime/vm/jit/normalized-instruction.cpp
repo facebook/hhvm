@@ -29,15 +29,8 @@ namespace HPHP { namespace jit {
  * Assumes that inst.source and inst.unit have been properly set.
  */
 static void populateImmediates(NormalizedInstruction& inst) {
-  auto pc = inst.pc();
-  decode_op(pc);
   for (int i = 0; i < numImmediates(inst.op()); ++i) {
-    if (immType(inst.op(), i) == RATA) {
-      inst.imm[i].u_RATA = decodeRAT(inst.unit(), pc);
-    } else {
-      inst.imm[i] = getImm(inst.pc(), i, inst.unit());
-    }
-    pc += immSize(inst.pc(), i);
+    inst.imm[i] = getImm(inst.pc(), i, inst.unit());
   }
   if (hasImmVector(inst.op())) {
     inst.immVec = getImmVector(inst.pc());

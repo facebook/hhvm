@@ -834,9 +834,6 @@ IterTable getIterTable(PC opcode);
 // Some decoding helper functions.
 int numImmediates(Op opcode);
 ArgType immType(Op opcode, int idx);
-int immSize(PC opcode, int idx);
-bool immIsVector(Op opcode, int idx);
-bool immIsIterTable(Op opcode, int idx);
 bool hasImmVector(Op opcode);
 bool hasIterTable(Op opcode);
 int instrLen(PC opcode);

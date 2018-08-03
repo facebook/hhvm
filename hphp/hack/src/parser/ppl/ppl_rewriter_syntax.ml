@@ -12,7 +12,7 @@ module CoroutineSyntax = Coroutine_syntax
 
 open CoroutineSyntax
 
-let ppl_infer_type_string = [ "PPL"; "Inference"; "Infer"; ]
+let ppl_infer_type_string = [ "Infer"; ]
 let ppl_infer_type_name_syntax =
   make_qualified_name_syntax ppl_infer_type_string ~has_leading:true
 let ppl_macro_string = Coroutine_smart_constructor.ppl_macro_string

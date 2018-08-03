@@ -24,7 +24,7 @@ let error_in file =
 
 let expect_error_in =
   Printf.sprintf
-    "File \"/%s\", line 0, characters 0--1:\n (Parsing[1002])\n\n"
+    "File \"/%s\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
 
 let test_do () =
   let errors, () = Errors.do_ begin fun () ->
@@ -141,8 +141,8 @@ let test_phases () =
     ()
   end in
   let expected =
-    "File \"/A\", line 0, characters 0--1:\n (Parsing[1002])\n\n" ^
-    "File \"/A\", line 0, characters 0--1:\n (Typing[4116])\n\n"
+    "File \"/A\", line 0, characters 0-0:\n (Parsing[1002])\n\n" ^
+    "File \"/A\", line 0, characters 0-0:\n (Typing[4116])\n\n"
   in
   Asserter.String_asserter.assert_equals expected
     (Errors.get_error_list errors |> error_list_to_string )
@@ -176,7 +176,7 @@ let test_incremental_update () =
     Errors.Parsing
   in
   let expected =
-    "File \"/bar\", line 0, characters 0--1:\n (Parsing[1002])\n\n" in
+    "File \"/bar\", line 0, characters 0-0:\n (Parsing[1002])\n\n" in
   Asserter.String_asserter.assert_equals expected
     (Errors.get_error_list errors |> error_list_to_string )
     "Incremental update should overwrite foo error with bar.";
@@ -188,8 +188,8 @@ let test_incremental_update () =
     Errors.Parsing
   in
   let expected =
-    "File \"/foo\", line 0, characters 0--1:\n (Parsing[1002])\n\n" ^
-    "File \"/baz\", line 0, characters 0--1:\n (Parsing[1002])\n\n"
+    "File \"/foo\", line 0, characters 0-0:\n (Parsing[1002])\n\n" ^
+    "File \"/baz\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
   in
   Asserter.String_asserter.assert_equals expected
     (Errors.get_error_list errors |> error_list_to_string )

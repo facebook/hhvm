@@ -5,7 +5,7 @@ Class C does not correctly implement all required methods  (Typing[4110])
 Read the following to see why:
   File "constraint_override_bad2.php", line 20, characters 19-21:
   Member foo has the wrong type
-  File "", line 0, characters 0--1:
+  File "", line 0, characters 0-0:
   Some type constraint(s) here are violated
   File "constraint_override_bad2.php", line 20, characters 23-23:
   'T' is a constrained type parameter

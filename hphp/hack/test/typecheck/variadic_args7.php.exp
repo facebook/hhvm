@@ -1,2 +1,2 @@
-File "variadic_args7.php", line 3, characters 27-26:
+File "variadic_args7.php", line 3, characters 27-27:
 A variadic parameter ('...') may not be followed by a comma. (Parsing[1002])

@@ -1,2 +1,2 @@
-File "suggest_method_name2.php", line 13, characters 36-35:
+File "suggest_method_name2.php", line 13, characters 36-36:
 Non-abstract method X::myMethod must contain body (Parsing[1002])

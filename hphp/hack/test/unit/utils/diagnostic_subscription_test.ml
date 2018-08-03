@@ -84,7 +84,7 @@ let test_update () =
     ~full_check_done:true
     |> DS.pop_errors ~global_errors:foo_error_a in
   let expected =
-    "/A:\nFile \"/A\", line 0, characters 0--1:\nfoo (Parsing[1002])\n\n" in
+    "/A:\nFile \"/A\", line 0, characters 0-0:\nfoo (Parsing[1002])\n\n" in
   Asserter.String_asserter.assert_equals expected
     (diagnostics_to_string diagnostics)
     "foo error in A should be pushed";
@@ -102,7 +102,7 @@ let test_update () =
     "Unchanged diagnostics in A should be not pushed again";
 
   let expected =
-    "/A:\nFile \"/A\", line 0, characters 0--1:\nbar (Parsing[1002])\n\n" in
+    "/A:\nFile \"/A\", line 0, characters 0-0:\nbar (Parsing[1002])\n\n" in
   let ds, diagnostics = DS.update ds
     ~priority_files
     ~reparsed
@@ -117,7 +117,7 @@ let test_update () =
   let priority_files = Relative_path.Set.singleton b_path  in
 
   let expected =
-    "/B:\nFile \"/B\", line 0, characters 0--1:\nbaz (Parsing[1002])\n\n" in
+    "/B:\nFile \"/B\", line 0, characters 0-0:\nbaz (Parsing[1002])\n\n" in
   let ds, diagnostics = DS.update ds
     ~priority_files
     ~reparsed

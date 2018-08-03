@@ -4066,7 +4066,7 @@ and is_abstract_ft fty = match fty with
         let env, tel, tuel, ty =
           call ~expected ~is_expr_statement
           ~method_call_info:(TR.make_call_info ~receiver_is_self:false
-              ~is_static:true ty1 (snd m))
+              ~is_static:true (Reason.Rwitness fpos, TUtils.this_of (Env.get_self env)) (snd m))
           p env fty el uel in
         make_call env (T.make_typed_expr fpos fty
           (T.Class_const (tcid, m))) hl tel tuel ty
@@ -4091,7 +4091,7 @@ and is_abstract_ft fty = match fty with
                 check_coroutine_call env fty;
                 let env, _tel, _tuel, method_ = call ~expected
                   ~method_call_info:(TR.make_call_info ~receiver_is_self:false
-                    ~is_static:false ty1 (snd m))
+                    ~is_static:false this_ty (snd m))
                   p env fty el uel in
                 env, method_, None
               end
@@ -4107,7 +4107,7 @@ and is_abstract_ft fty = match fty with
             let env, tel, tuel, ty =
               call ~expected
                 ~method_call_info:(TR.make_call_info ~receiver_is_self:false
-                  ~is_static:true ty1 (snd m))
+                  ~is_static:true (Reason.Rwitness fpos, TUtils.this_of (Env.get_self env)) (snd m))
                 p env fty el uel in
             make_call env (T.make_typed_expr fpos fty
               (T.Class_const (tcid, m))) hl tel tuel ty

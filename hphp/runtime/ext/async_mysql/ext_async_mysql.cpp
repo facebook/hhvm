@@ -337,6 +337,16 @@ Object HHVM_STATIC_METHOD(
   return newAsyncMysqlConnectEvent(std::move(op), getClient());
 }
 
+static AsyncMysqlConnection::AttributeMap transformAttributes(
+    const Array& attributes) {
+  AsyncMysqlConnection::AttributeMap cppAttributes;
+  IterateKV(attributes.get(), [&](Cell k, TypedValue v) {
+    cppAttributes[tvCastToString(k).toCppString()] =
+        tvCastToString(v).toCppString();
+  });
+  return cppAttributes;
+}
+
 Object HHVM_STATIC_METHOD(
     AsyncMysqlClient,
     connectAndQuery,
@@ -346,7 +356,8 @@ Object HHVM_STATIC_METHOD(
     const String& dbname,
     const String& user,
     const String& password,
-    const Object& asyncMysqlConnOpts) {
+    const Object& asyncMysqlConnOpts,
+    const Array& queryAttributes) {
   if (UNLIKELY(!isContainer(queries))) {
     raise_warning("AsyncMysqlClient::connectAndQuery() expects parameter 1 to "
                   "be array, %s given",
@@ -370,8 +381,13 @@ Object HHVM_STATIC_METHOD(
   connectOp->setConnectionOptions(connOpts);
   auto event = new AsyncMysqlConnectAndMultiQueryEvent(connectOp);
   auto transformedQueries = transformQueries(queries_as_array);
+  auto transformedAttributes = transformAttributes(queryAttributes);
   try {
-    connectOp->setCallback([clientPtr, event, transformedQueries]
+    connectOp->setCallback(
+            [clientPtr,
+            event,
+            transformedQueries,
+            transformedAttributes]
         (am::ConnectOperation& op) mutable {
 
         if (!op.ok()) {
@@ -383,6 +399,7 @@ Object HHVM_STATIC_METHOD(
 
         auto query_op = am::Connection::beginMultiQuery(
           op.releaseConnection(), std::move(transformedQueries));
+        query_op->setQueryAttributes(transformedAttributes);
         event->setQueryOp(query_op);
 
         try {
@@ -647,13 +664,15 @@ bool AsyncMysqlConnection::isValidConnection() {
 }
 
 Object AsyncMysqlConnection::query(
-  ObjectData* this_,
-  am::Query query,
-  int64_t timeout_micros /* = -1 */) {
-
+    ObjectData* this_,
+    am::Query query,
+    int64_t timeout_micros /* = -1 */,
+    const AttributeMap& queryAttributes /*  = AttributeMap() */) {
   verifyValidConnection();
   auto* clientPtr = static_cast<am::AsyncMysqlClient*>(m_conn->client());
   auto op = am::Connection::beginQuery(std::move(m_conn), query);
+
+  op->setQueryAttributes(queryAttributes);
   op->setTimeout(am::Duration(getQueryTimeout(timeout_micros)));
 
   auto event = new AsyncMysqlQueryEvent(this_, op);
@@ -689,13 +708,15 @@ static Object HHVM_METHOD(
     AsyncMysqlConnection,
     query,
     const String& query,
-    int64_t timeout_micros /* = -1 */) {
+    int64_t timeout_micros /* = -1 */,
+    const Array& queryAttributes) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
   return data->query(
       this_,
       am::Query::unsafe(static_cast<std::string>(query)),
-      timeout_micros);
+      timeout_micros,
+      transformAttributes(queryAttributes));
 }
 
 static Object HHVM_METHOD(
@@ -772,7 +793,8 @@ static Object HHVM_METHOD(
     AsyncMysqlConnection,
     multiQuery,
     const Variant& queries,
-    int64_t timeout_micros /* = -1 */) {
+    int64_t timeout_micros /* = -1 */,
+    const Array& queryAttributes) {
   if (UNLIKELY(!isContainer(queries))) {
     raise_warning("AsyncMysqlConnection::multiQuery() expects parameter 1 to "
                   "be array, %s given",
@@ -788,6 +810,8 @@ static Object HHVM_METHOD(
   auto* clientPtr = static_cast<am::AsyncMysqlClient*>(data->m_conn->client());
   auto op = am::Connection::beginMultiQuery(std::move(data->m_conn),
                                             transformQueries(queries_as_array));
+
+  op->setQueryAttributes(transformAttributes(queryAttributes));
   op->setTimeout(am::Duration(getQueryTimeout(timeout_micros)));
 
   auto event = new AsyncMysqlMultiQueryEvent(this_, op);

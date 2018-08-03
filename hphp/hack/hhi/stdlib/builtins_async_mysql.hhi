@@ -95,7 +95,8 @@ class AsyncMysqlClient {
       string $dbname,
       string $user,
       string $password,
-      AsyncMysqlConnectionOptions $conn_opts
+      AsyncMysqlConnectionOptions $conn_opts,
+      dict<string, string> $query_attributes = dict[],
     ): Awaitable<(AsyncMysqlConnectResult, Vector<AsyncMysqlQueryResult>)> { }
 
    static public function adoptConnection($connection) { }
@@ -141,9 +142,17 @@ class AsyncMysqlClientStats {
 
 class AsyncMysqlConnection {
   public function __construct() { }
-  public function query(string $query, int $timeout_micros = -1): Awaitable<AsyncMysqlQueryResult>{ }
+  public function query(
+    string $query,
+    int $timeout_micros = -1,
+    dict<string, string> $query_attributes = dict[],
+  ): Awaitable<AsyncMysqlQueryResult>{ }
   public function queryf(HH\FormatString<HH\SQLFormatter> $query, ...$args): Awaitable<AsyncMysqlQueryResult>{ }
-  public function multiQuery(Traversable<string> $query, int $timeout_micros = -1) { }
+  public function multiQuery(
+    Traversable<string> $query,
+    int $timeout_micros = -1,
+    dict<string, string> $query_attributes = dict[],
+  ) { }
   public function escapeString(string $data): string { }
   public function close(): void{ }
   public function releaseConnection() { }

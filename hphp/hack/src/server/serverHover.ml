@@ -29,14 +29,11 @@ let type_at (file, line, char) tcopt files_info =
   let _, tast = ServerIdeUtils.check_file_input tcopt files_info file in
   ServerInferType.type_at_pos tast line char
 
-(** Filters out redundant elements.
-
-An example of a redundant element would be a Class occurrence when we also
-have a Method occurrence, since that means that the user is hovering over an
-invocation of the constructor, and would therefore only want to see
-information about the constructor, rather than getting both the class and
-constructor back in the hover. *)
-let filter_redundant results =
+(** When we get a Class occurrence and a Method occurrence, that means that the
+user is hovering over an invocation of the constructor, and would therefore only
+want to see information about the constructor, rather than getting both the
+class and constructor back in the hover. *)
+let filter_class_and_constructor results =
   let result_is_constructor result =
     SymbolOccurrence.is_constructor (fst result) in
   let result_is_class result =
@@ -121,5 +118,6 @@ let go env (file, line, char) =
     end
   | identities ->
     identities
-    |> filter_redundant
+    |> filter_class_and_constructor
     |> List.map ~f:(make_hover_info tcopt env_and_ty file)
+    |> List.remove_consecutive_duplicates ~equal:(=)

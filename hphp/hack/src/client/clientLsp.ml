@@ -788,7 +788,6 @@ let do_enhanced_hover
         (MarkedCode ("hack", snippet)) :: (List.map ~f:(fun s -> MarkedString s) addendum)
     end
     |> List.concat
-    |> List.remove_consecutive_duplicates ~equal:(=)
   in
   (* We pull the position from the SymbolOccurrence.t record, so I would be
      surprised if there were any different ones in here. Just take the first

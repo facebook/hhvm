@@ -865,6 +865,43 @@ let class_id_positions_cases = [
   }];
 ]
 
+let duplicate_results = "<?hh // strict
+trait DuplicateResultTrait {
+  /** Doc block. */
+  public function foo(): void {}
+}
+
+class DuplicateResultClass1 {
+  use DuplicateResultTrait;
+}
+
+class DuplicateResultClass2 {
+  use DuplicateResultTrait;
+}
+
+function test_duplicate_result_class(bool $x): void {
+  if ($x) {
+    $y = new DuplicateResultClass1();
+  } else {
+    $y = new DuplicateResultClass2();
+  }
+
+  $y->foo();
+//    ^22:7
+}
+"
+
+let duplicate_results_cases = [
+  ("duplicate_results.php", 22, 7), [{
+    snippet = "public ((function(): void) | (function(): void))";
+    addendum = [
+      "Doc block.";
+      "Full name: `DuplicateResultTrait::foo`";
+    ];
+    pos = pos_at (22, 7) (22, 9);
+  }];
+]
+
 let files = [
   "class_members.php", class_members;
   "classname_call.php", classname_call;
@@ -875,10 +912,12 @@ let files = [
   "bounded_generic_fun.php", bounded_generic_fun;
   "doc_block_fallback.php", doc_block_fallback;
   "class_id_positions.php", class_id_positions;
+  "duplicate_results.php", duplicate_results;
 ]
 
 let cases =
-  class_id_positions_cases
+  duplicate_results_cases
+  @ class_id_positions_cases
   @ doc_block_fallback_cases
   @ special_cases_cases
   @ docblock_cases

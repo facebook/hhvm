@@ -385,7 +385,7 @@ bool optimizeSmashedJcc(TCA inst) {
     return true;
   }
 
-  return false;
+  return optimizeSmashedJmp((TCA)(b->NextInstruction()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -327,6 +327,8 @@ let generate_fresh_name_for_target_of_condition_type env target_type condition_t
   | _, Tapply ((_, cond_name), []) ->
     (* only if condition type is a Tapply with no type parameters *)
     Some ((Typing_print.full env target_type) ^ "#" ^ cond_name)
+  | _, Taccess _ ->
+    Some ((Typing_print.full env target_type) ^ "#" ^ (Typing_print.full env condition_type))
   | _ -> None
 
 let verify_void_return_to_rx ~is_expr_statement p env ft =
@@ -346,7 +348,7 @@ let try_substitute_type_with_condition env cond_ty ty =
     then env, param_ty
     else begin
       (* constraint type argument to hint *)
-      let env = Env.add_upper_bound env fresh_type_argument_name ty in
+      let env = Env.add_upper_bound_global env fresh_type_argument_name ty in
       (* link type argument name to condition type *)
       let env = Env.set_condition_type env fresh_type_argument_name cond_ty in
       env, param_ty

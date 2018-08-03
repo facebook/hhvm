@@ -2414,8 +2414,9 @@ void hphp_process_init() {
       }
       auto const numWorkers = RuntimeOption::EvalJitWorkerThreadsForSerdes ?
         RuntimeOption::EvalJitWorkerThreadsForSerdes : Process::GetCPUCount();
-      if (jit::deserializeProfData(RuntimeOption::EvalJitSerdesFile,
-                                   numWorkers)) {
+      auto const errMsg =
+        jit::deserializeProfData(RuntimeOption::EvalJitSerdesFile, numWorkers);
+      if (errMsg.empty()) {
         if (RuntimeOption::ServerExecutionMode()) {
           Logger::FInfo("JitDeserialize: Loaded {} Units with {} workers",
                         numLoadedUnits(), numWorkers);
@@ -2443,22 +2444,19 @@ void hphp_process_init() {
           hphp_process_exit();
           exit(0);
         }
-      } else {
+      } else {                          // failed to deserialize
         if (mode == JitSerdesMode::DeserializeOrFail ||
             mode == JitSerdesMode::DeserializeAndExit) {
-          Logger::Error("Failed to deserialize jit profile.");
+          Logger::Error(errMsg);
           hphp_process_exit();
           exit(1);
         }
         if (mode == JitSerdesMode::DeserializeOrGenerate) {
-          Logger::FInfo("JitDeserialize: `{}' was not valid, "
-                        "scheduling one time serialization and restart",
-                        RuntimeOption::EvalJitSerdesFile);
+          Logger::Info(errMsg +
+                       ", scheduling one time serialization and restart");
           RuntimeOption::EvalJitSerdesMode = JitSerdesMode::SerializeAndExit;
         } else {
-          Logger::FInfo("JitDeserialize: `{}' was not valid, "
-                        "will profile then retranslateAll",
-                        RuntimeOption::EvalJitSerdesFile);
+          Logger::Info(errMsg + ", will profile then retranslateAll");
         }
       }
     }

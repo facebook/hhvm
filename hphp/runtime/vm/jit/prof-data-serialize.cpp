@@ -1234,7 +1234,7 @@ Func* read_func(ProfDataDeserializer& ser) {
   return ret;
 }
 
-bool serializeProfData(const std::string& filename) {
+std::string serializeProfData(const std::string& filename) {
   try {
     ProfDataSerializer ser{filename};
 
@@ -1273,14 +1273,13 @@ bool serializeProfData(const std::string& filename) {
 
     ser.finalize();
 
-    return true;
+    return "";
   } catch (std::runtime_error& err) {
-    FTRACE(1, "serializeProfData - Failed: {}\n", err.what());
-    return false;
+    return folly::sformat("Failed to serialize profile data: {}", err.what());
   }
 }
 
-bool deserializeProfData(const std::string& filename, int numWorkers) {
+std::string deserializeProfData(const std::string& filename, int numWorkers) {
   try {
     ProfDataDeserializer ser{filename};
 
@@ -1321,10 +1320,10 @@ bool deserializeProfData(const std::string& filename, int numWorkers) {
     // in (resulting in fatals when the wrapper tries to call it).
     merge_loaded_units(numWorkers);
 
-    return true;
+    return "";
   } catch (std::runtime_error& err) {
-    FTRACE(1, "deserializeProfData - Failed: {}\n", err.what());
-    return false;
+    return folly::sformat("Failed to deserialize profile data {}: {}",
+                          filename, err.what());
   }
 }
 

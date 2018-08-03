@@ -286,9 +286,13 @@ void retranslateAll() {
         (mode == JitSerdesMode::Serialize ||
          mode == JitSerdesMode::SerializeAndExit)) {
       if (serverMode) Logger::Info("retranslateAll: serializing profile data");
-      serializeProfData(RuntimeOption::EvalJitSerdesFile);
+      auto const errMsg = serializeProfData(RuntimeOption::EvalJitSerdesFile);
       if (serverMode) {
-        Logger::Info("retranslateAll: serializing done");
+        if (errMsg.empty()) {
+          Logger::Info("retranslateAll: serializing done");
+        } else {
+          Logger::Error(errMsg);
+        }
         if (mode == JitSerdesMode::SerializeAndExit) {
           s_retranslateAllComplete.store(true, std::memory_order_release);
           HttpServer::Server->stop();

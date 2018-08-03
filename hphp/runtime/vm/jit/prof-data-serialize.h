@@ -159,8 +159,10 @@ Class* read_class(ProfDataDeserializer& ser);
 void write_func(ProfDataSerializer& ser, const Func* func);
 Func* read_func(ProfDataDeserializer& ser);
 
-bool serializeProfData(const std::string& filanme);
-bool deserializeProfData(const std::string& filanme, int numWorkers);
+// Return an empty string upon success, and a string that describes the reason
+// of failure otherwise.
+std::string serializeProfData(const std::string& filanme);
+std::string deserializeProfData(const std::string& filanme, int numWorkers);
 
 //////////////////////////////////////////////////////////////////////
 } }

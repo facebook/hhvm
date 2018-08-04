@@ -417,7 +417,11 @@ module WithStatementAndDeclAndTypeParser
   and parse_heredoc_string parser head name =
     parse_string_literal parser head (Lexer.Literal_heredoc name)
 
-  and parse_braced_expression_in_string parser =
+  and parse_braced_expression_in_string
+    ~left_brace
+    ~dollar_inside_braces
+    parser
+  =
     (*
     We are parsing something like "abc{$x}def" or "abc${x}def", and we
     are at the left brace.
@@ -441,17 +445,117 @@ module WithStatementAndDeclAndTypeParser
     ERROR RECOVERY: If the right brace is missing, treat the remainder as
     string text. *)
 
-    let (parser, left_brace) = assert_token parser LeftBrace in
+    let is_assignment_op token =
+      Full_fidelity_operator.trailing_from_token token
+      |> Full_fidelity_operator.is_assignment
+    in
+
+    let left_brace_trailing = Token.trailing left_brace in
+    let (parser, left_brace) = Make.token parser left_brace in
     let (parser1, name_or_keyword_as_name) = next_token_as_name parser in
-    let (parser1, right_brace) = next_token_no_trailing parser1 in
+    let (parser1, after_name) = next_token_no_trailing parser1 in
     let (parser, expr, right_brace) =
-      match Token.kind name_or_keyword_as_name, Token.kind right_brace with
+      match Token.kind name_or_keyword_as_name, Token.kind after_name with
       | Name, RightBrace ->
         let (parser, expr) = Make.token parser1 name_or_keyword_as_name in
-        let (parser, right_brace) = Make.token parser right_brace in
+        let (parser, right_brace) = Make.token parser after_name in
+        (parser, expr, right_brace)
+      | Name, LeftBracket when
+        not dollar_inside_braces
+        && left_brace_trailing = []
+        && (Token.leading name_or_keyword_as_name) = []
+        && (Token.trailing name_or_keyword_as_name) = []
+        ->
+        (* The case of "${x}" should be treated as if we were interpolating $x
+        (rather than interpolating the constant `x`).
+
+        But we can also put other expressions in between the braces, such as
+        "${foo()}". In that case, `foo()` is evaluated, and then the result is
+        used as the variable name to interpolate.
+
+        Considering that both start with `${ident`, how does the parser tell the
+        difference? It appears that PHP special-cases two forms to be treated as
+        direct variable interpolation:
+
+         1) `${x}` is semantically the same as `{$x}`.
+
+            No whitespace may come between `{` and `x`, or else the `x` is
+            treated as a constant.
+
+         2) `${x[expr()]}` should be treated as `{$x[expr()]}`. More than one
+            subscript expression, such as `${x[expr1()][expr2()]}`, is illegal.
+
+            No whitespace may come between either the `{` and `x` or the `x` and
+            the `[`, or else the `x` is treated as a constant, and therefore
+            arbitrary expressions are allowed in the curly braces. (This amounts
+            to a variable-variable.)
+
+        This is very similar to the grammar detailed in the specification
+        discussed in `parse_string_literal` below, except that `${x->y}` is not
+        valid; it appears to be treated the same as performing member access on
+        the constant `x` rather than the variable `$x`, which is not valid
+        syntax.
+
+        The first case can already be parsed successfully because `x` is a valid
+        expression, so we special-case only the second case here. *)
+        let (parser, receiver) = Make.token parser1 name_or_keyword_as_name in
+        let (parser, left_bracket) = Make.token parser after_name in
+        let (parser, index) =
+          parse_expression_with_reset_precedence parser in
+        let (parser, right_bracket) = require_right_bracket parser in
+        let (parser, expr) = Make.subscript_expression parser
+          receiver left_bracket index right_bracket in
+
+        let (parser1, right_brace) = next_token parser in
+        let (parser, right_brace) =
+          if (Token.kind right_brace) = RightBrace then
+            Make.token parser1 right_brace
+          else
+            let parser = with_error parser SyntaxError.error1006 in
+            Make.missing parser (pos parser)
+        in
+        parser, expr, right_brace
+      | Name, maybe_assignment_op
+        when is_assignment_op maybe_assignment_op ->
+        (* PHP compatibility: expressions like `${x + 1}` are okay, but
+        expressions like `${x = 1}` are not okay, since `x` is parsed as if it
+        were a constant, and you can't use an assignment operator with a
+        constant. Flag the issue by reporting that a right brace is expected. *)
+        let (parser, expr) = Make.token parser1 name_or_keyword_as_name in
+        let (parser1, right_brace) = next_token parser in
+        let (parser, right_brace) =
+          if (Token.kind right_brace) = RightBrace then
+            Make.token parser1 right_brace
+          else
+            let parser = with_error parser SyntaxError.error1006 in
+            Make.missing parser (pos parser)
+        in
         (parser, expr, right_brace)
       | _, _ ->
+        let start_offset = Lexer.start_offset (lexer parser) in
         let (parser, expr) = parse_expression_with_reset_precedence parser in
+        let end_offset = Lexer.start_offset (lexer parser) in
+
+        let parser =
+          (* PHP compatibility: only allow a handful of expression types in
+          {$...}-expressions. *)
+          if dollar_inside_braces && not (
+              SCI.is_function_call_expression expr
+              || SCI.is_subscript_expression expr
+              || SCI.is_member_selection_expression expr
+              || SCI.is_safe_member_selection_expression expr
+              || SCI.is_variable_expression expr
+            )
+          then
+            let error = SyntaxError.make start_offset end_offset
+              SyntaxError.illegal_interpolated_brace_with_embedded_dollar_expression
+            in
+            let errors = errors parser in
+            with_errors parser (error :: errors)
+          else
+            parser
+        in
+
         let (parser1, token) = next_token_no_trailing parser in
         let (parser, right_brace) =
           if (Token.kind token) = RightBrace then
@@ -623,6 +727,17 @@ module WithStatementAndDeclAndTypeParser
         in
         let (parser, token3) = Make.token parser token3 in
         Make.embedded_subscript_expression parser var_expr token1 expr token3
+      | (LeftBracket, _, _) ->
+        (* PHP compatibility: throw an error if we encounter an
+        insufficiently-simple expression for a string like "$b[<expr>]", or if
+        the expression or closing bracket are missing. *)
+        let parser = parser1 in
+        let (parser, token1) = Make.token parser token1 in
+        let (parser, token2) = Make.missing parser (pos parser) in
+        let (parser, token3) = Make.missing parser (pos parser) in
+        let parser = with_error parser
+          SyntaxError.expected_simple_offset_expression in
+        Make.embedded_subscript_expression parser var_expr token1 token2 token3
       | _ -> (parser, var_expr)
     in
 
@@ -635,13 +750,12 @@ module WithStatementAndDeclAndTypeParser
       match Token.kind token with
       | Dollar
       | Variable ->
-        (* Parse any expression followed by a close brace.
-           TODO: We do not actually support all possible expressions;
-                 see above. Do we want to (1) catch this at parse time,
-                 (2) catch it in a later pass, or (3) just allow any
-                 expression here? *)
-        let (parser, acc) = put_opt parser head acc in
-        let (parser, expr) = parse_braced_expression_in_string parser in
+        let (parser, acc) = put_opt parser1 head acc in
+        let (parser, expr) = parse_braced_expression_in_string
+          parser
+          ~left_brace
+          ~dollar_inside_braces:true
+        in
         aux parser None (expr :: acc)
       | _ ->
         (* We do not support {$ inside a string unless the $ begins a
@@ -658,7 +772,7 @@ module WithStatementAndDeclAndTypeParser
       (* TODO: This should be an error in strict mode. *)
       (* We must not have trivia between the $ and the {, but we can have
       trivia after the {. That's why we use next_token_in_string here. *)
-      let (_, token) = next_token_in_string parser literal_kind in
+      let (parser1, token) = next_token_in_string parser literal_kind in
       match Token.kind token with
       | LeftBrace ->
         (* The thing in the braces has to be an expression that begins
@@ -673,9 +787,13 @@ module WithStatementAndDeclAndTypeParser
         (* TODO: Make the parse tree for the leading word in the expression
         a variable expression, not a qualified name expression. *)
 
-        let (parser, acc) = put_opt parser head acc in
+        let (parser, acc) = put_opt parser1 head acc in
         let (parser, dollar) = Make.token parser dollar in
-        let (parser, expr) = parse_braced_expression_in_string parser in
+        let (parser, expr) = parse_braced_expression_in_string
+          parser
+          ~left_brace:token
+          ~dollar_inside_braces:false
+        in
         aux parser None (expr :: dollar :: acc)
 
       | _ ->
@@ -707,7 +825,7 @@ module WithStatementAndDeclAndTypeParser
     structure, do not represent that as a list with one item. *)
     let (parser, results) =
       match results with
-      | h :: [] -> (parser, h)
+      | [h] -> (parser, h)
       | _ -> make_list parser (List.rev results)
     in
     Make.literal_expression parser results

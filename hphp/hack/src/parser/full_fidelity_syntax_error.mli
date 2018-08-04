@@ -299,3 +299,5 @@ val shadowing_reified : string
 val dollar_unary : string
 val decl_outside_global_scope : string
 val experimental_in_codegen_without_hacksperimental : string
+val expected_simple_offset_expression : string
+val illegal_interpolated_brace_with_embedded_dollar_expression : string

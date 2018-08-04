@@ -552,3 +552,10 @@ let decl_outside_global_scope = "Declarations are not supported outside global s
 
 let experimental_in_codegen_without_hacksperimental =
   "Experimental mode files are not allowed during codegen unless the hacksperimental flag is set"
+
+let expected_simple_offset_expression =
+  "A simple offset expression is expected here"
+
+let illegal_interpolated_brace_with_embedded_dollar_expression =
+  "The only legal expressions inside a {$...}-expression embedded in a string are " ^
+  "variables, function calls, subscript expressions, and member access expressions"

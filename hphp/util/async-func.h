@@ -188,6 +188,7 @@ private:
   unsigned m_hugeStackKb{0};
   char* m_tlExtraBase{nullptr};
   unsigned m_tlExtraKb{0};
+  MemBlock m_hugePages{nullptr, 0};
   pthread_attr_t m_attr;
   pthread_t m_threadId{0};
   // exception was thrown and thread was terminated

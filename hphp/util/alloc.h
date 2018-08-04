@@ -315,6 +315,12 @@ extern __thread int32_t s_numaNode;
  */
 extern __thread MemBlock s_tlSpace;
 /*
+ * The part of thread stack and s_tlSpace that lives on huge pages.  It could be
+ * empty if huge page isn't used for this thread.
+ */
+extern __thread MemBlock s_hugeRange;
+
+/*
  * enable the numa support in hhvm,
  * and determine whether threads should default to using
  * local memory.

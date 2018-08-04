@@ -68,6 +68,9 @@ void *AsyncFuncImpl::ThreadFunc(void *obj) {
   init_stack_limits(self->getThreadAttr());
   s_tlSpace = MemBlock{self->m_tlExtraBase, self->m_tlExtraKb * 1024};
   assertx(!s_tlSpace.ptr || s_tlSpace.size);
+  s_hugeRange = self->m_hugePages;
+  assertx(!s_hugeRange.ptr || s_hugeRange.size);
+
   set_numa_binding(self->m_node);
   self->setThreadName();
   self->threadFuncImpl();
@@ -183,6 +186,7 @@ void AsyncFuncImpl::start() {
           hintHuge(hugeStart + i * size2m, size2m);
         }
       }
+      m_hugePages = MemBlock { hugeStart, nHugePages * size2m };
     }
     if (m_tlExtraKb) {
       m_tlExtraBase = m_threadStack + rlim.rlim_cur;

@@ -112,7 +112,11 @@ let get_closest_svn_ancestor rev repo =
     | None -> primary_mergebase
     | Some p2 ->
       let p2_mergebase = get_closest_svn_ancestor p2 repo in
-      let max_svn primary p2 = max primary p2 in
+      let max_svn primary p2 = match primary, p2 with
+        | Error x, _ -> Error x
+        | _, Error y -> Error y
+        | Ok x, Ok y -> Ok (max x y)
+      in
       Future.merge primary_mergebase p2_mergebase max_svn
 
   (** Returns the files changed since the given svn_rev

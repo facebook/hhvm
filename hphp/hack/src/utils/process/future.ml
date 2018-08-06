@@ -32,7 +32,8 @@ type 'a promise =
   | Delayed : 'a delayed -> 'a promise
     (** A future formed from two underlying futures. Calling "get" blocks until
      * both underlying are ready. *)
-  | Merged : ('a t * 'b t * ('a -> 'b -> 'c)) -> 'c promise
+  | Merged : ('a t * 'b t * (('a, error) result ->
+      ('b, error) result -> ('c, error) result)) -> 'c promise
   | Incomplete of Process_types.t * (string -> 'a)
 
 (** float is the time the Future was constructed. *)
@@ -77,15 +78,16 @@ let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =
   | Delayed _ ->
     Error (Process_types.dummy.Process_types.info, Timed_out ("", "Delayed value not ready yet"))
   | Merged (a, b, handler) ->
-    let open Core_result.Monad_infix in
     let start_t = Unix.time () in
-    get ~timeout a >>= fun a ->
+    let a = get ~timeout a in
     let consumed_t = int_of_float @@ Unix.time () -. start_t in
     let timeout = timeout - consumed_t in
-    get ~timeout b >>= fun b ->
-    let result = handler a b in
-    let () = promise := Complete result in
-    Ok result
+    let b = get ~timeout b in
+    (** NB: We don't need to cache the result of running the handler because
+     * underlying Futures a and b have the values cached internally. So
+     * subsequent calls to "get" on this Merged Future will just re-run
+     * the handler on the cached result. *)
+    handler a b
   | Incomplete (process, transformer) ->
     let info = process.Process_types.info in
     match Process.read_and_wait_pid ~timeout process with
@@ -127,11 +129,8 @@ let rec is_ready : 'a. 'a t -> bool = fun (promise, _) ->
 
 let merge_status stat_a stat_b handler =
   match stat_a, stat_b with
-  | Complete_with_result (Ok va), Complete_with_result (Ok vb) ->
-    Complete_with_result (Ok (handler va vb))
-  | Complete_with_result (Error e), _
-  | _, Complete_with_result (Error e) ->
-    Complete_with_result (Error e)
+  | Complete_with_result a, Complete_with_result b ->
+    Complete_with_result (handler a b)
   | In_progress age_a, In_progress age_b when age_a > age_b ->
     In_progress age_a
   | In_progress age, _

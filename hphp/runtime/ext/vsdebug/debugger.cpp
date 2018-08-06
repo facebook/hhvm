@@ -1857,22 +1857,20 @@ void Debugger::onExceptionBreakpointHit(
   BreakpointManager* bpMgr = m_session->getBreakpointManager();
   ExceptionBreakMode breakMode = bpMgr->getExceptionBreakMode();
 
-  switch (breakMode) {
-    case BreakNone:
-      // Do not break on exceptions.
-      return;
-    case BreakUnhandled:
-    case BreakUserUnhandled:
-      // The PHP VM doesn't give us any way to distinguish between handled
-      // and unhandled exceptions. Print a message to the console but do
-      // not break.
-      sendUserMessage(userMsg.c_str(), DebugTransport::OutputLevelWarning);
-      return;
-    case BreakAll:
-      break;
-    default:
-      assertx(false);
+  if (breakMode == BreakNone) {
+    return;
   }
+
+  sendUserMessage(userMsg.c_str(), DebugTransport::OutputLevelWarning);
+
+  if (breakMode == BreakUnhandled || breakMode == BreakUserUnhandled) {
+    // The PHP VM doesn't give us any way to distinguish between handled
+    // and unhandled exceptions. A message was already printed indicating
+    // the exception, but we won't actually break in.
+    return;
+  }
+
+  assertx(breakMode == BreakAll);
 
   if (prepareToPauseTarget(ri) != PrepareToPauseResult::ReadyToPause) {
     return;

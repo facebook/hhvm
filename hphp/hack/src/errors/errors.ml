@@ -1644,7 +1644,7 @@ let enum_switch_wrong_class pos expected got =
 
 let invalid_shape_field_name p =
   add (Typing.err_code Typing.InvalidShapeFieldName) p
-    "Was expecting a constant string or class constant (for shape access)"
+    "Was expecting a constant string, class constant, or int (for shape access)"
 
 let invalid_shape_field_name_empty p =
   add (Typing.err_code Typing.InvalidShapeFieldNameEmpty) p

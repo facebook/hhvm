@@ -1,2 +1,2 @@
 File "shape_remove_key5.php", line 13, characters 26-27:
-Was expecting a constant string or class constant (for shape access) (Typing[4051])
+Was expecting a constant string, class constant, or int (for shape access) (Typing[4051])

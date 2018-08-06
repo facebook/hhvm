@@ -5,11 +5,12 @@ module Watchman_changes_comparator = struct
     match changes with
     | Watchman_unavailable ->
       "Watchman_unavailable"
-    | Watchman_pushed (Changed_merge_base (hg_rev, changes)) ->
+    | Watchman_pushed (Changed_merge_base (hg_rev, changes, clock)) ->
       let changes = String.concat ", " (SSet.elements changes) in
-      Printf.sprintf "Changed_merge_base(%s, %s)"
+      Printf.sprintf "Changed_merge_base(%s, %s, %s)"
         hg_rev
         changes
+        clock
     | Watchman_pushed (State_enter (name, json)) ->
       Printf.sprintf "State_enter(%s, %s)"
         name
@@ -32,10 +33,11 @@ module Watchman_changes_comparator = struct
       match exp, actual with
         | Files_changed exp, Files_changed actual ->
           SSet.equal exp actual
-        | Changed_merge_base (hg_rev_exp, changes_exp),
-          Changed_merge_base (hg_rev_actual, changes_actual) ->
+        | Changed_merge_base (hg_rev_exp, changes_exp, clock_exp),
+          Changed_merge_base (hg_rev_actual, changes_actual, clock_actual) ->
           (String.equal hg_rev_exp hg_rev_actual) &&
-          (SSet.equal changes_exp changes_actual)
+          (SSet.equal changes_exp changes_actual) &&
+          (String.equal clock_exp clock_actual)
         | State_enter (state_exp, json_exp),
           State_enter (state_actual, json_actual)
         | State_leave (state_exp, json_exp),

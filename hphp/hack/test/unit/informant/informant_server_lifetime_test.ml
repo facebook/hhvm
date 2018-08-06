@@ -1,8 +1,15 @@
 module Target_mini_state_comparator = struct
   type t = ServerMonitorUtils.target_mini_state
-  let to_string { ServerMonitorUtils.mini_state_everstore_handle; target_svn_rev; is_tiny } =
-    Printf.sprintf "(Target mini state. everstore handle: %s. svn_rev: %d. is_tiny: %b)"
-      mini_state_everstore_handle target_svn_rev is_tiny
+  let to_string {
+    ServerMonitorUtils.mini_state_everstore_handle;
+    target_svn_rev;
+    is_tiny;
+    watchman_mergebase; } =
+      Printf.sprintf ("(Target mini state. everstore handle: %s. svn_rev: %d." ^^
+        " is_tiny: %b. watchman_mergebase: %s)")
+        mini_state_everstore_handle target_svn_rev is_tiny
+        (Option.value_map watchman_mergebase ~default:"None"
+          ~f:ServerMonitorUtils.watchman_mergebase_to_string)
 
   let is_equal x y = x = y
 end;;
@@ -179,10 +186,16 @@ let test_restart_server_with_target_saved_state mock_server_config temp_dir =
   let monitor = Test_monitor.check_and_run_loop_once monitor in
   ignore monitor;
   let last_call = Mock_server_config.get_last_start_server_call () in
+  let expected_mergebase = {
+    ServerMonitorUtils.mergebase_svn_rev = 200;
+    files_changed = SSet.empty;
+    watchman_clock = "dummy_clock";
+  } in
   let state_target = {
     ServerMonitorUtils.mini_state_everstore_handle = "dummy_handle_for_svn_200";
     target_svn_rev = 200;
     is_tiny = false;
+    watchman_mergebase = Some expected_mergebase;
   } in
   let expected = Some (Some state_target) in
   Start_server_args_opt_asserter.assert_equals expected last_call

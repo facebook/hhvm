@@ -159,7 +159,7 @@ let process_changes changes env =
   | Watchman_unavailable ->
     Hh_logger.log "Watchman unavailable. Exiting";
     exit 1
-  | Watchman_pushed (Changed_merge_base (mergebase, changes)) ->
+  | Watchman_pushed (Changed_merge_base (mergebase, changes, _)) ->
     Hh_logger.log "changed mergebase: %s" mergebase;
     let changes = String.concat "\n" (SSet.elements changes) in
     Hh_logger.log "changes: %s" changes;

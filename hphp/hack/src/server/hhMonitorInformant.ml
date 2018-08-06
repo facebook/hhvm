@@ -343,7 +343,7 @@ module Revision_tracker = struct
   type repo_transition =
     | State_enter of Hg.hg_rev
     | State_leave of Hg.hg_rev
-    | Changed_merge_base of Hg.hg_rev
+    | Changed_merge_base of Hg.hg_rev * SSet.t * Watchman.clock
 
   type init_settings = {
     watchman : Watchman.watchman_instance ref;
@@ -483,16 +483,23 @@ module Revision_tracker = struct
     | true, Changed_merge_base _, _, [] when use_xdb ->
       (** No XDB results, so w don't restart. *)
       Move_along
-    | true, Changed_merge_base _, _, (nearest_xdb_result :: _) when use_xdb ->
+    | true, Changed_merge_base (_rev, files_changed, watchman_clock), _,
+      (nearest_xdb_result :: _) when use_xdb ->
       let state_distance = abs @@ nearest_xdb_result.Xdb.svn_rev - svn_rev in
       let incremental_distance = abs @@ svn_rev - !(env.current_base_revision) in
       let () = HackEventLogger.informant_decision_on_saved_state
         ~start_t ~state_distance ~incremental_distance in
       if incremental_distance > state_distance then
+        let watchman_mergebase = {
+          ServerMonitorUtils.mergebase_svn_rev = svn_rev;
+          files_changed;
+          watchman_clock;
+        } in
         let target_state = {
           ServerMonitorUtils.mini_state_everstore_handle = nearest_xdb_result.Xdb.everstore_handle;
           target_svn_rev = nearest_xdb_result.Xdb.svn_rev;
           is_tiny;
+          watchman_mergebase = Some watchman_mergebase;
         } in
         Restart_server (Some target_state)
       else
@@ -512,7 +519,7 @@ module Revision_tracker = struct
     let hg_rev = match transition with
       | State_enter hg_rev
       | State_leave hg_rev
-      | Changed_merge_base hg_rev -> hg_rev
+      | Changed_merge_base (hg_rev, _, _) -> hg_rev
     in
     match cached_svn_rev ~start_t:timestamp env.rev_map hg_rev with
     | None ->
@@ -582,9 +589,9 @@ module Revision_tracker = struct
     | Watchman.Watchman_unavailable
     | Watchman.Watchman_synchronous _ ->
       None
-    | Watchman.Watchman_pushed (Watchman.Changed_merge_base (rev, _)) ->
+    | Watchman.Watchman_pushed (Watchman.Changed_merge_base (rev, files, clock)) ->
       let () = Hh_logger.log "Changed_merge_base: %s" rev in
-      Some (Changed_merge_base rev)
+      Some (Changed_merge_base (rev, files, clock))
     | Watchman.Watchman_pushed (Watchman.State_enter (state, json))
         when state = "hg.update" ->
         let open Option in
@@ -620,8 +627,8 @@ module Revision_tracker = struct
       Queue.add (State_enter hg_rev, Unix.time ()) env.state_changes
     | Some (State_leave hg_rev) ->
       Queue.add (State_leave hg_rev, Unix.time ()) env.state_changes
-    | Some (Changed_merge_base hg_rev) ->
-      Queue.add (Changed_merge_base hg_rev, Unix.time ()) env.state_changes
+    | Some (Changed_merge_base _ as change) ->
+      Queue.add (change, Unix.time ()) env.state_changes
     in
     churn_changes server_state env
   end
@@ -651,9 +658,9 @@ module Revision_tracker = struct
     | Some (State_leave hg_rev) ->
       let () = Revision_map.add_query ~hg_rev env.inits.root env.rev_map in
       preprocess server_state (State_leave hg_rev) env
-    | Some (Changed_merge_base hg_rev) ->
+    | Some (Changed_merge_base (hg_rev, _, _) as change) ->
       let () = Revision_map.add_query ~hg_rev env.inits.root env.rev_map in
-      preprocess server_state (Changed_merge_base hg_rev) env
+      preprocess server_state change env
     in
     (** If we make an "early" decision to either kill or restart, we toss
      * out earlier state changes and don't need to pump the queue anymore.

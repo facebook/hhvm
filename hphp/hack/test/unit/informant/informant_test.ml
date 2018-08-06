@@ -8,15 +8,19 @@ module Report_comparator : Asserter.Comparator
       | Restart_server state ->
         let str = begin match state with
           | None -> "None"
-          | Some state ->
-            Printf.sprintf "(Some %s %d)"
-              state.ServerMonitorUtils.mini_state_everstore_handle
-              state.ServerMonitorUtils.target_svn_rev
+          | Some { ServerMonitorUtils.mini_state_everstore_handle;
+              target_svn_rev;
+              watchman_mergebase; _ } ->
+            Printf.sprintf "(Some %s %d %s)"
+              mini_state_everstore_handle
+              target_svn_rev
+              (Option.value_map watchman_mergebase ~default:"None"
+                ~f:ServerMonitorUtils.watchman_mergebase_to_string)
         end in
         Printf.sprintf "Restart_server %s" str
 
     let is_equal exp actual =
-      exp = actual
+      String.equal (to_string exp) (to_string actual)
 end;;
 
 
@@ -40,10 +44,8 @@ module Tools = struct
 end;;
 
 
-(** When base revision has changed significantly, informant asks
- * for server restart. Also, ensures that there are entries in XDB
- * table for those revisions. *)
-let test_informant_restarts_significant_move temp_dir =
+(** Create XDB table entries for rev 5 and 200. Start Informant. *)
+let basic_setup_rev_5_and_200_and_start_informant temp_dir =
   Tools.set_hg_to_svn_map ();
   (** In XDB table, add an entry for svn rev 200. *)
   Tools.set_xdb ~state_svn_rev:200
@@ -71,6 +73,15 @@ let test_informant_restarts_significant_move temp_dir =
     informant Informant_sig.Server_alive in
   Report_asserter.assert_equals Informant_sig.Move_along report
     "no distance moved" ;
+  informant
+
+
+
+(** When base revision has changed significantly, informant asks
+ * for server restart. Also, ensures that there are entries in XDB
+ * table for those revisions. *)
+let test_informant_restarts_significant_move temp_dir =
+  let informant = basic_setup_rev_5_and_200_and_start_informant temp_dir in
 
   (**** Following tests all have a State_enter followed by a State_leave
    * and then a Changed_merge_base. *)
@@ -94,10 +105,16 @@ let test_informant_restarts_significant_move temp_dir =
     informant Tools.State_leave Tools.hg_rev_200
     Informant_sig.Server_alive Informant_sig.Move_along
     "state leave significant distance";
+  let expected_mergebase = {
+    ServerMonitorUtils.mergebase_svn_rev = 200;
+    files_changed = SSet.empty;
+    watchman_clock = "dummy_clock";
+  } in
   let expected_state_target = {
     ServerMonitorUtils.mini_state_everstore_handle = "dummy_handle_for_svn_200";
     is_tiny = false;
     target_svn_rev = 200;
+    watchman_mergebase = Some expected_mergebase;
   } in
   Tools.test_transition
     informant Tools.Changed_merge_base Tools.hg_rev_200
@@ -142,10 +159,16 @@ let test_informant_restarts_significant_move temp_dir =
     informant Tools.State_leave Tools.hg_rev_5
     Informant_sig.Server_alive Informant_sig.Move_along
     "state leave significant distance";
+  let expected_mergebase = {
+    ServerMonitorUtils.mergebase_svn_rev = 5;
+    files_changed = SSet.empty;
+    watchman_clock = "dummy_clock";
+  } in
   let expected_state_target = {
     ServerMonitorUtils.mini_state_everstore_handle = "dummy_handle_for_svn_5";
     is_tiny = false;
     target_svn_rev = 5;
+    watchman_mergebase = Some expected_mergebase;
   } in
   Tools.test_transition
     informant Tools.Changed_merge_base Tools.hg_rev_5
@@ -153,6 +176,40 @@ let test_informant_restarts_significant_move temp_dir =
     (Informant_sig.Restart_server (Some expected_state_target))
     "Move back significant distance";
   true
+
+
+(**
+ * Like the above test, but tests a lot less.
+ *
+ * Informant starts, and we jump to a local commit that is hg_rev_200 plus
+ * some files changed. This triggers an informant-directed restart which
+ * also has rev 200 as the mergebase, plus the files changed list
+ * threaded through.
+ *)
+let test_informant_restarts_significant_move_with_local_changes temp_dir =
+  let informant = basic_setup_rev_5_and_200_and_start_informant temp_dir in
+
+  (**** Following tests all have a State_enter followed by a State_leave
+   * and then a Changed_merge_base. *)
+  let expected_mergebase = {
+    ServerMonitorUtils.mergebase_svn_rev = 200;
+    files_changed = SSet.singleton "local_file.php";
+    watchman_clock = "dummy_clock";
+  } in
+  let expected_state_target = {
+    ServerMonitorUtils.mini_state_everstore_handle = "dummy_handle_for_svn_200";
+    is_tiny = false;
+    target_svn_rev = 200;
+    watchman_mergebase = Some expected_mergebase;
+  } in
+  Tools.test_transition
+    informant (Tools.Changed_merge_base_plus_files (SSet.singleton "local_file.php"))
+    Tools.hg_rev_200_plus_local
+    Informant_sig.Server_alive
+    (Informant_sig.Restart_server (Some expected_state_target))
+    "Move forward significant distance";
+  true
+
 
 (** This test is similar to the above (but shorter) except the
  * query for the SVN revision for the Changed_merge_base revision is
@@ -359,6 +416,8 @@ let tests =
   [
     "test_informant_restarts_significant_move", (fun () ->
       run_test test_informant_restarts_significant_move);
+    "test_informant_restarts_significant_move_with_local_changes", (fun () ->
+      run_test test_informant_restarts_significant_move_with_local_changes);
     "test_informant_restarts_significant_move_delayed", (fun () ->
       run_test test_informant_restarts_significant_move_delayed);
     "test_informant_no_saved_state_no_restart", (fun () ->

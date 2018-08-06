@@ -667,7 +667,6 @@ private:
   friend bool could_contain_objects(const Type&);
   friend bool could_copy_on_write(const Type&);
   friend Type loosen_staticness(Type);
-  friend Type loosen_unstaticness(Type);
   friend Type loosen_dvarrayness(Type);
   friend Type loosen_values(Type);
   friend Type loosen_emptiness(Type);
@@ -1352,17 +1351,11 @@ bool could_have_magic_bool_conversion(const Type&);
 Type stack_flav(Type a);
 
 /*
- * Discard any countedness information about the type. Force any type which
- * contains only static or counted variants to contain both. Doesn't change the
- * type otherwise.
+ * Discard any countedness information about the type. Force any type
+ * (recursively) which contains only static or counted variants to contain
+ * both. Doesn't change the type otherwise.
  */
 Type loosen_staticness(Type);
-
-/*
- * Make sure the corresponding static type is present for any
- * non-static type that is present.
- */
-Type loosen_unstaticness(Type);
 
 /*
  * Discard any specific knowledge about whether the type is a d/varray. Force

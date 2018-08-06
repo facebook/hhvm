@@ -2146,16 +2146,27 @@ TEST(Type, LoosenStaticness) {
   auto const program = make_program();
   Index index{ program.get() };
 
-  for (auto const& t : all_with_waithandles(index)) {
+  for (auto const& t : all()) {
     if (t == TUncArrKey || t == TOptUncArrKey ||
         t == TInitUnc || t == TUnc ||
-        (t.subtypeOfAny(TOptSArr,
-                        TOptSVec,
-                        TOptSDict,
-                        TOptSKeyset,
+        (t.subtypeOfAny(TOptArr,
+                        TOptVec,
+                        TOptDict,
+                        TOptKeyset,
                         TOptSStr) &&
          t != TInitNull)) continue;
     EXPECT_EQ(loosen_staticness(t), t);
+  }
+
+  for (auto const& t : all()) {
+    EXPECT_EQ(loosen_staticness(wait_handle(index, t)),
+              wait_handle(index, loosen_staticness(t)));
+    if (t.subtypeOf(TInitGen)) {
+      EXPECT_EQ(loosen_staticness(arr_packedn(t)),
+                arr_packedn(loosen_staticness(t)));
+      EXPECT_EQ(loosen_staticness(sarr_packedn(t)),
+                arr_packedn(loosen_staticness(t)));
+    }
   }
 
   auto test_map          = MapElems{};
@@ -2189,13 +2200,20 @@ TEST(Type, LoosenStaticness) {
     { sval(s_test.get()), TStr },
     { sarr_packedn(TInt), arr_packedn(TInt) },
     { sarr_packed({TInt, TBool}), arr_packed({TInt, TBool}) },
-    { sarr_mapn(TSStr, TInt), arr_mapn(TSStr, TInt) },
+    { sarr_mapn(TSStr, TInt), arr_mapn(TStr, TInt) },
+    { sarr_mapn(TInt, TSDictN), arr_mapn(TInt, TDictN) },
     { sarr_map(test_map), arr_map(test_map) },
   };
   for (auto const& p : tests) {
     EXPECT_EQ(loosen_staticness(p.first), p.second);
     if (p.first == TUnc || p.first == TInitUnc) continue;
     EXPECT_EQ(loosen_staticness(opt(p.first)), opt(p.second));
+    EXPECT_EQ(loosen_staticness(wait_handle(index, p.first)),
+              wait_handle(index, p.second));
+    EXPECT_EQ(loosen_staticness(arr_packedn(p.first)),
+              arr_packedn(p.second));
+    EXPECT_EQ(loosen_staticness(sarr_packedn(p.first)),
+              arr_packedn(p.second));
   }
 }
 

@@ -1948,7 +1948,9 @@ bool Type::checkInvariants() const {
       assert(isIntType(kv.first.m_type) ||
              kv.first.m_type == KindOfPersistentString);
       assert(kv.second.subtypeOf(valBits) && kv.second != TBottom);
-      assert(!isKeyset || from_cell(kv.first) == kv.second);
+      assert(!isKeyset ||
+             loosen_staticness(from_cell(kv.first)) ==
+             loosen_staticness(kv.second));
       if (packed) {
         packed = isIntType(kv.first.m_type) && kv.first.m_data.num == idx;
         ++idx;
@@ -3550,6 +3552,59 @@ Type loosen_staticness(Type t) {
   check(BDictN);
   check(BKeysetE);
   check(BKeysetN);
+
+  switch (t.m_dataTag) {
+    case DataTag::None:
+    case DataTag::Str:
+    case DataTag::Int:
+    case DataTag::Dbl:
+    case DataTag::Cls:
+    case DataTag::ArrLikeVal:
+      break;
+
+    case DataTag::Obj:
+      if (t.m_data.dobj.whType) {
+        auto whType = t.m_data.dobj.whType.mutate();
+        *whType = loosen_staticness(std::move(*whType));
+      }
+      break;
+
+    case DataTag::RefInner: {
+      auto inner = t.m_data.inner.mutate();
+      *inner = loosen_staticness(std::move(*inner));
+      break;
+    }
+
+    case DataTag::ArrLikePacked: {
+      auto& packed = *t.m_data.packed.mutate();
+      for (auto& e : packed.elems) {
+        e = loosen_staticness(std::move(e));
+      }
+      break;
+    }
+
+    case DataTag::ArrLikePackedN: {
+      auto& packed = *t.m_data.packedn.mutate();
+      packed.type = loosen_staticness(std::move(packed.type));
+      break;
+    }
+
+    case DataTag::ArrLikeMap: {
+      auto& map = *t.m_data.map.mutate();
+      for (auto it = map.map.begin(); it != map.map.end(); it++) {
+        map.map.update(it, loosen_staticness(it->second));
+      }
+      break;
+    }
+
+    case DataTag::ArrLikeMapN: {
+      auto& map = *t.m_data.mapn.mutate();
+      map.key = loosen_staticness(std::move(map.key));
+      map.val = loosen_staticness(std::move(map.val));
+      break;
+    }
+  }
+
   return t;
 }
 

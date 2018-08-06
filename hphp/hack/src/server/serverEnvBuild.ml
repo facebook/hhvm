@@ -28,8 +28,9 @@ let watchman_expression_terms = [
     J.pred "anyof" @@ [
       J.strlist ["suffix"; "php"];
       J.strlist ["suffix"; "phpt"];
-      J.strlist ["suffix"; "hh"];
       J.strlist ["suffix"; "hack"];
+      J.strlist ["suffix"; "hck"];
+      J.strlist ["suffix"; "hh"];
       J.strlist ["suffix"; "hhi"];
       J.strlist ["suffix"; "xhp"];
     ];

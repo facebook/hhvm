@@ -718,29 +718,35 @@ let handle_mode
         Printf.printf "%s %s\n" r.res_name r.res_ty
       end result.Utils.With_complete_flag.value
   | Ffp_autocomplete ->
-      let file_text = cat (Relative_path.to_absolute filename) in
-      (* TODO: Use a magic word/symbol to identify autocomplete location instead *)
-      let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [1-9][0-9]*" in
-      let position = try
-        let _ = Str.search_forward args_regex file_text 0 in
-        let raw_flags = Str.matched_string file_text in
-        match split ' ' raw_flags with
-        | [ _; row; column] ->
-          { line = int_of_string row; column = int_of_string column }
-        | _ -> failwith "Invalid test file: no flags found"
-      with
-        Not_found -> failwith "Invalid test file: no flags found"
-      in
-      let result =
-        FfpAutocompleteService.auto_complete tcopt file_text position
-        ~filter_by_token:true
-      in begin
+      begin try
+        let file_text = cat (Relative_path.to_absolute filename) in
+        (* TODO: Use a magic word/symbol to identify autocomplete location instead *)
+        let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [1-9][0-9]*" in
+        let position = try
+          let _ = Str.search_forward args_regex file_text 0 in
+          let raw_flags = Str.matched_string file_text in
+          match split ' ' raw_flags with
+          | [ _; row; column] ->
+            { line = int_of_string row; column = int_of_string column }
+          | _ -> failwith "Invalid test file: no flags found"
+        with
+          Not_found -> failwith "Invalid test file: no flags found"
+        in
+        let result =
+          FfpAutocompleteService.auto_complete tcopt file_text position
+          ~filter_by_token:true
+        in
         match result with
         | [] -> Printf.printf "No result found\n"
         | res -> List.iter res ~f:begin fun r ->
             let open AutocompleteTypes in
             Printf.printf "%s\n" r.res_name
           end
+      with
+      | Failure msg
+      | Invalid_argument msg ->
+        Printf.printf "%s\n" msg;
+        exit 1
       end
   | Color ->
       Relative_path.Map.iter files_info begin fun fn fileinfo ->

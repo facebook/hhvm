@@ -65,8 +65,25 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 31,
+        "line": 37,
         "character": 3
+      },
+      "context": {
+        "includeDeclaration": true
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 14,
+    "method": "textDocument/references",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 45,
+        "character": 13
       },
       "context": {
         "includeDeclaration": true

@@ -291,6 +291,10 @@ let go_ide (filename, line, char) new_name genv env =
           new_name;
         } in
       go command genv env
+    | Enum, [enum_name] ->
+      let command =
+        ServerRefactorTypes.ClassRename (enum_name, new_name) in
+      go command genv env
     | Class, [class_name] ->
       let command =
         ServerRefactorTypes.ClassRename (class_name, new_name) in

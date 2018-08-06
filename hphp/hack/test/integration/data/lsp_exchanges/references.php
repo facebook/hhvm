@@ -28,6 +28,12 @@ function h(string $x): int {
   return 5;
 }
 
+enum RefTestEnum: int {  // Request ID 14 on RefTestEnum
+  SMALL = 0;
+  MEDIUM = 1;
+  LARGE = 2;
+}
+
 function ref_test_2(int $x): void {   //  Should match
   $x = 3; // Request ID 13: Looking for this $x   //  Should match
   j($x) + $x + h("\$x = $x");         //  First, second, and fourth should match
@@ -37,4 +43,5 @@ function ref_test_2(int $x): void {   //  Should match
     return $x + 1; };                 //  Should not match
   $lambda4 = function($b) use($x) {   //  Should match
     return $x + $b; };                //  Should match
+  $size = RefTestEnum::SMALL;
 }

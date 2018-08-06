@@ -75,11 +75,11 @@
           {
             "range": {
               "start": {
-                "line": 46,
+                "line": 52,
                 "character": 22
               },
               "end": {
-                "line": 46,
+                "line": 52,
                 "character": 30
               }
             },
@@ -124,11 +124,11 @@
           {
             "range": {
               "start": {
-                "line": 48,
+                "line": 54,
                 "character": 19
               },
               "end": {
-                "line": 48,
+                "line": 54,
                 "character": 28
               }
             },
@@ -137,11 +137,11 @@
           {
             "range": {
               "start": {
-                "line": 47,
+                "line": 53,
                 "character": 15
               },
               "end": {
-                "line": 47,
+                "line": 53,
                 "character": 24
               }
             },
@@ -150,11 +150,11 @@
           {
             "range": {
               "start": {
-                "line": 46,
+                "line": 52,
                 "character": 11
               },
               "end": {
-                "line": 46,
+                "line": 52,
                 "character": 20
               }
             },
@@ -163,11 +163,11 @@
           {
             "range": {
               "start": {
-                "line": 43,
+                "line": 49,
                 "character": 20
               },
               "end": {
-                "line": 43,
+                "line": 49,
                 "character": 29
               }
             },
@@ -212,11 +212,11 @@
           {
             "range": {
               "start": {
-                "line": 45,
+                "line": 51,
                 "character": 43
               },
               "end": {
-                "line": 45,
+                "line": 51,
                 "character": 54
               }
             },
@@ -225,11 +225,11 @@
           {
             "range": {
               "start": {
-                "line": 45,
+                "line": 51,
                 "character": 15
               },
               "end": {
-                "line": 45,
+                "line": 51,
                 "character": 26
               }
             },
@@ -274,11 +274,11 @@
           {
             "range": {
               "start": {
-                "line": 47,
+                "line": 53,
                 "character": 26
               },
               "end": {
-                "line": 47,
+                "line": 53,
                 "character": 38
               }
             },
@@ -310,11 +310,11 @@
           {
             "range": {
               "start": {
-                "line": 48,
+                "line": 54,
                 "character": 30
               },
               "end": {
-                "line": 48,
+                "line": 54,
                 "character": 46
               }
             },
@@ -333,11 +333,11 @@
           {
             "range": {
               "start": {
-                "line": 62,
+                "line": 69,
                 "character": 34
               },
               "end": {
-                "line": 62,
+                "line": 69,
                 "character": 40
               }
             },
@@ -346,11 +346,11 @@
           {
             "range": {
               "start": {
-                "line": 63,
+                "line": 70,
                 "character": 2
               },
               "end": {
-                "line": 63,
+                "line": 70,
                 "character": 8
               }
             },
@@ -359,11 +359,11 @@
           {
             "range": {
               "start": {
-                "line": 64,
+                "line": 71,
                 "character": 4
               },
               "end": {
-                "line": 64,
+                "line": 71,
                 "character": 10
               }
             },
@@ -372,11 +372,11 @@
           {
             "range": {
               "start": {
-                "line": 64,
+                "line": 71,
                 "character": 14
               },
               "end": {
-                "line": 64,
+                "line": 71,
                 "character": 20
               }
             },
@@ -385,11 +385,11 @@
           {
             "range": {
               "start": {
-                "line": 64,
+                "line": 71,
                 "character": 32
               },
               "end": {
-                "line": 64,
+                "line": 71,
                 "character": 38
               }
             },
@@ -398,11 +398,11 @@
           {
             "range": {
               "start": {
-                "line": 66,
+                "line": 73,
                 "character": 20
               },
               "end": {
-                "line": 66,
+                "line": 73,
                 "character": 26
               }
             },
@@ -411,11 +411,11 @@
           {
             "range": {
               "start": {
-                "line": 69,
+                "line": 76,
                 "character": 30
               },
               "end": {
-                "line": 69,
+                "line": 76,
                 "character": 36
               }
             },
@@ -424,11 +424,11 @@
           {
             "range": {
               "start": {
-                "line": 70,
+                "line": 77,
                 "character": 11
               },
               "end": {
-                "line": 70,
+                "line": 77,
                 "character": 17
               }
             },
@@ -460,11 +460,11 @@
           {
             "range": {
               "start": {
-                "line": 50,
+                "line": 56,
                 "character": 22
               },
               "end": {
-                "line": 50,
+                "line": 56,
                 "character": 39
               }
             },
@@ -604,11 +604,11 @@
           {
             "range": {
               "start": {
-                "line": 42,
+                "line": 48,
                 "character": 9
               },
               "end": {
-                "line": 42,
+                "line": 48,
                 "character": 20
               }
             },
@@ -617,11 +617,11 @@
           {
             "range": {
               "start": {
-                "line": 58,
+                "line": 65,
                 "character": 2
               },
               "end": {
-                "line": 58,
+                "line": 65,
                 "character": 13
               }
             },
@@ -630,11 +630,11 @@
           {
             "range": {
               "start": {
-                "line": 41,
+                "line": 47,
                 "character": 0
               },
               "end": {
-                "line": 41,
+                "line": 47,
                 "character": 0
               }
             },
@@ -653,11 +653,24 @@
           {
             "range": {
               "start": {
-                "line": 53,
+                "line": 60,
                 "character": 15
               },
               "end": {
-                "line": 53,
+                "line": 60,
+                "character": 32
+              }
+            },
+            "newText": "new_async_test_rename_method"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 66,
+                "character": 15
+              },
+              "end": {
+                "line": 66,
                 "character": 32
               }
             },
@@ -667,27 +680,50 @@
             "range": {
               "start": {
                 "line": 59,
-                "character": 15
-              },
-              "end": {
-                "line": 59,
-                "character": 32
-              }
-            },
-            "newText": "new_async_test_rename_method"
-          },
-          {
-            "range": {
-              "start": {
-                "line": 52,
                 "character": 0
               },
               "end": {
-                "line": 52,
+                "line": 59,
                 "character": 0
               }
             },
             "newText": "\n<<__Deprecated(\"Use `new_async_test_rename_method` instead\")>>\nasync function async_test_rename(): Awaitable<int> {\n  return await new_async_test_rename_method();\n}\n"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 13,
+    "result": {
+      "changes": {
+        "${php_file_uri}": [
+          {
+            "range": {
+              "start": {
+                "line": 42,
+                "character": 5
+              },
+              "end": {
+                "line": 42,
+                "character": 19
+              }
+            },
+            "newText": "TSHIRT_SIZES"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 57,
+                "character": 10
+              },
+              "end": {
+                "line": 57,
+                "character": 24
+              }
+            },
+            "newText": "TSHIRT_SIZES"
           }
         ]
       }

@@ -103,7 +103,7 @@
         }
       },
       {
-        "uri": "${php_file_uri}",
+        "uri": "file://${root_path}${path_sep}references.php",
         "range": {
           "start": {
             "line": 19,
@@ -122,14 +122,14 @@
     "id": 13,
     "result": [
       {
-        "uri": "${php_file_uri}",
+        "uri": "file://${root_path}${path_sep}references.php",
         "range": {
           "start": {
-            "line": 30,
+            "line": 36,
             "character": 24
           },
           "end": {
-            "line": 30,
+            "line": 36,
             "character": 26
           }
         }
@@ -138,11 +138,11 @@
         "uri": "file://${root_path}${path_sep}references.php",
         "range": {
           "start": {
-            "line": 31,
+            "line": 37,
             "character": 2
           },
           "end": {
-            "line": 31,
+            "line": 37,
             "character": 4
           }
         }
@@ -151,11 +151,11 @@
         "uri": "file://${root_path}${path_sep}references.php",
         "range": {
           "start": {
-            "line": 32,
+            "line": 38,
             "character": 4
           },
           "end": {
-            "line": 32,
+            "line": 38,
             "character": 6
           }
         }
@@ -164,11 +164,11 @@
         "uri": "file://${root_path}${path_sep}references.php",
         "range": {
           "start": {
-            "line": 32,
+            "line": 38,
             "character": 10
           },
           "end": {
-            "line": 32,
+            "line": 38,
             "character": 12
           }
         }
@@ -177,11 +177,11 @@
         "uri": "file://${root_path}${path_sep}references.php",
         "range": {
           "start": {
-            "line": 32,
+            "line": 38,
             "character": 24
           },
           "end": {
-            "line": 32,
+            "line": 38,
             "character": 26
           }
         }
@@ -190,11 +190,11 @@
         "uri": "file://${root_path}${path_sep}references.php",
         "range": {
           "start": {
-            "line": 34,
+            "line": 40,
             "character": 20
           },
           "end": {
-            "line": 34,
+            "line": 40,
             "character": 22
           }
         }
@@ -203,11 +203,11 @@
         "uri": "file://${root_path}${path_sep}references.php",
         "range": {
           "start": {
-            "line": 37,
+            "line": 43,
             "character": 30
           },
           "end": {
-            "line": 37,
+            "line": 43,
             "character": 32
           }
         }
@@ -216,12 +216,44 @@
         "uri": "file://${root_path}${path_sep}references.php",
         "range": {
           "start": {
-            "line": 38,
+            "line": 44,
             "character": 11
           },
           "end": {
-            "line": 38,
+            "line": 44,
             "character": 13
+          }
+        }
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 14,
+    "result": [
+      {
+        "uri": "file://${root_path}${path_sep}references.php",
+        "range": {
+          "start": {
+            "line": 30,
+            "character": 5
+          },
+          "end": {
+            "line": 30,
+            "character": 16
+          }
+        }
+      },
+      {
+        "uri": "file://${root_path}${path_sep}references.php",
+        "range": {
+          "start": {
+            "line": 45,
+            "character": 10
+          },
+          "end": {
+            "line": 45,
+            "character": 21
           }
         }
       }

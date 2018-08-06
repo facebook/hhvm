@@ -61,7 +61,7 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 45,
+        "line": 51,
         "character": 18
       },
       "newName": "some_other_method"
@@ -76,7 +76,7 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 47,
+        "line": 53,
         "character": 34
       },
       "newName": "ANOTHER_STR_CONSTANT"
@@ -91,7 +91,7 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 48,
+        "line": 54,
         "character": 39
       },
       "newName": "AVOGADRO_CONSTANT"
@@ -106,7 +106,7 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 66,
+        "line": 73,
         "character": 23
       },
       "newName": "kittens_and_rainbows"
@@ -121,7 +121,7 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 50,
+        "line": 56,
         "character": 29
       },
       "newName": "new_and_improved"
@@ -181,7 +181,7 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 58,
+        "line": 65,
         "character": 11
       },
       "newName": "new_test_rename_method"
@@ -196,10 +196,25 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 59,
+        "line": 66,
         "character": 29
       },
       "newName": "new_async_test_rename_method"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 13,
+    "method": "textDocument/rename",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 57,
+        "character": 13
+      },
+      "newName": "TSHIRT_SIZES"
     }
   },
   {

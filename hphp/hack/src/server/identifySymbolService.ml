@@ -236,7 +236,28 @@ let visitor = object (self)
     self#plus acc (super#on_catch env (sid, lid, block))
 
   method! on_class_ env class_ =
+    let open Tast in
+    let open Aast in
     let acc = process_class class_ in
+    (*
+      Enums implicitly extend BuiltinEnum. However, BuiltinEnums also extend
+      the same Enum as a type parameter.
+
+      Ex: enum Size extends BuiltinEnum<Size> { ... }
+
+      This will return the definition of the enum twice when finding references
+      on it. As a result, we set the extends property of an enum's tast to an empty list.
+    *)
+    let class_ = match class_.c_extends with
+      | [(_,
+          Happly ((_, builtin_enum), [(_,
+            Happly (c_name, []))]
+          )
+        )]
+        when c_name = class_.c_name && builtin_enum = Naming_special_names.Classes.cHH_BuiltinEnum
+        -> { class_ with c_extends = [] }
+      | _ -> class_
+    in
     self#plus acc (super#on_class_ env class_)
 
   method! on_fun_ env fun_ =

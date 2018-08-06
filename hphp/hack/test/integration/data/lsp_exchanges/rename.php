@@ -40,6 +40,12 @@ class TestClass { // 2. Rename TestClass
   {}
 }
 
+enum RenameTestEnum: int {
+  SMALL = 0;
+  MEDIUM = 1;
+  LARGE = 2;
+}
+
 function test_rename(): void {
   $test_class = new TestClass(1);
   // 3. Rename 1st test_method
@@ -49,6 +55,7 @@ function test_rename(): void {
   $vec_int_const = TestClass::VEC_INT_CONSTANT; // 5. Rename VEC_INT_CONSTANT
   // 7. Renaming deprecated_method
   $num = $test_class->deprecated_method(5, "", 4, 4, 3, 5, "hello");
+  $size = RenameTestEnum::SMALL; // 13. Rename TestEnum
 }
 
 async function async_test_rename(): Awaitable<int> {

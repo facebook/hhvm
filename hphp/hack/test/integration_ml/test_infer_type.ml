@@ -218,7 +218,7 @@ function lambda_param(): void {
 let lambda_param_cases = [
    ("lambda_param.php", 4, 9), "_";
    ("lambda_param.php", 6, 14), "int";
-   ("lambda_param.php", 4, 12), "(function($s): _)";
+   ("lambda_param.php", 4, 12), "[fun]";
    ("lambda_param.php", 6, 17), "(function(int $x): num)";
 ]
 

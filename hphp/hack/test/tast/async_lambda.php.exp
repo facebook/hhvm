@@ -71,7 +71,7 @@
                  (([9:3-14], [fun]),
                   (Binop ((Eq None),
                      (([9:3-6], [fun]), (Lvar ([9:3-6], $f1))),
-                     (([9:9-14], (function($x): Awaitable<_>)),
+                     (([9:9-14], [fun]),
                       (Efun (
                          { Aast.AnnotatedAST.f_annotation = ();
                            f_mode = <opaque>; f_ret = None;

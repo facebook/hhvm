@@ -3136,13 +3136,15 @@ let inout_argument_bad_type pos msgl =
     "To use inout here, assign to/from a temporary local variable." in
   add_list (Typing.err_code Typing.InoutArgumentBadType) ((pos, msg) :: msgl)
 
-let ambiguous_lambda pos n =
-  let msg =
+let ambiguous_lambda pos uses =
+  let msg1 =
+    "Lambda has parameter types that could not be determined at definition site." in
+  let msg2 =
     Printf.sprintf
-      "Lambda has parameter types that could not be determined at definition-site: \
-       body was checked %d times. Please add type hints"
-      n in
-  add (Typing.err_code Typing.AmbiguousLambda) pos msg
+    "%d distinct use types were determined: please add type hints to lambda parameters."
+      (List.length uses) in
+  add_list (Typing.err_code Typing.AmbiguousLambda) ([(pos, msg1); (pos, msg2)] @
+    List.map uses (fun (pos, ty) -> (pos, "This use has type " ^ ty)))
 
 let wrong_expression_kind_attribute expr_kind pos attr attr_class_pos attr_class_name intf_name =
   let msg1 =

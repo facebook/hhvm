@@ -1420,7 +1420,7 @@ and sub_type_unwrapped_helper env ~this_ty
       | None ->
           Errors.anonymous_recursive_call (Reason.to_pos r_sub);
           env
-      | Some (reactivity, is_coroutine, counter, _, anon) ->
+      | Some (reactivity, is_coroutine, ftys, _, anon) ->
           let p_super = Reason.to_pos r_super in
           let p_sub = Reason.to_pos r_sub in
           if not (subtype_reactivity env reactivity ft.ft_reactive)
@@ -1432,7 +1432,8 @@ and sub_type_unwrapped_helper env ~this_ty
           if not (Unify.unify_arities
                     ~ellipsis_is_variadic:true anon_arity ft.ft_arity)
           then Errors.fun_arity_mismatch p_super p_sub;
-          counter := !counter + 1;
+          (* Add function type to set of types seen so far *)
+          ftys := TUtils.try_intersect env ety_super !ftys;
           let env, _, ret = anon env ft.ft_params ft.ft_arity in
           let env = sub_type env ret ft.ft_ret in
           env
@@ -1624,7 +1625,7 @@ and is_sub_type
  *   result = Some false implies NOT ty1 <: ty2
  *   result = None, we don't know
  *)
-let is_sub_type_alt env ty1 ty2 =
+and is_sub_type_alt env ty1 ty2 =
   match simplify_subtype ~deep:true ~this_ty:(Some ty1) ty1 ty2 (env, initial_result) with
   | _, { constraints = []; failed = None } -> Some true
   | _, { constraints = _; failed = Some _ }-> Some false
@@ -1640,7 +1641,7 @@ let is_sub_type_alt env ty1 ty2 =
  * we simplify (as above) wherever practical.
  * It can be assumed that the original list contains no redundancy.
  *)
-let rec try_intersect env ty tyl =
+and try_intersect env ty tyl =
   match tyl with
   | [] -> [ty]
   | ty'::tyl' ->
@@ -2016,3 +2017,4 @@ let add_constraint
 
 let () = Typing_utils.sub_type_ref := sub_type
 let () = Typing_utils.add_constraint_ref := add_constraint
+let () = Typing_utils.is_sub_type_ref := is_sub_type

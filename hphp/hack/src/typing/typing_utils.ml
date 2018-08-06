@@ -63,6 +63,10 @@ type sub_type = Env.env -> locl ty -> locl ty -> Env.env
 let (sub_type_ref: sub_type ref) = ref not_implemented
 let sub_type x = !sub_type_ref x
 
+type is_sub_type_type = Env.env -> locl ty -> locl ty -> bool
+let (is_sub_type_ref: is_sub_type_type ref) = ref not_implemented
+let is_sub_type x = !is_sub_type_ref x
+
 type add_constraint = Pos.Map.key -> Env.env -> Ast.constraint_kind -> locl ty -> locl ty -> Env.env
 let (add_constraint_ref: add_constraint ref) = ref not_implemented
 let add_constraint x = !add_constraint_ref x
@@ -149,7 +153,7 @@ let get_all_supertypes env ty =
  * In the case of a generic parameter whose "as" constraint is another
  * generic parameter, repeat the process until a type is reached that is not
  * a generic parameter. Don't loop on cycles.
- * (For example, functon foo<Tu as Tv, Tv as Tu>(...))
+ * (For example, function foo<Tu as Tv, Tv as Tu>(...))
  *****************************************************************************)
 let get_concrete_supertypes env ty =
   let rec iter seen env acc tyl =
@@ -733,3 +737,15 @@ let terr env =
   let dynamic_view_enabled =
     TypecheckerOptions.dynamic_view (Typing_env.get_tcopt env) in
   if dynamic_view_enabled then Tdynamic else Terr
+
+(* Hacked version of Typing_subtype.try_intersect for collecting function types *)
+let rec try_intersect env ty tyl =
+  match tyl with
+  | [] -> [ty]
+  | ty'::tyl' ->
+    if is_sub_type env ty ty'
+    then try_intersect env ty tyl'
+    else
+    if is_sub_type env ty' ty
+    then try_intersect env ty' tyl'
+    else ty' :: try_intersect env ty tyl'

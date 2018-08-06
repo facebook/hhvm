@@ -1,2 +1,0 @@
-File "lambda_ambiguous.php", line 5, characters 8-9:
-Lambda has parameter types that could not be determined at definition-site: body was checked 1 times. Please add type hints (Typing[4222])

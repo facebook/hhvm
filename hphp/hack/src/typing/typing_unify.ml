@@ -314,7 +314,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
       | None ->
         Errors.anonymous_recursive_call (Reason.to_pos r1);
         env, Terr
-      | Some (reactivity, is_coroutine, counter, _, anon) ->
+      | Some (reactivity, is_coroutine, ftys, _, anon) ->
         let p1 = Reason.to_pos r1 in
         let p2 = Reason.to_pos r2 in
         if reactivity <> ft.ft_reactive
@@ -326,7 +326,8 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
         if not (unify_arities ~ellipsis_is_variadic:true anon_arity ft.ft_arity)
         then Errors.fun_arity_mismatch p1 p2;
         let env, _, ret = anon env ft.ft_params ft.ft_arity in
-        counter := !counter + 1;
+        let funty = (r2, Tfun ft) in
+        ftys := TUtils.try_intersect env funty !ftys;
         let env, _ = unify env ft.ft_ret ret in
         env, Tfun ft)
   | Tobject, Tobject

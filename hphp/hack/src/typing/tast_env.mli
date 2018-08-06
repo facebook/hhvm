@@ -200,3 +200,7 @@ val set_ppl_lambda : env -> env
 (** Construct an {!env} where inside_ppl_class is {false}. Due to rewriting
     limitations, we are unable to rewrite lambdas inside <<__PPL>> classes.
     If you are using {!Tast_visitor}, you should have no need of this. *)
+
+val get_anonymous_lambda_types : env -> int -> Tast.ty list
+
+val typing_env_as_tast_env : Typing_env.env -> env

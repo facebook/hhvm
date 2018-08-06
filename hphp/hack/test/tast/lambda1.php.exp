@@ -13,7 +13,7 @@
              (Expr
                 (([4:3-10], [fun]),
                  (Binop ((Eq None), (([4:3-5], [fun]), (Lvar ([4:3-5], $f))),
-                    (([4:8-10], (function($n): _)),
+                    (([4:8-10], HackSuggest<(function(int): string), (function(string): string)>),
                      (Efun (
                         { Aast.AnnotatedAST.f_annotation = ();
                           f_mode = <opaque>; f_ret = None;

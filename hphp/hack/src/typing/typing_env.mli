@@ -69,7 +69,7 @@ val set_inside_ppl_class : env -> bool -> env
 val add_todo : env -> tfun -> env
 val add_anonymous : env -> anon -> env * int
 val get_anonymous : env -> int -> anon option
-val log_anonymous : env -> unit
+val iter_anonymous : env -> (Pos.t -> locl ty list -> unit) -> unit
 val set_self_id : env -> string -> env
 val set_self : env -> locl ty -> env
 val set_parent_id : env -> string -> env

@@ -1,0 +1,8 @@
+File "lambda_two_uses.php", line 15, characters 8-9:
+Lambda has parameter types that could not be determined at definition site. (Typing[4222])
+  File "lambda_two_uses.php", line 15, characters 8-9:
+  2 distinct use types were determined: please add type hints to lambda parameters.
+  File "lambda_two_uses.php", line 17, characters 8-18:
+  This use has type (function(D): float)
+  File "lambda_two_uses.php", line 18, characters 8-18:
+  This use has type (function(C): int)

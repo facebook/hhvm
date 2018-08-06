@@ -25,7 +25,7 @@
     },
     {
       "pos":{"filename":"lambda_argument.php","line":8,"char_start":8,"char_end":12},
-      "type":"_",
+      "type":"HackSuggest<vec<int>>",
       "ident":-602022284
     },
     {

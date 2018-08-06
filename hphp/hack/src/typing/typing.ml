@@ -494,7 +494,6 @@ and fun_def tcopt f =
       let local_tpenv = env.Env.lenv.Env.tpenv in
       let env, tb = fun_ env return pos nb f.f_fun_kind in
       let env = Env.check_todo env in
-      if Env.is_strict env then Env.log_anonymous env;
       begin match f.f_ret with
         | None when Env.is_strict env ->
           Typing_return.suggest_return env pos return.Typing_env_return_info.return_type
@@ -502,7 +501,7 @@ and fun_def tcopt f =
         | Some hint ->
           Typing_return.async_suggest_return (f.f_fun_kind) hint pos
       end;
-      {
+      let fundef =       {
         T.f_annotation = Env.save local_tpenv env;
         T.f_mode = f.f_mode;
         T.f_ret = f.f_ret;
@@ -518,7 +517,8 @@ and fun_def tcopt f =
           T.fnb_unsafe = nb.fnb_unsafe;
         };
         T.f_ret_by_ref = f.f_ret_by_ref;
-      }
+      } in
+      Typing_lambda_ambiguous.suggest_fun_def env fundef
   ) in
   Typing_hooks.dispatch_exit_fun_def_hook f;
   tfun_def
@@ -2511,7 +2511,10 @@ and expr_
                 let env, anon_id = Env.add_anonymous env anon_fun in
                 env, tefun, ty, anon_id) in
             let env = Env.set_env_reactive env old_reactivity in
-            env, tefun, (Reason.Rwitness p, Tanon (declared_ft.ft_arity, anon_id))
+            let anon_ty = (Reason.Rwitness p, Tanon (declared_ft.ft_arity, anon_id)) in
+            let ((ep,_efun_ty),efun) = tefun in
+            let tefun = ((ep, anon_ty), efun) in
+            env, tefun, anon_ty
         end
       end
   | Xml (sid, attrl, el) ->
@@ -2784,7 +2787,7 @@ and anon_make tenv p f ft idl =
   let nb = Nast.assert_named_body f.f_body in
   let is_coroutine = f.f_fun_kind = Ast.FCoroutine in
   is_coroutine,
-  ref 0,
+  ref [],
   p,
   (* Here ret_ty should include Awaitable wrapper *)
   fun ?el ?ret_ty env supplied_params supplied_arity ->
@@ -5591,11 +5594,30 @@ and call_ ~expected ~method_call_info ~is_expr_statement pos env fty el uel =
       | None ->
         Errors.anonymous_recursive_call pos;
         env, tel, tuel, err_witness env pos
-      | Some (_, _, counter, _, anon) ->
+      | Some (reactivity, is_coroutine, ftys, _, anon) ->
         let () = check_arity pos fpos (Typing_defs.arity_min call_arity) arity in
         let tyl = List.map tyl TUtils.default_fun_param in
-        counter := !counter + 1;
         let env, _, ty = anon ~el env tyl call_arity in
+        let fty =
+          (Reason.Rlambda_use pos, Tfun {
+            ft_pos = fpos;
+            ft_deprecated = None;
+            ft_abstract = false;
+            ft_is_coroutine = is_coroutine;
+            ft_arity = arity;
+            ft_tparams = [];
+            ft_where_constraints = [];
+            ft_params = tyl;
+            ft_ret = ty;
+            ft_ret_by_ref = false;
+            ft_reactive = reactivity;
+            ft_return_disposable = false;
+            ft_mutability = None;
+            ft_returns_mutable = false;
+            ft_decl_errors = None;
+            ft_returns_void_to_rx = false;
+          }) in
+        ftys := TUtils.try_intersect env fty !ftys;
         env, tel, tuel, ty)
   | _, Tarraykind _ when not (Env.is_strict env) ->
     (* Relaxing call_user_func to work with an array in partial mode *)
@@ -6858,10 +6880,9 @@ and method_def env m =
               m.m_ret
     | Some hint ->
       Typing_return.async_suggest_return (m.m_fun_kind) hint (fst m.m_name); m.m_ret in
-  Env.log_anonymous env;
   let m = { m with m_ret = m_ret; } in
   Typing_hooks.dispatch_exit_method_def_hook m;
-  {
+  let method_def = {
     T.m_annotation = Env.save local_tpenv env;
     T.m_final = m.m_final;
     T.m_abstract = m.m_abstract;
@@ -6879,7 +6900,8 @@ and method_def env m =
       T.fnb_unsafe = nb.fnb_unsafe;
     };
     T.m_ret_by_ref = m.m_ret_by_ref;
-  }
+  } in
+  Typing_lambda_ambiguous.suggest_method_def env method_def
 
 and typedef_def tcopt typedef  =
   let env = EnvFromDef.typedef_env tcopt typedef in

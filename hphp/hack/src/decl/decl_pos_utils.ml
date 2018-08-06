@@ -96,6 +96,7 @@ let rec reason = function
   | Rinvariant_generic (r1, n) -> Rcontravariant_generic (reason r1, n)
   | Rregex p                 -> Rregex (pos p)
   | Rlambda_use p            -> Rlambda_use (pos p)
+  | Rimplicit_upper_bound p -> Rimplicit_upper_bound (pos p)
 
 let string_id (p, x) = pos p, x
 

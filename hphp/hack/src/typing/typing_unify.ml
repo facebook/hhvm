@@ -219,16 +219,14 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
           env, Terr
         end
         else
-          let env, tcstr =
-            match tcstr1, tcstr2 with
-            | None, None -> env, None
-            | Some x1, Some x2 ->
-                let env, x = unify env x1 x2 in
-                env, Some x
-            | _ -> assert false
-          in
+          let implicit_upper_bound r =
+            let r' = Reason.Rimplicit_upper_bound (Reason.to_pos r) in
+            (r', Toption (r', Tnonnull)) in
+          let env, ty = unify env
+            (Option.value tcstr1 ~default:(implicit_upper_bound r1))
+            (Option.value tcstr2 ~default:(implicit_upper_bound r2)) in
           let env, argl = List.map2_env env argl1 argl2 unify in
-          env, Tabstract (AKnewtype (x1, argl), tcstr)
+          env, Tabstract (AKnewtype (x1, argl), Some ty)
   | Tabstract (AKgeneric x1, tcstr1),
     Tabstract (AKgeneric x2, tcstr2)
     when x1 = x2 && (Option.is_none tcstr1 = Option.is_none tcstr2) ->

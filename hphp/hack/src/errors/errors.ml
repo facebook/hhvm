@@ -3279,6 +3279,10 @@ let invalid_traversable_in_rx pos =
     "Cannot traverse over non-reactive traversable in reactive code."
   )
 
+let lateinit_with_default pos =
+  add (Typing.err_code Typing.LateInitWithDefault) pos
+    "A late-initialized property cannot have a default value"
+
 let forward_compatibility_not_current pos value =
   let current = ForwardCompatibilityLevel.current in
   add (Init.err_code Init.ForwardCompatibilityNotCurrent)

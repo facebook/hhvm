@@ -585,4 +585,5 @@ module type S = sig
   val declare_statement_in_hack : Pos.t -> unit
   val misplaced_rx_of_scope: Pos.t -> unit
   val rx_of_scope_and_explicit_rx: Pos.t -> unit
+  val lateinit_with_default: Pos.t -> unit
 end

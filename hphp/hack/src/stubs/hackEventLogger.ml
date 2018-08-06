@@ -119,8 +119,11 @@ let state_loader_dirty_files _ = ()
 
 (** Informant events *)
 let init_informant_prefetcher_runner ?exit_on_parent_exit _ = ()
+let informant_decision_on_saved_state
+  ~start_t:_ ~state_distance:_ ~incremental_distance:_ = ()
 let informant_induced_kill _ = ()
 let informant_induced_restart _ = ()
+let informant_no_xdb_result _ = ()
 let informant_prefetcher_success _ = ()
 let informant_prefetcher_failed _ _ = ()
 let informant_prefetcher_timed_out _ = ()

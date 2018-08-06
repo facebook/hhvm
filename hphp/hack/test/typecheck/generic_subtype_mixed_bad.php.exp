@@ -1,0 +1,6 @@
+File "generic_subtype_mixed_bad.php", line 5, characters 10-11:
+Invalid return type (Typing[4110])
+File "generic_subtype_mixed_bad.php", line 4, characters 41-43:
+This is a nullable type
+File "generic_subtype_mixed_bad.php", line 4, characters 33-34:
+It is incompatible with a value of generic type T1

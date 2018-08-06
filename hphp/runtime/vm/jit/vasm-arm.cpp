@@ -293,6 +293,13 @@ struct Vgen {
   void emit(const cmovw& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovl& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovq& i) { a->Csel(X(i.d), X(i.t), X(i.f), C(i.cc)); }
+  // note: cmp{bw}[i] are emitted only for narrow comparisons and _do not_ sign
+  // extend their arguments--these instructions are lowered to cmp{lq}[i] if
+  // the comparison is not narrow or not equality/inequality
+  void emit(const cmpb& i) { a->Cmp(W(i.s1), W(i.s0)); }
+  void emit(const cmpbi& i) { a->Cmp(W(i.s1), static_cast<uint8_t>(i.s0.b())); }
+  void emit(const cmpw& i) { a->Cmp(W(i.s1), W(i.s0)); }
+  void emit(const cmpwi& i) { a->Cmp(W(i.s1), static_cast<uint16_t>(i.s0.w())); }
   void emit(const cmpl& i) { a->Cmp(W(i.s1), W(i.s0)); }
   void emit(const cmpli& i) { a->Cmp(W(i.s1), i.s0.l()); }
   void emit(const cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
@@ -1407,13 +1414,17 @@ Y(orlim, orqi, loadl, storel, i.s0, m)
 
 #undef Y
 
-#define Y(vasm_opc, lower_opc, mov_opc)                     \
+#define Y(vasm_opc, lower_opc, movs_opc)                    \
 void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
   lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
-    auto r0 = v.makeReg(), r1 = v.makeReg();                \
-    v << mov_opc{i.s0, r0};                                 \
-    v << mov_opc{i.s1, r1};                                 \
-    v << lower_opc{r0, r1, i.sf};                           \
+    if (i.fl != static_cast<Vflags>(StatusFlags::Z)){       \
+      auto r0 = v.makeReg(), r1 = v.makeReg();              \
+      v << movs_opc{i.s0, r0};                              \
+      v << movs_opc{i.s1, r1};                              \
+      v << lower_opc{r0, r1, i.sf};                         \
+    } else {                                                \
+      v << i;                                               \
+    }                                                       \
   });                                                       \
 }
 
@@ -1422,12 +1433,16 @@ Y(cmpw, cmpl, movswl)
 
 #undef Y
 
-#define Y(vasm_opc, lower_opc, mov_opc)                     \
+#define Y(vasm_opc, lower_opc, movs_opc) \
 void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
   lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
-    auto r = v.makeReg();                                   \
-    v << mov_opc{i.s1, r};                                  \
-    v << lower_opc{i.s0, r, i.sf};                          \
+    if (i.fl != static_cast<Vflags>(StatusFlags::Z)) {      \
+      auto r = v.makeReg();                                 \
+      v << movs_opc{i.s1, r};                               \
+      v << lower_opc{i.s0, r, i.sf};                        \
+    } else {                                                \
+      v << i;                                               \
+    }                                                       \
   });                                                       \
 }
 
@@ -1801,6 +1816,7 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
 
   simplify(unit);
 
+  annotateSFUses(unit);
   lowerForARM(unit);
 
   simplify(unit);

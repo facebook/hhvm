@@ -192,6 +192,7 @@ module Revision_map = struct
         let handle = {
           State_loader.mini_state_for_rev = Hg.Svn_rev (xdb_result.Xdb.svn_rev);
           mini_state_everstore_handle = xdb_result.Xdb.everstore_handle;
+          watchman_mergebase = None;
         } in
         State_loader_prefetcher.fetch
           ~hhconfig_hash:xdb_result.Xdb.hhconfig_hash

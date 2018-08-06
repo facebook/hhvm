@@ -66,10 +66,17 @@ let make_genv options config local_config handle =
   let nbr_procs = min nbr_procs local_config.SLC.max_workers in
   let gc_control = ServerConfig.gc_control config in
   let workers = Some (ServerWorker.make ~nbr_procs gc_control handle) in
+  let (>>=) = Option.(>>=) in
+  let since_clockspec = (ServerArgs.with_mini_state options) >>= function
+    | ServerArgs.Mini_state_target_info _ -> None
+    | ServerArgs.Informant_induced_mini_state_target target ->
+      target.ServerMonitorUtils.watchman_mergebase >>= fun mb ->
+        Some mb.ServerMonitorUtils.watchman_clock
+  in
   let watchman_env =
     if check_mode || not local_config.SLC.use_watchman
     then None
-    else Watchman.init {
+    else Watchman.init ?since_clockspec {
       Watchman.init_timeout = local_config.SLC.watchman_init_timeout;
       subscribe_mode = if local_config.SLC.watchman_subscribe
         then Some Watchman.Defer_changes
@@ -83,7 +90,7 @@ let make_genv options config local_config handle =
   if Option.is_some watchman_env then Hh_logger.log "Using watchman";
   let max_bucket_size = local_config.SLC.max_bucket_size in
   Bucket.set_max_bucket_size max_bucket_size;
-  let indexer, notifier_async, notifier_async_reader, notifier, wait_until_ready =
+  let indexer, notifier_async, notifier_async_reader, notifier, wait_until_ready, options =
     match watchman_env with
     | Some watchman_env ->
       let indexer filter =
@@ -133,8 +140,18 @@ let make_genv options config local_config handle =
       (* The initial watch-project command blocks until watchman's crawl is
        * done, so we don't have anything else to wait for here. *)
       let wait_until_ready () = () in
-      indexer, notifier_async, notifier_async_reader, notifier, wait_until_ready
+      indexer, notifier_async, notifier_async_reader, notifier, wait_until_ready, options
     | None ->
+      (** Failed to start Watchman subscription. Clear out the watchman_mergebase
+       * inside the Informant-directed target mini state since it is no longer
+       * usable during init. *)
+      let options = match ServerArgs.with_mini_state options with
+        | None -> options
+        | Some (ServerArgs.Mini_state_target_info _) -> options
+        | Some (ServerArgs.Informant_induced_mini_state_target target) ->
+          ServerArgs.set_mini_state_target options
+            (Some { target with ServerMonitorUtils.watchman_mergebase = None; })
+      in
       let indexer filter = Find.make_next_files ~name:"root" ~filter root in
       let in_fd = Daemon.null_fd () in
       let log_link = ServerFiles.dfind_log root in
@@ -157,9 +174,13 @@ let make_genv options config local_config handle =
         if !ready then ()
         else (DfindLib.wait_until_ready dfind; ready := true)
       in
-      indexer, (fun() ->
-        ServerNotifierTypes.Notifier_synchronous_changes (notifier ())
-        ), (fun () -> None), notifier, wait_until_ready
+      indexer,
+      (fun() ->
+        ServerNotifierTypes.Notifier_synchronous_changes (notifier ())),
+      (fun () -> None),
+      notifier,
+      wait_until_ready,
+      options
   in
   { options;
     config;

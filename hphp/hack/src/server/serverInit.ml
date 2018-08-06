@@ -116,12 +116,13 @@ module ServerInitCommon = struct
   let invoke_loading_state_natively ~tiny ?(use_canary=false) ?target genv root =
     let mini_state_handle, tiny = begin match target with
     | None -> None, tiny
-    | Some { ServerMonitorUtils.mini_state_everstore_handle; target_svn_rev; is_tiny; _ } ->
+    | Some { ServerMonitorUtils.mini_state_everstore_handle; target_svn_rev; is_tiny; watchman_mergebase; } ->
       let handle =
       Some
       {
         State_loader.mini_state_everstore_handle = mini_state_everstore_handle;
         mini_state_for_rev = (Hg.Svn_rev target_svn_rev);
+        watchman_mergebase;
       } in
       handle, is_tiny
     end in

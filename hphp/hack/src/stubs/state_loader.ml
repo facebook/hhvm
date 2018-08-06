@@ -10,6 +10,7 @@ type native_load_result = {
 type mini_state_handle = {
   mini_state_for_rev : Hg.rev;
   mini_state_everstore_handle : string;
+  watchman_mergebase : ServerMonitorUtils.watchman_mergebase option;
 }
 
 let error_string _ = ""

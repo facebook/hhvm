@@ -271,6 +271,24 @@ FuncAnalysis do_analyze_collect(const Index& index,
   assertx(ctx.cls == adjust_closure_context(ctx).cls);
   FuncAnalysis ai{ctx};
 
+  SCOPE_ASSERT_DETAIL("do-analyze-collect-2") {
+    std::string ret;
+    for (auto& blk : ctx.func->blocks) {
+      folly::format(&ret,
+                    "block #{}\nin-{}\n{}",
+                    blk->id,
+                    state_string(*ctx.func, ai.bdata[blk->id].stateIn, collect),
+                    show(*ctx.func, *blk)
+                   );
+    }
+
+    return ret;
+  };
+
+  SCOPE_ASSERT_DETAIL("do-analyze-collect-1") {
+    return "Analyzing: " + show(ctx);
+  };
+
   auto const bump = trace_bump_for(ctx.cls, ctx.func);
   Trace::Bump bumper1{Trace::hhbbc, bump};
   Trace::Bump bumper2{Trace::hhbbc_cfg, bump};

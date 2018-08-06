@@ -36,12 +36,6 @@ namespace HPHP { namespace HHBBC {
 
 struct Bytecode;
 
-namespace php {
-
-struct Func;
-
-}
-
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -967,14 +961,6 @@ struct WriteClsRefSlotVisitor : boost::static_visitor<ClsRefSlotId> {
   typename std::enable_if<has_caw<T>::value,ClsRefSlotId>::type
   operator()(T const& t) const { return t.slot; }
 };
-
-//////////////////////////////////////////////////////////////////////
-
-std::string show(const php::Func&, const Bytecode& bc);
-inline std::string show(const php::Func* func,
-                        const Bytecode& bc) {
-  return show(*func, bc);
-}
 
 //////////////////////////////////////////////////////////////////////
 

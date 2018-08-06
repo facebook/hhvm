@@ -91,6 +91,175 @@ std::string local_string(const Func& func, LocalId lid) {
     : folly::to<std::string>("$<unnamed:", lid, ">");
 };
 
+std::string show(const Func& func, const Bytecode& bc) {
+  std::string ret;
+
+  auto append_vsa = [&] (const CompactVector<LSString>& keys) {
+    ret += "<";
+    auto delim = "";
+    for (auto& s : keys) {
+      ret += delim + escaped_string(s);
+      delim = ",";
+    }
+    ret += ">";
+  };
+
+  auto append_switch = [&] (const SwitchTab& tab) {
+    ret += "<";
+    for (auto& target : tab) {
+      folly::toAppend(target, " ", &ret);
+    }
+    ret += ">";
+  };
+
+  auto append_sswitch = [&] (const SSwitchTab& tab) {
+    ret += "<";
+    for (auto& kv : tab) {
+      folly::toAppend(escaped_string(kv.first), ":", kv.second, " ", &ret);
+    }
+    ret += ">";
+  };
+
+  auto append_itertab = [&] (const IterTab& tab) {
+    ret += "<";
+    auto const kindStr = [&] (IterKind kind) -> const char* {
+      switch (kind) {
+      case KindOfIter:   return "Iter";
+      case KindOfMIter:  return "MIter";
+      case KindOfCIter:  return "CIter";
+      case KindOfLIter:  return "LIter";
+      }
+      not_reached();
+    };
+
+    const char* sep = "";
+    for (auto const& kv : tab) {
+      folly::toAppend(sep, kindStr(kv.kind), ",iter:", kv.id, &ret);
+      if (kv.kind == KindOfLIter) {
+        folly::toAppend(",", local_string(func, kv.local), &ret);
+      }
+      sep = " ";
+    }
+    ret += ">";
+  };
+
+  auto append_argv32 = [&] (const CompactVector<uint32_t>& argv) {
+    if (!argv.empty()) {
+      ret += folly::sformat(" <{}>", folly::join(", ", argv));
+    }
+  };
+
+  auto append_argvb = [&] (const CompactVector<bool>& argv) {
+    ret += folly::sformat(" \"{}\"", folly::join("", argv));
+  };
+
+  auto append_mkey = [&](MKey mkey) {
+    ret += memberCodeString(mkey.mcode);
+
+    switch (mkey.mcode) {
+      case MEL: case MPL:
+        folly::toAppend(':', local_string(func, mkey.local), &ret);
+        break;
+      case MEC: case MPC:
+        folly::toAppend(':', mkey.idx, &ret);
+        break;
+      case MEI:
+        folly::toAppend(':', mkey.int64, &ret);
+        break;
+      case MET: case MPT: case MQT:
+        folly::toAppend(
+          ":\"", escapeStringForCPP(mkey.litstr->data(), mkey.litstr->size()),
+          '"', &ret
+        );
+        break;
+      case MW:
+        break;
+    }
+  };
+
+  auto append_lar = [&](const LocalRange& range) {
+    if (!range.count) {
+      folly::toAppend("L:-", &ret);
+    } else {
+      folly::toAppend("L:", local_string(func, range.first), "+",
+                      range.count, &ret);
+    }
+  };
+
+#define IMM_BLA(n)     ret += " "; append_switch(data.targets);
+#define IMM_SLA(n)     ret += " "; append_sswitch(data.targets);
+#define IMM_ILA(n)     ret += " "; append_itertab(data.iterTab);
+#define IMM_I32LA(n)   append_argv32(data.argv);
+#define IMM_BLLA(n)    append_argvb(data.argv);
+#define IMM_IVA(n)     folly::toAppend(" ", data.arg##n, &ret);
+#define IMM_I64A(n)    folly::toAppend(" ", data.arg##n, &ret);
+#define IMM_LA(n)      ret += " " + local_string(func, data.loc##n);
+#define IMM_IA(n)      folly::toAppend(" iter:", data.iter##n, &ret);
+#define IMM_CAR(n)     folly::toAppend(" rslot:", data.slot, &ret);
+#define IMM_CAW(n)     folly::toAppend(" wslot:", data.slot, &ret);
+#define IMM_DA(n)      folly::toAppend(" ", data.dbl##n, &ret);
+#define IMM_SA(n)      folly::toAppend(" ", escaped_string(data.str##n), &ret);
+#define IMM_RATA(n)    folly::toAppend(" ", show(data.rat), &ret);
+#define IMM_AA(n)      ret += " " + array_string(data.arr##n);
+#define IMM_BA(n)      folly::toAppend(" <blk:", data.target, ">", &ret);
+#define IMM_OA_IMPL(n) folly::toAppend(" ", subopToName(data.subop##n), &ret);
+#define IMM_OA(type)   IMM_OA_IMPL
+#define IMM_VSA(n)     ret += " "; append_vsa(data.keys);
+#define IMM_KA(n)      ret += " "; append_mkey(data.mkey);
+#define IMM_LAR(n)     ret += " "; append_lar(data.locrange);
+
+#define IMM_NA
+#define IMM_ONE(x)           IMM_##x(1)
+#define IMM_TWO(x, y)        IMM_##x(1);         IMM_##y(2);
+#define IMM_THREE(x, y, z)   IMM_TWO(x, y);      IMM_##z(3);
+#define IMM_FOUR(x, y, z, n) IMM_THREE(x, y, z); IMM_##n(4);
+#define IMM_FIVE(x, y, z, n, m) IMM_FOUR(x, y, z, n); IMM_##m(5);
+
+#define O(opcode, imms, inputs, outputs, flags) \
+  case Op::opcode:                              \
+    {                                           \
+      UNUSED auto const& data = bc.opcode;      \
+      UNUSED auto const curOpcode = Op::opcode; \
+      folly::toAppend(#opcode, &ret);           \
+      IMM_##imms                                \
+    }                                           \
+    break;
+
+  switch (bc.op) { OPCODES }
+
+#undef O
+
+#undef IMM_BLA
+#undef IMM_SLA
+#undef IMM_ILA
+#undef IMM_I32LA
+#undef IMM_BLLA
+#undef IMM_IVA
+#undef IMM_I64A
+#undef IMM_LA
+#undef IMM_IA
+#undef IMM_CAR
+#undef IMM_CAW
+#undef IMM_DA
+#undef IMM_SA
+#undef IMM_RATA
+#undef IMM_AA
+#undef IMM_BA
+#undef IMM_OA_IMPL
+#undef IMM_OA
+#undef IMM_KA
+#undef IMM_LAR
+
+#undef IMM_NA
+#undef IMM_ONE
+#undef IMM_TWO
+#undef IMM_THREE
+#undef IMM_FOUR
+#undef IMM_FIVE
+
+  return ret;
+}
+
 std::string show(const Func& func, const Block& block) {
   std::string ret;
 
@@ -286,177 +455,6 @@ std::string show(SrcLoc loc) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::string show(const php::Func& func, const Bytecode& bc) {
-  std::string ret;
-
-  auto append_vsa = [&] (const CompactVector<LSString>& keys) {
-    ret += "<";
-    auto delim = "";
-    for (auto& s : keys) {
-      ret += delim + escaped_string(s);
-      delim = ",";
-    }
-    ret += ">";
-  };
-
-  auto append_switch = [&] (const SwitchTab& tab) {
-    ret += "<";
-    for (auto& target : tab) {
-      folly::toAppend(target, " ", &ret);
-    }
-    ret += ">";
-  };
-
-  auto append_sswitch = [&] (const SSwitchTab& tab) {
-    ret += "<";
-    for (auto& kv : tab) {
-      folly::toAppend(escaped_string(kv.first), ":", kv.second, " ", &ret);
-    }
-    ret += ">";
-  };
-
-  auto append_itertab = [&] (const IterTab& tab) {
-    ret += "<";
-    auto const kindStr = [&] (IterKind kind) -> const char* {
-      switch (kind) {
-      case KindOfIter:   return "Iter";
-      case KindOfMIter:  return "MIter";
-      case KindOfCIter:  return "CIter";
-      case KindOfLIter:  return "LIter";
-      }
-      not_reached();
-    };
-
-    const char* sep = "";
-    for (auto const& kv : tab) {
-      folly::toAppend(sep, kindStr(kv.kind), ",iter:", kv.id, &ret);
-      if (kv.kind == KindOfLIter) {
-        folly::toAppend(",", local_string(func, kv.local), &ret);
-      }
-      sep = " ";
-    }
-    ret += ">";
-  };
-
-  auto append_argv32 = [&] (const CompactVector<uint32_t>& argv) {
-    if (!argv.empty()) {
-      ret += folly::sformat(" <{}>", folly::join(", ", argv));
-    }
-  };
-
-  auto append_argvb = [&] (const CompactVector<bool>& argv) {
-    ret += folly::sformat(" \"{}\"", folly::join("", argv));
-  };
-
-  auto append_mkey = [&](MKey mkey) {
-    ret += memberCodeString(mkey.mcode);
-
-    switch (mkey.mcode) {
-      case MEL: case MPL:
-        folly::toAppend(':', local_string(func, mkey.local), &ret);
-        break;
-      case MEC: case MPC:
-        folly::toAppend(':', mkey.idx, &ret);
-        break;
-      case MEI:
-        folly::toAppend(':', mkey.int64, &ret);
-        break;
-      case MET: case MPT: case MQT:
-        folly::toAppend(
-          ":\"", escapeStringForCPP(mkey.litstr->data(), mkey.litstr->size()),
-          '"', &ret
-        );
-        break;
-      case MW:
-        break;
-    }
-  };
-
-  auto append_lar = [&](const LocalRange& range) {
-    if (!range.count) {
-      folly::toAppend("L:-", &ret);
-    } else {
-      folly::toAppend("L:", local_string(func, range.first), "+",
-                      range.count, &ret);
-    }
-  };
-
-#define IMM_BLA(n)     ret += " "; append_switch(data.targets);
-#define IMM_SLA(n)     ret += " "; append_sswitch(data.targets);
-#define IMM_ILA(n)     ret += " "; append_itertab(data.iterTab);
-#define IMM_I32LA(n)   append_argv32(data.argv);
-#define IMM_BLLA(n)    append_argvb(data.argv);
-#define IMM_IVA(n)     folly::toAppend(" ", data.arg##n, &ret);
-#define IMM_I64A(n)    folly::toAppend(" ", data.arg##n, &ret);
-#define IMM_LA(n)      ret += " " + local_string(func, data.loc##n);
-#define IMM_IA(n)      folly::toAppend(" iter:", data.iter##n, &ret);
-#define IMM_CAR(n)     folly::toAppend(" rslot:", data.slot, &ret);
-#define IMM_CAW(n)     folly::toAppend(" wslot:", data.slot, &ret);
-#define IMM_DA(n)      folly::toAppend(" ", data.dbl##n, &ret);
-#define IMM_SA(n)      folly::toAppend(" ", escaped_string(data.str##n), &ret);
-#define IMM_RATA(n)    folly::toAppend(" ", show(data.rat), &ret);
-#define IMM_AA(n)      ret += " " + array_string(data.arr##n);
-#define IMM_BA(n)      folly::toAppend(" <blk:", data.target, ">", &ret);
-#define IMM_OA_IMPL(n) folly::toAppend(" ", subopToName(data.subop##n), &ret);
-#define IMM_OA(type)   IMM_OA_IMPL
-#define IMM_VSA(n)     ret += " "; append_vsa(data.keys);
-#define IMM_KA(n)      ret += " "; append_mkey(data.mkey);
-#define IMM_LAR(n)     ret += " "; append_lar(data.locrange);
-
-#define IMM_NA
-#define IMM_ONE(x)           IMM_##x(1)
-#define IMM_TWO(x, y)        IMM_##x(1);         IMM_##y(2);
-#define IMM_THREE(x, y, z)   IMM_TWO(x, y);      IMM_##z(3);
-#define IMM_FOUR(x, y, z, n) IMM_THREE(x, y, z); IMM_##n(4);
-#define IMM_FIVE(x, y, z, n, m) IMM_FOUR(x, y, z, n); IMM_##m(5);
-
-#define O(opcode, imms, inputs, outputs, flags) \
-  case Op::opcode:                              \
-    {                                           \
-      UNUSED auto const& data = bc.opcode;      \
-      UNUSED auto const curOpcode = Op::opcode; \
-      folly::toAppend(#opcode, &ret);           \
-      IMM_##imms                                \
-    }                                           \
-    break;
-
-  switch (bc.op) { OPCODES }
-
-#undef O
-
-#undef IMM_BLA
-#undef IMM_SLA
-#undef IMM_ILA
-#undef IMM_I32LA
-#undef IMM_BLLA
-#undef IMM_IVA
-#undef IMM_I64A
-#undef IMM_LA
-#undef IMM_IA
-#undef IMM_CAR
-#undef IMM_CAW
-#undef IMM_DA
-#undef IMM_SA
-#undef IMM_RATA
-#undef IMM_AA
-#undef IMM_BA
-#undef IMM_OA_IMPL
-#undef IMM_OA
-#undef IMM_KA
-#undef IMM_LAR
-
-#undef IMM_NA
-#undef IMM_ONE
-#undef IMM_TWO
-#undef IMM_THREE
-#undef IMM_FOUR
-#undef IMM_FIVE
-
-  return ret;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 std::string show(const Type& t) {
   std::string ret;
 
@@ -594,6 +592,9 @@ std::string show(const Type& t) {
 //////////////////////////////////////////////////////////////////////
 
 std::string show(Context ctx) {
+  if (!ctx.func) {
+    return ctx.cls->name->toCppString();
+  }
   auto ret = std::string{};
   if (is_pseudomain(ctx.func)) {
     ret = ctx.func->unit->filename->data();
@@ -601,13 +602,13 @@ std::string show(Context ctx) {
     return ret;
   }
   if (ctx.cls) {
-    ret = ctx.cls->name->data();
+    ret = ctx.cls->name->toCppString();
     if (ctx.cls != ctx.func->cls) {
       folly::format(&ret, "({})", ctx.func->cls->name);
     }
     ret += "::";
   }
-  ret += ctx.func->name->data();
+  ret += ctx.func->name->toCppString();
   return ret;
 }
 

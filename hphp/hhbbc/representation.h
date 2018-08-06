@@ -618,10 +618,16 @@ struct Program {
 //////////////////////////////////////////////////////////////////////
 
 std::string show(const Func&);
+std::string show(const Func&, const Block&);
+std::string show(const Func&, const Bytecode& bc);
 std::string show(const Class&, bool normalizeClosures = false);
 std::string show(const Unit&, bool normalizeClosures = false);
 std::string show(const Program&);
 std::string local_string(const Func&, LocalId);
+
+inline std::string show(const Func* f, const Bytecode& bc) {
+  return show(*f, bc);
+}
 
 //////////////////////////////////////////////////////////////////////
 

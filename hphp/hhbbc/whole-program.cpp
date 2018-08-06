@@ -329,6 +329,9 @@ void analyze_iteratively(Index& index, php::Program& program,
     DependencyContextSet deps;
 
     auto update_func = [&] (const FuncAnalysisResult& fa) {
+      SCOPE_ASSERT_DETAIL("update_func") {
+        return "Updating Func: " + show(fa.ctx);
+      };
       index.refine_effect_free(fa.ctx.func, fa.effectFree);
       index.refine_return_type(fa.ctx.func, fa.inferredReturn,
                                fa.retParam, deps);
@@ -355,13 +358,18 @@ void analyze_iteratively(Index& index, php::Program& program,
     };
 
     auto update_class = [&] (const ClassAnalysis& ca) {
-      index.refine_private_props(ca.ctx.cls,
-                                 ca.privateProperties);
-      index.refine_private_statics(ca.ctx.cls,
-                                   ca.privateStatics);
-      index.refine_bad_initial_prop_values(ca.ctx.cls,
-                                           ca.badPropInitialValues,
-                                           deps);
+      {
+        SCOPE_ASSERT_DETAIL("update_class") {
+          return "Updating Class: " + show(ca.ctx);
+        };
+        index.refine_private_props(ca.ctx.cls,
+                                   ca.privateProperties);
+        index.refine_private_statics(ca.ctx.cls,
+                                     ca.privateStatics);
+        index.refine_bad_initial_prop_values(ca.ctx.cls,
+                                             ca.badPropInitialValues,
+                                             deps);
+      }
       for (auto& fa : ca.methods)  update_func(fa);
       for (auto& fa : ca.closures) update_func(fa);
     };

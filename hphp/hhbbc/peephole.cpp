@@ -181,7 +181,7 @@ void BasicPeephole::push_back(const Bytecode& next) {
 }
 
 std::string BasicPeephole::show(const Bytecode& op) {
-  return ::HPHP::HHBBC::show(m_ctx.func, op);
+  return php::show(m_ctx.func, op);
 }
 
 void ConcatPeephole::finalize() {

@@ -744,8 +744,19 @@ void visit_blocks_impl(const char* what,
                        CollectedInfo& collect,
                        const BlockContainer& rpoBlocks,
                        Fun&& fun) {
+
+  BlockId curBlk = NoBlockId;
+  SCOPE_ASSERT_DETAIL(what) {
+    if (curBlk == NoBlockId) return std::string{"\nNo block processed\n"};
+    return folly::sformat(
+        "block #{}\nin-{}", curBlk,
+        state_string(*ainfo.ctx.func, ainfo.bdata[curBlk].stateIn, collect)
+    );
+  };
+
   FTRACE(1, "|---- {}\n", what);
   for (auto& blk : rpoBlocks) {
+    curBlk = blk->id;
     FTRACE(2, "block #{}\n", blk->id);
     auto const& state = ainfo.bdata[blk->id].stateIn;
     if (!state.initialized) {
@@ -1288,6 +1299,10 @@ Bytecode gen_constant(const Cell& cell) {
 
 void optimize_func(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
   auto const bump = trace_bump_for(ainfo.ctx.cls, ainfo.ctx.func);
+
+  SCOPE_ASSERT_DETAIL("optimize_func") {
+    return "Optimizing:" + show(ainfo.ctx);
+  };
 
   Trace::Bump bumper1{Trace::hhbbc, bump};
   Trace::Bump bumper2{Trace::hhbbc_cfg, bump};

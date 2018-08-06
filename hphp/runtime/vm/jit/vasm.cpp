@@ -90,7 +90,7 @@ struct BlockSorter {
   }
 
   void dfs(Vlabel b) {
-    assert_no_log(size_t(b) < unit.blocks.size());
+    assertx(size_t(b) < unit.blocks.size());
     if (visited.test(b)) return;
     visited.set(b);
 

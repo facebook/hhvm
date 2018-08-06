@@ -77,13 +77,6 @@ void assert_fail(const char* e,
                  const char* func,
                  const std::string& msg);
 
-[[noreturn]]
-void assert_fail_no_log(const char* e,
-                        const char* file,
-                        unsigned int line,
-                        const char* func,
-                        const std::string& msg);
-
 /*
  * Register a function for auxiliary assert logging.
  */
@@ -194,12 +187,7 @@ private:
 #define assert_fail_impl(e, msg) \
   ::HPHP::assert_fail(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__, msg)
 
-#define assert_fail_impl_no_log(e, msg) \
-  ::HPHP::assert_fail_no_log(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__, msg)
-
 #define always_assert(e)            assert_impl(e, assert_fail_impl(e, ""))
-#define always_assert_no_log(e)    assert_impl(e, \
-                                        assert_fail_impl_no_log(e, ""))
 #define always_assert_log(e, l)     assert_impl(e, assert_fail_impl(e, l()))
 #define always_assert_flog(e, ...)  assert_impl(e, assert_fail_impl(e,        \
                                         ::folly::format(__VA_ARGS__).str()))
@@ -209,13 +197,11 @@ private:
 #ifndef NDEBUG
 #define assert(e) always_assert(e)
 #define assertx(e) always_assert(e)
-#define assert_no_log(e) always_assert_no_log(e)
 #define assert_log(e, l) always_assert_log(e, l)
 #define assert_flog(e, ...) always_assert_flog(e, __VA_ARGS__)
 #else
 #define assert(e) static_cast<void>(0)
 #define assertx(e) static_cast<void>(0)
-#define assert_no_log(e) static_cast<void>(0)
 #define assert_log(e, l) static_cast<void>(0)
 #define assert_flog(e, ...) static_cast<void>(0)
 #endif

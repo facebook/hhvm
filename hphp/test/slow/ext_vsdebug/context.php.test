@@ -25,7 +25,7 @@ function innerFunc() {
   $bObj->aObj = new A();
   $e = [$bObj, $bObj];
 
-  echo "hell world 1\n";
+  echo "hello world 1\n";
 }
 
 innerFunc();

@@ -1,14 +1,7 @@
 <?hh
 require(__DIR__ . '/common.inc');
 
-$path = __DIR__ . "/step.php.test";
-$GLOBALS["path"] = $path;
-$GLOBALS["file"] = "step.php.test";
-
-// Calibration mappings:
-$mapping[9] = 9;
-$mapping[13] = 13;
-$GLOBALS['mapping'] = $mapping;
+$path = __FILE__ . ".test";
 
 function verifyStopLine($frames, $line) {
   global $path;
@@ -21,10 +14,9 @@ function verifyStopLine($frames, $line) {
         "threadId" => 1
     )));
 
-  sendVsCommand(array(
+  $seq = sendVsCommand(array(
     "command" => "stackTrace",
     "type" => "request",
-    "seq" => 1,
     "arguments" => array(
       "threadId" => 1
     )));
@@ -33,7 +25,7 @@ function verifyStopLine($frames, $line) {
   checkObjEqualRecursively($msg, array(
     "type" => "response",
     "command" => "stackTrace",
-    "request_seq" => 1,
+    "request_seq" => $seq,
     "success" => true,
     "body" => array(
         "totalFrames" => $frames,
@@ -48,16 +40,15 @@ function verifyStopLine($frames, $line) {
 }
 
 function stepCommand($cmd) {
-  sendVsCommand(array(
+  $seq = sendVsCommand(array(
     "command" => $cmd,
     "type" => "request",
-    "seq" => 5,
     "arguments" => array("threadId" => 1)));
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively($msg, array(
     "type" => "response",
     "command" => $cmd,
-    "request_seq" => 5,
+    "request_seq" => $seq,
     "success" => true));
 
   $msg = json_decode(getNextVsDebugMessage(), true);
@@ -69,75 +60,24 @@ function stepCommand($cmd) {
     )));
 }
 
-$setBreakpointsCommand = array(
-  "command" => "setBreakpoints",
-  "type" => "request",
-  "seq" => 3,
-  "arguments" => array(
-    "source" =>
-      array(
-        "path" => $path,
-        "name" => "step.php.test"
-      ),
-    "lines" => [9, 13],
-    "breakpoints" => [
-      array("line" => 9, "condition" => ""),
-      array("line" => 13, "condition" => "")
-    ]
-  ));
 
-$setBreakpointsRepsponse = array(
-  "type" => "response",
-  "command" => "setBreakpoints",
-  "success" => true,
-  "request_seq" => 3,
-  "body" => array(
-    "breakpoints" => array(
-      array("id" => 1, "verified" => false),
-      array("id" => 2, "verified" => false),
-    )));
+$breakpoints = [
+   array(
+     "path" => __FILE__ . ".test",
+     "breakpoints" => [
+       array("line" => 9, "calibratedLine" => 9, "condition" => ""),
+       array("line" => 13, "calibratedLine" => 13, "condition" => ""),
+     ])
+   ];
 
-$testProcess = vsDebugLaunch(
-  __DIR__ . '/step.php.test',
-  true,
-  [$setBreakpointsCommand],
-  [
-    // Response event
-    $setBreakpointsRepsponse,
-
-    // New BP event for each breakpoint
-    bpEvent($path, 9, 1, "new", false),
-    bpEvent($path, 13, 1, "new", false),
-
-    // Resolved BP event for each bp
-    bpEvent($path, 9, 1, "changed", true),
-    bpEvent($path, 13, 1, "changed", true)
-  ]
-);
-
-// Verify we resumed from loader break.
-$msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
-  "type" => "event",
-  "event" => "continued",
-  "body" => array(
-      "allThreadsContinued" => false
-  )));
-
-$msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
-  "type" => "event",
-  "event" => "continued",
-  "body" => array(
-      "allThreadsContinued" => true,
-      "threadId" => 1
-  )));
+$testProcess = vsDebugLaunch($path, true, $breakpoints);
 
 // Verify we hit breakpoint 1.
-verifyBpHit(1, 9);
+verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
 
 // Step over.
 stepCommand("next");
+checkForOutput($testProcess, "hello world 1\n", "stdout");
 verifyStopLine(1, 10);
 
 // Step in
@@ -157,7 +97,7 @@ stepCommand("next");
 verifyStopLine(1, 12);
 
 // Continue to location hits bp on the way to the target line.
-sendVsCommand(array(
+$seq = sendVsCommand(array(
   "command" => "fb_continueToLocation",
   "type" => "request",
   "seq" => 5,
@@ -179,14 +119,23 @@ $msg = json_decode(getNextVsDebugMessage(), true);
 checkObjEqualRecursively($msg, array(
   "type" => "response",
   "command" => "fb_continueToLocation",
-  "request_seq" => 5));
+  "request_seq" => $seq));
 
 $msg = json_decode(getNextVsDebugMessage(), true);
 checkObjEqualRecursively($msg, array(
   "type" => "event",
   "event" => "continued"));
 
-verifyBpHit(2, 13);
+checkForOutput($testProcess, "hello world 2\n", "stdout");
+verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[1]);
 
 // Resume and exit.
-resumeAndCleanup($testProcess);
+resumeTarget();
+
+
+checkForOutput($testProcess, "hello world 3\n", "stdout");
+checkForOutput($testProcess, "hello world 4\n", "stdout");
+checkForOutput($testProcess, "hello world 5\n", "stdout");
+vsDebugCleanup($testProcess);
+
+echo "OK!\n";

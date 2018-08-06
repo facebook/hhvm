@@ -11,4 +11,5 @@ for ($i = 0; $i < 2; $i++) {
 
 echo "About to throw again.\n";
 throw new UnexpectedValueException("Exn thrown!");
+
 echo "exit.\n";

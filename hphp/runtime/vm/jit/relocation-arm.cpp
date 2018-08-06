@@ -280,15 +280,24 @@ InstrSet findLiterals(Instruction* start, Instruction* end) {
 }
 
 /*
- * This attempts to invert the conditions of a JCC that was emitted with
- * inverted condition codes for easy patching.  It takes:
+ * This function attempts to optimize a pattern that looks like a smashable jcc,
+ * i.e.:
  *   B.<cc> (after)
  *   LDR Reg (literal A)
  *   BR Reg
  *   (after)
- * And converts it to:
+ *
+ * If the "literal A" target is within +-1MB, the condition is inverted and a
+ * single JCC is emitted:
  *   B.<neg(cc)> (literal A)
- * If possible.
+ *
+ * Otherwise, if the "literal A" target is within +-128MB, the code will be
+ * optimized to:
+ *   B.<cc> (after)
+ *   B (literal A)
+ *   (after)
+ *
+ * This function returns whether or not the code was optimized.
  */
 bool optimizeSmashableLookingJcc(Env& env, TCA srcAddr, TCA destAddr,
                                  size_t& srcCount, size_t& destCount) {
@@ -310,7 +319,10 @@ bool optimizeSmashableLookingJcc(Env& env, TCA srcAddr, TCA destAddr,
     // at the end of relocation.
     imm = static_cast<int64_t>(adjusted - srcAddr) >> kInstructionSizeLog2;
   }
-  if (!is_int19(imm >> kInstructionSizeLog2)) return false;
+  // NB: the imm offset was computed relative to destAddr, but the more general
+  // case, which handles int26, uses imm-1 because of the extra instruction that
+  // it requires.
+  if (!is_int26(imm - 1)) return false;
   if (env.start <= adjusted && adjusted < env.end) {
     env.rewriteAdjust.emplace_back(Patch {
       destAddr,
@@ -326,8 +338,19 @@ bool optimizeSmashableLookingJcc(Env& env, TCA srcAddr, TCA destAddr,
   env.destBlock.setFrontier(destAddr);
 
   // This inverts the condition code for us.
-  auto const cc = smashableJccCond(srcAddrActual);
-  a.b(imm, arm::convertCC(cc));
+  auto const cc = arm::convertCC(smashableJccCond(srcAddrActual));
+
+  if (is_int19(imm)) {
+    a.b(imm, cc);
+  } else {
+    // Branch over the next instruction.
+    const int nextImm = 2;
+    a.b(nextImm, vixl::InvertCondition(cc));
+    // NB: the imm offset was computed relative to destAddr, but we emitted an
+    // extra branch above, thus the -1 here.
+    a.b(imm - 1);
+    destCount++;
+  }
 
   srcCount = smashableJccLen() >> kInstructionSizeLog2;
 

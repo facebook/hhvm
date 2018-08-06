@@ -76,11 +76,11 @@ module Watchman_changes_asserter =
 
 let test_mock_basic () =
   Watchman.Mocking.init_returns None;
-  let result = Watchman.init Watchman.Testing.test_settings in
+  let result = Watchman.init Watchman.Testing.test_settings () in
   let result = Option.map result ~f:Watchman.Mocking.print_env in
   Asserter.String_asserter.assert_option_equals None result "init_returns";
   Watchman.Mocking.init_returns (Some "hello");
-  let result = Watchman.init Watchman.Testing.test_settings in
+  let result = Watchman.init Watchman.Testing.test_settings () in
   let result = Option.map result ~f:Watchman.Mocking.print_env in
   Asserter.String_asserter.assert_option_equals
     (Some "hello") result "init_returns";

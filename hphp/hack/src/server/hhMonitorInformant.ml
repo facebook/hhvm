@@ -787,7 +787,7 @@ let init {
       debug_logging = watchman_debug_logging;
       subscription_prefix = "hh_informant_watcher";
       roots = [root];
-    } in
+    } () in
     match watchman with
     | None ->
       let () = Printf.eprintf "Watchman failed to init - Informant resigning\n" in

@@ -78,7 +78,7 @@ let make_genv options config local_config handle =
       debug_logging = ServerArgs.watchman_debug_logging options;
       subscription_prefix = "hh_type_check_watcher";
       roots = [root];
-    }
+    } ()
   in
   if Option.is_some watchman_env then Hh_logger.log "Using watchman";
   let max_bucket_size = local_config.SLC.max_bucket_size in

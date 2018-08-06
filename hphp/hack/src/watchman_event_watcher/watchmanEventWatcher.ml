@@ -266,7 +266,7 @@ let init_watchman root =
     expression_terms = watchman_expression_terms;
     subscription_prefix = "hh_event_watcher";
     roots = [root];
-  }
+  } ()
 
 let init root =
   let init_id = Random_id.short_string () in

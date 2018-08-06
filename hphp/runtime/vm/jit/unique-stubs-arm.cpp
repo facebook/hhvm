@@ -211,8 +211,16 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& /*data*/, const UniqueStubs& us) {
   auto const begin = cb.frontier();
 
   // Jump to enterTCExit
-  a.Mov(rAsm, us.enterTCExit);
-  a.Br(rAsm);
+  auto target = us.enterTCExit;
+  // If target can be addressed by pc relative offset (signed 26 bits), emit
+  // PC relative jump. Else, emit target address into code and load from there.
+  auto diff = (target - a.frontier()) >> vixl::kInstructionSizeLog2;
+  if (vixl::is_int26(diff)) {
+     a.b(diff);
+  } else {
+     a.Mov(rAsm, target);
+     a.Br(rAsm);
+  }
 
   cb.sync(begin);
   return begin;

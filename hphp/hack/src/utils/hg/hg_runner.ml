@@ -53,4 +53,9 @@ let () =
     (Hg.Svn_rev svn_ancestor) @@ Args.root args in
   let changes = Future.get_exn changes in
   let changes = String.concat "\n" changes in
-  Printf.eprintf "Changes: %s\n" changes
+  Printf.eprintf "Changes: %s\n" changes;
+  let changes_between_current_and_svn = (Hg.files_changed_since_rev_to_rev
+    ~start:(Hg.Svn_rev svn_ancestor) ~finish:(Hg.Hg_rev current_hg_rev) (Args.root args))
+    |> Future.get_exn ~timeout:30
+    |> String.concat "," in
+  Printf.eprintf "Changes between svn and hg rev: %s\n" changes_between_current_and_svn

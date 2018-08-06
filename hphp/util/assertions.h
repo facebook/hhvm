@@ -172,7 +172,7 @@ private:
 }
 
 #define SCOPE_ASSERT_DETAIL(name)           \
-  auto FB_ANONYMOUS_VARIABLE(SCOPE_ASSERT)  \
+  auto const FB_ANONYMOUS_VARIABLE(SCOPE_ASSERT)  \
   = ::HPHP::detail::AssertDetailScopeMaker(name) + [&]()
 
 ///////////////////////////////////////////////////////////////////////////////

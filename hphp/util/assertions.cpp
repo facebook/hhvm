@@ -38,7 +38,7 @@ bool AssertDetailImpl::log_impl(const AssertDetailImpl* adi) {
   if (!adi) return false;
   log_impl(adi->m_next);
 
-  auto const title = folly::format("{:-^80}\n", adi->m_name).str();
+  auto const title = folly::sformat("{:-^80}\n", adi->m_name);
   auto const msg = adi->run();
 
   fprintf(stderr, "\n%s%s\n", title.c_str(), msg.c_str());
@@ -80,8 +80,8 @@ void assert_fail(const char* e, const char* file,
   if (s_assert_failed) std::abort();
   s_assert_failed = true;
 
-  auto const assertion = folly::format("{}:{}: {}: assertion `{}' failed.",
-                                       file, line, func, e).str();
+  auto const assertion = folly::sformat("{}:{}: {}: assertion `{}' failed.",
+                                        file, line, func, e);
   assert_log_failure(assertion.c_str(), msg);
 
   std::abort();
@@ -95,7 +95,7 @@ void assert_fail_no_log(
   const std::string& msg
 ) {
   auto const assertion = folly::sformat("{}:{}: {}: assertion `{}' failed.",
-    file, line, func, e);
+                                        file, line, func, e);
   fprintf(stderr, "\nAssertion failure: %s\n%s\n",
     assertion.c_str(), msg.c_str());
   std::abort();

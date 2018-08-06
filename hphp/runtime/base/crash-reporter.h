@@ -16,11 +16,14 @@
 #ifndef incl_HPHP_RUNTIME_CRASH_REPORTER_H_
 #define incl_HPHP_RUNTIME_CRASH_REPORTER_H_
 
+#include <atomic>
+#include <folly/portability/SysTypes.h>
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-extern bool IsCrashing;
+extern std::atomic<pid_t> CrashingThread;
 void install_crash_reporter();
 
 //////////////////////////////////////////////////////////////////////

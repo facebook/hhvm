@@ -785,7 +785,7 @@ wangle::SSLContextConfig ProxygenServer::createContextConfig() {
 }
 
 void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
-  if (IsCrashing) {
+  if (CrashingThread.load(std::memory_order_relaxed) != 0) {
     Logger::Error("Discarding request while crashing");
     if (m_shutdownState == ShutdownState::SHUTDOWN_NONE) {
       m_shutdownState = ShutdownState::DRAINING_READS;

@@ -420,14 +420,14 @@ module Revision_tracker = struct
       state_changes = Queue.create() ;
     }
 
-  let get_distance svn_rev env =
+  let get_jump_distance svn_rev env =
     abs @@ svn_rev - !(env.current_base_revision)
 
-  let is_significant ~min_distance_restart distance elapsed_t =
+  let is_significant ~min_distance_restart ~jump_distance elapsed_t =
     (** Allow up to 2 revisions per second for incremental. More than that,
      * prefer a server restart. *)
-    distance > (float_of_int min_distance_restart)
-      && (elapsed_t <= 0.0 || ((distance /. elapsed_t) > 2.0))
+    (jump_distance > min_distance_restart)
+      && (elapsed_t <= 0.0 || (((float_of_int jump_distance) /. elapsed_t) > 2.0))
 
   let cached_svn_rev ~start_t revision_map hg_rev =
     Revision_map.find ~start_t hg_rev revision_map
@@ -437,10 +437,10 @@ module Revision_tracker = struct
    * svn_rev: The corresponding SVN rev for this transition's hg rev.
    * xdb_results: The nearest saved states for this svn_rev provided by the XDB table.
    *)
-  let form_decision ~is_tiny is_significant transition server_state xdb_results svn_rev env =
+  let form_decision ~is_tiny ~significant transition server_state xdb_results svn_rev env =
     let use_xdb = env.inits.use_xdb in
     let open Informant_sig in
-    match is_significant, transition, server_state, xdb_results with
+    match significant, transition, server_state, xdb_results with
     | _, State_leave _, Server_not_yet_started, _ ->
      (** This case should be unreachable since Server_not_yet_started
       * should be handled by "should_start_first_server" and not by the
@@ -496,12 +496,12 @@ module Revision_tracker = struct
     | None ->
       None
     | Some (svn_rev, xdb_results, is_tiny) ->
-      let distance = float_of_int @@ get_distance svn_rev env in
+      let jump_distance = get_jump_distance svn_rev env in
       let elapsed_t = (Unix.time () -. timestamp) in
       let significant = is_significant
         ~min_distance_restart:env.inits.min_distance_restart
-        distance elapsed_t in
-      Some (form_decision ~is_tiny significant
+        ~jump_distance elapsed_t in
+      Some (form_decision ~is_tiny ~significant
         transition server_state xdb_results svn_rev env, svn_rev)
 
   (**

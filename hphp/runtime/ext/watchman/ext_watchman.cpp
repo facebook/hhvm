@@ -467,10 +467,9 @@ std::unordered_map<std::string, ActiveSubscription> s_activeSubscriptions;
 
 template <typename T> struct FutureEvent : AsioExternalThreadEvent {
   // (PHP)
-  explicit FutureEvent(folly::Future<T>&& future) :
-    m_future(std::move(future))
+  explicit FutureEvent(folly::Future<T>&& future)
   {
-    m_future.then([this] (folly::Try<T> result) { // (ASYNC)
+    std::move(future).thenTry([this] (folly::Try<T> result) { // (ASYNC)
       if (result.hasException()) {
         m_exception = result.exception();
       } else {
@@ -519,7 +518,6 @@ template <typename T> struct FutureEvent : AsioExternalThreadEvent {
     cellCopy(make_tv<KindOfBoolean>(m_result), result);
   }
 
-  folly::Future<T> m_future;
   T m_result;
   folly::exception_wrapper m_exception;
 };

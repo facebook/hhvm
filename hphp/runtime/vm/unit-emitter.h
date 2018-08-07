@@ -46,6 +46,10 @@ struct FuncEmitter;
 struct PreClassEmitter;
 struct StringData;
 
+namespace Native {
+struct FuncTable;
+}
+
 /*
  * Report capacity of RepoAuthoritative mode bytecode arena.
  *
@@ -65,7 +69,7 @@ struct UnitEmitter {
   /////////////////////////////////////////////////////////////////////////////
   // Initialization and execution.
 
-  explicit UnitEmitter(const MD5& md5);
+  explicit UnitEmitter(const MD5& md5, const Native::FuncTable&);
   ~UnitEmitter();
 
   /*
@@ -470,6 +474,11 @@ private:
   std::vector<std::pair<Offset,SourceLoc>> m_sourceLocTab;
   std::vector<const FuncEmitter*> m_feTab;
   LineTable m_lineTable;
+
+  /*
+   * name=>NativeFuncInfo for native funcs in this unit
+   */
+  const Native::FuncTable& m_nativeFuncs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

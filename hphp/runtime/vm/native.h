@@ -315,14 +315,24 @@ struct NativeSig {
   {}
 
   NativeSig(Type ret, std::vector<Type>&& args)
-    : ret(ret), args(args)
+    : ret(ret), args(std::move(args))
   {}
+
+  NativeSig(NativeSig&&) = default;
+  NativeSig(const NativeSig&) = default;
+
+  NativeSig& operator=(const NativeSig&) = default;
+  NativeSig& operator=(NativeSig&&) = default;
 
   template<class Ret>
   explicit NativeSig(Ret (*ptr)());
 
   template<class Ret, class... Args>
   explicit NativeSig(Ret (*ptr)(Args...));
+
+  bool operator==(const NativeSig& other) const {
+    return ret == other.ret && args == other.args;
+  }
 
   std::string toString(const char* classname, const char* fname) const;
 
@@ -405,6 +415,12 @@ struct NativeFunctionInfo {
     : sig(sig)
     , ptr(reinterpret_cast<NativeFunction>(f))
   {}
+
+  explicit operator bool() const { return ptr != nullptr; }
+
+  bool operator==(const NativeFunctionInfo& other) const {
+    return ptr == other.ptr && sig == other.sig;
+  }
 
   NativeSig sig;
   NativeFunction ptr;
@@ -533,13 +549,19 @@ const char* checkTypeFunc(const NativeSig& sig,
                           const TypeConstraint& retType,
                           const FuncEmitter* func);
 
-NativeFunctionInfo getNativeFunction(const StringData* fname,
+struct FuncTable;
+extern FuncTable s_builtinNativeFuncs;
+extern const FuncTable s_noNativeFuncs;
+
+NativeFunctionInfo getNativeFunction(const FuncTable& nativeFuncs,
+                                     const StringData* fname,
                                      const StringData* cname = nullptr,
                                      bool isStatic = false);
 
-NativeFunctionInfo getNativeFunction(const char* fname,
-                                      const char* cname = nullptr,
-                                      bool isStatic = false);
+NativeFunctionInfo getNativeFunction(const FuncTable& nativeFuncs,
+                                     const char* fname,
+                                     const char* cname = nullptr,
+                                     bool isStatic = false);
 
 //////////////////////////////////////////////////////////////////////////////
 // Global constants

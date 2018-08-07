@@ -3378,7 +3378,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   bool swallowErrors,
   AsmCallbacks* callbacks
 ) {
-  auto ue = std::make_unique<UnitEmitter>(md5);
+  auto ue = std::make_unique<UnitEmitter>(md5, Native::s_builtinNativeFuncs);
   if (!SystemLib::s_inited) {
     ue->m_mergeOnly = true;
   }

@@ -88,7 +88,7 @@ size_t hhbc_arena_capacity() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-UnitEmitter::UnitEmitter(const MD5& md5)
+UnitEmitter::UnitEmitter(const MD5& md5, const Native::FuncTable& nativeFuncs)
   : m_mainReturn(make_tv<KindOfUninit>())
   , m_md5(md5)
   , m_bc((unsigned char*)malloc(BCMaxInit))
@@ -96,6 +96,7 @@ UnitEmitter::UnitEmitter(const MD5& md5)
   , m_bcmax(BCMaxInit)
   , m_nextFuncSn(0)
   , m_allClassesHoistable(true)
+  , m_nativeFuncs(nativeFuncs)
 {}
 
 UnitEmitter::~UnitEmitter() {
@@ -912,14 +913,14 @@ RepoStatus UnitRepoProxy::loadHelper(UnitEmitter& ue,
 
 std::unique_ptr<UnitEmitter>
 UnitRepoProxy::loadEmitter(const std::string& name, const MD5& md5) {
-  auto ue = std::make_unique<UnitEmitter>(md5);
+  auto ue = std::make_unique<UnitEmitter>(md5, Native::s_builtinNativeFuncs);
   if (loadHelper(*ue, name, md5) == RepoStatus::error) ue.reset();
   return ue;
 }
 
 std::unique_ptr<Unit>
 UnitRepoProxy::load(const std::string& name, const MD5& md5) {
-  UnitEmitter ue(md5);
+  UnitEmitter ue(md5, Native::s_builtinNativeFuncs);
   if (loadHelper(ue, name, md5) == RepoStatus::error) return nullptr;
 
   if (RuntimeOption::XenonTraceUnitLoad) {
@@ -1332,7 +1333,7 @@ UnitRepoProxy::GetSourceLocTabStmt::get(int64_t unitSn,
 std::unique_ptr<UnitEmitter>
 createFatalUnit(StringData* filename, const MD5& md5, FatalOp /*op*/,
                 StringData* err) {
-  auto ue = std::make_unique<UnitEmitter>(md5);
+  auto ue = std::make_unique<UnitEmitter>(md5, Native::s_noNativeFuncs);
   ue->m_filepath = filename;
   ue->initMain(1, 1);
   ue->emitOp(OpString);

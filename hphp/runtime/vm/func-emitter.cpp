@@ -257,6 +257,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     ex->m_hniReturnType = hniReturnType;
 
     auto const& info = Native::getNativeFunction(
+      Native::s_builtinNativeFuncs,
       name,
       m_pce ? m_pce->name() : nullptr,
       f->isStatic()

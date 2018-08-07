@@ -19,17 +19,15 @@
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/func-emitter.h"
+#include "hphp/runtime/vm/native-func-table.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit.h"
 
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
 
-using BuiltinFunctionMap = hphp_hash_map<
-  const StringData*, NativeFunctionInfo, string_data_hash, string_data_isame
->;
-
-BuiltinFunctionMap s_builtinFunctions;
+FuncTable s_builtinNativeFuncs;
+const FuncTable s_noNativeFuncs;
 std::vector<NativeFuncResolver> s_nativeFuncResolvers;
 ConstantMap s_constant_map;
 ClassConstantMapMap s_class_constant_map;
@@ -697,16 +695,19 @@ const char* checkTypeFunc(const NativeSig& sig,
   return argIt == endIt ? nullptr : kInvalidArgCountMessage;
 }
 
-NativeFunctionInfo getNativeFunction(const StringData* fname,
-                                     const StringData* cname, bool isStatic) {
+NativeFunctionInfo getNativeFunction(const FuncTable& nativeFuncs,
+                                     const StringData* fname,
+                                     const StringData* cname,
+                                     bool isStatic) {
   const String name{
     cname == nullptr
       ? String{const_cast<StringData*>(fname)}
       : (String{const_cast<StringData*>(cname)} + (isStatic ? "::" : "->") +
          String{const_cast<StringData*>(fname)})
   };
-  auto const it = s_builtinFunctions.find(name.get());
-  if (it != s_builtinFunctions.end()) return it->second;
+  if (auto info = nativeFuncs.get(name.get())) {
+    return info;
+  }
 
   // didn't find builtin native function, query each resolver
   for (const auto& resolver : s_nativeFuncResolvers) {
@@ -719,16 +720,32 @@ NativeFunctionInfo getNativeFunction(const StringData* fname,
   return NativeFunctionInfo();
 }
 
-NativeFunctionInfo getNativeFunction(const char* fname, const char* cname,
+NativeFunctionInfo getNativeFunction(const FuncTable& nativeFuncs,
+                                     const char* fname,
+                                     const char* cname,
                                      bool isStatic) {
-  return getNativeFunction(makeStaticString(fname),
-                           cname ? makeStaticString(cname) : nullptr, isStatic);
+  return getNativeFunction(nativeFuncs,
+                           makeStaticString(fname),
+                           cname ? makeStaticString(cname) : nullptr,
+                           isStatic);
 }
 
 void registerBuiltinNativeFunc(const StringData* name,
                                const NativeFunctionInfo& info) {
+  s_builtinNativeFuncs.insert(name, info);
+}
+
+void FuncTable::insert(const StringData* name,
+                       const NativeFunctionInfo& info) {
   assert(name->isStatic());
-  s_builtinFunctions[name] = info;
+  DEBUG_ONLY auto it = m_infos.insert(std::make_pair(name, info));
+  assert(it.second || it.first->second == info);
+}
+
+NativeFunctionInfo FuncTable::get(const StringData* name) const {
+  auto const it = m_infos.find(name);
+  if (it != m_infos.end()) return it->second;
+  return NativeFunctionInfo();
 }
 
 static std::string nativeTypeString(NativeSig::Type ty) {

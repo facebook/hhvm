@@ -185,7 +185,8 @@ bool checkNativeFunc(const FuncEmitter* func, ErrorMode mode) {
   auto const funcname = func->name;
   auto const pc = func->pce();
   auto const clsname = pc ? pc->name() : nullptr;
-  auto const& info = Native::getNativeFunction(funcname, clsname,
+  auto const& info = Native::getNativeFunction(Native::s_builtinNativeFuncs,
+                                               funcname, clsname,
                                                func->attrs & AttrStatic);
 
   if (!info.ptr) return true;

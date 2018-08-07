@@ -1528,7 +1528,8 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
 
   assert(check(unit));
 
-  auto ue = std::make_unique<UnitEmitter>(unit.md5);
+  auto ue = std::make_unique<UnitEmitter>(unit.md5,
+                                          Native::s_builtinNativeFuncs);
   FTRACE(1, "  unit {}\n", unit.filename->data());
   ue->m_filepath = unit.filename;
   ue->m_preloadPriority = unit.preloadPriority;

@@ -28,7 +28,7 @@ namespace HPHP {
  * guarded on checking this first, and placed in an unlikely path.
  */
 inline bool strong_iterators_exist() {
-  return tl_miter_table && tl_miter_table->ents[0].array != nullptr;
+  return tl_miter_table->ents[0].array != nullptr;
 }
 
 template<class Fn> NEVER_INLINE

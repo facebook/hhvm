@@ -433,7 +433,16 @@ let do_compile filename compiler_options fail_or_ast debug_time for_debugger_eva
   hhas
 
 let extract_facts ?pretty text =
-  Facts_parser.extract_as_json ~php5_compat_mode:true ~hhvm_compat_mode:true text
+  let enable_hh_syntax =
+    Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
+  let enable_xhp =
+    Hhbc_options.enable_xhp !Hhbc_options.compiler_options in
+
+  Facts_parser.extract_as_json
+    ~php5_compat_mode:true
+    ~hhvm_compat_mode:true
+    ~force_hh:enable_hh_syntax
+    ~enable_xhp text
   (* return empty string if file has syntax errors *)
   |> Option.value_map ~default:"" ~f:(Hh_json.json_to_string ?pretty)
   |> fun x -> [x]

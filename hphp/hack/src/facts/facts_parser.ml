@@ -355,7 +355,8 @@ let facts_to_json md5 facts =
     constants_json;
     type_aliases_json; ]
 
-let from_text php5_compat_mode hhvm_compat_mode s =
+let from_text php5_compat_mode hhvm_compat_mode force_hh enable_xhp s =
+  Full_fidelity_lexer.Env.set ~force_hh ~enable_xhp;
   let env = Full_fidelity_parser_env.make ~php5_compat_mode ~hhvm_compat_mode () in
   let text = Full_fidelity_source_text.make Relative_path.default s in
   let (parser, root) =
@@ -375,8 +376,8 @@ let from_text php5_compat_mode hhvm_compat_mode s =
     let _, facts = collect ("", initial_facts) root in
     Some facts
   end
-let extract_as_json ~php5_compat_mode ~hhvm_compat_mode text =
-  from_text php5_compat_mode hhvm_compat_mode text
+let extract_as_json ~php5_compat_mode ~hhvm_compat_mode ~force_hh ~enable_xhp text =
+  from_text php5_compat_mode hhvm_compat_mode force_hh enable_xhp text
   |> Option.map ~f:(fun facts ->
     let md5 = OpaqueDigest.to_hex @@ OpaqueDigest.string text in
     facts_to_json md5 facts)

@@ -10,4 +10,6 @@
  val extract_as_json:
   php5_compat_mode: bool ->
   hhvm_compat_mode: bool ->
+  force_hh: bool ->
+  enable_xhp: bool ->
   string -> Hh_json.json option

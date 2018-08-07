@@ -730,7 +730,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
       $classname = $cls;
     } else {
       $cls = $args[0];
-      $name = (string) $args[1];
+      $mth_names = explode('::', (string)$args[1]);
+      $name = $mth_names[count($mth_names) - 1];
 
       $classname = is_object($cls) ? get_class($cls) : $cls;
       $method = $args[1];

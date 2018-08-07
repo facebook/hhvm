@@ -1076,6 +1076,70 @@ void emitFPushObjMethodD(IRGS& env,
   PUNT(FPushObjMethodD-nonObj);
 }
 
+namespace {
+
+SSATmp* lookupClsMethodKnown(IRGS& env,
+                             const StringData* methodName,
+                             SSATmp* callerCtx,
+                             const Class *baseClass,
+                             bool exact,
+                             bool check,
+                             bool forward,
+                             bool& magicCall,
+                             SSATmp*& calleeCtx) {
+  magicCall = false;
+  auto const func = lookupImmutableMethod(baseClass,
+                                          methodName,
+                                          magicCall,
+                                          true /* staticLookup */,
+                                          curFunc(env),
+                                          exact);
+  if (!func) return nullptr;
+
+  auto const objOrCls = forward ?
+                        ldCtx(env) :
+                        ldCtxForClsMethod(env, func, callerCtx, baseClass,
+                                          exact);
+  if (check) {
+    assertx(exact);
+    if (!classIsPersistentOrCtxParent(env, baseClass)) {
+      gen(env, LdClsCached, cns(env, baseClass->name()));
+    }
+  }
+  auto funcTmp = exact || func->isImmutableFrom(baseClass) ?
+    cns(env, func) :
+    gen(env, LdClsMethod, callerCtx, cns(env, -(func->methodSlot() + 1)));
+
+  calleeCtx = forward ?
+              forwardCtx(env, objOrCls, funcTmp) :
+              objOrCls;
+  return funcTmp;
+}
+
+SSATmp* loadClsMethodUnknown(IRGS& env,
+                             const ClsMethodData& data,
+                             Block* onFail) {
+  // Look up the Func* in the targetcache. If it's not there, try the slow
+  // path. If that fails, slow exit.
+  return cond(
+    env,
+    [&] (Block* taken) {
+      return gen(env, LdClsMethodCacheFunc, data, taken);
+    },
+    [&] (SSATmp* func) { // next
+      implIncStat(env, Stats::TgtCache_StaticMethodHit);
+      return func;
+    },
+    [&] { // taken
+      hint(env, Block::Hint::Unlikely);
+      auto const result = gen(env, LookupClsMethodCache, data, fp(env));
+      return gen(env, CheckNonNull, onFail, result);
+    }
+  );
+}
+
+}
+
 bool fpushClsMethodKnown(IRGS& env,
                          uint32_t numParams,
                          const StringData* methodName,
@@ -1085,31 +1149,11 @@ bool fpushClsMethodKnown(IRGS& env,
                          bool check,
                          bool forward,
                          bool dynamic) {
-  bool magicCall = false;
-  auto const func = lookupImmutableMethod(baseClass,
-                                          methodName,
-                                          magicCall,
-                                          true /* staticLookup */,
-                                          curFunc(env),
-                                          exact);
-  if (!func) return false;
-
-  auto const objOrCls = forward ?
-                        ldCtx(env) :
-                        ldCtxForClsMethod(env, func, ctxTmp, baseClass, exact);
-  if (check) {
-    assertx(exact);
-    if (!classIsPersistentOrCtxParent(env, baseClass)) {
-      gen(env, LdClsCached, cns(env, baseClass->name()));
-    }
-  }
-  auto funcTmp = exact || func->isImmutableFrom(baseClass) ?
-    cns(env, func) :
-    gen(env, LdClsMethod, ctxTmp, cns(env, -(func->methodSlot() + 1)));
-
-  auto const ctx = forward ?
-                   forwardCtx(env, objOrCls, funcTmp) :
-                   objOrCls;
+  auto magicCall = false;
+  SSATmp* ctx = nullptr;
+  auto funcTmp = lookupClsMethodKnown(env, methodName, ctxTmp, baseClass, exact,
+                                      check, forward, magicCall, ctx);
+  if (!funcTmp) return false;
   fpushActRec(env,
               funcTmp,
               ctx,
@@ -1135,26 +1179,8 @@ void emitFPushClsMethodD(IRGS& env,
   auto const slowExit = makeExitSlow(env);
   auto const ne = NamedEntity::get(className);
   auto const data = ClsMethodData { className, methodName, ne };
-
-  // Look up the Func* in the targetcache. If it's not there, try the slow
-  // path. If that fails, slow exit.
-  auto const func = cond(
-    env,
-    [&] (Block* taken) {
-      return gen(env, LdClsMethodCacheFunc, data, taken);
-    },
-    [&] (SSATmp* func) { // next
-      implIncStat(env, Stats::TgtCache_StaticMethodHit);
-      return func;
-    },
-    [&] { // taken
-      hint(env, Block::Hint::Unlikely);
-      auto const result = gen(env, LookupClsMethodCache, data, fp(env));
-      return gen(env, CheckNonNull, slowExit, result);
-    }
-  );
+  auto func = loadClsMethodUnknown(env, data, slowExit);
   auto const clsCtx = gen(env, LdClsMethodCacheCls, data);
-
   fpushActRec(env,
               func,
               clsCtx,
@@ -1198,6 +1224,51 @@ void emitResolveObjMethod(IRGS& env) {
     return;
   }
   PUNT(ResolveObjMethod-unkownObjMethod);
+}
+
+
+const StaticString s_resolveClsMagicCall(
+  "Unable to resolve magic call for class_meth()");
+
+void emitResolveClsMethod(IRGS& env) {
+  auto const name = topC(env, BCSPRelOffset { 0 });
+  auto const cls = topC(env, BCSPRelOffset { 1 });
+  if (!(cls->type() <= TStr) || !(name->type() <= TStr)) {
+    PUNT(ResolveClsMethod-nonStr);
+  }
+  if (!name->hasConstVal() || !cls->hasConstVal()) {
+    PUNT(ResolveClsMethod-nonConstStr);
+  }
+  auto className = cls->strVal();
+  auto methodName = name->strVal();
+  SSATmp* clsTmp = nullptr;
+  SSATmp* funcTmp = nullptr;
+  if (auto const baseClass =
+      Unit::lookupUniqueClassInContext(className, curClass(env))) {
+    bool magicCall = false;
+    funcTmp = lookupClsMethodKnown(env, methodName, cns(env, baseClass),
+                                    baseClass, true, true, false, magicCall,
+                                    clsTmp);
+    if (magicCall) {
+      gen(env, ThrowInvalidOperation, cns(env, s_resolveClsMagicCall.get()));
+      return;
+    }
+  }
+  if (!funcTmp) {
+    auto const slowExit = makeExitSlow(env);
+    auto const ne = NamedEntity::get(className);
+    auto const data = ClsMethodData { className, methodName, ne };
+    funcTmp = loadClsMethodUnknown(env, data, slowExit);
+    clsTmp = gen(env, LdClsCached, cns(env, className));
+  }
+  auto methPair = gen(env, AllocVArray, PackedArrayData { 2 });
+  gen(env, InitPackedLayoutArray, IndexData { 0 }, methPair, clsTmp);
+  gen(env, InitPackedLayoutArray, IndexData { 1 }, methPair, funcTmp);
+  decRef(env, name);
+  decRef(env, cls);
+  popC(env);
+  popC(env);
+  push(env, methPair);
 }
 
 namespace {

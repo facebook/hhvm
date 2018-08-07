@@ -268,6 +268,7 @@ type instruct_operator =
   | Fatal of FatalOp.t
   | ResolveFunc of function_id
   | ResolveObjMethod
+  | ResolveClsMethod
 
 type switchkind =
   | Bounded

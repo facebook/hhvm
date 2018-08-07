@@ -565,6 +565,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FPushFuncU,      THREE(IVA,SA,SA), NOV,             NOV,        PF) \
   O(ResolveFunc,     ONE(SA),          NOV,             ONE(CV),    NF) \
   O(ResolveObjMethod,NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(ResolveClsMethod,NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(FPushObjMethod,  THREE(IVA,                                         \
                        OA(ObjMethodOp),                                 \
                        I32LA),          TWO(CV,CV),      NOV,       PF) \

@@ -246,6 +246,7 @@ let instr_setm num_params key = instr (IFinal (SetM (num_params, key)))
 let instr_setm_pt num_params key = instr_setm num_params (MemberKey.PT key)
 let instr_resolve_func func_id = instr (IOp (ResolveFunc func_id))
 let instr_resolve_obj_method = instr (IOp (ResolveObjMethod))
+let instr_resolve_cls_method = instr (IOp (ResolveClsMethod))
 let instr_await = instr (IAsync Await)
 let instr_yield = instr (IGenerator Yield)
 let instr_yieldk = instr (IGenerator YieldK)
@@ -759,7 +760,8 @@ let get_input_output_count i =
     begin match i with
     | Concat | Add | Sub | Mul | AddO | SubO | MulO | Div | Mod | Xor | Same
     | NSame | Eq | Neq | Lt | Lte | Gt | Gte | Cmp | BitAnd | BitOr | BitXor
-    | Shl | Shr | InstanceOf | Pow | ResolveObjMethod -> (2, 1)
+    | Shl | Shr | InstanceOf | Pow
+    | ResolveObjMethod | ResolveClsMethod -> (2, 1)
     | Sqrt | Not | BitNot | Floor | Ceil | CastBool | CastInt | CastDouble
     | CastString | CastArray | CastObject | CastVec | CastDict | CastKeyset
     | CastVArray | CastDArray | InstanceOfD _ | IsTypeStruct _ | AsTypeStruct _

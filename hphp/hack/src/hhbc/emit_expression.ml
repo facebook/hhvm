@@ -3345,6 +3345,20 @@ and emit_special_function env pos id args uargs default =
            (string_of_int nargs) ^ " given")
     end
 
+  | "hh\\class_meth", _ ->
+      begin match args with
+        | [class_name; method_name] ->
+          Some (gather [
+            emit_expr ~need_ref:false env class_name;
+            emit_expr ~need_ref:false env method_name;
+            instr_resolve_cls_method;
+          ], Flavor.Cell)
+        | _ ->
+          Emit_fatal.raise_fatal_runtime pos
+            ("class_meth() expects exactly 2 parameters, " ^
+             (string_of_int nargs) ^ " given")
+      end
+
   | _ ->
     begin match args, istype_op lower_fq_name, is_isexp_op lower_fq_name with
     | [arg_expr], _, Some h when Emit_env.is_hh_syntax_enabled () ->

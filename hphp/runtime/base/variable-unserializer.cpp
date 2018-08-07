@@ -857,6 +857,11 @@ void VariableUnserializer::unserializeVariant(
       }
     }
     return;
+  // TODO (T32282640) Currently raise an error when we are unserializing
+  // a function because no one tries to do so. But in the future we can
+  // support this after an improvement of autoloader.
+  case 'f':
+    raise_error("Unable to unserialize a function value");
   case 'S':
     if (this->type() == VariableUnserializer::Type::APCSerialize) {
       auto str = readStr(8);
@@ -1767,6 +1772,7 @@ void VariableUnserializer::reserialize(StringBuffer& buf) {
   case 'b':
   case 'i':
   case 'd':
+  case 'f':
     {
       buf.append(type);
       buf.append(sep);

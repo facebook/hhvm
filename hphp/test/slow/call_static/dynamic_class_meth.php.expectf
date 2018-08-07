@@ -1,0 +1,2 @@
+Notice: 'C::foo' called dynamically in %s/dynamic_class_meth.php on line 10
+int(1)

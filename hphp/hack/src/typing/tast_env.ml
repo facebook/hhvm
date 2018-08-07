@@ -147,7 +147,8 @@ let set_ppl_lambda env =
 let get_anonymous_lambda_types env id =
   match Typing_env.get_anonymous env id with
   | Some (_, _, ftys, _, _) ->
-    !ftys
+    let (untyped, typed) = !ftys in
+    untyped @ typed
   | _ ->
     []
 

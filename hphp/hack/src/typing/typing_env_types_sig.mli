@@ -99,7 +99,7 @@ and genv = {
  * - the arity of the function
  * - the expected return type of the body (optional)
  *)
-and anon_log = locl ty list
+and anon_log = locl ty list * locl ty list
 and anon =
   reactivity *
   Nast.is_coroutine *

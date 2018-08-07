@@ -707,7 +707,8 @@ let is_decl env = get_mode env = FileInfo.Mdecl
 let get_options env = env.genv.tcopt
 
 let iter_anonymous env f =
-  IMap.iter (fun _id (_, _, ftys, pos, _) -> f pos !ftys) env.genv.anons
+  IMap.iter (fun _id (_, _, ftys, pos, _) ->
+    let (untyped,typed) = !ftys in f pos (untyped @ typed)) env.genv.anons
 
 (*
 let debug_env env =

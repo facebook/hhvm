@@ -739,13 +739,19 @@ let terr env =
   if dynamic_view_enabled then Tdynamic else Terr
 
 (* Hacked version of Typing_subtype.try_intersect for collecting function types *)
-let rec try_intersect env ty tyl =
+let add_function_type env fty logged =
+  let (untyped_ftys, ftys) = logged in
+  let rec try_intersect env ty tyl =
   match tyl with
   | [] -> [ty]
   | ty'::tyl' ->
-    if is_sub_type env ty ty'
+    if is_sub_type env ty ty' && not (HasTany.check ty)
     then try_intersect env ty tyl'
     else
-    if is_sub_type env ty' ty
+    if is_sub_type env ty' ty && not (HasTany.check ty')
     then try_intersect env ty' tyl'
     else ty' :: try_intersect env ty tyl'
+in
+  if HasTany.check fty
+  then (try_intersect env fty untyped_ftys, ftys)
+  else (untyped_ftys, try_intersect env fty ftys)

@@ -1440,7 +1440,7 @@ and sub_type_unwrapped_helper env ~this_ty
                     ~ellipsis_is_variadic:true anon_arity ft.ft_arity)
           then Errors.fun_arity_mismatch p_super p_sub;
           (* Add function type to set of types seen so far *)
-          ftys := TUtils.try_intersect env ety_super !ftys;
+          ftys := TUtils.add_function_type env ety_super !ftys;
           let env, _, ret = anon env ft.ft_params ft.ft_arity in
           let env = sub_type env ret ft.ft_ret in
           env

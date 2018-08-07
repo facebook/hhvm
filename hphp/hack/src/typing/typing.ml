@@ -2787,7 +2787,7 @@ and anon_make tenv p f ft idl =
   let nb = Nast.assert_named_body f.f_body in
   let is_coroutine = f.f_fun_kind = Ast.FCoroutine in
   is_coroutine,
-  ref [],
+  ref ([], []),
   p,
   (* Here ret_ty should include Awaitable wrapper *)
   fun ?el ?ret_ty env supplied_params supplied_arity ->
@@ -5617,7 +5617,7 @@ and call_ ~expected ~method_call_info ~is_expr_statement pos env fty el uel =
             ft_decl_errors = None;
             ft_returns_void_to_rx = false;
           }) in
-        ftys := TUtils.try_intersect env fty !ftys;
+        ftys := TUtils.add_function_type env fty !ftys;
         env, tel, tuel, ty)
   | _, Tarraykind _ when not (Env.is_strict env) ->
     (* Relaxing call_user_func to work with an array in partial mode *)

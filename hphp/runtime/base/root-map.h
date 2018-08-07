@@ -31,7 +31,7 @@ namespace HPHP {
  */
 template<class T> struct RootMap {
   using RootId = uintptr_t;
-  using Map = req::hash_map<RootId,req::ptr<T>>;
+  using Map = req::fast_map<RootId,req::ptr<T>>;
 
   RootId addRoot(req::ptr<T>&& ptr) {
     assertx(ptr);

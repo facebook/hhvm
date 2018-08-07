@@ -516,10 +516,12 @@ struct LibXmlDeferredTrees final {
     // should force unconditional cleanup.
     assertx(!MemoryManager::sweeping());
 
-    auto it = tl_libxml_trees->m_refCounts.find(root);
-    if (it != tl_libxml_trees->m_refCounts.end()) {
-      assertx(it->second != 0);
-      return true;
+    {
+      auto it = tl_libxml_trees->m_refCounts.find(root);
+      if (it != tl_libxml_trees->m_refCounts.end()) {
+        assertx(it->second != 0);
+        return true;
+      }
     }
     uint32_t count = 0;
     walk_tree(
@@ -546,7 +548,7 @@ private:
     return reinterpret_cast<XMLNodeData*>(node->_private)->m_lastSeenRoot;
   }
 
-  req::hash_map<xmlNodePtr,uint32_t> m_refCounts;
+  req::fast_map<xmlNodePtr,uint32_t> m_refCounts;
 };
 
 static void php_libxml_node_free_resource(xmlNodePtr node, bool force) {

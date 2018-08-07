@@ -106,7 +106,7 @@ private:
     const EnumValues*,
     clsCompare>;
 
-  using ReqEnumValuesMap = req::hash_map<
+  using ReqEnumValuesMap = req::fast_map<
     intptr_t,
     const EnumValues*>;
 

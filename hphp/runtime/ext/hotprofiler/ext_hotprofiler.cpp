@@ -483,7 +483,7 @@ private:
     int64_t         m_vtsc_start;  // user/sys time start
   };
 
-  typedef hphp_hash_map<std::string, CountMap, string_hash> StatsMap;
+  using StatsMap = hphp_hash_map<std::string, CountMap, string_hash>;
   StatsMap m_stats; // outcome
 
 public:
@@ -958,7 +958,7 @@ struct TraceProfiler final : Profiler {
     int64_t count;
     CountedTraceData() : count(0)  { clear(); }
   };
-  typedef hphp_hash_map<std::string, CountedTraceData, string_hash> StatsMap;
+  using StatsMap = hphp_hash_map<std::string, CountedTraceData, string_hash>;
   StatsMap m_stats; // outcome
 
   static pthread_mutex_t s_inUse;

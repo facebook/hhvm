@@ -581,7 +581,7 @@ public:
     time_t ts_sec; // timestamp seconds
     unsigned long ts_nsec; // timestamp nanoseconds (or 0 if ns not supported)
   };
-  req::hash_map<const StringData*, FileInfo, string_data_hash, string_data_same>
+  req::fast_map<const StringData*, FileInfo, string_data_hash, string_data_same>
     m_evaledFiles;
   req::vector<const StringData*> m_evaledFilesOrder;
   req::vector<Unit*> m_createdFuncs;

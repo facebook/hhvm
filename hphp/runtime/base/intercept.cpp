@@ -63,6 +63,8 @@ struct InterceptRequestData final : RequestEventHandler {
 
 private:
   Variant m_global_handler;
+  // get_intercept_handler() returns Variant* pointing into this map,
+  // so we need reference stability.
   req::Optional<req::StringIMap<Variant>> m_intercept_handlers;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(InterceptRequestData, s_intercept_data);
@@ -106,6 +108,7 @@ bool register_intercept(const String& name, const Variant& callback,
         auto& handlers = s_intercept_data->intercept_handlers();
         auto it = handlers.find(name);
         if (it != handlers.end()) {
+          // erase the map entry before destroying the value
           auto tmp = it->second;
           handlers.erase(it);
         }

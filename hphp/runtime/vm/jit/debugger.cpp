@@ -61,7 +61,7 @@ bool addDbgBLFunc(const Func* func) {
 
 struct DebuggerCatches {
   // keys could point to resumable ActRecs in req heap
-  req::Optional<req::hash_map<const ActRec*, TCA>> catches;
+  req::Optional<req::fast_map<const ActRec*, TCA>> catches;
 };
 
 THREAD_LOCAL(DebuggerCatches, tl_debuggerCatches);

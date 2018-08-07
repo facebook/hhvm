@@ -942,6 +942,7 @@ struct SystemSettings {
 };
 
 struct LocalSettings {
+  // Using hash_map for reference stability
   using Map = req::hash_map<std::string,Variant>;
   req::Optional<Map> settings;
   Map& init() {
@@ -1154,8 +1155,7 @@ bool IniSetting::GetSystem(const String& name, Variant& value) {
 
 bool IniSetting::SetUser(const String& name, const Variant& value) {
   auto& defaults = s_saved_defaults->init();
-  auto it = defaults.find(name.toCppString());
-  if (it == defaults.end()) {
+  if (!defaults.count(name.toCppString())) {
     Variant def;
     auto success = Get(name, def); // def gets populated here
     if (success) {

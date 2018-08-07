@@ -86,8 +86,8 @@ let ast_deregister_attributes_mapper = object (self)
     let body = this.c_body in
     let body = List.filter body (fun elt ->
       match elt with
-      | Method m when self#ignored_attr env m.m_user_attributes ->
-        false
+      | Method m when self#ignored_attr env m.m_user_attributes -> false
+      | ClassVars cv when self#ignored_attr env cv.cv_user_attributes -> false
       | _ -> true
     ) in
     let this = { this with c_body = body } in

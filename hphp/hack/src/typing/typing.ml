@@ -12,8 +12,9 @@
  * Given an Nast.program, it infers the type of all the local
  * variables, and checks that all the types are correct (aka
  * consistent) *)
+open Core_kernel
+open Common
 open Autocomplete
-open Hh_core
 open Decl_defs
 open Nast
 open Typing_defs
@@ -318,7 +319,7 @@ let make_param_local_ty attrs env param =
         let env, expanded_ty = Env.expand_type env ty in
         let adjusted_ty =
           make_function_type_mayberx (Env.env_reactivity env) expanded_ty in
-        env, if adjusted_ty == expanded_ty then ty else adjusted_ty
+        env, if phys_equal adjusted_ty expanded_ty then ty else adjusted_ty
       | _ ->
         let env, loc_ty = Phase.localize ~ety_env env ty in
         begin match ty, TR.condition_type_from_reactivity (Env.env_reactivity env) with
@@ -1967,7 +1968,7 @@ and expr_
       let env, ty1 = TUtils.fold_unresolved env ty1 in
       let env, te2, ty2 = expr env e2 in
       let env = save_and_merge_next_in_catch env in
-      let is_lvalue = (valkind == `lvalue) in
+      let is_lvalue = phys_equal valkind `lvalue in
       let env, ty =
         array_get ?lhs_of_null_coalesce is_lvalue p env ty1 e2 ty2 in
       make_result env (T.Array_get(te1, Some te2)) ty
@@ -6205,7 +6206,7 @@ and safe_instanceof env p class_name class_info ivar_pos ivar_ty obj_ty =
     tparams_with_new_names in
   let s =
       snd class_name ^ "<" ^
-      String.concat "," new_names
+      String.concat ~sep:"," new_names
       ^ ">" in
   let reason = Reason.Rinstanceof (ivar_pos, s) in
   let tyl_fresh = List.map

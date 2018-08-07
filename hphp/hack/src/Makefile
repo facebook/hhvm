@@ -42,6 +42,7 @@ MODULES=\
   annotated_ast\
   ast\
   client\
+	common\
   config\
   decl\
   deps\

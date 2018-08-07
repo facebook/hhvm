@@ -411,11 +411,14 @@ module Full = struct
             TypecheckerOptions.experimental_disable_optional_and_unknown_shape_fields in
       let fields =
         let f_field (shape_map_key, { sft_optional; sft_ty }) =
+        let key_delim =
+          match shape_map_key with Ast.SFlit_str _ -> text "'" | _ -> Nothing
+        in
           Concat [
             if optional_shape_fields_enabled && sft_optional then text "?" else Nothing;
-            text "'";
+            key_delim;
             to_doc (Env.get_shape_field_name shape_map_key);
-            text "'";
+            key_delim;
             Space;
             text "=>";
             Space;

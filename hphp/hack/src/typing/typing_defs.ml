@@ -572,7 +572,7 @@ module AbstractKind = struct
   let to_string = function
     | AKnewtype (name, _) -> name
     | AKgeneric name -> name
-    | AKenum name -> "enum "^(Utils.strip_ns name)
+    | AKenum name -> Utils.strip_ns name
     | AKdependent (dt, ids) ->
        let dt =
          match dt with

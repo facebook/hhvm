@@ -18,24 +18,24 @@ Errors:
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
-               (([4:3-19], HH\Lib\Regex\Pattern<shape('0' => string)>),
+               (([4:3-19], HH\Lib\Regex\Pattern<shape(0 => string)>),
                 (Binop ((Eq None),
-                   (([4:3-5], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                   (([4:3-5], HH\Lib\Regex\Pattern<shape(0 => string)>),
                     (Lvar ([4:3-5], $x))),
-                   (([4:8-19], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                   (([4:8-19], HH\Lib\Regex\Pattern<shape(0 => string)>),
                     (PrefixedString ("re",
                        (([4:10-19], string), (String "/Hello/")))))
                    ))));
              (Expr
-                (([7:3-19], shape('0' => string)),
+                (([7:3-19], shape(0 => string)),
                  (Binop ((Eq None),
-                    (([7:3-5], shape('0' => string)), (Lvar ([7:3-5], $y))),
-                    (([7:8-19], shape('0' => string)),
+                    (([7:3-5], shape(0 => string)), (Lvar ([7:3-5], $y))),
+                    (([7:8-19], shape(0 => string)),
                      (Call (Cnormal,
-                        (([7:8-15], (function(HH\Lib\Regex\Pattern<shape('0' => string)> $pattern): shape('0' => string))),
+                        (([7:8-15], (function(HH\Lib\Regex\Pattern<shape(0 => string)> $pattern): shape(0 => string))),
                          (Id ([7:8-15], "\\goodbye"))),
                         [],
-                        [(([7:16-18], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                        [(([7:16-18], HH\Lib\Regex\Pattern<shape(0 => string)>),
                           (Lvar ([7:16-18], $x)))],
                         [])))
                     ))));
@@ -45,7 +45,7 @@ Errors:
                     (([12:3-7], string), (Lvar ([12:3-7], $y_0))),
                     (([12:10-15], string),
                      (Array_get (
-                        (([12:10-12], shape('0' => string)),
+                        (([12:10-12], shape(0 => string)),
                          (Lvar ([12:10-12], $y))),
                         (Some (([12:13-14], int), (Int "0"))))))
                     ))));
@@ -55,7 +55,7 @@ Errors:
                     (([15:3-5], string), (Lvar ([15:3-5], $z))),
                     (([15:8-21], string),
                      (Binop (Dot,
-                        (([15:8-10], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                        (([15:8-10], HH\Lib\Regex\Pattern<shape(0 => string)>),
                          (Lvar ([15:8-10], $x))),
                         (([15:11-21], string), (String ", world!")))))
                     ))))
@@ -97,11 +97,11 @@ Errors:
        (NamedBody
           { Aast.AnnotatedAST.fnb_nast =
             [(Expr
-                (([25:3-33], HH\Lib\Regex\Pattern<shape('0' => string, ?'1' => string, ?'o' => string)>),
+                (([25:3-33], HH\Lib\Regex\Pattern<shape(0 => string, ?1 => string, ?'o' => string)>),
                  (Binop ((Eq None),
-                    (([25:3-9], HH\Lib\Regex\Pattern<shape('0' => string, ?'1' => string, ?'o' => string)>),
+                    (([25:3-9], HH\Lib\Regex\Pattern<shape(0 => string, ?1 => string, ?'o' => string)>),
                      (Lvar ([25:3-9], $good0))),
-                    (([25:12-33], HH\Lib\Regex\Pattern<shape('0' => string, ?'1' => string, ?'o' => string)>),
+                    (([25:12-33], HH\Lib\Regex\Pattern<shape(0 => string, ?1 => string, ?'o' => string)>),
                      (PrefixedString ("re",
                         (([25:14-33], string), (String "/Hel(\\D)(?'o'\\D)/"))
                         )))
@@ -122,11 +122,11 @@ Errors:
                      (([28:3-8], _), (Lvar ([28:3-8], $bad3))),
                      (([28:13-19], _), Any)))));
               (Expr
-                 (([29:3-64], HH\Lib\Regex\Pattern<shape('0' => string, ?'2' => string, ?'4' => string, ?'5' => string, ?'one' => string, ?'six' => string, ?'three' => string)>),
+                 (([29:3-64], HH\Lib\Regex\Pattern<shape(0 => string, ?2 => string, ?4 => string, ?5 => string, ?'one' => string, ?'six' => string, ?'three' => string)>),
                   (Binop ((Eq None),
-                     (([29:3-9], HH\Lib\Regex\Pattern<shape('0' => string, ?'2' => string, ?'4' => string, ?'5' => string, ?'one' => string, ?'six' => string, ?'three' => string)>),
+                     (([29:3-9], HH\Lib\Regex\Pattern<shape(0 => string, ?2 => string, ?4 => string, ?5 => string, ?'one' => string, ?'six' => string, ?'three' => string)>),
                       (Lvar ([29:3-9], $good4))),
-                     (([29:12-64], HH\Lib\Regex\Pattern<shape('0' => string, ?'2' => string, ?'4' => string, ?'5' => string, ?'one' => string, ?'six' => string, ?'three' => string)>),
+                     (([29:12-64], HH\Lib\Regex\Pattern<shape(0 => string, ?2 => string, ?4 => string, ?5 => string, ?'one' => string, ?'six' => string, ?'three' => string)>),
                       (PrefixedString ("re",
                          (([29:14-64], string),
                           (String
@@ -134,62 +134,62 @@ Errors:
                          )))
                      ))));
               (Expr
-                 (([30:3-39], HH\Lib\Regex\Pattern<shape('0' => string, ?'1' => string, ?'3' => string, ?'c' => string, ?'e' => string)>),
+                 (([30:3-39], HH\Lib\Regex\Pattern<shape(0 => string, ?1 => string, ?3 => string, ?'c' => string, ?'e' => string)>),
                   (Binop ((Eq None),
-                     (([30:3-9], HH\Lib\Regex\Pattern<shape('0' => string, ?'1' => string, ?'3' => string, ?'c' => string, ?'e' => string)>),
+                     (([30:3-9], HH\Lib\Regex\Pattern<shape(0 => string, ?1 => string, ?3 => string, ?'c' => string, ?'e' => string)>),
                       (Lvar ([30:3-9], $good5))),
-                     (([30:12-39], HH\Lib\Regex\Pattern<shape('0' => string, ?'1' => string, ?'3' => string, ?'c' => string, ?'e' => string)>),
+                     (([30:12-39], HH\Lib\Regex\Pattern<shape(0 => string, ?1 => string, ?3 => string, ?'c' => string, ?'e' => string)>),
                       (PrefixedString ("re",
                          (([30:14-39], string),
                           (String "/a(b)(?<c>c)(d)(?<e>e)/"))
                          )))
                      ))));
               (Expr
-                 (([31:3-23], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                 (([31:3-23], HH\Lib\Regex\Pattern<shape(0 => string)>),
                   (Binop ((Eq None),
-                     (([31:3-9], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([31:3-9], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (Lvar ([31:3-9], $good6))),
-                     (([31:12-23], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([31:12-23], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (PrefixedString ("re",
                          (([31:14-23], string), (String "/Hello/")))))
                      ))));
               (Expr
-                 (([32:3-47], HH\Lib\Regex\Pattern<shape('0' => string, ?'b' => string, ?'c' => string, ?'d' => string, ?'e' => string)>),
+                 (([32:3-47], HH\Lib\Regex\Pattern<shape(0 => string, ?'b' => string, ?'c' => string, ?'d' => string, ?'e' => string)>),
                   (Binop ((Eq None),
-                     (([32:3-9], HH\Lib\Regex\Pattern<shape('0' => string, ?'b' => string, ?'c' => string, ?'d' => string, ?'e' => string)>),
+                     (([32:3-9], HH\Lib\Regex\Pattern<shape(0 => string, ?'b' => string, ?'c' => string, ?'d' => string, ?'e' => string)>),
                       (Lvar ([32:3-9], $good7))),
-                     (([32:12-47], HH\Lib\Regex\Pattern<shape('0' => string, ?'b' => string, ?'c' => string, ?'d' => string, ?'e' => string)>),
+                     (([32:12-47], HH\Lib\Regex\Pattern<shape(0 => string, ?'b' => string, ?'c' => string, ?'d' => string, ?'e' => string)>),
                       (PrefixedString ("re",
                          (([32:14-47], string),
                           (String "/a(?<b>b)(?<c>c)(?<d>d)(?<e>e)/"))
                          )))
                      ))));
               (Expr
-                 (([33:3-30], HH\Lib\Regex\Pattern<shape('0' => string, ?'1' => string, ?'2' => string, ?'3' => string)>),
+                 (([33:3-30], HH\Lib\Regex\Pattern<shape(0 => string, ?1 => string, ?2 => string, ?3 => string)>),
                   (Binop ((Eq None),
-                     (([33:3-9], HH\Lib\Regex\Pattern<shape('0' => string, ?'1' => string, ?'2' => string, ?'3' => string)>),
+                     (([33:3-9], HH\Lib\Regex\Pattern<shape(0 => string, ?1 => string, ?2 => string, ?3 => string)>),
                       (Lvar ([33:3-9], $good8))),
-                     (([33:12-30], HH\Lib\Regex\Pattern<shape('0' => string, ?'1' => string, ?'2' => string, ?'3' => string)>),
+                     (([33:12-30], HH\Lib\Regex\Pattern<shape(0 => string, ?1 => string, ?2 => string, ?3 => string)>),
                       (PrefixedString ("re",
                          (([33:14-30], string), (String "/a(b)(c)(d)?e/")))))
                      ))));
               (Expr
-                 (([34:3-49], HH\Lib\Regex\Pattern<shape('0' => string, ?'1' => string)>),
+                 (([34:3-49], HH\Lib\Regex\Pattern<shape(0 => string, ?1 => string)>),
                   (Binop ((Eq None),
-                     (([34:3-9], HH\Lib\Regex\Pattern<shape('0' => string, ?'1' => string)>),
+                     (([34:3-9], HH\Lib\Regex\Pattern<shape(0 => string, ?1 => string)>),
                       (Lvar ([34:3-9], $good9))),
-                     (([34:12-49], HH\Lib\Regex\Pattern<shape('0' => string, ?'1' => string)>),
+                     (([34:12-49], HH\Lib\Regex\Pattern<shape(0 => string, ?1 => string)>),
                       (PrefixedString ("re",
                          (([34:14-49], string),
                           (String "/WoS Action: .*Disable.+\\[(\\w+)/s"))
                          )))
                      ))));
               (Expr
-                 (([35:3-69], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                 (([35:3-69], HH\Lib\Regex\Pattern<shape(0 => string)>),
                   (Binop ((Eq None),
-                     (([35:3-10], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([35:3-10], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (Lvar ([35:3-10], $good10))),
-                     (([35:13-69], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([35:13-69], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (PrefixedString ("re",
                          (([35:15-69], string),
                           (String
@@ -197,66 +197,66 @@ Errors:
                          )))
                      ))));
               (Expr
-                 (([36:3-38], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                 (([36:3-38], HH\Lib\Regex\Pattern<shape(0 => string)>),
                   (Binop ((Eq None),
-                     (([36:3-10], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([36:3-10], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (Lvar ([36:3-10], $good11))),
-                     (([36:13-38], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([36:13-38], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (PrefixedString ("re",
                          (([36:15-38], string),
                           (String "/(?<!\\w)youtube.com$/"))
                          )))
                      ))));
               (Expr
-                 (([37:3-53], HH\Lib\Regex\Pattern<shape('0' => string, ?'2' => string, ?'3' => string, ?'4' => string, ?'version' => string)>),
+                 (([37:3-53], HH\Lib\Regex\Pattern<shape(0 => string, ?2 => string, ?3 => string, ?4 => string, ?'version' => string)>),
                   (Binop ((Eq None),
-                     (([37:3-10], HH\Lib\Regex\Pattern<shape('0' => string, ?'2' => string, ?'3' => string, ?'4' => string, ?'version' => string)>),
+                     (([37:3-10], HH\Lib\Regex\Pattern<shape(0 => string, ?2 => string, ?3 => string, ?4 => string, ?'version' => string)>),
                       (Lvar ([37:3-10], $good12))),
-                     (([37:13-53], HH\Lib\Regex\Pattern<shape('0' => string, ?'2' => string, ?'3' => string, ?'4' => string, ?'version' => string)>),
+                     (([37:13-53], HH\Lib\Regex\Pattern<shape(0 => string, ?2 => string, ?3 => string, ?4 => string, ?'version' => string)>),
                       (PrefixedString ("re",
                          (([37:15-53], string),
                           (String "/.+(?P<version>(:s(\\d)+)*:c(\\d)+)$/U"))
                          )))
                      ))));
               (Expr
-                 (([38:3-48], HH\Lib\Regex\Pattern<shape('0' => string, ?'1' => string, ?'m' => string, ?'s' => string)>),
+                 (([38:3-48], HH\Lib\Regex\Pattern<shape(0 => string, ?1 => string, ?'m' => string, ?'s' => string)>),
                   (Binop ((Eq None),
-                     (([38:3-10], HH\Lib\Regex\Pattern<shape('0' => string, ?'1' => string, ?'m' => string, ?'s' => string)>),
+                     (([38:3-10], HH\Lib\Regex\Pattern<shape(0 => string, ?1 => string, ?'m' => string, ?'s' => string)>),
                       (Lvar ([38:3-10], $good13))),
-                     (([38:13-48], HH\Lib\Regex\Pattern<shape('0' => string, ?'1' => string, ?'m' => string, ?'s' => string)>),
+                     (([38:13-48], HH\Lib\Regex\Pattern<shape(0 => string, ?1 => string, ?'m' => string, ?'s' => string)>),
                       (PrefixedString ("re",
                          (([38:15-48], string),
                           (String "/^t=((?<m>\\d+)m)?(?<s>\\d+)s?$/i"))
                          )))
                      ))));
               (Expr
-                 (([39:3-46], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                 (([39:3-46], HH\Lib\Regex\Pattern<shape(0 => string)>),
                   (Binop ((Eq None),
-                     (([39:3-10], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([39:3-10], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (Lvar ([39:3-10], $good14))),
-                     (([39:13-46], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([39:13-46], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (PrefixedString ("re",
                          (([39:15-46], string),
                           (String "/(?<=\\(currently )[^)](?=\\))/"))
                          )))
                      ))));
               (Expr
-                 (([40:3-47], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                 (([40:3-47], HH\Lib\Regex\Pattern<shape(0 => string)>),
                   (Binop ((Eq None),
-                     (([40:3-10], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([40:3-10], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (Lvar ([40:3-10], $good15))),
-                     (([40:13-47], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([40:13-47], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (PrefixedString ("re",
                          (([40:15-47], string),
                           (String "/(?<=\\(currently )[^)]+(?=\\))/"))
                          )))
                      ))));
               (Expr
-                 (([41:3-73], HH\Lib\Regex\Pattern<shape('0' => string, ?'1' => string, ?'10' => string, ?'11' => string, ?'12' => string, ?'13' => string, ?'2' => string, ?'3' => string, ?'5' => string, ?'6' => string, ?'7' => string, ?'9' => string, ?'d' => string, ?'h' => string, ?'n' => string)>),
+                 (([41:3-73], HH\Lib\Regex\Pattern<shape(0 => string, ?1 => string, ?10 => string, ?11 => string, ?12 => string, ?13 => string, ?2 => string, ?3 => string, ?5 => string, ?6 => string, ?7 => string, ?9 => string, ?'d' => string, ?'h' => string, ?'n' => string)>),
                   (Binop ((Eq None),
-                     (([41:3-10], HH\Lib\Regex\Pattern<shape('0' => string, ?'1' => string, ?'10' => string, ?'11' => string, ?'12' => string, ?'13' => string, ?'2' => string, ?'3' => string, ?'5' => string, ?'6' => string, ?'7' => string, ?'9' => string, ?'d' => string, ?'h' => string, ?'n' => string)>),
+                     (([41:3-10], HH\Lib\Regex\Pattern<shape(0 => string, ?1 => string, ?10 => string, ?11 => string, ?12 => string, ?13 => string, ?2 => string, ?3 => string, ?5 => string, ?6 => string, ?7 => string, ?9 => string, ?'d' => string, ?'h' => string, ?'n' => string)>),
                       (Lvar ([41:3-10], $good16))),
-                     (([41:13-73], HH\Lib\Regex\Pattern<shape('0' => string, ?'1' => string, ?'10' => string, ?'11' => string, ?'12' => string, ?'13' => string, ?'2' => string, ?'3' => string, ?'5' => string, ?'6' => string, ?'7' => string, ?'9' => string, ?'d' => string, ?'h' => string, ?'n' => string)>),
+                     (([41:13-73], HH\Lib\Regex\Pattern<shape(0 => string, ?1 => string, ?10 => string, ?11 => string, ?12 => string, ?13 => string, ?2 => string, ?3 => string, ?5 => string, ?6 => string, ?7 => string, ?9 => string, ?'d' => string, ?'h' => string, ?'n' => string)>),
                       (PrefixedString ("re",
                          (([41:15-73], string),
                           (String
@@ -280,11 +280,11 @@ Errors:
                     (([47:3-8], _), (Lvar ([47:3-8], $bad0))),
                     (([47:13-20], _), Any)))));
               (Expr
-                 (([48:3-23], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                 (([48:3-23], HH\Lib\Regex\Pattern<shape(0 => string)>),
                   (Binop ((Eq None),
-                     (([48:3-9], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([48:3-9], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (Lvar ([48:3-9], $good1))),
-                     (([48:12-23], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([48:12-23], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (PrefixedString ("re",
                          (([48:14-23], string), (String "/Hello/")))))
                      ))));
@@ -294,11 +294,11 @@ Errors:
                      (([49:3-8], _), (Lvar ([49:3-8], $bad2))),
                      (([49:13-21], _), Any)))));
               (Expr
-                 (([50:3-23], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                 (([50:3-23], HH\Lib\Regex\Pattern<shape(0 => string)>),
                   (Binop ((Eq None),
-                     (([50:3-9], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([50:3-9], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (Lvar ([50:3-9], $good3))),
-                     (([50:12-23], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([50:12-23], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (PrefixedString ("re",
                          (([50:14-23], string), (String "#Hello#")))))
                      ))));
@@ -313,20 +313,20 @@ Errors:
                      (([52:3-8], _), (Lvar ([52:3-8], $bad5))),
                      (([52:13-21], _), Any)))));
               (Expr
-                 (([53:3-23], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                 (([53:3-23], HH\Lib\Regex\Pattern<shape(0 => string)>),
                   (Binop ((Eq None),
-                     (([53:3-9], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([53:3-9], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (Lvar ([53:3-9], $good6))),
-                     (([53:12-23], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([53:12-23], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (PrefixedString ("re",
                          (([53:14-23], string), (String "(Hello)")))))
                      ))));
               (Expr
-                 (([54:3-23], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                 (([54:3-23], HH\Lib\Regex\Pattern<shape(0 => string)>),
                   (Binop ((Eq None),
-                     (([54:3-9], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([54:3-9], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (Lvar ([54:3-9], $good7))),
-                     (([54:12-23], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([54:12-23], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (PrefixedString ("re",
                          (([54:14-23], string), (String ")Hello)")))))
                      ))));
@@ -336,11 +336,11 @@ Errors:
                      (([55:3-8], _), (Lvar ([55:3-8], $bad8))),
                      (([55:13-22], _), Any)))));
               (Expr
-                 (([56:3-23], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                 (([56:3-23], HH\Lib\Regex\Pattern<shape(0 => string)>),
                   (Binop ((Eq None),
-                     (([56:3-9], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([56:3-9], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (Lvar ([56:3-9], $good9))),
-                     (([56:12-23], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                     (([56:12-23], HH\Lib\Regex\Pattern<shape(0 => string)>),
                       (PrefixedString ("re",
                          (([56:14-23], string), (String "[Hello]")))))
                      ))));
@@ -366,11 +366,11 @@ Errors:
        (NamedBody
           { Aast.AnnotatedAST.fnb_nast =
             [(Expr
-                (([64:3-76], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                (([64:3-76], HH\Lib\Regex\Pattern<shape(0 => string)>),
                  (Binop ((Eq None),
-                    (([64:3-9], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                    (([64:3-9], HH\Lib\Regex\Pattern<shape(0 => string)>),
                      (Lvar ([64:3-9], $good0))),
-                    (([64:12-76], HH\Lib\Regex\Pattern<shape('0' => string)>),
+                    (([64:12-76], HH\Lib\Regex\Pattern<shape(0 => string)>),
                      (PrefixedString ("re",
                         (([64:14-76], string),
                          (String

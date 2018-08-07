@@ -723,8 +723,8 @@
         {
           "label": "Bard",
           "kind": 12,
-          "detail": "enum Elsa",
-          "inlineDetail": "enum Elsa",
+          "detail": "Elsa",
+          "inlineDetail": "Elsa",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -749,8 +749,8 @@
         {
           "label": "Alonso",
           "kind": 12,
-          "detail": "enum Elsa",
-          "inlineDetail": "enum Elsa",
+          "detail": "Elsa",
+          "inlineDetail": "Elsa",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -802,9 +802,9 @@
         {
           "label": "getValues",
           "kind": 2,
-          "detail": "function(): darray<string, enum Elsa>",
+          "detail": "function(): darray<string, Elsa>",
           "inlineDetail": "()",
-          "itemType": "darray<string, enum Elsa>",
+          "itemType": "darray<string, Elsa>",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -829,9 +829,9 @@
         {
           "label": "getNames",
           "kind": 2,
-          "detail": "function(): darray<enum Elsa, string>",
+          "detail": "function(): darray<Elsa, string>",
           "inlineDetail": "()",
-          "itemType": "darray<enum Elsa, string>",
+          "itemType": "darray<Elsa, string>",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -856,9 +856,9 @@
         {
           "label": "coerce",
           "kind": 2,
-          "detail": "function(mixed $value): ?enum Elsa",
+          "detail": "function(mixed $value): ?Elsa",
           "inlineDetail": "(mixed $value)",
-          "itemType": "?enum Elsa",
+          "itemType": "?Elsa",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -883,9 +883,9 @@
         {
           "label": "assertAll",
           "kind": 2,
-          "detail": "function(Traversable<mixed> $values): Container<enum Elsa>",
+          "detail": "function(Traversable<mixed> $values): Container<Elsa>",
           "inlineDetail": "(Traversable<mixed> $values)",
-          "itemType": "Container<enum Elsa>",
+          "itemType": "Container<Elsa>",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -910,9 +910,9 @@
         {
           "label": "assert",
           "kind": 2,
-          "detail": "function(mixed $value): enum Elsa",
+          "detail": "function(mixed $value): Elsa",
           "inlineDetail": "(mixed $value)",
-          "itemType": "enum Elsa",
+          "itemType": "Elsa",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {

@@ -622,7 +622,7 @@ class CommonTests(BarebonesTests):
             'string'
             ], [
             '{{"type":"string",' +
-            '"pos":{{"filename":"","line":0,"char_start":0,"char_end":-1}},' +
+            '"pos":{{"filename":"","line":0,"char_start":0,"char_end":0}},' +
             '"full_type":{{"kind":"primitive","name":"string"}}}}'
             ], options=['--type-at-pos', '{root}foo_3.php:11:14'])
 

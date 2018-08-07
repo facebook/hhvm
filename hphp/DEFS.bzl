@@ -8,14 +8,14 @@ def get_fbcode_platform():
     return platform_utils.get_platform_for_base_path(get_base_path())
 
 def is_opt_hhvm_build():
-    buck_out = read_config('project', 'buck_out')
+    buck_out = native.read_config('project', 'buck_out')
     return '/opt' in buck_out
 
 def is_dev_hhvm_build():
-    return '/dev' in read_config('project', 'buck_out')
+    return '/dev' in native.read_config('project', 'buck_out')
 
 def is_lto_build(platform):
-    return read_config("fbcode", "lto_type", "") != ""
+    return native.read_config("fbcode", "lto_type", "") != ""
 
 def find_systemlib_files(dir, skip):
     find_cmd = [ 'find', dir, '-type', 'f', '-name', 'ext_*.php' ]

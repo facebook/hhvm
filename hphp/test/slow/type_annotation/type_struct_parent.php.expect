@@ -1,18 +1,24 @@
-array(2) {
+array(3) {
   ["kind"]=>
   int(16)
   ["classname"]=>
   string(5) "IThis"
+  ["exact"]=>
+  bool(true)
 }
-array(2) {
+array(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(1) "P"
+  ["exact"]=>
+  bool(true)
 }
-array(2) {
+array(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(1) "C"
+  ["exact"]=>
+  bool(true)
 }

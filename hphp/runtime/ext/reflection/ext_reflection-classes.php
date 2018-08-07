@@ -1282,6 +1282,8 @@ namespace HH {
     'name' => ?string,
     // for type aliases
     'alias' => ?string,
+    // if the type is exact (i.e., not a subtype)
+    ?'exact' => bool,
   );
 
   /**

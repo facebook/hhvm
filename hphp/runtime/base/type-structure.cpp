@@ -56,6 +56,7 @@ struct TSEnv {
  */
 const StaticString
   s_nullable("nullable"),
+  s_exact("exact"),
   s_name("name"),
   s_classname("classname"),
   s_kind("kind"),
@@ -564,6 +565,8 @@ bool resolveClass(TSEnv& env,
 
   ret.set(s_kind, Variant(static_cast<uint8_t>(resolvedKind)));
   ret.add(s_classname, Variant(makeStaticString(cls->name())));
+  if (clsName.same(s_this)) ret.add(s_exact, true_varNR.tv());
+
   return true;
 }
 

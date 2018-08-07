@@ -4,11 +4,13 @@ array(2) {
   ["classname"]=>
   string(5) "Foo\D"
 }
-array(2) {
+array(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(1) "C"
+  ["exact"]=>
+  bool(true)
 }
 array(2) {
   ["kind"]=>

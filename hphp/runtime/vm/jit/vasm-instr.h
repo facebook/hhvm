@@ -91,6 +91,7 @@ struct Vunit;
   O(inlineend, Inone, Un, Dn)\
   O(pushframe, Inone, Un, Dn)\
   O(popframe, Inone, Un, Dn)\
+  O(recordstack, Inone, Un, Dn)\
   /* native function abi */\
   O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
   O(vinvoke, I(call) I(destType) I(fixup), U(args), D(d))\
@@ -564,6 +565,12 @@ struct inlineend {};
  */
 struct pushframe {};
 struct popframe {};
+
+/*
+ * Record the current inline stack as though it were materialized for a call at
+ * fakeAddress.
+ */
+struct recordstack { TCA fakeAddress; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // Native function ABI.

@@ -131,6 +131,11 @@ inline bool emit(Venv& env, const popframe&) {
   return true;
 }
 
+inline bool emit(Venv& env, const recordstack& i) {
+  env.record_inline_stack(i.fakeAddress);
+  return true;
+}
+
 inline void record_frame(Venv& env) {
   auto const& block = env.unit.blocks[env.current];
   auto const frame = env.frame;

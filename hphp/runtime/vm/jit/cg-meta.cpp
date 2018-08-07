@@ -65,12 +65,24 @@ IFrameID insertFrames(const std::vector<IFrame>& frames) {
   return start;
 }
 
+bool isFakeAddr(CTCA addr) {
+  return (int64_t)addr < 0;
+}
+
+Offset fromFakeAddr(CTCA addr) {
+  return (int32_t)reinterpret_cast<int64_t>(addr);
+}
+
+Offset stackAddrToOffset(CTCA addr) {
+  return isFakeAddr(addr) ? fromFakeAddr(addr) : tc::addrToOffset(addr);
+}
+
 void insertStacks(
   IFrameID start, const std::vector<std::pair<TCA,IStack>>& stacks
 ) {
   for (auto& stk : stacks) {
     if (!stk.second.nframes) continue;
-    auto off = tc::addrToOffset(stk.first);
+    auto off = stackAddrToOffset(stk.first);
     auto val = stk.second;
     val.frame += start;
     if (auto pos = s_inlineStacks.find(off)) {
@@ -89,7 +101,7 @@ void processInlineFrames(const CGMeta& cm) {
 }
 
 folly::Optional<IStack> inlineStackAt(CTCA addr) {
-  auto off = tc::addrToOffset(addr);
+  auto off = stackAddrToOffset(addr);
   if (auto pos = s_inlineStacks.find(off)) {
     return *pos;
   }

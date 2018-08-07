@@ -49,7 +49,7 @@ type env = {
   class_kind: Ast.class_kind option;
   imm_ctrl_ctx: control_context;
   typedef_tparams : Nast.tparam list;
-  lvalue: bool; (* current expression is being used as an lvalue *)
+  is_array_append_allowed: bool;
   is_reactive: bool; (* The enclosing function is reactive *)
   tenv: Env.env;
 }
@@ -423,7 +423,7 @@ let rec fun_ tenv f named_body =
   if !auto_complete then ()
   else begin
     let env = { t_is_finally = false;
-                lvalue = false;
+                is_array_append_allowed = false;
                 class_name = None; class_kind = None;
                 imm_ctrl_ctx = Toplevel;
                 typedef_tparams = [];
@@ -632,7 +632,7 @@ and class_ tenv c =
   if !auto_complete then () else begin
   let cname = Some (snd c.c_name) in
   let env = { t_is_finally = false;
-              lvalue = false;
+              is_array_append_allowed = false;
               class_name = cname;
               class_kind = Some c.c_kind;
               imm_ctrl_ctx = Toplevel;
@@ -1200,7 +1200,8 @@ and expr_ env p = function
   | ImmutableVar _
   | Lplaceholder _ | Dollardollar _ -> ()
   | Dollar e ->
-    expr env e
+    let env' = {env with is_array_append_allowed = false} in
+    expr env' e
   | Pipe (_, e1, e2) ->
       expr env e1;
       expr env e2
@@ -1237,18 +1238,21 @@ and expr_ env p = function
   | Obj_get (e, (_, Id s), _) ->
       if is_magic s && Env.is_strict env.tenv
       then Errors.magic s;
-      expr env e;
+      let env' = {env with is_array_append_allowed = false} in
+      expr env' e;
       ()
   | Obj_get (e1, e2, _) ->
-      expr env e1;
-      expr env e2;
+      let env' = {env with is_array_append_allowed = false} in
+      expr env' e1;
+      expr env' e2;
       ()
-  | Array_get ((p, _), None) when not env.lvalue ->
+  | Array_get ((p, _), None) when not env.is_array_append_allowed ->
     Errors.reading_from_append p;
     ()
   | Array_get (e, eopt) ->
-      expr env e;
-      maybe expr env eopt;
+      let env' = {env with is_array_append_allowed = false} in
+      expr env' e;
+      maybe expr env' eopt;
       ()
   | Call (_, e, _, el, uel) ->
       expr env e;
@@ -1308,7 +1312,7 @@ and expr_ env p = function
       ()
   | Binop (op, e1, e2) ->
       let lvalue_env = match op with
-      | Ast.Eq _ -> { env with lvalue = true }
+      | Ast.Eq _ -> { env with is_array_append_allowed = true }
       | _ -> env in
       expr lvalue_env e1;
       expr env e2;
@@ -1371,7 +1375,7 @@ and field env (e1, e2) =
 
 let typedef tenv t =
   let env = { t_is_finally = false;
-              lvalue = false;
+              is_array_append_allowed = false;
               class_name = None; class_kind = None;
               imm_ctrl_ctx = Toplevel;
               (* Since typedefs cannot have constraints we shouldn't check

@@ -1441,7 +1441,7 @@ inline StringData* SetElemString(tv_lval base, key_type<keyType> key,
   }
 
   // Convert key to string offset.
-  int64_t x = castKeyToInt<keyType>(key);
+  auto const x = castKeyToInt<keyType>(key);
   if (UNLIKELY(x < 0 || x >= StringData::MaxSize)) {
     // Can't use PRId64 here because of order of inclusion issues
     raise_warning("Illegal string offset: %lld", (long long)x);
@@ -1463,7 +1463,7 @@ inline StringData* SetElemString(tv_lval base, key_type<keyType> key,
   }
 
   // Extract the first character of (string)value.
-  char y[2];
+  char y;
   {
     StringData* valStr;
     if (LIKELY(isStringType(value->m_type))) {
@@ -1473,21 +1473,17 @@ inline StringData* SetElemString(tv_lval base, key_type<keyType> key,
       valStr = tvCastToStringData(*value);
     }
 
-    if (valStr->size() > 0) {
-      y[0] = valStr->data()[0];
-      y[1] = '\0';
-    } else {
-      y[0] = '\0';
-    }
+    y = valStr->data()[0];
     decRefStr(valStr);
   }
 
   // Create and save the result.
-  if (x >= 0 && x < baseLen && !val(base).pstr->cowCheck()) {
+  assert(x >= 0); // x < 0 is handled above.
+  if (x < baseLen && !val(base).pstr->cowCheck()) {
     // Modify base in place.  This is safe because the LHS owns the
     // only reference.
     auto const oldp = val(base).pstr;
-    auto const newp = oldp->modifyChar(x, y[0]);
+    auto const newp = oldp->modifyChar(x, y);
     if (UNLIKELY(newp != oldp)) {
       decRefStr(oldp);
       val(base).pstr = newp;
@@ -1500,14 +1496,14 @@ inline StringData* SetElemString(tv_lval base, key_type<keyType> key,
     if (x > baseLen) {
       memset(&s[baseLen], ' ', slen - baseLen - 1);
     }
-    s[x] = y[0];
+    s[x] = y;
     sd->setSize(slen);
     decRefStr(val(base).pstr);
     val(base).pstr = sd;
     type(base) = KindOfString;
   }
 
-  return StringData::Make(y, strlen(y), CopyString);
+  return makeStaticString(y);
 }
 
 /**

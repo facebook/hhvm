@@ -163,10 +163,9 @@ private:
   struct SavedRefMap {
     ~SavedRefMap();
 
-    struct MapData : boost::noncopyable {
-      MapData() : m_count(0), m_id(-1) { }
-      int m_count;
-      int m_id;
+    struct MapData {
+      int m_count{0};
+      int m_id{-1};
     };
 
     MapData& operator[](tv_rval tv) {
@@ -192,7 +191,7 @@ private:
       }
     };
 
-    req::hash_map<TypedValue, MapData, TvHash, TvEq> m_mapping;
+    req::fast_map<TypedValue, MapData, TvHash, TvEq> m_mapping;
   };
 
   Type m_type;

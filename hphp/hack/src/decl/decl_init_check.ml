@@ -18,39 +18,44 @@ let parent_init_prop = "parent::" ^ SN.Members.__construct
  * a class variable that needs to be initialized. It's a bit hacky
  * but it works. The idea here is that if the parent needs to be
  * initialized, we add a phony class variable. *)
-let add_parent_construct c decl_env props parent_hint =
+let add_parent_construct decl_env c add_prop acc parent_hint =
   match parent_hint with
     | (_, Happly ((_, parent), _)) ->
       let class_ = Decl_env.get_class_dep decl_env parent in
       (match class_ with
         | Some class_ when
             class_.dc_need_init && c.c_constructor <> None
-            -> SSet.add parent_init_prop props
-        | _ -> props
+            -> add_prop parent_init_prop acc
+        | _ -> acc
       )
-    | _ -> props
+    | _ -> acc
 
-let parent decl_env props c =
-  if c.c_mode = FileInfo.Mdecl then props
+let parent decl_env c add_prop acc =
+  if c.c_mode = FileInfo.Mdecl then acc
   else
     if c.c_kind = Ast.Ctrait
     then List.fold_left c.c_req_extends
-      ~f:(add_parent_construct c decl_env) ~init:props
+      ~f:(add_parent_construct decl_env c add_prop) ~init:acc
     else match c.c_extends with
-    | [] -> props
-    | parent_hint :: _ -> add_parent_construct c decl_env props parent_hint
+    | [] -> acc
+    | parent_hint :: _ -> add_parent_construct decl_env c add_prop acc parent_hint
 
-let prop_needs_init add_to_acc acc cv =
-  if cv.cv_is_xhp then acc else begin
-    match cv.cv_type with
-      | None
-      | Some (_, Hoption _)
-      | Some (_, Hmixed) -> acc
-      | Some _ when cv.cv_expr = None -> add_to_acc cv acc
-      | Some _ -> acc
-  end
+let prop_needs_init cv =
+  if cv.cv_is_xhp then false
+  else match cv.cv_type with
+    | None
+    | Some (_, Hoption _)
+    | Some (_, Hmixed) -> false
+    | Some _ -> cv.cv_expr = None
 
-let parent_props decl_env acc c =
+let own_props c add_prop acc =
+  List.fold_left c.c_vars ~f:begin fun acc cv ->
+    if prop_needs_init cv
+    then add_prop (snd cv.cv_id) acc
+    else acc
+  end ~init:acc
+
+let parent_props decl_env c add_prop acc =
   List.fold_left c.c_extends ~f:begin fun acc parent ->
     match parent with
     | _, Happly ((_, parent), _) ->
@@ -58,11 +63,11 @@ let parent_props decl_env acc c =
       (match tc with
         | None -> acc
         | Some { dc_deferred_init_members = members; _ } ->
-          SSet.union members acc)
+          SSet.fold add_prop members acc)
     | _ -> acc
   end ~init:acc
 
-let trait_props decl_env props c =
+let trait_props decl_env c add_prop acc =
   List.fold_left c.c_uses ~f:begin fun acc -> function
     | _, Happly ((_, trait), _) -> begin
       let class_ = Decl_env.get_class_dep decl_env trait in
@@ -77,44 +82,43 @@ let trait_props decl_env props c =
          * defining `dc_deferred_init_members`. See logic in `class_` for
          * Ast.Cabstract to see where this deviated for traits.
          *)
+        let add_props members acc = SSet.fold add_prop members acc in
         match fst cstr with
-          | None -> SSet.union members acc
+          | None -> add_props members acc
           | Some cstr when cstr.elt_origin <> trait || cstr.elt_abstract ->
-              SSet.union members acc
-          | _ when c.c_constructor <> None -> SSet.union members acc
+              add_props members acc
+          | _ when c.c_constructor <> None -> add_props members acc
           | _ -> acc
       end
     end
     | _ -> acc
-  end ~init:props
+  end ~init:acc
 
 (* return a tuple of the private init-requiring props of the class
- * and the other init-requiring props of the class and its ancestors *)
-let classify_props_for_decl decl_env c =
-  let adder = begin fun cv (private_props, hierarchy_props) ->
-    let cname = snd cv.cv_id in
-    if cv.cv_visibility = Private then
-      (SSet.add cname private_props), hierarchy_props
+ * and all init-requiring props of the class and its ancestors *)
+let get_deferred_init_props decl_env c =
+  let priv_props, props = List.fold_left ~f:(fun (priv_props, props) cv ->
+    let name = snd cv.cv_id in
+    let visibility = cv.cv_visibility in
+    if not (prop_needs_init cv) then
+      priv_props, props
+    else if visibility = Private then
+      SSet.add name priv_props, SSet.add name props
     else
-      private_props, (SSet.add cname hierarchy_props)
-  end in
-  let acc = (SSet.empty, SSet.empty) in
-  let priv_props, props =
-    List.fold_left ~f:(prop_needs_init adder) ~init:acc c.c_vars in
-  let props = parent_props decl_env props c in
-  let props = parent decl_env props c in
+      priv_props, SSet.add name props
+  ) ~init:(SSet.empty, SSet.empty) c.c_vars in
+  let props = parent_props decl_env c SSet.add props in
+  let props = parent decl_env c SSet.add props in
   priv_props, props
 
 let class_ ~has_own_cstr decl_env c =
   match c.c_kind with
   | Ast.Cabstract when not has_own_cstr ->
-    let priv_props, props = classify_props_for_decl decl_env c in
+    let priv_props, props = get_deferred_init_props decl_env c in
     if priv_props <> SSet.empty then
       (* XXX: should priv_props be checked for a trait?
        * see chown_privates in typing_inherit *)
       Errors.constructor_required c.c_name priv_props;
-    SSet.union priv_props props
-  | Ast.Ctrait ->
-    let priv_props, props = classify_props_for_decl decl_env c in
-    SSet.union priv_props props
+    props
+  | Ast.Ctrait -> snd (get_deferred_init_props decl_env c)
   | _ -> SSet.empty

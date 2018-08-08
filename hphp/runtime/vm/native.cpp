@@ -695,16 +695,21 @@ const char* checkTypeFunc(const NativeSig& sig,
   return argIt == endIt ? nullptr : kInvalidArgCountMessage;
 }
 
+String fullName(const StringData* fname, const StringData* cname,
+                bool isStatic) {
+  return {
+    cname == nullptr ? String{const_cast<StringData*>(fname)} :
+    (String{const_cast<StringData*>(cname)} +
+      (isStatic ? "::" : "->") +
+      String{const_cast<StringData*>(fname)})
+  };
+}
+
 NativeFunctionInfo getNativeFunction(const FuncTable& nativeFuncs,
                                      const StringData* fname,
                                      const StringData* cname,
                                      bool isStatic) {
-  const String name{
-    cname == nullptr
-      ? String{const_cast<StringData*>(fname)}
-      : (String{const_cast<StringData*>(cname)} + (isStatic ? "::" : "->") +
-         String{const_cast<StringData*>(fname)})
-  };
+  const String name = fullName(fname, cname, isStatic);
   if (auto info = nativeFuncs.get(name.get())) {
     return info;
   }
@@ -746,6 +751,12 @@ NativeFunctionInfo FuncTable::get(const StringData* name) const {
   auto const it = m_infos.find(name);
   if (it != m_infos.end()) return it->second;
   return NativeFunctionInfo();
+}
+
+void FuncTable::dump() const {
+  for (auto e : m_infos) {
+    fprintf(stderr, "%s\n", e.first->data());
+  }
 }
 
 static std::string nativeTypeString(NativeSig::Type ty) {

@@ -40,6 +40,10 @@ struct StringData;
 struct PreClassEmitter;
 struct UnitEmitter;
 
+namespace Native {
+struct NativeFunctionInfo;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -213,6 +217,8 @@ public:
    */
   std::pair<int,int> getLocation() const;
 
+  Native::NativeFunctionInfo getNativeInfo() const;
+  String nativeFullname() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Complex setters.

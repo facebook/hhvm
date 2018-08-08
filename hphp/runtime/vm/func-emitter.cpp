@@ -256,12 +256,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
     ex->m_hniReturnType = hniReturnType;
 
-    auto const& info = Native::getNativeFunction(
-      Native::s_builtinNativeFuncs,
-      name,
-      m_pce ? m_pce->name() : nullptr,
-      f->isStatic()
-    );
+    auto const info = getNativeInfo();
 
     Attr dummy = AttrNone;
     auto nativeAttributes = parseNativeAttributes(dummy);
@@ -300,6 +295,20 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   f->finishedEmittingParams(fParams);
   return f;
+}
+
+String FuncEmitter::nativeFullname() const {
+  return Native::fullName(name, m_pce ? m_pce->name() : nullptr,
+                          (attrs & AttrStatic));
+}
+
+Native::NativeFunctionInfo FuncEmitter::getNativeInfo() const {
+  return Native::getNativeFunction(
+      m_ue.m_nativeFuncs,
+      name,
+      m_pce ? m_pce->name() : nullptr,
+      (attrs & AttrStatic)
+    );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

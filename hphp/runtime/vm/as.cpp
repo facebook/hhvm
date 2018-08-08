@@ -2484,19 +2484,34 @@ static const StaticString
  */
 void check_native(AsmState& as, bool is_construct_or_destruct) {
   if (as.fe->userAttributes.count(s_native.get())) {
-    if (SystemLib::s_inited) {
-      as.error("Native function may only appear in systemlib");
-    }
-
     as.fe->hniReturnType = is_construct_or_destruct
       ? KindOfNull
       : type_constraint_to_data_type(as.fe->retUserType,
         as.fe->retTypeConstraint);
+
     as.fe->isNative =
       !(as.fe->parseNativeAttributes(as.fe->attrs) & Native::AttrOpCodeImpl);
 
-    // set extra attributes
-    as.fe->attrs |= AttrBuiltin | AttrSkipFrame | AttrMayUseVV;
+    if (as.fe->isNative) {
+      auto info = as.fe->getNativeInfo();
+      if (!info) {
+        if (SystemLib::s_inited) {
+          // non-builtin native functions must have a valid binding
+          as.error("No NativeFunctionInfo for function {}",
+                   as.fe->nativeFullname());
+        } else {
+          // Allow builtins to have mising NativeFunctionInfo, to support
+          // conditional compilation. Calling such a function will Fatal.
+        }
+      }
+    } else {
+      // was AttrOpCodeImpl
+    }
+
+    // set extra attributes for builtin native functions
+    if (!SystemLib::s_inited) {
+      as.fe->attrs |= AttrBuiltin | AttrSkipFrame | AttrMayUseVV;
+    }
 
     if (as.fe->userAttributes.count(s_ParamCoerceModeFalse.get())) {
       as.fe->attrs |= AttrParamCoerceModeFalse;
@@ -3375,10 +3390,11 @@ std::unique_ptr<UnitEmitter> assemble_string(
   int codeLen,
   const char* filename,
   const MD5& md5,
+  const Native::FuncTable& nativeFuncs,
   bool swallowErrors,
   AsmCallbacks* callbacks
 ) {
-  auto ue = std::make_unique<UnitEmitter>(md5, Native::s_builtinNativeFuncs);
+  auto ue = std::make_unique<UnitEmitter>(md5, nativeFuncs);
   if (!SystemLib::s_inited) {
     ue->m_mergeOnly = true;
   }

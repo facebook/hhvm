@@ -31,6 +31,7 @@
 
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/zend-strtod.h"
+#include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/util/atomic-vector.h"
@@ -258,6 +259,7 @@ struct ExternCompiler {
                                 prog.length(),
                                 filename,
                                 md5,
+                                Native::s_builtinNativeFuncs,
                                 false /* swallow errors */,
                                 callbacks
                               );

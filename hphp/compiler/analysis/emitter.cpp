@@ -343,12 +343,14 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       if (const char* dot = strrchr(filename, '.')) {
         const char hhbc_ext[] = "hhas";
         if (!strcmp(dot + 1, hhbc_ext)) {
-          ue = assemble_string(code, codeLen, filename, md5);
+          ue = assemble_string(code, codeLen, filename, md5,
+                               Native::s_builtinNativeFuncs);
           if (BuiltinSymbols::s_systemAr) {
             assertx(ue->m_filepath->data()[0] == '/' &&
                     ue->m_filepath->data()[1] == ':');
             BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
-            ue = assemble_string(code, codeLen, filename, md5);
+            ue = assemble_string(code, codeLen, filename, md5,
+                                 Native::s_builtinNativeFuncs);
           }
         }
       }

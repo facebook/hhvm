@@ -344,7 +344,8 @@ bool Package::parseImpl(const std::string* fileName) {
       MD5 md5{string_md5(content)};
 
       std::unique_ptr<UnitEmitter> ue{
-        assemble_string(content.data(), content.size(), fileName->c_str(), md5)
+        assemble_string(content.data(), content.size(), fileName->c_str(), md5,
+                        Native::s_builtinNativeFuncs)
       };
       Lock lock(m_ar->getMutex());
       m_ar->addHhasFile(std::move(ue));

@@ -400,6 +400,11 @@ public:
   TypedValue m_mainReturn;
   UserAttributeMap m_metaData;
 
+  /*
+   * name=>NativeFuncInfo for native funcs in this unit
+   */
+  const Native::FuncTable& m_nativeFuncs;
+
 private:
   MD5 m_md5;
 
@@ -474,11 +479,6 @@ private:
   std::vector<std::pair<Offset,SourceLoc>> m_sourceLocTab;
   std::vector<const FuncEmitter*> m_feTab;
   LineTable m_lineTable;
-
-  /*
-   * name=>NativeFuncInfo for native funcs in this unit
-   */
-  const Native::FuncTable& m_nativeFuncs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

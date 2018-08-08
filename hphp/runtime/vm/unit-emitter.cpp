@@ -90,13 +90,13 @@ size_t hhbc_arena_capacity() {
 
 UnitEmitter::UnitEmitter(const MD5& md5, const Native::FuncTable& nativeFuncs)
   : m_mainReturn(make_tv<KindOfUninit>())
+  , m_nativeFuncs(nativeFuncs)
   , m_md5(md5)
   , m_bc((unsigned char*)malloc(BCMaxInit))
   , m_bclen(0)
   , m_bcmax(BCMaxInit)
   , m_nextFuncSn(0)
   , m_allClassesHoistable(true)
-  , m_nativeFuncs(nativeFuncs)
 {}
 
 UnitEmitter::~UnitEmitter() {

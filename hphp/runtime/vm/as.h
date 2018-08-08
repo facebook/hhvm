@@ -26,6 +26,10 @@ struct UnitEmitter;
 struct FuncEmitter;
 struct MD5;
 
+namespace Native {
+struct FuncTable;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -56,6 +60,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   int codeLen,
   const char* filename,
   const MD5&,
+  const Native::FuncTable&,
   bool swallowErrors = true,
   AsmCallbacks* callbacks = nullptr
 );

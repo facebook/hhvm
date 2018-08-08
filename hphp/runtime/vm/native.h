@@ -553,6 +553,9 @@ struct FuncTable;
 extern FuncTable s_builtinNativeFuncs;
 extern const FuncTable s_noNativeFuncs;
 
+String fullName(const StringData* fname, const StringData* cname,
+                bool isStatic);
+
 NativeFunctionInfo getNativeFunction(const FuncTable& nativeFuncs,
                                      const StringData* fname,
                                      const StringData* cname = nullptr,

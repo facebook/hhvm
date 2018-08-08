@@ -814,7 +814,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env kw;
       Space;
       transform_condition env left_p condition right_p;
-      handle_possible_compound_statement env if_body;
+      transform_consequence t env if_body right_p;
       handle_possible_list env elseif_clauses;
       t env else_clause;
       Newline;
@@ -829,7 +829,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env kw;
       Space;
       transform_condition env left_p condition right_p;
-      handle_possible_compound_statement env body;
+      transform_consequence t env body right_p;
     ]
   | Syntax.ElseClause x ->
     Concat [
@@ -840,7 +840,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
           t env x.else_statement;
           Space;
         ]
-      | _ -> handle_possible_compound_statement env x.else_statement
+      | _ -> transform_consequence t env x.else_statement x.else_keyword;
     ]
   | Syntax.AlternateIfStatement {
       alternate_if_keyword = kw;
@@ -3360,6 +3360,20 @@ and transform_xhp_leading_trivia triv =
 and node_has_trailing_newline node =
   let trivia = Syntax.trailing_trivia node in
   List.exists trivia ~f:(fun x -> Trivia.kind x = TriviaKind.EndOfLine)
+
+and transform_consequence t (env: Env.t) (node_body: Syntax.t) (node_newline: Syntax.t) = 
+  match Syntax.syntax node_body with
+  | Syntax.CompoundStatement _ -> handle_possible_compound_statement env node_body
+  | _ -> Concat [
+      Space;
+      if has_newline (Syntax.trailing_trivia node_newline)
+      then Concat [Newline; Nest [t env node_body]]
+      else WithRule (Rule.Parental, Nest [ Span [
+        Space;
+        Split;
+        t env node_body;
+      ]]);
+    ]
 
 let transform (env: Env.t) (node: Syntax.t) : Doc.t =
   t env node

@@ -27,49 +27,34 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static AssertFailLogger s_logger;
 static bool s_assert_failed{false};
 
 __thread AssertDetailImpl* AssertDetailImpl::s_head = nullptr;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool AssertDetailImpl::log_impl(const AssertDetailImpl* adi) {
-  if (!adi) return false;
-  log_impl(adi->m_next);
-
-  auto const title = folly::sformat("{:-^80}\n", adi->m_name);
-  auto const msg = adi->run();
+std::pair<std::string,std::string>
+AssertDetailImpl::log_one(const AssertDetailImpl* adi, const char* name) {
+  auto title = folly::sformat("{:-^80}\n", name);
+  auto msg = adi->run();
 
   fprintf(stderr, "\n%s%s\n", title.c_str(), msg.c_str());
-  if (s_logger) s_logger(title.c_str(), msg);
+  return { std::move(title), std::move(msg) };
+}
 
+bool AssertDetailImpl::readAndRemove(std::string& msg) {
+  if (!s_head) return false;
+  auto const head = s_head;
+  auto const name = head->m_name;
+  head->m_name = nullptr;
+  s_head = head->m_next;
+
+  auto pair = log_one(head, name);
+  msg = std::move(pair.first) + std::move(pair.second) + "\n";
   return true;
 }
 
-bool AssertDetailImpl::log() { return log_impl(s_head); }
-
 //////////////////////////////////////////////////////////////////////
-
-static void assert_log_failure(const char* e, const std::string& msg) {
-  fprintf(stderr, "\nAssertion failure: %s\n\n%s\n", e, msg.c_str());
-
-  if (s_logger) {
-    s_logger("Assertion Failure", e);
-    if (!msg.empty()) {
-      s_logger("Assertion Message", msg);
-    }
-  }
-  auto const detailed = AssertDetailImpl::log();
-  fprintf(stderr, "\n");
-
-  // Reprint the original message, so readers don't necessarily have to page up
-  // through all the detail to find it.  We also printed it first, just in case
-  // one of the detailers wanted to segfault.
-  if (detailed) {
-    fprintf(stderr, "\nAssertion failure: %s\n\n%s\n", e, msg.c_str());
-  }
-}
 
 void assert_fail(const char* e, const char* file,
                  unsigned int line, const char* func,
@@ -82,13 +67,16 @@ void assert_fail(const char* e, const char* file,
 
   auto const assertion = folly::sformat("{}:{}: {}: assertion `{}' failed.",
                                         file, line, func, e);
-  assert_log_failure(assertion.c_str(), msg);
 
+  fprintf(stderr, "\nAssertion failure: %s\n\n%s\n",
+          assertion.c_str(), msg.c_str());
+
+  SCOPE_ASSERT_DETAIL("Assertion Failure") { return assertion; };
+
+  if (msg.empty()) std::abort();
+
+  SCOPE_ASSERT_DETAIL("Assertion Message") { return msg; };
   std::abort();
-}
-
-void register_assert_fail_logger(AssertFailLogger l) {
-  s_logger = l;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

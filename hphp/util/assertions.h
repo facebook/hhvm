@@ -77,13 +77,6 @@ void assert_fail(const char* e,
                  const char* func,
                  const std::string& msg);
 
-/*
- * Register a function for auxiliary assert logging.
- */
-using AssertFailLogger = std::function<void(const char*, const std::string&)>;
-
-void register_assert_fail_logger(AssertFailLogger);
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -91,11 +84,10 @@ void register_assert_fail_logger(AssertFailLogger);
  */
 struct AssertDetailImpl {
   /*
-   * Prints the results of all registered detailers to stderr.  Returns true if
-   * we had any registered detailers.
+   * Reads the most recently added message, and removes it from the
+   * list. Returns true if there was a message to read.
    */
-  static bool log();
-
+  static bool readAndRemove(std::string& msg);
 protected:
   explicit AssertDetailImpl(const char* name)
     : m_name(name)
@@ -122,7 +114,8 @@ protected:
   AssertDetailImpl& operator=(const AssertDetailImpl&) = delete;
 
 private:
-  static bool log_impl(const AssertDetailImpl*);
+  static std::pair<std::string,std::string>
+  log_one(const AssertDetailImpl* adi, const char* name);
   virtual std::string run() const = 0;
 
 private:

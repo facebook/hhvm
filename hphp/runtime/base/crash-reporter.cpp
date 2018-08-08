@@ -55,6 +55,7 @@ enum class CrashReportStage {
   CheckFD,
   CreateCppStack,
   ReportHeader,
+  ReportAssertDetail,
   ReportTrap,
   ReportCppStack,
   ReportPhpStack,
@@ -149,7 +150,7 @@ static void bt_handler(int sigin, siginfo_t* info, void*) {
       st.emplace();
       // fall through
     case CrashReportStage::ReportHeader:
-      s_crash_report_stage = CrashReportStage::ReportTrap;
+      s_crash_report_stage = CrashReportStage::ReportAssertDetail;
       {
         auto const debuggerCount = [&] {
           if (RuntimeOption::EnableHphpdDebugger) {
@@ -167,6 +168,17 @@ static void bt_handler(int sigin, siginfo_t* info, void*) {
         st->log(strsignal(sig), fd, compilerId().begin(), debuggerCount);
       }
       // fall through
+    case CrashReportStage::ReportAssertDetail:
+    {
+      // Don't point s_crash_report_stage to the next one. We want to
+      // spin here until we're done
+      std::string msg;
+      while (AssertDetailImpl::readAndRemove(msg)) {
+        write(fd, msg.c_str(), msg.size());
+        ::fsync(fd);
+      }
+      // fall through
+    }
     case CrashReportStage::ReportTrap:
       s_crash_report_stage = CrashReportStage::ReportCppStack;
 
@@ -289,9 +301,6 @@ void install_crash_reporter() {
   CHECK_ERR(sigaction(SIGSEGV, &sa, &osa));
   CHECK_ERR(sigaction(SIGABRT, &sa, &osa));
 #endif
-
-
-  register_assert_fail_logger(&StackTraceNoHeap::AddExtraLogging);
 }
 
 //////////////////////////////////////////////////////////////////////

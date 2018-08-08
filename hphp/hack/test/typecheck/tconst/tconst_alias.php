@@ -2,7 +2,7 @@
 
 interface Bar {
   abstract const type TData;
-  abstract public function this(): this;
+  public function this(): this;
   public function getData(): this::TData;
 }
 

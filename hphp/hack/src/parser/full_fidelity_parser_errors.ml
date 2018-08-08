@@ -115,6 +115,11 @@ and is_hack env = env.is_hh_file || env.enable_hh_syntax
 
 let is_typechecker env =
   is_hack env && (not env.codegen)
+
+let is_strict env =
+  let mode_opt = FileInfo.parse_mode @@ SyntaxTree.mode env.syntax_tree in
+  mode_opt = Some FileInfo.Mstrict
+
 let global_namespace_name = "\\"
 
 let combine_names n1 n2 =
@@ -602,6 +607,11 @@ let methodish_abstract_conflict_with_final node =
   let is_abstract = methodish_contains_abstract node in
   let has_final = methodish_contains_final node in
   is_abstract && has_final
+
+let methodish_abstract_inside_interface parents node =
+  let is_abstract = methodish_contains_abstract node in
+  let is_in_interface = methodish_inside_interface parents in
+  is_abstract && is_in_interface
 
 let using_statement_function_scoped_is_legal parents =
   match parents with
@@ -1148,6 +1158,11 @@ let methodish_errors env node parents errors =
       methodish_abstract_conflict_with_final
       node (SyntaxError.error2019 class_name method_name) modifiers in
     let errors =
+      if not (is_strict env && is_typechecker env) then errors else
+      produce_error errors
+      (methodish_abstract_inside_interface parents)
+      node SyntaxError.error2045 modifiers in
+    let errors =
       methodish_memoize_lsb_on_non_static node errors in
     let errors =
       let async_annotation = Option.value (extract_async_node node)
@@ -1382,8 +1397,7 @@ let redeclaration_errors env node parents namespace_name names errors =
           t_functions = strmap_add function_name def names.t_functions }, errors
       | _ ->
         (* Only check this in strict mode. *)
-        let mode_opt = FileInfo.parse_mode @@ SyntaxTree.mode env.syntax_tree in
-        if mode_opt <> Some FileInfo.Mstrict then names, errors else
+        if not @@ is_strict env then names, errors else
         let error = make_error_from_node
           ~error_type:SyntaxError.ParseError
           node
@@ -2171,8 +2185,7 @@ let classish_errors env node parents namespace_name names errors =
        global scope. *)
     let classish_declaration_check _ =
       (* Only check this in strict mode. *)
-      let mode_opt = FileInfo.parse_mode @@ SyntaxTree.mode env.syntax_tree in
-      if mode_opt <> Some FileInfo.Mstrict then false else
+      if not @@ is_strict env then false else
       match List.map syntax parents with
       | [SyntaxList _; Script _]
       | [SyntaxList _; NamespaceBody _; NamespaceDeclaration _; SyntaxList _; Script _] -> false

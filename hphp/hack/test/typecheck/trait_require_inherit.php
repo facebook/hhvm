@@ -12,7 +12,7 @@
 interface IParent {
   const FOO = 'bar';
 
-  public abstract function whatevs();
+  public function whatevs();
 }
 
 abstract class ParentClass implements IParent {

@@ -2,7 +2,7 @@
 
 interface Rx1 {
   <<__RxShallow>>
-  abstract protected function get(): int;
+  protected function get(): int;
 }
 
 interface Rx2 {

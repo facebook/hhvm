@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP { namespace jit {
@@ -90,7 +91,7 @@ void RepoWrapper::addUnit(Unit* unit) {
 Unit* RepoWrapper::getUnit(MD5 md5) {
   CacheType::const_iterator it = unitCache.find(md5);
   if (it != unitCache.end()) return it->second;
-  auto unit = repo->loadUnit("", md5).release();
+  auto unit = repo->loadUnit("", md5, Native::s_builtinNativeFuncs).release();
 
   if (unit) unitCache.insert({md5, unit});
   return unit;

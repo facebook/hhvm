@@ -280,11 +280,12 @@ void Repo::saveGlobalData(GlobalData newData) {
   txn.commit();
 }
 
-std::unique_ptr<Unit> Repo::loadUnit(const std::string& name, const MD5& md5) {
+std::unique_ptr<Unit> Repo::loadUnit(const std::string& name, const MD5& md5,
+                                     const Native::FuncTable& nativeFuncs) {
   if (m_dbc == nullptr) {
     return nullptr;
   }
-  return m_urp.load(name, md5);
+  return m_urp.load(name, md5, nativeFuncs);
 }
 
 std::vector<std::pair<std::string,MD5>>

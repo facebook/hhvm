@@ -1465,7 +1465,8 @@ void Unit::initialMerge() {
             auto const unit = lookupUnit(
               SourceRootInfo::RelativeToPhpRoot(StrNR(s)).get(),
               "",
-              nullptr /* initial_opt */
+              nullptr /* initial_opt */,
+              Native::s_builtinNativeFuncs
             );
             unit->initialMerge();
             mi->mergeableObj(ix) = (void*)((char*)unit + (int)k);

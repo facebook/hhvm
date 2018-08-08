@@ -1441,7 +1441,8 @@ void invalidatePath(const std::string& path) {
      * going to be some new file, not the old file that needs invalidation.
      */
     String spath(path);
-    lookupUnit(spath.get(), "", nullptr /* initial_opt */);
+    lookupUnit(spath.get(), "", nullptr /* initial_opt */,
+               Native::s_builtinNativeFuncs);
   });
 }
 

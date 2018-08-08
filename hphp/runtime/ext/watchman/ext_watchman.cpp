@@ -318,7 +318,8 @@ struct ActiveSubscription {
       auto unit = lookupUnit(
         String(m_callbackFile.c_str()).get(),
         "",
-        &initial);
+        &initial,
+        Native::s_builtinNativeFuncs);
       if (!unit) {
         throw std::runtime_error(
           folly::sformat("Unit '{}' no longer exists.", m_callbackFile));

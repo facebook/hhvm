@@ -1759,7 +1759,8 @@ int cli_openfd_unsafe(const String& filename, int flags, mode_t mode,
 
   if (use_include_path) {
     struct stat s;
-    String resolved_fname = resolveVmInclude(fname.get(), "", &s);
+    String resolved_fname = resolveVmInclude(fname.get(), "", &s,
+                                             Native::s_builtinNativeFuncs);
     if (!resolved_fname.isNull()) {
       fname = resolved_fname;
     }

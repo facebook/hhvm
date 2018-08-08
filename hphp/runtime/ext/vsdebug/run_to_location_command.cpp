@@ -74,7 +74,8 @@ bool RunToLocationCommand::executeImpl(DebuggerSession* session,
 
   // Find a compilation unit to place a temp bp in.
   HPHP::String unitPath(path.c_str());
-  const auto compilationUnit = lookupUnit(unitPath.get(), "", nullptr);
+  const auto compilationUnit = lookupUnit(unitPath.get(), "", nullptr,
+                                          Native::s_builtinNativeFuncs);
   if (compilationUnit == nullptr) {
     throw DebuggerCommandException(
       "Could not find a loaded compilation unit to run to location in!"

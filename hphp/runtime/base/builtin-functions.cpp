@@ -995,7 +995,8 @@ static bool invoke_file_impl(Variant& res, const String& path, bool once,
                              const char *currentDir,
                              bool callByHPHPInvoke) {
   bool initial;
-  auto const u = lookupUnit(path.get(), currentDir, &initial);
+  auto const u = lookupUnit(path.get(), currentDir, &initial,
+                            Native::s_builtinNativeFuncs);
   if (u == nullptr) return false;
   if (!once || initial) {
     *res.asTypedValue() = g_context->invokeUnit(u, callByHPHPInvoke);

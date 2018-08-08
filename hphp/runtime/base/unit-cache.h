@@ -28,6 +28,10 @@ struct Unit;
 struct String;
 struct StringData;
 
+namespace Native {
+struct FuncTable;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -55,12 +59,13 @@ struct StringData;
  * May return nullptr if the Unit can't be loaded, and may throw exceptions or
  * fatal errors.
  */
-Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt);
+Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
+                 const Native::FuncTable&);
 
 /*
  * As above, but for system units.
  */
-Unit* lookupSyslibUnit(StringData* path);
+Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
 
 /*
  * Mangle a file's md5sum with runtime options that affect the Unit output.
@@ -96,6 +101,7 @@ std::vector<Unit*> loadedUnitsRepoAuth();
 String resolveVmInclude(StringData* path,
                         const char* currentDir,
                         struct stat* s,  // out
+                        const Native::FuncTable&,
                         bool allow_dir = false);
 
 void preloadRepo();

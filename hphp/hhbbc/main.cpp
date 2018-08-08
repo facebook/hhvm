@@ -36,6 +36,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/hhvm/process-init.h"
+#include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -291,9 +292,11 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   RuntimeOption::EvalAbortBuildOnVerifyError = gd.AbortBuildOnVerifyError;
   return {
     parallel::map(Repo::get().enumerateUnits(RepoIdCentral, false, true),
-                  [&] (const std::pair<std::string,MD5>& kv) {
-                    return Repo::get().urp().loadEmitter(kv.first, kv.second);
-                  }),
+      [&] (const std::pair<std::string,MD5>& kv) {
+        return Repo::get().urp().loadEmitter(
+          kv.first, kv.second, Native::s_builtinNativeFuncs
+        );
+      }),
     Repo().get().global().APCProfile
   };
 }

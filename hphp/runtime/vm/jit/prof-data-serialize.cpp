@@ -1035,10 +1035,11 @@ Unit* read_unit(ProfDataDeserializer& ser) {
     [&] () -> Unit* {
       auto const filepath = read_string(ser);
       ITRACE(2, "Unit: {}\n", filepath);
+      auto& nativeFuncs = Native::s_builtinNativeFuncs;
       if (filepath->data()[0] == '/' && filepath->data()[1] == ':') {
-        return lookupSyslibUnit(filepath);
+        return lookupSyslibUnit(filepath, nativeFuncs);
       }
-      return lookupUnit(filepath, "", nullptr);
+      return lookupUnit(filepath, "", nullptr, nativeFuncs);
     }
   );
 }

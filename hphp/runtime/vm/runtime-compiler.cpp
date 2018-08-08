@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/runtime-compiler.h"
+#include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/unit-cache.h"
@@ -39,7 +40,10 @@ Unit* compile_string(const char* s,
                      const char* fname,
                      bool forDebuggerEval) {
   auto const md5 = MD5{mangleUnitMd5(string_md5(folly::StringPiece{s, sz}))};
-  if (auto u = Repo::get().loadUnit(fname ? fname : "", md5).release()) {
+  if (auto u = Repo::get().loadUnit(
+        fname ? fname : "",
+        md5,
+        Native::s_builtinNativeFuncs).release()) {
     return u;
   }
   // NB: fname needs to be long-lived if generating a bytecode repo because it
@@ -50,7 +54,8 @@ Unit* compile_string(const char* s,
 
 Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname) {
   assertx(fname[0] == '/' && fname[1] == ':');
-  if (auto u = lookupSyslibUnit(makeStaticString(fname))) return u;
+  if (auto u = lookupSyslibUnit(makeStaticString(fname),
+                                Native::s_builtinNativeFuncs)) return u;
 
   return compile_string(s, sz, fname);
 }

@@ -493,9 +493,11 @@ struct UnitRepoProxy : public RepoProxy {
   explicit UnitRepoProxy(Repo& repo);
   ~UnitRepoProxy();
   void createSchema(int repoId, RepoTxn& txn); // throws(RepoExc)
-  std::unique_ptr<Unit> load(const std::string& name, const MD5& md5);
+  std::unique_ptr<Unit> load(const std::string& name, const MD5& md5,
+                             const Native::FuncTable&);
   std::unique_ptr<UnitEmitter> loadEmitter(const std::string& name,
-                                           const MD5& md5);
+                                           const MD5& md5,
+                                           const Native::FuncTable&);
 
   void insertUnitLineTable(int repoId, RepoTxn& txn, int64_t unitSn,
                            LineTable& lineTable); // throws(RepoExc)

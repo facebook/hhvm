@@ -329,6 +329,8 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
   RID().setJitFolding(true);
   SCOPE_EXIT { RID().setJitFolding(prevFolding); };
 
+  auto& nativeFuncs = Native::s_builtinNativeFuncs;
+
   try {
     UnitOrigin unitOrigin = UnitOrigin::File;
     if (!filename) {
@@ -343,14 +345,12 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       if (const char* dot = strrchr(filename, '.')) {
         const char hhbc_ext[] = "hhas";
         if (!strcmp(dot + 1, hhbc_ext)) {
-          ue = assemble_string(code, codeLen, filename, md5,
-                               Native::s_builtinNativeFuncs);
+          ue = assemble_string(code, codeLen, filename, md5, nativeFuncs);
           if (BuiltinSymbols::s_systemAr) {
             assertx(ue->m_filepath->data()[0] == '/' &&
                     ue->m_filepath->data()[1] == ':');
             BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
-            ue = assemble_string(code, codeLen, filename, md5,
-                                 Native::s_builtinNativeFuncs);
+            ue = assemble_string(code, codeLen, filename, md5, nativeFuncs);
           }
         }
       }
@@ -384,7 +384,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     if (unit->sn() == -1) {
       // the unit was not committed to the Repo, probably because
       // another thread did it first. Try to use the winner.
-      auto u = Repo::get().loadUnit(filename ? filename : "", md5);
+      auto u = Repo::get().loadUnit(filename ? filename : "", md5, nativeFuncs);
       if (u != nullptr) {
         return u.release();
       }

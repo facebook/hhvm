@@ -912,15 +912,17 @@ RepoStatus UnitRepoProxy::loadHelper(UnitEmitter& ue,
 }
 
 std::unique_ptr<UnitEmitter>
-UnitRepoProxy::loadEmitter(const std::string& name, const MD5& md5) {
-  auto ue = std::make_unique<UnitEmitter>(md5, Native::s_builtinNativeFuncs);
+UnitRepoProxy::loadEmitter(const std::string& name, const MD5& md5,
+                           const Native::FuncTable& nativeFuncs) {
+  auto ue = std::make_unique<UnitEmitter>(md5, nativeFuncs);
   if (loadHelper(*ue, name, md5) == RepoStatus::error) ue.reset();
   return ue;
 }
 
 std::unique_ptr<Unit>
-UnitRepoProxy::load(const std::string& name, const MD5& md5) {
-  UnitEmitter ue(md5, Native::s_builtinNativeFuncs);
+UnitRepoProxy::load(const std::string& name, const MD5& md5,
+                    const Native::FuncTable& nativeFuncs) {
+  UnitEmitter ue(md5, nativeFuncs);
   if (loadHelper(ue, name, md5) == RepoStatus::error) return nullptr;
 
   if (RuntimeOption::XenonTraceUnitLoad) {

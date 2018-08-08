@@ -77,7 +77,7 @@ let default = {
   informant_min_distance_restart = 100;
   informant_use_xdb = false;
   load_script_config = LoadScriptConfig.default;
-  use_full_fidelity_parser = false;
+  use_full_fidelity_parser = true;
   interrupt_on_watchman = false;
   interrupt_on_client = false;
 }

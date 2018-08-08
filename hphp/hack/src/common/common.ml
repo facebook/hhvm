@@ -53,7 +53,7 @@ module List = struct
           if counter > 1000
           then
             let env, zs = rev_map_env env ys ~f in
-            env, List.rev zs
+            env, rev zs
           else
             aux env ys (counter + 1)
         in
@@ -73,5 +73,4 @@ module List = struct
     let env, l = rev_map_env env xs ~f in
     env, rev_filter_map l ~f:(fun x -> x)
 
-  let for_all2 = List.for_all2
 end

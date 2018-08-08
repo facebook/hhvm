@@ -30,9 +30,6 @@ module StringNAST = Nast.AnnotatedAST(StringNASTAnnotations)
 module TASTStringMapper =
   Aast_mapper.MapAnnotatedAST(Tast_expand.ExpandedTypeAnnotations)(StringNASTAnnotations)
 
-module TASTTypeStripper =
-  Aast_mapper.MapAnnotatedAST(Tast.Annotations)(Nast.Annotations)
-
 module PS = Full_fidelity_positioned_syntax
 module PositionedTree = Full_fidelity_syntax_tree
   .WithSyntax(PS)
@@ -890,7 +887,7 @@ let handle_mode
     let env = Typing_env.empty tcopt filename ~droot:None in
     let stringify_types tast =
       let tast = Tast_expand.expand_program tast in
-      let print_pos_and_ty () (pos, ty) =
+      let print_pos_and_ty (pos, ty) =
         Format.asprintf "(%a, %s)" Pos.pp pos (Typing_print.full_strip_ns env ty)
       in
       TASTStringMapper.map_program tast
@@ -921,13 +918,7 @@ let handle_mode
     Printf.printf "%s\n" (Hh_json.json_to_string result);
   | Dump_stripped_tast ->
     let _, tast = get_tast tcopt filename files_info in
-    let strip_types =
-      TASTTypeStripper.map_program
-        ~map_env_annotation:(fun _ -> ())
-        ~map_class_id_annotation:(fun _ (p, _) -> p)
-        ~map_expr_annotation:(fun _ (p, _) -> p)
-    in
-    let nast = strip_types tast in
+    let nast = Tast.to_nast tast in
     Printf.printf "%s\n" (Nast.show_program nast)
   | Find_refs (line, column) ->
     Typing_deps.update_files files_info;

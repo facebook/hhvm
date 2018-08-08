@@ -58,7 +58,6 @@ let set_in_loop env = { env with Typing_env.in_loop = true }
 let get_inside_constructor env = env.Typing_env.inside_constructor
 let get_decl_env env = env.Typing_env.decl_env
 let get_inside_ppl_class env = env.Typing_env.inside_ppl_class
-let save = Typing_env.save SMap.empty
 
 let forward_compat_ge = Typing_env.forward_compat_ge
 let error_if_forward_compat_ge = Typing_env.error_if_forward_compat_ge

@@ -177,10 +177,6 @@ val get_inside_ppl_class : env -> bool
 (** Returns whether or not the typing environment is
     inside a <<__PPL>> annotated class. *)
 
-val save : env -> Tast.saved_env
-(** Return the subset of this {!env} which is persisted in a TAST.
-    It should usually not be necessary to invoke this. *)
-
 val empty : TypecheckerOptions.t -> env
 (** Construct an empty {!env}. Unlikely to be the best choice; prefer using
     {!Tast_visitor} or constructing an {!env} from a {!Tast.def}. *)

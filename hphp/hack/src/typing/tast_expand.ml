@@ -118,5 +118,5 @@ let expand_program tast =
   let tast = expander#go tast in
   ExpandAST.map_program tast
     ~map_env_annotation:(fun _ -> ())
-    ~map_class_id_annotation:(fun _ x -> x)
-    ~map_expr_annotation:(fun _ x -> x)
+    ~map_class_id_annotation:(fun x -> x)
+    ~map_expr_annotation:(fun x -> x)

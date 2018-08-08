@@ -517,8 +517,8 @@ let resolve_ty
     func_details    = func_details;
   }
 
-let tast_cid_to_nast_cid env cid =
-  let nmenv = Tast.nast_mapping_env (Tast_env.save env) in
+let tast_cid_to_nast_cid cid =
+  let nmenv = Tast.nast_mapping_env in
   Tast.NastMapper.map_class_id_ nmenv cid
 
 let autocomplete_typed_member ~is_static env class_ty cid mid =
@@ -526,7 +526,7 @@ let autocomplete_typed_member ~is_static env class_ty cid mid =
   |> List.iter ~f:begin fun cname ->
     Typing_lazy_heap.get_class (Tast_env.get_tcopt env) cname
     |> Option.iter ~f:begin fun class_ ->
-      let cid = Option.map cid (tast_cid_to_nast_cid env) in
+      let cid = Option.map cid tast_cid_to_nast_cid in
       autocomplete_member ~is_static env class_ cid mid
     end
   end
@@ -546,7 +546,7 @@ let visitor = object (self)
     super#on_Fun_id env id
 
   method! on_New env cid el uel =
-    autocomplete_new (tast_cid_to_nast_cid env (snd cid)) env;
+    autocomplete_new (tast_cid_to_nast_cid (snd cid)) env;
     super#on_New env cid el uel
 
   method! on_Happly env sid hl =

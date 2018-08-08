@@ -18,10 +18,9 @@ struct
   module TargetCI = Target.ClassIdAnnotation
 
   type mapping_env = {
-    env : SourceEnv.t;
-    map_expr_annotation : SourceEnv.t -> SourceExpr.t -> TargetExpr.t;
+    map_expr_annotation : SourceExpr.t -> TargetExpr.t;
     map_env_annotation : SourceEnv.t -> TargetEnv.t;
-    map_class_id_annotation : SourceEnv.t -> SourceCI.t -> TargetCI.t;
+    map_class_id_annotation : SourceCI.t -> TargetCI.t;
   }
 
   let rec map_afield menv af =
@@ -46,7 +45,7 @@ struct
     | S.CI x -> T.CI x
 
   and map_class_id menv (ca, ci) =
-    (menv.map_class_id_annotation menv.env ca, map_class_id_ menv ci)
+    (menv.map_class_id_annotation ca, map_class_id_ menv ci)
 
   and map_expr menv (p,e) =
   let e' =
@@ -116,7 +115,7 @@ struct
     | S.Assert (S.AE_assert e) -> T.Assert (T.AE_assert (map_expr menv e))
     | S.Clone e -> T.Clone (map_expr menv e)
   in
-  let p' = menv.map_expr_annotation menv.env p in
+  let p' = menv.map_expr_annotation p in
     (p', e')
 
   and map_exprl menv el = List.map el (map_expr menv)
@@ -200,7 +199,7 @@ struct
 
   and map_fun_param menv fp =
   {
-    T.param_annotation = menv.map_expr_annotation menv.env fp.S.param_annotation;
+    T.param_annotation = menv.map_expr_annotation fp.S.param_annotation;
     T.param_hint = fp.S.param_hint;
     T.param_is_reference = fp.S.param_is_reference;
     T.param_is_variadic = fp.S.param_is_variadic;
@@ -267,7 +266,6 @@ struct
   }
 
   and map_method menv m =
-    let menv = {menv with env = m.S.m_annotation} in
     {
       T.m_annotation = menv.map_env_annotation m.S.m_annotation;
       T.m_final = m.S.m_final;
@@ -311,15 +309,7 @@ struct
     ~map_env_annotation
     ~map_class_id_annotation
     d =
-    let env =
-      match d with
-      | S.Fun fd -> fd.S.f_annotation
-      | S.Class c -> c.S.c_annotation
-      | S.Typedef td -> td.S.t_annotation
-      | S.Constant gc -> gc.S.cst_annotation
-    in
     let menv = {
-      env;
       map_expr_annotation;
       map_env_annotation;
       map_class_id_annotation;

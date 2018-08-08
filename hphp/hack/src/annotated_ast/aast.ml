@@ -60,6 +60,7 @@ and env_annotation = EnvAnnotation.t [@visitors.opaque]
 and class_id_annotation = ClassIdAnnotation.t [@visitors.opaque]
 
 and stmt =
+  | Unsafe_block of block
   | Fallthrough
   | Expr of expr
   (* AST has Block of block *)
@@ -455,6 +456,7 @@ class type ['a] visitor_type = object
       'a -> expr -> as_expr -> block -> 'a
   method on_if : 'a -> expr -> block -> block -> 'a
   method on_noop : 'a -> 'a
+  method on_unsafe_block : 'a -> block -> 'a
   method on_fallthrough : 'a -> 'a
   method on_return : 'a -> Pos.t -> expr option -> 'a
   method on_goto_label : 'a -> pstring -> 'a
@@ -551,6 +553,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
   method on_break acc _ = acc
   method on_continue acc _ = acc
   method on_noop acc = acc
+  method on_unsafe_block acc _ = acc
   method on_fallthrough acc = acc
   method on_goto_label acc _ = acc
   method on_goto acc _ = acc
@@ -663,6 +666,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | Foreach (e, ae, b)      -> this#on_foreach acc e ae b
     | Try     (b, cl, fb)     -> this#on_try acc b cl fb
     | Noop                    -> this#on_noop acc
+    | Unsafe_block b          -> this#on_unsafe_block acc b
     | Fallthrough             -> this#on_fallthrough acc
     | Static_var el           -> this#on_static_var acc el
     | Global_var el           -> this#on_global_var acc el

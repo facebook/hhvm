@@ -233,6 +233,7 @@ and stmt env acc st =
       (* the finally block executes even if *none* of try and catch do *)
       let acc = SSet.union acc f in
       SSet.union acc c
+    | Unsafe_block _
     | Fallthrough
     | Noop -> acc
     | Let (_, _, e) ->

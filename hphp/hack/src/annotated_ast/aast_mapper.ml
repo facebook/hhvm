@@ -193,6 +193,7 @@ struct
     | S.Try (b1, cl, b2) ->
       T.Try(map_block menv b1, List.map cl map_catch, map_block menv b2)
     | S.Noop -> T.Noop
+    | S.Unsafe_block b -> T.Unsafe_block(map_block menv b)
     | S.Fallthrough -> T.Fallthrough
     | S.Let(x, h, e) -> T.Let(x, h, map_expr menv e)
 

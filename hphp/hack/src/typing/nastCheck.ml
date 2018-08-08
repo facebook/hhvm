@@ -105,7 +105,7 @@ module CheckFunctionBody = struct
         expr_allow_await f_type env e;
         ()
     | _, ( Noop | Fallthrough | GotoLabel _ | Goto _ | Break _ | Continue _
-         | Static_var _ | Global_var _ ) -> ()
+         | Static_var _ | Global_var _ | Unsafe_block _ ) -> ()
     | _, If (cond, b1, b2) ->
         expr f_type env cond;
         block f_type env b1;
@@ -1107,6 +1107,7 @@ and stmt env = function
   | GotoLabel _
   | Goto _
   | Noop
+  | Unsafe_block _
   | Fallthrough -> ()
   | Break p -> begin
     match env.imm_ctrl_ctx with

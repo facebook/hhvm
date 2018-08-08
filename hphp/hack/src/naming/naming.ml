@@ -1871,14 +1871,6 @@ module Make (GetLocals : GetLocals) = struct
     } in
     named_fun
 
-  and cut_unsafe ?(replacement=Noop) env = function
-    | [] -> []
-    | (p, Unsafe) :: _ -> Env.set_unsafe env true; [p, replacement]
-    | (p, Block b) :: rest ->
-        (p, Block (cut_unsafe ~replacement env b)) ::
-          (cut_unsafe ~replacement env rest)
-    | x :: rest -> x :: (cut_unsafe ~replacement env rest)
-
   and get_using_vars e =
     match snd e with
     | Expr_list using_clauses ->
@@ -2098,28 +2090,31 @@ module Make (GetLocals : GetLocals) = struct
     SMap.iter (fun x _ -> Env.promote_pending_lvar env x) vars;
     result
 
-  and stmt_with_block env = fun astmt -> match astmt with
-    | (_, Block b) -> always_block env b
-    | astmt -> [stmt env astmt]
-
-  and always_block env stl =
-    (* Add lexical scope for block scoped let variables *)
-    Env.scope_lexical env (fun env -> List.concat_map stl (stmt_with_block env))
+  and stmt_list ?after_unsafe stl env =
+    let stmt_list = stmt_list ?after_unsafe in
+    match stl with
+    | [] -> []
+    | (_, Unsafe) :: rest ->
+      Env.set_unsafe env true;
+      let st = Errors.ignore_ (fun () -> N.Unsafe_block (stmt_list rest env)) in
+      st :: Option.to_list after_unsafe
+    | (_, Block b) :: rest ->
+      (* Add lexical scope for block scoped let variables *)
+      let b = Env.scope_lexical env (stmt_list b) in
+      let rest = stmt_list rest env in
+      b @ rest
+    | x :: rest ->
+      let x = stmt env x in
+      let rest = stmt_list rest env in
+      x :: rest
 
   and block ?(new_scope=true) env stl =
-    let stl = cut_unsafe env stl in
     if new_scope
-    then
-      Env.scope env (
-        fun env -> List.concat_map stl (stmt_with_block env)
-      )
-    else List.concat_map stl (stmt_with_block env)
+    then Env.scope env (stmt_list stl)
+    else stmt_list stl env
 
-  and branch env stmt_l =
-    let stmt_l = cut_unsafe env stmt_l in
-    Env.scope_all env begin fun env ->
-      List.concat_map stmt_l (stmt_with_block env)
-    end
+  and branch ?after_unsafe env stmt_l =
+    Env.scope_all env (stmt_list ?after_unsafe stmt_l)
 
   (**
    * Names a goto label.
@@ -2714,13 +2709,11 @@ module Make (GetLocals : GetLocals) = struct
 
   and case env acc = function
     | Default b ->
-      let b = cut_unsafe ~replacement:Fallthrough env b in
-      let all_locals, b = branch env b in
+      let all_locals, b = branch ~after_unsafe:N.Fallthrough env b in
       all_locals :: acc, N.Default b
     | Case (e, b) ->
       let e = expr env e in
-      let b = cut_unsafe ~replacement:Fallthrough env b in
-      let all_locals, b = branch env b in
+      let all_locals, b = branch ~after_unsafe:N.Fallthrough env b in
       all_locals :: acc, N.Case (e, b)
 
   and catchl env l = List.map_env [] l (catch env)

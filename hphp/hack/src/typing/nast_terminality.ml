@@ -83,6 +83,7 @@ end = struct
     | For _
     | Foreach _
     | Noop
+    | Unsafe_block _
     | Fallthrough
     | GotoLabel _
     | Expr _

@@ -5,7 +5,27 @@
       f_body =
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
-           [(If ((([13:8-12], bool), True), [Noop], [Noop]))];
+           [(If ((([13:7-11], bool), True),
+               [(Expr
+                   (([15:7-12], _),
+                    (Call (Cnormal,
+                       (([15:7-10], _), (Id ([15:7-10], "\\bar"))), [], 
+                       [], []))));
+                 (Unsafe_block
+                    [(Expr
+                        (([17:7-12], _),
+                         (Call (Cnormal,
+                            (([17:7-10], _), (Id ([17:7-10], "\\baz"))), 
+                            [], [], []))))
+                      ]);
+                 (Expr
+                    (([19:5-10], _),
+                     (Call (Cnormal,
+                        (([19:5-8], _), (Id ([19:5-8], "\\qux"))), [], 
+                        [], []))))
+                 ],
+               [Noop]))
+             ];
            fnb_unsafe = true });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
   ]

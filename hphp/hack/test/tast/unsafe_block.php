@@ -10,7 +10,12 @@
  */
 
 function foo() {
-   if (true) {{
-     // UNSAFE
-   }}
+  if (true) {
+    {
+      bar();
+      // UNSAFE
+      baz();
+    }
+    qux();
+  }
 }

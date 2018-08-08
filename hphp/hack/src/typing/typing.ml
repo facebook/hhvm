@@ -684,6 +684,12 @@ and save_and_merge_next_in_catch env =
     else env
 
 and stmt env = function
+  | Unsafe_block b ->
+    (* Do not run inference on the block, since unsafe is sometimes used to work
+       around inference performance problems. *)
+    let tcopt = Env.get_tcopt env in
+    let tb = NastTanyMapper.map_block (ntm_env tcopt) b in
+    env, T.Unsafe_block tb
   | Fallthrough ->
       let env = if env.Env.in_case
         then LEnv.move_and_merge_next_in_cont env C.Fallthrough

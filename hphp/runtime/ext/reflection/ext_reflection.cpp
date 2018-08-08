@@ -514,6 +514,12 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
                 sd->data(), prop.get()->data());
   }
 
+  auto const& sprop = class_->staticProperties()[lookup.slot];
+  auto const& tc = sprop.typeConstraint;
+  auto const temp = value.asInitCellTmp();
+  if (RuntimeOption::EvalCheckPropTypeHints > 0 && tc.isCheckable()) {
+    tc.verifyStaticProperty(&temp, class_, sprop.cls, prop.get());
+  }
   tvAsVariant(lookup.val) = value;
 }
 

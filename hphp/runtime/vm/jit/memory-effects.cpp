@@ -2097,6 +2097,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowArithmeticError:
   case ThrowDivisionByZeroError:
   case SetOpCell:
+  case SetOpCellVerify:
   case AsTypeStruct:
   case ResolveTypeStruct:
   case PropTypeRedefineCheck: // Can raise and autoload

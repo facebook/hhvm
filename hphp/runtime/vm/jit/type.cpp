@@ -931,6 +931,89 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
+Type typeFromPropTC(const HPHP::TypeConstraint& tc,
+                    const Class* propCls,
+                    const Class* ctx,
+                    bool isSProp) {
+  assertx(tc.validForProp());
+
+  if (!tc.isCheckable() || tc.isSoft()) return TGen;
+
+  using A = AnnotType;
+  auto const atToType = [&](AnnotType at) {
+    switch (at) {
+      case A::Null:       return TNull;
+      case A::Bool:       return TBool;
+      case A::Int:        return TInt;
+      case A::Float:      return TDbl;
+      case A::String:     return TStr;
+      case A::Array:      return TArr;
+      // We only call this once we've attempted resolving the
+      // type-constraint. If we successfully resolved it, we'll never get here,
+      // So if we're here and we have AnnotType::Object, we don't know what the
+      // type-hint is, so be conservative.
+      case A::Object:     return TInitCell;
+      case A::Resource:   return TRes;
+      case A::Dict:       return TDict;
+      case A::Vec:        return TVec;
+      case A::Keyset:     return TKeyset;
+      case A::Mixed:      return TInitCell;
+      case A::Nonnull:    return TInitCell - TInitNull;
+      case A::Number:     return TInt | TDbl;
+      case A::ArrayKey:   return TInt | TStr;
+      case A::VArray:
+      case A::DArray:
+      case A::VArrOrDArr: return TArr;
+      case A::VecOrDict:  return TVec | TDict;
+      case A::ArrayLike:  return TArrLike;
+      case A::This:
+        return (isSProp && !tc.couldSeeMockObject())
+          ? Type::ExactObj(propCls)
+          : Type::SubObj(propCls);
+      case A::NoReturn:
+      case A::Self:
+      case A::Parent:
+      case A::Callable:
+        break;
+    }
+    always_assert(false);
+  };
+
+  auto base = [&]{
+    if (!tc.isObject()) return atToType(tc.type());
+
+    auto const handleCls = [&] (const Class* cls) {
+      if (isEnum(cls)) {
+        if (auto const dt = cls->enumBaseTy()) return Type{*dt};
+        return TInt | TStr;
+      }
+      return Type::SubObj(cls);
+    };
+
+    bool persistent = false;
+    if (auto const alias = Unit::lookupTypeAlias(tc.typeName(), &persistent)) {
+      if (persistent && !alias->invalid) {
+        auto ty = [&]{
+          if (alias->klass) return handleCls(alias->klass);
+          return atToType(alias->type);
+        }();
+        if (alias->nullable) ty |= TInitNull;
+        return ty;
+      }
+    }
+
+    if (auto const cls = Unit::lookupUniqueClassInContext(tc.typeName(), ctx)) {
+      return handleCls(cls);
+    }
+
+    return TInitCell;
+  }();
+  if (tc.isNullable()) base |= TInitNull;
+  return base;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 Type ldRefReturn(Type typeParam) {
   // Guarding on specialized types and uncommon unions like {Int|Bool} is
   // expensive enough that we only want to do it in situations where we've

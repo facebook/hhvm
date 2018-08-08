@@ -3074,7 +3074,7 @@ void HHVM_METHOD(SoapHeader, __construct,
 
   this_->setProp(nullptr, s_namespace.get(), ns.asCell());
   this_->setProp(nullptr, s_name.get(), name.asCell());
-  this_->setProp(nullptr, s_data.get(), *data.asCell());
+  this_->setProp(nullptr, s_data.get(), data.asInitCellTmp());
   this_->setProp(nullptr, s_mustUnderstand.get(),
                  make_tv<KindOfBoolean>(mustunderstand));
 

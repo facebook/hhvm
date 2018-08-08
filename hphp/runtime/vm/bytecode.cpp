@@ -1849,6 +1849,7 @@ static inline void lookup_sprop(ActRec* fp,
                                 StringData*& name,
                                 TypedValue* key,
                                 TypedValue*& val,
+                                Slot& slot,
                                 bool& visible,
                                 bool& accessible) {
   name = lookup_name(key);
@@ -1857,6 +1858,7 @@ static inline void lookup_sprop(ActRec* fp,
   auto const lookup = cls->getSProp(ctx, name);
 
   val = lookup.val;
+  slot = lookup.slot;
   visible = lookup.val != nullptr;
   accessible = lookup.accessible;
 }
@@ -3400,14 +3402,15 @@ struct SpropState {
   TypedValue* output;
   TypedValue* val;
   TypedValue oldNameCell;
+  Slot slot;
   bool visible;
   bool accessible;
 };
 
-SpropState::SpropState(Stack& vmstack, clsref_slot slot) {
-  cls = slot.take();
+SpropState::SpropState(Stack& vmstack, clsref_slot cslot) {
+  cls = cslot.take();
   auto nameCell = output = vmstack.topTV();
-  lookup_sprop(vmfp(), cls, name, nameCell, val, visible, accessible);
+  lookup_sprop(vmfp(), cls, name, nameCell, val, slot, visible, accessible);
   oldNameCell = *nameCell;
 }
 
@@ -3424,6 +3427,18 @@ template<bool box> void getS(clsref_slot slot) {
                 ss.name->data());
   }
   if (box) {
+    if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+      auto const& sprop = ss.cls->staticProperties()[ss.slot];
+      auto const& tc = sprop.typeConstraint;
+      if (tc.isCheckable()) {
+        raise_property_typehint_binding_error(
+          sprop.cls,
+          sprop.name,
+          true,
+          tc.isSoft()
+        );
+      }
+    }
     if (!isRefType(ss.val->m_type)) {
       tvBox(*ss.val);
     }
@@ -4526,20 +4541,26 @@ OPTBLD_INLINE void iopSetG() {
   vmStack().discard();
 }
 
-OPTBLD_INLINE void iopSetS(clsref_slot slot) {
+OPTBLD_INLINE void iopSetS(clsref_slot cslot) {
   TypedValue* tv1 = vmStack().topTV();
-  Class* cls = slot.take();
+  Class* cls = cslot.take();
   TypedValue* propn = vmStack().indTV(1);
   TypedValue* output = propn;
   StringData* name;
   TypedValue* val;
   bool visible, accessible;
-  lookup_sprop(vmfp(), cls, name, propn, val, visible, accessible);
+  Slot slot;
+  lookup_sprop(vmfp(), cls, name, propn, val, slot, visible, accessible);
   SCOPE_EXIT { decRefStr(name); };
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(),
                 name->data());
+  }
+  if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+    auto const& sprop = cls->staticProperties()[slot];
+    auto const& tc = sprop.typeConstraint;
+    if (tc.isCheckable()) tc.verifyStaticProperty(tv1, cls, sprop.cls, name);
   }
   tvSet(*tv1, *val);
   tvDecRefGen(propn);
@@ -4587,25 +4608,49 @@ OPTBLD_INLINE void iopSetOpG(SetOpOp op) {
   vmStack().discard();
 }
 
-OPTBLD_INLINE void iopSetOpS(SetOpOp op, clsref_slot slot) {
+OPTBLD_INLINE void iopSetOpS(SetOpOp op, clsref_slot cslot) {
   Cell* fr = vmStack().topC();
-  Class* cls = slot.take();
+  Class* cls = cslot.take();
   TypedValue* propn = vmStack().indTV(1);
   TypedValue* output = propn;
   StringData* name;
   TypedValue* val;
   bool visible, accessible;
-  lookup_sprop(vmfp(), cls, name, propn, val, visible, accessible);
+  Slot slot;
+  lookup_sprop(vmfp(), cls, name, propn, val, slot, visible, accessible);
   SCOPE_EXIT { decRefStr(name); };
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(),
                 name->data());
   }
-  setopBody(tvToCell(val), op, fr);
+
+  auto const checkable_sprop = [&]() -> const Class::SProp* {
+    if (RuntimeOption::EvalCheckPropTypeHints <= 0) return nullptr;
+    auto const& sprop = cls->staticProperties()[slot];
+    return sprop.typeConstraint.isCheckable() ? &sprop : nullptr;
+  }();
+
+  val = tvToCell(val);
+  if (checkable_sprop) {
+    Cell temp;
+    cellDup(*val, temp);
+    SCOPE_FAIL { tvDecRefGen(&temp); };
+    setopBody(&temp, op, fr);
+    checkable_sprop->typeConstraint.verifyStaticProperty(
+      &temp,
+      cls,
+      checkable_sprop->cls,
+      name
+    );
+    cellMove(temp, *val);
+  } else {
+    setopBody(val, op, fr);
+  }
+
   tvDecRefGen(propn);
   tvDecRefGen(fr);
-  cellDup(*tvToCell(val), *output);
+  cellDup(*val, *output);
   vmStack().ndiscard(1);
 }
 
@@ -4656,7 +4701,31 @@ OPTBLD_INLINE void iopIncDecS(IncDecOp op, clsref_slot slot) {
                 ss.cls->name()->data(),
                 ss.name->data());
   }
-  cellCopy(IncDecBody(op, tvToCell(ss.val)), *ss.output);
+
+  auto const checkable_sprop = [&]() -> const Class::SProp* {
+    if (RuntimeOption::EvalCheckPropTypeHints <= 0) return nullptr;
+    auto const& sprop = ss.cls->staticProperties()[ss.slot];
+    return sprop.typeConstraint.isCheckable() ? &sprop : nullptr;
+  }();
+
+  auto const val = tvToCell(ss.val);
+  if (checkable_sprop) {
+    Cell temp;
+    cellDup(*val, temp);
+    SCOPE_FAIL { tvDecRefGen(&temp); };
+    auto result = IncDecBody(op, &temp);
+    SCOPE_FAIL { tvDecRefGen(&result); };
+    checkable_sprop->typeConstraint.verifyStaticProperty(
+      &temp,
+      ss.cls,
+      checkable_sprop->cls,
+      ss.name
+    );
+    cellMove(temp, *val);
+    cellCopy(result, *ss.output);
+  } else {
+    cellCopy(IncDecBody(op, val), *ss.output);
+  }
 }
 
 OPTBLD_INLINE void iopBindL(local_var to) {
@@ -4690,21 +4759,36 @@ OPTBLD_INLINE void iopBindG() {
   vmStack().discard();
 }
 
-OPTBLD_INLINE void iopBindS(clsref_slot slot) {
+OPTBLD_INLINE void iopBindS(clsref_slot cslot) {
   TypedValue* fr = vmStack().topTV();
-  Class* cls = slot.take();
+  Class* cls = cslot.take();
   TypedValue* propn = vmStack().indTV(1);
   TypedValue* output = propn;
   StringData* name;
   TypedValue* val;
   bool visible, accessible;
-  lookup_sprop(vmfp(), cls, name, propn, val, visible, accessible);
+  Slot slot;
+  lookup_sprop(vmfp(), cls, name, propn, val, slot, visible, accessible);
   SCOPE_EXIT { decRefStr(name); };
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(),
                 name->data());
   }
+
+  if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+    auto const& sprop = cls->staticProperties()[slot];
+    auto const& tc = sprop.typeConstraint;
+    if (tc.isCheckable()) {
+      raise_property_typehint_binding_error(
+        sprop.cls,
+        sprop.name,
+        true,
+        tc.isSoft()
+      );
+    }
+  }
+
   tvBind(*fr, *val);
   tvDecRefGen(propn);
   memcpy(output, fr, sizeof(TypedValue));

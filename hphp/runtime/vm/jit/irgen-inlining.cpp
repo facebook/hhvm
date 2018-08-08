@@ -395,7 +395,7 @@ void inlSingletonSProp(IRGS& env,
   }
 
   // Look up the static property.
-  auto const sprop   = ldClsPropAddrKnown(env, cls, propName);
+  auto const sprop   = ldClsPropAddrKnown(env, cls, propName).propPtr;
   auto const unboxed = gen(env, UnboxPtr, sprop);
   auto const value   = gen(env, LdMem, unboxed->type().deref(), unboxed);
 

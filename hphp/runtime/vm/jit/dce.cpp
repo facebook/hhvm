@@ -699,6 +699,7 @@ bool canDCE(IRInstruction* inst) {
   case BeginInlining:
   case SyncReturnBC:
   case SetOpCell:
+  case SetOpCellVerify:
   case ConjureUse:
   case CheckStaticLoc:
   case LdClsMethodFCacheFunc:

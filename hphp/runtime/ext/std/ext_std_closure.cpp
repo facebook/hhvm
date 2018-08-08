@@ -128,6 +128,14 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
    */
   auto const numDeclProperties = cls->numDeclProperties();
   assertx(numDeclProperties - numArgs == getInvokeFunc()->numStaticLocals());
+
+  if (debug) {
+    // Closure properties shouldn't have type-hints
+    for (auto const& prop : cls->declProperties()) {
+      always_assert(!prop.typeConstraint.isCheckable());
+    }
+  }
+
   auto beforeCurUseVar = sp + numArgs;
   auto curProperty = getUseVars();
   int i = 0;

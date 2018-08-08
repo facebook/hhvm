@@ -45,24 +45,36 @@ void destroyName(IRGS& env, SSATmp* name) {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* ldClsPropAddrKnown(IRGS& env,
-                           const Class* cls,
-                           const StringData* name) {
+ClsPropLookup ldClsPropAddrKnown(IRGS& env,
+                                 const Class* cls,
+                                 const StringData* name) {
   initSProps(env, cls); // calls init; must be above sPropHandle()
   auto const slot = cls->lookupSProp(name);
   auto const handle = cls->sPropHandle(slot);
   assertx(!rds::isNormalHandle(handle));
-  auto const repoTy =
-    !RuntimeOption::RepoAuthoritative
-      ? RepoAuthType{}
-      : cls->staticPropRepoAuthType(slot);
-  auto const ptrTy = typeFromRAT(repoTy, curClass(env)).ptr(Ptr::SProp);
-  return gen(env, LdRDSAddr, RDSHandleData { handle }, ptrTy);
+
+  auto const ctx = curClass(env);
+  auto const& prop = cls->staticProperties()[slot];
+  auto const knownTy = [&]{
+    if (RuntimeOption::EvalCheckPropTypeHints < 3) return TGen;
+    auto knownTy = typeFromPropTC(prop.typeConstraint, cls, ctx, true);
+    if (!(prop.attrs & AttrNoImplicitNullable)) knownTy |= TInitNull;
+    return knownTy;
+  }() & typeFromRAT(prop.repoAuthType, ctx);
+  auto const ptrTy = knownTy.ptr(Ptr::SProp);
+
+  return {
+    gen(env, LdRDSAddr, RDSHandleData { handle }, ptrTy),
+    &prop.typeConstraint,
+    slot
+  };
+
   static_assert(sizeof(StaticPropData) == sizeof(TypedValue),
                 "StaticPropData expected to only wrap TypedValue");
 }
 
-SSATmp* ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName, bool raise) {
+ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls,
+                            SSATmp* ssaName, bool raise) {
   assertx(ssaCls->isA(TCls));
   assertx(ssaName->isA(TStr));
 
@@ -86,13 +98,14 @@ SSATmp* ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName, bool raise) {
     return ldClsPropAddrKnown(env, ssaCls->clsVal(), ssaName->strVal());
   }
 
-  return gen(
+  auto const propAddr = gen(
     env,
     raise ? LdClsPropAddrOrRaise : LdClsPropAddrOrNull,
     ssaCls,
     ssaName,
     cns(env, curClass(env))
   );
+  return { propAddr, nullptr, kInvalidSlot };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -104,10 +117,10 @@ void emitCGetS(IRGS& env, uint32_t slot) {
     PUNT(CGetS-PropNameNotString);
   }
 
-  auto const ssaCls   = takeClsRef(env, slot);
-  auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
-  auto const unboxed  = gen(env, UnboxPtr, propAddr);
-  auto const ldMem    = gen(env, LdMem, unboxed->type().deref(), unboxed);
+  auto const ssaCls    = takeClsRef(env, slot);
+  auto const propAddr  = ldClsPropAddr(env, ssaCls, ssaPropName, true).propPtr;
+  auto const unboxed   = gen(env, UnboxPtr, propAddr);
+  auto const ldMem     = gen(env, LdMem, unboxed->type().deref(), unboxed);
 
   destroyName(env, ssaPropName);
   pushIncRef(env, ldMem);
@@ -120,48 +133,30 @@ void emitSetS(IRGS& env, uint32_t slot) {
     PUNT(SetS-PropNameNotString);
   }
 
-  auto const value    = popC(env, DataTypeCountness);
-  auto const ssaCls   = takeClsRef(env, slot);
-  auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
-  auto const ptr      = gen(env, UnboxPtr, propAddr);
+  auto const value  = popC(env, DataTypeCountness);
+  auto const ssaCls = peekClsRef(env, slot);
+  auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, true);
 
+  if (lookup.tc) {
+    verifyPropType(
+      env,
+      ssaCls,
+      lookup.tc,
+      lookup.slot,
+      value,
+      ssaPropName,
+      true
+    );
+  } else if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+    auto const slot = gen(env, LookupSPropSlot, ssaCls, ssaPropName);
+    gen(env, VerifyProp, ssaCls, slot, value, cns(env, true));
+  }
+
+  auto const ptr = gen(env, UnboxPtr, lookup.propPtr);
+
+  killClsRef(env, slot);
   destroyName(env, ssaPropName);
   bindMem(env, ptr, value);
-}
-
-void emitVGetS(IRGS& env, uint32_t slot) {
-  auto const ssaPropName = topC(env);
-
-  if (!ssaPropName->isA(TStr)) {
-    PUNT(VGetS-PropNameNotString);
-  }
-
-  auto const ssaCls   = takeClsRef(env, slot);
-  auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
-
-  destroyName(env, ssaPropName);
-  auto const val = gen(
-    env,
-    LdMem,
-    TBoxedInitCell,
-    gen(env, BoxPtr, propAddr)
-  );
-  pushIncRef(env, val);
-}
-
-void emitBindS(IRGS& env, uint32_t slot) {
-  auto const ssaPropName = topC(env, BCSPRelOffset{1});
-
-  if (!ssaPropName->isA(TStr)) {
-    PUNT(BindS-PropNameNotString);
-  }
-
-  auto const value    = popV(env);
-  auto const ssaCls   = takeClsRef(env, slot);
-  auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
-
-  destroyName(env, ssaPropName);
-  bindMem(env, propAddr, value);
 }
 
 void emitIssetS(IRGS& env, uint32_t slot) {
@@ -174,7 +169,8 @@ void emitIssetS(IRGS& env, uint32_t slot) {
   auto const ret = cond(
     env,
     [&] (Block* taken) {
-      auto propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, false);
+      auto const propAddr =
+        ldClsPropAddr(env, ssaCls, ssaPropName, false).propPtr;
       return gen(env, CheckNonNull, taken, propAddr);
     },
     [&] (SSATmp* ptr) { // Next: property or global exists
@@ -199,7 +195,8 @@ void emitEmptyS(IRGS& env, uint32_t slot) {
   auto const ret = cond(
     env,
     [&] (Block* taken) {
-      auto propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, false);
+      auto const propAddr =
+        ldClsPropAddr(env, ssaCls, ssaPropName, false).propPtr;
       return gen(env, CheckNonNull, taken, propAddr);
     },
     [&] (SSATmp* ptr) {
@@ -222,14 +219,31 @@ void emitIncDecS(IRGS& env, IncDecOp subop, uint32_t slot) {
     PUNT(IncDecS-PropNameNotString);
   }
 
-  auto const ssaCls   = takeClsRef(env, slot);
-  auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
-  auto const unboxed  = gen(env, UnboxPtr, propAddr);
-  auto const oldVal   = gen(env, LdMem, unboxed->type().deref(), unboxed);
+  auto const ssaCls  = peekClsRef(env, slot);
+  auto const lookup  = ldClsPropAddr(env, ssaCls, ssaPropName, true);
+  auto const unboxed = gen(env, UnboxPtr, lookup.propPtr);
+  auto const oldVal  = gen(env, LdMem, unboxed->type().deref(), unboxed);
 
   auto const result = incDec(env, subop, oldVal);
   if (!result) PUNT(IncDecS);
+  assertx(result->isA(TUncounted));
 
+  if (lookup.tc) {
+    verifyPropType(
+      env,
+      ssaCls,
+      lookup.tc,
+      lookup.slot,
+      result,
+      ssaPropName,
+      true
+    );
+  } else if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+    auto const slot = gen(env, LookupSPropSlot, ssaCls, ssaPropName);
+    gen(env, VerifyProp, ssaCls, slot, result, cns(env, true));
+  }
+
+  killClsRef(env, slot);
   destroyName(env, ssaPropName);
   pushIncRef(env, isPre(subop) ? result : oldVal);
 

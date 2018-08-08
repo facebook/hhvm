@@ -1501,7 +1501,7 @@ static Variant to_zval_object_ex(encodeType* type, xmlNodePtr data,
     }
     if (sdlType->model) {
       if (redo_any) {
-        ret.toObject()->setProp(nullptr, s_any.get(), make_tv<KindOfUninit>());
+        ret.toObject()->unsetProp(nullptr, s_any.get());
       }
       model_to_zval_object(ret, sdlType->model, data, sdl);
       if (redo_any) {

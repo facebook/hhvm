@@ -475,6 +475,7 @@ bool opcodeMayRaise(Opcode opc) {
   case SetNewElemKeyset:
   case SetNewElemVec:
   case SetOpCell:
+  case SetOpCellVerify:
   case SetOpElem:
   case SetOpProp:
   case SetProp:

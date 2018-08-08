@@ -409,13 +409,20 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   void setDynProps(const Array&);
   void reserveDynProps(int nProp);
 
-  // accessors for the declared properties area
+  // Accessors for the declared properties area. Note that if the caller writes
+  // to these properties, they are responsible for validating the values with
+  // any type-hints on the properties.
   TypedValue* propVecForWrite();
   TypedValue* propVecForConstruct();
   const TypedValue* propVec() const;
 
-  // accessors for declared properties at statically known offsets
-  // in the lval case, the property must be statically known to be mutable
+  void verifyPropTypeHints() const;
+  void verifyPropTypeHints(size_t end) const;
+
+  // Accessors for declared properties at statically known offsets. In the lval
+  // case, the property must be statically known to be mutable. If the caller
+  // modifies the lval, they are responsible for validating the value with any
+  // type-hint on that property.
   tv_lval propLvalAtOffset(Slot);
   tv_rval propRvalAtOffset(Slot) const;
 

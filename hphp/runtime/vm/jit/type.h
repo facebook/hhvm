@@ -36,6 +36,7 @@ struct ArrayData;
 struct Class;
 struct Func;
 struct StringData;
+struct TypeConstraint;
 struct TypedValue;
 
 namespace jit {
@@ -948,7 +949,10 @@ using OptType = folly::Optional<Type>;
  */
 Type typeFromTV(tv_rval tv, const Class* ctx);
 Type typeFromRAT(RepoAuthType ty, const Class* ctx);
-
+Type typeFromPropTC(const HPHP::TypeConstraint& tc,
+                    const Class* propCls,
+                    const Class* ctx,
+                    bool isSProp);
 
 ///////////////////////////////////////////////////////////////////////////////
 

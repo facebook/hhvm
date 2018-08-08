@@ -2605,7 +2605,6 @@ void in(ISS& env, const bc::SetS& op) {
 
   if (!self || tcls.couldBe(*self)) {
     if (vname && vname->m_type == KindOfPersistentString) {
-      if (!classInitMightRaise(env, tcls)) nothrow(env);
       mergeSelfProp(env, vname->m_data.pstr, t1);
     } else {
       mergeEachSelfPropRaw(env, [&] (Type) { return t1; });

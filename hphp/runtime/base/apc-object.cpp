@@ -261,6 +261,9 @@ Object APCObject::createObject() const {
     }
   }
 
+  // Make sure the unserialized values don't violate any type-hints.
+  obj->verifyPropTypeHints();
+
   if (UNLIKELY(numProps < m_propCount)) {
     auto dynProps = apcProp[numProps];
     assertx(dynProps->kind() == APCKind::StaticArray ||

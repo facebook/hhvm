@@ -576,6 +576,8 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
     Variant temp;
     return unserializePropertyValue(temp.asTypedValue(), nProp);
   } else {
+    // We'll check if this doesn't violate the type-hint once we're done
+    // unserializing all the props.
     t = obj->getPropLval(ctx, key.get());
   }
 
@@ -1114,6 +1116,12 @@ void VariableUnserializer::unserializeVariant(
           } else {
             INC_TPC(unser_prop_fast);
           }
+
+          // Verify that all the unserialized properties satisfy their
+          // type-hints. Its safe to do it like this (after we've set the values
+          // in the properties) because this object hasn't escaped to the
+          // outside world yet.
+          obj->verifyPropTypeHints();
 
           // nativeDataWakeup is called last to ensure that all properties are
           // already unserialized. We also ensure that nativeDataWakeup is

@@ -457,8 +457,8 @@ TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
 }
 
 template <bool Assert, bool ForProp>
-bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
-  assertx(tv->m_type != KindOfObject);
+bool TypeConstraint::checkTypeAliasNonObj(tv_rval val) const {
+  assertx(val.type() != KindOfObject);
   assertx(isObject());
 
   auto const p = [&]() -> std::pair<const TypeAliasReq*, Class*> {
@@ -481,27 +481,27 @@ bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
   // Common case is that we actually find the alias:
   if (td) {
     assertx(td->type != AnnotType::Self && td->type != AnnotType::Parent);
-    if (td->nullable && tv->m_type == KindOfNull) return true;
-    auto result = annotCompat(tv->m_type, td->type,
+    if (td->nullable && val.type() == KindOfNull) return true;
+    auto result = annotCompat(val.type(), td->type,
                               td->klass ? td->klass->name() : nullptr);
     switch (result) {
       case AnnotAction::Pass: return true;
       case AnnotAction::Fail: return false;
       case AnnotAction::CallableCheck:
-        return !ForProp && (Assert || is_callable(tvAsCVarRef(tv)));
+        return !ForProp && (Assert || is_callable(cellAsCVarRef(*val)));
       case AnnotAction::ObjectCheck: break;
       case AnnotAction::VArrayCheck:
-        assertx(tvIsArray(tv));
-        return Assert || tv->m_data.parr->isVArray();
+        assertx(tvIsArray(val));
+        return Assert || val.val().parr->isVArray();
       case AnnotAction::DArrayCheck:
-        assertx(tvIsArray(tv));
-        return Assert || tv->m_data.parr->isDArray();
+        assertx(tvIsArray(val));
+        return Assert || val.val().parr->isDArray();
       case AnnotAction::VArrayOrDArrayCheck:
-        assertx(tvIsArray(tv));
-        return Assert || !tv->m_data.parr->isNotDVArray();
+        assertx(tvIsArray(val));
+        return Assert || !val.val().parr->isNotDVArray();
       case AnnotAction::NonVArrayOrDArrayCheck:
-        assertx(tvIsArray(tv));
-        return Assert || tv->m_data.parr->isNotDVArray();
+        assertx(tvIsArray(val));
+        return Assert || val.val().parr->isNotDVArray();
     }
     assertx(result == AnnotAction::ObjectCheck);
     assertx(td->type == AnnotType::Object);
@@ -519,9 +519,9 @@ bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
     // For an enum, if the underlying type is mixed, we still require
     // it is either an int or a string!
     if (dt) {
-      return equivDataTypes(*dt, tv->m_type);
+      return equivDataTypes(*dt, val.type());
     } else {
-      return isIntType(tv->m_type) || isStringType(tv->m_type);
+      return isIntType(val.type()) || isStringType(val.type());
     }
   }
   return false;
@@ -575,10 +575,10 @@ template bool TypeConstraint::checkTypeAliasObjImpl<false>(const Class*) const;
 template bool TypeConstraint::checkTypeAliasObjImpl<true>(const Class*) const;
 
 template <TypeConstraint::CheckMode Mode>
-bool TypeConstraint::checkImpl(const TypedValue* tv,
+bool TypeConstraint::checkImpl(tv_rval val,
                                const Class* context) const {
   assertx(isCheckable());
-  assertx(tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*val));
 
   auto const isAssert = Mode == CheckMode::Assert;
   auto const isPasses = Mode == CheckMode::AlwaysPasses;
@@ -589,15 +589,15 @@ bool TypeConstraint::checkImpl(const TypedValue* tv,
   assertx(!isPasses || !context);
   assertx(!isProp   || validForProp());
 
-  tv = tvToCell(tv);
-  if (isNullable() && tv->m_type == KindOfNull) return true;
+  val = tvToCell(val);
+  if (isNullable() && val.type() == KindOfNull) return true;
 
-  if (tv->m_type == KindOfObject) {
+  if (val.type() == KindOfObject) {
     // Perfect match seems common enough to be worth skipping the hash
     // table lookup.
     const Class *c = nullptr;
     if (isObject()) {
-      if (m_typeName->isame(tv->m_data.pobj->getVMClass()->name())) {
+      if (m_typeName->isame(val.val().pobj->getVMClass()->name())) {
         return true;
       }
       if (!isPasses) {
@@ -617,7 +617,7 @@ bool TypeConstraint::checkImpl(const TypedValue* tv,
         case MetaType::This:
           if (isAssert) return true;
           if (isPasses) return false;
-          if (isProp) return tv->m_data.pobj->getVMClass() == context;
+          if (isProp) return val.val().pobj->getVMClass() == context;
           switch (RuntimeOption::EvalThisTypeHintLevel) {
             case 0:   // Like Mixed.
               return true;
@@ -628,7 +628,7 @@ bool TypeConstraint::checkImpl(const TypedValue* tv,
             case 2:   // Soft this in irgen verifyTypeImpl and verifyFail.
             case 3:   // Hard this.
               if (auto const cls = getThis()) {
-                return tv->m_data.pobj->getVMClass() == cls;
+                return val.val().pobj->getVMClass() == cls;
               }
               return false;
           }
@@ -643,7 +643,7 @@ bool TypeConstraint::checkImpl(const TypedValue* tv,
           assertx(!isProp);
           if (isAssert) return true;
           if (isPasses) return false;
-          return is_callable(tvAsCVarRef(tv));
+          return is_callable(cellAsCVarRef(*val));
         case MetaType::Precise:
         case MetaType::NoReturn:
         case MetaType::Number:
@@ -662,14 +662,14 @@ bool TypeConstraint::checkImpl(const TypedValue* tv,
           not_reached();
       }
     }
-    if (c && tv->m_data.pobj->instanceof(c)) {
+    if (c && val.val().pobj->instanceof(c)) {
       return true;
     }
     return isObject() && !isPasses &&
-      checkTypeAliasObjImpl<isAssert>(tv->m_data.pobj->getVMClass());
+      checkTypeAliasObjImpl<isAssert>(val.val().pobj->getVMClass());
   }
 
-  auto const result = annotCompat(tv->m_type, m_type, m_typeName);
+  auto const result = annotCompat(val.type(), m_type, m_typeName);
   switch (result) {
     case AnnotAction::Pass: return true;
     case AnnotAction::Fail: return false;
@@ -677,42 +677,42 @@ bool TypeConstraint::checkImpl(const TypedValue* tv,
       assertx(!isProp);
       if (isAssert) return true;
       if (isPasses) return false;
-      return is_callable(tvAsCVarRef(tv));
+      return is_callable(cellAsCVarRef(*val));
     case AnnotAction::ObjectCheck:
       assertx(isObject());
-      return !isPasses && checkTypeAliasNonObj<isAssert, isProp>(tv);
+      return !isPasses && checkTypeAliasNonObj<isAssert, isProp>(val);
     case AnnotAction::VArrayCheck:
       // Since d/varray type-hints are always soft, we can never assert on their
       // correctness.
-      assertx(tvIsArray(tv));
-      return isAssert || tv->m_data.parr->isVArray();
+      assertx(tvIsArray(val));
+      return isAssert || val.val().parr->isVArray();
     case AnnotAction::DArrayCheck:
-      assertx(tvIsArray(tv));
-      return isAssert || tv->m_data.parr->isDArray();
+      assertx(tvIsArray(val));
+      return isAssert || val.val().parr->isDArray();
     case AnnotAction::VArrayOrDArrayCheck:
-      assertx(tvIsArray(tv));
-      return isAssert || !tv->m_data.parr->isNotDVArray();
+      assertx(tvIsArray(val));
+      return isAssert || !val.val().parr->isNotDVArray();
     case AnnotAction::NonVArrayOrDArrayCheck:
-      assertx(tvIsArray(tv));
-      return isAssert || tv->m_data.parr->isNotDVArray();
+      assertx(tvIsArray(val));
+      return isAssert || val.val().parr->isNotDVArray();
   }
   not_reached();
 }
 
 template bool TypeConstraint::checkImpl<TypeConstraint::CheckMode::Exact>(
-  const TypedValue*,
+  tv_rval,
   const Class*
 ) const;
 template bool TypeConstraint::checkImpl<TypeConstraint::CheckMode::ExactProp>(
-  const TypedValue*,
+  tv_rval,
   const Class*
 ) const;
 template bool TypeConstraint::checkImpl<TypeConstraint::CheckMode::AlwaysPasses>(
-  const TypedValue*,
+  tv_rval,
   const Class*
 ) const;
 template bool TypeConstraint::checkImpl<TypeConstraint::CheckMode::Assert>(
-  const TypedValue*,
+  tv_rval,
   const Class*
 ) const;
 
@@ -738,25 +738,25 @@ void TypeConstraint::verifyOutParam(const TypedValue* tv,
   }
 }
 
-void TypeConstraint::verifyProperty(const TypedValue* tv,
+void TypeConstraint::verifyProperty(tv_rval val,
                                     const Class* thisCls,
                                     const Class* declCls,
                                     const StringData* propName) const {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(validForProp());
-  if (UNLIKELY(!checkImpl<CheckMode::ExactProp>(tv, thisCls))) {
-    verifyPropFail(thisCls, declCls, tv, propName, false);
+  if (UNLIKELY(!checkImpl<CheckMode::ExactProp>(val, thisCls))) {
+    verifyPropFail(thisCls, declCls, val, propName, false);
   }
 }
 
-void TypeConstraint::verifyStaticProperty(const TypedValue* tv,
+void TypeConstraint::verifyStaticProperty(tv_rval val,
                                           const Class* thisCls,
                                           const Class* declCls,
                                           const StringData* propName) const {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(validForProp());
-  if (UNLIKELY(!checkImpl<CheckMode::ExactProp>(tv, thisCls))) {
-    verifyPropFail(thisCls, declCls, tv, propName, true);
+  if (UNLIKELY(!checkImpl<CheckMode::ExactProp>(val, thisCls))) {
+    verifyPropFail(thisCls, declCls, val, propName, true);
   }
 }
 
@@ -777,9 +777,9 @@ void TypeConstraint::verifyReturnNonNull(TypedValue* tv,
   }
 }
 
-const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
-  tv = tvToCell(tv);
-  switch (tv->m_type) {
+const char* describe_actual_type(tv_rval val, bool isHHType) {
+  val = tvToCell(val);
+  switch (val.type()) {
     case KindOfUninit:        return "undefined variable";
     case KindOfNull:          return "null";
     case KindOfBoolean:       return "bool";
@@ -795,9 +795,9 @@ const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
     case KindOfKeyset:        return "HH\\keyset";
     case KindOfPersistentArray:
     case KindOfArray:         return "array";
-    case KindOfObject:        return tv->m_data.pobj->getClassName().c_str();
+    case KindOfObject:        return val.val().pobj->getClassName().c_str();
     case KindOfResource:
-      return tv->m_data.pres->data()->o_getClassName().c_str();
+      return val.val().pres->data()->o_getClassName().c_str();
     case KindOfFunc:          return "func";
     case KindOfClass:         return "class";
     case KindOfRef:
@@ -841,20 +841,20 @@ bool call_uses_strict_types(const Func* callee) {
 }
 
 ALWAYS_INLINE
-folly::Optional<AnnotType> TypeConstraint::checkDVArray(const Cell* c) const {
+folly::Optional<AnnotType> TypeConstraint::checkDVArray(tv_rval val) const {
   auto const check = [&](AnnotType at) -> folly::Optional<AnnotType> {
     switch (at) {
       case AnnotType::Array:
-        assertx(!c->m_data.parr->isNotDVArray());
+        assertx(!val.val().parr->isNotDVArray());
         break;
       case AnnotType::VArray:
-        assertx(!c->m_data.parr->isVArray());
+        assertx(!val.val().parr->isVArray());
         break;
       case AnnotType::DArray:
-        assertx(!c->m_data.parr->isDArray());
+        assertx(!val.val().parr->isDArray());
         break;
       case AnnotType::VArrOrDArr:
-        assertx(c->m_data.parr->isNotDVArray());
+        assertx(val.val().parr->isNotDVArray());
         break;
       default:
         return folly::none;
@@ -864,7 +864,7 @@ folly::Optional<AnnotType> TypeConstraint::checkDVArray(const Cell* c) const {
   if (LIKELY(!RuntimeOption::EvalHackArrCompatTypeHintNotices)) {
     return folly::none;
   }
-  if (!isArrayType(c->m_type)) return folly::none;
+  if (!isArrayType(val.type())) return folly::none;
   if (isArray()) return check(m_type);
   if (!isObject()) return folly::none;
   if (auto alias = getTypeAliasWithAutoload(m_namedEntity, m_typeName)) {
@@ -910,22 +910,22 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
 
 void TypeConstraint::verifyPropFail(const Class* thisCls,
                                     const Class* declCls,
-                                    const TypedValue* tv,
+                                    tv_rval val,
                                     const StringData* propName,
                                     bool isStatic) const {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(validForProp());
 
-  auto const c = tvToCell(tv);
-  if (auto const at = checkDVArray(c)) {
+  val = tvToCell(val);
+  if (auto const at = checkDVArray(val)) {
     raise_hackarr_compat_type_hint_property_notice(
-      declCls, c->m_data.parr, *at, propName, isStatic
+      declCls, val.val().parr, *at, propName, isStatic
     );
     return;
   }
 
-  if (UNLIKELY(isThis() && c->m_type == KindOfObject)) {
-    auto const valCls = c->m_data.pobj->getVMClass();
+  if (UNLIKELY(isThis() && val.type() == KindOfObject)) {
+    auto const valCls = val.val().pobj->getVMClass();
     if (valCls->preClass()->userAttributes().count(s___MockClass.get()) &&
         valCls->parent() == thisCls) {
       return;
@@ -939,7 +939,7 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
       declCls->name(),
       propName,
       displayName(nullptr),
-      describe_actual_type(c, isHHType())
+      describe_actual_type(val, isHHType())
     ),
     isSoft()
   );

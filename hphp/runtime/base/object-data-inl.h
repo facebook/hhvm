@@ -157,6 +157,47 @@ inline void ObjectData::instanceInit(Class* cls) {
   }
 }
 
+inline void ObjectData::verifyPropTypeHints(size_t end) const {
+  assertx(end <= m_cls->declProperties().size());
+
+  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
+
+  auto const declProps = m_cls->declProperties();
+  auto const props = propVec();
+  for (size_t idx = 0; idx < end; ++idx) {
+    auto const val = props[idx];
+    assertx(tvIsPlausible(val));
+    auto const& prop = declProps[idx];
+    auto const& tc = prop.typeConstraint;
+    if (tc.isCheckable()) {
+      if (UNLIKELY(val.m_type == KindOfRef)) {
+        raise_property_typehint_binding_error(
+          prop.cls,
+          prop.name,
+          false,
+          tc.isSoft()
+        );
+      } else if (UNLIKELY(val.m_type == KindOfUninit)) {
+        raise_property_typehint_unset_error(
+          prop.cls,
+          prop.name,
+          tc.isSoft()
+        );
+      } else {
+        tc.verifyProperty(&val, m_cls, prop.cls, prop.name);
+      }
+    }
+
+    if (debug && RuntimeOption::RepoAuthoritative) {
+      always_assert(tvMatchesRepoAuthType(val, prop.repoAuthType));
+    }
+  }
+}
+
+inline void ObjectData::verifyPropTypeHints() const {
+  verifyPropTypeHints(m_cls->declProperties().size());
+}
+
 inline Class* ObjectData::getVMClass() const {
   assertx(kindIsValid());
   return m_cls;

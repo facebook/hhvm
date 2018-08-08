@@ -68,14 +68,16 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
       env,
       LdPropAddr,
       ByteOffsetData { (ptrdiff_t)rootCls->declPropOffset(idx) },
-      TInitNull.lval(Ptr::Prop),
+      TUncounted.lval(Ptr::Prop),
       throwable
     );
   };
 
   // Load Exception::$traceOpts
-  auto const sprop = ldClsPropAddrKnown(
-    env, SystemLib::s_ExceptionClass, s_traceOpts.get());
+  auto const lookup =
+    ldClsPropAddrKnown(env, SystemLib::s_ExceptionClass, s_traceOpts.get());
+  assertx(!lookup.tc->isCheckable());
+  auto const sprop = lookup.propPtr;
 
   auto const trace = cond(
     env,
@@ -124,6 +126,7 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
   // $throwable->trace = $trace
   auto const traceIdx = rootCls->lookupDeclProp(s_trace.get());
   assertx(traceIdx != kInvalidSlot);
+  assertx(!rootCls->declPropTypeConstraint(traceIdx).isCheckable());
   gen(env, StMem, propAddr(traceIdx), trace);
 
   // Populate $throwable->{file,line}
@@ -134,6 +137,8 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
     auto const lineIdx = rootCls->lookupDeclProp(s_line.get());
     auto const unit = curFunc(env)->unit();
     auto const line = unit->getLineNumber(bcOff(env));
+    assertx(rootCls->declPropTypeConstraint(fileIdx).isString());
+    assertx(rootCls->declPropTypeConstraint(lineIdx).isInt());
     gen(env, StMem, propAddr(fileIdx), cns(env, unit->filepath()));
     gen(env, StMem, propAddr(lineIdx), cns(env, line));
   }

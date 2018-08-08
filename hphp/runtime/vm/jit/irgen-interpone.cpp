@@ -461,8 +461,10 @@ void emitSetOpS(IRGS& env, SetOpOp, uint32_t) { INTERP }
 void emitIncDecN(IRGS& env, IncDecOp)         { INTERP }
 void emitIncDecG(IRGS& env, IncDecOp)         { INTERP }
 void emitBindN(IRGS& env)                     { INTERP }
+void emitBindS(IRGS& env, uint32_t)           { INTERP }
 void emitUnsetN(IRGS& env)                    { INTERP }
 void emitUnsetG(IRGS& env)                    { INTERP }
+void emitVGetS(IRGS& env, uint32_t)           { INTERP }
 void emitIncl(IRGS& env)                      { INTERP }
 void emitInclOnce(IRGS& env)                  { INTERP }
 void emitReq(IRGS& env)                       { INTERP }

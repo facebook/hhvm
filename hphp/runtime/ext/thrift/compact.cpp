@@ -635,12 +635,16 @@ struct CompactReader {
         if (i == numFields ||
             prop[i].name != fields[i].name ||
             !typesAreCompatible(fieldType, fields[i].type)) {
+          // Verify everything we've set so far
+          dest->verifyPropTypeHints(i);
           return readStructSlow(dest, spec, fieldNum, fieldType);
         }
         if (fields[i].isUnion) {
           if (s__type.equal(prop[numFields].name)) {
             tvAsVariant(&objProp[numFields]) = Variant(fieldNum);
           } else {
+            // Verify everything we've set so far
+            dest->verifyPropTypeHints(i);
             return readStructSlow(dest, spec, fieldNum, fieldType);
           }
         }
@@ -650,6 +654,8 @@ struct CompactReader {
         readFieldBegin(fieldNum, fieldType);
       }
       readStructEnd();
+      // Verify everything we've set
+      dest->verifyPropTypeHints();
     }
 
   private:

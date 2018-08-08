@@ -1,0 +1,2 @@
+-vCheckPropTypeHints=1
+-vRuntime.Eval.HackArrCompatTypeHintNotices=1

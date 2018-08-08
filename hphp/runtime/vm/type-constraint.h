@@ -336,8 +336,8 @@ struct TypeConstraint {
    * slightly differently) and the context is required. The context determines
    * the meaning of Self, Parent, and This type-constraints.
    */
-  bool check(const TypedValue* tv, const Class* context) const {
-    return checkImpl<CheckMode::Exact>(tv, context);
+  bool check(tv_rval val, const Class* context) const {
+    return checkImpl<CheckMode::Exact>(val, context);
   }
 
   /*
@@ -347,8 +347,8 @@ struct TypeConstraint {
    * only return false if the value definitely does not satisfy the
    * type-constraint, true otherwise.
    */
-  bool assertCheck(const TypedValue* tv) const {
-    return checkImpl<CheckMode::Assert>(tv, nullptr);
+  bool assertCheck(tv_rval val) const {
+    return checkImpl<CheckMode::Assert>(val, nullptr);
   }
 
   /*
@@ -357,9 +357,9 @@ struct TypeConstraint {
    * currently loaded. A type which passes this check will never need to be
    * checked at run-time.
    */
-  bool alwaysPasses(const TypedValue* tv) const {
+  bool alwaysPasses(tv_rval val) const {
     if (!isCheckable()) return true;
-    return checkImpl<CheckMode::AlwaysPasses>(tv, nullptr);
+    return checkImpl<CheckMode::AlwaysPasses>(val, nullptr);
   }
 
   bool checkTypeAliasObj(const Class* cls) const {
@@ -372,11 +372,11 @@ struct TypeConstraint {
   void verifyReturnNonNull(TypedValue* tv, const Func* func) const;
   void verifyOutParam(const TypedValue* tv, const Func* func,
                       int paramNum) const;
-  void verifyProperty(const TypedValue* tv,
+  void verifyProperty(tv_rval val,
                       const Class* thisCls,
                       const Class* declCls,
                       const StringData* propName) const;
-  void verifyStaticProperty(const TypedValue* tv,
+  void verifyStaticProperty(tv_rval val,
                             const Class* thisCls,
                             const Class* declCls,
                             const StringData* propName) const;
@@ -389,7 +389,7 @@ struct TypeConstraint {
     verifyFail(func, tv, ReturnId);
   }
   void verifyPropFail(const Class* thisCls, const Class* declCls,
-                      const TypedValue* tv, const StringData* propName,
+                      tv_rval val, const StringData* propName,
                       bool isStatic) const;
 
 private:
@@ -404,10 +404,10 @@ private:
   };
 
   template <CheckMode>
-  bool checkImpl(const TypedValue* tv, const Class* context) const;
+  bool checkImpl(tv_rval val, const Class* context) const;
 
   template <bool, bool>
-  bool checkTypeAliasNonObj(const TypedValue* tv) const;
+  bool checkTypeAliasNonObj(tv_rval val) const;
 
   template <bool>
   bool checkTypeAliasObjImpl(const Class* cls) const;
@@ -415,7 +415,7 @@ private:
   void verifyFail(const Func* func, TypedValue* tv, int id,
                   bool useStrictTypes) const;
 
-  folly::Optional<AnnotType> checkDVArray(const Cell*) const;
+  folly::Optional<AnnotType> checkDVArray(tv_rval) const;
 
 private:
   // m_type represents the type to check on.  We don't know whether a
@@ -468,7 +468,7 @@ enum class MemoKeyConstraint {
 };
 MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint&);
 
-const char* describe_actual_type(const TypedValue* tv, bool isHHType);
+const char* describe_actual_type(tv_rval val, bool isHHType);
 
 bool call_uses_strict_types(const Func* func);
 

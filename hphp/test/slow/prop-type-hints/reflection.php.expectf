@@ -1,0 +1,1 @@
+Catchable fatal error: Static property 'A::x' declared as type int, string assigned in %s/reflection.php on line 10

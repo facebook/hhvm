@@ -105,6 +105,9 @@ struct c_Closure final : ObjectData {
    *
    * Returns obj->propVecForWrite()
    * but with runtime generalized checks replaced with assertions
+   *
+   * NB: Closure properties can't have type-hints, so no checking is necessary
+   * for writes.
    */
   TypedValue* getUseVars() { return propVecForWrite(); }
 

@@ -36,6 +36,7 @@
 #include "hphp/runtime/vm/jit/irgen-incdec.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
+#include "hphp/runtime/vm/jit/irgen-types.h"
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
@@ -88,13 +89,15 @@ struct PropInfo {
   explicit PropInfo(int offset,
                     Slot slot,
                     bool immutable,
-                    RepoAuthType repoAuthType,
+                    Type knownType,
+                    const HPHP::TypeConstraint* typeConstraint,
                     const Class* objClass,
                     const Class* propClass)
     : offset{offset}
     , slot{slot}
     , immutable{immutable}
-    , repoAuthType{repoAuthType}
+    , knownType{std::move(knownType)}
+    , typeConstraint{typeConstraint}
     , objClass{objClass}
     , propClass{propClass}
   {}
@@ -102,10 +105,22 @@ struct PropInfo {
   int offset{-1};
   Slot slot{kInvalidSlot};
   bool immutable{false};
-  RepoAuthType repoAuthType{};
+  Type knownType{TGen};
+  const HPHP::TypeConstraint* typeConstraint{nullptr};
   const Class* objClass{nullptr};
   const Class* propClass{nullptr};
 };
+
+Type knownTypeForProp(const Class::Prop& prop,
+                      const Class* propCls,
+                      const Class* ctx) {
+  return [&]{
+    if (RuntimeOption::EvalCheckPropTypeHints < 3) return TGen;
+    auto knownTy = typeFromPropTC(prop.typeConstraint, propCls, ctx, false);
+    if (!(prop.attrs & AttrNoImplicitNullable)) knownTy |= TInitNull;
+    return knownTy;
+  }() & typeFromRAT(prop.repoAuthType, ctx);
+}
 
 /*
  * Try to find a property offset for the given key in baseClass. Will return a
@@ -113,12 +128,13 @@ struct PropInfo {
  * Class* can change (which happens in sandbox mode when the ctx class is
  * unrelated to baseClass).
  */
-PropInfo getPropertyOffset(IRGS& /*env*/, const Class* ctx,
-                           const Class* baseClass, Type keyType) {
+PropInfo getPropertyOffset(IRGS& env, const Class* baseClass, Type keyType) {
   if (!baseClass) return PropInfo();
 
   if (!keyType.hasConstVal(TStr)) return PropInfo();
   auto const name = keyType.strVal();
+
+  auto const ctx = curClass(env);
 
   // We need to check that baseClass cannot change between requests.
   if (!(baseClass->preClass()->attrs() & AttrUnique)) {
@@ -154,7 +170,8 @@ PropInfo getPropertyOffset(IRGS& /*env*/, const Class* ctx,
     baseClass->declPropOffset(idx),
     idx,
     prop.attrs & AttrIsImmutable,
-    baseClass->declPropRepoAuthType(idx),
+    knownTypeForProp(prop, baseClass, ctx),
+    &prop.typeConstraint,
     baseClass,
     prop.cls
   );
@@ -182,10 +199,9 @@ bool prop_ignores_tvref(IRGS& env, SSATmp* base, const SSATmp* key) {
     auto const lookup = cls->getDeclPropIndex(ctx, keyStr);
     if (lookup.slot != kInvalidSlot) {
       isDeclared = true;
-      propClass = cls->declProperties()[lookup.slot].cls;
-      if (RuntimeOption::RepoAuthoritative) {
-        propType = typeFromRAT(cls->declPropRepoAuthType(lookup.slot), nullptr);
-      }
+      auto const& prop = cls->declProperties()[lookup.slot];
+      propClass = prop.cls;
+      propType = knownTypeForProp(prop, cls, curClass(env));
     }
   }
 
@@ -317,9 +333,7 @@ SSATmp* propStatePtrFinalProp(IRGS& env, const SSATmp* base) {
 }
 
 bool mightCallMagicPropMethod(MOpMode mode, PropInfo propInfo) {
-  if (!typeFromRAT(propInfo.repoAuthType, nullptr).maybe(TUninit)) {
-    return false;
-  }
+  if (!propInfo.knownType.maybe(TUninit)) return false;
   auto const cls = propInfo.objClass;
   if (!cls) return true;
   // NB: this function can't yet be used for unset or isset contexts.  Just get
@@ -359,7 +373,7 @@ PropInfo getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType,
   if (!(baseType < (TObj | TInitNull) && baseType.clsSpec())) return PropInfo{};
 
   auto const baseCls = baseType.clsSpec().cls();
-  auto const info = getPropertyOffset(env, curClass(env), baseCls, keyType);
+  auto const info = getPropertyOffset(env, baseCls, keyType);
   if (info.offset == -1) return info;
 
   if (env.irb->constrainValue(
@@ -446,7 +460,7 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
       env,
       LdPropAddr,
       ByteOffsetData { propInfo.offset },
-      typeFromRAT(propInfo.repoAuthType, curClass(env)).lval(Ptr::Prop),
+      propInfo.knownType.lval(Ptr::Prop),
       base
     );
     return {
@@ -479,7 +493,7 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
         env,
         LdPropAddr,
         ByteOffsetData { propInfo.offset },
-        typeFromRAT(propInfo.repoAuthType, curClass(env)).lval(Ptr::Prop),
+        propInfo.knownType.lval(Ptr::Prop),
         obj
       );
       return checkInitProp(env, obj, propAddr, key, doWarn, doDefine);
@@ -919,13 +933,15 @@ SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
       !mightCallMagicPropMethod(MOpMode::Define, propInfo)) {
 
     // Special case for when the property is known to be an int.
-    if (base->isA(TObj) &&
-        propInfo.repoAuthType.tag() == RepoAuthType::Tag::Int) {
+    if (base->isA(TObj) && propInfo.knownType <= TInt) {
       base = emitPropSpecialized(env, base, key, false,
                                  MOpMode::Define, propInfo).first;
       auto const prop = gen(env, LdMem, TInt, base);
       auto const result = incDec(env, op, prop);
+      // No need for a property type-check because the input is an Int and the
+      // result is always an Int.
       assertx(result != nullptr);
+      assertx(result->isA(TInt));
       gen(env, StMem, base, result);
       return isPre(op) ? result : prop;
     }
@@ -1210,7 +1226,7 @@ void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
 void baseSImpl(IRGS& env, SSATmp* name, uint32_t clsRefSlot, MOpMode mode) {
   if (!name->isA(TStr)) PUNT(BaseS-non-string-name);
   auto const cls = takeClsRef(env, clsRefSlot);
-  auto const spropPtr = ldClsPropAddr(env, cls, name, true);
+  auto const spropPtr = ldClsPropAddr(env, cls, name, true).propPtr;
   stMBase(env, spropPtr);
   setClsMIPropState(env, spropPtr, mode, cls, name);
 }
@@ -1658,10 +1674,30 @@ SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
   if (propInfo.offset != -1 &&
       !propInfo.immutable &&
       !mightCallMagicPropMethod(mode, propInfo)) {
-    auto propPtr =
-      emitPropSpecialized(env, base, key, false, mode, propInfo).first;
-    auto propTy = propPtr->type().deref();
 
+    SSATmp* propPtr;
+    SSATmp* obj;
+    std::tie(propPtr, obj) = emitPropSpecialized(
+      env,
+      base,
+      key,
+      false,
+      mode,
+      propInfo
+    );
+
+    assertx(obj != nullptr);
+    verifyPropType(
+      env,
+      gen(env, LdObjClass, obj),
+      propInfo.typeConstraint,
+      propInfo.slot,
+      value,
+      key,
+      false
+    );
+
+    auto propTy = propPtr->type().deref();
     if (propTy.maybe(TBoxedCell)) {
       propTy = propTy.unbox();
       propPtr = gen(env, UnboxPtr, propPtr);
@@ -2192,10 +2228,8 @@ void emitIncDecM(IRGS& env, uint32_t nDiscard, IncDecOp incDec, MemberKey mk) {
 
 /*
  * If the op and operand types are a supported combination, return the modified
- * value. Otherwise, return nullptr.
- *
- * If the resulting value is a refcounted type, it will have one unconsumed
- * reference.
+ * value. Otherwise, return nullptr. The returned value always has an uncounted
+ * type.
  */
 SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
   auto const maybeOp = [&]() -> folly::Optional<Op> {
@@ -2231,7 +2265,9 @@ SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
 
   auto const hhirOp = isBitOp(bcOp) ? bitOp(bcOp)
                                     : promoteBinaryDoubles(env, bcOp, lhs, rhs);
-  return gen(env, hhirOp, lhs, rhs);
+  auto result = gen(env, hhirOp, lhs, rhs);
+  assertx(result->isA(TUncounted));
+  return result;
 }
 
 SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
@@ -2241,25 +2277,52 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
   if (propInfo.offset != -1 &&
       !propInfo.immutable &&
       !mightCallMagicPropMethod(MOpMode::Define, propInfo)) {
-    auto propPtr = emitPropSpecialized(
+
+    SSATmp* propPtr;
+    SSATmp* obj;
+    std::tie(propPtr, obj) = emitPropSpecialized(
       env,
       base,
       key,
       false,
       MOpMode::Define,
       propInfo
-    ).first;
+    );
+    assertx(obj != nullptr);
+
     propPtr = gen(env, UnboxPtr, propPtr);
 
     auto const lhs = gen(env, LdMem, propPtr->type().deref(), propPtr);
     if (auto const result = inlineSetOp(env, op, lhs, rhs)) {
+      verifyPropType(
+        env,
+        gen(env, LdObjClass, obj),
+        propInfo.typeConstraint,
+        propInfo.slot,
+        result,
+        key,
+        false
+      );
       gen(env, StMem, propPtr, result);
       gen(env, DecRef, DecRefData{}, lhs);
       gen(env, IncRef, result);
       return result;
     }
 
-    gen(env, SetOpCell, SetOpData{op}, propPtr, rhs);
+    if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
+        propInfo.typeConstraint && propInfo.typeConstraint->isCheckable()) {
+      gen(
+        env,
+        SetOpCellVerify,
+        SetOpData{op},
+        propPtr,
+        rhs,
+        gen(env, LdObjClass, obj),
+        cns(env, propInfo.slot)
+      );
+    } else {
+      gen(env, SetOpCell, SetOpData{op}, propPtr, rhs);
+    }
     auto newVal = gen(env, LdMem, propPtr->type().deref(), propPtr);
     gen(env, IncRef, newVal);
     return newVal;

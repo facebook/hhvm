@@ -58,21 +58,6 @@ __thread uint32_t ObjectData::os_max_id;
 
 TRACE_SET_MOD(runtime);
 
-const StaticString
-  s_offsetGet("offsetGet"),
-  s_call("__call"),
-  s_clone("__clone");
-
-static Array convert_to_array(const ObjectData* obj, Class* cls) {
-  auto const prop = obj->getProp(cls, s_storage.get());
-
-  // We currently do not special case ArrayObjects / ArrayIterators in
-  // reflectionClass. Until, either ArrayObject moves to HNI or a special
-  // case is added to reflection unset should be turned off.
-  assertx(prop.is_set() /* && prop.type() != KindOfUninit */);
-  return tvCastToArrayLike(prop.tv());
-}
-
 #ifdef _MSC_VER
 static_assert(sizeof(ObjectData) == (use_lowptr ? 16 : 20),
               "Change this only on purpose");
@@ -83,8 +68,25 @@ static_assert(sizeof(ObjectData) == (use_lowptr ? 16 : 24),
 
 //////////////////////////////////////////////////////////////////////
 
+namespace {
+
+const StaticString
+  s_offsetGet("offsetGet"),
+  s_call("__call"),
+  s_clone("__clone");
+
+Array convert_to_array(const ObjectData* obj, Class* cls) {
+  auto const prop = obj->getProp(cls, s_storage.get());
+
+  // We currently do not special case ArrayObjects / ArrayIterators in
+  // reflectionClass. Until, either ArrayObject moves to HNI or a special
+  // case is added to reflection unset should be turned off.
+  assertx(prop.is_set() /* && prop.type() != KindOfUninit */);
+  return tvCastToArrayLike(prop.tv());
+}
+
 ALWAYS_INLINE
-static void invoke_destructor(ObjectData* obj, const Func* dtor) {
+void invoke_destructor(ObjectData* obj, const Func* dtor) {
   try {
     // Call the destructor method
     g_context->invokeMethodV(obj, dtor, InvokeArgs{}, false);
@@ -93,6 +95,70 @@ static void invoke_destructor(ObjectData* obj, const Func* dtor) {
     handle_destructor_exception();
   }
 }
+
+ALWAYS_INLINE
+bool typeHintChecked(const Class::Prop* prop) {
+  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return false;
+  return prop && prop->typeConstraint.isCheckable();
+}
+
+ALWAYS_INLINE
+void verifyTypeHint(const Class* thisCls,
+                    const Class::Prop* prop,
+                    tv_rval val) {
+  assertx(cellIsPlausible(*val));
+  assertx(type(val) != KindOfUninit);
+  if (!typeHintChecked(prop)) return;
+  prop->typeConstraint.verifyProperty(val, thisCls, prop->cls, prop->name);
+}
+
+ALWAYS_INLINE
+void boxingTypeHint(const Class::Prop* prop) {
+  if (!typeHintChecked(prop)) return;
+  raise_property_typehint_binding_error(
+    prop->cls,
+    prop->name,
+    false,
+    prop->typeConstraint.isSoft()
+  );
+}
+
+ALWAYS_INLINE
+void unsetTypeHint(const Class::Prop* prop) {
+  if (!typeHintChecked(prop)) return;
+  raise_property_typehint_unset_error(
+    prop->cls,
+    prop->name,
+    prop->typeConstraint.isSoft()
+  );
+}
+
+// Check that the given property's type matches its type-hint.
+bool assertTypeHint(const Class* cls, tv_rval prop, Slot propIdx) {
+  assertx(tvIsPlausible(*prop));
+  assertx(propIdx < cls->numDeclProperties());
+
+  if (debug && RuntimeOption::RepoAuthoritative) {
+    auto const repoTy = cls->declPropRepoAuthType(propIdx);
+    always_assert(tvMatchesRepoAuthType(*prop, repoTy));
+  }
+
+  // If we're not hard enforcing, then the prop might contain anything.
+  if (RuntimeOption::EvalCheckPropTypeHints <= 2) return true;
+  auto const& propDecl = cls->declProperties()[propIdx];
+  return
+    !propDecl.typeConstraint.isCheckable() ||
+    propDecl.typeConstraint.isSoft() ||
+    (!(propDecl.attrs & AttrNoImplicitNullable)
+     && prop.type() == KindOfNull) ||
+    (prop.type() != KindOfRef &&
+     prop.type() != KindOfUninit &&
+     propDecl.typeConstraint.assertCheck(prop));
+}
+
+}
+
+//////////////////////////////////////////////////////////////////////
 
 NEVER_INLINE bool ObjectData::destructImpl() {
   setNoDestruct();
@@ -444,7 +510,9 @@ void ObjectData::o_set(const String& propName, const Variant& v,
       if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
         throwMutateImmutable(lookup.slot);
       }
-      tvSet(tvToInitCell(*v.asTypedValue()), prop);
+      auto const val = tvToInitCell(*v.asTypedValue());
+      verifyTypeHint(m_cls, lookup.prop, &val);
+      tvSet(val, prop);
       return;
     }
   }
@@ -877,6 +945,7 @@ ObjectData* ObjectData::clone() {
     } else {
       tvDupWithRef(propVec()[i], clonePropVec[i]);
     }
+    assertx(assertTypeHint(m_cls, &clonePropVec[i], i));
   }
 
   if (UNLIKELY(getAttribute(HasDynPropArr))) {
@@ -1144,13 +1213,7 @@ ObjectData::PropLookup ObjectData::getPropImpl(
     // We found a visible property, but it might not be accessible.  No need to
     // check if there is a dynamic property with this name.
     auto const prop = &propVec()[propIdx];
-
-    if (debug) {
-      if (RuntimeOption::RepoAuthoritative) {
-        auto const repoTy = m_cls->declPropRepoAuthType(propIdx);
-        always_assert(tvMatchesRepoAuthType(*prop, repoTy));
-      }
-    }
+    assertx(assertTypeHint(m_cls, prop, propIdx));
 
     return {
      const_cast<TypedValue*>(prop),
@@ -1207,6 +1270,7 @@ tv_lval ObjectData::vGetProp(const Class* ctx, const StringData* key) {
   auto prop = lookup.val;
   if (UNLIKELY(lookup.immutable)) throwBindImmutable(lookup.slot);
   if (lookup.accessible && prop && type(prop) != KindOfUninit) {
+    boxingTypeHint(lookup.prop);
     tvBoxIfNeeded(prop);
     return prop;
   }
@@ -1218,6 +1282,7 @@ tv_lval ObjectData::vGetPropIgnoreAccessibility(const StringData* key) {
   auto prop = lookup.val;
   if (UNLIKELY(lookup.immutable)) throwBindImmutable(lookup.slot);
   if (prop && type(prop) != KindOfUninit) {
+    boxingTypeHint(lookup.prop);
     tvBoxIfNeeded(prop);
     return prop;
   }
@@ -1423,6 +1488,7 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
       auto const checkImmutable = [&]() {
         if (mode == PropMode::Bind) {
           if (UNLIKELY(lookup.immutable)) throwBindImmutable(lookup.slot);
+          boxingTypeHint(lookup.prop);
         }
         if (mode == PropMode::DimForWrite) {
           if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
@@ -1615,6 +1681,9 @@ bool ObjectData::propEmpty(const Class* ctx, const StringData* key) {
 }
 
 void ObjectData::setProp(Class* ctx, const StringData* key, Cell val) {
+  assertx(cellIsPlausible(val));
+  assertx(val.m_type != KindOfUninit);
+
   auto const lookup = getPropImpl<true, false>(ctx, key);
   auto const prop = lookup.val;
 
@@ -1625,6 +1694,7 @@ void ObjectData::setProp(Class* ctx, const StringData* key, Cell val) {
       if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
         throwMutateImmutable(lookup.slot);
       }
+      verifyTypeHint(m_cls, lookup.prop, &val);
       tvSet(val, prop);
     }
     return;
@@ -1679,6 +1749,7 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
         if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
           throwMutateImmutable(lookup.slot);
         }
+        verifyTypeHint(m_cls, lookup.prop, tvAssertCell(&r.val));
         cellDup(tvAssertCell(r.val), prop);
         return prop;
       }
@@ -1687,7 +1758,22 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
       throwMutateImmutable(lookup.slot);
     }
     prop = tvToCell(prop);
-    setopBody(prop, op, val);
+    if (typeHintChecked(lookup.prop)) {
+      /*
+       * If this property has a type-hint, we can't do the setop truely in
+       * place. We need to verify that the new value satisfies the type-hint
+       * before assigning back to the property (if we raise a warning and throw,
+       * we don't want to have already put the value into the prop).
+       */
+      Cell temp;
+      cellDup(*prop, temp);
+      SCOPE_FAIL { tvDecRefGen(&temp); };
+      setopBody(&temp, op, val);
+      verifyTypeHint(m_cls, lookup.prop, &temp);
+      cellMove(temp, prop);
+    } else {
+      setopBody(prop, op, val);
+    }
     return prop;
   }
 
@@ -1771,6 +1857,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
         if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
           throwMutateImmutable(lookup.slot);
         }
+        verifyTypeHint(m_cls, lookup.prop, tvAssertCell(&r.val));
         cellCopy(tvAssertCell(r.val), prop);
         tvWriteNull(r.val); // suppress decref
         return dest;
@@ -1784,7 +1871,34 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
     } else {
       prop = tvToCell(prop);
     }
-    return IncDecBody(op, tvAssertCell(prop));
+
+    /*
+     * If this property has a type-hint, we can't do the inc-dec truely in
+     * place. We need to verify that the new value satisfies the type-hint
+     * before assigning back to the property (if we raise a warning and throw,
+     * we don't want to have already put the value into the prop).
+     *
+     * If the prop is an integer and we're doing the common pre/post inc/dec
+     * ops, we know the type won't change, so we can skip the type-hint check in
+     * that case.
+     */
+    auto const fast = [&]{
+      if (!typeHintChecked(lookup.prop)) return true;
+      if (!isIntType(type(prop))) return false;
+      return
+        op == IncDecOp::PreInc || op == IncDecOp::PostInc ||
+        op == IncDecOp::PreDec || op == IncDecOp::PostDec;
+    }();
+    if (fast) return IncDecBody(op, tvAssertCell(prop));
+
+    Cell temp;
+    cellDup(tvAssertCell(*prop), temp);
+    SCOPE_FAIL { tvDecRefGen(&temp); };
+    auto result = IncDecBody(op, &temp);
+    SCOPE_FAIL { tvDecRefGen(&result); };
+    verifyTypeHint(m_cls, lookup.prop, &temp);
+    tvMove(temp, tvAssertCell(prop));
+    return result;
   }
 
   if (UNLIKELY(!*key->data())) throw_invalid_property_name(StrNR(key));
@@ -1851,6 +1965,7 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
       if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
         throwMutateImmutable(lookup.slot);
       }
+      unsetTypeHint(lookup.prop);
       tvSetIgnoreRef(*uninit_variant.asTypedValue(), prop);
     } else {
       // Dynamic property.
@@ -1948,6 +2063,7 @@ void ObjectData::getProp(const Class* klass,
   Slot propInd = klass->lookupDeclProp(prop->name());
   assertx(propInd != kInvalidSlot);
   const TypedValue* propVal = &propVec()[propInd];
+  assertx(assertTypeHint(klass, propVal, propInd));
 
   if ((!pubOnly || (prop->attrs() & AttrPublic)) &&
       propVal->m_type != KindOfUninit &&

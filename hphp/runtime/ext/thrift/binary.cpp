@@ -493,6 +493,8 @@ void binary_deserialize_spec(const Object& dest, PHPInputTransport& transport,
     if (i == numFields ||
         prop[i].name != fields[i].name ||
         !ttypes_are_compatible(fieldType, fields[i].type)) {
+      // Verify everything we've set so far
+      dest->verifyPropTypeHints(i);
       return binary_deserialize_slow(
         dest, spec, fieldNum, fieldType, transport);
     }
@@ -500,6 +502,8 @@ void binary_deserialize_spec(const Object& dest, PHPInputTransport& transport,
       if (s__type.equal(prop[numFields].name)) {
         tvAsVariant(&objProp[numFields]) = Variant(fieldNum);
       } else {
+        // Verify everything we've set so far
+        dest->verifyPropTypeHints(i);
         return binary_deserialize_slow(
           dest, spec, fieldNum, fieldType, transport);
       }
@@ -509,6 +513,8 @@ void binary_deserialize_spec(const Object& dest, PHPInputTransport& transport,
       binary_deserialize(fieldType, transport, fieldSpec.asArray());
     fieldType = static_cast<TType>(transport.readI8());
   }
+  // Verify everything we've set
+  dest->verifyPropTypeHints();
 }
 
 void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,

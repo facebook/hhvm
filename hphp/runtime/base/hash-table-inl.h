@@ -44,10 +44,10 @@ void HashTableCommon::InitHash(int32_t* hash, uint32_t scale) {
   uint64_t offset = scale * 16;
   __asm__ __volatile__(
     "pcmpeqd    %%xmm0, %%xmm0\n"          // xmm0 <- 11111....
-    ".l%=:\n"
+    ASM_LOCAL_LABEL("%=") ":\n"
     "sub        $0x10, %0\n"
     "movdqu     %%xmm0, (%1, %0)\n"
-    "ja         .l%=\n"
+    "ja         " ASM_LOCAL_LABEL("%=") "\n"
     : "+r"(offset) : "r"(hash) : "xmm0"
   );
 #elif defined(__aarch64__)
@@ -58,10 +58,10 @@ void HashTableCommon::InitHash(int32_t* hash, uint32_t scale) {
   uint64_t ones = -1;
   auto hash2 = hash;
   __asm__ __volatile__(
-    ".l%=:\n"
+    ASM_LOCAL_LABEL("%=") ":\n"
     "stp        %x2, %x2, [%x1], #16\n"
     "subs       %x0, %x0, #16\n"
-    "bhi        .l%=\n"
+    "bhi        " ASM_LOCAL_LABEL("%=") "\n"
     : "+r"(offset), "+r"(hash2) : "r"(ones) : "cc"
   );
 #elif defined(__powerpc__)
@@ -71,10 +71,10 @@ void HashTableCommon::InitHash(int32_t* hash, uint32_t scale) {
   uint64_t offset = scale * 16;
   __asm__ __volatile__(
     "vspltisw   0, -1       \n"
-    ".l%=:                  \n"
+    ASM_LOCAL_LABEL("%=") ":\n"
     "subic.     %0, %0, 0x10\n"
     "stxvd2x    32, %1, %0   \n"
-    "bgt        .l%=        \n"
+    "bgt        " ASM_LOCAL_LABEL("%=") "\n"
     : "+b"(offset) : "b"(hash) : "v0");
 #else
   static_assert(Empty == -1, "Cannot use wordfillones().");

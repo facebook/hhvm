@@ -168,6 +168,10 @@ public:
   template<typename Tag = tag_t>
   with_tag_t<Tag, tv_val<is_const>> drop_tag() const;
 
+  TYPE_SCAN_CUSTOM() {
+    if (isRefcountedType(type())) scanner.scan(val().pcnt);
+  }
+
 private:
   template<bool, typename> friend struct tv_val;
 

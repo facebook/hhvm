@@ -1737,7 +1737,7 @@ inline Variant toVariant(req::ptr<T>&& p) {
 }
 
 template <>
-inline bool is_null(const Variant& v) {
+inline bool ptr_is_null(const Variant& v) {
   return v.isNull();
 }
 

@@ -58,7 +58,6 @@ let ntm_env tcopt =
   NastTanyMapper.{
     map_env_annotation = (fun () -> Tast.empty_saved_env tcopt);
     map_expr_annotation = (fun p -> p, (Reason.Rnone, Tany));
-    map_class_id_annotation = (fun p -> p, (Reason.Rnone, Tany));
   }
 
 (*****************************************************************************)

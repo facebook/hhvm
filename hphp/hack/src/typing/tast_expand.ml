@@ -13,7 +13,6 @@ module T = Tast
 module ExpandedTypeAnnotations = struct
   module ExprAnnotation = T.Annotations.ExprAnnotation
   module EnvAnnotation = Nast.UnitAnnotation
-  module ClassIdAnnotation = T.Annotations.ClassIdAnnotation
 end
 
 module ExpandedTypeAnnotatedAST = Nast.AnnotatedAST(ExpandedTypeAnnotations)
@@ -102,12 +101,9 @@ let expand_ty env ty =
   and exp_where_constraint (ty1, ck, ty2) = (exp_ty ty1, ck, exp_ty ty2) in
   exp_ty ty
 
-let expand_annotation env (pos, ty) = (pos, expand_ty env ty)
-
 let expander = object
   inherit Tast_visitor.endo
-  method! on_expr_annotation = expand_annotation
-  method! on_class_id_annotation = expand_annotation
+  method! on_expr_annotation env (pos, ty) = (pos, expand_ty env ty)
 end
 
 module ExpandAST =
@@ -118,5 +114,4 @@ let expand_program tast =
   let tast = expander#go tast in
   ExpandAST.map_program tast
     ~map_env_annotation:(fun _ -> ())
-    ~map_class_id_annotation:(fun x -> x)
     ~map_expr_annotation:(fun x -> x)

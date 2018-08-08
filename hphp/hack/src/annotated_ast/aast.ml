@@ -17,7 +17,6 @@ end
 module type ASTAnnotationTypes = sig
   module ExprAnnotation : AnnotationType
   module EnvAnnotation : AnnotationType
-  module ClassIdAnnotation : AnnotationType
 end
 
 module AnnotatedAST(Annotations: ASTAnnotationTypes) =
@@ -25,7 +24,6 @@ struct
 
 module ExprAnnotation = Annotations.ExprAnnotation
 module EnvAnnotation = Annotations.EnvAnnotation
-module ClassIdAnnotation = Annotations.ClassIdAnnotation
 
 type program = def list
 [@@deriving
@@ -57,7 +55,6 @@ type program = def list
 
 and expr_annotation = ExprAnnotation.t [@visitors.opaque]
 and env_annotation = EnvAnnotation.t [@visitors.opaque]
-and class_id_annotation = ClassIdAnnotation.t [@visitors.opaque]
 
 and stmt =
   | Unsafe_block of block
@@ -95,7 +92,7 @@ and as_expr =
 and block = stmt list
 
 (* This is not in AST *)
-and class_id = class_id_annotation * class_id_
+and class_id = expr_annotation * class_id_
 and class_id_ =
   | CIparent
   | CIself

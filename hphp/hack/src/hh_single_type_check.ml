@@ -22,7 +22,6 @@ end
 module StringNASTAnnotations = struct
   module ExprAnnotation = StringAnnotation
   module EnvAnnotation = Nast.UnitAnnotation
-  module ClassIdAnnotation = StringAnnotation
 end
 
 module StringNAST = Nast.AnnotatedAST(StringNASTAnnotations)
@@ -893,7 +892,6 @@ let handle_mode
       TASTStringMapper.map_program tast
         ~map_env_annotation:(fun () -> ())
         ~map_expr_annotation:print_pos_and_ty
-        ~map_class_id_annotation:print_pos_and_ty
     in
     let string_ast = stringify_types tast in
     Printf.printf "%s\n" (StringNAST.show_program string_ast)

@@ -119,6 +119,10 @@ let go_ide conn args filename line char new_name =
       char;
       new_name;
     } in
+  let patches = match patches with
+  | Ok patches -> patches
+  | Error message -> failwith message
+  in
   let file_map = List.fold_left patches
     ~f:map_patches_to_filename ~init:SMap.empty in
   if args.output_json

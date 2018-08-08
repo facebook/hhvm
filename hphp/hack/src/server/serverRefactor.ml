@@ -290,19 +290,19 @@ let go_ide (filename, line, char) new_name genv env =
           old_name = function_name;
           new_name;
         } in
-      go command genv env
+      Ok (go command genv env)
     | Enum, [enum_name] ->
       let command =
         ServerRefactorTypes.ClassRename (enum_name, new_name) in
-      go command genv env
+      Ok (go command genv env)
     | Class, [class_name] ->
       let command =
         ServerRefactorTypes.ClassRename (class_name, new_name) in
-      go command genv env
+      Ok (go command genv env)
     | Const, [class_name; const_name] ->
       let command =
         ServerRefactorTypes.ClassConstRename (class_name, const_name, new_name) in
-      go command genv env
+      Ok (go command genv env)
     | Method, [class_name; method_name] ->
       let command =
         ServerRefactorTypes.MethodRename {
@@ -312,7 +312,7 @@ let go_ide (filename, line, char) new_name genv env =
           old_name = method_name;
           new_name;
         } in
-      go command genv env
+      Ok (go command genv env)
     | LocalVar, _ ->
       let command =
         ServerRefactorTypes.LocalVarRename {
@@ -322,6 +322,8 @@ let go_ide (filename, line, char) new_name genv env =
           char;
           new_name = maybe_add_dollar new_name;
         } in
-      go command genv env
-    | _, _ -> [] end
-  | _ -> [] (* We have 0 or >1 definitions so correct behavior is unknown *)
+      Ok (go command genv env)
+    | _, _ -> Error "Tried to rename a non-renameable symbol"
+    end
+    (* We have 0 or >1 definitions so correct behavior is unknown *)
+  | _ -> Error "Tried to rename a non-renameable symbol"

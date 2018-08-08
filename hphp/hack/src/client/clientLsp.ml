@@ -1317,7 +1317,10 @@ let do_documentRename
     ServerCommandTypes.IDE_REFACTOR
       { ServerCommandTypes.Ide_refactor_type.filename; line; char; new_name } in
   let patches =
-    rpc conn ref_unblocked_time command
+    rpc conn ref_unblocked_time command in
+  let patches = match patches with
+  | Ok patches -> patches
+  | Error message -> raise (Error.InvalidRequest message)
   in
   patches_to_workspace_edit patches
 

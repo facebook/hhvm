@@ -1,0 +1,1 @@
+Fatal error: <<__LateInit>> property 'A::$x1' cannot have an initial value in %s/no-initial2.php on line 5

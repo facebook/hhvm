@@ -89,6 +89,8 @@ struct PropInfo {
   explicit PropInfo(int offset,
                     Slot slot,
                     bool immutable,
+                    bool lateInit,
+                    bool lateInitCheck,
                     Type knownType,
                     const HPHP::TypeConstraint* typeConstraint,
                     const Class* objClass,
@@ -96,6 +98,8 @@ struct PropInfo {
     : offset{offset}
     , slot{slot}
     , immutable{immutable}
+    , lateInit{lateInit}
+    , lateInitCheck{lateInitCheck}
     , knownType{std::move(knownType)}
     , typeConstraint{typeConstraint}
     , objClass{objClass}
@@ -105,6 +109,8 @@ struct PropInfo {
   int offset{-1};
   Slot slot{kInvalidSlot};
   bool immutable{false};
+  bool lateInit{false};
+  bool lateInitCheck{false};
   Type knownType{TGen};
   const HPHP::TypeConstraint* typeConstraint{nullptr};
   const Class* objClass{nullptr};
@@ -113,13 +119,26 @@ struct PropInfo {
 
 Type knownTypeForProp(const Class::Prop& prop,
                       const Class* propCls,
-                      const Class* ctx) {
-  return [&]{
-    if (RuntimeOption::EvalCheckPropTypeHints < 3) return TGen;
-    auto knownTy = typeFromPropTC(prop.typeConstraint, propCls, ctx, false);
-    if (!(prop.attrs & AttrNoImplicitNullable)) knownTy |= TInitNull;
-    return knownTy;
-  }() & typeFromRAT(prop.repoAuthType, ctx);
+                      const Class* ctx,
+                      bool ignoreLateInit) {
+  auto knownType = TGen;
+  if (RuntimeOption::EvalCheckPropTypeHints >= 3) {
+    knownType = typeFromPropTC(prop.typeConstraint, propCls, ctx, false);
+    if (!(prop.attrs & AttrNoImplicitNullable)) knownType |= TInitNull;
+  }
+  knownType &= typeFromRAT(prop.repoAuthType, ctx);
+  // Repo-auth-type doesn't include uninit for AttrLateInit props, so we need to
+  // add it after intersecting with it.
+  if (prop.attrs & AttrLateInit) {
+    // If we're ignoring AttrLateInit, the prop might be uninit, but if we're
+    // validating it, we'll never see uninit, so remove it.
+    if (ignoreLateInit) {
+      knownType |= TUninit;
+    } else {
+      knownType -= TUninit;
+    }
+  }
+  return knownType;
 }
 
 /*
@@ -128,7 +147,10 @@ Type knownTypeForProp(const Class::Prop& prop,
  * Class* can change (which happens in sandbox mode when the ctx class is
  * unrelated to baseClass).
  */
-PropInfo getPropertyOffset(IRGS& env, const Class* baseClass, Type keyType) {
+PropInfo getPropertyOffset(IRGS& env,
+                           const Class* baseClass,
+                           Type keyType,
+                           bool ignoreLateInit) {
   if (!baseClass) return PropInfo();
 
   if (!keyType.hasConstVal(TStr)) return PropInfo();
@@ -170,7 +192,9 @@ PropInfo getPropertyOffset(IRGS& env, const Class* baseClass, Type keyType) {
     baseClass->declPropOffset(idx),
     idx,
     prop.attrs & AttrIsImmutable,
-    knownTypeForProp(prop, baseClass, ctx),
+    prop.attrs & AttrLateInit,
+    (prop.attrs & AttrLateInit) && !ignoreLateInit,
+    knownTypeForProp(prop, baseClass, ctx, ignoreLateInit),
     &prop.typeConstraint,
     baseClass,
     prop.cls
@@ -201,7 +225,7 @@ bool prop_ignores_tvref(IRGS& env, SSATmp* base, const SSATmp* key) {
       isDeclared = true;
       auto const& prop = cls->declProperties()[lookup.slot];
       propClass = prop.cls;
-      propType = knownTypeForProp(prop, cls, curClass(env));
+      propType = knownTypeForProp(prop, cls, curClass(env), true);
     }
   }
 
@@ -365,7 +389,7 @@ void specializeObjBase(IRGS& env, SSATmp* base) {
 // Intermediate ops
 
 PropInfo getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType,
-                                  bool constrain) {
+                                  bool constrain, bool ignoreLateInit) {
   // We allow the use of clases from nullable objects because
   // emitPropSpecialized() explicitly checks for null (when needed) before
   // doing the property access.
@@ -373,7 +397,7 @@ PropInfo getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType,
   if (!(baseType < (TObj | TInitNull) && baseType.clsSpec())) return PropInfo{};
 
   auto const baseCls = baseType.clsSpec().cls();
-  auto const info = getPropertyOffset(env, baseCls, keyType);
+  auto const info = getPropertyOffset(env, baseCls, keyType, ignoreLateInit);
   if (info.offset == -1) return info;
 
   if (env.irb->constrainValue(
@@ -449,6 +473,49 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
   auto const initNull = ptrToInitNull(env);
   auto const baseType = base->type();
 
+  auto const getAddr = [&] (SSATmp* obj) {
+    if (!propInfo.lateInitCheck) {
+      assertx(!propInfo.lateInit || mode == MOpMode::Define);
+      auto const addr = gen(
+        env,
+        LdPropAddr,
+        ByteOffsetData { propInfo.offset },
+        propInfo.knownType.lval(Ptr::Prop),
+        obj
+      );
+      return !propInfo.lateInit
+        ? checkInitProp(env, obj, addr, key, doWarn, doDefine)
+        : addr;
+    }
+
+    assertx(propInfo.lateInit);
+    return cond(
+      env,
+      [&] (Block* taken) {
+        return gen(
+          env,
+          LdInitPropAddr,
+          ByteOffsetData { propInfo.offset },
+          taken,
+          propInfo.knownType.lval(Ptr::Prop),
+          obj
+        );
+      },
+      [&] (SSATmp* addr) { return addr; },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        gen(
+          env,
+          ThrowLateInitPropError,
+          cns(env, propInfo.propClass),
+          key,
+          cns(env, false)
+        );
+        return cns(env, TBottom);
+      }
+    );
+  };
+
   /*
    * Normal case, where the base is an object (and not a pointer to
    * something)---just do a lea with the type information we got from static
@@ -456,15 +523,8 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
    * avoid a generic incref, unbox, etc.
    */
   if (baseType <= TObj) {
-    auto const propAddr = gen(
-      env,
-      LdPropAddr,
-      ByteOffsetData { propInfo.offset },
-      propInfo.knownType.lval(Ptr::Prop),
-      base
-    );
     return {
-      checkInitProp(env, base, propAddr, key, doWarn, doDefine),
+      getAddr(base),
       mode == MOpMode::Define ? base : nullptr
     };
   }
@@ -489,14 +549,7 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
     [&] {
       // Next: Base is an object. Load property and check for uninit.
       obj = gen(env, LdMem, baseType.deref() & TObj, base);
-      auto const propAddr = gen(
-        env,
-        LdPropAddr,
-        ByteOffsetData { propInfo.offset },
-        propInfo.knownType.lval(Ptr::Prop),
-        obj
-      );
-      return checkInitProp(env, obj, propAddr, key, doWarn, doDefine);
+      return getAddr(obj);
     },
     [&] { // Taken: Base is Null. Raise warnings/errors and return InitNull.
       hint(env, Block::Hint::Unlikely);
@@ -924,7 +977,8 @@ void emitVectorSet(IRGS& env, SSATmp* base, SSATmp* key, SSATmp* value) {
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
-  auto const propInfo = getCurrentPropertyOffset(env, base, key->type(), false);
+  auto const propInfo =
+    getCurrentPropertyOffset(env, base, key->type(), false, false);
 
   if (RuntimeOption::RepoAuthoritative &&
       propInfo.offset != -1 &&
@@ -1226,7 +1280,7 @@ void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
 void baseSImpl(IRGS& env, SSATmp* name, uint32_t clsRefSlot, MOpMode mode) {
   if (!name->isA(TStr)) PUNT(BaseS-non-string-name);
   auto const cls = takeClsRef(env, clsRefSlot);
-  auto const spropPtr = ldClsPropAddr(env, cls, name, true).propPtr;
+  auto const spropPtr = ldClsPropAddr(env, cls, name, true, false).propPtr;
   stMBase(env, spropPtr);
   setClsMIPropState(env, spropPtr, mode, cls, name);
 }
@@ -1352,7 +1406,8 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe) {
 
   auto const base = extractBaseIfObj(env);
 
-  auto const propInfo = getCurrentPropertyOffset(env, base, key->type(), true);
+  auto const propInfo =
+    getCurrentPropertyOffset(env, base, key->type(), true, false);
   if (propInfo.offset == -1 ||
       propInfo.immutable ||
       mode == MOpMode::Unset ||
@@ -1596,7 +1651,8 @@ void mFinalImpl(IRGS& env, int32_t nDiscard, SSATmp* result) {
 
 SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
                      MOpMode mode, bool nullsafe) {
-  auto const propInfo = getCurrentPropertyOffset(env, base, key->type(), true);
+  auto const propInfo =
+    getCurrentPropertyOffset(env, base, key->type(), true, false);
 
   if (propInfo.offset != -1 &&
       !mightCallMagicPropMethod(MOpMode::None, propInfo)) {
@@ -1669,7 +1725,8 @@ SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
   auto const base = extractBaseIfObj(env);
 
   auto const mode = MOpMode::Define;
-  auto const propInfo = getCurrentPropertyOffset(env, base, key->type(), true);
+  auto const propInfo =
+    getCurrentPropertyOffset(env, base, key->type(), true, true);
 
   if (propInfo.offset != -1 &&
       !propInfo.immutable &&
@@ -2272,7 +2329,8 @@ SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
 
 SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
                       SSATmp* key, SSATmp* rhs) {
-  auto const propInfo = getCurrentPropertyOffset(env, base, key->type(), false);
+  auto const propInfo =
+    getCurrentPropertyOffset(env, base, key->type(), false, false);
 
   if (propInfo.offset != -1 &&
       !propInfo.immutable &&

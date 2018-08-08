@@ -3278,11 +3278,13 @@ PublicSPropEntry lookup_public_static_impl(
     return noInfo;
   }
 
+  const ClassInfo* knownCInfo = nullptr;
   auto const knownClsPart = visit_public_statics(
     cinfo,
     [&] (const ClassInfo* ci) -> const PublicSPropEntry* {
       auto const it = ci->publicStaticProps.find(prop);
       if (it != end(ci->publicStaticProps)) {
+        knownCInfo = ci;
         return &it->second;
       }
       return nullptr;
@@ -3301,8 +3303,16 @@ PublicSPropEntry lookup_public_static_impl(
     return noInfo;
   }
 
+  auto const maybeLateInit = [&]{
+    if (!knownCInfo) return true;
+    for (auto const& cprop : knownCInfo->cls->properties) {
+      if (cprop.name == prop) return bool(cprop.attrs & AttrLateInit);
+    }
+    return true;
+  };
+
   always_assert_flog(
-    !knownClsPart->inferredType.subtypeOf(BBottom),
+    !knownClsPart->inferredType.subtypeOf(BBottom) || maybeLateInit(),
     "A public static property had type TBottom; probably "
     "was marked uninit but didn't show up in the class 86sinit."
   );
@@ -3694,8 +3704,12 @@ void Index::rewrite_default_initial_values(php::Program& program) const {
           inState->erase(prop.name);
           continue;
         }
-        // Ignore properties which have actual user provided initial values
-        if (!(prop.attrs & AttrSystemInitialValue)) continue;
+        // Ignore properties which have actual user provided initial values or
+        // are LateInit.
+        if (!(prop.attrs & AttrSystemInitialValue) ||
+            (prop.attrs & AttrLateInit)) {
+          continue;
+        }
         // Forced to be null, nothing to do
         if (inState->count(prop.name) > 0) continue;
 
@@ -3742,7 +3756,10 @@ void Index::rewrite_default_initial_values(php::Program& program) const {
           (!out || out->count(prop.name) > 0);
         attribute_setter(prop.attrs, !nullable, AttrNoImplicitNullable);
         if (!(prop.attrs & AttrSystemInitialValue)) continue;
-        assertx(prop.val.m_type != KindOfUninit);
+        if (prop.val.m_type == KindOfUninit) {
+          assertx(prop.attrs & AttrLateInit);
+          continue;
+        }
         prop.val = nullable
           ? make_tv<KindOfNull>()
           : prop.typeConstraint.defaultValue();
@@ -4889,6 +4906,43 @@ void Index::fixup_public_static(const php::Class* cls,
   }
 }
 
+bool Index::lookup_public_static_maybe_late_init(const Type& cls,
+                                                 const Type& name) const {
+  auto const cinfo = [&] () -> const ClassInfo* {
+    if (!is_specialized_cls(cls)) {
+      return nullptr;
+    }
+    auto const dcls = dcls_of(cls);
+    switch (dcls.type) {
+    case DCls::Sub:   return nullptr;
+    case DCls::Exact: return dcls.cls.val.right();
+    }
+    not_reached();
+  }();
+  if (!cinfo) return true;
+
+  auto const vname = tv(name);
+  if (!vname || (vname && vname->m_type != KindOfPersistentString)) {
+    return true;
+  }
+  auto const sname = vname->m_data.pstr;
+
+  auto isLateInit = false;
+  visit_public_statics(
+    cinfo,
+    [&] (const ClassInfo* ci) -> bool {
+      for (auto const& prop : ci->cls->properties) {
+        if (prop.name == sname) {
+          isLateInit = prop.attrs & AttrLateInit;
+          return true;
+        }
+      }
+      return false;
+    }
+  );
+  return isLateInit;
+}
+
 bool Index::lookup_class_init_might_raise(Context ctx, res::Class cls) const {
   return cls.val.match(
     []  (SString) { return true; },
@@ -4937,9 +4991,10 @@ void Index::init_public_static_prop_types() {
 
       /*
        * If the initializer type is TUninit, it means an 86sinit provides the
-       * actual initialization type.  So we don't want to include the Uninit
-       * (which isn't really a user-visible type for the property) or by the
-       * time we union things in we'll have inferred nothing much.
+       * actual initialization type or it is AttrLateInit.  So we don't want to
+       * include the Uninit (which isn't really a user-visible type for the
+       * property) or by the time we union things in we'll have inferred nothing
+       * much.
        */
       auto const tyRaw = from_cell(prop.val);
       auto const ty = tyRaw.subtypeOf(BUninit) ? TBottom : tyRaw;

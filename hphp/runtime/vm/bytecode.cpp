@@ -1851,11 +1851,14 @@ static inline void lookup_sprop(ActRec* fp,
                                 TypedValue*& val,
                                 Slot& slot,
                                 bool& visible,
-                                bool& accessible) {
+                                bool& accessible,
+                                bool ignoreLateInit) {
   name = lookup_name(key);
   auto const ctx = arGetContextClass(fp);
 
-  auto const lookup = cls->getSProp(ctx, name);
+  auto const lookup = ignoreLateInit
+    ? cls->getSPropIgnoreLateInit(ctx, name)
+    : cls->getSProp(ctx, name);
 
   val = lookup.val;
   slot = lookup.slot;
@@ -3395,7 +3398,7 @@ OPTBLD_INLINE void iopCGetG() { cgetg_body(true); }
 OPTBLD_INLINE void iopCGetQuietG() { cgetg_body(false); }
 
 struct SpropState {
-  SpropState(Stack&, clsref_slot slot);
+  SpropState(Stack&, clsref_slot slot, bool ignoreLateInit);
   ~SpropState();
   StringData* name;
   Class* cls;
@@ -3407,10 +3410,11 @@ struct SpropState {
   bool accessible;
 };
 
-SpropState::SpropState(Stack& vmstack, clsref_slot cslot) {
+SpropState::SpropState(Stack& vmstack, clsref_slot cslot, bool ignoreLateInit) {
   cls = cslot.take();
   auto nameCell = output = vmstack.topTV();
-  lookup_sprop(vmfp(), cls, name, nameCell, val, slot, visible, accessible);
+  lookup_sprop(vmfp(), cls, name, nameCell, val,
+               slot, visible, accessible, ignoreLateInit);
   oldNameCell = *nameCell;
 }
 
@@ -3420,7 +3424,7 @@ SpropState::~SpropState() {
 }
 
 template<bool box> void getS(clsref_slot slot) {
-  SpropState ss(vmStack(), slot);
+  SpropState ss(vmStack(), slot, false);
   if (!(ss.visible && ss.accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 ss.cls->name()->data(),
@@ -4238,7 +4242,7 @@ OPTBLD_INLINE void iopIssetG() {
 }
 
 OPTBLD_INLINE void iopIssetS(clsref_slot slot) {
-  SpropState ss(vmStack(), slot);
+  SpropState ss(vmStack(), slot, true);
   bool e;
   if (!(ss.visible && ss.accessible)) {
     e = false;
@@ -4413,7 +4417,7 @@ OPTBLD_INLINE void iopEmptyG() {
 }
 
 OPTBLD_INLINE void iopEmptyS(clsref_slot slot) {
-  SpropState ss(vmStack(), slot);
+  SpropState ss(vmStack(), slot, true);
   bool e;
   if (!(ss.visible && ss.accessible)) {
     e = true;
@@ -4550,7 +4554,7 @@ OPTBLD_INLINE void iopSetS(clsref_slot cslot) {
   TypedValue* val;
   bool visible, accessible;
   Slot slot;
-  lookup_sprop(vmfp(), cls, name, propn, val, slot, visible, accessible);
+  lookup_sprop(vmfp(), cls, name, propn, val, slot, visible, accessible, true);
   SCOPE_EXIT { decRefStr(name); };
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",
@@ -4617,7 +4621,7 @@ OPTBLD_INLINE void iopSetOpS(SetOpOp op, clsref_slot cslot) {
   TypedValue* val;
   bool visible, accessible;
   Slot slot;
-  lookup_sprop(vmfp(), cls, name, propn, val, slot, visible, accessible);
+  lookup_sprop(vmfp(), cls, name, propn, val, slot, visible, accessible, false);
   SCOPE_EXIT { decRefStr(name); };
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",
@@ -4695,7 +4699,7 @@ OPTBLD_INLINE void iopIncDecG(IncDecOp op) {
 }
 
 OPTBLD_INLINE void iopIncDecS(IncDecOp op, clsref_slot slot) {
-  SpropState ss(vmStack(), slot);
+  SpropState ss(vmStack(), slot, false);
   if (!(ss.visible && ss.accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 ss.cls->name()->data(),
@@ -4768,7 +4772,7 @@ OPTBLD_INLINE void iopBindS(clsref_slot cslot) {
   TypedValue* val;
   bool visible, accessible;
   Slot slot;
-  lookup_sprop(vmfp(), cls, name, propn, val, slot, visible, accessible);
+  lookup_sprop(vmfp(), cls, name, propn, val, slot, visible, accessible, false);
   SCOPE_EXIT { decRefStr(name); };
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",

@@ -137,20 +137,25 @@ void unsetTypeHint(const Class::Prop* prop) {
 bool assertTypeHint(const Class* cls, tv_rval prop, Slot propIdx) {
   assertx(tvIsPlausible(*prop));
   assertx(propIdx < cls->numDeclProperties());
+  auto const& propDecl = cls->declProperties()[propIdx];
 
   if (debug && RuntimeOption::RepoAuthoritative) {
-    auto const repoTy = cls->declPropRepoAuthType(propIdx);
-    always_assert(tvMatchesRepoAuthType(*prop, repoTy));
+    // The fact that uninitialized LateInit props are uninint isn't
+    // reflected in the repo-auth-type.
+    if (prop.type() != KindOfUninit || !(propDecl.attrs & AttrLateInit)) {
+      always_assert(tvMatchesRepoAuthType(*prop, propDecl.repoAuthType));
+    }
   }
 
   // If we're not hard enforcing, then the prop might contain anything.
   if (RuntimeOption::EvalCheckPropTypeHints <= 2) return true;
-  auto const& propDecl = cls->declProperties()[propIdx];
   return
     !propDecl.typeConstraint.isCheckable() ||
     propDecl.typeConstraint.isSoft() ||
     (!(propDecl.attrs & AttrNoImplicitNullable)
      && prop.type() == KindOfNull) ||
+    ((propDecl.attrs & AttrLateInit) &&
+     prop.type() == KindOfUninit) ||
     (prop.type() != KindOfRef &&
      prop.type() != KindOfUninit &&
      propDecl.typeConstraint.assertCheck(prop));
@@ -461,9 +466,14 @@ Variant ObjectData::o_get(const String& propName, bool error /* = true */,
   // there is no magic __get, propImpl will raise_error("Cannot access ...",
   // but o_get will only (maybe) raise_notice("Undefined property ..." :-(
 
-  auto const prop = getProp(ctx, propName.get());
-  if (prop && prop.type() != KindOfUninit) {
-    return Variant::wrap(tvToCell(prop.tv()));
+  auto const lookup = getPropImpl<false, true, true>(ctx, propName.get());
+  if (lookup.val && lookup.accessible) {
+    if (lookup.val.type() != KindOfUninit) {
+      return Variant::wrap(tvToCell(lookup.val.tv()));
+    } else if (lookup.prop && (lookup.prop->attrs & AttrLateInit)) {
+      if (error) throw_late_init_prop(lookup.prop->cls, propName.get(), false);
+      return uninit_null();
+    }
   }
 
   if (m_cls->rtAttribute(Class::UseGet)) {
@@ -501,12 +511,12 @@ void ObjectData::o_set(const String& propName, const Variant& v,
   // invoke __set and fail due to recursion, setProp will fall back to writing
   // the property normally, but o_set will just skip writing and return :-(
 
-  bool useSet = m_cls->rtAttribute(Class::UseSet);
-
-  auto const lookup = getPropImpl<true, false>(ctx, propName.get());
+  auto const useSet = m_cls->rtAttribute(Class::UseSet);
+  auto const lookup = getPropImpl<true, false, true>(ctx, propName.get());
   auto prop = lookup.val;
   if (prop && lookup.accessible) {
-    if (!useSet || type(prop) != KindOfUninit) {
+    if (!useSet || type(prop) != KindOfUninit ||
+        (lookup.prop && (lookup.prop->attrs & AttrLateInit))) {
       if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
         throwMutateImmutable(lookup.slot);
       }
@@ -551,7 +561,9 @@ void ObjectData::o_setArray(const Array& properties) {
   }
 }
 
-void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
+void ObjectData::o_getArray(Array& props,
+                            bool pubOnly /* = false */,
+                            bool ignoreLateInit /* = false */) const {
   assertx(kindIsValid());
 
   // Fast path for classes with no declared properties
@@ -578,9 +590,10 @@ void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
   // Iterate over declared properties and insert {mangled name --> prop} pairs.
   const Class* cls = m_cls;
   do {
-    getProps(cls, pubOnly, cls->preClass(), props, inserted);
+    getProps(cls, pubOnly, ignoreLateInit, cls->preClass(), props, inserted);
     for (auto const& traitCls : cls->usedTraitClasses()) {
-      getTraitProps(cls, pubOnly, traitCls.get(), props, inserted);
+      getTraitProps(cls, pubOnly, ignoreLateInit,
+                    traitCls.get(), props, inserted);
     }
     cls = cls->parent();
   } while (cls);
@@ -604,7 +617,8 @@ const int64_t ARRAYOBJ_STD_PROP_LIST = 1;
 
 const StaticString s_flags("flags");
 
-Array ObjectData::toArray(bool pubOnly /* = false */) const {
+Array ObjectData::toArray(bool pubOnly /* = false */,
+                          bool ignoreLateInit /* = false */) const {
   assertx(kindIsValid());
 
   // We can quickly tell if this object is a collection, which lets us avoid
@@ -623,7 +637,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */) const {
     if (UNLIKELY(flags.type() == KindOfInt64 &&
                  flags.val().num == ARRAYOBJ_STD_PROP_LIST)) {
       auto ret = Array::Create();
-      o_getArray(ret, true);
+      o_getArray(ret, true, ignoreLateInit);
       return ret;
     }
     return convert_to_array(this, SystemLib::s_ArrayObjectClass);
@@ -635,7 +649,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */) const {
     return Native::data<DateTimeData>(this)->getDebugInfo();
   } else {
     auto ret = Array::Create();
-    o_getArray(ret, pubOnly);
+    o_getArray(ret, pubOnly, ignoreLateInit);
     return ret;
   }
 }
@@ -1200,7 +1214,7 @@ void ObjectData::throwBindImmutable(Slot prop) const {
   );
 }
 
-template <bool forWrite, bool forRead>
+template <bool forWrite, bool forRead, bool ignoreLateInit>
 ALWAYS_INLINE
 ObjectData::PropLookup ObjectData::getPropImpl(
   const Class* ctx,
@@ -1215,17 +1229,25 @@ ObjectData::PropLookup ObjectData::getPropImpl(
     auto const prop = &propVec()[propIdx];
     assertx(assertTypeHint(m_cls, prop, propIdx));
 
+    auto const& declProp = m_cls->declProperties()[propIdx];
+    if (!ignoreLateInit && lookup.accessible) {
+      if (UNLIKELY(prop->m_type == KindOfUninit) &&
+          (declProp.attrs & AttrLateInit)) {
+        throw_late_init_prop(declProp.cls, key, false);
+      }
+    }
+
     return {
      const_cast<TypedValue*>(prop),
-     &m_cls->declProperties()[propIdx],
+     &declProp,
      propIdx,
      lookup.accessible,
      // we always return true in the !forWrite case; this way the compiler
      // may optimize away this value, and if a caller intends to write but
      // instantiates with false by mistake it will always see immutable
      forWrite
-       ? bool(m_cls->declProperties()[propIdx].attrs & AttrIsImmutable)
-       : true,
+       ? bool(declProp.attrs & AttrIsImmutable)
+       : true
     };
   }
 
@@ -1252,7 +1274,7 @@ ObjectData::PropLookup ObjectData::getPropImpl(
 }
 
 tv_lval ObjectData::getPropLval(const Class* ctx, const StringData* key) {
-  auto const lookup = getPropImpl<true, false>(ctx, key);
+  auto const lookup = getPropImpl<true, false, true>(ctx, key);
   if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
     throwMutateImmutable(lookup.slot);
   }
@@ -1261,12 +1283,12 @@ tv_lval ObjectData::getPropLval(const Class* ctx, const StringData* key) {
 
 tv_rval ObjectData::getProp(const Class* ctx, const StringData* key) const {
   auto const lookup = const_cast<ObjectData*>(this)
-    ->getPropImpl<false, true>(ctx, key);
+    ->getPropImpl<false, true, false>(ctx, key);
   return lookup.val && lookup.accessible ? lookup.val : nullptr;
 }
 
 tv_lval ObjectData::vGetProp(const Class* ctx, const StringData* key) {
-  auto const lookup = getPropImpl<true, true>(ctx, key);
+  auto const lookup = getPropImpl<true, true, false>(ctx, key);
   auto prop = lookup.val;
   if (UNLIKELY(lookup.immutable)) throwBindImmutable(lookup.slot);
   if (lookup.accessible && prop && type(prop) != KindOfUninit) {
@@ -1278,13 +1300,17 @@ tv_lval ObjectData::vGetProp(const Class* ctx, const StringData* key) {
 }
 
 tv_lval ObjectData::vGetPropIgnoreAccessibility(const StringData* key) {
-  auto const lookup = getPropImpl<true, true>(nullptr, key);
+  auto const lookup = getPropImpl<true, true, true>(nullptr, key);
   auto prop = lookup.val;
   if (UNLIKELY(lookup.immutable)) throwBindImmutable(lookup.slot);
-  if (prop && type(prop) != KindOfUninit) {
-    boxingTypeHint(lookup.prop);
-    tvBoxIfNeeded(prop);
-    return prop;
+  if (prop) {
+    if (type(prop) != KindOfUninit) {
+      boxingTypeHint(lookup.prop);
+      tvBoxIfNeeded(prop);
+      return prop;
+    } else if (lookup.prop && (lookup.prop->attrs & AttrLateInit)) {
+      throw_late_init_prop(lookup.prop->cls, key, false);
+    }
   }
   return tv_lval{};
 }
@@ -1480,7 +1506,7 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
                          (mode == PropMode::Bind);
   auto constexpr read = (mode == PropMode::ReadNoWarn) ||
                         (mode == PropMode::ReadWarn);
-  auto const lookup = getPropImpl<write, read>(ctx, key);
+  auto const lookup = getPropImpl<write, read, false>(ctx, key);
   auto const prop = lookup.val;
 
   if (prop) {
@@ -1614,9 +1640,14 @@ tv_lval ObjectData::propB(
 }
 
 bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
-  auto const prop = getProp(ctx, key);
-  if (prop && prop.type() != KindOfUninit) {
-    return prop.unboxed().type() != KindOfNull;
+  auto const lookup = getPropImpl<false, true, true>(ctx, key);
+  if (lookup.val && lookup.accessible) {
+    if (lookup.val.type() != KindOfUninit) {
+      return lookup.val.unboxed().type() != KindOfNull;
+    }
+    if (lookup.prop && (lookup.prop->attrs & AttrLateInit)) {
+      return false;
+    }
   }
 
   if (m_cls->rtAttribute(Class::HasNativePropHandler)) {
@@ -1634,9 +1665,14 @@ bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
 }
 
 bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
-  auto const prop = getProp(ctx, key);
-  if (prop && prop.type() != KindOfUninit) {
-    return !cellToBool(prop.unboxed().tv());
+  auto const lookup = getPropImpl<false, true, true>(ctx, key);
+  if (lookup.val && lookup.accessible) {
+    if (lookup.val.type() != KindOfUninit) {
+      return !cellToBool(lookup.val.unboxed().tv());
+    }
+    if (lookup.prop && (lookup.prop->attrs & AttrLateInit)) {
+      return true;
+    }
   }
 
   if (m_cls->rtAttribute(Class::HasNativePropHandler)) {
@@ -1684,12 +1720,13 @@ void ObjectData::setProp(Class* ctx, const StringData* key, Cell val) {
   assertx(cellIsPlausible(val));
   assertx(val.m_type != KindOfUninit);
 
-  auto const lookup = getPropImpl<true, false>(ctx, key);
+  auto const lookup = getPropImpl<true, false, true>(ctx, key);
   auto const prop = lookup.val;
 
   if (prop && lookup.accessible) {
     if (type(prop) != KindOfUninit ||
         !m_cls->rtAttribute(Class::UseSet) ||
+        (lookup.prop && (lookup.prop->attrs & AttrLateInit)) ||
         !invokeSet(key, val)) {
       if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
         throwMutateImmutable(lookup.slot);
@@ -1729,7 +1766,7 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
                               SetOpOp op,
                               const StringData* key,
                               Cell* val) {
-  auto const lookup = getPropImpl<true, true>(ctx, key);
+  auto const lookup = getPropImpl<true, true, false>(ctx, key);
   auto prop = lookup.val;
 
   if (prop && lookup.accessible) {
@@ -1841,7 +1878,7 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
 }
 
 Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
-  auto const lookup = getPropImpl<true, true>(ctx, key);
+  auto const lookup = getPropImpl<true, true, false>(ctx, key);
   auto prop = lookup.val;
 
   if (prop && lookup.accessible) {
@@ -1956,10 +1993,12 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
 }
 
 void ObjectData::unsetProp(Class* ctx, const StringData* key) {
-  auto const lookup = getPropImpl<true, false>(ctx, key);
+  auto const lookup = getPropImpl<true, false, true>(ctx, key);
   auto const prop = lookup.val;
 
-  if (prop && lookup.accessible && type(prop) != KindOfUninit) {
+  if (prop && lookup.accessible &&
+      (type(prop) != KindOfUninit ||
+       (lookup.prop && (lookup.prop->attrs & AttrLateInit)))) {
     if (lookup.slot != kInvalidSlot) {
       // Declared property.
       if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
@@ -2049,6 +2088,7 @@ void ObjectData::raiseReadDynamicProp(const StringData* key) const {
 
 void ObjectData::getProp(const Class* klass,
                          bool pubOnly,
+                         bool ignoreLateInit,
                          const PreClass::Prop* prop,
                          Array& props,
                          std::vector<bool>& inserted) const {
@@ -2065,6 +2105,11 @@ void ObjectData::getProp(const Class* klass,
   const TypedValue* propVal = &propVec()[propInd];
   assertx(assertTypeHint(klass, propVal, propInd));
 
+  if (UNLIKELY(propVal->m_type == KindOfUninit) &&
+      (prop->attrs() & AttrLateInit) && !ignoreLateInit) {
+    throw_late_init_prop(klass, prop->name(), false);
+  }
+
   if ((!pubOnly || (prop->attrs() & AttrPublic)) &&
       propVal->m_type != KindOfUninit &&
       !inserted[propInd]) {
@@ -2075,27 +2120,32 @@ void ObjectData::getProp(const Class* klass,
   }
 }
 
-void ObjectData::getProps(const Class* klass, bool pubOnly,
+void ObjectData::getProps(const Class* klass,
+                          bool pubOnly,
+                          bool ignoreLateInit,
                           const PreClass* pc,
                           Array& props,
                           std::vector<bool>& inserted) const {
   PreClass::Prop const* propVec = pc->properties();
   size_t count = pc->numProperties();
   for (size_t i = 0; i < count; ++i) {
-    getProp(klass, pubOnly, &propVec[i], props, inserted);
+    getProp(klass, pubOnly, ignoreLateInit, &propVec[i], props, inserted);
   }
 }
 
-void ObjectData::getTraitProps(const Class* klass, bool pubOnly,
+void ObjectData::getTraitProps(const Class* klass,
+                               bool pubOnly, bool ignoreLateInit,
                                const Class* trait, Array& props,
                                std::vector<bool>& inserted) const {
   assertx(isNormalClass(klass));
   assertx(isTrait(trait));
 
-  getProps(klass, pubOnly, trait->preClass(), props, inserted);
+  getProps(klass, pubOnly, ignoreLateInit, trait->preClass(), props, inserted);
   for (auto const& traitCls : trait->usedTraitClasses()) {
-    getProps(klass, pubOnly, traitCls->preClass(), props, inserted);
-    getTraitProps(klass, pubOnly, traitCls.get(), props, inserted);
+    getProps(klass, pubOnly, ignoreLateInit, traitCls->preClass(),
+             props, inserted);
+    getTraitProps(klass, pubOnly, ignoreLateInit, traitCls.get(),
+                  props, inserted);
   }
 }
 

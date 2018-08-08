@@ -107,6 +107,16 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
       objProp = objPropVec + i;
     }
 
+    if (UNLIKELY(objProp->m_type == KindOfUninit) && (attrs & AttrLateInit)) {
+      auto const origI = i;
+      while (i > 0) {
+        --i;
+        apcPropVec[i]->unreferenceRoot();
+      }
+      apc_sized_free(apcObj, size);
+      throw_late_init_prop(propInfo[origI].cls, propInfo[origI].name, false);
+    }
+
     auto val = APCHandle::Create(tvAsCVarRef(objProp), false,
                                  APCHandleLevel::Inner, true);
     size += val.size;

@@ -447,10 +447,10 @@ static CallMap s_callMap {
     /* Static prop helpers */
     {LdClsPropAddrOrNull,
                          getSPropOrNull, DSSA, SSync,
-                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
     {LdClsPropAddrOrRaise,
                          getSPropOrRaise, DSSA, SSync,
-                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
 
     /* Global helpers */
     {LdGblAddrDef,       ldGblAddrDefHelper, DSSA, SNone,

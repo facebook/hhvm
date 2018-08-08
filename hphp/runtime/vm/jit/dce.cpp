@@ -428,6 +428,8 @@ bool canDCE(IRInstruction* inst) {
   case LdGblAddrDef:
   case LdClsPropAddrOrNull:
   case LdClsPropAddrOrRaise:
+  case LdInitRDSAddr:
+  case LdInitPropAddr:
   case LdObjMethod:
   case LdObjInvoke:
   case LdArrFuncCtx:
@@ -692,6 +694,7 @@ bool canDCE(IRInstruction* inst) {
   case ThrowInvalidOperation:
   case ThrowArithmeticError:
   case ThrowDivisionByZeroError:
+  case ThrowLateInitPropError:
   case StMBase:
   case StMIPropState:
   case FinishMemberOp:

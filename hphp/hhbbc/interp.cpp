@@ -1727,21 +1727,23 @@ void in(ISS& env, const bc::CGetS& op) {
   if (vname && vname->m_type == KindOfPersistentString &&
       self && tcls.subtypeOf(*self)) {
     if (auto ty = selfPropAsCell(env, vname->m_data.pstr)) {
-      // Only nothrow when we know it's a private declared property
-      // (and thus accessible here).
-      auto const initMightRaise = classInitMightRaise(env, tcls);
-      if (!initMightRaise) nothrow(env);
+      // Only nothrow when we know it's a private declared property (and thus
+      // accessible here), class initialization won't throw, and its not a
+      // LateInit prop (which will throw if not initialized).
+      if (!classInitMightRaise(env, tcls) &&
+          !isMaybeLateInitSelfProp(env, vname->m_data.pstr)) {
+        nothrow(env);
 
-      // We can only constprop here if we know for sure this is exactly the
-      // correct class.  The reason for this is that you could have a LSB class
-      // attempting to access a private static in a derived class with the same
-      // name as a private static in this class, which is supposed to fatal at
-      // runtime (for an example see test/quick/static_sprop2.php).
-      auto const selfExact = selfClsExact(env);
-      if (selfExact && tcls.subtypeOf(*selfExact) && !initMightRaise) {
-        constprop(env);
+        // We can only constprop here if we know for sure this is exactly the
+        // correct class.  The reason for this is that you could have a LSB
+        // class attempting to access a private static in a derived class with
+        // the same name as a private static in this class, which is supposed to
+        // fatal at runtime (for an example see test/quick/static_sprop2.php).
+        auto const selfExact = selfClsExact(env);
+        if (selfExact && tcls.subtypeOf(*selfExact)) constprop(env);
       }
 
+      if (ty->subtypeOf(BBottom)) unreachable(env);
       return push(env, std::move(*ty));
     }
   }
@@ -1756,9 +1758,12 @@ void in(ISS& env, const bc::CGetS& op) {
      * back a constant type, it's because it found a public static and it must
      * be the property this would have read dynamically.
      */
-    if (options.HardConstProp && !classInitMightRaise(env, tcls)) {
+    if (options.HardConstProp &&
+        !classInitMightRaise(env, tcls) &&
+        !env.index.lookup_public_static_maybe_late_init(tcls, tname)) {
       constprop(env);
     }
+    if (indexTy.subtypeOf(BBottom)) unreachable(env);
     return push(env, std::move(indexTy));
   }
 
@@ -2178,6 +2183,10 @@ void in(ISS& env, const bc::IssetS& op) {
   if (self && tcls.subtypeOf(*self) &&
       vname && vname->m_type == KindOfPersistentString) {
     if (auto const t = selfPropAsCell(env, vname->m_data.pstr)) {
+      if (isMaybeLateInitSelfProp(env, vname->m_data.pstr)) {
+        if (!classInitMightRaise(env, tcls)) constprop(env);
+        return push(env, t->subtypeOf(BBottom) ? TFalse : TBool);
+      }
       if (t->subtypeOf(BNull)) {
         if (!classInitMightRaise(env, tcls)) constprop(env);
         return push(env, TFalse);
@@ -2194,6 +2203,9 @@ void in(ISS& env, const bc::IssetS& op) {
     // See the comments in CGetS about constprop for public statics.
     if (options.HardConstProp && !classInitMightRaise(env, tcls)) {
       constprop(env);
+    }
+    if (env.index.lookup_public_static_maybe_late_init(tcls, tname)) {
+      return push(env, indexTy.subtypeOf(BBottom) ? TFalse : TBool);
     }
     if (indexTy.subtypeOf(BNull))  { return push(env, TFalse); }
     if (!indexTy.couldBe(BNull))   { return push(env, TTrue); }

@@ -1061,6 +1061,20 @@ bool isNonSerializedThisProp(ISS& env, SString name) {
   return env.collect.props.isNonSerialized(name);
 }
 
+bool isMaybeLateInitThisProp(ISS& env, SString name) {
+  if (!env.ctx.cls) return false;
+  for (auto const& prop : env.ctx.cls->properties) {
+    if (prop.name == name &&
+        (prop.attrs & AttrPrivate) &&
+        !(prop.attrs & AttrStatic)
+       ) {
+      return prop.attrs & AttrLateInit;
+    }
+  }
+  // Prop either doesn't exist, or is on an unflattened trait. Be conservative.
+  return true;
+}
+
 void killThisProps(ISS& env) {
   FTRACE(2, "    killThisProps\n");
   for (auto& kv : env.collect.props.privateProperties()) {
@@ -1220,6 +1234,20 @@ void loseNonRefSelfPropTypes(ISS& env) {
   for (auto& kv : env.collect.props.privateStatics()) {
     if (kv.second.subtypeOf(BInitCell)) kv.second = TCell;
   }
+}
+
+bool isMaybeLateInitSelfProp(ISS& env, SString name) {
+  if (!env.ctx.cls) return false;
+  for (auto const& prop : env.ctx.cls->properties) {
+    if (prop.name == name &&
+        (prop.attrs & AttrPrivate) &&
+        (prop.attrs & AttrStatic)
+       ) {
+      return prop.attrs & AttrLateInit;
+    }
+  }
+  // Prop either doesn't exist, or is on an unflattened trait. Be conservative.
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////

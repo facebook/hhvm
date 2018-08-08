@@ -865,9 +865,13 @@ public:
    * The behavior is identical to that of findSProp(), except substituting
    * nullptr for kInvalidInd.
    *
+   * getSProp() will throw if the property is AttrLateInit and the value is
+   * Uninit. getSPropIgnoreLateInit() will not.
+   *
    * May perform initialization.
    */
   PropValLookup getSProp(const Class*, const StringData*) const;
+  PropValLookup getSPropIgnoreLateInit(const Class*, const StringData*) const;
 
   /*
    * Return whether or not a declared instance property is accessible from the

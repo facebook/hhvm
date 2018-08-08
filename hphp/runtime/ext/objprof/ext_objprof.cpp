@@ -797,7 +797,7 @@ std::pair<int, double> getObjSize(
   }
 
   // We're increasing ref count by calling toArray, need to adjust it later
-  auto arr = obj->toArray(); // TODO t12985984 avoid toArray.
+  auto arr = obj->toArray(false, true); // TODO t12985984 avoid toArray.
   bool is_packed = arr->hasPackedLayout();
 
   for (ArrayIter iter(arr); iter; ++iter) {
@@ -926,7 +926,7 @@ void getObjStrings(
   }
 
   path->push_back(obj->getClassName().data());
-  auto arr = obj->toArray(); // TODO t12985984 avoid toArray.
+  auto arr = obj->toArray(false, true); // TODO t12985984 avoid toArray.
   bool is_packed = arr->hasPackedLayout();
 
   for (ArrayIter iter(arr); iter; ++iter) {
@@ -1141,7 +1141,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
     for (Slot i = 0; i < nSProps; ++i) {
       auto const& prop = staticProps[i];
       auto tv = cls->getSPropData(i);
-      if (tv == nullptr) {
+      if (tv == nullptr || tv->m_type == KindOfUninit) {
         continue;
       }
 

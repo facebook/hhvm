@@ -490,6 +490,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowDivisionByZeroError:
   case ThrowInvalidArrayKey:
   case ThrowInvalidOperation:
+  case ThrowLateInitPropError:
   case ThrowOutOfBounds:
   case UnsetElem:
   case UnsetProp:
@@ -791,6 +792,8 @@ bool opcodeMayRaise(Opcode opc) {
   case LdGblAddr:
   case LdGblAddrDef:
   case LdIfaceMethod:
+  case LdInitPropAddr:
+  case LdInitRDSAddr:
   case LdLoc:
   case LdLocAddr:
   case LdLocPseudoMain:

@@ -1710,7 +1710,7 @@ void VariableSerializer::serializeCollection(ObjectData* obj) {
 Array VariableSerializer::getSerializeProps(const ObjectData* obj) const {
   if (getType() == VariableSerializer::Type::VarExport) {
     Array props = Array::Create();
-    for (ArrayIter iter(obj->toArray()); iter; ++iter) {
+    for (ArrayIter iter(obj->toArray(false, true)); iter; ++iter) {
       auto key = iter.first().toString();
       // Jump over any class attribute mangling
       if (key[0] == '\0' && key.size() > 0) {
@@ -1726,7 +1726,11 @@ Array VariableSerializer::getSerializeProps(const ObjectData* obj) const {
   }
   if ((getType() != VariableSerializer::Type::PrintR) &&
       (getType() != VariableSerializer::Type::VarDump)) {
-    return obj->toArray();
+    auto const ignoreLateInit =
+      (getType() == VariableSerializer::Type::DebugDump ||
+       getType() == VariableSerializer::Type::DebuggerDump ||
+       getType() == VariableSerializer::Type::DebuggerSerialize);
+    return obj->toArray(false, ignoreLateInit);
   }
   auto cls = obj->getVMClass();
   auto debuginfo = cls->lookupMethod(s_debugInfo.get());
@@ -1735,7 +1739,7 @@ Array VariableSerializer::getSerializeProps(const ObjectData* obj) const {
     // however when it's being var_dump'd or print_r'd, it shows its properties
     if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayIteratorClass))) {
       auto ret = Array::Create();
-      obj->o_getArray(ret);
+      obj->o_getArray(ret, false, true);
       return ret;
     }
 
@@ -1743,17 +1747,17 @@ Array VariableSerializer::getSerializeProps(const ObjectData* obj) const {
     // different behavior for var_dump and cast to array
     if (UNLIKELY(obj->instanceof(c_Closure::classof()))) {
       auto ret = Array::Create();
-      obj->o_getArray(ret);
+      obj->o_getArray(ret, false, true);
       return ret;
     }
 
-    return obj->toArray();
+    return obj->toArray(false, true);
   }
   if (debuginfo->attrs() & (AttrPrivate|AttrProtected|
                             AttrAbstract|AttrStatic)) {
     raise_warning("%s::__debugInfo() must be public and non-static",
                   cls->name()->data());
-    return obj->toArray();
+    return obj->toArray(false, true);
   }
   auto ret = const_cast<ObjectData*>(obj)->invokeDebugInfo();
   if (ret.isArray()) {
@@ -1861,19 +1865,21 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
         auto const slot = lookup.slot;
 
         if (slot != kInvalidSlot && lookup.accessible) {
-          auto const prop = obj->propRvalAtOffset(slot);
-          if (prop.type() != KindOfUninit) {
-            auto const attrs = obj_cls->declProperties()[slot].attrs;
-            if (attrs & AttrPrivate) {
+          auto const propVal = obj->propRvalAtOffset(slot);
+          auto const& prop = obj_cls->declProperties()[slot];
+          if (propVal.type() != KindOfUninit) {
+            if (prop.attrs & AttrPrivate) {
               memberName = concat4(s_zero, ctx->nameStr(),
                                    s_zero, memberName);
-            } else if (attrs & AttrProtected) {
+            } else if (prop.attrs & AttrProtected) {
               memberName = concat(s_protected_prefix, memberName);
             }
-            if (!attrMask || (attrMask & attrs) == attrMask) {
-              wanted.set(memberName, prop.tv());
+            if (!attrMask || (attrMask & prop.attrs) == attrMask) {
+              wanted.set(memberName, propVal.tv());
               continue;
             }
+          } else if (prop.attrs & AttrLateInit) {
+            throw_late_init_prop(prop.cls, memberName.get(), false);
           }
         }
         if (!attrMask &&

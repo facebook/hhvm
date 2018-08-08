@@ -118,6 +118,12 @@ void cgRaiseForbiddenDynCall(IRLS& env, const IRInstruction* inst) {
                kVoidDest, SyncOptions::Sync, argGroup(env, inst).ssa(0));
 }
 
+void cgThrowLateInitPropError(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(vmain(env), env, CallSpec::direct(throw_late_init_prop),
+               kVoidDest, SyncOptions::Sync,
+               argGroup(env, inst).ssa(0).ssa(1).ssa(2));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPL_OPCODE_CALL(InitThrowableFileAndLine)

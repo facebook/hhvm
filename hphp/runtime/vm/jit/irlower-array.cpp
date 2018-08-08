@@ -180,7 +180,7 @@ bool ak_exist_int_obj(ObjectData* obj, int64_t key) {
   if (obj->isCollection()) {
     return collections::contains(obj, key);
   }
-  auto const arr = obj->toArray();
+  auto const arr = obj->toArray(false, true);
   return arr.get()->exists(key);
 }
 
@@ -188,7 +188,7 @@ bool ak_exist_string_obj(ObjectData* obj, StringData* key) {
   if (obj->isCollection()) {
     return collections::contains(obj, Variant{key});
   }
-  auto const arr = obj->toArray();
+  auto const arr = obj->toArray(false, true);
   return ak_exist_string_impl<false>(arr.get(), key);
 }
 

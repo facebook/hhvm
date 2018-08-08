@@ -729,6 +729,7 @@ let mutate_metadata (input : HP.t)  =
         (prop |> Hhas_property.has_system_initial |> mutate_bool)
         (prop |> Hhas_property.no_implicit_null   |> mutate_bool)
         (prop |> Hhas_property.initial_satisfies_tc |> mutate_bool)
+        (prop |> Hhas_property.is_late_init       |> mutate_bool)
         (prop |> Hhas_property.name)
         (prop |> Hhas_property.initial_value |> option_lift mutate_typed_value)
         (prop |> Hhas_property.initializer_instrs |> mutate_option)

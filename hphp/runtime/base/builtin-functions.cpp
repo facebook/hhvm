@@ -737,6 +737,20 @@ void throw_cannot_bind_immutable_prop(const char* className,
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
+NEVER_INLINE
+void throw_late_init_prop(const Class* cls,
+                          const StringData* propName,
+                          bool isSProp) {
+  SystemLib::throwInvalidOperationExceptionObject(
+    folly::sformat(
+      "Accessing <<__LateInit>> {} '{}::{}' before initialization",
+      isSProp ? "static property" : "property",
+      cls->name(),
+      propName
+    )
+  );
+}
+
 void check_collection_compare(const ObjectData* obj) {
   if (obj && obj->isCollection()) throw_collection_compare_exception();
 }

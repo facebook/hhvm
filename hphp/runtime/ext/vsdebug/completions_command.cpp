@@ -411,7 +411,7 @@ void CompletionsCommand::addMemberCompletions(
   }
 
   // Add any matching instance properties of the object.
-  const Array instProps = object->toArray();
+  const Array instProps = object->toArray(false, true);
   for (ArrayIter iter(instProps); iter; ++iter) {
     std::string propName = iter.first().toString().toCppString();
 

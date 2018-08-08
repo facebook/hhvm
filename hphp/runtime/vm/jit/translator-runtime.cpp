@@ -729,8 +729,11 @@ TypedValue keysetIdxS(ArrayData* a, StringData* key, TypedValue def) {
 
 TypedValue* getSPropOrNull(const Class* cls,
                            const StringData* name,
-                           Class* ctx) {
-  auto const lookup = cls->getSProp(ctx, name);
+                           Class* ctx,
+                           bool ignoreLateInit) {
+  auto const lookup = ignoreLateInit
+    ? cls->getSPropIgnoreLateInit(ctx, name)
+    : cls->getSProp(ctx, name);
 
   if (UNLIKELY(!lookup.val || !lookup.accessible)) return nullptr;
 
@@ -739,8 +742,9 @@ TypedValue* getSPropOrNull(const Class* cls,
 
 TypedValue* getSPropOrRaise(const Class* cls,
                             const StringData* name,
-                            Class* ctx) {
-  auto sprop = getSPropOrNull(cls, name, ctx);
+                            Class* ctx,
+                            bool ignoreLateInit) {
+  auto sprop = getSPropOrNull(cls, name, ctx, ignoreLateInit);
   if (UNLIKELY(!sprop)) {
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(), name->data());

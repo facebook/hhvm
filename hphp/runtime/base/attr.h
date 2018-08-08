@@ -107,6 +107,9 @@ enum Attr {
                                          //       |          |         //
   // This class is sealed                //       |          |         //
   AttrSealed               = (1u << 11), //    X  |          |         //
+  // Property starts as uninit, will throw if accessed before being explicitly
+  // set.
+  AttrLateInit             = (1u << 11), //       |    X     |         //
   // Traits have been flattened on this class.
   AttrNoExpandTrait        = (1u << 12), //    X  |          |         //
                                          //       |          |         //

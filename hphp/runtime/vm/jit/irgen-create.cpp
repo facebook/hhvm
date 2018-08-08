@@ -74,8 +74,12 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
   };
 
   // Load Exception::$traceOpts
-  auto const lookup =
-    ldClsPropAddrKnown(env, SystemLib::s_ExceptionClass, s_traceOpts.get());
+  auto const lookup = ldClsPropAddrKnown(
+    env,
+    SystemLib::s_ExceptionClass,
+    s_traceOpts.get(),
+    false
+  );
   assertx(!lookup.tc->isCheckable());
   auto const sprop = lookup.propPtr;
 

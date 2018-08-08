@@ -471,7 +471,7 @@ Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
   }
   VMRegAnchor _;
 
-  auto const lookup = class_->getSProp(
+  auto const lookup = class_->getSPropIgnoreLateInit(
     force ? class_ : arGetContextClass(vmfp()),
     prop.get()
   );
@@ -501,7 +501,7 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
 
   VMRegAnchor _;
 
-  auto const lookup = class_->getSProp(
+  auto const lookup = class_->getSPropIgnoreLateInit(
     force ? class_ : arGetContextClass(vmfp()),
     prop.get()
   );

@@ -314,7 +314,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   bool toBoolean() const;
   int64_t toInt64() const;
   double toDouble() const;
-  Array toArray(bool pubOnly = false) const;
+  Array toArray(bool pubOnly = false, bool ignoreLateInit = false) const;
 
   /*
    * Comparisons.
@@ -357,7 +357,9 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
              const String& context = null_string);
 
   void o_setArray(const Array& properties);
-  void o_getArray(Array& props, bool pubOnly = false) const;
+  void o_getArray(Array& props,
+                  bool pubOnly = false,
+                  bool ignoreLateInit = false) const;
 
   static Object FromArray(ArrayData* properties);
 
@@ -411,7 +413,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   // Accessors for the declared properties area. Note that if the caller writes
   // to these properties, they are responsible for validating the values with
-  // any type-hints on the properties.
+  // any type-hints on the properties. Likewise the caller is responsible for
+  // enforcing AttrLateInit.
   TypedValue* propVecForWrite();
   TypedValue* propVecForConstruct();
   const TypedValue* propVec() const;
@@ -422,7 +425,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   // Accessors for declared properties at statically known offsets. In the lval
   // case, the property must be statically known to be mutable. If the caller
   // modifies the lval, they are responsible for validating the value with any
-  // type-hint on that property.
+  // type-hint on that property. Likewise the caller is responsible for
+  // enforcing AttrLateInit.
   tv_lval propLvalAtOffset(Slot);
   tv_rval propRvalAtOffset(Slot) const;
 
@@ -481,7 +485,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
     bool immutable;
   };
 
-  template <bool forWrite, bool forRead>
+  template <bool forWrite, bool forRead, bool ignoreLateInit>
   ALWAYS_INLINE
   PropLookup getPropImpl(const Class*, const StringData*);
 
@@ -509,12 +513,15 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   InvokeResult invokeNativeIssetProp(const StringData* key);
   bool invokeNativeUnsetProp(const StringData* key);
 
-  void getProp(const Class* klass, bool pubOnly, const PreClass::Prop* prop,
-               Array& props, std::vector<bool>& inserted) const;
-  void getProps(const Class* klass, bool pubOnly, const PreClass* pc,
-                Array& props, std::vector<bool>& inserted) const;
-  void getTraitProps(const Class* klass, bool pubOnly, const Class* trait,
-                     Array& props, std::vector<bool>& inserted) const;
+  void getProp(const Class* klass, bool pubOnly, bool ignoreLateInit,
+               const PreClass::Prop* prop, Array& props,
+               std::vector<bool>& inserted) const;
+  void getProps(const Class* klass, bool pubOnly, bool ignoreLateInit,
+                const PreClass* pc, Array& props,
+                std::vector<bool>& inserted) const;
+  void getTraitProps(const Class* klass, bool pubOnly, bool ignoreLateInit,
+                     const Class* trait, Array& props,
+                     std::vector<bool>& inserted) const;
 
  public:
   tv_lval prop(TypedValue* tvRef, const Class* ctx, const StringData* key);

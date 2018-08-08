@@ -963,6 +963,11 @@ void miFinalIssetProp(ISS& env, int32_t nDiscard, const Type& key) {
   discard(env, nDiscard);
   if (name && mustBeThisObj(env, env.state.mInstrState.base)) {
     if (auto const pt = thisPropAsCell(env, name)) {
+      if (isMaybeLateInitThisProp(env, name)) {
+        // LateInit props can always be maybe unset, except if its never set at
+        // all.
+        return push(env, pt->subtypeOf(BBottom) ? TFalse : TBool);
+      }
       if (pt->subtypeOf(BNull))  return push(env, TFalse);
       if (!pt->couldBe(BNull))   return push(env, TTrue);
     }
@@ -975,6 +980,7 @@ void miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key) {
   discard(env, nDiscard);
   if (name && mustBeThisObj(env, env.state.mInstrState.base)) {
     if (auto const t = thisPropAsCell(env, name)) {
+      if (t->subtypeOf(BBottom)) unreachable(env);
       return push(env, *t);
     }
   }

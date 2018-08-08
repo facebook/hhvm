@@ -398,22 +398,30 @@ void cgLdPropAddr(IRLS& env, const IRInstruction* inst) {
   }
 }
 
+void cgLdInitPropAddr(IRLS& env, const IRInstruction* inst) {
+  auto const dstLoc = irlower::dstLoc(env, inst, 0);
+  auto const obj = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  auto const propPtr = obj[inst->extra<LdInitPropAddr>()->offsetBytes];
+
+  if (dstLoc.hasReg(tv_lval::val_idx)) {
+    v << lea{propPtr, dstLoc.reg(tv_lval::val_idx)};
+  }
+  if (wide_tv_val && dstLoc.hasReg(tv_lval::type_idx)) {
+    static_assert(TVOFF(m_data) == 0, "");
+    v << lea{propPtr + TVOFF(m_type), dstLoc.reg(tv_lval::type_idx)};
+  }
+
+  auto const sf = v.makeReg();
+  emitCmpTVType(v, sf, KindOfUninit, propPtr + TVOFF(m_type));
+  v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
+}
+
 IMPL_OPCODE_CALL(LdClsPropAddrOrNull)
 IMPL_OPCODE_CALL(LdClsPropAddrOrRaise)
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void cgLdRDSAddr(IRLS& env, const IRInstruction* inst) {
-  auto const handle = inst->extra<LdRDSAddr>()->handle;
-  if (rds::isPersistentHandle(handle)) {
-    // Persistent RDS handles are not relative to RDS base.
-    auto const addr = rds::handleToPtr<void, rds::Mode::Persistent>(handle);
-    auto& v = vmain(env);
-    v << copy{v.cns(addr), dstLoc(env, inst, 0).reg()};
-  } else {
-    vmain(env) << lea{rvmtl()[handle], dstLoc(env, inst, 0).reg()};
-  }
-}
 
 void cgCheckRDSInitialized(IRLS& env, const IRInstruction* inst) {
   auto const handle = inst->extra<CheckRDSInitialized>()->handle;
@@ -434,6 +442,41 @@ void cgCheckRDSInitialized(IRLS& env, const IRInstruction* inst) {
 void cgMarkRDSInitialized(IRLS& env, const IRInstruction* inst) {
   auto const handle = inst->extra<MarkRDSInitialized>()->handle;
   if (rds::isNormalHandle(handle)) markRDSHandleInitialized(vmain(env), handle);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+void ldRDSAddrImpl(Vout& v, rds::Handle handle, Vreg dst) {
+  if (rds::isPersistentHandle(handle)) {
+    // Persistent RDS handles are not relative to RDS base.
+    auto const addr = rds::handleToPtr<void, rds::Mode::Persistent>(handle);
+    v << copy{v.cns(addr), dst};
+  } else {
+    v << lea{rvmtl()[handle], dst};
+  }
+}
+
+}
+
+void cgLdRDSAddr(IRLS& env, const IRInstruction* inst) {
+  ldRDSAddrImpl(
+    vmain(env),
+    inst->extra<LdRDSAddr>()->handle,
+    dstLoc(env, inst, 0).reg()
+  );
+}
+
+void cgLdInitRDSAddr(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  ldRDSAddrImpl(v, inst->extra<LdInitRDSAddr>()->handle, dst);
+
+  auto const sf = v.makeReg();
+  emitCmpTVType(v, sf, KindOfUninit, dst[TVOFF(m_type)]);
+  v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

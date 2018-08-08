@@ -21,6 +21,7 @@ type t = {
   property_has_system_initial : bool;
   property_no_implicit_null : bool;
   property_initial_satisfies_tc : bool;
+  property_is_late_init : bool;
   property_name         : Hhbc_id.Prop.t;
   property_initial_value  : Typed_value.t option;
   property_initializer_instrs : Instruction_sequence.t option;
@@ -42,6 +43,7 @@ let make
   property_has_system_initial
   property_no_implicit_null
   property_initial_satisfies_tc
+  property_is_late_init
   property_name
   property_initial_value
   property_initializer_instrs
@@ -60,6 +62,7 @@ let make
     property_has_system_initial;
     property_no_implicit_null;
     property_initial_satisfies_tc;
+    property_is_late_init;
     property_name;
     property_initial_value;
     property_initializer_instrs;
@@ -83,5 +86,6 @@ let is_no_bad_redeclare hhas_property = hhas_property.property_is_no_bad_redecla
 let has_system_initial hhas_property = hhas_property.property_has_system_initial
 let no_implicit_null hhas_property = hhas_property.property_no_implicit_null
 let initial_satisfies_tc hhas_property = hhas_property.property_initial_satisfies_tc
+let is_late_init hhas_property = hhas_property.property_is_late_init
 let type_info hhas_property = hhas_property.property_type_info
 let doc_comment hhas_property = hhas_property.property_doc_comment

@@ -130,9 +130,10 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   assertx(numDeclProperties - numArgs == getInvokeFunc()->numStaticLocals());
 
   if (debug) {
-    // Closure properties shouldn't have type-hints
+    // Closure properties shouldn't have type-hints nor should they be LateInit.
     for (auto const& prop : cls->declProperties()) {
       always_assert(!prop.typeConstraint.isCheckable());
+      always_assert(!(prop.attrs & AttrLateInit));
     }
   }
 

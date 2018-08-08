@@ -1077,6 +1077,12 @@ To string conversions:
   Load the address of a Gen that lives at the specified RDS handle. The type
   param must be a subtype of PtrToGen.
 
+| LdInitRDSAddr<T,RDSHandle>, DParam(PtrToInitGen), NA, B
+
+  Load the address of a Gen that lives at the specified RDS handle. Branch if
+  the value at that address is Uninit. The type param must be a subtype of
+  PtrToInitGen.
+
 | LdVectorBase, D(PtrToMembCell), S(Obj), NF
 
 | LdPairBase, D(PtrToMembCell), S(Obj), NF
@@ -1345,6 +1351,12 @@ To string conversions:
   Load the address of the object property for S0 + `offset' (in bytes).  T must
   be a subtype of PtrToPropGen.
 
+| LdInitPropAddr<T,offset>, DParam(LvalToPropGen), S(Obj), B
+
+  Load the address of the object property for S0 + `offset' (in bytes). Branch
+  if the value at that address is Uninit.  T must be a subtype of
+  PtrToPropInitGen.
+
 | LdGblAddr, D(PtrToGblGen), S(Str), B
 
   Loads a pointer to a global. S0 is the global's name. Branches to B if the
@@ -1356,20 +1368,24 @@ To string conversions:
   it is not already defined.
 
 | LdClsPropAddrOrNull, D(PtrToSPropGen|Nullptr),
-|                      S(Cls) S(Str) C(Cls),
+|                      S(Cls) S(Str) C(Cls) C(Bool),
 |                      NF
 
   Loads a pointer to a static class property. S0 points to the class, S1 is the
   property name, and S2 is the class representing the context of the code
   accessing the property. If class S0 does not have a visible and accessible
-  static property named S1, then nullptr is returned.
+  static property named S1, then nullptr is returned. An exception
+  will be thrown if the property is marked LateInit and its value is
+  Uninit, unless S3 is true.
 
-| LdClsPropAddrOrRaise, D(PtrToSPropGen), S(Cls) S(Str) C(Cls), NF
+| LdClsPropAddrOrRaise, D(PtrToSPropGen), S(Cls) S(Str) C(Cls) C(Bool), NF
 
   Loads a pointer to a static class property. S0 points to the class, S1 is the
   property name, and S2 is the class representing the context of the code
   accessing the property. If class S0 does not have a visible and accessible
-  static property named S1, throw a fatal error.
+  static property named S1, then nullptr is returned. An exception
+  will be thrown if the property is marked LateInit and its value is
+  Uninit, unless S3 is true.
 
 | LookupSPropSlot, D(Int), S(Cls) S(Str), NF
 
@@ -3257,6 +3273,12 @@ fields of that struct for holding intermediate values.
 | ThrowDivisionByZeroError, ND, S(Str), T
 
   Throws a DivisionByZeroError with a message indicating S0.
+
+| ThrowLateInitPropError, ND, S(Cls) S(Str) S(Bool), T
+
+  Throws an InvalidOperationException indicating an access of a unset LateInit
+  property. S0 is the class the property was declared on. S1 is the property
+  name. S2 is true if its a static property, false otherwise.
 
 | ProfileArrayKind, ND, S(Arr), NF
 

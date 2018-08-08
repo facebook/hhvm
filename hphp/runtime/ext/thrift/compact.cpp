@@ -246,6 +246,9 @@ struct CompactWriter {
             writeFieldBegin(fields[i].fieldNum, fieldType);
             writeField(fieldVal, fieldSpec.asArray(), fieldType);
             writeFieldEnd();
+          } else if (UNLIKELY(fieldVal.is(KindOfUninit)) &&
+                     (prop[i].attrs & AttrLateInit)) {
+            throw_late_init_prop(prop[i].cls, prop[i].name, false);
           }
         } else {
           writeSlow(fields[i], obj);

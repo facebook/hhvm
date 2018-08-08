@@ -749,6 +749,13 @@ struct Index {
   bool lookup_class_init_might_raise(Context, res::Class) const;
 
   /*
+   * Lookup if a public static property with the given class and name might be
+   * AttrLateInit.
+   */
+  bool lookup_public_static_maybe_late_init(const Type& cls,
+                                            const Type& name) const;
+
+  /*
    * If we resolve a public static initializer to a constant, and eliminate the
    * 86pinit, we need to update the initializer in the index.
    *

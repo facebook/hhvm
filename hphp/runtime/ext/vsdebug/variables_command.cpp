@@ -1075,7 +1075,7 @@ void VariablesCommand::forEachInstanceProp(
   }
 
   // Instance properties on this object.
-  const Array instProps = obj->toArray();
+  const Array instProps = obj->toArray(false, true);
   const std::string className = cls->name()->toCppString();
 
   for (ArrayIter iter(instProps); iter; ++iter) {

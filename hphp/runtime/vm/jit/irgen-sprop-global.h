@@ -41,8 +41,8 @@ struct ClsPropLookup {
   Slot slot;
 };
 
-ClsPropLookup ldClsPropAddrKnown(IRGS&, const Class*, const StringData*);
-ClsPropLookup ldClsPropAddr(IRGS&, SSATmp*, SSATmp*, bool);
+ClsPropLookup ldClsPropAddrKnown(IRGS&, const Class*, const StringData*, bool);
+ClsPropLookup ldClsPropAddr(IRGS&, SSATmp*, SSATmp*, bool, bool);
 
 //////////////////////////////////////////////////////////////////////
 

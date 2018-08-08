@@ -598,6 +598,10 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
   if (UNLIKELY(slot == kInvalidSlot)) return;
   auto const repoTy = cls->declPropRepoAuthType(slot);
   if (LIKELY(tvMatchesRepoAuthType(*t, repoTy))) return;
+  if (t.type() == KindOfUninit &&
+      (cls->declProperties()[slot].attrs & AttrLateInit)) {
+    return;
+  }
   throwUnexpectedType(key, obj, *t);
 }
 

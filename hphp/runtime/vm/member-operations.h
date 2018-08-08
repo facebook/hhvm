@@ -867,15 +867,18 @@ inline tv_lval ElemDObject(TypedValue& tvRef, tv_lval base,
   } else if (obj->getVMClass()->classof(SystemLib::s_ArrayObjectClass)) {
     auto storage = obj->getPropLval(SystemLib::s_ArrayObjectClass,
                                     s_storage.get());
-    // ArrayObject should always have the 'storage' property...
-    assertx(storage);
-    // We shouldn't have a type-hint on the storage property.
-    assertx(
-      !obj->getVMClass()->declPropTypeConstraint(
-        obj->getVMClass()->getDeclPropIndex(SystemLib::s_ArrayObjectClass,
-                                            s_storage.get()).slot
-      ).isCheckable()
-    );
+    if (debug) {
+      // ArrayObject should always have the 'storage' property, it shouldn't
+      // have a type-hint on it, nor should it be LateInit.
+      always_assert(storage);
+      auto const slot = obj->getVMClass()->getDeclPropIndex(
+        SystemLib::s_ArrayObjectClass,
+        s_storage.get()
+      ).slot;
+      auto const& prop = obj->getVMClass()->declProperties()[slot];
+      always_assert(!prop.typeConstraint.isCheckable());
+      always_assert(!(prop.attrs & AttrLateInit));
+    }
     return UNLIKELY(checkHACIntishCast())
       ? ElemDArray<mode, reffy, true, keyType>(storage, key)
       : ElemDArray<mode, reffy, false, keyType>(storage, key);

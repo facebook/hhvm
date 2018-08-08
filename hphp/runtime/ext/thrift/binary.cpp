@@ -661,6 +661,9 @@ void binary_serialize_spec(const Object& obj, PHPOutputTransport& transport,
         transport.writeI8(fieldType);
         transport.writeI16(fields[i].fieldNum);
         binary_serialize(fieldType, transport, fieldVal, fieldSpec);
+      } else if (UNLIKELY(fieldVal.is(KindOfUninit)) &&
+                 (prop[i].attrs & AttrLateInit)) {
+        throw_late_init_prop(prop[i].cls, prop[i].name, false);
       }
     } else {
       binary_serialize_slow(fields[i], obj, transport);

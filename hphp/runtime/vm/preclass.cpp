@@ -201,6 +201,8 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
   if (m_attrs & AttrSystemInitialValue) { out << "(system-initial-val) "; }
   if (m_attrs & AttrNoImplicitNullable) { out << "(no-implicit-nullable) "; }
   if (m_attrs & AttrInitialSatisfiesTC) { out << "(initial-satisfies-tc) "; }
+  if (m_attrs & AttrLSB) { out << "(lsb) "; }
+  if (m_attrs & AttrLateInit) { out << "(late-init) "; }
   out << preClass->name()->data() << "::" << m_name->data() << " = ";
   if (m_val.m_type == KindOfUninit) {
     out << "<non-scalar>";

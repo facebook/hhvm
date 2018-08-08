@@ -30,6 +30,7 @@ let is_dynamically_callable = is_ "__DynamicallyCallable"
 let is_const    = is_ "__Const"
 let is_sealed = is_ "__Sealed"
 let is_lsb      = is_ "__LSB"
+let is_late_init = is_ "__LateInit"
 
 let has_memoized = has_ is_memoized
 let has_native   = has_ is_native
@@ -38,6 +39,7 @@ let has_dynamically_callable = has_ is_dynamically_callable
 let has_const    = has_ is_const
 let has_sealed = has_ is_sealed
 let has_lsb      = has_ is_lsb
+let has_late_init = has_ is_late_init
 
 let is_native_arg s attributes =
   let f attr =

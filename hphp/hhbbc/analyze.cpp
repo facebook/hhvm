@@ -649,7 +649,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     auto const cellTy = from_cell(prop.val);
 
     if (is_closure(*ctx.cls) ||
-        (prop.attrs & AttrSystemInitialValue) ||
+        (prop.attrs & (AttrSystemInitialValue | AttrLateInit)) ||
         (!cellTy.subtypeOf(TUninit) &&
          index.satisfies_constraint(ctx, cellTy, prop.typeConstraint))) {
       prop.attrs |= AttrInitialSatisfiesTC;
@@ -736,11 +736,11 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
    */
   analyze_86init(s_86cinit);
 
-  // Verify that none of the class properties are TBottom, i.e.
-  // any property of type KindOfUninit has been initialized (by
-  // 86pinit or 86sinit).
+  // Verify that none of the non-LateInit class properties are TBottom, i.e.
+  // any property of type KindOfUninit has been initialized (by 86pinit or
+  // 86sinit).
   for (auto& prop : ctx.cls->properties) {
-    if (!(prop.attrs & AttrPrivate)) continue;
+    if (!(prop.attrs & AttrPrivate) || (prop.attrs & AttrLateInit)) continue;
     if (prop.attrs & AttrStatic) {
       assert(!clsAnalysis.privateStatics[prop.name].subtypeOf(BBottom));
     } else {

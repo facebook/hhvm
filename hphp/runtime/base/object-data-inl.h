@@ -178,18 +178,24 @@ inline void ObjectData::verifyPropTypeHints(size_t end) const {
           tc.isSoft()
         );
       } else if (UNLIKELY(val.m_type == KindOfUninit)) {
-        raise_property_typehint_unset_error(
-          prop.cls,
-          prop.name,
-          tc.isSoft()
-        );
+        if (!(prop.attrs & AttrLateInit)) {
+          raise_property_typehint_unset_error(
+            prop.cls,
+            prop.name,
+            tc.isSoft()
+          );
+        }
       } else {
         tc.verifyProperty(&val, m_cls, prop.cls, prop.name);
       }
     }
 
     if (debug && RuntimeOption::RepoAuthoritative) {
-      always_assert(tvMatchesRepoAuthType(val, prop.repoAuthType));
+      // The fact that uninitialized LateInit props are uninint isn't
+      // reflected in the repo-auth-type.
+      if (val.m_type != KindOfUninit || !(prop.attrs & AttrLateInit)) {
+        always_assert(tvMatchesRepoAuthType(val, prop.repoAuthType));
+      }
     }
   }
 }

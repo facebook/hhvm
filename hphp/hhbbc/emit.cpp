@@ -1466,9 +1466,15 @@ void emit_class(EmitUnitState& state,
   auto const privateStatics = state.index.lookup_private_statics(&cls, true);
   for (auto& prop : cls.properties) {
     auto const makeRat = [&] (const Type& ty) -> RepoAuthType {
-      if (ty.couldBe(BCls)) {
+      if (ty.couldBe(BCls)) return RepoAuthType{};
+      if (ty.subtypeOf(BBottom)) {
+        // Properties are only allowed to be TBottom if they're LateInit. The
+        // repo auth type here doesn't particularly matter, since every access
+        // of it is guaranteed to throw.
+        always_assert(prop.attrs & AttrLateInit);
         return RepoAuthType{};
       }
+
       auto const rat = make_repo_type(*state.index.array_table_builder(), ty);
       merge_repo_auth_type(ue, rat);
       return rat;

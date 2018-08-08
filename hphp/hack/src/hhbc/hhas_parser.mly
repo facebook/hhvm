@@ -346,6 +346,7 @@ classproperty:
       (List.mem "sys_initial_val" attrs)
       (List.mem "no_implicit_null" attrs)
       (List.mem "initial_satisfies_tc" attrs)
+      (List.mem "late_init" attrs)
       (Hhbc_id.Prop.from_raw_string $5) (*name *)
       $8 (*initial value *)
       None (* initializer instructions. already been emitted elsewhere *)

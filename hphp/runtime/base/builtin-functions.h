@@ -176,6 +176,10 @@ void throw_instance_method_fatal(const char *name);
                                                      const char* propName);
 [[noreturn]] void throw_cannot_bind_immutable_prop(const char* className,
                                                    const char* propName);
+[[noreturn]] void throw_late_init_prop(const Class* cls,
+                                       const StringData* propName,
+                                       bool isSProp);
+
 void check_collection_compare(const ObjectData* obj);
 void check_collection_compare(const ObjectData* obj1, const ObjectData* obj2);
 void check_collection_cast_to_array();

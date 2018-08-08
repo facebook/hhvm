@@ -87,6 +87,7 @@ template<class TyBC, class ArgType>
 folly::Optional<Bytecode> makeAssert(ArrayTypeTable::Builder& arrTable,
                                      ArgType arg,
                                      Type t) {
+  if (t.subtypeOf(BBottom)) return folly::none;
   auto const rat = make_repo_type(arrTable, t);
   using T = RepoAuthType::Tag;
   if (options.FilterAssertions) {
@@ -131,7 +132,7 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
     auto const realT = state.stack[state.stack.size() - idx - 1].type;
     auto const flav  = stack_flav(realT);
 
-    assert(!realT.subtypeOf(BCls));
+    assert(realT.subtypeOf(BBottom) || !realT.subtypeOf(BCls));
     if (options.FilterAssertions && !realT.strictSubtypeOf(flav)) {
       return;
     }

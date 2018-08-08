@@ -1209,7 +1209,7 @@ Class::PropSlotLookup Class::findSProp(
   return PropSlotLookup { sPropInd, accessible };
 }
 
-Class::PropValLookup Class::getSProp(
+Class::PropValLookup Class::getSPropIgnoreLateInit(
   const Class* ctx,
   const StringData* sPropName
 ) const {
@@ -1223,30 +1223,48 @@ Class::PropValLookup Class::getSProp(
   auto const sProp = getSPropData(lookup.slot);
 
   if (debug) {
+    auto const& decl = m_staticProperties[lookup.slot];
+    auto const lateInit = bool(decl.attrs & AttrLateInit);
+
     always_assert(
-      sProp && sProp->m_type != KindOfUninit &&
+      sProp && (sProp->m_type != KindOfUninit || lateInit) &&
       "Static property initialization failed to initialize a property."
     );
 
-    if (RuntimeOption::RepoAuthoritative) {
-      auto const repoTy = staticPropRepoAuthType(lookup.slot);
-      always_assert(tvMatchesRepoAuthType(*sProp, repoTy));
-    }
+    if (sProp->m_type != KindOfUninit) {
+      if (RuntimeOption::RepoAuthoritative) {
+        auto const repoTy = staticPropRepoAuthType(lookup.slot);
+        always_assert(tvMatchesRepoAuthType(*sProp, repoTy));
+      }
 
-    if (RuntimeOption::EvalCheckPropTypeHints > 2) {
-      auto const& decl = m_staticProperties[lookup.slot];
-      auto const typeOk =
-        !decl.typeConstraint.isCheckable() ||
-        decl.typeConstraint.isSoft() ||
-        (!(decl.attrs & AttrNoImplicitNullable)
-         && sProp->m_type == KindOfNull) ||
-        (sProp->m_type != KindOfRef &&
-         decl.typeConstraint.assertCheck(sProp));
-      always_assert(typeOk);
+      if (RuntimeOption::EvalCheckPropTypeHints > 2) {
+        auto const typeOk =
+          !decl.typeConstraint.isCheckable() ||
+          decl.typeConstraint.isSoft() ||
+          (!(decl.attrs & AttrNoImplicitNullable)
+           && sProp->m_type == KindOfNull) ||
+          (sProp->m_type != KindOfRef &&
+           decl.typeConstraint.assertCheck(sProp));
+        always_assert(typeOk);
+      }
     }
   }
 
   return PropValLookup { sProp, lookup.slot, lookup.accessible };
+}
+
+Class::PropValLookup Class::getSProp(
+  const Class* ctx,
+  const StringData* sPropName
+) const {
+  auto const lookup = getSPropIgnoreLateInit(ctx, sPropName);
+  if (lookup.val && UNLIKELY(lookup.val->m_type == KindOfUninit)) {
+    auto const& decl = m_staticProperties[lookup.slot];
+    if (decl.attrs & AttrLateInit) {
+      throw_late_init_prop(decl.cls, sPropName, true);
+    }
+  }
+  return lookup;
 }
 
 bool Class::IsPropAccessible(const Prop& prop, Class* ctx) {
@@ -2478,6 +2496,26 @@ void Class::setProperties() {
         m_declPropInit.push_back(tv);
       };
 
+      auto const lateInitCheck = [&] (const Class::Prop& prop) {
+        if ((prop.attrs ^ preProp->attrs()) & AttrLateInit) {
+          if (prop.attrs & AttrLateInit) {
+            raise_error(
+              "Property %s::$%s must be <<__LateInit>> (as in class %s)",
+              m_preClass->name()->data(),
+              preProp->name()->data(),
+              m_parent->name()->data()
+            );
+          } else {
+            raise_error(
+              "Property %s::$%s must not be <<__LateInit>> (as in class %s)",
+              m_preClass->name()->data(),
+              preProp->name()->data(),
+              m_parent->name()->data()
+            );
+          }
+        }
+      };
+
       switch (preProp->attrs() & (AttrPublic|AttrProtected|AttrPrivate)) {
       case AttrPrivate: {
         addNewProp();
@@ -2494,6 +2532,9 @@ void Class::setProperties() {
           assertx(!(prop.attrs & AttrNoImplicitNullable) ||
                   (preProp->attrs() & AttrNoImplicitNullable));
           assertx(prop.attrs & AttrNoBadRedeclare);
+
+          lateInitCheck(prop);
+
           prop.cls = this;
           prop.docComment = preProp->docComment();
 
@@ -2556,6 +2597,9 @@ void Class::setProperties() {
           assertx(!(prop.attrs & AttrNoImplicitNullable) ||
                   (preProp->attrs() & AttrNoImplicitNullable));
           assertx(prop.attrs & AttrNoBadRedeclare);
+
+          lateInitCheck(prop);
+
           prop.cls = this;
           prop.docComment = preProp->docComment();
           if ((prop.attrs & (AttrPublic|AttrProtected|AttrPrivate))

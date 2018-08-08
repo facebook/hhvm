@@ -167,9 +167,13 @@ TypedValue keysetIdxS(ArrayData*, StringData*, TypedValue);
 TypedValue* ldGblAddrDefHelper(StringData* name);
 
 TypedValue* getSPropOrNull(const Class* cls,
-    const StringData* name, Class* ctx);
+                           const StringData* name,
+                           Class* ctx,
+                           bool ignoreLateInit);
 TypedValue* getSPropOrRaise(const Class* cls,
-    const StringData* name, Class* ctx);
+                            const StringData* name,
+                            Class* ctx,
+                            bool ignoreLateInit);
 
 int64_t switchDoubleHelper(double val, int64_t base, int64_t nTargets);
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);

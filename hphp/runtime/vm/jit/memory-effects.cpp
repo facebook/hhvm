@@ -56,8 +56,8 @@ AliasClass pointee(
     return ARefAny | pointee(sinst->src(0), visited_labels);
   }
 
-  if (sinst->is(LdRDSAddr)) {
-    return ARds { sinst->extra<LdRDSAddr>()->handle };
+  if (sinst->is(LdRDSAddr, LdInitRDSAddr)) {
+    return ARds { sinst->extra<RDSHandleData>()->handle };
   }
 
   // For phis, union all incoming values, taking care to not recurse infinitely
@@ -109,10 +109,12 @@ AliasClass pointee(
     }
 
     if (typeNR <= TMemToPropGen) {
-      if (sinst->is(LdPropAddr)) {
+      if (sinst->is(LdPropAddr, LdInitPropAddr)) {
         return AliasClass {
-          AProp { sinst->src(0),
-                  safe_cast<uint32_t>(sinst->extra<LdPropAddr>()->offsetBytes) }
+          AProp {
+            sinst->src(0),
+            safe_cast<uint32_t>(sinst->extra<ByteOffsetData>()->offsetBytes)
+          }
         };
       }
       return APropAny;
@@ -1497,6 +1499,19 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case MapSet:
     return may_reenter(inst, may_load_store(AHeapAny, AEmpty /* Note */));
 
+  case LdInitPropAddr:
+    return may_load_store(
+      AProp {
+        inst.src(0),
+        safe_cast<uint32_t>(inst.extra<LdInitPropAddr>()->offsetBytes)
+      },
+      AEmpty
+    );
+  case LdInitRDSAddr:
+    return may_load_store(
+      ARds { inst.extra<LdInitRDSAddr>()->handle },
+      AEmpty
+    );
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that allocate new objects, without reading any other memory
@@ -2096,6 +2111,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowInvalidOperation:
   case ThrowArithmeticError:
   case ThrowDivisionByZeroError:
+  case ThrowLateInitPropError:
   case SetOpCell:
   case SetOpCellVerify:
   case AsTypeStruct:

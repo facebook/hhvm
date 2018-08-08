@@ -146,7 +146,6 @@ struct Class : AtomicCountable {
      */
     LowStringPtr name;
     LowStringPtr mangledName;
-    LowStringPtr originalMangledName;
 
     /* First parent class that declares this property. */
     LowPtr<Class> cls;

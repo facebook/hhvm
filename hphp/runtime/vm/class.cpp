@@ -2367,7 +2367,6 @@ void Class::setProperties() {
       Prop prop;
       prop.cls                 = parentProp.cls;
       prop.mangledName         = parentProp.mangledName;
-      prop.originalMangledName = parentProp.originalMangledName;
       prop.attrs               = parentProp.attrs | AttrNoBadRedeclare;
       prop.docComment          = parentProp.docComment;
       prop.userType            = parentProp.userType;
@@ -2462,7 +2461,6 @@ void Class::setProperties() {
         Prop prop;
         prop.name                = preProp->name();
         prop.mangledName         = preProp->mangledName();
-        prop.originalMangledName = preProp->mangledName();
         prop.attrs               = Attr(preProp->attrs() & ~AttrTrait)
                                    | AttrNoBadRedeclare;
         // This is the first class to declare this property
@@ -2606,7 +2604,6 @@ void Class::setProperties() {
               == AttrProtected) {
             // Weaken protected property to public.
             prop.mangledName = preProp->mangledName();
-            prop.originalMangledName = preProp->mangledName();
             prop.attrs = Attr(prop.attrs ^ (AttrProtected|AttrPublic));
             prop.userType = preProp->userType();
           }

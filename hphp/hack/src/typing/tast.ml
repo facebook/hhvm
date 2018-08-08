@@ -21,6 +21,13 @@ type saved_env = {
   tpenv : Type_parameter_env.t;
 }
 
+let empty_saved_env tcopt = {
+  tcopt;
+  tenv = IMap.empty;
+  subst = IMap.empty;
+  tpenv = SMap.empty;
+}
+
 let pp_saved_env fmt env =
   Format.fprintf fmt "@[<hv 2>{ ";
 

@@ -2629,8 +2629,8 @@ module Make (GetLocals : GetLocals) = struct
           ShapeMap.add name (expr env value) fdm
         end
       end
-    | Unsafeexpr _ ->
-      N.Any
+    | Unsafeexpr e ->
+      N.Unsafe_expr (Errors.ignore_ (fun () -> expr env e))
     | BracedExpr _ ->
       N.Any
     | Dollar _ ->

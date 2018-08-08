@@ -49,6 +49,18 @@ module CMap         = C.Map
 module Try          = Typing_try
 module TR           = Typing_reactivity
 
+(* Maps a Nast to a Tast where every type is Tany.
+   Used to produce a Tast for unsafe code without inferring types for it. *)
+module NastTanyMapper =
+  Aast_mapper.MapAnnotatedAST(Nast.Annotations)(Tast.Annotations)
+
+let ntm_env tcopt =
+  NastTanyMapper.{
+    map_env_annotation = (fun () -> Tast.empty_saved_env tcopt);
+    map_expr_annotation = (fun p -> p, (Reason.Rnone, Tany));
+    map_class_id_annotation = (fun p -> p, (Reason.Rnone, Tany));
+  }
+
 (*****************************************************************************)
 (* Debugging *)
 (*****************************************************************************)
@@ -2545,6 +2557,12 @@ and expr_
         end ~init:env in
         make_result env txml obj
       )
+  | Unsafe_expr e ->
+    (* Do not run inference on the expression, since unsafe is sometimes used to
+       work around inference performance problems. *)
+    let tcopt = Env.get_tcopt env in
+    let te = NastTanyMapper.map_expr (ntm_env tcopt) e in
+    make_result env (T.Unsafe_expr te) (Reason.Rnone, Tany)
   | Callconv (kind, e) ->
       let env, te, ty = expr env e in
       let rec check_types env = function

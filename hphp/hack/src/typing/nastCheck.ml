@@ -347,6 +347,7 @@ module CheckFunctionBody = struct
         List.iter attrl (fun attr -> expr f_type env (get_xhp_attr_expr attr));
         List.iter el (expr f_type env);
         ()
+    | _, Unsafe_expr _ -> ()
     | _, Callconv (_, e) ->
         expr f_type env e;
         ()
@@ -772,7 +773,7 @@ and check_class_property_initialization prop =
       match (snd e) with
       | Any | Typename _
       | Id _ | Class_const _ | True | False | Int _ | Float _
-      | Null | String _ | PrefixedString _ ->
+      | Null | String _ | PrefixedString _ | Unsafe_expr _ ->
         ()
       | Array field_list ->
         List.iter field_list begin function
@@ -1198,7 +1199,9 @@ and expr_ env p = function
   | Typename _
   | Lvar _
   | ImmutableVar _
-  | Lplaceholder _ | Dollardollar _ -> ()
+  | Lplaceholder _
+  | Dollardollar _
+  | Unsafe_expr _ -> ()
   | Dollar e ->
     let env' = {env with is_array_append_allowed = false} in
     expr env' e

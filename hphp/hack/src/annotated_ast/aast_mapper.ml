@@ -111,6 +111,7 @@ struct
         | S.Xhp_simple (p, e) -> T.Xhp_simple (p,map_expr menv e)
         | S.Xhp_spread e -> T.Xhp_spread (map_expr menv e)
       ), map_exprl menv el)
+    | S.Unsafe_expr e -> T.Unsafe_expr (map_expr menv e)
     | S.Callconv (k, e) -> T.Callconv (k, map_expr menv e)
     | S.Assert (S.AE_assert e) -> T.Assert (T.AE_assert (map_expr menv e))
     | S.Clone e -> T.Clone (map_expr menv e)

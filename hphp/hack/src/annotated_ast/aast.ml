@@ -154,6 +154,7 @@ and expr_ =
   | New of class_id * expr list * expr list
   | Efun of fun_ * lid list
   | Xml of sid * xhp_attribute list * expr list
+  | Unsafe_expr of expr
   | Callconv of Ast.param_kind * expr
 
   (* None of these constructors exist in the AST *)
@@ -420,6 +421,7 @@ let expr_to_string expr =
   | New _  -> "New"
   | Efun _  -> "Efun"
   | Xml _  -> "Xml"
+  | Unsafe_expr _ -> "Unsafe_expr"
   | Callconv _ -> "Callconv"
   | Assert _  -> "Assert"
   | Clone _  -> "Clone"
@@ -517,6 +519,7 @@ class type ['a] visitor_type = object
   method on_efun : 'a -> fun_ -> id list -> 'a
   method on_xml : 'a -> sid -> xhp_attribute list -> expr list -> 'a
   method on_param_kind : 'a -> Ast.param_kind -> 'a
+  method on_unsafe_expr : 'a -> expr -> 'a
   method on_callconv : 'a -> Ast.param_kind -> expr -> 'a
   method on_assert : 'a -> assert_expr -> 'a
   method on_clone : 'a -> expr -> 'a
@@ -722,6 +725,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | New         (cid, el, uel)   -> this#on_new acc cid el uel
    | Efun        (f, idl)         -> this#on_efun acc f idl
    | Xml         (sid, attrl, el) -> this#on_xml acc sid attrl el
+   | Unsafe_expr (e)              -> this#on_unsafe_expr acc e
    | Callconv    (kind, e)        -> this#on_callconv acc kind e
    | ValCollection    (s, el)     ->
        this#on_valCollection acc s el
@@ -871,6 +875,8 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     acc
 
   method on_param_kind acc _ = acc
+
+  method on_unsafe_expr acc _ = acc
 
   method on_callconv acc kind e =
     let acc = this#on_param_kind acc kind in

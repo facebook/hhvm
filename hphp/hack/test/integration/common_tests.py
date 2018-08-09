@@ -295,8 +295,8 @@ class BarebonesTests(object):
         Add a new file that contains an error.
         """
         with open(os.path.join(self.repo_dir, 'foo_4.php'), 'w') as f:
-            f.write("""
-            <?hh
+            f.write("""<?hh
+
             function k(): int {
                 return 'a';
             }
@@ -315,8 +315,8 @@ class BarebonesTests(object):
         Add a new file which contains a naming collisions with an old file
         """
         with open(os.path.join(self.repo_dir, 'foo_4.php'), 'w') as f:
-            f.write("""
-            <?hh
+            f.write("""<?hh
+
             class FOO {}
             function H () {}
             """)
@@ -343,8 +343,8 @@ class BarebonesTests(object):
         in a use case on one of its subclasses.
         """
         with open(os.path.join(self.repo_dir, 'class_1.php'), 'w') as f:
-            f.write("""
-                <?hh // strict
+            f.write("""<?hh // strict
+
                 class B {
                   public static function foo () : bool {
                       return true;
@@ -383,8 +383,8 @@ class CommonTests(BarebonesTests):
         Add an error to a file that previously had none.
         """
         with open(os.path.join(self.repo_dir, 'foo_2.php'), 'w') as f:
-            f.write("""
-            <?hh
+            f.write("""<?hh
+
             function g(): int {
                 return 'a';
             }
@@ -463,8 +463,8 @@ class CommonTests(BarebonesTests):
         )
 
         with open(os.path.join(self.repo_dir, 'foo_1.php'), 'w') as f:
-            f.write("""
-            <?hh
+            f.write("""<?hh
+
             function f(): string {
                 return g();
             }
@@ -775,15 +775,15 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         redeclaring Bar with the remaining parent class.
         """
         with open(os.path.join(self.repo_dir, 'foo_4.php'), 'w') as f:
-            f.write("""
-            <?hh
+            f.write("""<?hh
+
             class Foo { // also declared in foo_3.php in setUpClass
                 public static $x;
             }
             """)
         with open(os.path.join(self.repo_dir, 'foo_5.php'), 'w') as f:
-            f.write("""
-            <?hh
+            f.write("""<?hh
+
             class Bar extends Foo {}
 
             function main(Bar $a) {
@@ -805,8 +805,8 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
             ])
 
         with open(os.path.join(self.repo_dir, 'foo_4.php'), 'w') as f:
-            f.write("""
-            <?hh
+            f.write("""<?hh
+
             class Foo {
                 public static $y;
             }
@@ -816,8 +816,8 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
 
     def test_refactor_methods(self):
         with open(os.path.join(self.repo_dir, 'foo_4.php'), 'w') as f:
-            f.write("""
-            <?hh
+            f.write("""<?hh
+
             class Bar extends Foo {
                 public function f() {}
                 public function g() {}
@@ -833,35 +833,35 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
 
         self.check_cmd_and_json_cmd(['Rewrote 1 files.'],
                 ['[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":86,"char_end":87,"line":4,"col_start":33,'
+                '"char_start":74,"char_end":75,"line":4,"col_start":33,'
                 '"col_end":33,"patch_type":"replace","replacement":"wat"}},'
-                '{{"char_start":248,"char_end":249,"line":10,"col_start":28,'
+                '{{"char_start":236,"char_end":237,"line":10,"col_start":28,'
                 '"col_end":28,"patch_type":"replace","replacement":"wat"}}]}}]'],
                 options=['--refactor', 'Method', 'Bar::f', 'Bar::wat'])
         self.check_cmd_and_json_cmd(['Rewrote 1 files.'],
                 ['[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":127,"char_end":128,"line":5,"col_start":33,'
+                '"char_start":115,"char_end":116,"line":5,"col_start":33,'
                 '"col_end":33,"patch_type":"replace",'
-                '"replacement":"overrideMe"}},{{"char_start":217,'
-                '"char_end":218,"line":9,"col_start":33,"col_end":33,'
+                '"replacement":"overrideMe"}},{{"char_start":205,'
+                '"char_end":206,"line":9,"col_start":33,"col_end":33,'
                 '"patch_type":"replace","replacement":"overrideMe"}}]}}]'],
                 options=['--refactor', 'Method', 'Bar::g', 'Bar::overrideMe'])
         self.check_cmd_and_json_cmd(['Rewrote 2 files.'],
                 ['[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":48,"char_end":51,"line":3,"col_start":31,'
+                '"char_start":36,"char_end":39,"line":3,"col_start":31,'
                 '"col_end":33,"patch_type":"replace","replacement":"Qux"}}]}},'
                 '{{"filename":"{root}foo_3.php","patches":[{{'
-                '"char_start":94,"char_end":97,"line":7,"col_start":15,'
+                '"char_start":86,"char_end":89,"line":7,"col_start":15,'
                 '"col_end":17,"patch_type":"replace","replacement":"Qux"}},'
-                '{{"char_start":163,"char_end":166,"line":10,"col_start":17,'
+                '{{"char_start":155,"char_end":158,"line":10,"col_start":17,'
                 '"col_end":19,"patch_type":"replace","replacement":"Qux"}}]'
                 '}}]'],
                 options=['--refactor', 'Class', 'Foo', 'Qux'])
 
         with open(os.path.join(self.repo_dir, 'foo_4.php')) as f:
             out = f.read()
-            self.assertEqual(out, """
-            <?hh
+            self.assertEqual(out, """<?hh
+
             class Bar extends Qux {
                 public function wat() {}
                 public function overrideMe() {}
@@ -876,8 +876,8 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
 
         with open(os.path.join(self.repo_dir, 'foo_3.php')) as f:
             out = f.read()
-            self.assertEqual(out, """
-        <?hh
+            self.assertEqual(out, """<?hh
+
         function h(): string {
             return "a";
         }
@@ -892,8 +892,8 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
 
     def test_refactor_functions(self):
         with open(os.path.join(self.repo_dir, 'foo_4.php'), 'w') as f:
-            f.write("""
-            <?hh
+            f.write("""<?hh
+
             function wow() {
                 wat();
                 return f();
@@ -905,26 +905,26 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
 
         self.check_cmd_and_json_cmd(['Rewrote 1 files.'],
                 ['[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":134,"char_end":137,"line":8,"col_start":22,'
+                '"char_start":122,"char_end":125,"line":8,"col_start":22,'
                 '"col_end":24,"patch_type":"replace","replacement":"woah"}},'
-                '{{"char_start":63,"char_end":66,"line":4,"col_start":17,'
+                '{{"char_start":51,"char_end":54,"line":4,"col_start":17,'
                 '"col_end":19,"patch_type":"replace","replacement":"woah"}}]'
                 '}}]'],
                 options=['--refactor', 'Function', 'wat', 'woah'])
         self.check_cmd_and_json_cmd(['Rewrote 2 files.'],
                 ['[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":94,"char_end":95,"line":5,"col_start":24,'
+                '"char_start":82,"char_end":83,"line":5,"col_start":24,'
                 '"col_end":24,"patch_type":"replace","replacement":"fff"}}]}},'
                 '{{"filename":"{root}foo_1.php","patches":[{{'
-                '"char_start":31,"char_end":32,"line":3,"col_start":18,'
+                '"char_start":23,"char_end":24,"line":3,"col_start":18,'
                 '"col_end":18,"patch_type":"replace","replacement":"fff"}}]'
                 '}}]'],
                 options=['--refactor', 'Function', 'f', 'fff'])
 
         with open(os.path.join(self.repo_dir, 'foo_4.php')) as f:
             out = f.read()
-            self.assertEqual(out, """
-            <?hh
+            self.assertEqual(out, """<?hh
+
             function wow() {
                 woah();
                 return fff();
@@ -935,8 +935,8 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
 
         with open(os.path.join(self.repo_dir, 'foo_1.php')) as f:
             out = f.read()
-            self.assertEqual(out, """
-        <?hh
+            self.assertEqual(out, """<?hh
+
         function fff() {
             return g() + 1;
         }
@@ -944,8 +944,8 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
 
     def test_refactor_typedefs(self):
         with open(os.path.join(self.repo_dir, 'foo_4.php'), 'w') as f:
-            f.write("""
-            <?hh
+            f.write("""<?hh
+
             newtype NewType = int;
             type Type = int;
 
@@ -959,26 +959,26 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
 
         self.check_cmd_and_json_cmd(['Rewrote 1 files.'],
         ['[{{"filename":"{root}foo_4.php","patches":[{{'
-        '"char_start":38,"char_end":45,"line":3,"col_start":21,'
+        '"char_start":26,"char_end":33,"line":3,"col_start":21,'
         '"col_end":27,"patch_type":"replace","replacement":"NewTypeX"}},'
-        '{{"char_start":160,"char_end":167,"line":7,"col_start":50,'
+        '{{"char_start":148,"char_end":155,"line":7,"col_start":50,'
         '"col_end":56,"patch_type":"replace","replacement":"NewTypeX"}}]'
         '}}]'],
         options=['--refactor', 'Class', 'NewType', 'NewTypeX'])
 
         self.check_cmd_and_json_cmd(['Rewrote 1 files.'],
         ['[{{"filename":"{root}foo_4.php","patches":[{{'
-        '"char_start":71,"char_end":75,"line":4,"col_start":18,'
+        '"char_start":59,"char_end":63,"line":4,"col_start":18,'
         '"col_end":21,"patch_type":"replace","replacement":"TypeX"}},'
-        '{{"char_start":151,"char_end":155,"line":7,"col_start":40,'
+        '{{"char_start":139,"char_end":143,"line":7,"col_start":40,'
         '"col_end":43,"patch_type":"replace","replacement":"TypeX"}}]'
         '}}]'],
         options=['--refactor', 'Class', 'Type', 'TypeX'])
 
         with open(os.path.join(self.repo_dir, 'foo_4.php')) as f:
             out = f.read()
-            self.assertEqual(out, """
-            <?hh
+            self.assertEqual(out, """<?hh
+
             newtype NewTypeX = int;
             type TypeX = int;
 
@@ -998,8 +998,8 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         self.check_cmd(['No errors!'])
 
         with open(os.path.join(self.repo_dir, 'auto_ns_2.php'), 'w') as f:
-            f.write("""
-            <?hh
+            f.write("""<?hh
+
             function haha() {
                 Herp\\f();
                 return 1;

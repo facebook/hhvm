@@ -125,7 +125,7 @@ interface MutableSet extends ConstSet,
                              SetAccess {
 }
 
-trait StrictIterable {
+trait StrictIterable implements \HH\Iterable {
   public function toArray() {
     $arr = varray[];
     foreach ($this as $v) {
@@ -254,7 +254,7 @@ trait StrictIterable {
   }
 }
 
-trait StrictKeyedIterable {
+trait StrictKeyedIterable implements \HH\KeyedIterable {
   public function toArray() {
     $arr = darray[];
     foreach ($this as $k => $v) {
@@ -432,7 +432,7 @@ trait StrictKeyedIterable {
   }
 }
 
-trait LazyIterable {
+trait LazyIterable implements \HH\Iterable {
   public function toArray() {
     $arr = varray[];
     foreach ($this as $v) {
@@ -507,7 +507,7 @@ trait LazyIterable {
   }
 }
 
-trait LazyKeyedIterable {
+trait LazyKeyedIterable implements \HH\KeyedIterable {
   public function toArray() {
     $arr = darray[];
     foreach ($this as $k => $v) {

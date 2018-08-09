@@ -119,6 +119,7 @@ t, u {{ ocaml ty }} :: 'ty_' ::=                           {{ com syntax of type
   | this   ::   :: this                     {{ com this type }}
   | ? t    ::   :: option                   {{ com nullable }}
   | t1 '|' t2         :: :: union           {{ com union type }}
+  | t1 & t2 :: :: intersection              {{ com intersection type }}
   | ( t )  :: S :: paren {{ coq [[t]] }}    {{ com parentheses }} {{ ocaml [[t]] }}
   | ( t1 , .... , tn ) :: :: tuple          {{ com tuple }}
   | shape ( sft1 , ... , sftn ) :: :: shape  {{ com closed shape }}
@@ -156,6 +157,7 @@ U {{ ocaml updatel }} {{ tex \Upsilon }} :: U_ ::= {{ com list of context update
 Gitem :: 'lenv_' ::= {{ com entry in locals environment }}
   | x : t                           ::   :: lvar {{ com local typing }}
   | t <: t'                         ::   :: sub {{ com subtype assumption }}
+  | t ~> t'                         ::   :: coerce {{ com coercion assumption }}
 
 G {{ ocaml lenv }} {{ coq lenv }}
    {{ tex \Gamma }} :: 'lenv_' ::=
@@ -356,8 +358,8 @@ uop :: '' ::= {{ com unary operations }}
   | ! :: :: Unot {{ com not }} {{ tex \kwd{!} }}
   | + :: :: Uplus  {{ com unary plus }} {{ tex \kwd{+} }}
   | - :: :: Uminus {{ com unary negation }} {{ tex \kwd{-} }}
-  | ++ :: :: Uincr {{ com increment }} {{ tex \kwd{++} }}
-  | -- :: :: Udecr {{ com decrement }} {{ tex \kwd{--} }}
+  | (++) :: :: Uincr {{ com increment }} {{ tex \kwd{++} }}
+  | (--) :: :: Udecr {{ com decrement }} {{ tex \kwd{--} }}
 
 bop :: '' ::= {{ com binary operations }}
   | + :: :: Plus {{ com addition }} {{ tex \kwd{+} }}
@@ -1038,22 +1040,33 @@ by
 {{ com \\\section*{Implicit coercion} }}
 
 defn
-  t1 ~> t2 :: :: coerce :: 'coerce_'
+  G |- t1 ~> t2 :: :: coerce :: 'coerce_'
   {{ com Values of type [[t1]] implicitly coerce to type [[t2]] }}
 by
 
-  ------------ :: dynamic
-  t ~> dynamic
+  ------------------ :: dynamic
+  G |- t ~> dynamic
 
-  ------------ :: refl
-  t ~> t
+  G |- t1 <: t2
+  -------------------------- :: subtype
+  G |- t1 ~> t2
+
+  G |- t1 ~> t2
+  G |- t2 ~> t3
+  ------------------ :: trans
+  G |- t1 ~> t3
+
+  G |- t1 ~> t2
+  ------------------------------------ :: awaitable
+  G |- `Awaitable`<t1> ~> `Awaitable`<t2>
 
 defn
   G ; K |- e ~ t :: :: exprimplicitty :: 'expr_'
   {{ com Expression [[e]] has implicit coercion to type [[t]] under locals [[G]] and continuations [[K]] }}
 by
 
-    G ; K |- e : t1   t1 ~> t2
+    G ; K |- e : t1
+    G |- t1 ~> t2
     -------------------------- :: coercion
     G ; K |- e ~ t2
 
@@ -1100,6 +1113,8 @@ defn
   {{ com Expression [[e]] of type [[t]] can be executed under locals [[G]] and continuations [[K]] }}
 by
 
+{{ com It should also be noted that throughout this section, left rules have
+complementary right rules that are omitted for brevity. }}
 
 {{ com \subsection{General rules} }}
 
@@ -1150,59 +1165,122 @@ G' ; K , skip : G'' |- e2 : t
 ------------------------------------- :: assign
 G ; K , skip : G''[U] |- e1 = e2 : t
 
-{{ com \subsection{Array append} }}
-
-G ; K |- < e1 : array<t> , e2 : array<t> >
----------------------------------------------------- :: add_vec_array
-G ; K |- e1 + e2 : array<t>
-
-G ; K |- < e1 : array<t1,t2> , e2 : array<t1,t2> >
-------------------------------------------------------------- :: add_map_array
-G ; K |- e1 + e2 : array<t1,t2>
-
 {{ com \subsection{Addition} }}
 
-{{ com Same rules for subtraction and multiplication. }}
-
-G ; K |- < e1 : float , e2 : num >
+G ; K |- < e1 : float , e2 : num|dynamic >
 ---------------------------------------------- :: add_float_left
-G ; K |- e1 + e2 : float
-
-G ; K |- < e1 : num , e2 : float >
----------------------------------------------- :: add_float_right
 G ; K |- e1 + e2 : float
 
 G ; K |- < e1 : int , e2 : int >
 -------------------------------- :: add_int
 G ; K |- e1 + e2 : int
 
-G ; K |- < e1 : num , e2 : num >
--------------------------------- :: add_num
+G ; K |- < e1 : num , e2 : num|dynamic >
+----------------------------------------- :: add_num_left
 G ; K |- e1 + e2 : num
 
-{{ com \subsection{Division} }}
+{{ com The case below cannot gain the typing of num, as the runtime allows adding
+arrays to get arrays. Taking two arrays for dynamic parameters, adding them, and treating the
+resultant array as a num can cause crashing later. It could safely be $[[
+num|array<dynamic>|array<dynamic,dynamic>]]$ instead, but this typing is confusing to users. }}
 
-G ; K , skip:G', catch:G' |- < e1 : float , e2 : num >
+G ; K |- < e1 : dynamic , e2 : dynamic >
+------------------------------------ :: add_dynamic
+G ; K |- e1 + e2 : dynamic
+
+{{ com \subsection{Subtraction and Multiplication} }}
+
+{{ com These differ from addition only in how they handle the case of two dynamic
+types. Multiplication is omitted, but is similar to subtraction. }}
+
+G ; K |- < e1 : dynamic , e2 : dynamic >
+---------------------------------------------------- :: sub_dynamic
+G ; K |- e1 - e2 : num
+
+{{ com \subsection{Division and Exponentiation} }}
+
+{{ com Exponentiation is ommitted, but is similar to division. }}
+
+G ; K , skip:G', catch:G' |- < e1 : float , e2 : num|dynamic >
 --------------------------------------------------- :: div_float_left
 G ; K , skip:G', catch:G' |- e1 / e2 : float
 
-G ; K , skip:G', catch:G' |- < e1 : num , e2 : float >
------------------------------------------------------- :: div_float_right
-G ; K , skip:G', catch:G' |- e1 / e2 : float
+{{ com When int operations do not perfectly yield an int, the result is a float.
+ Thus num is the tightest typing. }}
 
-G ; K , skip:G', catch:G' |- < e1 : num , e2 : num >
+G ; K , skip:G', catch:G' |- < e1 : num|dynamic , e2 : num|dynamic >
 ------------------------------------------------- :: div_num
 G ; K , skip:G', catch:G' |- e1 / e2 : num
 
-{{ com \subsection{Remainder} }}
+{{ com \subsection{Remainder and Shifts} }}
 
-{{ com Same rules for bitwise and, bitwise or, shift left, shift right. }}
+{{ com Same rules for shift left and shift right }}
 
-G ; K |- < e1 : int , e2 : int >
---------------------------------   :: mod_int
+G ; K |- < e1 : int|dynamic , e2 : int|dynamic >
+------------------------------------------------   :: mod
 G ; K |- e1 % e2 : int
 
+{{ com \subsection{Negation} }}
+
+{{ com Same rules for + }}
+
+G ; K |- e : int
+--------------------------------   :: neg_int
+G ; K |- - e : int
+
+G ; K |- e : float
+--------------------------------   :: neg_float
+G ; K |- - e : float
+
+G ; K |- e : num|dynamic
+--------------------------------   :: neg_num
+G ; K |- - e : num
+
+
+
+{{ com \subsection{Binary Bitwise} }}
+
+{{ com Same rules for bitwise xor and and }}
+
+G ; K |- < e1 : int , e2 : int|dynamic >
+--------------------------------   :: or_int_left
+G ; K |- e1 | e2 : int
+
+{{ com The case below cannot gain the typing of int, as the runtime allows bitwise
+operations on strings. Taking two strings for dynamic parameters, bitwise or-ing
+them, and treating the resultant string as an int can cause crashing later. It could safely be
+$[[int|string]]$ = $[[arraykey]]$ instead, but this typing is confusing to users. }}
+
+G ; K |- < e1 : dynamic , e2 : dynamic >
+--------------------------------------   :: or_dynamic
+G ; K |- e1 | e2 : dynamic
+
+{{ com \subsection{Bitwise Not} }}
+
+G ; K |- e : int
+--------------------------------   :: bitnot
+G ; K |- ~ e : int
+
+{{ com For the same reason as the binary case, unary bitwise operations on
+dynamic parameters yield dynamic. }}
+
+G ; K |- e : dynamic
+--------------------------------   :: bitnot_dynamic
+G ; K |- ~ e : dynamic
+
+
+{{ com \subsection{Concatenation} }}
+
+{{ com The type t here must be Stringish, containing any primitive type and
+objects that implement underscore underscore toString. }}
+
+G ; K |- < e1 : t|dynamic , e2 : t|dynamic >
+--------------------------------------------  :: concat
+G ; K |- e1 . e2 : string
+
 {{ com \subsection{Equality} }}
+
+{{ com Same rules for === and !==. }}
 
 G ; K |- < e1 : t1 , e2 : t2 >
 ------------------------------ :: equals
@@ -1227,6 +1305,12 @@ G ; K |- e1 < e2 : bool
 G ; K |- < e1 : `DateTime` , e2 : `DateTime` >
 ------------------------------------------ :: lt_datetime
 G ; K |- e1 < e2 : bool
+
+G ; K |- < e1 : dynamic , e2 : ((num|string)|`DateTime`)|dynamic >
+-------------------------------- :: lt_dynamic_left
+G ; K |- e1 < e2 : bool
+
+{{ com Also similar for $\kwd{<=>}$ except the type bool is replaced with int. }}
 
 {{ com \subsection{Conditionals and logical operators} }}
 

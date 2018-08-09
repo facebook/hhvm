@@ -342,6 +342,7 @@ struct ServerOptions {
   int m_hugeThreads{0};
   unsigned m_hugeStackKb{0};
   unsigned m_extraKb{0};
+  uint32_t m_loop_sample_rate{0};
 };
 
 /**

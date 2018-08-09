@@ -125,6 +125,43 @@ void HPHPWorkerThread::cleanup() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+ProxygenServer::ProxygenEventBaseObserver::ProxygenEventBaseObserver(
+    uint32_t loop_sample_rate
+  ) : m_sample_rate_(loop_sample_rate),
+      m_busytime_estimator(std::chrono::seconds{60}),
+      m_idletime_estimator(std::chrono::seconds{60}),
+      m_evbLoopCountTimeSeries(ServiceData::createTimeSeries(
+                                "proxygen_evb_loop_count",
+                                {ServiceData::StatsType::COUNT},
+                                {std::chrono::seconds(60)}, 60)) {
+  m_counterCallback.init([this](std::map<std::string, int64_t>& values){
+    auto now = ClockT::now();
+    // export p90 p99 for evb busy time
+    const std::array<double, 2> quantiles_busytime {0.9, 0.99};
+    auto estimates = m_busytime_estimator.estimateQuantiles(
+      quantiles_busytime, now).quantiles;
+
+    values["proxygen_evb_busy_time_us.p90.60"] = estimates[0].second;
+    values["proxygen_evb_busy_time_us.p99.60"] = estimates[1].second;
+
+    // export p1 p10 for evb idle time
+    const std::array<double, 2> quantiles_idletime {0.01, 0.1};
+    estimates = m_idletime_estimator.estimateQuantiles(
+      quantiles_idletime, now).quantiles;
+
+    values["proxygen_evb_idle_time_us.p1.60"] = estimates[0].second;
+    values["proxygen_evb_idle_time_us.p10.60"] = estimates[1].second;
+  });
+}
+
+void ProxygenServer::ProxygenEventBaseObserver::loopSample(
+  int64_t busytime /*usec */, int64_t idletime /* usec */) {
+  auto now = ClockT::now();
+  m_busytime_estimator.addValue(static_cast<double>(busytime), now);
+  m_idletime_estimator.addValue(static_cast<double>(idletime), now);
+  m_evbLoopCountTimeSeries->addValue(static_cast<int64_t>(getSampleRate()));
+}
+
 ProxygenServer::ProxygenServer(
   const ServerOptions& options
   ) : Server(options.m_address, options.m_port),
@@ -142,6 +179,10 @@ ProxygenServer::ProxygenServer(
                    options.m_initThreads,
                    options.m_hugeStackKb,
                    options.m_extraKb) {
+  if (options.m_loop_sample_rate > 0) {
+    m_worker.getEventBase()->setObserver(
+      std::make_shared<ProxygenEventBaseObserver>(options.m_loop_sample_rate));
+  }
   SocketAddress address;
   if (options.m_address.empty()) {
     address.setFromLocalPort(options.m_port);

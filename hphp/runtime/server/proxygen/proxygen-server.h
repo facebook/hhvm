@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <folly/io/async/EventBaseManager.h>
+#include <folly/stats/QuantileEstimator.h>
 #include <memory>
 
 
@@ -166,6 +167,30 @@ struct ProxygenServer : Server,
     }
     m_pendingTransports.push_back(transport);
   }
+
+ private:
+  class ProxygenEventBaseObserver : public folly::EventBaseObserver {
+   public:
+     using ClockT = std::chrono::steady_clock;
+
+     explicit ProxygenEventBaseObserver(uint32_t loop_sample_rate);
+
+     ~ProxygenEventBaseObserver() = default;
+
+     uint32_t getSampleRate() const override {
+       return m_sample_rate_;
+     };
+
+     void loopSample(int64_t busytime /* usec */, int64_t idletime) override;
+
+   private:
+     const uint32_t m_sample_rate_;
+     folly::SlidingWindowQuantileEstimator<ClockT> m_busytime_estimator;
+     folly::SlidingWindowQuantileEstimator<ClockT> m_idletime_estimator;
+
+     ServiceData::ExportedTimeSeries* m_evbLoopCountTimeSeries;
+     ServiceData::CounterCallback m_counterCallback;
+  };
 
  protected:
   enum RequestPriority {

@@ -155,6 +155,7 @@ struct RuntimeOption {
   // Number of worker threads with stack partially on huge pages.
   static int ServerHugeThreadCount;
   static int ServerHugeStackKb;
+  static uint32_t ServerLoopSampleRate;
   static int ServerWarmupThrottleRequestCount;
   static int ServerThreadDropCacheTimeoutSeconds;
   static int ServerThreadJobLIFOSwitchThreshold;

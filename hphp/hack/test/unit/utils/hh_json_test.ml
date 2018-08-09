@@ -333,6 +333,15 @@ let test_truncate () =
   Asserter.String_asserter.assert_equals exp actual "max_total_count truncate 2";
   true
 
+let test_hex_escape () =
+  let input = "\"\\u003C\"" in
+  let exp = "<" in
+  Asserter.Hh_json_json_asserter.assert_equals
+    (Hh_json.JSON_String exp)
+    (Hh_json.json_of_string input)
+    "unicode escape with caps";
+  true
+
 let tests = [
   "test_escape_unescape", test_escape_unescape;
   "test_empty_string", test_empty_string;
@@ -351,6 +360,7 @@ let tests = [
   "test_access_3_keys_one_object_wrong_type_middle",
     test_access_3_keys_one_object_wrong_type_middle;
   "test_truncate", test_truncate;
+  "test_hex_escape", test_hex_escape;
 ]
 
 let () =

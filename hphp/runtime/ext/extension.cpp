@@ -56,20 +56,20 @@ bool Extension::IsSystemlibPath(const std::string& name) {
 }
 
 void Extension::CompileSystemlib(const std::string &slib,
-                                 const std::string &name) {
+                                 const std::string &name,
+                                 const Native::FuncTable& nativeFuncs) {
   // TODO (t3443556) Bytecode repo compilation expects that any errors
   // encountered during systemlib compilation have valid filename pointers
   // which won't be the case for now unless these pointers are long-lived.
   auto const moduleName = makeStaticString("/:" + name);
   auto const unit = compile_systemlib_string(slib.c_str(), slib.size(),
                                              moduleName->data(),
-                                             Native::s_builtinNativeFuncs);
+                                             nativeFuncs);
   always_assert_flog(unit, "No unit created for systemlib `{}'", moduleName);
 
   const StringData* msg;
   int line;
-  if (unit->compileTimeFatal(msg, line) ||
-      unit->parseFatal(msg, line)) {
+  if (unit->compileTimeFatal(msg, line) || unit->parseFatal(msg, line)) {
     std::fprintf(stderr, "Systemlib `%s' contains a fataling unit: %s, %d\n",
                  name.c_str(),
                  msg->data(),
@@ -99,11 +99,11 @@ void Extension::loadSystemlib(const std::string& name) {
   std::string slib = get_systemlib(&hhas, section, m_dsoName);
   if (!slib.empty()) {
     std::string phpname = s_systemlibPhpName + name;
-    CompileSystemlib(slib, phpname);
+    CompileSystemlib(slib, phpname, Native::s_builtinNativeFuncs);
   }
   if (!hhas.empty()) {
     std::string hhasname = s_systemlibHhasName + name;
-    CompileSystemlib(hhas, hhasname);
+    CompileSystemlib(hhas, hhasname, Native::s_builtinNativeFuncs);
   }
 }
 

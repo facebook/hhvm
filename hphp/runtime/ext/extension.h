@@ -63,7 +63,8 @@ struct Extension : IDebuggable {
 
   // Compile and merge an systemlib fragment
   static void CompileSystemlib(const std::string &slib,
-                               const std::string &name);
+                               const std::string &name,
+                               const Native::FuncTable& nativeFuncs);
 public:
   explicit Extension(const char* name, const char* version = "");
   ~Extension() override {}

@@ -27,8 +27,7 @@ namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
 
 FuncTable s_builtinNativeFuncs;
-const FuncTable s_noNativeFuncs;
-std::vector<NativeFuncResolver> s_nativeFuncResolvers;
+const FuncTable s_noNativeFuncs; // always empty
 ConstantMap s_constant_map;
 ClassConstantMapMap s_class_constant_map;
 
@@ -709,19 +708,10 @@ NativeFunctionInfo getNativeFunction(const FuncTable& nativeFuncs,
                                      const StringData* fname,
                                      const StringData* cname,
                                      bool isStatic) {
-  const String name = fullName(fname, cname, isStatic);
+  auto const name = fullName(fname, cname, isStatic);
   if (auto info = nativeFuncs.get(name.get())) {
     return info;
   }
-
-  // didn't find builtin native function, query each resolver
-  for (const auto& resolver : s_nativeFuncResolvers) {
-    if (auto info = resolver(name)) {
-      return *info;
-    }
-  }
-
-  // not found
   return NativeFunctionInfo();
 }
 

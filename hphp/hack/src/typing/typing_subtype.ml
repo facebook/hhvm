@@ -1383,7 +1383,7 @@ and sub_type_unwrapped_helper env ~this_ty
 
   | (r_sub, Tabstract (AKnewtype _ as ak, None)),
     (_, Toption _) ->
-    let r = Reason.Rimplicit_upper_bound (Reason.to_pos r_sub) in
+    let r = Reason.Rimplicit_upper_bound (Reason.to_pos r_sub, "?nonnull") in
     let ty = (r, Toption (r, Tnonnull)) in
     let ty_sub' = (r_sub, Tabstract (ak, Some ty)) in
     sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty_sub' ty_super
@@ -1555,7 +1555,7 @@ and sub_generic_params
              E.g., if t is a generic type parameter T with nonnull as
              a lower bound.
            *)
-          let r = Reason.Rimplicit_upper_bound (Reason.to_pos r_sub) in
+          let r = Reason.Rimplicit_upper_bound (Reason.to_pos r_sub, "?nonnull") in
           let tmixed = (r, Toption (r, Tnonnull)) in
           Errors.try_
             (fun () ->

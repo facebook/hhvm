@@ -116,11 +116,18 @@ let enum_class_check env tc consts const_types =
               Errors.enum_type_bad (Reason.to_pos r)
                 (Typing_print.error ty_exp') trail);
 
-        (* Make sure that if a constraint was given that the base type is
-         * actually a subtype of it. *)
+        (* If a constraint was given, make sure that it is a subtype
+           of arraykey, and that the base type is actually a subtype
+           of it. *)
         let env = (match ty_constraint with
           | Some ty ->
              let env, ty = Phase.localize ~ety_env env ty in
+             let ty_arraykey = (
+               Reason.Rimplicit_upper_bound (tc.tc_pos, "arraykey"),
+               Tprim Tarraykey
+             ) in
+             let env = Typing_ops.sub_type tc.tc_pos Reason.URenum_cstr env
+               ty ty_arraykey in
              Typing_ops.sub_type tc.tc_pos Reason.URenum_cstr env ty_exp ty
           | None -> env) in
 

@@ -220,7 +220,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
         end
         else
           let implicit_upper_bound r =
-            let r' = Reason.Rimplicit_upper_bound (Reason.to_pos r) in
+            let r' = Reason.Rimplicit_upper_bound (Reason.to_pos r, "?nonnull") in
             (r', Toption (r', Tnonnull)) in
           let env, ty = unify env
             (Option.value tcstr1 ~default:(implicit_upper_bound r1))

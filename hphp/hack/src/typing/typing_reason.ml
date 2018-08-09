@@ -83,7 +83,7 @@ type t =
   | Rinvariant_generic of t * string
   | Rregex           of Pos.t
   | Rlambda_use      of Pos.t
-  | Rimplicit_upper_bound of Pos.t
+  | Rimplicit_upper_bound of Pos.t * string
 
 and expr_dep_type_reason =
   | ERexpr of int
@@ -237,8 +237,8 @@ let rec to_string prefix r =
     [(p, prefix ^ " resulting from this regex pattern")]
   | Rlambda_use p ->
       [(p, prefix ^ " because the lambda function was used here")]
-  | Rimplicit_upper_bound _ ->
-    [(p, prefix ^ " arising from an implicit 'as ?nonnull' constraint on this type")]
+  | Rimplicit_upper_bound (_, cstr) ->
+    [(p, prefix ^ " arising from an implicit 'as " ^ cstr ^ "' constraint on this type")]
 
 and to_pos = function
   | Rnone     -> Pos.none
@@ -310,7 +310,7 @@ and to_pos = function
   | Rinvariant_generic (r, _) -> to_pos r
   | Rregex p -> p
   | Rlambda_use p -> p
-  | Rimplicit_upper_bound p -> p
+  | Rimplicit_upper_bound (p, _) -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users

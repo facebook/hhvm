@@ -1,0 +1,6 @@
+File "fc_enum_non_arraykey_constraint.php", line 4, characters 6-9:
+Invalid constraint on enum (Typing[4110])
+File "fc_enum_non_arraykey_constraint.php", line 4, characters 6-9:
+This is an array key (int/string) arising from an implicit 'as arraykey' constraint on this type
+File "fc_enum_non_arraykey_constraint.php", line 4, characters 22-28:
+It is incompatible with a nullable type

@@ -349,7 +349,6 @@ module Revision_tracker = struct
   type init_settings = {
     watchman : Watchman.watchman_instance ref;
     root : Path.t;
-    prefetcher : State_prefetcher.t;
     min_distance_restart : int;
     saved_state_cache_limit : int;
     use_xdb : bool;
@@ -402,10 +401,9 @@ module Revision_tracker = struct
   ~use_xdb ~ignore_hh_version
   ~saved_state_cache_limit
   ~devinfra_saved_state_lookup
-  watchman prefetcher root =
+  watchman root =
     let init_settings = {
       watchman = ref watchman;
-      prefetcher;
       root;
       min_distance_restart;
       saved_state_cache_limit;
@@ -560,7 +558,6 @@ module Revision_tracker = struct
       | Some (decision, svn_rev) ->
         (** We already peeked the value above. Can ignore here. *)
         let _ = Queue.pop env.state_changes in
-        let _ = State_prefetcher.run svn_rev env.inits.prefetcher in
         (** Maybe setting the base revision must be done after
          * computing distance. *)
         maybe_set_base_rev transition svn_rev env;
@@ -613,13 +610,7 @@ module Revision_tracker = struct
       None
 
   let preprocess server_state transition env =
-    match make_decision (Unix.time ()) transition server_state env with
-    | None ->
-      None
-    | Some (decision, svn_rev) ->
-      if decision <> Informant_sig.Move_along
-        then ignore @@ State_prefetcher.run svn_rev env.inits.prefetcher;
-      Some (decision, svn_rev)
+    make_decision (Unix.time ()) transition server_state env
 
   let handle_change_then_churn server_state change env = begin
     let () = match change with
@@ -764,7 +755,6 @@ let watchman_expression_terms =
 let init {
   root;
   allow_subscriptions;
-  state_prefetcher;
   use_dummy;
   min_distance_restart;
   saved_state_cache_limit;
@@ -803,8 +793,7 @@ let init {
           ~saved_state_cache_limit
           ~devinfra_saved_state_lookup
           (Watchman.Watchman_alive watchman_env)
-          (** TODO: Put the prefetcher here. *)
-          state_prefetcher root;
+          root;
         watchman_event_watcher = WEWClient.init root;
       }
 

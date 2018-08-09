@@ -71,7 +71,6 @@ module Tools = struct
   let simple_informant_options temp_dir = {
     HhMonitorInformant.root = temp_dir;
     allow_subscriptions = true;
-    state_prefetcher = State_prefetcher.dummy;
     use_dummy = false;
     watchman_debug_logging = false;
     min_distance_restart = 100;

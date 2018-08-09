@@ -21,7 +21,6 @@ val ignored_paths       : t -> string list
 val extra_paths         : t -> Path.t list
 val gc_control          : t -> Gc.control
 val sharedmem_config    : t -> SharedMem.config
-val state_prefetcher_script : t -> Path.t option
 val typechecker_options : t -> TypecheckerOptions.t
 val parser_options      : t -> ParserOptions.t
 val formatter_override  : t -> Path.t option

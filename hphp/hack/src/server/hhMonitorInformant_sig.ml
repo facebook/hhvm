@@ -6,7 +6,6 @@ module Types = struct
   type options = {
     root : Path.t;
     allow_subscriptions : bool;
-    state_prefetcher : State_prefetcher.t;
     (** Disable the informant - use the dummy instead. *)
     use_dummy : bool;
     (** Don't trigger a server restart if the distance between two

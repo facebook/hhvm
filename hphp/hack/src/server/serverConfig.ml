@@ -21,14 +21,6 @@ type t = {
   load_script      : Path.t option;
   load_script_timeout : int; (* in seconds *)
 
-  (** Script to call to prefetch a saved state. Expected invocation is:
-    *   state_prefetcher_script <svn revision number>
-    *
-   * Which is expected to put a saved state into the correct place which the
-   * above load_script will be able to use.
-   *)
-  state_prefetcher_script : Path.t option;
-
   (* Configures only the workers. Workers can have more relaxed GC configs as
    * they are short-lived processes *)
   gc_control       : Gc.control;
@@ -195,8 +187,6 @@ let process_untrusted_mode config =
         (* potential resource abuse *)
         "gc_";
         "sharedmem_";
-        (* arbitrary code execution *)
-        "state_";
       ] in
       let invalid_keys = SMap.filter ~f:(fun ck _ ->
         let ck = String.lowercase_ascii ck in
@@ -251,8 +241,6 @@ let load config_filename options =
   (* Since we use the unix alarm() for our timeouts, a timeout value of 0 means
    * to wait indefinitely *)
   let load_script_timeout = int_ "load_script_timeout" ~default:0 config in
-  let state_prefetcher_script =
-    Option.map (SMap.get config "state_prefetcher_script") maybe_relative_path in
   let formatter_override =
     Option.map (SMap.get config "formatter_override") maybe_relative_path in
   let forward_compat_level = process_forward_compatibility_level config in
@@ -289,7 +277,6 @@ let load config_filename options =
     version = version;
     load_script = load_script;
     load_script_timeout = load_script_timeout;
-    state_prefetcher_script = state_prefetcher_script;
     gc_control = make_gc_control config;
     sharedmem_config = make_sharedmem_config config options local_config;
     tc_options = global_opts;
@@ -306,7 +293,6 @@ let default_config = {
   version = None;
   load_script = None;
   load_script_timeout = 0;
-  state_prefetcher_script = None;
   gc_control = GlobalConfig.gc_control;
   sharedmem_config = GlobalConfig.default_sharedmem_config;
   tc_options = TypecheckerOptions.default;
@@ -322,7 +308,6 @@ let set_parser_options config popt = { config with parser_options = popt }
 let set_tc_options config tcopt = { config with tc_options = tcopt }
 let gc_control config = config.gc_control
 let sharedmem_config config = config.sharedmem_config
-let state_prefetcher_script config = config.state_prefetcher_script
 let typechecker_options config = config.tc_options
 let parser_options config = config.parser_options
 let formatter_override config = config.formatter_override

@@ -319,7 +319,7 @@ struct ActiveSubscription {
         String(m_callbackFile.c_str()).get(),
         "",
         &initial,
-        Native::s_builtinNativeFuncs);
+        Native::s_noNativeFuncs);
       if (!unit) {
         throw std::runtime_error(
           folly::sformat("Unit '{}' no longer exists.", m_callbackFile));

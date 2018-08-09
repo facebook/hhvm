@@ -1035,7 +1035,7 @@ Unit* read_unit(ProfDataDeserializer& ser) {
     [&] () -> Unit* {
       auto const filepath = read_string(ser);
       ITRACE(2, "Unit: {}\n", filepath);
-      auto& nativeFuncs = Native::s_builtinNativeFuncs;
+      auto& nativeFuncs = Native::s_noNativeFuncs;
       if (filepath->data()[0] == '/' && filepath->data()[1] == ':') {
         return lookupSyslibUnit(filepath, nativeFuncs);
       }

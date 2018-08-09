@@ -1804,7 +1804,7 @@ static int execute_program_impl(int argc, char** argv) {
     std::atomic_thread_fence(std::memory_order_release);
 
     auto compiled = compile_file(str.c_str(), str.size(), md5, file.c_str(),
-                                 Native::s_builtinNativeFuncs,
+                                 Native::s_noNativeFuncs,
                                  nullptr);
 
     if (po.mode == "verify") {
@@ -1964,7 +1964,7 @@ static int execute_program_impl(int argc, char** argv) {
     try {
       auto const unit = lookupUnit(
         makeStaticString(po.lint.c_str()), "", nullptr,
-        Native::s_builtinNativeFuncs);
+        Native::s_noNativeFuncs);
       if (unit == nullptr) {
         throw FileOpenException(po.lint);
       }

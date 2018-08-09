@@ -1439,7 +1439,7 @@ void invalidatePath(const std::string& path) {
      */
     String spath(path);
     lookupUnit(spath.get(), "", nullptr /* initial_opt */,
-               Native::s_builtinNativeFuncs);
+               Native::s_noNativeFuncs);
   });
 }
 

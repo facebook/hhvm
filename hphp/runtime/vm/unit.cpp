@@ -1466,7 +1466,7 @@ void Unit::initialMerge() {
               SourceRootInfo::RelativeToPhpRoot(StrNR(s)).get(),
               "",
               nullptr /* initial_opt */,
-              Native::s_builtinNativeFuncs
+              Native::s_noNativeFuncs
             );
             unit->initialMerge();
             mi->mergeableObj(ix) = (void*)((char*)unit + (int)k);

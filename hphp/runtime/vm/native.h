@@ -560,8 +560,12 @@ const char* checkTypeFunc(const NativeSig& sig,
                           const TypeConstraint& retType,
                           const FuncEmitter* func);
 
-extern FuncTable s_builtinNativeFuncs;
+// NativeFunctionInfo for native funcs and methods defined under
+// system/php, separate from normal extensions.
 extern FuncTable s_systemNativeFuncs;
+
+// A permanently empty table, used in contexts were no native bindings
+// are possible (most ordinary code).
 extern const FuncTable s_noNativeFuncs;
 
 String fullName(const StringData* fname, const StringData* cname,

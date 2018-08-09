@@ -345,7 +345,7 @@ bool Package::parseImpl(const std::string* fileName) {
 
       std::unique_ptr<UnitEmitter> ue{
         assemble_string(content.data(), content.size(), fileName->c_str(), md5,
-                        Native::s_builtinNativeFuncs)
+                        Native::s_noNativeFuncs)
       };
       Lock lock(m_ar->getMutex());
       m_ar->addHhasFile(std::move(ue));
@@ -380,7 +380,7 @@ bool Package::parseImpl(const std::string* fileName) {
   // error and and skip it.
   auto uc = UnitCompiler::create(
     content.data(), content.size(), fileName->c_str(), md5,
-    Native::s_builtinNativeFuncs, false);
+    Native::s_noNativeFuncs, false);
   assertx(uc);
   try {
     auto ue = uc->compile(m_ar->getParseOnDemandCallBacks());

@@ -848,7 +848,7 @@ void preloadRepo() {
           auto& kv = units[begin + i];
           try {
             lookupUnit(String(RuntimeOption::SourceRoot + kv.first).get(),
-                       "", nullptr, Native::s_builtinNativeFuncs);
+                       "", nullptr, Native::s_noNativeFuncs);
           } catch (...) {
             // swallow errors silently
           }

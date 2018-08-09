@@ -93,7 +93,7 @@ void RepoWrapper::addUnit(Unit* unit) {
 Unit* RepoWrapper::getUnit(MD5 md5) {
   CacheType::const_iterator it = unitCache.find(md5);
   if (it != unitCache.end()) return it->second;
-  auto unit = repo->loadUnit("", md5, Native::s_builtinNativeFuncs).release();
+  auto unit = repo->loadUnit("", md5, Native::s_noNativeFuncs).release();
 
   if (unit) unitCache.insert({md5, unit});
   return unit;

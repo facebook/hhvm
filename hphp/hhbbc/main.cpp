@@ -294,7 +294,7 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
     parallel::map(Repo::get().enumerateUnits(RepoIdCentral, false, true),
       [&] (const std::pair<std::string,MD5>& kv) {
         return Repo::get().urp().loadEmitter(
-          kv.first, kv.second, Native::s_builtinNativeFuncs
+          kv.first, kv.second, Native::s_noNativeFuncs
         );
       }),
     Repo().get().global().APCProfile

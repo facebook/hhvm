@@ -255,7 +255,7 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
       bool initial;
       auto const ec = g_context.getNoCheck();
       auto const unit = lookupUnit(fName.get(), "", &initial,
-                                   Native::s_builtinNativeFuncs);
+                                   Native::s_noNativeFuncs);
       if (unit) {
         if (initial) {
           tvDecRefGen(

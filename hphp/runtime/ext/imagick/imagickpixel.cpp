@@ -242,7 +242,7 @@ static bool HHVM_METHOD(ImagickPixel, setHSL,
 
 #undef IMAGICKPIXEL_THROW
 
-void loadImagickPixelClass() {
+void ImagickExtension::loadImagickPixelClass() {
   HHVM_ME(ImagickPixel, clear);
   HHVM_ME(ImagickPixel, __construct);
   HHVM_ME(ImagickPixel, destroy);

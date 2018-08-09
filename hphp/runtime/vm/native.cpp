@@ -27,6 +27,7 @@ namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
 
 FuncTable s_builtinNativeFuncs;
+FuncTable s_systemNativeFuncs;
 const FuncTable s_noNativeFuncs; // always empty
 ConstantMap s_constant_map;
 ClassConstantMapMap s_class_constant_map;
@@ -725,9 +726,10 @@ NativeFunctionInfo getNativeFunction(const FuncTable& nativeFuncs,
                            isStatic);
 }
 
-void registerBuiltinNativeFunc(const StringData* name,
-                               const NativeFunctionInfo& info) {
-  s_builtinNativeFuncs.insert(name, info);
+void registerNativeFunc(Native::FuncTable& nativeFuncs,
+                        const StringData* name,
+                        const NativeFunctionInfo& info) {
+  nativeFuncs.insert(name, info);
 }
 
 void FuncTable::insert(const StringData* name,

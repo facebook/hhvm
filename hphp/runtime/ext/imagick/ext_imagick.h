@@ -46,6 +46,11 @@ struct ImagickExtension final : Extension {
   static bool hasProgressMonitor();
 
  private:
+  void loadImagickClass();
+  void loadImagickDrawClass();
+  void loadImagickPixelClass();
+  void loadImagickPixelIteratorClass();
+
   struct ImagickIniSetting {
     bool m_locale_fix;
     bool m_progress_monitor;

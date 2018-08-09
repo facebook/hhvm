@@ -184,7 +184,7 @@ static bool HHVM_METHOD(ImagickPixelIterator, valid) {
 
 #undef IMAGICKPIXELITERATOR_THROW
 
-void loadImagickPixelIteratorClass() {
+void ImagickExtension::loadImagickPixelIteratorClass() {
   HHVM_STATIC_ME(ImagickPixelIterator, getPixelIterator);
   HHVM_STATIC_ME(ImagickPixelIterator, getPixelRegionIterator);
   HHVM_ME(ImagickPixelIterator, clear);

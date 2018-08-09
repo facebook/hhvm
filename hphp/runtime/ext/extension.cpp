@@ -26,6 +26,7 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/vm/native-func-table.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/system/systemlib.h"
@@ -99,11 +100,11 @@ void Extension::loadSystemlib(const std::string& name) {
   std::string slib = get_systemlib(&hhas, section, m_dsoName);
   if (!slib.empty()) {
     std::string phpname = s_systemlibPhpName + name;
-    CompileSystemlib(slib, phpname, Native::s_builtinNativeFuncs);
+    CompileSystemlib(slib, phpname, m_nativeFuncs);
   }
   if (!hhas.empty()) {
     std::string hhasname = s_systemlibHhasName + name;
-    CompileSystemlib(hhas, hhasname, Native::s_builtinNativeFuncs);
+    CompileSystemlib(hhas, hhasname, m_nativeFuncs);
   }
 }
 

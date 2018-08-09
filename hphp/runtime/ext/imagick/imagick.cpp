@@ -3795,7 +3795,7 @@ static bool HHVM_METHOD(Imagick, valid) {
 
 #undef IMAGICK_THROW
 
-void loadImagickClass() {
+void ImagickExtension::loadImagickClass() {
   HHVM_ME(Imagick, adaptiveBlurImage);
   HHVM_ME(Imagick, adaptiveResizeImage);
   HHVM_ME(Imagick, adaptiveSharpenImage);

@@ -365,9 +365,9 @@ static void closureInstanceDtor(ObjectData* obj, const Class* cls) {
 }
 
 void StandardExtension::loadClosure() {
-  HHVM_ME(Closure, __debugInfo);
-  HHVM_ME(Closure, bindto);
-  HHVM_ME(Closure, call);
+  HHVM_SYS_ME(Closure, __debugInfo);
+  HHVM_SYS_ME(Closure, bindto);
+  HHVM_SYS_ME(Closure, call);
 }
 
 void StandardExtension::initClosure() {

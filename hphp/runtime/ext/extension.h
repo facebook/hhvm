@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/native-func-table.h"
 #include "hphp/runtime/version.h"
 #include "hphp/util/hdf.h"
 
@@ -98,17 +99,24 @@ public:
     return m_name;
   }
 
-  void registerExtensionFunction(const String& name);
+  void registerNativeFunc(const StringData* name,
+                          const Native::NativeFunctionInfo&);
 
   // access the list of functions (excluding methods);
   // helper for get_extension_funcs()
   const std::vector<StringData*>& getExtensionFunctions() const;
+  void registerExtensionFunction(const String& name);
+
+  Native::FuncTable& nativeFuncs() {
+    return m_nativeFuncs;
+  }
 
 private:
   std::string m_name;
   std::string m_version;
   std::string m_dsoName;
   std::vector<StringData*> m_functions;
+  Native::FuncTable m_nativeFuncs;
 };
 
 struct ExtensionBuildInfo {

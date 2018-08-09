@@ -887,7 +887,7 @@ static bool HHVM_METHOD(ImagickDraw, translate,
 
 #undef IMAGICKDRAW_THROW
 
-void loadImagickDrawClass() {
+void ImagickExtension::loadImagickDrawClass() {
   HHVM_ME(ImagickDraw, affine);
   HHVM_ME(ImagickDraw, annotation);
   HHVM_ME(ImagickDraw, arc);

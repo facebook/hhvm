@@ -366,8 +366,8 @@ static int64_t HHVM_METHOD(GlobIterator, count) {
 struct SPLExtension final : Extension {
   SPLExtension() : Extension("spl", "0.2") { }
   void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*config*/) override {
-    HHVM_ME(DirectoryIterator, hh_readdir);
-    HHVM_ME(GlobIterator, count);
+    HHVM_SYS_ME(DirectoryIterator, hh_readdir);
+    HHVM_SYS_ME(GlobIterator, count);
   }
   void moduleInit() override {
     HHVM_FE(spl_object_hash);

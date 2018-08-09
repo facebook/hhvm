@@ -31,6 +31,7 @@ struct ActRec;
 struct Class;
 struct FuncEmitter;
 struct Object;
+struct Extension;
 };
 
 /* Macros related to declaring/registering internal implementations
@@ -79,10 +80,10 @@ struct Object;
  *   virtual moduleLoad(const IniSetting::Map& ini, Hdf config) {
  *     HHVM_NAME_FE(sum, my_sum_function)
  *   }
- * Or an explicit call to registerBuiltinNativeFunc()
+ * Or an explicit call to registerNativeFunc()
  *   static const StaticString s_sum("sum");
  *   virtual moduleLoad(const IniSetting::Map& ini, Hdf config) {
- *     Native::registerBuiltinNativeFunc(s_sum, (void*)my_sum_function);
+ *     Native::registerNativeFunc(s_sum, (void*)my_sum_function);
  *   }
  *
  ****************************************************************************
@@ -96,17 +97,18 @@ struct Object;
 #define HHVM_FN(fn) f_ ## fn
 #define HHVM_FUNCTION(fn, ...) \
         HHVM_FN(fn)(__VA_ARGS__)
-#define HHVM_NAMED_FE_STR(fn, fimpl) \
+#define HHVM_NAMED_FE_STR(fn, fimpl, functable) \
         do { \
-          /* This calls Extension::registerExtensionFunction() on the */ \
-          /* local 'this' at the call site. */ \
           String name{makeStaticString(fn)}; \
           registerExtensionFunction(name); \
-          Native::registerBuiltinNativeFunc(name, fimpl); \
+          Native::registerNativeFunc(functable, name, fimpl); \
         } while(0)
-#define HHVM_NAMED_FE(fn, fimpl) HHVM_NAMED_FE_STR(#fn, fimpl)
-#define HHVM_FE(fn) HHVM_NAMED_FE_STR(#fn, HHVM_FN(fn))
-#define HHVM_FALIAS(fn, falias) HHVM_NAMED_FE_STR(#fn, HHVM_FN(falias))
+#define HHVM_NAMED_FE(fn, fimpl)\
+  HHVM_NAMED_FE_STR(#fn, fimpl, nativeFuncs())
+#define HHVM_FE(fn) \
+  HHVM_NAMED_FE_STR(#fn, HHVM_FN(fn), nativeFuncs())
+#define HHVM_FALIAS(fn, falias)\
+  HHVM_NAMED_FE_STR(#fn, HHVM_FN(falias), nativeFuncs())
 
 /* Macros related to declaring/registering internal implementations
  * of <<__Native>> class instance methods.
@@ -121,10 +123,19 @@ struct Object;
 #define HHVM_METHOD(cn, fn, ...) \
         HHVM_MN(cn,fn)(ObjectData* const this_, ##__VA_ARGS__)
 #define HHVM_NAMED_ME(cn,fn,mimpl) \
-        Native::registerBuiltinNativeFunc(#cn "->" #fn, mimpl)
+        Native::registerNativeFunc(nativeFuncs(), #cn "->" #fn, mimpl)
 #define HHVM_ME(cn,fn) HHVM_NAMED_ME(cn,fn, HHVM_MN(cn,fn))
 #define HHVM_MALIAS(cn,fn,calias,falias) \
   HHVM_NAMED_ME(cn,fn,HHVM_MN(calias,falias))
+
+/* special case when we're registering info for a method defined in
+ * s_systemNativeFuncs, instead of the current Extension
+ */
+#define HHVM_SYS_FE(fn)\
+  HHVM_NAMED_FE_STR(#fn, HHVM_FN(fn), Native::s_systemNativeFuncs)
+#define HHVM_NAMED_SYS_ME(cn,fn,mimpl) Native::registerNativeFunc(\
+    Native::s_systemNativeFuncs, #cn "->" #fn, mimpl)
+#define HHVM_SYS_ME(cn,fn) HHVM_NAMED_SYS_ME(cn,fn, HHVM_MN(cn,fn))
 
 /* Macros related to declaring/registering internal implementations
  * of <<__Native>> class static methods.
@@ -139,7 +150,7 @@ struct Object;
 #define HHVM_STATIC_METHOD(cn, fn, ...) \
         HHVM_STATIC_MN(cn,fn)(const Class *self_, ##__VA_ARGS__)
 #define HHVM_NAMED_STATIC_ME(cn,fn,mimpl) \
-        Native::registerBuiltinNativeFunc(#cn "::" #fn, mimpl)
+        Native::registerNativeFunc(nativeFuncs(), #cn "::" #fn, mimpl)
 #define HHVM_STATIC_ME(cn,fn) HHVM_NAMED_STATIC_ME(cn,fn,HHVM_STATIC_MN(cn,fn))
 #define HHVM_STATIC_MALIAS(cn,fn,calias,falias) \
   HHVM_NAMED_STATIC_ME(cn,fn,HHVM_STATIC_MN(calias,falias))
@@ -456,20 +467,21 @@ TypedValue* unimplementedWrapper(ActRec* ar);
 /////////////////////////////////////////////////////////////////////////////
 
 /**
- * registerBuiltinNativeFunc() and getNativeFunction() provide access to a
- * case insensitive map of "name" to function pointer.
+ * registerNativeFunc() and getNativeFunction() use a provided
+ * FuncTable that is a case insensitive map of "name" to function pointer.
  *
  * Extensions should generally add items to this map using the HHVM_FE/ME
- * macros above. The function name (key) must be a static string because
- * the underlying table is shared and outlives individual requests.
+ * macros above. The function name (key) must be a static string.
  */
 
-void registerBuiltinNativeFunc(const StringData*, const NativeFunctionInfo&);
+struct FuncTable;
+void registerNativeFunc(FuncTable&, const StringData*,
+                        const NativeFunctionInfo&);
 
 // Helper accepting a C-string name
 template <class Fun> typename
   std::enable_if<!std::is_member_function_pointer<Fun>::value, void>::type
-registerBuiltinNativeFunc(const char* name, Fun func) {
+registerNativeFunc(FuncTable& nativeFuncs, const char* name, Fun func) {
   static_assert(
     std::is_pointer<Fun>::value &&
     std::is_function<typename std::remove_pointer<Fun>::type>::value,
@@ -479,13 +491,14 @@ registerBuiltinNativeFunc(const char* name, Fun func) {
     detail::understandable_sig<Fun>::value,
     "Arguments on builtin function were not understood types"
   );
-  registerBuiltinNativeFunc(makeStaticString(name), NativeFunctionInfo(func));
+  registerNativeFunc(nativeFuncs, makeStaticString(name),
+                     NativeFunctionInfo(func));
 }
 
 // Helper accepting a possibly nonstatic HPHP::String name
 template <class Fun> typename
   std::enable_if<!std::is_member_function_pointer<Fun>::value, void>::type
-registerBuiltinNativeFunc(const String& name, Fun func) {
+registerNativeFunc(FuncTable& nativeFuncs, const String& name, Fun func) {
   static_assert(
     std::is_pointer<Fun>::value &&
     std::is_function<typename std::remove_pointer<Fun>::type>::value,
@@ -495,10 +508,11 @@ registerBuiltinNativeFunc(const String& name, Fun func) {
     detail::understandable_sig<Fun>::value,
     "Arguments on builtin function were not understood types"
   );
-  registerBuiltinNativeFunc(makeStaticString(name), NativeFunctionInfo(func));
+  registerNativeFunc(nativeFuncs, makeStaticString(name),
+                     NativeFunctionInfo(func));
 }
 
-// Specializations of registerBuiltinNativeFunc for taking pointers to member
+// Specializations of registerNativeFunc for taking pointers to member
 // functions and making them look like HNI wrapper funcs.
 //
 // This allows invoking object method calls directly, but ONLY for specialized
@@ -508,30 +522,35 @@ registerBuiltinNativeFunc(const String& name, Fun func) {
 // you are not implementing one of these
 template<class Ret, class Cls> typename
   std::enable_if<std::is_base_of<ObjectData, Cls>::value, void>::type
-registerBuiltinNativeFunc(const char* name, Ret (Cls::*func)()) {
-  registerBuiltinNativeFunc(name, (Ret (*)(ObjectData*))getMethodPtr(func));
+registerNativeFunc(FuncTable& nativeFuncs, const char* name,
+                   Ret (Cls::*func)()) {
+  registerNativeFunc(nativeFuncs, name,
+                     (Ret (*)(ObjectData*))getMethodPtr(func));
 }
 
 template<class Ret, class Cls, class... Args> typename
   std::enable_if<std::is_base_of<ObjectData, Cls>::value, void>::type
-registerBuiltinNativeFunc(const char* name, Ret (Cls::*func)(Args...)) {
-  registerBuiltinNativeFunc(
-      name, (Ret (*)(ObjectData*, Args...))getMethodPtr(func)
+registerNativeFunc(FuncTable& nativeFuncs, const char* name,
+                   Ret (Cls::*func)(Args...)) {
+  registerNativeFunc(
+      nativeFuncs, name, (Ret (*)(ObjectData*, Args...))getMethodPtr(func)
   );
 }
 
 template<class Ret, class Cls> typename
   std::enable_if<std::is_base_of<ObjectData, Cls>::value, void>::type
-registerBuiltinNativeFunc(const char* name, Ret (Cls::*func)() const) {
-  registerBuiltinNativeFunc(name, (Ret (*)(ObjectData*))getMethodPtr(func));
+registerNativeFunc(FuncTable& nativeFuncs, const char* name,
+                          Ret (Cls::*func)() const) {
+  registerNativeFunc(nativeFuncs, name,
+                     (Ret (*)(ObjectData*))getMethodPtr(func));
 }
 
 template<class Ret, class Cls, class... Args> typename
   std::enable_if<std::is_base_of<ObjectData, Cls>::value, void>::type
-registerBuiltinNativeFunc(const char* name,
-                          Ret (Cls::*func)(Args...) const) {
-  registerBuiltinNativeFunc(
-      name, (Ret (*)(ObjectData*, Args...))getMethodPtr(func)
+registerNativeFunc(FuncTable& nativeFuncs, const char* name,
+                   Ret (Cls::*func)(Args...) const) {
+  registerNativeFunc(
+      nativeFuncs, name, (Ret (*)(ObjectData*, Args...))getMethodPtr(func)
   );
 }
 
@@ -541,8 +560,8 @@ const char* checkTypeFunc(const NativeSig& sig,
                           const TypeConstraint& retType,
                           const FuncEmitter* func);
 
-struct FuncTable;
 extern FuncTable s_builtinNativeFuncs;
+extern FuncTable s_systemNativeFuncs;
 extern const FuncTable s_noNativeFuncs;
 
 String fullName(const StringData* fname, const StringData* cname,

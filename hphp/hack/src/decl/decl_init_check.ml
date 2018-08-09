@@ -21,13 +21,15 @@ let parent_init_prop = "parent::" ^ SN.Members.__construct
 let add_parent_construct decl_env c add_prop acc parent_hint =
   match parent_hint with
     | (_, Happly ((_, parent), _)) ->
-      let class_ = Decl_env.get_class_dep decl_env parent in
-      (match class_ with
-        | Some class_ when
-            class_.dc_need_init && c.c_constructor <> None
-            -> add_prop parent_init_prop acc
+      begin match Decl_env.get_class_dep decl_env parent with
+        | Some
+          { dc_construct = construct, _;
+            dc_need_init = need_init;
+            _ }
+          when need_init && c.c_constructor <> None ->
+          add_prop parent_init_prop construct acc
         | _ -> acc
-      )
+      end
     | _ -> acc
 
 let parent decl_env c add_prop acc =
@@ -48,12 +50,26 @@ let prop_needs_init cv =
     | Some (_, Hmixed) -> false
     | Some _ -> cv.cv_expr = None
 
+let add_prop_and_element props sprops add_prop member acc =
+  match SMap.find_opt member props with
+    | Some prop -> add_prop member (Some prop) acc
+    | None -> add_prop member (SMap.find_opt member sprops) acc
+
+let add_props members props sprops add_prop acc =
+  SSet.fold (add_prop_and_element props sprops add_prop) members acc
+
 let own_props c add_prop acc =
-  List.fold_left c.c_vars ~f:begin fun acc cv ->
-    if prop_needs_init cv
-    then add_prop (snd cv.cv_id) acc
-    else acc
-  end ~init:acc
+  match Decl_heap.Classes.get (snd c.c_name) with
+    | None -> acc
+    | Some
+      { dc_props = props;
+        dc_sprops = sprops;
+        _ } ->
+      List.fold_left c.c_vars ~f:begin fun acc cv ->
+        if prop_needs_init cv
+        then add_prop_and_element props sprops add_prop (snd cv.cv_id) acc
+        else acc
+      end ~init:acc
 
 let parent_props decl_env c add_prop acc =
   List.fold_left c.c_extends ~f:begin fun acc parent ->
@@ -62,8 +78,12 @@ let parent_props decl_env c add_prop acc =
       let tc = Decl_env.get_class_dep decl_env parent in
       (match tc with
         | None -> acc
-        | Some { dc_deferred_init_members = members; _ } ->
-          SSet.fold add_prop members acc)
+        | Some
+          { dc_deferred_init_members = members;
+            dc_props = props;
+            dc_sprops = sprops;
+            _ } ->
+          add_props members props sprops add_prop acc)
     | _ -> acc
   end ~init:acc
 
@@ -73,7 +93,12 @@ let trait_props decl_env c add_prop acc =
       let class_ = Decl_env.get_class_dep decl_env trait in
       match class_ with
       | None -> acc
-      | Some { dc_construct = cstr; dc_deferred_init_members = members; _ } -> begin
+      | Some
+        { dc_construct = cstr;
+          dc_deferred_init_members = members;
+          dc_props = props;
+          dc_sprops = sprops;
+          _ } -> begin
         (* If our current class defines its own constructor, completely ignore
          * the fact that the trait may have had one defined and merge in all of
          * its members.
@@ -82,7 +107,8 @@ let trait_props decl_env c add_prop acc =
          * defining `dc_deferred_init_members`. See logic in `class_` for
          * Ast.Cabstract to see where this deviated for traits.
          *)
-        let add_props members acc = SSet.fold add_prop members acc in
+        let add_props members acc =
+          add_props members props sprops add_prop acc in
         match fst cstr with
           | None -> add_props members acc
           | Some cstr when cstr.elt_origin <> trait || cstr.elt_abstract ->
@@ -107,8 +133,9 @@ let get_deferred_init_props decl_env c =
     else
       priv_props, SSet.add name props
   ) ~init:(SSet.empty, SSet.empty) c.c_vars in
-  let props = parent_props decl_env c SSet.add props in
-  let props = parent decl_env c SSet.add props in
+  let add_prop prop _ acc = SSet.add prop acc in
+  let props = parent_props decl_env c add_prop props in
+  let props = parent decl_env c add_prop props in
   priv_props, props
 
 let class_ ~has_own_cstr decl_env c =

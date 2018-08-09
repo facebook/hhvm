@@ -1479,7 +1479,8 @@ module Make (GetLocals : GetLocals) = struct
     | ClassTraitRequire _ -> acc
     | Const _ -> acc
     | AbsConst _ -> acc
-    | ClassVars { cv_kinds = kl; cv_hint = h; cv_names = cvl; _ }
+    | ClassVars
+      { cv_kinds = kl; cv_hint = h; cv_names = cvl; cv_user_attributes = ua; _ }
       when List.mem kl Static ->
       (* Static variables are shared for all classes in the hierarchy.
        * This makes the 'this' type completely unsafe as a type for a
@@ -1487,8 +1488,12 @@ module Make (GetLocals : GetLocals) = struct
        * an example of what can occur.
        *)
       let h = Option.map h (hint ~forbid_this:true ~is_static_var:true env) in
-      let cvl = List.map cvl (class_prop_ env) in
-      let cvl = List.map cvl (fill_prop kl h) in
+      let attrs = user_attributes env ua in
+      let cvl = List.map cvl (fun cv ->
+        let cv = class_prop_ env cv in
+        let cv = fill_prop kl h cv in
+        { cv with N.cv_user_attributes = attrs }
+      ) in
       cvl @ acc
     | ClassVars _ -> acc
     | XhpAttr _ -> acc

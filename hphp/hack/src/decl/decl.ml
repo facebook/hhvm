@@ -118,6 +118,11 @@ let experimental_no_trait_reuse_enabled env =
   env.Decl_env.decl_tcopt
   TypecheckerOptions.experimental_no_trait_reuse)
 
+let lateinit_enabled env =
+  TypecheckerOptions.experimental_feature_enabled
+    env.Decl_env.decl_tcopt
+    TypecheckerOptions.experimental_lateinit
+
 let report_reused_trait parent_type class_nast =
   Errors.trait_reuse parent_type.dc_pos parent_type.dc_name class_nast.c_name
 
@@ -696,6 +701,7 @@ and build_constructor env class_ method_ =
     elt_abstract = ft.ft_abstract;
     elt_is_xhp_attr = false;
     elt_const = false;
+    elt_lateinit = false;
     elt_override = consist_override;
     elt_synthesized = false;
     elt_visibility = vis;
@@ -765,8 +771,9 @@ and class_class_decl class_id =
   }
 
 and class_var_decl env c acc cv =
+  let cv_pos, cv_name = cv.cv_id in
   let ty = match cv.cv_type with
-    | None -> Reason.Rwitness (fst cv.cv_id), Tany
+    | None -> Reason.Rwitness cv_pos, Tany
     | Some ty' when cv.cv_is_xhp ->
       (* If this is an XHP attribute and we're in strict mode,
          relax to partial mode to allow the use of the "array"
@@ -782,13 +789,15 @@ and class_var_decl env c acc cv =
       Decl_hint.hint env ty'
     | Some ty' -> Decl_hint.hint env ty'
   in
-  let id = snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
   let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
+  let lateinit = Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes in
+  let lateinit = lateinit_enabled env && lateinit in
   let elt = {
     elt_final = true;
     elt_is_xhp_attr = cv.cv_is_xhp;
     elt_const = const;
+    elt_lateinit = lateinit;
     elt_synthesized = false;
     elt_override = false;
     elt_abstract = false;
@@ -796,20 +805,25 @@ and class_var_decl env c acc cv =
     elt_origin = (snd c.c_name);
     elt_reactivity = None;
   } in
-  Decl_heap.Props.add (elt.elt_origin, id) ty;
-  let acc = SMap.add id elt acc in
-  if cv.cv_final then Errors.final_property (fst cv.cv_id);
+  Decl_heap.Props.add (elt.elt_origin, cv_name) ty;
+  let acc = SMap.add cv_name elt acc in
+  if cv.cv_final then Errors.final_property cv_pos;
+  if lateinit && cv.cv_expr <> None then Errors.lateinit_with_default cv_pos;
   acc
 
 and static_class_var_decl env c acc cv =
+  let cv_pos, cv_name = cv.cv_id in
   let ty = match cv.cv_type with
-    | None -> Reason.Rwitness (fst cv.cv_id), Tany
+    | None -> Reason.Rwitness cv_pos, Tany
     | Some ty -> Decl_hint.hint env ty in
-  let id = "$" ^ snd cv.cv_id in
+  let id = "$" ^ cv_name in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
+  let lateinit = Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes in
+  let lateinit = lateinit_enabled env && lateinit in
   let elt = {
     elt_final = true;
     elt_const = false; (* unsupported for static properties *)
+    elt_lateinit = lateinit;
     elt_is_xhp_attr = cv.cv_is_xhp;
     elt_override = false;
     elt_abstract = false;
@@ -825,8 +839,10 @@ and static_class_var_decl env c acc cv =
     | None
     | Some (_, Hmixed)
     | Some (_, Hoption _) -> ()
-    | _ -> Errors.missing_assign (fst cv.cv_id)
+    | _ when not lateinit -> Errors.missing_assign cv_pos
+    | _ -> ()
   end;
+  if lateinit && cv.cv_expr <> None then Errors.lateinit_with_default cv_pos;
   acc
 
 and visibility cid = function
@@ -964,6 +980,7 @@ and method_decl_acc ~is_static env c (acc, condition_types) m  =
     elt_final = m.m_final;
     elt_is_xhp_attr = false;
     elt_const = false;
+    elt_lateinit = false;
     elt_abstract = ft.ft_abstract;
     elt_override = check_override;
     elt_synthesized = false;

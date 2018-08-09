@@ -36,6 +36,7 @@ let element_to_class_elt ce_type {
   elt_abstract = _;
   elt_is_xhp_attr = ce_is_xhp_attr;
   elt_const = ce_const;
+  elt_lateinit = _;
   elt_origin = ce_origin;
   elt_visibility = ce_visibility;
   elt_reactivity = _

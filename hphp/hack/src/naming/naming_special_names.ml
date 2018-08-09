@@ -137,6 +137,7 @@ module UserAttributes = struct
   let uaReturnsVoidToRx     = "__ReturnsVoidToRx"
   let uaMaybeMutable        = "__MaybeMutable"
   let uaRxOfScope           = "__RxOfScope"
+  let uaLateInit            = "__LateInit"
 
   let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
     [
@@ -165,6 +166,7 @@ module UserAttributes = struct
       uaReturnsVoidToRx;
       uaMaybeMutable;
       uaRxOfScope;
+      uaLateInit;
     ]
 end
 

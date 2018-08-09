@@ -132,6 +132,11 @@ let tco_experimental_reified_generics = "reified_generics"
  *)
 let tco_experimental_re_prefixed_strings = "re_prefixed_strings"
 
+(**
+ * Enable the <<__LateInit>> attribute on class properties.
+ *)
+let tco_experimental_lateinit = "lateinit"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -153,6 +158,7 @@ let tco_experimental_all =
      tco_experimental_null_coalesce_assignment;
      tco_experimental_reified_generics;
      tco_experimental_re_prefixed_strings;
+     tco_experimental_lateinit;
    ]
 
 let tco_migration_flags_all =

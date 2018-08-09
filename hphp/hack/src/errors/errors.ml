@@ -1183,11 +1183,14 @@ let constructor_required (pos, name) prop_names =
 
 let not_initialized (pos, cname) prop_names =
   let cname = Utils.strip_ns cname in
-  let props_str = SSet.fold ~f:(fun x acc -> x^" "^acc) prop_names ~init:"" in
-  let members, verb = if 1 == SSet.cardinal prop_names then "member", "is"
+  let props_str = List.fold_left prop_names
+    ~f:(fun acc x -> x^" "^acc) ~init:"" in
+  let members, verb =
+    if 1 == List.length prop_names
+    then "member", "is"
     else "members", "are" in
-  let setters_str =
-    SSet.fold ~f:(fun x acc -> "$this->"^x^" "^acc) prop_names ~init:"" in
+  let setters_str = List.fold_left prop_names
+    ~f:(fun acc x -> "$this->"^x^" "^acc) ~init:"" in
   add (NastCheck.err_code NastCheck.NotInitialized) pos (
     sl[
       "Class "; cname ; " does not initialize all of its members; ";

@@ -4255,12 +4255,6 @@ ResolveObjMethod [C C] -> [C]
   always $2. Fatal if the function resolves to a magic __call method. When
   resolution fails, raise an error.
 
-ResolveClsMethod [C C] -> [C]
-
-  Resolve $1 as a class method of $2 to a method array, then push the array onto
-  the top of stack. Fatal if there is an invoke name for PHP magic call. When
-  resolution fails, raise an error.
-
 15. Async functions
 -------------------
 

@@ -1444,12 +1444,6 @@ void VariableSerializer::serializeFunc(const Func* func) {
       write(name->data(), name->size());
       break;
     case Type::Serialize:
-      m_buf->append("f:");
-      m_buf->append(name->size());
-      m_buf->append(":\"");
-      m_buf->append(name->data(), name->size());
-      m_buf->append("\";");
-      break;
     case Type::Internal:
     case Type::APCSerialize:
     case Type::DebuggerSerialize:

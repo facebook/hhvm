@@ -938,7 +938,6 @@ let makeunaryinst s arg = match s with
    | "RetM" -> IContFlow(RetM (intofiarg arg))
    | "ResolveFunc" -> IOp(ResolveFunc (function_id_of_iarg arg))
    | "ResolveObjMethod" -> IOp (ResolveObjMethod)
-   | "ResolveClsMethod" -> IOp (ResolveClsMethod)
 
    (* instruct_final *)
    | "SetWithRefRML" -> IFinal(SetWithRefRML(localidofiarg arg))

@@ -32,6 +32,5 @@ string(9) "inst_meth"
 string(4) "meth"
 function(foo)fun('foo')function(foo)
 string(5) ""foo""
-string(10) "f:3:"foo";"
 
-Fatal error: Unable to unserialize a function value in %s/function_pointers.php on line 87
+Fatal error: Unable to serialize a function value in %s/function_pointers.php on line 85

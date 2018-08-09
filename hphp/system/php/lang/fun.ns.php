@@ -66,4 +66,38 @@ function meth_caller(string $class, string $method) {
   return new \__SystemLib\MethCallerHelper($class, $method);
 }
 
+/**
+ * Like `fun`, but with the purpose of
+ * calling static methods.
+ *
+ * Example:
+ *
+ * ```
+ * <?hh
+ * class C {
+ *   public static function isOdd(int $i): bool { return $i % 2 == 1; }
+ * }
+ * $data = Vector { 1, 2, 3 };
+ * $data->filter(class_meth('C', 'isOdd'));
+ * ```
+ *
+ * See also:
+ *  - [`fun`](/hack/reference/function/HH.fun/)
+ *  - [`meth_caller`](/hack/reference/function/HH.meth_caller/)
+ *  - [`inst_meth`](/hack/reference/function/HH.inst_meth/)
+ *
+ * @param $class The class of the static method to call. Must be a constant
+*         string.
+ * @param $method The static method of the class that will be called. Must be a
+ *        constant string.
+ * @return A callback which will call `$method` when invoked.
+ *
+ * @guide /hack/callables/special-functions
+ */
+<<__IsFoldable>>
+function class_meth(string $class, string $method)
+  /* : (function(<hack figures this>): <and this>) */ {
+  return varray[$class, $method];
+}
+
 }

@@ -5161,9 +5161,17 @@ iopFPushObjMethodD(uint32_t numArgs, const StringData* name, ObjMethodOp op) {
   fPushObjMethodImpl(const_cast<StringData*>(name), obj, numArgs, false);
 }
 
-namespace {
-void resolveMethodImpl(Cell* c1, Cell* c2, const char* meth_type) {
+OPTBLD_INLINE void iopResolveObjMethod() {
+  Cell* c1 = vmStack().topC();
+  Cell* c2 = vmStack().indC(1);
+  if (!isStringType(c1->m_type)) {
+    raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
+  }
   auto name = c1->m_data.pstr;
+  if (!isObjectType(c2->m_type)) {
+    raise_resolve_non_object(name->data(),
+                             getDataTypeString(c2->m_type).get()->data());
+  }
   ObjectData* thiz = nullptr;
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
@@ -5185,14 +5193,13 @@ void resolveMethodImpl(Cell* c1, Cell* c2, const char* meth_type) {
   assertx(dynamic);
   if (!func) raise_error("Failure to resolve method name \'%s\'", name->data());
   if (invName) {
-    auto const msg = folly::sformat(
-      "Unable to resolve magic call for {}()", meth_type
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Unable to resolve magic call for inst_meth()"
     );
-    SystemLib::throwInvalidOperationExceptionObject(msg.c_str());
   }
   if (!thiz) {
     assertx(cls);
-    arr.set(0, Variant{cls});
+    arr.set(int64_t(0), Variant{cls});
   }
   arr.set(1, Variant{func});
   vmStack().popC();
@@ -5202,31 +5209,6 @@ void resolveMethodImpl(Cell* c1, Cell* c2, const char* meth_type) {
   } else {
     vmStack().pushArrayNoRc(arr.detach());
   }
-}
-}
-
-OPTBLD_INLINE void iopResolveClsMethod() {
-  Cell* c1 = vmStack().topC();
-  Cell* c2 = vmStack().indC(1);
-  if (!isStringType(c1->m_type)) {
-    raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
-  }
-  if (!isStringType(c2->m_type)) raise_error("class name must be a string.");
-  resolveMethodImpl(c1, c2, "class_meth");
-}
-
-OPTBLD_INLINE void iopResolveObjMethod() {
-  Cell* c1 = vmStack().topC();
-  Cell* c2 = vmStack().indC(1);
-  if (!isStringType(c1->m_type)) {
-    raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
-  }
-  auto name = c1->m_data.pstr;
-  if (!isObjectType(c2->m_type)) {
-    raise_resolve_non_object(name->data(),
-                             getDataTypeString(c2->m_type).get()->data());
-  }
-  resolveMethodImpl(c1, c2, "inst_meth");
 }
 
 namespace {

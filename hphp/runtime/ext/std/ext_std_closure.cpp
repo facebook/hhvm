@@ -347,6 +347,9 @@ ObjectData* c_Closure::clone() {
 }
 
 static void closureInstanceDtor(ObjectData* obj, const Class* cls) {
+  if (UNLIKELY(obj->getAttribute(ObjectData::IsWeakRefed))) {
+    WeakRefData::invalidateWeakRef((uintptr_t)obj);
+  }
   auto const nProps = size_t{cls->numDeclProperties()};
   auto prop = c_Closure::fromObject(obj)->getUseVars();
   auto const stop = prop + nProps;

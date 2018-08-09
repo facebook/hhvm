@@ -233,9 +233,26 @@ void ObjectData::releaseNoObjDestructCheck() noexcept {
 
   auto const cls = getVMClass();
 
+  // Note: Don't put any cleanup code above this hasInstanceDtor short-circuit
+  // check. The jit checks hasInstanceDtor and calls instanceDtor directly if
+  // it returns true, so cleanups need to be below this check in this function
+  // and/or in the instanceDtors.
   if (UNLIKELY(hasInstanceDtor())) {
     return cls->instanceDtor()(this, cls);
   }
+
+  // Note: cleanups done in this function are only run for classes without an
+  // instanceDtor. Some of these cleanups are duplicated in ~ObjectData, and
+  // your instanceDtor may call that to have them run; if you choose not to run
+  // ~ObjectData from your instanceDtor you MUST do some of them manually
+  // (e.g. invalidate WeakRefs). Some cleanups (e.g. clearing memo caches) are
+  // not done from ~ObjectData because it is assumed they're not needed for
+  // builtin classes (and in the case of memo caches, since the clearing needs
+  // to be done differently when there is native data).
+  // Finally, cleanups such as invalidating WeakRefs that have to be done for
+  // correctness MUST also be done in Collector::sweep, since none of the code
+  // in this function or the instanceDtor will be run when the object is
+  // collected by GC.
 
   // `this' is being torn down now---be careful about where/how you dereference
   // this from here on.
@@ -1187,7 +1204,14 @@ ObjectData::~ObjectData() {
   if (o_id && o_id == pmax) {
     --pmax;
   }
-  if (UNLIKELY(getAttribute(HasDynPropArr))) freeDynPropArray(this);
+  if (UNLIKELY(slowDestroyCheck())) {
+    // no builtin classes that use ~ObjectData support memoization
+    assertx(!getAttribute(UsedMemoCache));
+    if (getAttribute(HasDynPropArr)) freeDynPropArray(this);
+    if (getAttribute(IsWeakRefed)) {
+      WeakRefData::invalidateWeakRef((uintptr_t)this);
+    }
+  }
 }
 
 Object ObjectData::FromArray(ArrayData* properties) {

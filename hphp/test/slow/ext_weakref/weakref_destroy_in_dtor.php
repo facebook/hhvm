@@ -11,3 +11,4 @@ class A {
 }
 $a = new A;
 unset($a);
+echo "Done\n";

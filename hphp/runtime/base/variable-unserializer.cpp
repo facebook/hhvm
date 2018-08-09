@@ -571,10 +571,6 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
     // unserialization.
     SuppressHackArrCompatNotices shacn;
     t = obj->makeDynProp(realKey.get());
-  } else if (UNLIKELY(cls->declProperties()[slot].attrs & AttrNoSerialize)) {
-    // Ignore fields which are marked as NoSerialize
-    Variant temp;
-    return unserializePropertyValue(temp.asTypedValue(), nProp);
   } else {
     // We'll check if this doesn't violate the type-hint once we're done
     // unserializing all the props.
@@ -1037,14 +1033,6 @@ void VariableUnserializer::unserializeVariant(
               if (!matchString(prop.mangledName->slice())) {
                 mismatch = true;
                 break;
-              }
-
-              // Ignore NoSerialize props if present
-              if (UNLIKELY(prop.attrs & AttrNoSerialize)) {
-                ++objProps;
-                Variant temp;
-                unserializePropertyValue(temp.asTypedValue(), remainingProps--);
-                continue;
               }
 
               // don't need to worry about overwritten list, because

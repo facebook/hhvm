@@ -722,7 +722,6 @@ let mutate_metadata (input : HP.t)  =
         (prop |> Hhas_property.is_public          |> mutate_bool)
         (prop |> Hhas_property.is_static          |> mutate_bool)
         (prop |> Hhas_property.is_deep_init       |> mutate_bool)
-        (prop |> Hhas_property.no_serialize       |> mutate_bool)
         (prop |> Hhas_property.is_immutable       |> mutate_bool)
         (prop |> Hhas_property.is_lsb             |> mutate_bool)
         (prop |> Hhas_property.is_no_bad_redeclare |> mutate_bool)

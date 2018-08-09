@@ -215,13 +215,6 @@ PropertiesInfo::PropertiesInfo(const Index& index,
     m_privateProperties = index.lookup_private_props(ctx.cls);
     m_privateStatics    = index.lookup_private_statics(ctx.cls);
   }
-
-  if (ctx.cls) {
-    for (auto const& prop : ctx.cls->properties) {
-      if (!(prop.attrs & AttrNoSerialize)) continue;
-      m_nonSerializedProps.emplace(prop.name);
-    }
-  }
 }
 
 PropState& PropertiesInfo::privateProperties() {
@@ -244,10 +237,6 @@ const PropState& PropertiesInfo::privateProperties() const {
 
 const PropState& PropertiesInfo::privateStatics() const {
   return const_cast<PropertiesInfo*>(this)->privateStatics();
-}
-
-bool PropertiesInfo::isNonSerialized(SString name) const {
-  return m_nonSerializedProps.count(name) > 0;
 }
 
 void PropertiesInfo::setBadPropInitialValues() {

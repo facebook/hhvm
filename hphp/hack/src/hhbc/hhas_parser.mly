@@ -339,7 +339,6 @@ classproperty:
       (List.mem "public" attrs)
       (List.mem "static" attrs)
       (List.mem "deep_init" attrs)
-      (List.mem "no_serialize" attrs)
       (List.mem "is_immutable" attrs)
       (List.mem "lsb" attrs)
       (List.mem "no_bad_redeclare" attrs)

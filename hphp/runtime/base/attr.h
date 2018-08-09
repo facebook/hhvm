@@ -145,10 +145,6 @@ enum Attr {
   // Set on all builtin functions, whether PHP or C++.
   AttrBuiltin              = (1u << 20), //    X  |          |    X    //
                                          //       |          |         //
-  // Set on all properties that should not be serialized (e.g.
-  // <<__Memoize> caches).  Reuses the AttrBuiltin bit.
-  AttrNoSerialize          = (1u << 20), //       |    X     |         //
-                                         //       |          |         //
   // Set on all functions which take at least one inout parameter. Also implies
   // that the function takes no parameters by reference.
   AttrTakesInOutParams     = (1u << 21), //       |          |    X    //

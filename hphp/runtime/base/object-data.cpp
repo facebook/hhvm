@@ -959,23 +959,8 @@ ObjectData* ObjectData::clone() {
   }
 
   auto const clonePropVec = clone->propVecForConstruct();
-  auto const props = m_cls->declProperties();
   for (auto i = Slot{0}; i < nProps; i++) {
-    if (UNLIKELY(props[i].attrs & AttrNoSerialize)) {
-      // need to write default value, not value from instance we're cloning
-      if (m_cls->pinitVec().size() > 0) {
-        const Class::PropInitVec* propInitVec = m_cls->getPropData();
-        cellCopy((*propInitVec)[i], clonePropVec[i]);
-        if ((*propInitVec)[i].deepInit()) {
-          tvIncRefGen(clonePropVec[i]);
-          collections::deepCopy(&clonePropVec[i]);
-        }
-      } else {
-        cellCopy(m_cls->declPropInit()[i], clonePropVec[i]);
-      }
-    } else {
-      tvDupWithRef(propVec()[i], clonePropVec[i]);
-    }
+    tvDupWithRef(propVec()[i], clonePropVec[i]);
     assertx(assertTypeHint(m_cls, &clonePropVec[i], i));
   }
 
@@ -2116,11 +2101,8 @@ void ObjectData::getProp(const Class* klass,
                          const PreClass::Prop* prop,
                          Array& props,
                          std::vector<bool>& inserted) const {
-  if (prop->attrs()
-      & (AttrStatic |    // statics aren't part of individual instances
-         AttrNoSerialize // runtime-internal attrs, such as the
-                         // <<__Memoize>> cache
-        )) {
+  if (prop->attrs() & AttrStatic) {
+    // statics aren't part of individual instances
     return;
   }
 

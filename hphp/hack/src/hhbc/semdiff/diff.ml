@@ -669,10 +669,8 @@ let property_is_static_comparer =
   wrap Hhas_property.is_static (fun _f s -> s) (flag_comparer "static")
 let property_is_deep_init_comparer =
   wrap Hhas_property.is_deep_init (fun _f s -> s) (flag_comparer "deep_init")
-let property_no_serialize_comparer =
-  wrap Hhas_property.no_serialize (fun _f s -> s) (flag_comparer "no_serialize")
 let property_no_bad_redeclare_comparer =
-  wrap Hhas_property.no_serialize (fun _f s -> s) (flag_comparer "no_bad_redeclare")
+  wrap Hhas_property.is_no_bad_redeclare (fun _f s -> s) (flag_comparer "no_bad_redeclare")
 let property_has_system_initial_comparer =
   wrap Hhas_property.has_system_initial (fun _f s -> s) (flag_comparer "sys_initial_val")
 let property_no_implicit_null_comparer =
@@ -700,7 +698,6 @@ let property_comparer =
      property_is_deep_init_comparer;
      property_name_comparer;
      property_initial_value_comparer;
-     property_no_serialize_comparer;
      property_no_bad_redeclare_comparer;
      property_has_system_initial_comparer;
      property_no_implicit_null_comparer;

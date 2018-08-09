@@ -1057,10 +1057,6 @@ bool isTrackedThisProp(ISS& env, SString name) {
   return thisPropRaw(env, name);
 }
 
-bool isNonSerializedThisProp(ISS& env, SString name) {
-  return env.collect.props.isNonSerialized(name);
-}
-
 bool isMaybeLateInitThisProp(ISS& env, SString name) {
   if (!env.ctx.cls) return false;
   for (auto const& prop : env.ctx.cls->properties) {
@@ -1114,7 +1110,7 @@ folly::Optional<Type> thisPropAsCell(ISS& env, SString name) {
 void mergeThisProp(ISS& env, SString name, Type type) {
   auto const t = thisPropRaw(env, name);
   if (!t) return;
-  *t |= (isNonSerializedThisProp(env, name) ? type : loosen_all(type));
+  *t |= loosen_all(type);
 }
 
 /*

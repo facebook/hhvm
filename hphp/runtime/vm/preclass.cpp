@@ -194,7 +194,6 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
   if (m_attrs & AttrProtected) { out << "protected "; }
   if (m_attrs & AttrPrivate) { out << "private "; }
   if (m_attrs & AttrPersistent) { out << "(persistent) "; }
-  if (m_attrs & AttrNoSerialize) { out << "(no-serialize) "; }
   if (m_attrs & AttrIsImmutable) { out << "(immutable) "; }
   if (m_attrs & AttrNoBadRedeclare) { out << "(no-bad-redeclare) "; }
   if (m_attrs & AttrNoOverride) { out << "(no-override) "; }

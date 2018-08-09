@@ -166,12 +166,6 @@ bool couldBeInProp(ISS& env, const Base& b) {
   return true;
 }
 
-bool couldBeInNonSerializedProp(ISS& env, const Base& b) {
-  if (!couldBeInProp(env, b)) return false;
-  if (b.locName) return isNonSerializedThisProp(env, b.locName);
-  return true;
-}
-
 bool couldBeInPrivateStatic(ISS& env, const Base& b) {
   if (b.loc != BaseLoc::StaticProp) return false;
   auto const selfTy = selfCls(env);
@@ -357,21 +351,6 @@ void setPrivateStaticForBase(ISS& env, Type ty) {
   );
 }
 
-void setPropForBase(ISS& env, Type ty) {
-  assert(couldBeInNonSerializedProp(env, env.state.mInstrState.base));
-
-  if (auto const name = env.state.mInstrState.base.locName) {
-    FTRACE(4, "      $this->{} |= {}\n", name->data(), show(ty));
-    mergeThisProp(env, name, std::move(ty));
-    return;
-  }
-  FTRACE(4, "      $this->* |= {}\n", show(ty));
-  mergeEachThisPropRaw(
-    env,
-    [&] (const Type& old) { return old.couldBe(BInitCell) ? ty : TBottom; }
-  );
-}
-
 // Run backwards through an array chain doing array_set operations
 // to produce the array type that incorporates the effects of any
 // intermediate defining dims.
@@ -439,9 +418,6 @@ void updateBaseWithType(ISS& env,
   }
   if (couldBeInPrivateStatic(env, base)) {
     return setPrivateStaticForBase(env, ty);
-  }
-  if (couldBeInNonSerializedProp(env, base)) {
-    return setPropForBase(env, ty);
   }
 }
 

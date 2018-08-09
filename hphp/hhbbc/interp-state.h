@@ -345,15 +345,12 @@ struct PropertiesInfo {
   const PropState& privateProperties() const;
   const PropState& privateStatics() const;
 
-  bool isNonSerialized(SString name) const;
-
   void setBadPropInitialValues();
 
 private:
   ClassAnalysis* const m_cls;
   PropState m_privateProperties;
   PropState m_privateStatics;
-  boost::container::flat_set<LSString> m_nonSerializedProps;
 };
 
 //////////////////////////////////////////////////////////////////////

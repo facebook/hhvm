@@ -639,8 +639,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
    *
    * We need to loosen_all on instance properties, because the class could be
    * unserialized, which we don't guarantee preserves those aspects of the
-   * type. The exception is properties marked as AttrNoSerialize, which won't be
-   * unserialized.
+   * type.
    *
    * Also, set Uninit properties to TBottom, so that analysis
    * of 86pinit methods sets them to the correct type.
@@ -677,7 +676,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     }
 
     if (!(prop.attrs & AttrStatic)) {
-      auto t = (prop.attrs & AttrNoSerialize) ? cellTy : loosen_all(cellTy);
+      auto t = loosen_all(cellTy);
       if (!is_closure(*ctx.cls) && t.subtypeOf(BUninit)) {
         /*
          * For non-closure classes, a property of type KindOfUninit

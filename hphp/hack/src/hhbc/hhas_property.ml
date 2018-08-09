@@ -14,7 +14,6 @@ type t = {
   property_is_public    : bool;
   property_is_static    : bool;
   property_is_deep_init : bool;
-  property_no_serialize : bool;
   property_is_immutable : bool;
   property_is_lsb       : bool;
   property_is_no_bad_redeclare : bool;
@@ -36,7 +35,6 @@ let make
   property_is_public
   property_is_static
   property_is_deep_init
-  property_no_serialize
   property_is_immutable
   property_is_lsb
   property_is_no_bad_redeclare
@@ -55,7 +53,6 @@ let make
     property_is_public;
     property_is_static;
     property_is_deep_init;
-    property_no_serialize;
     property_is_immutable;
     property_is_lsb;
     property_is_no_bad_redeclare;
@@ -79,7 +76,6 @@ let is_static hhas_property = hhas_property.property_is_static
 let is_deep_init hhas_property = hhas_property.property_is_deep_init
 let initial_value hhas_property = hhas_property.property_initial_value
 let initializer_instrs hhas_property = hhas_property.property_initializer_instrs
-let no_serialize hhas_property = hhas_property.property_no_serialize
 let is_immutable hhas_property = hhas_property.property_is_immutable
 let is_lsb hhas_property = hhas_property.property_is_lsb
 let is_no_bad_redeclare hhas_property = hhas_property.property_is_no_bad_redeclare

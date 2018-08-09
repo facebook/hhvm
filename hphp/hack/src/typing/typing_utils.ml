@@ -506,17 +506,7 @@ let normalize_inter env tyl1 tyl2 =
     (* normalization is O(len(tyl1) * len(tyl2)), so just appending is
      * a significant perf win here *)
     env, (List.rev_append tyl1 tyl2)
-  else
-  begin match find_dynamic env tyl1 with
-    | Some ty -> env, [ty]
-    | None ->
-      begin match find_dynamic env tyl2 with
-      | Some ty -> env, [ty]
-      | None ->
-        (* TODO this should probably pass through the uenv *)
-        normalize_inter env tyl1 tyl2
-      end
-  end
+  else normalize_inter env tyl1 tyl2
 
 let rec push_option_out env ty =
   let is_option = function

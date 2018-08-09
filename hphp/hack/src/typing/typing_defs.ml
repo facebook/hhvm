@@ -107,9 +107,13 @@ and _ ty_ =
   | Tany
   | Tmixed
   | Tnonnull
-  (* A dynamic type is a special type which, similar to mixed, is considered the
-   * supertype of all types (except mixed), can be used in any operation like
-   * TAny, but, unlike TAny, does not subtype or unify with regular types:
+  (* A dynamic type is a special type which sometimes behaves as if it were a
+   * top type; roughly speaking, where a specific value of a particular type is
+   * expected and that type is dynamic, anything can be given. We call this
+   * behaviour "coercion", in that the types "coerce" to dynamic. In other ways it
+   * behaves like a bottom type; it can be used in any sort of binary expression
+   * or even have object methods called from it. However, it is in fact neither.
+   *
    * it captures dynamicism within function scope.
    * See tests in typecheck/dynamic/ for more examples.
    *)

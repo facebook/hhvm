@@ -572,7 +572,7 @@ and fun_implicit_return env pos ret = function
     then
       fst (Type.unify pos Reason.URreturn env rty ret)
     else
-      Type.sub_type pos Reason.URreturn env rty ret
+      Type.coerce_type pos Reason.URreturn env rty ret
   | Ast.FAsync ->
     (* An async function without a terminal block has an implicit return;
      * the Awaitable<void> type *)
@@ -584,7 +584,7 @@ and fun_implicit_return env pos ret = function
     then
       fst (Type.unify pos Reason.URreturn env rty ret)
     else
-      Type.sub_type pos Reason.URreturn env rty ret
+      Type.coerce_type pos Reason.URreturn env rty ret
 
 (* Perform provided typing function only if the Next continuation is present.
  * If the Next continuation is absent, it means that we are typechecking
@@ -743,11 +743,11 @@ and stmt env = function
       Typing_suggest.save_return env expected_return rty;
       let env =
         if TypecheckerOptions.disallow_implicit_returns_in_non_void_functions
-             (Env.get_tcopt env)
+              (Env.get_tcopt env)
         then
           fst (Type.unify p Reason.URreturn env rty expected_return)
         else
-          Type.sub_type p Reason.URreturn env rty expected_return in
+          Type.coerce_type p Reason.URreturn env rty expected_return in
       let env = LEnv.move_and_merge_next_in_cont env C.Exit in
       env, T.Return (p, None)
   | Return (p, Some e) ->
@@ -791,13 +791,13 @@ and stmt env = function
         | _, Tunresolved _ ->
             (* we allow return types to grow for anonymous functions *)
             let env, rty = TUtils.unresolved env rty in
-            let env = Type.sub_type pos Reason.URreturn env rty return_type in
+            let env = Type.coerce_type pos Reason.URreturn env rty return_type in
             env, T.Return(p, Some te)
         | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _
           | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
           | Tanon (_, _) | Tobject | Tshape _ | Tdynamic) ->
             Typing_suggest.save_return env return_type rty;
-            let env = Type.sub_type pos Reason.URreturn env rty return_type in
+            let env = Type.coerce_type pos Reason.URreturn env rty return_type in
             env, T.Return(p, Some te)
         ) in
       let env = LEnv.move_and_merge_next_in_cont env C.Exit in
@@ -1416,9 +1416,11 @@ and expr_
     let ty_arraykey = Reason.Ridx_dict key_pos, Tprim Tarraykey in
     Type.sub_type p (Reason.index_class class_name) env key_ty ty_arraykey in
 
-  let check_call ~is_using_clause ~expected ~is_expr_statement env p call_type e hl el uel ~in_suspend=
+  let check_call
+    ~is_using_clause ~expected ~is_expr_statement env p call_type e hl el uel ~in_suspend =
     let env, te, result =
-      dispatch_call ~is_using_clause ~expected ~is_expr_statement p env call_type e hl el uel ~in_suspend in
+      dispatch_call
+      ~is_using_clause ~expected ~is_expr_statement p env call_type e hl el uel ~in_suspend in
     let env = Env.forget_members env p in
     env, te, result in
 
@@ -2264,34 +2266,39 @@ and expr_
             failwith "Parsing should never allow this" in
       let Typing_env_return_info.{ return_type = expected_return; _ } = Env.get_return env in
       let env =
-        Type.sub_type p (Reason.URyield) env rty expected_return in
+        Type.coerce_type p (Reason.URyield) env rty expected_return in
       let env = Env.forget_members env p in
       let env = LEnv.save_and_merge_next_in_cont env C.Exit in
       make_result env (T.Yield taf) (Reason.Ryield_send p, Toption send)
   | Yield_from e ->
     let key = Env.fresh_type () in
     let value = Env.fresh_type () in
-    (* Expected type of `e` in `yield from e` is KeyedTraversable<Tk,Tv> *)
-    let expected_yield_from_ty =
-      (Reason.Ryield_gen p,
-        Tclass ((p, SN.Collections.cKeyedTraversable), [key; value])) in
     let env, te, yield_from_ty =
       expr ~is_using_clause ~is_expr_statement env e in
+      (* Expected type of `e` in `yield from e` is KeyedTraversable<Tk,Tv> (but might be dynamic)*)
+    let expected_yield_from_ty =
+       (Reason.Ryield_gen p,
+        Tclass ((p, SN.Collections.cKeyedTraversable), [key; value])) in
+    let from_dynamic = SubType.is_sub_type env yield_from_ty (fst yield_from_ty, Tdynamic) in
     let env =
-      Type.sub_type p Reason.URyield_from env yield_from_ty expected_yield_from_ty in
+      if from_dynamic
+      then env (* all set if dynamic, otherwise need to check against KeyedTraversable *)
+      else Type.coerce_type p Reason.URyield_from env yield_from_ty expected_yield_from_ty in
     let rty = match Env.get_fn_kind env with
       | Ast.FCoroutine ->
         (* yield in coroutine is already reported as error in NastCheck *)
         let _, _, ty = expr_error env p (Reason.Rwitness p) in
         ty
       | Ast.FGenerator ->
-        Reason.Ryield_gen p,
-        Tclass ((p, SN.Classes.cGenerator), [key; value; (Reason.Rwitness p, Tprim Tvoid)])
-    | Ast.FSync | Ast.FAsync | Ast.FAsyncGenerator ->
+        if from_dynamic
+        then Reason.Ryield_gen p, Tdynamic (*TODO: give better reason*)
+        else Reason.Ryield_gen p,
+          Tclass ((p, SN.Classes.cGenerator), [key; value; (Reason.Rwitness p, Tprim Tvoid)])
+      | Ast.FSync | Ast.FAsync | Ast.FAsyncGenerator ->
         failwith "Parsing should never allow this" in
     let Typing_env_return_info.{ return_type = expected_return; _ } = Env.get_return env in
     let env =
-      Type.sub_type p (Reason.URyield_from) env rty expected_return in
+      Type.coerce_type p (Reason.URyield_from) env rty expected_return in
     let env = Env.forget_members env p in
     make_result env (T.Yield_from te) (Reason.Rwitness p, Tprim Tvoid)
   | Await e ->
@@ -2558,7 +2565,7 @@ and expr_
             obj_get ~is_method:false ~nullsafe:None env obj cid
               namepstr (fun x -> x) in
           let ureason = Reason.URxhp (class_info.tc_name, snd namepstr) in
-          Type.sub_type valp ureason env valty declty
+          Type.coerce_type valp ureason env valty declty
         end ~init:env in
         make_result env txml obj
       )
@@ -2645,6 +2652,9 @@ and anon_sub_type pos ur env ty_sub ty_super =
   Errors.try_add_err pos (Reason.string_of_ureason ur)
     (fun () -> SubType.sub_type env ty_sub ty_super)
     (fun () -> env)
+
+and anon_coerce_type pos ur env ty_have ty_expect =
+  Typing_ops.coerce_type ~sub_fn:anon_sub_type pos ur env ty_have ty_expect
 
 (*****************************************************************************)
 (* XHP attribute/body helpers. *)
@@ -2736,8 +2746,8 @@ and anon_bind_param params (env, t_params) ty : Env.env * Tast.fun_param list =
           { (Phase.env_with_self env) with from_class = Some CIstatic } in
         let env, h = Phase.localize ~ety_env env h in
         let pos = Reason.to_pos (fst ty) in
-        (* Don't use Type.sub_type as it resets env.Env.pos unnecessarily *)
-        let env = anon_sub_type pos Reason.URparam env ty h in
+        (* Don't use Type.coerce_type as it resets env.Env.pos unnecessarily *)
+        let env = anon_coerce_type pos Reason.URparam env ty h in
         (* Closures are allowed to have explicit type-hints. When
          * that is the case we should check that the argument passed
          * is compatible with the type-hint.
@@ -2766,7 +2776,7 @@ and anon_bind_variadic env vparam variadic_ty =
         { (Phase.env_with_self env) with from_class = Some CIstatic; } in
       let env, h = Phase.localize ~ety_env env h in
       let pos = Reason.to_pos (fst variadic_ty) in
-      let env = anon_sub_type pos Reason.URparam env variadic_ty h in
+      let env = anon_coerce_type pos Reason.URparam env variadic_ty h in
       env, h, vparam.param_pos
   in
   let r = Reason.Rvar_param pos in
@@ -2795,7 +2805,7 @@ and anon_check_param env param =
       let env, hty = Phase.localize_hint_with_self env hty in
       let paramty = Env.get_local env (Local_id.get param.param_name) in
       let hint_pos = Reason.to_pos (fst hty) in
-      let env = Type.sub_type hint_pos Reason.URhint env paramty hty in
+      let env = Type.coerce_type hint_pos Reason.URhint env paramty hty in
       env
 
 and anon_block env b =
@@ -3005,7 +3015,7 @@ and check_expected_ty message env inferred_ty expected =
       (Printf.sprintf "Typing.check_expected_ty %s" message,
        [Typing_log.Log_type ("inferred_ty", inferred_ty);
        Typing_log.Log_type ("expected_ty", expected_ty)])];
-    Type.sub_type p ur env inferred_ty expected_ty
+    Type.coerce_type p ur env inferred_ty expected_ty
 
 and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p env cid el uel =
   (* Obtain class info from the cid expression. We get multiple
@@ -3353,7 +3363,7 @@ and assign_ p ur env e1 ty2 =
       let env = save_and_merge_next_in_catch env in
       let env, ty2' = Env.unbind env ty2 in
       let k (env, member_ty, vis) =
-        let env = Type.sub_type p ur env ty2' member_ty in
+        let env = Type.coerce_type p ur env ty2' member_ty in
         env, member_ty, vis in
       let env, result =
         obj_get ~is_method:false ~nullsafe ~valkind:`lvalue
@@ -3383,7 +3393,7 @@ and assign_ p ur env e1 ty2 =
       let env, exp_real_type = Env.expand_type env real_type in
       let env = { env with Env.lenv = lenv } in
       let env, ty2' = Env.unbind env ty2 in
-      let env = Type.sub_type p ur env ty2' exp_real_type in
+      let env = Type.coerce_type p ur env ty2' exp_real_type in
       env, te1, ty2
   | _, Class_get ((_, x), (_, y)) ->
       let lenv = env.Env.lenv in
@@ -3398,7 +3408,7 @@ and assign_ p ur env e1 ty2 =
         | ty -> [ty]
       in
       let env = List.fold_left real_type_list ~f:begin fun env real_type ->
-        Type.sub_type p ur env ety2 real_type
+        Type.coerce_type p ur env ety2 real_type
       end ~init:env in
       let env, local = Env.FakeMembers.make_static p env x y in
       let env, ty3 = set_valid_rvalue p env local ty2 in
@@ -3439,7 +3449,7 @@ and assign_simple pos ur env e1 ty2 =
   let env, te1, ty1 = lvalue env e1 in
   let env, ty2 = check_valid_rvalue pos env ty2 in
   let env, ty2 = TUtils.unresolved env ty2 in
-  let env = Type.sub_type pos ur env ty2 ty1 in
+  let env = Type.coerce_type pos ur env ty2 ty1 in
   env, te1, ty2
 
 and array_field env = function
@@ -4337,6 +4347,16 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
         );
       env, (Reason.Rwitness p, Typing_utils.terr env)
     end in
+  let type_index env p ty_have ty_expect reason =
+    (* let it work out if they subtype, in order to resolve unresolved etc.*)
+    if SubType.is_sub_type env ty_have ty_expect
+    then Type.coerce_type p reason env ty_have ty_expect
+    (* else if ty_have is dynamic, just let it be used b/c dynamic can be used any way *)
+    else if SubType.is_sub_type env ty_have (fst ty_have, Tdynamic)
+    then env
+    (* otherwise try to coerce and fail with a useful error *)
+    else Type.coerce_type p reason env ty_have ty_expect
+  in
   match snd ety1 with
   | Tunresolved tyl ->
       let env, tyl = List.map_env env tyl begin fun env ty1 ->
@@ -4345,11 +4365,11 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
       env, (fst ety1, Tunresolved tyl)
   | Tarraykind (AKvarray ty | AKvec ty) ->
       let ty1 = Reason.Ridx (fst e2, fst ety1), Tprim Tint in
-      let env = Type.sub_type p Reason.index_array env ty2 ty1 in
+      let env = type_index env p ty2 ty1 Reason.index_array in
       env, ty
   | Tarraykind (AKvarray_or_darray ty) ->
       let ty1 = Reason.Rvarray_or_darray_key p, Tprim Tarraykey in
-      let env = Type.sub_type p Reason.index_array env ty2 ty1 in
+      let env = type_index env p ty2 ty1 Reason.index_array in
       env, ty
   | Tclass ((_, cn) as id, argl)
     when cn = SN.Collections.cVector
@@ -4358,7 +4378,7 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
         | [ty] -> ty
         | _ -> arity_error id; err_witness env p in
       let ty1 = Reason.Ridx_vector (fst e2), Tprim Tint in
-      let env = Type.sub_type p (Reason.index_class cn) env ty2 ty1 in
+      let env = type_index env p ty2 ty1 (Reason.index_class cn) in
       env, ty
   | Tclass ((_, cn) as id, argl)
     when cn = SN.Collections.cMap
@@ -4378,7 +4398,7 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
               any, any
         in
         let env, ty2 = Env.unbind env ty2 in
-        let env = Type.sub_type p (Reason.index_class cn) env ty2 k in
+        let env = type_index env p ty2 k (Reason.index_class cn) in
         env, v
   (* Certain container/collection types are intended to be immutable/const,
    * thus they should never appear as a lvalue when indexing i.e.
@@ -4401,7 +4421,7 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
             let any = err_witness env p in
             any, any
       in
-      let env = Type.sub_type p (Reason.index_class cn) env ty2 k in
+      let env = type_index env p ty2 k (Reason.index_class cn) in
       env, v
   | Tclass ((_, cn) as id, argl)
       when not is_lvalue &&
@@ -4410,7 +4430,7 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
         | [ty] -> ty
         | _ -> arity_error id; err_witness env p in
       let ty1 = Reason.Ridx (fst e2, fst ety1), Tprim Tint in
-      let env = Type.sub_type p (Reason.index_class cn) env ty2 ty1 in
+      let env = type_index env p ty2 ty1 (Reason.index_class cn) in
       env, ty
   | Tclass ((_, cn), _)
       when is_lvalue &&
@@ -4418,7 +4438,7 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
     error_const_mutation env p ety1
   | Tarraykind (AKdarray (k, v) | AKmap (k, v)) ->
       let env, ty2 = Env.unbind env ty2 in
-      let env = Type.sub_type p Reason.index_array env ty2 k in
+      let env = type_index env p ty2 k Reason.index_array in
       env, v
   | Tarraykind ((AKshape  _ |  AKtuple _) as akind) ->
       let key = Typing_arrays.static_array_access env (Some e2) in
@@ -4427,7 +4447,7 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
             begin match IMap.get index fields with
               | Some ty ->
                   let ty1 = Reason.Ridx (fst e2, fst ety1), Tprim Tint in
-                  let env = Type.sub_type p Reason.index_array env ty2 ty1 in
+                  let env = type_index env p ty2 ty1 Reason.index_array in
                   env, Some ty
               | None -> env, None
             end
@@ -4435,7 +4455,7 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
             begin match Nast.ShapeMap.get field_name fdm with
               | Some (k, v) ->
                   let env, ty2 = Env.unbind env ty2 in
-                  let env = Type.sub_type p Reason.index_array env ty2 k in
+                  let env = type_index env p ty2 k Reason.index_array in
                   env, Some v
               | None -> env, None
             end
@@ -4454,10 +4474,11 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
       env, (Reason.Rnone, Typing_utils.tany env)
   | Tprim Tstring ->
       let ty = Reason.Rwitness p, Tprim Tstring in
-      let int = Reason.Ridx (fst e2, fst ety1), Tprim Tint in
-      let env = Type.sub_type p Reason.index_array env ty2 int in
+      let ty1 = Reason.Ridx (fst e2, fst ety1), Tprim Tint in
+      let env = type_index env p ty2 ty1 Reason.index_array in
       env, ty
   | Ttuple tyl ->
+      (* requires integer literal *)
       (match e2 with
       | p, Int n ->
           (try
@@ -4479,7 +4500,7 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
             arity_error id;
             let any = err_witness env p in
             any, any
-      in
+      in (* requires integer literal *)
       (match e2 with
       | p, Int n ->
           (try
@@ -5397,7 +5418,8 @@ and inout_write_back env { fp_type; _ } (_, e) =
     | _ -> env
 
 and call ~expected ?(is_expr_statement=false) ?method_call_info pos env fty el uel =
-  let env, tel, tuel, ty = call_ ~expected ~is_expr_statement ~method_call_info pos env fty el uel in
+  let env, tel, tuel, ty =
+    call_ ~expected ~is_expr_statement ~method_call_info pos env fty el uel in
   (* We need to solve the constraints after every single function call.
    * The type-checker is control-flow sensitive, the same value could
    * have different type depending on the branch that we are in.
@@ -5417,7 +5439,8 @@ and call_ ~expected ~method_call_info ~is_expr_statement pos env fty el uel =
     let el = el @ uel in
     let env, tel = List.map_env env el begin fun env elt ->
       let env, te, arg_ty =
-        expr ~expected:(pos, Reason.URparam, (Reason.Rnone, Typing_utils.tany env)) ~is_func_arg:true env elt
+        expr ~expected:(pos, Reason.URparam, (Reason.Rnone, Typing_utils.tany env))
+        ~is_func_arg:true env elt
       in
       let env =
         match elt with
@@ -5489,8 +5512,8 @@ and call_ ~expected ~method_call_info ~is_expr_statement pos env fty el uel =
               let env = call_param env param (e, ty) ~is_variadic in
               env, Some (te, ty)
             | None ->
-              let env, te, ty = expr ~expected:(pos, Reason.URparam, (Reason.Rnone, Typing_utils.tany env))
-                ~is_func_arg:true env e in
+              let env, te, ty = expr ~expected:(pos, Reason.URparam,
+                (Reason.Rnone, Typing_utils.tany env)) ~is_func_arg:true env e in
               env, Some (te, ty)
             end in
         let env, rl, paraml = check_args check_lambdas env el paraml in
@@ -5668,7 +5691,7 @@ and call_param env param ((pos, _ as e), arg_ty) ~is_variadic =
   let env, dep_ty = match snd e with
     | Lvar _ -> ExprDepTy.make env (CIexpr e) arg_ty
     | _ -> env, arg_ty in
-  Type.sub_type pos Reason.URparam env dep_ty param.fp_type
+  Type.coerce_type pos Reason.URparam env dep_ty param.fp_type
 
 and call_untyped_unpack env uel = match uel with
   (* In the event that we don't have a known function call type, we can still
@@ -5684,7 +5707,7 @@ and call_untyped_unpack env uel = match uel with
       let ty = Env.fresh_type () in
       let unpack_r = Reason.Runpack_param pos in
       let unpack_ty = unpack_r, Tclass ((pos, SN.Collections.cTraversable), [ty]) in
-      Type.sub_type pos Reason.URparam env ety unpack_ty
+      Type.coerce_type pos Reason.URparam env ety unpack_ty
     end
   end
 
@@ -5699,9 +5722,11 @@ and enforce_sub_ty env p ty1 ty2 =
 (* throws typing error if neither t <: ty nor t <: dynamic, and adds appropriate
  * constraint to env otherwise *)
 and check_type ty p r env t =
-  if TUtils.is_dynamic env t (* TODO: when dynamic is no longer top-ish, replace using subtyping *)
-  then enforce_sub_ty env p t (r, Tdynamic)
-  else enforce_sub_ty env p t (r, ty)
+  let is_ty = SubType.is_sub_type env t (r, ty) in
+  let is_dynamic = SubType.is_sub_type env t (r, Tdynamic) in
+  match is_ty, is_dynamic with
+  | false, true -> enforce_sub_ty env p t (r, Tdynamic)
+  | _ -> enforce_sub_ty env p t (r, ty)
 
 (* does check_type with num and then gives back normalized type and env *)
 and check_num env p t r =
@@ -5896,16 +5921,24 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
         (Reason.Rcomp p, Tclass ((p, SN.Classes.cDateTime), [])) in
       let ty_datetimeimmutable =
         (Reason.Rcomp p, Tclass ((p, SN.Classes.cDateTimeImmutable), [])) in
-      let both_sub tyl = (*TODO: update to use subtyping on dynamic, not TUtils *)
-        (List.exists tyl ~f:(SubType.is_sub_type env ty1) || TUtils.is_dynamic env ty1)
-        && (List.exists tyl ~f:(SubType.is_sub_type env ty2) || TUtils.is_dynamic env ty2) in
-      (* So we have three different types here:
-       *   function(num, num): bool
-       *   function(string, string): bool
-       *   function(DateTime | DateTimeImmutable, DateTime | DateTimeImmutable): bool
+      let ty_dynamic = (Reason.Rcomp p, Tdynamic) in
+      let both_sub tyl =
+        (List.exists tyl ~f:(SubType.is_sub_type env ty1))
+        && (List.exists tyl ~f:(SubType.is_sub_type env ty2)) in
+      (*
+       * Comparison here is allowed when both args are num, both string, or both
+       * DateTime | DateTimeImmutable. Alternatively, either or both args can be
+       * dynamic. We use both_sub to check that both arguments subtype a type.
+       *
+       * This actually does not properly handle union types. For instance,
+       * DateTime | DateTimeImmutable is neither a subtype of DateTime nor
+       * DateTimeImmutable, but it will be the type of an element coming out
+       * of a vector containing both. Further, dynamic could be comparable to
+       * num | string | DateTime | DateTimeImmutable | dynamic. Better union
+       * handling would be an improvement.
        *)
-      if not (both_sub [ty_num] || both_sub [ty_string] ||
-                both_sub [ty_datetime; ty_datetimeimmutable])
+      if not (both_sub [ty_num; ty_dynamic] || both_sub [ty_string; ty_dynamic] ||
+        both_sub [ty_datetime; ty_datetimeimmutable; ty_dynamic])
       then begin
         let ty1 = Typing_expand.fully_expand env ty1 in
         let ty2 = Typing_expand.fully_expand env ty2 in
@@ -6064,7 +6097,8 @@ and condition ?lhs_of_null_coalesce env tparamet =
   | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_resource ->
       is_type env lv Tresource (Reason.Rpredicated (p, f))
-  | _, Call (Cnormal,  (_, Class_const ((_, CI ((_, class_name), _)), (_, method_name))), _, [shape; field], [])
+  | _, Call (Cnormal,
+    (_, Class_const ((_, CI ((_, class_name), _)), (_, method_name))), _, [shape; field], [])
     when tparamet && class_name = SN.Shapes.cShapes && method_name = SN.Shapes.keyExists ->
       key_exists env shape field
   | _, Unop (Ast.Unot, e) ->
@@ -6705,7 +6739,7 @@ and class_const_def env (h, id, e) =
   match e with
     | Some e ->
       let env, te, ty' = expr ?expected:opt_expected env e in
-      ignore (Type.sub_type (fst id) Reason.URhint env ty' ty);
+      ignore (Type.coerce_type (fst id) Reason.URhint env ty' ty);
       (h, id, Some te), ty'
     | None ->
       (h, id, None), ty
@@ -6758,7 +6792,7 @@ and class_var_def env ~is_static c cv =
       let env =
         match expected with
         | None -> env
-        | Some (p, ur, cty) -> Type.sub_type p ur env ty cty in
+        | Some (p, ur, cty) -> Type.coerce_type p ur env ty cty in
       env, Some te, ty in
   let env =
     if is_static

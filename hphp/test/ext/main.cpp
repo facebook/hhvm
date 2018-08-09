@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
   }
 
   // Initialize compiler state
-  compile_file(0, 0, MD5(), 0);
+  hphp_compiler_init();
   hphp_process_init();
   SCOPE_EXIT { hphp_process_exit(); };
   Test test;

@@ -23,6 +23,10 @@
 
 namespace HPHP {
 
+namespace Native {
+struct FuncTable;
+}
+
 struct MD5;
 
 struct BadCompilerException : Exception {
@@ -69,11 +73,13 @@ struct UnitCompiler {
                int codeLen,
                const char* filename,
                const MD5& md5,
+               const Native::FuncTable& nativeFuncs,
                bool forDebuggerEval)
       : m_code(code),
         m_codeLen(codeLen),
         m_filename(filename),
         m_md5(md5),
+        m_nativeFuncs(nativeFuncs),
         m_forDebuggerEval(forDebuggerEval)
     {}
   virtual ~UnitCompiler() {}
@@ -83,9 +89,12 @@ struct UnitCompiler {
     int codeLen,
     const char* filename,
     const MD5& md5,
+    const Native::FuncTable& nativeFuncs,
     bool forDebuggerEval);
+
   virtual std::unique_ptr<UnitEmitter> compile(
     AsmCallbacks* callbacks = nullptr) const = 0;
+
   virtual const char* getName() const = 0;
 
  protected:
@@ -93,6 +102,7 @@ struct UnitCompiler {
   int m_codeLen;
   const char* m_filename;
   const MD5& m_md5;
+  const Native::FuncTable& m_nativeFuncs;
   bool m_forDebuggerEval;
 };
 
@@ -101,6 +111,7 @@ struct HackcUnitCompiler : public UnitCompiler {
 
   virtual std::unique_ptr<UnitEmitter> compile(
     AsmCallbacks* callbacks = nullptr) const override;
+
   virtual const char* getName() const override { return "HackC"; }
 };
 

@@ -23,9 +23,17 @@ namespace HPHP {
 struct Unit;
 struct MD5;
 
+namespace Native {
+struct FuncTable;
+}
+
+// Called once at process startup to initialize compiler
+void hphp_compiler_init();
+
 // If set, releaseUnit will contain a pointer to any extraneous unit created due
 // to race-conditions while compiling
 Unit* compile_file(const char* s, size_t sz, const MD5& md5, const char* fname,
+                   const Native::FuncTable& nativeFuncs,
                    Unit** releaseUnit = nullptr);
 
 // If forDebuggerEval is true, and the unit contains a single expression
@@ -34,10 +42,14 @@ Unit* compile_file(const char* s, size_t sz, const MD5& md5, const char* fname,
 // forDebuggerEval is only meant to be used by debuggers, where humans may
 // enter a statement and we wish to eval it and display the resulting value,
 // if any.
-Unit* compile_string(const char* s, size_t sz, const char* fname = nullptr,
+Unit* compile_string(const char* s, size_t sz, const char* fname,
+                     const Native::FuncTable& nativeFuncs,
                      bool forDebuggerEval = false);
 
-Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname);
+Unit* compile_debugger_string(const char* s, size_t sz);
+
+Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
+                               const Native::FuncTable& nativeFuncs);
 
 /*
  * A few functions are exposed by libhphp_analysis and used in
@@ -48,7 +60,7 @@ Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname);
  */
 
 using CompileStringFn = Unit* (*)(const char*, int, const MD5&, const char*,
-                                  Unit**, bool);
+                                  const Native::FuncTable&, Unit**, bool);
 
 extern CompileStringFn g_hphp_compiler_parse;
 

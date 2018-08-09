@@ -1794,7 +1794,7 @@ static int execute_program_impl(int argc, char** argv) {
     SCOPE_EXIT { hphp_thread_exit(); };
 
     // Initialize compiler state
-    compile_file(0, 0, MD5(), 0);
+    hphp_compiler_init();
 
     if (po.mode == "dumphhas")  RuntimeOption::EvalDumpHhas = true;
     else RuntimeOption::EvalVerifyOnly = true;
@@ -1804,6 +1804,7 @@ static int execute_program_impl(int argc, char** argv) {
     std::atomic_thread_fence(std::memory_order_release);
 
     auto compiled = compile_file(str.c_str(), str.size(), md5, file.c_str(),
+                                 Native::s_builtinNativeFuncs,
                                  nullptr);
 
     if (po.mode == "verify") {
@@ -1936,8 +1937,9 @@ static int execute_program_impl(int argc, char** argv) {
   if (!ShmCounters::initialize(true, Logger::Error)) {
     exit(HPHP_EXIT_FAILURE);
   }
+
   // Initialize compiler state
-  compile_file(0, 0, MD5(), 0);
+  hphp_compiler_init();
 
   if (!po.lint.empty()) {
     Logger::LogHeader = false;

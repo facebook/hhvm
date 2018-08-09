@@ -237,6 +237,7 @@ struct ExternCompiler {
     const char* filename,
     const MD5& md5,
     folly::StringPiece code,
+    const Native::FuncTable& nativeFuncs,
     bool forDebuggerEval,
     AsmCallbacks* callbacks
   ) {
@@ -259,7 +260,7 @@ struct ExternCompiler {
                                 prog.length(),
                                 filename,
                                 md5,
-                                Native::s_builtinNativeFuncs,
+                                nativeFuncs,
                                 false /* swallow errors */,
                                 callbacks
                               );
@@ -358,6 +359,7 @@ struct CompilerPool {
                          int len,
                          const char* filename,
                          const MD5& md5,
+                         const Native::FuncTable& nativeFuncs,
                          bool forDebuggerEval,
                          AsmCallbacks* callbacks,
                          bool& internal_error);
@@ -528,6 +530,7 @@ CompilerResult CompilerPool::compile(const char* code,
                                      int len,
                                      const char* filename,
                                      const MD5& md5,
+                                     const Native::FuncTable& nativeFuncs,
                                      bool forDebuggerEval,
                                      AsmCallbacks* callbacks,
                                      bool& internal_error
@@ -536,6 +539,7 @@ CompilerResult CompilerPool::compile(const char* code,
     return c->compile(filename,
                       md5,
                       folly::StringPiece(code, len),
+                      nativeFuncs,
                       forDebuggerEval,
                       callbacks);
   };
@@ -919,12 +923,13 @@ CompilerResult hackc_compile(
   int len,
   const char* filename,
   const MD5& md5,
+  const Native::FuncTable& nativeFuncs,
   bool forDebuggerEval,
   AsmCallbacks* callbacks,
   bool& internal_error
 ) {
   return s_manager.get_hackc_pool().compile(
-    code, len, filename, md5, forDebuggerEval, callbacks, internal_error
+    code, len, filename, md5, nativeFuncs, forDebuggerEval, callbacks, internal_error
   );
 }
 
@@ -1064,15 +1069,17 @@ bool isFileHack(const char* code, size_t codeLen) {
   return codeLen > strlen("<?hh") && startsWith(code, "<?hh");
 }
 
-std::unique_ptr<UnitCompiler> UnitCompiler::create(const char* code,
-                                                   int codeLen,
-                                                   const char* filename,
-                                                   const MD5& md5,
-                                                   bool forDebuggerEval
+std::unique_ptr<UnitCompiler>
+UnitCompiler::create(const char* code,
+                     int codeLen,
+                     const char* filename,
+                     const MD5& md5,
+                     const Native::FuncTable& nativeFuncs,
+                     bool forDebuggerEval
 ) {
   s_manager.ensure_started();
   return std::make_unique<HackcUnitCompiler>(code, codeLen, filename, md5,
-                                             forDebuggerEval);
+                                             nativeFuncs, forDebuggerEval);
 }
 
 std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
@@ -1082,6 +1089,7 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
                            m_codeLen,
                            m_filename,
                            m_md5,
+                           m_nativeFuncs,
                            m_forDebuggerEval,
                            callbacks,
                            ice);

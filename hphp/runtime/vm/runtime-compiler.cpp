@@ -30,34 +30,47 @@ TRACE_SET_MOD(runtime);
 
 CompileStringFn g_hphp_compiler_parse;
 
+void hphp_compiler_init() {
+  g_hphp_compiler_parse(nullptr, 0, MD5(), nullptr, Native::s_noNativeFuncs,
+                        nullptr, false);
+}
+
 Unit* compile_file(const char* s, size_t sz, const MD5& md5,
-                   const char* fname, Unit** releaseUnit) {
-  return g_hphp_compiler_parse(s, sz, md5, fname, releaseUnit, false);
+                   const char* fname, const Native::FuncTable& nativeFuncs,
+                   Unit** releaseUnit) {
+  return g_hphp_compiler_parse(s, sz, md5, fname, nativeFuncs, releaseUnit,
+                               false);
 }
 
 Unit* compile_string(const char* s,
                      size_t sz,
                      const char* fname,
+                     const Native::FuncTable& nativeFuncs,
                      bool forDebuggerEval) {
   auto const md5 = MD5{mangleUnitMd5(string_md5(folly::StringPiece{s, sz}))};
   if (auto u = Repo::get().loadUnit(
         fname ? fname : "",
-        md5,
-        Native::s_builtinNativeFuncs).release()) {
+        md5, nativeFuncs).release()) {
     return u;
   }
   // NB: fname needs to be long-lived if generating a bytecode repo because it
   // can be cached via a Location ultimately contained by ErrorInfo for printing
   // code errors.
-  return g_hphp_compiler_parse(s, sz, md5, fname, nullptr, forDebuggerEval);
+  return g_hphp_compiler_parse(s, sz, md5, fname, nativeFuncs, nullptr,
+                               forDebuggerEval);
 }
 
-Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname) {
+Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
+                               const Native::FuncTable& nativeFuncs) {
   assertx(fname[0] == '/' && fname[1] == ':');
-  if (auto u = lookupSyslibUnit(makeStaticString(fname),
-                                Native::s_builtinNativeFuncs)) return u;
+  if (auto u = lookupSyslibUnit(makeStaticString(fname), nativeFuncs)) {
+    return u;
+  }
+  return compile_string(s, sz, fname, nativeFuncs);
+}
 
-  return compile_string(s, sz, fname);
+Unit* compile_debugger_string(const char* s, size_t sz) {
+  return compile_string(s, sz, nullptr, Native::s_noNativeFuncs, true);
 }
 
 }

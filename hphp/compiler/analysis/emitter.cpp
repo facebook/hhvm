@@ -303,8 +303,9 @@ extern "C" {
  */
 
 Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
-                          const char* filename, Unit** releaseUnit,
-                          bool forDebuggerEval) {
+                          const char* filename,
+                          const Native::FuncTable& nativeFuncs,
+                          Unit** releaseUnit, bool forDebuggerEval) {
   if (UNLIKELY(!code)) {
     // Do initialization when code is null; see above.
     Option::RecordErrors = false;
@@ -328,8 +329,6 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
   auto const prevFolding = RID().getJitFolding();
   RID().setJitFolding(true);
   SCOPE_EXIT { RID().setJitFolding(prevFolding); };
-
-  auto& nativeFuncs = Native::s_builtinNativeFuncs;
 
   try {
     UnitOrigin unitOrigin = UnitOrigin::File;
@@ -360,7 +359,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     // the extern compiler
     if (!ue) {
       auto uc = UnitCompiler::create(code, codeLen, filename, md5,
-                                     forDebuggerEval);
+                                     nativeFuncs, forDebuggerEval);
       assertx(uc);
       try {
         ue = uc->compile();

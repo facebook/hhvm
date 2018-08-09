@@ -266,7 +266,7 @@ CachedUnit createUnitFromString(const char* path,
   }
   LogTimer compileTimer("compile_ms", ent);
   auto const unit = compile_file(contents.data(), contents.size(), md5, path,
-                                 releaseUnit);
+                                 nativeFuncs, releaseUnit);
   return CachedUnit { unit, rds::allocBit() };
 }
 

@@ -2212,7 +2212,8 @@ Unit* ExecutionContext::compileEvalString(
     acc->second = compile_string(
       code->data(),
       code->size(),
-      evalFilename
+      evalFilename,
+      Native::s_noNativeFuncs
     );
   }
   return acc->second;
@@ -2242,7 +2243,8 @@ StrNR ExecutionContext::createFunction(const String& args,
           << "(" << args.data() << ") {"
           << code.data() << "}\n";
   std::string evalCode = codeStr.str();
-  Unit* unit = compile_string(evalCode.data(), evalCode.size());
+  Unit* unit = compile_string(evalCode.data(), evalCode.size(),
+                              nullptr, Native::s_noNativeFuncs);
   // Move the function to a different name.
   std::ostringstream newNameStr;
   newNameStr << '\0' << "lambda_" << ++m_lambdaCounter;
@@ -2278,7 +2280,7 @@ StrNR ExecutionContext::createFunction(const String& args,
 ExecutionContext::EvaluationResult
 ExecutionContext::evalPHPDebugger(StringData* code, int frame) {
   // The code has "<?php" prepended already
-  auto unit = compile_string(code->data(), code->size());
+  auto unit = compile_debugger_string(code->data(), code->size());
   if (unit == nullptr) {
     raise_error("Syntax error");
     return {true, init_null_variant, "Syntax error"};
@@ -2427,7 +2429,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
 }
 
 void ExecutionContext::enterDebuggerDummyEnv() {
-  static Unit* s_debuggerDummy = compile_string("<?php?>", 7);
+  static Unit* s_debuggerDummy = compile_debugger_string("<?php?>", 7);
   // Ensure that the VM stack is completely empty (vmfp() should be null)
   // and that we're not in a nested VM (reentrancy)
   assertx(vmfp() == nullptr);

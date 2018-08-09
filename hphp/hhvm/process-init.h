@@ -48,7 +48,7 @@ inline void init_for_unit_test() {
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
   RuntimeOption::Load(ini, config);
-  compile_file(0, 0, MD5(), 0);
+  hphp_compiler_init();
   hphp_process_init();
   hphp_session_init(Treadmill::SessionKind::UnitTests);
 }

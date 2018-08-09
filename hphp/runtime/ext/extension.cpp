@@ -62,7 +62,8 @@ void Extension::CompileSystemlib(const std::string &slib,
   // which won't be the case for now unless these pointers are long-lived.
   auto const moduleName = makeStaticString("/:" + name);
   auto const unit = compile_systemlib_string(slib.c_str(), slib.size(),
-                                             moduleName->data());
+                                             moduleName->data(),
+                                             Native::s_builtinNativeFuncs);
   always_assert_flog(unit, "No unit created for systemlib `{}'", moduleName);
 
   const StringData* msg;

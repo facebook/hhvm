@@ -101,7 +101,8 @@ void ProcessInit() {
   SystemLib::s_source = slib;
 
   SystemLib::s_unit = compile_systemlib_string(slib.c_str(), slib.size(),
-                                               "/:systemlib.php");
+                                               "/:systemlib.php",
+                                               Native::s_builtinNativeFuncs);
 
   const StringData* msg;
   int line;
@@ -115,7 +116,8 @@ void ProcessInit() {
 
   if (!hhas.empty()) {
     SystemLib::s_hhas_unit = compile_systemlib_string(
-      hhas.c_str(), hhas.size(), "/:systemlib.hhas");
+      hhas.c_str(), hhas.size(), "/:systemlib.hhas",
+      Native::s_builtinNativeFuncs);
     if (SystemLib::s_hhas_unit->compileTimeFatal(msg, line)) {
       Logger::Error("An error has been introduced in the hhas portion of "
                     "systemlib.");

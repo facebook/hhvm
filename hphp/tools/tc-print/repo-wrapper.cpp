@@ -52,7 +52,7 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   }
   RuntimeOption::Load(ini, config);
   RuntimeOption::RepoCommit = false;
-  compile_file(nullptr, 0, MD5(), nullptr);
+  hphp_compiler_init();
 
   repo = &Repo::get();
 
@@ -70,10 +70,12 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   auto const phpLib = get_systemlib(&hhasLib);
   always_assert(!hhasLib.empty() && !phpLib.empty());
   auto phpUnit = compile_string(phpLib.c_str(), phpLib.size(),
-                                "systemlib.php");
+                                "systemlib.php",
+                                Native::s_builtinNativeFuncs);
   addUnit(phpUnit);
   auto hhasUnit = compile_string(hhasLib.c_str(), hhasLib.size(),
-                                 "systemlib.hhas");
+                                 "systemlib.hhas",
+                                 Native::s_builtinNativeFuncs);
   addUnit(hhasUnit);
 
   SystemLib::s_inited = true;

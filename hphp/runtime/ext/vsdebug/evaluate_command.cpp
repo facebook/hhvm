@@ -139,9 +139,9 @@ bool EvaluateCommand::executeImpl(
     session->clearCachedVariable(DebuggerSession::kCachedVariableKeyAll);
   };
 
-  std::unique_ptr<Unit> unit(compile_string(evalExpression.c_str(),
-                              evalExpression.size(), nullptr, true));
-  if (unit == nullptr) {
+  std::unique_ptr<Unit> unit(compile_debugger_string(evalExpression.c_str(),
+                              evalExpression.size()));
+  if (!unit) {
     // The compiler will already have printed more detailed error messages
     // to stderr, which is redirected to the debugger client's console.
     throw DebuggerCommandException("Error compiling expression.");

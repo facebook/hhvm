@@ -552,3 +552,6 @@ let decl_outside_global_scope = "Declarations are not supported outside global s
 
 let experimental_in_codegen_without_hacksperimental =
   "Experimental mode files are not allowed during codegen unless the hacksperimental flag is set"
+
+let type_alias_to_type_constant =
+  "Type aliases to type constants are not supported"

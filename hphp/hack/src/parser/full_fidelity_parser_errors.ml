@@ -2349,6 +2349,14 @@ let alias_errors env node namespace_name names errors =
     else
     let name = text ad.alias_name in
     let location = make_location_of_node ad.alias_name in
+    let errors = match ad.alias_type with
+    | {
+      syntax = TypeConstant _;
+      _;
+    } when is_typechecker env ->
+      make_error_from_node ad.alias_type
+        SyntaxError.type_alias_to_type_constant :: errors
+    | _ -> errors in
     check_type_name env.syntax_tree ad.alias_name namespace_name name location names errors
   | _ -> names, errors
 

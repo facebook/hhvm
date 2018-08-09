@@ -18,7 +18,6 @@ open Reordered_argument_collections
 type t = {
   version : string option;
 
-  load_script      : Path.t option;
   load_script_timeout : int; (* in seconds *)
 
   (* Configures only the workers. Workers can have more relaxed GC configs as
@@ -178,8 +177,6 @@ let process_untrusted_mode config =
       let blacklist = [
         (* out of tree file access*)
         "extra_paths";
-        (* arbitrary code execution *)
-        "load_script";
         (* potential resource abuse *)
         "language_feature_logging";
       ] in
@@ -236,8 +233,6 @@ let load config_filename options =
   let version = SMap.get config "version" in
   let ignored_paths = process_ignored_paths config in
   let extra_paths = process_extra_paths config in
-  let load_script =
-    Option.map (SMap.get config "load_script") maybe_relative_path in
   (* Since we use the unix alarm() for our timeouts, a timeout value of 0 means
    * to wait indefinitely *)
   let load_script_timeout = int_ "load_script_timeout" ~default:0 config in
@@ -275,7 +270,6 @@ let load config_filename options =
     (GlobalOptions.ignored_fixme_codes global_opts);
   {
     version = version;
-    load_script = load_script;
     load_script_timeout = load_script_timeout;
     gc_control = make_gc_control config;
     sharedmem_config = make_sharedmem_config config options local_config;
@@ -291,7 +285,6 @@ let load config_filename options =
 (* useful in testing code *)
 let default_config = {
   version = None;
-  load_script = None;
   load_script_timeout = 0;
   gc_control = GlobalConfig.gc_control;
   sharedmem_config = GlobalConfig.default_sharedmem_config;

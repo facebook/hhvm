@@ -31,16 +31,16 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
    *
    * @return     mixed   An ArrayIterator object.
    */
-  public function __construct($array = array(), $flags = null) {
+  public function __construct($array = darray[], $flags = null) {
     if (($array instanceof ArrayObject) || ($array instanceof ArrayIterator)) {
       $this->storage = $array->getArrayCopy();
       $flags = ($flags === null) ? $array->getFlags() : $flags;
     } else if (gettype($array) === 'object') {
       $this->storage = get_object_vars($array);
-    } else if (is_array($array)) {
-      $this->storage = (array) $array;
+    } else if (HH\is_any_array($array)) {
+      $this->storage = $array;
     } else {
-      $this->storage = array();
+      $this->storage = darray[];
       throw new InvalidArgumentException(
         "Passed variable is not an array or object, using empty array instead"
       );

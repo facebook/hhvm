@@ -15,7 +15,7 @@
  * work to do. We need calculate what must be re-checked.
  *)
 (*****************************************************************************)
-open Hh_core
+open Core_kernel
 open Reordered_argument_collections
 open Typing_deps
 
@@ -150,8 +150,8 @@ let load_and_otf_decl_files _ filel =
     let tcopt, _ = OnTheFlyStore.load() in
     otf_decl_files tcopt filel
   with e ->
-    Printf.printf "Error: %s\n" (Printexc.to_string e);
-    flush stdout;
+    Printf.printf "Error: %s\n" (Exn.to_string e);
+    Out_channel.flush stdout;
     raise e
 
 let load_and_compute_deps _acc filel =
@@ -159,8 +159,8 @@ let load_and_compute_deps _acc filel =
     let _, fast = OnTheFlyStore.load() in
     compute_deps fast filel
   with e ->
-    Printf.printf "Error: %s\n" (Printexc.to_string e);
-    flush stdout;
+    Printf.printf "Error: %s\n" (Exn.to_string e);
+    Out_channel.flush stdout;
     raise e
 
 (*****************************************************************************)

@@ -13,7 +13,7 @@
  * the methods defined in the class plus everything that was inherited.
  *)
 (*****************************************************************************)
-open Hh_core
+open Core_kernel
 open Decl_defs
 open Nast
 open Typing_defs
@@ -623,7 +623,7 @@ and get_sealed_whitelist c =
       begin match c.c_kind with
         | Ast.Cenum ->
           let pos = fst c.c_name in
-          let kind = String.capitalize_ascii (Ast.string_of_class_kind c.c_kind) in
+          let kind = String.capitalize (Ast.string_of_class_kind c.c_kind) in
           Errors.unsealable pos kind;
           None
         | Ast.Cabstract | Ast.Cinterface | Ast.Cnormal | Ast.Ctrait ->
@@ -685,10 +685,10 @@ and build_constructor env class_ method_ =
   let ft = method_decl env method_ in
   let _, class_name = class_.c_name in
   let vis = visibility class_name method_.m_visibility in
-  let mconsist = method_.m_final || class_.c_kind == Ast.Cinterface in
+  let mconsist = method_.m_final || class_.c_kind = Ast.Cinterface in
   (* due to the requirement of calling parent::__construct, a private
    * constructor cannot be overridden *)
-  let mconsist = mconsist || method_.m_visibility == Private in
+  let mconsist = mconsist || method_.m_visibility = Private in
   let mconsist = mconsist || ft.ft_abstract in
   (* the alternative to overriding
    * UserAttributes.uaConsistentConstruct is marking the corresponding
@@ -1020,24 +1020,24 @@ and method_pos opt ~is_static class_id meth  =
       | Some (pos, `Class) ->
         let fn = FileInfo.get_pos_filename pos in
         begin match Parser_heap.find_class_in_file opt fn class_id with
-          | None -> raise Not_found
+          | None -> raise Caml.Not_found
           | Some { Ast.c_body; _ } ->
             let elt = List.find ~f:begin fun x ->
               match x with
               | Ast.Method {Ast.m_name = (_, name); m_kind; _ }
-                when name = meth && is_static = List.mem m_kind Ast.Static ->
+                when name = meth && is_static = List.mem m_kind Ast.Static ~equal:(=) ->
                 true
               | _ -> false
             end c_body
             in
             begin match elt with
               | Some (Ast.Method { Ast.m_name = (pos, _); _ }) -> pos
-              | _ -> raise Not_found
+              | _ -> raise Caml.Not_found
             end
         end
-      | _ -> raise Not_found
+      | _ -> raise Caml.Not_found
     with
-    | Not_found -> Pos.none
+    | Caml.Not_found -> Pos.none
 
 
 (*****************************************************************************)

@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Decl_defs
 open Nast
 open Typing_defs
@@ -95,21 +95,21 @@ let declared_class_req env (requirements, req_extends) hint =
  * than I'm willing to do now. *)
 let naive_dedup req_extends =
   (* maps class names to type params *)
-  let h = Hashtbl.create 0 in
+  let h = Caml.Hashtbl.create 0 in
   List.rev_filter_map req_extends begin fun (parent_pos, ty) ->
     match ty with
     | _r, Tapply (name, hl) ->
       let hl = List.map hl Decl_pos_utils.NormalizeSig.ty in
       begin try
-        let hl' = Hashtbl.find h name in
-        if List.compare ~cmp:Pervasives.compare hl hl' <> 0 then
+        let hl' = Caml.Hashtbl.find h name in
+        if List.compare Pervasives.compare hl hl' <> 0 then
           raise Exit
         else
           None
       with
       | Exit
-      | Not_found ->
-        Hashtbl.add h name hl;
+      | Caml.Not_found ->
+        Caml.Hashtbl.add h name hl;
         Some (parent_pos, ty)
       end
     | _ -> Some (parent_pos, ty)

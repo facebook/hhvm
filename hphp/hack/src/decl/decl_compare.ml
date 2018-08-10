@@ -19,7 +19,7 @@
  *    either redeclared or checked again.
  *)
 (*****************************************************************************)
-open Hh_core
+open Core_kernel
 open Decl_defs
 open Typing_deps
 
@@ -211,8 +211,8 @@ let class_big_diff class1 class2 =
   class1.dc_tparams <> class2.dc_tparams ||
   SMap.compare class1.dc_substs class2.dc_substs <> 0 ||
   SMap.compare class1.dc_ancestors class2.dc_ancestors <> 0 ||
-  List.compare ~cmp:Pervasives.compare
-    class1.dc_req_ancestors class2.dc_req_ancestors <> 0 ||
+  List.compare Pervasives.compare class1.dc_req_ancestors class2.dc_req_ancestors
+    <> 0 ||
   SSet.compare class1.dc_req_ancestors_extends class2.dc_req_ancestors_extends <> 0 ||
   SSet.compare class1.dc_extends class2.dc_extends <> 0 ||
   SSet.compare class1.dc_xhp_attr_deps class2.dc_xhp_attr_deps <> 0 ||

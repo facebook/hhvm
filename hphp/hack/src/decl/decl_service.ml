@@ -12,7 +12,7 @@
 (* Module declaring the types in parallel *)
 (*****************************************************************************)
 
-open Hh_core
+open Core_kernel
 open Utils
 
 (* The result expected from the service *)

@@ -194,11 +194,19 @@ bool EvaluateCommand::executeImpl(
   }
 
   if (result.failed) {
-    m_debugger->sendUserMessage(
-      result.error.c_str(),
-      DebugTransport::OutputLevelError
-    );
-    throw DebuggerCommandException("Failed to evaluate expression.");
+    if (!evalSilent) {
+      m_debugger->sendUserMessage(
+        result.error.c_str(),
+        DebugTransport::OutputLevelError
+      );
+      throw DebuggerCommandException("Failed to evaluate expression");
+    } else {
+      // Return empty response with no type in silent eval context.
+      (*responseMsg)["body"] = folly::dynamic::object;
+      folly::dynamic& body = (*responseMsg)["body"];
+      body["type"] = "";
+      return false;
+    }
   }
 
   folly::dynamic serializedResult =

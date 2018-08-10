@@ -709,6 +709,7 @@ private:
   StringBuffer* m_savedOutputBuffer;
   NoOpStdoutHook m_noOpHook;
   ExecutionContext::StdoutHook* m_oldHook;
+  StringBuffer m_sb;
 
   PCFilter m_savedFlowFilter;
   PCFilter m_savedBpFilter;

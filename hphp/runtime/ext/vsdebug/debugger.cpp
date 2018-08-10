@@ -2078,7 +2078,7 @@ SilentEvaluationContext::SilentEvaluationContext(
 
     // Disable all sorts of output during this eval.
     m_oldHook = debugger->getStdoutHook();
-    m_savedOutputBuffer = g_context->swapOutputBuffer(nullptr);
+    m_savedOutputBuffer = g_context->swapOutputBuffer(&m_sb);
     g_context->removeStdoutHook(m_oldHook);
     g_context->addStdoutHook(&m_noOpHook);
   }
@@ -2105,6 +2105,7 @@ SilentEvaluationContext::~SilentEvaluationContext() {
 
   m_savedFlowFilter.swap(rid.m_flowFilter);
   m_savedBpFilter.swap(rid.m_breakPointFilter);
+  m_sb.clear();
 }
 
 }

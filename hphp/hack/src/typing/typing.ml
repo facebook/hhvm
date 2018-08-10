@@ -5767,7 +5767,7 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
       let env, t = check_int env p ty (Reason.Rbitwise p) in
       begin
         match snd t with
-        | Tdynamic -> make_result env te (Reason.Rbitwise_ret p, Tdynamic)
+        | Tdynamic -> make_result env te (Reason.Rbitwise_dynamic p, Tdynamic)
         | _ -> make_result env te (Reason.Rbitwise_ret p, Tprim Tint)
       end
   | Ast.Uincr
@@ -5792,10 +5792,12 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
           else env
         in
         match snd t with
-        | Tprim Tfloat -> make_result env te (Reason.Rarith_ret p, Tprim Tfloat)
-        | Tprim Tint -> make_result env te (Reason.Rarith_ret p, Tprim Tint)
-        | Tdynamic -> make_result env te (Reason.Rarith_ret p, Tdynamic)
-        (*TODO: give better reason why increments of dynamic yield dynamic*)
+        | Tprim Tfloat ->
+          make_result env te (Reason.Rarith_ret_float (p, fst t, Reason.Aonly), Tprim Tfloat)
+        | Tprim Tnum ->
+          make_result env te (Reason.Rarith_ret_num (p, fst t, Reason.Aonly), Tprim Tnum)
+        | Tprim Tint -> make_result env te (Reason.Rarith_ret_int p, Tprim Tint)
+        | Tdynamic -> make_result env te (Reason.Rincdec_dynamic p, Tdynamic)
         | _ ->  make_result env te (Reason.Rarith_ret p, Tprim Tnum)
       end
   | Ast.Uplus
@@ -5806,8 +5808,11 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
       let env, t = check_num env p ty (Reason.Rarith p) in
       begin
         match snd t with
-        | Tprim Tfloat -> make_result env te (Reason.Rarith_ret p, Tprim Tfloat)
-        | Tprim Tint -> make_result env te (Reason.Rarith_ret p, Tprim Tint)
+        | Tprim Tfloat ->
+          make_result env te (Reason.Rarith_ret_float (p, fst t, Reason.Aonly), Tprim Tfloat)
+        | Tprim Tnum ->
+          make_result env te (Reason.Rarith_ret_num (p, fst t, Reason.Aonly), Tprim Tnum)
+        | Tprim Tint -> make_result env te (Reason.Rarith_ret_int p, Tprim Tint)
         | _ -> make_result env te (Reason.Rarith_ret p, Tprim Tnum)
       end
   | Ast.Uref ->
@@ -5848,65 +5853,72 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
     let env, t1 = check_num env p ty1 (Reason.Rarith p1) in
     let env, t2 = check_num env p ty2 (Reason.Rarith p2) in
     (* postcondition: t1 and t2 are dynamic or subtypes of num and
-      annotated as such *)
+      annotated as such, or we are e.g. HH_FIXMEing *)
     begin
       match snd t1, snd t2 with
-      | Tprim Tint, Tprim Tint -> make_result env te1 te2 (Reason.Rarith_ret p, Tprim Tint)
-      | Tprim Tfloat, _ -> make_result env te1 te2 (fst t1, Tprim Tfloat)
-      | _, Tprim Tfloat -> make_result env te1 te2 (fst t2, Tprim Tfloat)
-      | Tprim Tnum, _ -> make_result env te1 te2 (fst t1, Tprim Tnum)
-      | _, Tprim Tnum -> make_result env te1 te2 (fst t2, Tprim Tnum)
-       (*TODO: should these reasons be Rarith_ret rather than Rarith?*)
-      | Tdynamic, Tdynamic -> make_result env te1 te2 (Reason.Rarith p, Tdynamic)
-        (*TODO: give better reason for 2 dynamics yielding dynamic*)
-      | _ -> make_result env te1 te2 (Reason.Rarith p, Tprim Tnum)
+      | Tprim Tint, Tprim Tint -> make_result env te1 te2 (Reason.Rarith_ret_int p, Tprim Tint)
+      | Tprim Tfloat, _ ->
+        make_result env te1 te2 ((Reason.Rarith_ret_float (p, fst t1, Reason.Afirst)), Tprim Tfloat)
+      | _, Tprim Tfloat ->
+        make_result env te1 te2 ((Reason.Rarith_ret_float (p, fst t2, Reason.Asecond)),Tprim Tfloat)
+      | Tprim Tnum, _ ->
+        make_result env te1 te2 ((Reason.Rarith_ret_num (p, fst t1, Reason.Afirst)), Tprim Tnum)
+      | _, Tprim Tnum ->
+        make_result env te1 te2 ((Reason.Rarith_ret_num (p, fst t2, Reason.Asecond)), Tprim Tnum)
+      | Tdynamic, Tdynamic -> make_result env te1 te2 (Reason.Rsum_dynamic p, Tdynamic)
+      | _ -> make_result env te1 te2 (Reason.Rarith_ret p, Tprim Tnum)
     end
   | Ast.Minus | Ast.Star ->
     let env, t1 = check_num env p ty1 (Reason.Rarith p1) in
     let env, t2 = check_num env p ty2 (Reason.Rarith p2) in
     (* postcondition: t1 and t2 are dynamic or subtypes of num and
-      annotated as such *)
+      annotated as such, or we are e.g. HH_FIXMEing *)
     begin
       match snd t1, snd t2 with
-      | Tprim Tint, Tprim Tint -> make_result env te1 te2 (Reason.Rarith_ret p, Tprim Tint)
-      | Tprim Tfloat, _ -> make_result env te1 te2 (fst t1, Tprim Tfloat)
-      | _, Tprim Tfloat -> make_result env te1 te2 (fst t2, Tprim Tfloat)
-      | Tprim Tnum, _ -> make_result env te1 te2 (fst t1, Tprim Tnum)
-      | _, Tprim Tnum -> make_result env te1 te2 (fst t2, Tprim Tnum)
-      (*TODO: should this reason be Rarith_ret rather than Rarith?*)
-      | _ -> make_result env te1 te2 (Reason.Rarith p, Tprim Tnum)
+      | Tprim Tint, Tprim Tint -> make_result env te1 te2 (Reason.Rarith_ret_int p, Tprim Tint)
+      | Tprim Tfloat, _ ->
+        make_result env te1 te2 ((Reason.Rarith_ret_float (p, fst t1, Reason.Afirst)), Tprim Tfloat)
+      | _, Tprim Tfloat ->
+        make_result env te1 te2 ((Reason.Rarith_ret_float (p, fst t2, Reason.Asecond)),Tprim Tfloat)
+      | Tprim Tnum, _ ->
+        make_result env te1 te2 ((Reason.Rarith_ret_num (p, fst t1, Reason.Afirst)), Tprim Tnum)
+      | _, Tprim Tnum ->
+        make_result env te1 te2 ((Reason.Rarith_ret_num (p, fst t2, Reason.Asecond)), Tprim Tnum)
+      | _ -> make_result env te1 te2 (Reason.Rarith_ret p, Tprim Tnum)
     end
   | Ast.Slash | Ast.Starstar ->
     let env, t1 = check_num env p ty1 (Reason.Rarith p1) in
     let env, t2 = check_num env p ty2 (Reason.Rarith p2) in
     (* postcondition: t1 and t2 are dynamic or subtypes of num and
-      annotated as such *)
+      annotated as such, or we are e.g. HH_FIXMEing *)
     let r = match bop with
       | Ast.Slash -> Reason.Rret_div p
       | _ -> Reason.Rarith_ret p in
     begin
       match snd t1, snd t2 with
-      | Tprim Tfloat, _ -> make_result env te1 te2 (fst t1, Tprim Tfloat)
-      | _, Tprim Tfloat -> make_result env te1 te2 (fst t2, Tprim Tfloat)
+      | Tprim Tfloat, _ ->
+        make_result env te1 te2 ((Reason.Rarith_ret_float (p, fst t1, Reason.Afirst)), Tprim Tfloat)
+      | _, Tprim Tfloat ->
+        make_result env te1 te2 ((Reason.Rarith_ret_float (p, fst t2, Reason.Asecond)), Tprim Tfloat)
       | _ -> make_result env te1 te2 (r, Tprim Tnum)
     end
   | Ast.Percent | Ast.Ltlt | Ast.Gtgt ->
     let env, _ = check_int env p ty1 (Reason.Rarith p1) in
     let env, _ = check_int env p ty2 (Reason.Rarith p2) in
     (* postcondition: t1 and t2 are dynamic or int and
-      annotated as such *)
+      annotated as such, or we are e.g. HH_FIXMEing *)
     let r = match bop with
-      | Ast.Percent -> Reason.Rarith_ret p
+      | Ast.Percent -> Reason.Rarith_ret_int p
       | _ -> Reason.Rbitwise_ret p in
     make_result env te1 te2 (r, Tprim Tint)
   | Ast.Xor | Ast.Amp | Ast.Bar ->
     let env, t1 = check_int env p ty1 (Reason.Rbitwise p1) in
     let env, t2 = check_int env p ty2 (Reason.Rbitwise p2) in
     (* postcondition: t1 and t2 are dynamic or int and
-      annotated as such *)
+      annotated as such, or we are e.g. HH_FIXMEing *)
     begin
       match snd t1, snd t2 with
-      | Tdynamic, Tdynamic -> make_result env te1 te2 (Reason.Rbitwise_ret p, Tdynamic)
+      | Tdynamic, Tdynamic -> make_result env te1 te2 (Reason.Rbitwise_dynamic p, Tdynamic)
       | _ -> make_result env te1 te2 (Reason.Rbitwise_ret p, Tprim Tint)
     end
   | Ast.Eqeq  | Ast.Diff  ->

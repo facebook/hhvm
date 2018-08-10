@@ -24,8 +24,14 @@ type t =
   | Rasyncforeach    of Pos.t (* Because it is iterated "await as" in foreach *)
   | Raccess          of Pos.t
   | Rarith           of Pos.t
+  | Rarith_int       of Pos.t
   | Rarith_ret       of Pos.t
-  | Rarray_plus_ret  of Pos.t
+  | Rarith_ret_float of Pos.t * t * arg_position (* pos, arg float typing reason, arg position *)
+  | Rarith_ret_num   of Pos.t * t * arg_position (* pos, arg num typing reason, arg position *)
+  | Rarith_ret_int   of Pos.t
+  | Rsum_dynamic     of Pos.t
+  | Rbitwise_dynamic of Pos.t
+  | Rincdec_dynamic  of Pos.t
   | Rstring2         of Pos.t
   | Rcomp            of Pos.t
   | Rconcat          of Pos.t
@@ -85,12 +91,23 @@ type t =
   | Rlambda_use      of Pos.t
   | Rimplicit_upper_bound of Pos.t * string
 
+and arg_position =
+  | Aonly
+  | Afirst
+  | Asecond
+
 and expr_dep_type_reason =
   | ERexpr of int
   | ERstatic
   | ERclass of string
   | ERparent of string
   | ERself of string
+
+let arg_pos_str ap =
+  match ap with
+  | Aonly -> "only"
+  | Afirst -> "first"
+  | Asecond -> "second"
 
 (* Translate a reason to a (pos, string) list, suitable for error_l. This
  * previously returned a string, however the need to return multiple lines with
@@ -109,11 +126,37 @@ let rec to_string prefix r =
   | Rappend          _ -> [(p, prefix ^ " because a value is appended to it")]
   | Rfield           _ -> [(p, prefix ^ " because one of its field is accessed")]
   | Rforeach         _ -> [(p, prefix ^ " because this is used in a foreach statement")]
-  | Rasyncforeach    _ -> [(p, prefix ^ " because this is used in a foreach statement with \"await as\"")]
+  | Rasyncforeach    _ -> [(p, prefix ^ " because this is used in a foreach statement \
+    with \"await as\"")]
   | Raccess          _ -> [(p, prefix ^ " because one of its elements is accessed")]
   | Rarith           _ -> [(p, prefix ^ " because this is used in an arithmetic operation")]
+  | Rarith_int       _ -> [(p, prefix ^ " because this is used in integer arithmetic operation")]
   | Rarith_ret       _ -> [(p, prefix ^ " because this is the result of an arithmetic operation")]
-  | Rarray_plus_ret  _ -> [(p, prefix ^ " because this is the result of adding arrays")]
+  | Rarith_ret_float (_, r, s) ->
+      let rec find_last reason =
+        match reason with
+        | Rarith_ret_float (_, r, _) -> find_last r
+        | r -> r in
+      let r_last = find_last r in
+      [(p, prefix ^ " because this is the result of an arithmetic operation with a float as the "
+        ^ arg_pos_str s ^ " argument.")]
+        @ (to_string "Here is why I think the argument is a float: this is a float" r_last)
+  | Rarith_ret_num   (_, r, s) ->
+      let rec find_last reason =
+        match reason with
+        | Rarith_ret_num (_, r, _) -> find_last r
+        | r -> r in
+      let r_last = find_last r in
+      [(p, prefix ^ " because this is the result of an arithmetic operation with a num as the "
+        ^ arg_pos_str s ^ " argument, and no floats.")]
+        @ (to_string "Here is why I think the argument is a num: this is a num" r_last)
+  | Rarith_ret_int   _ -> [(p, prefix ^ " because this is the result of an integer arithmetic \
+    operation")]
+  | Rsum_dynamic     _ -> [(p, prefix ^ " because this is the sum of two arguments typed dynamic")]
+  | Rbitwise_dynamic _ -> [(p, prefix ^ " because this is the result of a bitwise operation with \
+    all arguments typed dynamic")]
+  | Rincdec_dynamic  _ -> [(p, prefix ^ " because this is the result of an increment/decrement of \
+    an argument typed dynamic")]
   | Rstring2         _ -> [(p, prefix ^ " because this is used in a string")]
   | Rcomp            _ -> [(p, prefix ^ " because this is the result of a comparison")]
   | Rconcat          _ -> [(p, prefix ^ " because this is used in a string concatenation")]
@@ -124,13 +167,14 @@ let rec to_string prefix r =
   | Rbitwise_ret     _ -> [(p, prefix ^ " because this is the result of a bitwise operation")]
   | Rstmt            _ -> [(p, prefix ^ " because this is a statement")]
   | Rno_return       _ -> [(p, prefix ^ " because this function implicitly returns void")]
-  | Rno_return_async _ -> [(p, prefix ^ " because this async function implicitly returns Awaitable<void>")]
+  | Rno_return_async _ -> [(p, prefix ^ " because this async function implicitly returns \
+    Awaitable<void>")]
   | Rret_fun_kind    (_, kind) ->
-    [(p, match kind with
-      | Ast.FAsyncGenerator -> prefix ^ " (result of 'async function' containing a 'yield')"
-      | Ast.FGenerator -> prefix ^ " (result of function containing a 'yield')"
-      | Ast.FAsync -> prefix ^ " (result of 'async function')"
-      | Ast.FCoroutine | Ast.FSync -> prefix)]
+      [(p, match kind with
+        | Ast.FAsyncGenerator -> prefix ^ " (result of 'async function' containing a 'yield')"
+        | Ast.FGenerator -> prefix ^ " (result of function containing a 'yield')"
+        | Ast.FAsync -> prefix ^ " (result of 'async function')"
+        | Ast.FCoroutine | Ast.FSync -> prefix)]
   | Rhint            _ -> [(p, prefix)]
   | Rnull_check      _ -> [(p, prefix ^ " because this was checked to see if the value was null")]
   | Rnot_in_cstr     _ -> [(p, prefix ^ " because it is not always defined in __construct")]
@@ -141,8 +185,10 @@ let rec to_string prefix r =
   | Rret_div         _ -> [(p, prefix ^ " because it is the result of a division (/)")]
   | Ryield_gen       _ -> [(p, prefix ^ " (result of function with 'yield' in the body)")]
   | Ryield_asyncgen  _ -> [(p, prefix ^ " (result of 'async function' with 'yield' in the body)")]
-  | Ryield_asyncnull _ -> [(p, prefix ^ " because \"yield x\" is equivalent to \"yield null => x\" in an async function")]
-  | Ryield_send      _ -> [(p, prefix ^ " ($generator->send() can always send a null back to a \"yield\")")]
+  | Ryield_asyncnull _ -> [(p, prefix ^ " because \"yield x\" is equivalent to \"yield null => x\" \
+    in an async function")]
+  | Ryield_send      _ -> [(p, prefix ^ " ($generator->send() can always send a null back to a \
+    \"yield\")")]
   | Rvar_param       _ -> [(p, prefix ^ " (variadic argument)")]
   | Runpack_param    _ -> [(p, prefix ^ " (it is unpacked with '...')")]
   | Rinout_param     _ -> [(p, prefix ^ " (inout parameter)")]
@@ -251,8 +297,8 @@ and to_pos = function
   | Rasyncforeach p -> p
   | Raccess   p -> p
   | Rarith       p -> p
-  | Rarith_ret   p -> p
-  | Rarray_plus_ret p -> p
+  | Rarith_ret p -> p
+  | Rsum_dynamic p -> p
   | Rstring2     p -> p
   | Rcomp        p -> p
   | Rconcat      p -> p
@@ -311,6 +357,12 @@ and to_pos = function
   | Rregex p -> p
   | Rlambda_use p -> p
   | Rimplicit_upper_bound (p, _) -> p
+  | Rarith_int p -> p
+  | Rarith_ret_float (p, _, _) -> p
+  | Rarith_ret_num (p, _, _) -> p
+  | Rarith_ret_int p -> p
+  | Rbitwise_dynamic p -> p
+  | Rincdec_dynamic p -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -353,7 +405,6 @@ match r with
   | Raccess _ -> "Raccess"
   | Rarith _ -> "Rarith"
   | Rarith_ret _ -> "Rarith_ret"
-  | Rarray_plus_ret _ -> "Rarray_plus_ret"
   | Rstring2 _ -> "Rstring2"
   | Rcomp _ -> "Rcomp"
   | Rconcat _ -> "Rconcat"
@@ -412,6 +463,13 @@ match r with
   | Rregex _ -> "Rregex"
   | Rlambda_use _ -> "Rlambda_use"
   | Rimplicit_upper_bound _ -> "Rimplicit_upper_bound"
+  | Rarith_int _ -> "Rarith_int"
+  | Rarith_ret_num _ -> "Rarith_ret_num"
+  | Rarith_ret_float _ -> "Rarith_ret_float"
+  | Rarith_ret_int _ -> "Rarith_ret_int"
+  | Rsum_dynamic _ -> "Rsum_dynamic"
+  | Rbitwise_dynamic _ -> "Rbitwise_dynamic"
+  | Rincdec_dynamic _ -> "Rincdec_dynamic"
 
 let pp fmt r =
   Format.pp_print_string fmt @@ to_constructor_string r

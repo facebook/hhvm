@@ -38,7 +38,6 @@ let rec reason = function
   | Raccess p              -> Raccess (pos p)
   | Rarith p               -> Rarith (pos p)
   | Rarith_ret p           -> Rarith_ret (pos p)
-  | Rarray_plus_ret p      -> Rarray_plus_ret (pos p)
   | Rstring2 p             -> Rstring2 (pos p)
   | Rcomp p                -> Rcomp (pos p)
   | Rconcat p              -> Rconcat (pos p)
@@ -97,6 +96,13 @@ let rec reason = function
   | Rregex p                 -> Rregex (pos p)
   | Rlambda_use p            -> Rlambda_use (pos p)
   | Rimplicit_upper_bound (p, s) -> Rimplicit_upper_bound (pos p, s)
+  | Rarith_int p -> Rarith_int (pos p)
+  | Rarith_ret_int p -> Rarith_ret_int (pos p)
+  | Rarith_ret_float (p, r, s) -> Rarith_ret_float (pos p, reason r, s)
+  | Rarith_ret_num (p, r, s) -> Rarith_ret_num (pos p, reason r, s)
+  | Rsum_dynamic p -> Rsum_dynamic (pos p)
+  | Rbitwise_dynamic p -> Rbitwise_dynamic (pos p)
+  | Rincdec_dynamic p -> Rincdec_dynamic (pos p)
 
 let string_id (p, x) = pos p, x
 

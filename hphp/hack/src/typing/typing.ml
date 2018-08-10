@@ -1761,7 +1761,6 @@ and expr_
      * Typing this is pretty simple, we just need to check that instance->meth
      * is public+not static and then return its type.
      *)
-    Typing_hooks.dispatch_fun_id_hook (p, "\\"^SN.SpecialFunctions.inst_meth);
     let env, te, ty1 = expr env instance in
     let env, result, vis =
       obj_get_with_visibility ~is_method:true ~nullsafe:None ~valkind:`other ~pos_params:None env
@@ -1790,7 +1789,6 @@ and expr_
     (* meth_caller('X', 'foo') desugars to:
      * $x ==> $x->foo()
      *)
-    Typing_hooks.dispatch_fun_id_hook (p, "\\"^SN.SpecialFunctions.meth_caller);
     let class_ = Env.get_class env class_name in
     (match class_ with
     | None -> unbound_name env pos_cname
@@ -1866,7 +1864,6 @@ and expr_
      * Typing this is pretty simple, we just need to check that c::meth is
      * public+static and then return its type.
      *)
-    Typing_hooks.dispatch_fun_id_hook (p, "\\"^SN.SpecialFunctions.class_meth);
     let class_ = Env.get_class env (snd c) in
     (match class_ with
     | None ->
@@ -3997,7 +3994,6 @@ and is_abstract_ft fty = match fty with
       (* Directly call get_fun so that we can muck with the type before
        * instantiation -- much easier to work in terms of Tgeneric Tk/Tv than
        * trying to figure out which Tvar is which. *)
-      Typing_hooks.dispatch_fun_id_hook (p, SN.FB.idx);
       (match Env.get_fun env (snd id) with
       | Some fty ->
         let param1, param2, param3 =
@@ -4302,7 +4298,6 @@ and is_abstract_ft fty = match fty with
       make_call env te hl tel tuel ty
 
 and fun_type_of_id env x hl =
-  Typing_hooks.dispatch_fun_id_hook x;
   let env, fty =
     match Env.get_fun env (snd x) with
     | None -> let env, _, ty = unbound_name env x in env, ty
@@ -5330,7 +5325,6 @@ and call_construct p env class_ params el uel cid =
   if class_.tc_is_xhp then env, tcid, [], [], (Reason.Rnone, TUtils.tany env) else
   let cstr = Env.get_construct env class_ in
   let mode = Env.get_mode env in
-  Typing_hooks.dispatch_constructor_hook class_ params env p;
   match (fst cstr) with
     | None ->
       if el <> [] &&

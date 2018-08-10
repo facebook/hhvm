@@ -268,4 +268,10 @@
 # define MSVC_NO_STD_CHRONO_DURATION_DOUBLE_ADD 1
 #endif
 
+#ifdef __APPLE__
+#define ASM_LOCAL_LABEL(x) "L" x
+#else
+#define ASM_LOCAL_LABEL(x) ".L" x
+#endif
+
 #endif

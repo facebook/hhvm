@@ -20,17 +20,12 @@
 #include <folly/Portability.h>
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/portability.h"
 
 extern "C" void* _memcpy8(void* dst, const void* src, size_t len);
 extern "C" void* _memcpy16(void* dst, const void* src, size_t len);
 extern "C" void _bcopy32(void* dst, const void* src, size_t len);
 extern "C" void _bcopy_in_64(void* dst, const void* src, size_t lenIn64);
-
-#ifdef __APPLE__
-#define ASM_LOCAL_LABEL(x) "L" x
-#else
-#define ASM_LOCAL_LABEL(x) ".L" x
-#endif
 
 namespace HPHP {
 

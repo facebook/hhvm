@@ -11,7 +11,7 @@
  * Parser::AutoAliasMap in hphp/compiler/parser/{parser.cpp,parser.h}
  *)
 
-open Hh_core
+open Core_kernel
 
 type alias =
 | HH_ONLY_TYPE of string
@@ -21,7 +21,7 @@ type alias =
 (* Create map from name to (alias, is_php7_scalar_type) *)
 let add_alias m a =
   let add k v =
-    SMap.add (String.lowercase_ascii k) v m in
+    SMap.add (String.lowercase k) v m in
   match a with
   | HH_ONLY_TYPE s ->
     add s ("HH\\" ^ s, false)
@@ -135,7 +135,7 @@ let rec normalize ~is_hack ~php7_scalar_types s =
   if not (is_hack || php7_scalar_types)
   then s
   else
-  match SMap.get (String.lowercase_ascii s) alias_map with
+  match SMap.get (String.lowercase s) alias_map with
   | None -> s
   | Some (a, is_scalar_type) ->
     if is_hack || is_scalar_type
@@ -143,7 +143,7 @@ let rec normalize ~is_hack ~php7_scalar_types s =
     else s
 
 let opt_normalize ~is_hack ~php7_scalar_types s =
-  match String.lowercase_ascii s with
+  match String.lowercase s with
   | "callable" -> Some "callable"
   | "array" -> Some "array"
   | s ->
@@ -157,4 +157,4 @@ let opt_normalize ~is_hack ~php7_scalar_types s =
       then Some (normalize ~is_hack ~php7_scalar_types a)
       else None
 
-let is_hh_autoimport s = SMap.mem (String.lowercase_ascii s) alias_map
+let is_hh_autoimport s = SMap.mem (String.lowercase s) alias_map

@@ -13,8 +13,9 @@
  * 1- get all the global names
  * 2- transform all the local names into a unique identifier
  *)
+open Core_kernel
+open Common
 open Ast
-open Hh_core
 open Utils
 open String_utils
 
@@ -62,9 +63,9 @@ type genv = {
   (* The current class, None if we are in a function *)
   current_cls: (Ast.id * Ast.class_kind) option;
 
-  class_consts: (string, Pos.t) Hashtbl.t;
+  class_consts: (string, Pos.t) Caml.Hashtbl.t;
 
-  class_props: (string, Pos.t) Hashtbl.t;
+  class_props: (string, Pos.t) Caml.Hashtbl.t;
 
   (* Normally we don't need to add dependencies at this stage, but there
    * are edge cases when we do. *)
@@ -237,8 +238,8 @@ end = struct
       in_ppl        = is_ppl;
       type_params   = tparams;
       current_cls   = Some (cid, ckind);
-      class_consts  = Hashtbl.create 0;
-      class_props   = Hashtbl.create 0;
+      class_consts  = Caml.Hashtbl.create 0;
+      class_props   = Caml.Hashtbl.create 0;
       droot         = Typing_deps.Dep.Class (snd cid);
       namespace;
     }
@@ -279,8 +280,8 @@ end = struct
     in_ppl        = false;
     type_params   = cstrs;
     current_cls   = None;
-    class_consts = Hashtbl.create 0;
-    class_props = Hashtbl.create 0;
+    class_consts = Caml.Hashtbl.create 0;
+    class_props = Caml.Hashtbl.create 0;
     droot         = Typing_deps.Dep.Class (snd tdef.t_id);
     namespace     = tdef.t_namespace;
   }
@@ -299,8 +300,8 @@ end = struct
     in_ppl        = false;
     type_params   = params;
     current_cls   = None;
-    class_consts = Hashtbl.create 0;
-    class_props = Hashtbl.create 0;
+    class_consts = Caml.Hashtbl.create 0;
+    class_props = Caml.Hashtbl.create 0;
     droot         = Typing_deps.Dep.Fun f_name;
     namespace     = f_namespace;
   }
@@ -316,8 +317,8 @@ end = struct
     in_ppl        = false;
     type_params   = SMap.empty;
     current_cls   = None;
-    class_consts = Hashtbl.create 0;
-    class_props = Hashtbl.create 0;
+    class_consts = Caml.Hashtbl.create 0;
+    class_props = Caml.Hashtbl.create 0;
     droot         = Typing_deps.Dep.GConst (snd cst.cst_name);
     namespace     = cst.cst_namespace;
   }
@@ -355,7 +356,7 @@ end = struct
    * generics in scope as a runtime value *)
   let check_no_runtime_generic genv (p, name) =
     let tparaml = SMap.keys genv.type_params in
-    if List.mem tparaml name then Errors.generic_at_runtime p;
+    if List.mem tparaml name ~equal:(=) then Errors.generic_at_runtime p;
     ()
 
   let handle_unbound_name genv get_full_pos get_canon (p, name) kind =
@@ -582,13 +583,13 @@ end = struct
 
   let bind_class_member tbl (p, x) =
     try
-      let p' = Hashtbl.find tbl x in
+      let p' = Caml.Hashtbl.find tbl x in
       Errors.error_name_already_bound x x p p'
-    with Not_found ->
-      Hashtbl.replace tbl x p
+    with Caml.Not_found ->
+      Caml.Hashtbl.replace tbl x p
 
   let bind_class_const (genv, _env) (p, x) =
-    if String.lowercase_ascii x = "class" then Errors.illegal_member_variable_class p;
+    if String.lowercase x = "class" then Errors.illegal_member_variable_class p;
     bind_class_member genv.class_consts (p, x)
 
   let bind_prop (genv, _env) x =
@@ -731,7 +732,7 @@ let is_alok_type_name (_, x) = String.length x <= 2 && x.[0] = 'T'
 
 let check_constraint (_, (pos, name), _, _) =
   (* TODO refactor this in a separate module for errors *)
-  if String.lowercase_ascii name = "this"
+  if String.lowercase name = "this"
   then Errors.this_reserved pos
   else if name.[0] <> 'T' then Errors.start_with_T pos
 
@@ -972,7 +973,7 @@ module Make (GetLocals : GetLocals) = struct
       | x when x = SN.Typehints.nonnull -> N.Hnonnull
       | x when x = SN.Typehints.dynamic -> N.Hdynamic
       | x when x = SN.Typehints.this && not forbid_this ->
-          if hl != []
+          if not (phys_equal hl [])
           then Errors.this_no_argument p;
           (match (fst env).current_cls with
           | None ->
@@ -992,7 +993,7 @@ module Make (GetLocals : GetLocals) = struct
       | x when x = SN.Classes.cClassname && (List.length hl) <> 1 ->
           Errors.classname_param p;
           N.Hprim N.Tstring
-      | _ when String.lowercase_ascii x = SN.Typehints.this ->
+      | _ when String.lowercase x = SN.Typehints.this ->
           Errors.lowercase_this p x;
           N.Hany
       | _ when SMap.mem x params ->
@@ -1014,7 +1015,7 @@ module Make (GetLocals : GetLocals) = struct
    * have to handle the remaining cases. *)
   and try_castable_hint ?(forbid_this=false) ?(allow_wildcard=false) ~tp_depth env p x hl =
     let hint = hint ~forbid_this ~tp_depth:(tp_depth+1) ~allow_wildcard ~allow_retonly:false in
-    let canon = String.lowercase_ascii x in
+    let canon = String.lowercase x in
     let opt_hint = match canon with
       | nm when nm = SN.Typehints.int    -> Some (N.Hprim N.Tint)
       | nm when nm = SN.Typehints.bool   -> Some (N.Hprim N.Tbool)
@@ -1240,15 +1241,15 @@ module Make (GetLocals : GetLocals) = struct
     named_class
 
   and user_attributes env attrl =
-    let seen = Hashtbl.create 0 in
+    let seen = Caml.Hashtbl.create 0 in
     let validate_seen = begin fun ua_name ->
       let pos, name = ua_name in
       let existing_attr_pos =
-        try Some (Hashtbl.find seen name)
-        with Not_found -> None
+        try Some (Caml.Hashtbl.find seen name)
+        with Caml.Not_found -> None
       in (match existing_attr_pos with
         | Some p -> Errors.duplicate_user_attribute ua_name p; false
-        | None -> Hashtbl.add seen name pos; true
+        | None -> Caml.Hashtbl.add seen name pos; true
       )
     end in
     List.fold_left attrl ~init:[] ~f:begin fun acc {ua_name; ua_params} ->
@@ -1481,7 +1482,7 @@ module Make (GetLocals : GetLocals) = struct
     | AbsConst _ -> acc
     | ClassVars
       { cv_kinds = kl; cv_hint = h; cv_names = cvl; cv_user_attributes = ua; _ }
-      when List.mem kl Static ->
+      when List.mem kl Static ~equal:(=) ->
       (* Static variables are shared for all classes in the hierarchy.
        * This makes the 'this' type completely unsafe as a type for a
        * static variable. See test/typecheck/this_tparam_static.php as
@@ -1513,7 +1514,7 @@ module Make (GetLocals : GetLocals) = struct
     | Const _ -> acc
     | AbsConst _ -> acc
     | ClassVars { cv_kinds; cv_hint; cv_names; cv_user_attributes; _ }
-      when not (List.mem cv_kinds Static) ->
+      when not (List.mem cv_kinds Static ~equal:(=)) ->
       let h = Option.map cv_hint (hint env) in
       let cvl = List.map cv_names (class_prop_ env) in
       let cvl = List.map cvl (fill_prop cv_kinds h) in
@@ -1548,7 +1549,7 @@ module Make (GetLocals : GetLocals) = struct
     | XhpCategory _ -> acc
     | XhpChild _ -> acc
     | Method m when snd m.m_name = SN.Members.__construct -> acc
-    | Method m when List.mem m.m_kind Static -> method_ (fst env) m :: acc
+    | Method m when List.mem m.m_kind Static ~equal:(=) -> method_ (fst env) m :: acc
     | Method _ -> acc
     | TypeConst _ -> acc
 
@@ -1567,7 +1568,7 @@ module Make (GetLocals : GetLocals) = struct
     | XhpCategory _ -> acc
     | XhpChild _ -> acc
     | Method m when snd m.m_name = SN.Members.__construct -> acc
-    | Method m when not (List.mem m.m_kind Static) ->(
+    | Method m when not (List.mem m.m_kind Static ~equal:(=)) ->(
       match (m.m_name, m.m_params) with
         | ( (m_pos, m_name), _::_) when m_name = SN.Members.__clone ->
             Errors.clone_too_many_arguments m_pos; acc
@@ -2904,7 +2905,7 @@ module Make (GetLocals : GetLocals) = struct
     let lenv = Env.empty_local @@ UBMFunc handle_unbound in
     let env = genv, lenv in
     ignore (expr_lambda env f);
-    List.dedup !to_capture
+    List.dedup_and_sort !to_capture ~compare:String.compare
 
   (**************************************************************************)
   (* The entry point to CHECK the program, and transform the program *)

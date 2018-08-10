@@ -7,6 +7,8 @@
  *
  *)
 
+open Core_kernel
+
 module SN = Naming_special_names
 
 include Aast
@@ -100,4 +102,4 @@ let get_xhp_attr_expr = function
   | Xhp_spread e -> e
 
 let get_simple_xhp_attrs =
-  Hh_core.List.filter_map ~f:(function Xhp_simple (id, e) -> Some (id, e) | Xhp_spread _ -> None)
+  List.filter_map ~f:(function Xhp_simple (id, e) -> Some (id, e) | Xhp_spread _ -> None)

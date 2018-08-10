@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 
 (** Module consisting of the special names known to the typechecker *)
 
@@ -101,7 +101,7 @@ module Members = struct
       __get; __invoke; __isset; __set; __set_state; __sleep; __toString;
       __unset; __wakeup;
     ]
-  let as_lowercase_set = SSet.map String.lowercase_ascii as_set
+  let as_lowercase_set = SSet.map String.lowercase as_set
 
   (* Any data- or aria- attribute is always valid, even if it is not declared
    * for a given XHP element *)
@@ -291,11 +291,11 @@ module Typehints = struct
   let wildcard = "_"
 
   let is_reserved_global_name x =
-    let x = String.lowercase_ascii x in
+    let x = String.lowercase x in
     x = array    || x = callable || x = Classes.cSelf || x = Classes.cParent
 
   let is_reserved_hh_name x =
-    let x = String.lowercase_ascii x in
+    let x = String.lowercase x in
     x = void     || x = noreturn || x = int      || x = bool     || x = float ||
     x = num      || x = string   || x = resource || x = mixed    || x = array ||
     x = arraykey || x = integer  || x = boolean  || x = double   || x = real  ||
@@ -304,7 +304,7 @@ module Typehints = struct
   let is_namespace_with_reserved_hh_name x =
     let unqualify qualified_name =
       let as_list = Str.split (Str.regexp "\\") qualified_name in
-      let as_list = List.filter as_list ~f:(fun s -> s != "") in
+      let as_list = List.filter as_list ~f:(fun s -> not (phys_equal s "")) in
       match List.rev as_list with
       | name :: qualifiers -> List.rev qualifiers, name
       | [] -> [], qualified_name in

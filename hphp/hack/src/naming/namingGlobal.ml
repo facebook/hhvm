@@ -13,7 +13,7 @@
  * 1- get all the global names
  * 2- transform all the local names into a unique identifier
  *)
-open Hh_core
+open Core_kernel
 open Utils
 open Naming_heap
 module SN = Naming_special_names
@@ -22,7 +22,7 @@ module SN = Naming_special_names
 (* The types *)
 (*****************************************************************************)
 
-let canon_key = String.lowercase_ascii
+let canon_key = String.lowercase
 
 module GEnv = struct
   let get_full_pos popt (pos, name) =

@@ -34,7 +34,6 @@
 #include "hphp/util/process.h"
 
 #include <folly/portability/Unistd.h>
-#include <folly/system/ThreadName.h>
 #include <proxygen/lib/http/codec/HTTP2Constants.h>
 
 namespace HPHP {
@@ -110,13 +109,6 @@ ProxygenTransportTraits::~ProxygenTransportTraits() {
 void HPHPWorkerThread::setup() {
   WorkerThread::setup();
   hphp_thread_init();
-  folly::setThreadName("ProxygenWorker");
-#ifdef __linux__
-  // Bump scheduling priority to avoid starving the IO thread.
-  setpriority(PRIO_PROCESS /* actually just one thread */,
-              0 /* self */,
-              -20 /* highest priority */);
-#endif
 }
 
 void HPHPWorkerThread::cleanup() {

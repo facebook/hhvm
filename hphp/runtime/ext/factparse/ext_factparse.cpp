@@ -137,6 +137,7 @@ struct ParseFactsWorker: public BaseWorker<T> {
     m_state = T::init_state();
   }
   void onThreadExit() override {
+    m_state = T::clear_state();
     hphp_context_exit();
     hphp_session_exit();
   }
@@ -208,6 +209,10 @@ struct HackCFactsExtractor {
 
   static state_type init_state() {
     return acquire_facts_parser();
+  }
+
+  static state_type clear_state() {
+    return std::unique_ptr<FactsParser>();
   }
 
   static void mark_failed(result_type& workerResult) {

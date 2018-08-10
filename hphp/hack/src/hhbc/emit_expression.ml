@@ -3315,36 +3315,6 @@ and emit_special_function env pos id args uargs default =
   | ("exit" | "die"), _ when nargs = 0 || nargs = 1 ->
     Some (emit_exit env (List.hd args), Flavor.Cell)
 
-  | "hh\\fun", _ ->
-    if nargs <> 1 then
-      Emit_fatal.raise_fatal_runtime pos
-        ("fun() expects exactly 1 parameter, " ^ (string_of_int nargs) ^
-         " given")
-    else begin match args with
-      | [(pos, A.String func_name)] ->
-        let func_id, id_opt = Hhbc_id.Function.elaborate_id_with_builtins
-          (Emit_env.get_namespace env) (pos, func_name) in
-        let func_id = Option.value_map id_opt
-          ~default:func_id ~f:Hhbc_id.Function.from_raw_string in
-        Some (instr_resolve_func func_id, Flavor.Cell)
-      | _ ->
-        Emit_fatal.raise_fatal_runtime pos "Constant string expected in fun()"
-    end
-
-  | "hh\\inst_meth", _ ->
-    begin match args with
-      | [obj_expr; method_name] ->
-        Some (gather [
-          emit_expr ~need_ref:false env obj_expr;
-          emit_expr ~need_ref:false env method_name;
-          instr_resolve_obj_method;
-        ], Flavor.Cell)
-      | _ ->
-        Emit_fatal.raise_fatal_runtime pos
-          ("inst_meth() expects exactly 2 parameters, " ^
-           (string_of_int nargs) ^ " given")
-    end
-
   | _ ->
     begin match args, istype_op lower_fq_name, is_isexp_op lower_fq_name with
     | [arg_expr], _, Some h when Emit_env.is_hh_syntax_enabled () ->

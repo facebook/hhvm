@@ -1192,7 +1192,7 @@ static Array zipStatToArray(struct zip_stat* zipStat) {
     return Array();
   }
 
-  return make_map_array(
+  return make_darray(
     s_name,        String(zipStat->name),
     s_index,       VarNR(zipStat->index),
     s_crc,         VarNR(static_cast<int64_t>(zipStat->crc)),

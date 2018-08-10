@@ -105,6 +105,14 @@ final class Generator<+Tk, +Tv, -Ts> implements KeyedIterator<Tk, Tv> {
   public function rewind(): void {}
 }
 
+<<__Sealed(
+  AwaitAllWaitHandle::class,
+  ConditionWaitHandle::class,
+  ExternalThreadEventWaitHandle::class,
+  RescheduleWaitHandle::class,
+  ResumableWaitHandle::class,
+  SleepWaitHandle::class
+)>>
 abstract class WaitableWaitHandle<+T> extends Awaitable<T> {
 }
 final class StaticWaitHandle<+T> extends Awaitable<T> {
@@ -119,12 +127,14 @@ final class AsyncGeneratorWaitHandle<Tk, +Tv>
 }
 
 
+<<__Sealed(StaticWaitHandle::class, WaitableWaitHandle::class)>>
 abstract class Awaitable<+T> {
   public static function setOnIOWaitEnterCallback(?(function(): void) $callback) {}
   public static function setOnIOWaitExitCallback(?(function(): void) $callback) {}
   public static function setOnJoinCallback(?(function(WaitableWaitHandle<mixed>): void) $callback) {}
 }
 
+<<__Sealed(AsyncFunctionWaitHandle::class, AsyncGeneratorWaitHandle::class)>>
 abstract class ResumableWaitHandle<+T> extends WaitableWaitHandle<T> {
   public static function setOnCreateCallback(?(function(AsyncFunctionWaitHandle<mixed>, WaitableWaitHandle<mixed>): void) $callback) {}
   public static function setOnAwaitCallback(?(function(AsyncFunctionWaitHandle<mixed>, WaitableWaitHandle<mixed>): void) $callback) {}

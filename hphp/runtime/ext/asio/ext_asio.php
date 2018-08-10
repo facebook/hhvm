@@ -4,6 +4,7 @@ namespace HH {
 
 /* A wait handle representing asynchronous operation
  */
+<<__Sealed(StaticWaitHandle::class, WaitableWaitHandle::class)>>
 abstract class Awaitable {
 
   final private function __construct() {
@@ -69,11 +70,20 @@ final class StaticWaitHandle extends Awaitable {}
 
 /* A wait handle that can be waited upon
  */
+<<__Sealed(
+  AwaitAllWaitHandle::class,
+  ConditionWaitHandle::class,
+  ExternalThreadEventWaitHandle::class,
+  RescheduleWaitHandle::class,
+  ResumableWaitHandle::class,
+  SleepWaitHandle::class
+)>>
 abstract class WaitableWaitHandle extends Awaitable {
 }
 
 /* A wait handle that can resume execution of PHP code
  */
+<<__Sealed(AsyncFunctionWaitHandle::class, AsyncGeneratorWaitHandle::class)>>
 abstract class ResumableWaitHandle extends WaitableWaitHandle {
 
   /* Set callback to be called when a ResumableWaitHandle is created

@@ -1514,10 +1514,16 @@ SSATmp* simplifyEqArrayDataPtr(State& env, const IRInstruction* inst) {
   auto const left = inst->src(0);
   auto const right = inst->src(1);
   if (left == right) return cns(env, true);
+  if (!left->type().maybe(right->type())) return cns(env, false);
   if (left->hasConstVal() && right->hasConstVal()) {
-    // this assumes that all the ArrayData* in Type::m_extra overlap exactly
-    // so we can use arrVal without having to check the type
-    return cns(env, left->arrVal() == right->arrVal());
+    auto const val = [&](const SSATmp* s) -> const ArrayData* {
+      if (s->hasConstVal(TArr))    return s->arrVal();
+      if (s->hasConstVal(TVec))    return s->vecVal();
+      if (s->hasConstVal(TDict))   return s->dictVal();
+      if (s->hasConstVal(TKeyset)) return s->keysetVal();
+      always_assert(false);
+    };
+    return cns(env, val(left) == val(right));
   }
   return nullptr;
 }

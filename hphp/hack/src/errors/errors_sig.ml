@@ -305,6 +305,7 @@ module type S = sig
   val toString_visibility : Pos.t -> unit
   val uses_non_trait : Pos.t -> string -> string -> unit
   val requires_non_class : Pos.t -> string -> string -> unit
+  val requires_final_class : Pos.t -> string -> unit
   val abstract_body : Pos.t -> unit
   val not_public_or_protected_interface : Pos.t -> unit
   val interface_with_member_variable : Pos.t -> unit

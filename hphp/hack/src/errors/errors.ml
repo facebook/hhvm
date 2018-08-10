@@ -1342,6 +1342,10 @@ let requires_non_class (p: Pos.t) (n: string) (t: string) =
   add (NastCheck.err_code NastCheck.RequiresNonClass) p
     ((Utils.strip_ns n) ^ " is not a class. It is " ^ t ^ ".")
 
+let requires_final_class (p: Pos.t) (n: string) =
+  add (NastCheck.err_code NastCheck.RequiresFinalClass) p
+    ((Utils.strip_ns n) ^ " is not an extendable class.")
+
 let abstract_body pos =
   add (NastCheck.err_code NastCheck.AbstractBody) pos "This method shouldn't have a body"
 

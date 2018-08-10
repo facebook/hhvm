@@ -727,8 +727,8 @@ and check_is_class env (x : hint) =
           (* in strict mode, we catch the unknown class error before
              even reaching here. *)
           ()
-        | Some { tc_kind = Ast.Cabstract; _ } -> ()
-        | Some { tc_kind = Ast.Cnormal; _ } -> ()
+        | Some { tc_kind = Ast.(Cabstract | Cnormal); tc_final; tc_name; _ } ->
+          if tc_final then Errors.requires_final_class (fst x) tc_name
         | Some { tc_kind; tc_name; _ } ->
           Errors.requires_non_class (fst x) tc_name (Ast.string_of_class_kind tc_kind)
       )

@@ -1,0 +1,2 @@
+File "interface_requires_final_class.php", line 7, characters 19-19:
+C is not an extendable class. (NastCheck[3072])

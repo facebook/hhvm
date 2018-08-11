@@ -1190,8 +1190,10 @@ ObjectData::~ObjectData() {
     --pmax;
   }
   if (UNLIKELY(slowDestroyCheck())) {
-    // no builtin classes that use ~ObjectData support memoization
-    assertx(!getAttribute(UsedMemoCache));
+    // The only builtin classes that use ~ObjectData and support memoization
+    // are ones with native data, and the memo slot cleanup for them happens
+    // in nativeDataInstanceDtor.
+    assertx(!getAttribute(UsedMemoCache) || hasNativeData());
     if (getAttribute(HasDynPropArr)) freeDynPropArray(this);
     if (getAttribute(IsWeakRefed)) {
       WeakRefData::invalidateWeakRef((uintptr_t)this);

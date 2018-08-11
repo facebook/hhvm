@@ -7,6 +7,7 @@
  *
 *)
 
+open Core_kernel
 open Hhbc_ast
 open Parsing
 module TV = Typed_value
@@ -54,10 +55,10 @@ let rec parse_attribute c =
                    ( let read_float c =
                        Scanf.bscanf c "%g;" (fun f -> Some (Typed_value.Float f)) in
                      fun ch -> match ch with
-                            | 'N' -> Scanf.bscanf c "NAN;" (Some (Typed_value.Float nan))
-                            | 'I' -> Scanf.bscanf c "INF;" (Some (Typed_value.Float infinity))
+                            | 'N' -> Scanf.bscanf c "NAN;" (Some (Typed_value.Float Float.nan))
+                            | 'I' -> Scanf.bscanf c "INF;" (Some (Typed_value.Float Float.infinity))
                             | _ ->
-                                (try Scanf.bscanf c "-INF;" (Some (Typed_value.Float neg_infinity))
+                                (try Scanf.bscanf c "-INF;" (Some (Typed_value.Float Float.neg_infinity))
                                 with _ -> read_float c))
            | 's' -> Scanf.bscanf c "s:%d:\""
                    (fun n -> let myfmt =
@@ -222,9 +223,9 @@ let rec split_decl_list ds hh_file strict_types funs classes optmain datadecls a
 (* This is a pretty poor way to deal with these flags on functions, and
    doesn't Throw if there's an illegal one in the list, but it'll do for now.
 *)
-let isasync ss = List.mem "isAsync" ss
-let isgenerator ss = List.mem "isGenerator" ss
-let ispairgenerator ss = List.mem "isPairGenerator" ss
+let isasync ss = List.mem ~equal:(=) ss "isAsync"
+let isgenerator ss = List.mem ~equal:(=) ss "isGenerator"
+let ispairgenerator ss = List.mem ~equal:(=) ss "isPairGenerator"
 
 let makelabel s =
  let len = String.length s in
@@ -272,7 +273,7 @@ let parse_alias x y vislist opt_lastid =
      match colon_split x with
       | Some (first_id, second_id) -> (Some first_id, second_id)
       | None -> (None, x) in
-   let vis = List.map (function "final" -> Ast.Final | x -> vis_of x) vislist in
+   let vis = List.map ~f:(function "final" -> Ast.Final | x -> vis_of x) vislist in
    if y = "as" then
     Alias (first, second, opt_lastid, vis)
    else report_error "missing as in alias"
@@ -458,17 +459,17 @@ let class_id_of_iarg arg =
 
 let class_num_of_iarg arg =
   match arg with
-  | IAInt64 i -> Int64.to_int i
+  | IAInt64 i -> Int64.to_int_exn i
   | _ -> report_error "expected class number"
 
 let function_num_of_iarg arg =
   match arg with
-  | IAInt64 i -> Int64.to_int i
+  | IAInt64 i -> Int64.to_int_exn i
   | _ -> report_error "expected function number"
 
 let typedef_num_of_iarg arg =
   match arg with
-  | IAInt64 i -> Int64.to_int i
+  | IAInt64 i -> Int64.to_int_exn i
   | _ -> report_error "expected typedef number"
 
 let prop_id_of_iarg arg =
@@ -510,13 +511,13 @@ match arg with
               (int_of_string (String.sub s 1 (String.length s - 1)))
              else Local.Named s
  | IAMemberkey (s,IAInt64 n) ->
-             if s="L" then Local.Unnamed (Int64.to_int n)
+             if s = "L" then Local.Unnamed (Int64.to_int_exn n)
              else report_error "expected L:n member key"
  | _ -> report_error "bad local arg"
 
 let intofiarg arg =
 match arg with
- | IAInt64 n -> Int64.to_int n
+ | IAInt64 n -> Int64.to_int_exn n
  | _ -> report_error "expected integer instruction argument"
 
 let typeopofiarg arg =
@@ -617,8 +618,8 @@ let memberkeyofiarg arg =
 let memoargofiarg arg =
   match arg with
   | IAMemberkey ("L", IAArglist [IAInt64 n; IAInt64 m]) ->
-     let l = Int64.to_int n in
-     let c = Int64.to_int m in
+     let l = Int64.to_int_exn n in
+     let c = Int64.to_int_exn m in
      if (c = 0) then None else Some (Local.Unnamed l, c)
   | _ -> report_error "bad memo arg"
 
@@ -654,7 +655,7 @@ let fpasshintof arg =
 let paramidofiarg arg =
   match arg with
   | IAId s -> Param_named s
-  | IAInt64 n -> Param_unnamed (Int64.to_int n)
+  | IAInt64 n -> Param_unnamed (Int64.to_int_exn n)
   | _ -> report_error "bad param id to instruction"
 
 let has_unpack_of_iarg arg =
@@ -680,12 +681,12 @@ let classkindofiarg arg =
 
 let listofshapefieldsofiarg arg =
   match arg with
-  | IAArglist args -> List.map stringofiarg args
+  | IAArglist args -> List.map ~f:stringofiarg args
   | _ -> report_error "expected list of shape fields"
 
 let listofintofiarg arg =
   match arg with
-  | IAArglist args -> List.map intofiarg args
+  | IAArglist args -> List.map ~f:intofiarg args
   | _ -> report_error "expected list of ints"
 
 let listofboolofiarg arg =
@@ -699,7 +700,7 @@ let listofboolofiarg arg =
     in
     let len = String.length args in
     let rec aux i =
-      if i == len then []
+      if i = len then []
       else (parse_char (String.get args i)) :: (aux (i + 1))
     in aux 0
   | _ -> report_error "expected list of bools"
@@ -731,7 +732,7 @@ let checkstarted_of_arg arg =
 
 let iterwithkindofiarg arg =
   match arg with
-  | IAIteratorid (kind, id) -> kind = "MIter", Iterator.Id (Int64.to_int id)
+  | IAIteratorid (kind, id) -> kind = "MIter", Iterator.Id (Int64.to_int_exn id)
   | _ -> report_error "bad iterator"
 
 let memberopmodeofiarg arg =
@@ -758,12 +759,12 @@ let freeiteratorofiarg arg =
 
 let listofiteratorsofiarg arg =
    match arg with
-   | IAArglist l -> List.map iterwithkindofiarg l
+   | IAArglist l -> List.map ~f:iterwithkindofiarg l
    | _ -> report_error "bad list of iterators"
 
 let listoflabelsofiarg arg =
   match arg with
-  | IAArglist l -> List.map labelofiarg l
+  | IAArglist l -> List.map ~f:labelofiarg l
   | _ -> report_error "bad list of labels"
 
 let opsilenceofiarg arg =
@@ -783,7 +784,7 @@ let switchkindofiarg arg =
     @@ Printf.sprintf "bad switch kind: '%s'" @@ stringofiarg arg
 
 let to_inf_nan s =
- match String.uppercase_ascii s with
+ match String.uppercase s with
    | "NAN" -> Some "NAN"
    | "INF" -> Some "INF"
    | _ -> None
@@ -824,16 +825,16 @@ let makeunaryinst s arg = match s with
        | IAArrayno n -> ILitConst (Keyset n)
        | _ -> report_error "bad keyset lit cst")
    | "NewArray" -> (match arg with
-       | IAInt64 n -> ILitConst (NewArray (Int64.to_int n))
+       | IAInt64 n -> ILitConst (NewArray (Int64.to_int_exn n))
        | _ -> report_error "bad array size")
    | "NewMixedArray" -> (match arg with
-       | IAInt64 n -> ILitConst (NewMixedArray (Int64.to_int n))
+       | IAInt64 n -> ILitConst (NewMixedArray (Int64.to_int_exn n))
        | _ -> report_error "bad array size")
    | "NewDictArray" -> (match arg with
-       | IAInt64 n -> ILitConst (NewDictArray (Int64.to_int n))
+       | IAInt64 n -> ILitConst (NewDictArray (Int64.to_int_exn n))
        | _ -> report_error "bad array size")
    | "NewPackedArray" -> (match arg with
-       | IAInt64 n -> ILitConst (NewPackedArray (Int64.to_int n))
+       | IAInt64 n -> ILitConst (NewPackedArray (Int64.to_int_exn n))
        | _ -> report_error "bad array size")
    | "NewStructArray" ->
         (ILitConst(NewStructArray (listofshapefieldsofiarg arg)))
@@ -842,16 +843,16 @@ let makeunaryinst s arg = match s with
    | "NewStructDict" ->
         (ILitConst(NewStructDict (listofshapefieldsofiarg arg)))
    | "NewVecArray" -> (match arg with
-       | IAInt64 n -> ILitConst (NewVecArray (Int64.to_int n))
+       | IAInt64 n -> ILitConst (NewVecArray (Int64.to_int_exn n))
        | _ -> report_error "bad array size")
    | "NewKeysetArray" -> (match arg with
-       | IAInt64 n -> ILitConst (NewKeysetArray (Int64.to_int n))
+       | IAInt64 n -> ILitConst (NewKeysetArray (Int64.to_int_exn n))
        | _ -> report_error "bad array size")
    | "NewVArray" -> (match arg with
-       | IAInt64 n -> ILitConst (NewVArray (Int64.to_int n))
+       | IAInt64 n -> ILitConst (NewVArray (Int64.to_int_exn n))
        | _ -> report_error "bad array size")
    | "NewDArray" -> (match arg with
-       | IAInt64 n -> ILitConst (NewDArray (Int64.to_int n))
+       | IAInt64 n -> ILitConst (NewDArray (Int64.to_int_exn n))
        | _ -> report_error "bad array size")
    | "NewCol" -> ILitConst (NewCol (collectiontypeofiarg arg))
    | "ColFromArray" -> ILitConst (ColFromArray (collectiontypeofiarg arg))
@@ -896,7 +897,7 @@ let makeunaryinst s arg = match s with
        | _ -> report_error "bad jmp label")
    | "SSwitch" -> (match arg with
        | IAArglist cases ->
-          let args = List.map (function IASswitchcase (s, l) -> (s, makelabel l)
+          let args = List.map ~f:(function IASswitchcase (s, l) -> (s, makelabel l)
                                         | _ -> report_error "bad sswitch case") cases
           in IContFlow (SSwitch args)
        | _ -> report_error "sswitch expects list of cases")

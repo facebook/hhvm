@@ -11,6 +11,7 @@
    Used for pattern-matching of special sequences in rhl
 *)
 open Hhbc_ast
+open Core_kernel
 
 (*  turn destructors into parsers on arrays *)
 let rec pa p ?(ignore_srcloc=true) (a, n)=
@@ -61,7 +62,7 @@ let uSub = pa (function | IOp (Sub | SubO) -> Some () | _ -> None)
 let uIntOrDouble = pa (function
   | ILitConst ((Int _ | Double _) as v) -> Some v
   | ILitConst ((Cns s))
-    when String.lowercase_ascii (Hhbc_id.Const.to_raw_string s) = "inf" -> Some (Double "inf")
+    when String.lowercase (Hhbc_id.Const.to_raw_string s) = "inf" -> Some (Double "inf")
   | _ -> None)
 let uSrcLoc =
   pa (function ISrcLoc loc -> Some loc | _ -> None) ~ignore_srcloc:false

@@ -7,6 +7,8 @@
  *
 *)
 
+open Core_kernel
+
 type t = {
   env_pipe_var             : Local.t option;
   env_scope                : Ast_scope.Scope.t;

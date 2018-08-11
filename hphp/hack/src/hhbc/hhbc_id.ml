@@ -7,7 +7,7 @@
  *
 *)
 
-open Hh_core
+open Core_kernel
 
 module SU = Hhbc_string_utils
 
@@ -29,7 +29,7 @@ let auto_namespace_map () =
 
 let elaborate_id ns kind id =
   let autoimport =
-    if List.mem
+    if List.mem ~equal:(=)
       Hh_autoimport.autoimport_only_for_typechecker (SU.strip_ns @@ snd id)
     then false else Emit_env.is_hh_syntax_enabled () in
 
@@ -160,12 +160,12 @@ module Function = struct
   ]
 
   let has_hh_prefix s =
-    let s = String.lowercase_ascii s in
+    let s = String.lowercase s in
     String_utils.string_starts_with s "hh\\"
 
   let is_hh_builtin s =
     let s = if has_hh_prefix s then String_utils.lstrip s "hh\\" else s in
-    List.mem builtins_in_hh s
+    List.mem ~equal:(=) builtins_in_hh s
 
   let from_raw_string s = s
   let to_raw_string s = s
@@ -181,9 +181,9 @@ module Function = struct
        * it's an HH\ or top-level function with implicit namespace.
        *)
     | Some id ->
-      if List.mem builtins_in_hh id && (Emit_env.is_hh_syntax_enabled ())
+      if List.mem ~equal:(=) builtins_in_hh id && (Emit_env.is_hh_syntax_enabled ())
       then SU.prefix_namespace "HH" id, Some id
-      else if List.mem builtins_at_top (String.lowercase_ascii id)
+      else if List.mem ~equal:(=) builtins_at_top (String.lowercase id)
       then id, None
       else fq_id, backoff_id
       (* Likewise for top-level, with no namespace *)

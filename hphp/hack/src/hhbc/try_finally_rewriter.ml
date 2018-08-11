@@ -7,9 +7,9 @@
  *
 *)
 
+open Core_kernel
 open Hhbc_ast
 open Instruction_sequence
-open Hh_core
 
 module JT = Jump_targets
 

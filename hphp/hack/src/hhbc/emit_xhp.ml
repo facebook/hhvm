@@ -7,7 +7,7 @@
  *
 *)
 
-open Hh_core
+open Core_kernel
 open Emit_expression
 
 module SU = Hhbc_string_utils
@@ -202,12 +202,12 @@ let rec emit_xhp_child_decl ~unary = function
       (A.Int unary)
       (A.Int "5")
       (emit_xhp_children_decl_expr ~unary:"0" l)
-  | A.ChildName (_, name) when String.lowercase_ascii name = "any" ->
+  | A.ChildName (_, name) when String.lowercase name = "any" ->
     get_array3
       (A.Int unary)
       (A.Int "1")
       (A.Null)
-  | A.ChildName (_, name) when String.lowercase_ascii name = "pcdata"->
+  | A.ChildName (_, name) when String.lowercase name = "pcdata"->
     get_array3
       (A.Int unary)
       (A.Int "2")
@@ -241,7 +241,7 @@ and emit_xhp_children_decl_expr ~unary l =
         (A.Int "4")
         (emit_xhp_child_decl ~unary c1)
         (emit_xhp_child_decl ~unary c2) in
-    Core_list.fold_left cs ~init:first_two ~f:(fun acc n ->
+    List.fold_left cs ~init:first_two ~f:(fun acc n ->
       get_array3
         (A.Int "4")
         acc
@@ -261,7 +261,7 @@ let emit_xhp_children_paren_expr c =
 let emit_xhp_children_array = function
   | [] -> A.Int "0"
   | [A.ChildName (_, n) as c] ->
-    begin match String.lowercase_ascii n with
+    begin match String.lowercase n with
     | "empty" -> A.Int "0"
     | "any" -> A.Int "1"
     | _ -> emit_xhp_children_paren_expr c

@@ -14,6 +14,13 @@
    +----------------------------------------------------------------------+
 *)
 
+module IS = Instruction_sequence
+module HP = Hhas_program
+open Random_utils
+open Instr_utils
+open Core_kernel
+open Common
+
 (* This fuzzer works by applying semi-random mutations of different kinds to a
    hhas input file. Given a starter program, each mutation will generate a
    sample space of outcomes, the size of which is determined by user input. The
@@ -77,9 +84,9 @@ let options =
 
 let die : 'a . string -> 'a =
   fun str ->
-  let oc = stderr in
-  output_string oc str;
-  close_out oc;
+  let oc = Caml.stderr in
+  Caml.output_string oc str;
+  Caml.close_out oc;
   exit 2
 
 let print_output : Hhas_program.t -> unit =
@@ -87,22 +94,22 @@ let print_output : Hhas_program.t -> unit =
   fun (p : Hhas_program.t) ->
     let out =
       if !out_dir <> ""
-      then open_out (!out_dir ^ "/mutation" ^ string_of_int(!m_no) ^ ".hhas")
-      else stdout in
-    begin try p |> Hhbc_hhas.to_string |> (Printf.fprintf out "%s\n")
+      then Caml.open_out (!out_dir ^ "/mutation" ^ string_of_int(!m_no) ^ ".hhas")
+      else Caml.stdout in
+    begin try p |> Hhbc_hhas.to_string |> (Caml.Printf.fprintf out "%s\n")
     with _ -> () end;
-    if (!out_dir <> "") then close_out out;
+    if (!out_dir <> "") then Caml.close_out out;
     m_no := !m_no + 1
 
 let parse_file program_parser filename =
-  let channel = open_in filename in
+  let channel = Caml.open_in filename in
   let prog =
     try program_parser (Lexing.from_channel channel)
     with Parsing.Parse_error -> (
       Printf.eprintf "Parsing of file failed\n";
       raise Parsing.Parse_error
       ) in
-  close_in channel; prog
+  Caml.close_in channel; prog
 
 let read_input () : Hhas_program.t =
   let filename = ref ""  in
@@ -123,11 +130,6 @@ let debug_print str = if !debug then print_endline str
 
 (*---------------------------------Mutations----------------------------------*)
 
-module IS = Instruction_sequence
-module HP = Hhas_program
-open Random_utils
-open Instr_utils
-
 type mutation_monad = HP.t Nondet.m
 type mutation = HP.t -> mutation_monad
 
@@ -144,15 +146,15 @@ let mutate_main (mut: IS.t -> IS.t) (p : HP.t) : Hhas_program.t =
 let mutate_functions (mut: IS.t -> IS.t) (p : HP.t) : Hhas_program.t =
   let mutate_function (f : Hhas_function.t) : Hhas_function.t =
     Hhas_function.body f |> mutate_body mut |> Hhas_function.with_body f in
-  HP.functions p |> List.map mutate_function |> HP.with_fun p
+  HP.functions p |> List.map ~f:mutate_function |> HP.with_fun p
 
 let mutate_methods (mut: IS.t -> IS.t) (p : HP.t) : Hhas_program.t =
   let mutate_method (m : Hhas_method.t) : Hhas_method.t =
     Hhas_method.body m |> mutate_body mut |> Hhas_method.with_body m in
   let mutate_class (c : Hhas_class.t) : Hhas_class.t =
-    Hhas_class.methods c |> List.map mutate_method |>
+    Hhas_class.methods c |> List.map ~f:mutate_method |>
     Hhas_class.with_methods c in
-  HP.classes p |> List.map mutate_class |> HP.with_classes p
+  HP.classes p |> List.map ~f:mutate_class |> HP.with_classes p
 
 let mutate_program (mut: IS.t -> IS.t) (p : HP.t) : Hhas_program.t =
   p |> mutate_main mut |> mutate_functions mut |> mutate_methods mut
@@ -165,7 +167,7 @@ let mutate (mut: IS.t -> IS.t) (prog : HP.t) : int ->
   num_fold (fun a -> mutate_program mut prog |> Nondet.add_event a)
 
 (* produces sublist (i, k] of input lst *)
-let slice lst i k = Hh_core.List.take (Hh_core.List.drop lst (i + 1)) (k - i)
+let slice lst i k = List.take (List.drop lst (i + 1)) (k - i)
 
 open Hhbc_ast
 
@@ -190,12 +192,12 @@ let mutate_local_id (id : Local.t) c =
 let mutate_label data (label : Label.t) =
   try
     if not (should_mutate()) then label else
-    let height l = data.stack_history |> List.assoc l |> List.length in
+    let height l = data.stack_history |> Caml.List.assoc l |> List.length in
     let init_height = height (ILabel label) in
-    List.filter (fun l -> init_height = height @@ ILabel l) data.labels |>
+    List.filter ~f:(fun l -> init_height = height @@ ILabel l) data.labels |>
     rand_elt
   with
-  | Not_found -> label
+  | Caml.Not_found -> label
 
 (* produces a new member key, swapping key types and values, if applicable *)
 let mutate_key (k : MemberKey.t) c =
@@ -208,7 +210,7 @@ let mutate_key (k : MemberKey.t) c =
     | MemberKey.EC n -> if should_mutate() then new_key_type n else k
     | MemberKey.PC n -> if should_mutate() then new_key_type n else k
     | MemberKey.EI n ->
-        if should_mutate() then new_key_type (Int64.to_int n)  else k
+        if should_mutate() then new_key_type (Int64.to_int_exn n)  else k
     | MemberKey.EL (Local.Unnamed n) ->
         if should_mutate() then new_key_type n                 else k
     | MemberKey.PL (Local.Unnamed n) ->
@@ -220,7 +222,7 @@ let mutate_key (k : MemberKey.t) c =
   | MemberKey.PC i   -> MemberKey.PC (mutate_int      i  c)
   | MemberKey.PL id  -> MemberKey.PL (mutate_local_id id c)
   | MemberKey.EI i   ->
-      MemberKey.EI (Int64.of_int (mutate_int (Int64.to_int i) c))
+      MemberKey.EI (Int64.of_int_exn (mutate_int (Int64.to_int_exn i) c))
   | _ -> k
 
 (* TODO: Given the fact that we explicitly check this in the verifier as of
@@ -252,7 +254,7 @@ let maintain_stack (data : Instr_utils.seq_data) :
       | IContFlow RetC (* These require a stack height of 1 *)
       | IContFlow RetV   ->
           let old_stk = !stk in
-          stk := num_fold List.tl (List.length !stk - 1) !stk;
+          stk := num_fold List.tl_exn (List.length !stk - 1) !stk;
           empty_stk old_stk 1
       | IContFlow Unwind (* require a stack height of 0 *)
       | IMisc NativeImpl -> let old_stk = !stk in
@@ -260,7 +262,7 @@ let maintain_stack (data : Instr_utils.seq_data) :
       | ILabel _
       | IIterator _
       | IContFlow _ -> (* Stack height needs to match across block boundaries *)
-        let orig_stack = List.nth data.stack_history (!pc - 1) |> snd in
+        let orig_stack = snd @@ List.nth_exn data.stack_history (!pc - 1) in
         let res = equate_stk !stk orig_stack in
         stk := orig_stack; res
       | _ -> [] in
@@ -277,11 +279,11 @@ let maintain_stack (data : Instr_utils.seq_data) :
      * remove all values consumed by the instruction, and append all values
      * produced *)
     stk := stk_extra @ !stk;
-    stk := List.fold_left (fun acc _ -> List.tl acc) !stk stk_req;
-    stk := List.fold_left (fun acc x -> x :: acc)    !stk stk_prod;
+    stk := List.fold_left ~f:(fun acc _ -> List.tl_exn acc) !stk ~init:stk_req;
+    stk := List.fold_left ~f:(fun acc x -> x :: acc)    !stk ~init:stk_prod;
     (* add any necessary buffer instructions in front of the original *)
     buffer @ pre_buffer @ ctrl_buffer @ [instr] in
-  List.fold_right helper (op i) []
+  List.fold_right ~f:helper (op i) ~init:[]
 
 (* Mutate immediates according to their types *)
 let mut_imms (is : IS.t) : IS.t =
@@ -397,7 +399,7 @@ let mut_imms (is : IS.t) : IS.t =
     | JmpZ  l -> JmpZ  (mutate_label data l)
     | JmpNZ l -> JmpNZ (mutate_label data l)
     | SSwitch lst ->
-        SSwitch (List.map (fun (id, l) -> (id, mutate_label data l)) lst)
+        SSwitch (List.map ~f:(fun (id, l) -> (id, mutate_label data l)) lst)
     | _ -> s in
   let mutate_final s =
     let mutate_op op = if should_mutate () then random_query_op () else op in
@@ -447,7 +449,7 @@ let mut_imms (is : IS.t) : IS.t =
                        mutate_local_id  id !mag, mutate_local_id id' !mag)
     | IterBreak  (l, lst)        ->
         IterBreak     (mutate_label data l,
-                       List.map (fun (b, i) -> (mutate_bool b, i)) lst)
+                       List.map ~f:(fun (b, i) -> (mutate_bool b, i)) lst)
     | _ -> s in
   let mutate_misc s =
     let mutate_bare op = if should_mutate() then random_bare_op    () else op in
@@ -521,8 +523,8 @@ let mutate_duplicate (input : HP.t) : mutation_monad =
 let mutate_reorder (input : HP.t) : mutation_monad =
   debug_print "Reordering";
   let with_height_after map h idx : int list =
-    if Hashtbl.mem map h
-    then Hashtbl.find map h |> List.filter ((<) idx)
+    if Caml.Hashtbl.mem map h
+    then Caml.Hashtbl.find map h |> List.filter ~f:((<) idx)
     else [] in
   let mut (is : IS.t) =
     if not (should_mutate()) then is else
@@ -537,7 +539,7 @@ let mutate_reorder (input : HP.t) : mutation_monad =
         try
           let start_h = rand_elt heights in
           let end_h   = rand_elt heights in
-          let start1  = Hashtbl.find by_height start_h |> rand_elt in
+          let start1  = Caml.Hashtbl.find by_height start_h |> rand_elt in
           let end1    = next_pos end_h start1 in
           let start2  = next_pos start_h end1 in
           start1, end1, start2, next_pos end_h start2
@@ -549,7 +551,7 @@ let mutate_reorder (input : HP.t) : mutation_monad =
                  subinstrs end2 (List.length instrs - 1) in
     (* Reattach fault regions that were discarded by converting to list *)
     IS.gather [IS.InstrSeq.flat_map (IS.Instr_list newseq)
-               (maintain_stack (seq_data is) Hh_core.List.return);
+               ~f:(maintain_stack (seq_data is) List.return);
                IS.extract_fault_funclets is] in
   Nondet.return input |> mutate mut input !reorder_reps
 
@@ -617,10 +619,10 @@ let mutate_replace (input : HP.t) : mutation_monad =
       match i with
       | IContFlow _
       | ITry _ -> i
-      | _ -> try (List.assoc (stk_data i) equiv_map |> rand_elt) ()
-             with | Not_found | Invalid_argument _ -> i in
+      | _ -> try (Caml.List.assoc (stk_data i) equiv_map |> rand_elt) ()
+             with | Not_found_s _ | Invalid_argument _ -> i in
     let replace i = if should_mutate() then [equiv_instr i] else [i] in
-    IS.InstrSeq.flat_map is (maintain_stack (seq_data is) replace) in
+    IS.InstrSeq.flat_map is ~f:(maintain_stack (seq_data is) replace) in
   Nondet.return input |> mutate mut input !replace_reps
 
 (* This will add random instructions, with arbitrary stack signatures, to the
@@ -672,7 +674,7 @@ let mutate_metadata (input : HP.t)  =
       (param |> Hhas_param.is_reference |> mutate_bool)
       (param |> Hhas_param.is_variadic  |> mutate_bool)
       (param |> Hhas_param.is_inout  |> mutate_bool)
-      (param |> Hhas_param.user_attributes |> List.map mutate_attribute)
+      (param |> Hhas_param.user_attributes |> List.map ~f:mutate_attribute)
       (param |> Hhas_param.type_info    |> option_lift mutate_type_info)
       (param |> Hhas_param.default_value) in
   let mutate_body_data (body : Hhas_body.t) : Hhas_body.t =
@@ -822,14 +824,17 @@ let mutate_metadata (input : HP.t)  =
 open Nondet
 
 let fuzz (input : HP.t) (mutations : mutation list): unit =
-  mutations |> List.fold_left (>>=) (return input) >>| print_output |> ignore
+  mutations
+  |> List.fold_left ~f:(>>=) ~init:(return input)
+  >>| print_output
+  |> ignore
 
 (* command line driver *)
 let _ =
   Random.self_init ();
   if !Sys.interactive then ()
   else
-    set_binary_mode_out stdout true;
+    Caml.set_binary_mode_out stdout true;
     let input = read_input () in
     let mutations = [mutate_immediate;  mutate_duplicate; mutate_reorder;
                      mutate_remove;     mutate_replace;   mutate_insert;

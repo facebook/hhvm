@@ -7,6 +7,8 @@
  *
  *)
 
+open Core_kernel
+
 module J = Hh_json
 module SU = Hhbc_string_utils
 module FSC = Facts_smart_constructors
@@ -17,7 +19,7 @@ module InvStringKey = struct
 end
 
 module InvSMap = MyMap.Make(InvStringKey)
-module InvSSet = Set.Make(InvStringKey)
+module InvSSet = Caml.Set.Make(InvStringKey)
 
 module FactsParser_ = Full_fidelity_parser
   .WithSyntax(Full_fidelity_positioned_syntax)
@@ -73,7 +75,7 @@ let qualified_name_from_parts ns l =
   let open FSC in
   let rec aux l acc =
     match l with
-    | [] -> Some (String.concat "" @@ List.rev acc)
+    | [] -> Some (String.concat ~sep:"" @@ List.rev acc)
     | Name n :: xs -> aux xs (n () :: acc)
     (* ignore leading backslash *)
     | Backslash :: xs -> aux xs acc
@@ -149,7 +151,7 @@ let add_or_update_classish_declaration types name kind flags base_types
         tf with require_implements =
           InvSSet.union require_implements tf.require_implements } in
 
-    if tf == old_tf then types
+    if phys_equal tf old_tf then types
     else InvSMap.add name tf types
 
   | None ->
@@ -168,7 +170,7 @@ let typenames_from_list ns init l =
     | Some n -> InvSSet.add n s
     | None -> s in
   match l with
-  | List l -> Core_list.fold_left l ~init ~f:aux
+  | List l -> List.fold_left l ~init ~f:aux
   | _ -> init
 
 let define_name n =
@@ -180,7 +182,7 @@ let defines_from_method_body constants body =
   let open FSC in
   let rec aux acc l =
     match l with
-    | List l -> Core_list.fold_left l ~init:acc ~f:aux
+    | List l -> List.fold_left l ~init:acc ~f:aux
     | Define (String name) -> (define_name name) :: acc
     | _ -> acc in
   aux constants body
@@ -209,10 +211,10 @@ let type_info_from_class_body facts ns check_require body =
   let init = InvSSet.empty, InvSSet.empty, InvSSet.empty, facts.constants in
   let extends, implements, trait_uses, constants =
     match body with
-    | List l -> Core_list.fold_left l ~init ~f:aux
+    | List l -> List.fold_left l ~init ~f:aux
     | _ -> init in
   let facts =
-    if constants == facts.constants
+    if phys_equal constants facts.constants
     then facts
     else { facts with constants } in
   extends, implements, trait_uses, facts
@@ -236,7 +238,7 @@ let facts_from_class_decl facts ns modifiers kind name extends implements body =
     let types =
       add_or_update_classish_declaration facts.types name kind flags
         base_types require_extends require_implements in
-    if types == facts.types
+    if phys_equal types facts.types
     then facts
     else { facts with types }
 
@@ -244,7 +246,7 @@ let rec collect (ns, facts as acc) n =
   let open FSC in
   match n with
   | List l ->
-    Core_list.fold_left ~init:acc ~f:collect l
+    List.fold_left ~init:acc ~f:collect l
   | ClassDecl decl ->
     let facts = facts_from_class_decl facts ns
       decl.modifiers decl.kind decl.name
@@ -257,7 +259,7 @@ let rec collect (ns, facts as acc) n =
         add_or_update_classish_declaration facts.types name
           TKEnum flags_final InvSSet.empty InvSSet.empty InvSSet.empty in
       let facts =
-        if types == facts.types
+        if phys_equal types facts.types
         then facts
         else { facts with types } in
       ns, facts
@@ -314,7 +316,7 @@ let add_member ~include_empty name values members =
 
 let list_to_json_array l =
   let elements =
-    Core_list.fold_left l ~init:[] ~f:(fun acc el -> J.JSON_String el :: acc) in
+    List.fold_left l ~init:[] ~f:(fun acc el -> J.JSON_String el :: acc) in
   J.JSON_Array elements
 
 let type_facts_to_json name tf =
@@ -364,7 +366,7 @@ let from_text php5_compat_mode hhvm_compat_mode force_hh enable_xhp s =
     FactsParser.parse_script p in
   let has_script_content = FactsParser.sc_state parser in
   (* report errors only if result of parsing is non-empty *)
-  if has_script_content && not @@ Core_list.is_empty (FactsParser.errors parser)
+  if has_script_content && not @@ List.is_empty (FactsParser.errors parser)
   then None
   else begin
     let initial_facts = {

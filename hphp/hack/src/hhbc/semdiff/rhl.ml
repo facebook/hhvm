@@ -11,7 +11,7 @@
   This is a pretty dumbed-down RHL prover for showing equivalence of two
   hhvm bytecode function bodies.
 *)
-open Hh_core
+open Core_kernel
 open Hhbc_ast
 open Local
 open Hhbc_destruct
@@ -29,9 +29,9 @@ module Utils = Semdiff_utils
    we discovered that we needed it - maybe refactor sometime.
 *)
 type perm = (int * int) list
-module IntIntPermSet = Set.Make(struct type t = int*int*perm let compare = compare end)
-module IntIntSet = Set.Make(struct type t = int*int let compare = compare end)
-module StringStringSet = Set.Make(struct type t = string*string let compare = compare end)
+module IntIntPermSet = Caml.Set.Make(struct type t = int*int*perm let compare = compare end)
+module IntIntSet = Caml.Set.Make(struct type t = int*int let compare = compare end)
+module StringStringSet = Caml.Set.Make(struct type t = string*string let compare = compare end)
 
 let classes_to_check = ref IntIntPermSet.empty
 let classes_checked = ref IntIntSet.empty
@@ -50,8 +50,8 @@ let typedefs_checked = ref IntIntSet.empty
 *)
 let compare_double_strings s s' =
  (* convert both to lowercase to handle INF in different casing *)
- let s = String.lowercase_ascii s in
- let s' = String.lowercase_ascii s' in
+ let s = String.lowercase s in
+ let s' = String.lowercase s' in
  if s=s' then true
  else match Scanf.sscanf s "%f" (fun x -> Some x),
             Scanf.sscanf s' "%f" (fun x -> Some x) with
@@ -69,8 +69,8 @@ let lax_unset = ref false
   now.
 *)
 type prop = Local.t * Local.t
-module PropSet = Set.Make(struct type t = prop let compare = compare end)
-module VarSet = Set.Make(struct type t = Local.t let compare = compare end)
+module PropSet = Caml.Set.Make(struct type t = prop let compare = compare end)
+module VarSet = Caml.Set.Make(struct type t = Local.t let compare = compare end)
 
 (* Along with pc, we track the current exception handler context. This should be
   understood as a list of which exception handlers we are currently
@@ -114,7 +114,7 @@ let (entry_assertion : assertion) = (PropSet.empty,VarSet.empty,VarSet.empty)
   Each pair of program counters maps to a set of assertions, each representing a
   possible state that may hold that those points. I.e. this is a disjunction of
   assertions. *)
-module AsnSet = Set.Make(struct type t = assertion let compare=compare end)
+module AsnSet = Caml.Set.Make(struct type t = assertion let compare=compare end)
 
 exception Labelexn
 module  LabelMap = MyMap.Make(struct type t = Label.t let compare = compare end)
@@ -230,7 +230,7 @@ let throw_pc static dynamic =
 
 (* Moving string functions into rhl so that I can use them in debugging *)
 let propstostring props =
-  String.concat " " (List.map
+  String.concat ~sep:" " (List.map
     ~f:(fun (v,v') ->
       "(" ^ (Hhbc_hhas.string_of_local_id v) ^ "," ^
       (Hhbc_hhas.string_of_local_id v') ^ ")")
@@ -238,7 +238,7 @@ let propstostring props =
 
 let varsettostring vs =
   "{" ^
-  String.concat "," (List.map
+  String.concat ~sep:"," (List.map
     ~f:(fun v -> Hhbc_hhas.string_of_local_id v)
     (VarSet.elements vs)) ^
   "}"
@@ -248,10 +248,10 @@ let asntostring (props,vs,vs') =
 
 let asnsettostring asns =
   "<" ^
-  String.concat "," (List.map ~f:asntostring (AsnSet.elements asns)) ^ ">"
+  String.concat ~sep:"," (List.map ~f:asntostring (AsnSet.elements asns)) ^ ">"
 
 let string_of_pc (hs,ip) =
-  String.concat " " (List.map ~f:(fun h -> string_of_int (ip_of_emv h)) hs) ^
+  String.concat ~sep:" " (List.map ~f:(fun h -> string_of_int (ip_of_emv h)) hs) ^
   ";" ^
   string_of_int ip
 let labasnstostring ((l1,l2),asns) =
@@ -266,9 +266,9 @@ let labasntostring ((l1,l2),asns) =
   (string_of_pc l2) ^ "->" ^
   (asntostring asns) ^
   "]\n"
-let labasnlisttostring l = String.concat "" (List.map ~f:labasntostring l)
+let labasnlisttostring l = String.concat ~sep:"" (List.map ~f:labasntostring l)
 let labasnsmaptostring asnmap =
-  String.concat "" (List.map ~f:labasnstostring (PcpMap.bindings asnmap))
+  String.concat ~sep:"" (List.map ~f:labasnstostring (PcpMap.bindings asnmap))
 
 let string_of_nth_instruction l pc =
   let i = ip_of_pc pc in
@@ -742,13 +742,13 @@ let add_assumption (pc,pc') asn assumed =
 (* Compute the permutation mapping. Not very efficiently, but lists should
   always be very small. *)
 let findperm l1 l2 =
-  if List.contains_dup l1 || (List.length l1 <> List.length l2)
+  if (List.contains_dup ~compare:Pervasives.compare l1) || ((List.length l1) <> (List.length l2))
   then None
   else let rec loop n l p =
     match l with
     | [] -> Some p
     | x :: xs ->
-      begin match List.findi l2 (fun _i y -> x = y) with
+      begin match List.findi l2 ~f:(fun _i y -> x = y) with
       | Some (j,_) -> loop (n+1) xs ((n,j)::p)
       | None -> None
       end in
@@ -1289,7 +1289,7 @@ let equiv prog prog' startlabelpairs =
     let zero_minus_number =
       uInt0 $$ positive_int_or_double $$ uSub
       $> (fun ((_, v), _) -> match v with
-          | Int v -> Int (Int64.sub 0L v)
+          | Int v -> Int (Int64.(-) 0L v)
           | Double s -> Double ("-" ^ s)
           | _ -> assert false) in
 
@@ -1324,8 +1324,8 @@ let equiv prog prog' startlabelpairs =
       $? (function
         | [], _ | _, [] -> false
         | l1, l2 ->
-          let s1 = List.map l1 (fun ((s, _), _) -> s) |> String.concat "" in
-          let s2 = List.map l2 (fun ((s, _), _) -> s) |> String.concat "" in
+          let s1 = List.map l1 ~f:(fun ((s, _), _) -> s) |> String.concat ~sep:"" in
+          let s2 = List.map l2 ~f:(fun ((s, _), _) -> s) |> String.concat ~sep:"" in
           s1 = s2)
       $> (fun (s,_) -> s)
       $>> (fun _s ((_,n), (_,n')) ->

@@ -7,8 +7,8 @@
  *
 *)
 
+open Core_kernel
 open Instruction_sequence
-open Hh_core
 
 module H = Hhbc_ast
 module SU = Hhbc_string_utils
@@ -119,7 +119,7 @@ let emit_wrapper_function
     ~scope ast_fun.Ast.f_params in
   let function_attributes =
     Emit_attribute.from_asts namespace ast_fun.Ast.f_user_attributes
-    |> Core_list.filter ~f:(fun attr -> not (Hhas_attribute.is_native attr)) in
+    |> List.filter ~f:(fun attr -> not (Hhas_attribute.is_native attr)) in
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
   let return_type_info =
     Emit_body.emit_return_type_info
@@ -181,19 +181,19 @@ let emit_wrapper_method
     ~scope ast_method.Ast.m_params in
   let has_ref_params = List.exists params ~f:Hhas_param.is_reference in
   let method_is_abstract =
-    List.mem ast_method.Ast.m_kind Ast.Abstract ||
+    List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Abstract ||
     ast_class.Ast.c_kind = Ast.Cinterface in
-  let method_is_final = List.mem ast_method.Ast.m_kind Ast.Final in
+  let method_is_final = List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Final in
   let method_is_static = not is_closure &&
-    List.mem ast_method.Ast.m_kind Ast.Static in
+    List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Static in
   let method_attributes = Emit_attribute.from_asts
       (Emit_env.get_namespace env) ast_method.Ast.m_user_attributes in
   let method_is_private =
-    List.mem ast_method.Ast.m_kind Ast.Private in
+    List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Private in
   let method_is_protected =
-    List.mem ast_method.Ast.m_kind Ast.Protected in
+    List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Protected in
   let method_is_public =
-    List.mem ast_method.Ast.m_kind Ast.Public ||
+    List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Public ||
     (not method_is_private && not method_is_protected) in
   let is_in_trait = ast_class.Ast.c_kind = Ast.Ctrait in
   let return_type_info =

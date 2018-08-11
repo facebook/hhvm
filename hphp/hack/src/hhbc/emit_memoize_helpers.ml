@@ -7,8 +7,8 @@
  *
 *)
 
+open Core_kernel
 open Instruction_sequence
-open Hh_core
 
 let memoize_suffix = "$memoize_impl"
 

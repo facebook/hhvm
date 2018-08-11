@@ -7,7 +7,7 @@
  *
 *)
 
-open Hh_core
+open Core_kernel
 open Hhbc_string_utils
 
 module A = Ast
@@ -18,7 +18,7 @@ let hack_arr_dv_arrs () =
 
 (* Taken from: hphp/runtime/base/type-structure.h *)
 let get_kind_num ~tparams p =
-  let p = if List.mem tparams p then "typevar" else String.lowercase_ascii p in
+  let p = if List.mem ~equal:(=) tparams p then "typevar" else String.lowercase p in
   Int64.of_int @@
   match p with
   | "hh\\void" -> 0
@@ -133,7 +133,7 @@ and resolve_classname ~tparams ~namespace (p, s) =
   let s = add_ns namespace (p, Types.fix_casing s) in
   if is_prim s || is_resolved_classname s then [], s
   else
-    let is_tparam = List.mem tparams s || (String.lowercase_ascii s) = "hh\\_" in
+    let is_tparam = List.mem ~equal:(=) tparams s || (String.lowercase s) = "hh\\_" in
     let id = if is_tparam then "name" else "classname" in
     [TV.String id, TV.String s], s
 
@@ -150,14 +150,14 @@ and root_to_string ~namespace s =
 
 and get_typevars = function
  | [] -> []
- | tparams -> [TV.String "typevars", TV.String (String.concat "," tparams)]
+ | tparams -> [TV.String "typevars", TV.String (String.concat ~sep:"," tparams)]
 
 and hint_to_type_constant_list ~tparams ~namespace h =
   match snd h with
   | A.Happly (s, l) ->
     let classname, s_res = resolve_classname ~tparams ~namespace s in
     let kind = get_kind ~tparams s_res in
-    let n = String.lowercase_ascii @@ snd s in
+    let n = String.lowercase @@ snd s in
     let generic_types =
       if n = "classname" || n = "typename" then []
       else get_generic_types ~tparams ~namespace l in

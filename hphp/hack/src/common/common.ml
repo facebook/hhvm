@@ -73,4 +73,12 @@ module List = struct
     let env, l = rev_map_env env xs ~f in
     env, rev_filter_map l ~f:(fun x -> x)
 
+  let rec replicate ~num x =
+    match num with
+    | 0 -> []
+    | n when n < 0 ->
+        raise @@ Invalid_argument (
+          Printf.sprintf "List.replicate was called with %d argument" n)
+    | _ -> x :: replicate ~num:(num - 1) x
+
 end

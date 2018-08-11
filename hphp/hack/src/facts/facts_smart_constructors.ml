@@ -7,6 +7,8 @@
  *
  *)
 
+open Core_kernel
+
 module Syntax = Full_fidelity_positioned_syntax
 module Token = Syntax.Token
 module TK = Full_fidelity_token_kind
@@ -82,7 +84,7 @@ module SC = struct
     | _ -> false
 
   let flatten l =
-    let r = Core_list.concat_map l ~f:(
+    let r = List.concat_map l ~f:(
       function
       | List l -> l
       | x -> if is_zero x then [] else [x]
@@ -133,7 +135,7 @@ module SC = struct
 
   let make_list _ items st =
     if items <> []
-    then st, (if Core_list.for_all ~f:((=) Ignored) items then Ignored else List items)
+    then st, (if List.for_all ~f:((=) Ignored) items then Ignored else List items)
     else st, Ignored
 
   let make_qualified_name arg0 st =

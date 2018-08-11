@@ -7,7 +7,7 @@
  *
 *)
 
-open Hh_core
+open Core_kernel
 open Instruction_sequence
 open Emit_expression
 
@@ -196,7 +196,7 @@ let from_enum_type ~namespace opt =
 let is_hh_namespace ns =
   Option.value_map ns.Namespace_env.ns_name
     ~default:false
-    ~f:(fun v -> String.lowercase_ascii v = "hh")
+    ~f:(fun v -> String.lowercase v = "hh")
 
 let is_global_namespace ns =
   Option.is_none ns.Namespace_env.ns_name

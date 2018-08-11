@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
 *)
-open Hh_core
+open Core_kernel
 
 module ScopeItem =
 struct
@@ -63,7 +63,7 @@ struct
 
   let rec is_in_static_method scope =
     match scope with
-    | ScopeItem.Method md :: _ -> List.mem md.Ast.m_kind Ast.Static
+    | ScopeItem.Method md :: _ -> List.mem ~equal:(=) md.Ast.m_kind Ast.Static
     | ScopeItem.Lambda :: scope -> is_in_static_method scope
     | ScopeItem.LongLambda is_static :: scope ->
       not is_static && is_in_static_method scope

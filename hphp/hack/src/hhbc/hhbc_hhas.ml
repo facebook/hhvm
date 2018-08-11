@@ -7,6 +7,7 @@
  *
 *)
 
+open Core_kernel
 module Acc = Mutable_accumulator
 module H = Hhbc_ast
 module A = Ast
@@ -16,7 +17,7 @@ module ULS = Unique_list_string
 open H
 
 (* Generic helpers *)
-let sep pieces = String.concat " " pieces
+let sep pieces = String.concat ~sep:" " pieces
 
 let indent_text = "  "
 
@@ -69,7 +70,7 @@ let string_of_basic instruction =
     | RGetCNop    -> "RGetCNop"
 
 let string_of_list_of_shape_fields sl =
-  String.concat " " @@ List.map SU.quote_string sl
+  String.concat ~sep:" " @@ List.map ~f:SU.quote_string sl
 
 let string_of_stack_index si = string_of_int si
 
@@ -317,22 +318,20 @@ let string_of_mutator x =
   | InitProp (id, op) -> sep ["InitProp"; string_of_prop_id id;
       string_of_initprop_op op]
 
-let string_of_label label =
-  match label with
-    | Label.Regular id -> "L" ^ (string_of_int id)
-    | Label.Catch id -> "C" ^ (string_of_int id)
-    | Label.Fault id -> "F" ^ (string_of_int id)
-    | Label.DefaultArg id -> "DV" ^ (string_of_int id)
-    | Label.Named id -> id
+let string_of_label = function
+  | Label.Regular id -> "L" ^ (string_of_int id)
+  | Label.Catch id -> "C" ^ (string_of_int id)
+  | Label.Fault id -> "F" ^ (string_of_int id)
+  | Label.DefaultArg id -> "DV" ^ (string_of_int id)
+  | Label.Named id -> id
 
-let string_of_switch_kind kind =
-  match kind with
-  | Unbounded -> "Unbounded"
-  | Bounded -> "Bounded"
+let string_of_switch_kind = function
+  | H.Unbounded -> "Unbounded"
+  | H.Bounded -> "Bounded"
 
 let string_of_switch kind base labels =
   let kind = string_of_switch_kind kind in
-  let labels = String.concat " " @@ List.map string_of_label labels in
+  let labels = String.concat ~sep:" " @@ List.map ~f:string_of_label labels in
   Printf.sprintf "Switch %s %d <%s>" kind base labels
 
 let string_of_sswitch cases =
@@ -341,8 +340,8 @@ let string_of_sswitch cases =
    | [] -> failwith "sswitch should have at least one case"
    | (_dummystring, lastlabel) :: revrest ->
        let reststring =
-         String.concat " " @@
-         List.rev_map (function (s,l) -> SU.quote_string s ^ ":" ^ string_of_label l) revrest in
+         String.concat  ~sep:" " @@
+         List.rev_map ~f:(function (s,l) -> SU.quote_string s ^ ":" ^ string_of_label l) revrest in
        let laststring = "-:" ^ string_of_label lastlabel in
          Printf.sprintf "SSwitch <%s %s>" reststring laststring
 
@@ -448,12 +447,12 @@ let string_of_final instruction =
 
 let string_of_param_locations pl =
   if List.length pl = 0 then "" else
-  "<" ^ (String.concat ", " (List.map string_of_int pl)) ^ ">"
+  "<" ^ (String.concat ~sep:", " (List.map ~f:string_of_int pl)) ^ ">"
 
 let string_of_list_of_bools l =
   if List.length l = 0 then "" else
   let bool_to_str b = if b then "1" else "0" in
-  "\"" ^ (String.concat "" (List.map bool_to_str l)) ^ "\""
+  "\"" ^ (String.concat ~sep:"" (List.map ~f:bool_to_str l)) ^ "\""
 
 let string_of_call instruction =
   match instruction with
@@ -670,7 +669,7 @@ let string_of_iterator instruction =
         (string_of_iterator_id id)
       in
       let values =
-        String.concat ", " (List.rev_map map_item iterlist) in
+        String.concat ~sep:", " (List.rev_map ~f:map_item iterlist) in
       "IterBreak " ^ (string_of_label label) ^ " <" ^ values ^ ">"
   | _ -> "### string_of_iterator instruction not implemented"
 
@@ -710,7 +709,7 @@ let string_of_generator = function
   | ContCurrent -> "ContCurrent"
 
 let string_of_include_eval_define = function
-  | Incl -> "Incl"
+  | H.Incl -> "Incl"
   | InclOnce -> "InclOnce"
   | Req -> "Req"
   | ReqOnce -> "ReqOnce"
@@ -811,8 +810,8 @@ let quote_str_option s =
   | Some s -> SU.quote_string s
 
 let string_of_type_flags flags =
-  let flag_strs = List.map Hhas_type_constraint.string_of_flag flags in
-  let flags_text = String.concat " " flag_strs in
+  let flag_strs = List.map ~f:Hhas_type_constraint.string_of_flag flags in
+  let flags_text = String.concat ~sep:" " flag_strs in
   flags_text
 
 let string_of_type_info ?(is_enum = false) ti =
@@ -831,7 +830,8 @@ let string_of_typedef_info ti =
   let name = Hhas_type_constraint.name type_constraint in
   let flags = Hhas_type_constraint.flags type_constraint in
   (* TODO: check if other flags are emitted for type aliases *)
-  let flags = List.filter (fun f -> f = Hhas_type_constraint.Nullable) flags in
+  let flags =
+    List.filter ~f:(fun f -> f = Hhas_type_constraint.Nullable) flags in
   let flags_text = string_of_type_flags flags in
     "<" ^ SU.quote_string (Option.value ~default:"" name)
     ^ " " ^ flags_text ^ " >"
@@ -856,7 +856,7 @@ let rec string_of_afield ~env = function
 and string_of_afield_list ~env afl =
   if List.length afl = 0
   then ""
-  else String.concat ", " @@ List.map (string_of_afield ~env) afl
+  else String.concat ~sep:", " @@ List.map ~f:(string_of_afield ~env) afl
 
 and shape_field_name_to_expr = function
   | A.SFlit_int (pos, s) -> (pos, A.Int s)
@@ -950,13 +950,13 @@ and string_of_fun ~env f use_list =
       param_text ^ string_of_is_reference p.A.param_is_reference ^ name in
     Some (param_text ^ default_val)
   in
-  let args = String.concat ", " @@ Core_list.filter_map ~f:string_of_args f.A.f_params in
+  let args = String.concat ~sep:", " @@ List.filter_map ~f:string_of_args f.A.f_params in
   let use_list_helper ((_, id), b) = (if b then "&" else "") ^ id in
   let use_statement = match use_list with
     | [] -> ""
     | _ ->
       "use ("
-      ^ (String.concat ", " @@ List.map use_list_helper use_list)
+      ^ (String.concat ~sep:", " @@ List.map ~f:use_list_helper use_list)
       ^ ") "
   in
   (if f.A.f_static then "static " else "")
@@ -972,8 +972,8 @@ and string_of_optional_expr ~env e =
 
 and string_of_block_ ~env ~start_indent ~block_indent ~end_indent block =
   let lines =
-    (String.concat "" @@
-      List.map (string_of_statement ~env ~indent:block_indent) block) in
+    (String.concat ~sep:"" @@
+      List.map ~f:(string_of_statement ~env ~indent:block_indent) block) in
   start_indent ^ "{\\n" ^ lines ^ end_indent ^ "}\\n"
 
 and string_of_block ~env ~indent (block:A.stmt list) =
@@ -1050,7 +1050,7 @@ and string_of_xml ~env (_, id) attributes children =
   let p = Pos.none in
   let name = SU.Xhp.mangle id in
   let _, attributes =
-    List.fold_right (string_of_xhp_attr p) attributes (0, [])
+    List.fold_right ~f:(string_of_xhp_attr p) attributes ~init:(0, [])
   in
   let attributes = string_of_param_default_value ~env (p, A.Darray attributes) in
   let children = string_of_param_default_value ~env
@@ -1171,7 +1171,7 @@ and string_of_param_default_value ~env expr =
   | A.Shape fl ->
     let fl =
       List.map
-        (fun (f_name, e) ->
+        ~f:(fun (f_name, e) ->
           (shape_field_name_to_expr f_name, e))
         fl
     in
@@ -1184,18 +1184,18 @@ and string_of_param_default_value ~env expr =
   | A.New (e, _, es, ues)
   | A.Call (e, _, es, ues) ->
     let e = String_utils.lstrip (string_of_param_default_value ~env e) "\\\\" in
-    let es = List.map (string_of_param_default_value ~env) (es @ ues) in
+    let es = List.map ~f:(string_of_param_default_value ~env) (es @ ues) in
     let prefix = match snd expr with A.New (_, _, _, _) -> "new " | _ -> "" in
     prefix
     ^ e
     ^ "("
-    ^ String.concat ", " es
+    ^ String.concat ~sep:", " es
     ^ ")"
   | A.NewAnonClass (es, ues, _) ->
-    let es = List.map (string_of_param_default_value ~env) (es @ ues) in
+    let es = List.map ~f:(string_of_param_default_value ~env) (es @ ues) in
     "new class"
     ^ "("
-    ^ String.concat ", " es
+    ^ String.concat ~sep:", " es
     ^ ")"
   | A.Class_get (e1, e2) ->
     let s1 = match snd e1 with
@@ -1247,12 +1247,12 @@ and string_of_param_default_value ~env expr =
     in
     e ^ "[" ^ eo ^ "]"
   | A.String2 es ->
-    String.concat " . " @@ List.map (string_of_param_default_value ~env) es
+    String.concat ~sep:" . " @@ List.map ~f:(string_of_param_default_value ~env) es
   | A.PrefixedString (name, e) ->
-    String.concat " . " @@ [name; string_of_param_default_value ~env e]
+    String.concat ~sep:" . " @@ [name; string_of_param_default_value ~env e]
   | A.Execution_operator es ->
     let s =
-      String.concat " . " @@ List.map (string_of_param_default_value ~env) es in
+      String.concat ~sep:" . " @@ List.map ~f:(string_of_param_default_value ~env) es in
     "shell_exec(" ^ s ^ ")"
   | A.Eif (cond, etrue, efalse) ->
     let cond = string_of_param_default_value ~env cond in
@@ -1282,14 +1282,14 @@ and string_of_param_default_value ~env expr =
     let h = string_of_hint ~ns:true h in
     e ^ o ^ h
   | A.Varray es ->
-    let es = List.map (string_of_param_default_value ~env) es in
-    "varray[" ^ (String.concat ", " es) ^ "]"
+    let es = List.map ~f:(string_of_param_default_value ~env) es in
+    "varray[" ^ (String.concat ~sep:", " es) ^ "]"
   | A.Darray es ->
-    let es = List.map (fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
+    let es = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
     "darray[" ^ (string_of_afield_list ~env es) ^ "]"
   | A.List l ->
-    let l = List.map (string_of_param_default_value ~env) l in
-    "list(" ^ (String.concat ", " l) ^ ")"
+    let l = List.map ~f:(string_of_param_default_value ~env) l in
+    "list(" ^ (String.concat ~sep:", " l) ^ ")"
   | A.Yield y ->
     "yield " ^ (string_of_afield ~env y)
   | A.Await a ->
@@ -1327,7 +1327,7 @@ let string_of_param_user_attributes p =
   | [] -> ""
   | user_attrs ->
     let attrs = Emit_adata.attributes_to_strings user_attrs in
-    "[" ^ (String.concat " " attrs) ^ "]"
+    "[" ^ (String.concat ~sep:" " attrs) ^ "]"
 
 let string_of_is_inout b = if b then "inout " else ""
 
@@ -1344,7 +1344,7 @@ let string_of_param env p =
   ^ string_of_param_default_value_option env param_default_value
 
 let string_of_params env ps =
-  "(" ^ String.concat ", " (List.map (string_of_param env) ps) ^ ")"
+  "(" ^ String.concat ~sep:", " (List.map ~f:(string_of_param env) ps) ^ ")"
 
 let add_indent buf indent = Acc.add buf (String.make indent ' ')
 let add_indented_line buf indent str =
@@ -1358,7 +1358,7 @@ let add_num_cls_ref_slots buf indent num_cls_ref_slots =
     (Printf.sprintf ".numclsrefslots %d;" num_cls_ref_slots)
 
 let is_bareword_char c =
-  match Char.lowercase_ascii c with
+  match Char.lowercase c with
   | '_' | '.' | '$' | '\\' -> true
   | c -> (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z')
 
@@ -1368,14 +1368,14 @@ let is_bareword_string s =
   aux 0
 
 let add_decl_vars buf indent decl_vars =
-  let decl_vars = List.map (fun s ->
+  let decl_vars = List.map ~f:(fun s ->
     if is_bareword_string s
     then s
     else "\"" ^ (Php_escaping.escape s) ^ "\""
   ) decl_vars in
   if decl_vars <> []
   then add_indented_line buf indent
-    (".declvars " ^ String.concat " " decl_vars ^ ";")
+    (".declvars " ^ String.concat ~sep:" " decl_vars ^ ";")
 
 let add_num_iters buf indent num_iters =
   if num_iters <> 0
@@ -1439,7 +1439,7 @@ let function_attributes f =
     if Hhas_function.is_return_by_ref f then "reference" :: attrs else attrs in
   let attrs =
     if Hhas_function.is_interceptable f then "interceptable" :: attrs else attrs in
-  let text = String.concat " " attrs in
+  let text = String.concat ~sep:" " attrs in
   if text = "" then "" else "[" ^ text ^ "] "
 
 let add_fun_def buf fun_def =
@@ -1467,7 +1467,7 @@ let add_fun_def buf fun_def =
   Acc.add buf "}\n"
 
 let attributes_to_string attrs =
-  let text = String.concat " " attrs in
+  let text = String.concat ~sep:" " attrs in
   let text = if text = "" then "" else "[" ^ text ^ "] " in
   text
 
@@ -1567,7 +1567,7 @@ let class_special_attributes c =
     if Hhas_class.enum_type c <> None then "enum" :: attrs else attrs
   in
   let attrs = if Hhas_class.is_abstract c then "abstract" :: attrs else attrs in
-  let text = String.concat " " attrs in
+  let text = String.concat ~sep:" " attrs in
   let text = if text = "" then "" else "[" ^ text ^ "] " in
   text
 
@@ -1586,8 +1586,8 @@ let add_implements buf class_implements =
   | _ ->
   begin
     Acc.add buf " implements (";
-    Acc.add buf (String.concat " "
-      (List.map Hhbc_id.Class.to_raw_string class_implements));
+    Acc.add buf (String.concat ~sep:" "
+      (List.map ~f:Hhbc_id.Class.to_raw_string class_implements));
     Acc.add buf ")";
   end
 
@@ -1607,7 +1607,7 @@ let property_attributes p =
   let attrs = if P.is_public p then "public" :: attrs else attrs in
   let attrs = if P.is_protected p then "protected" :: attrs else attrs in
   let attrs = if P.is_private p then "private" :: attrs else attrs in
-  let text = String.concat " " attrs in
+  let text = String.concat ~sep:" " attrs in
   let text = if text = "" then "" else "[" ^ text ^ "] " in
   text
 
@@ -1686,8 +1686,8 @@ let add_enum_ty buf c =
 
 let add_use_precedence buf (id1, id2, ids) =
   let name = id1 ^ "::" ^ id2 in
-  let unique_ids = List.fold_left ULS.add ULS.empty ids in
-  let ids = String.concat " " @@ ULS.items unique_ids in
+  let unique_ids = List.fold_left ~f:ULS.add ~init:ULS.empty ids in
+  let ids = String.concat ~sep:" " @@ ULS.items unique_ids in
   Acc.add buf @@ Printf.sprintf "\n    %s insteadof %s;" name ids
 
 let add_use_alias buf (ido1, id, ido2, kindl) =
@@ -1697,7 +1697,7 @@ let add_use_alias buf (ido1, id, ido2, kindl) =
   let kind =
     match kindl with
     | [] -> None
-    | x -> Some ("[" ^ (String.concat " " @@ List.map Ast.string_of_kind x ) ^ "]")
+    | x -> Some ("[" ^ (String.concat ~sep:" " @@ List.map ~f:Ast.string_of_kind x ) ^ "]")
   in
   let rest = Option.merge kind ido2 ~f:(fun x y -> x ^ " " ^ y) in
   let rest = Option.value ~default:"" rest in
@@ -1710,16 +1710,16 @@ let add_uses buf c =
   if use_l = [] then () else
     begin
       let unique_ids =
-        List.fold_left (fun l e -> ULS.add l (Utils.strip_ns e)) ULS.empty use_l
+        List.fold_left ~f:(fun l e -> ULS.add l (Utils.strip_ns e)) ~init:ULS.empty use_l
       in
-      let use_l = String.concat " " @@ ULS.items unique_ids in
+      let use_l = String.concat ~sep:" " @@ ULS.items unique_ids in
       Acc.add buf @@ Printf.sprintf "\n  .use %s" use_l;
       if use_alias_list = [] && use_precedence_list = []
       then Acc.add buf ";" else
       begin
         Acc.add buf " {";
-        List.iter (add_use_precedence buf) use_precedence_list;
-        List.iter (add_use_alias buf) use_alias_list;
+        List.iter ~f:(add_use_precedence buf) use_precedence_list;
+        List.iter ~f:(add_use_alias buf) use_alias_list;
         Acc.add buf "\n  }";
       end
     end
@@ -1738,11 +1738,11 @@ let add_class_def buf class_def =
   add_doc buf 2 (Hhas_class.doc_comment class_def);
   add_uses buf class_def;
   add_enum_ty buf class_def;
-  List.iter (add_requirement buf) (Hhas_class.requirements class_def);
-  List.iter (add_constant buf) (Hhas_class.constants class_def);
-  List.iter (add_type_constant buf) (Hhas_class.type_constants class_def);
-  List.iter (add_property class_def buf) (Hhas_class.properties class_def);
-  List.iter (add_method_def buf) (Hhas_class.methods class_def);
+  List.iter ~f:(add_requirement buf) (Hhas_class.requirements class_def);
+  List.iter ~f:(add_constant buf) (Hhas_class.constants class_def);
+  List.iter ~f:(add_type_constant buf) (Hhas_class.type_constants class_def);
+  List.iter ~f:(add_property class_def buf) (Hhas_class.properties class_def);
+  List.iter ~f:(add_method_def buf) (Hhas_class.methods class_def);
   (* TODO: other members *)
   Acc.add buf "\n}\n"
 
@@ -1754,7 +1754,7 @@ let add_data_region_element buf argument =
   Acc.add buf "\"\"\";\n"
 
 let add_data_region buf adata =
-  List.iter (add_data_region_element buf) adata;
+  List.iter ~f:(add_data_region_element buf) adata;
   Acc.add buf "\n"
 
 let add_top_level buf body =
@@ -1843,9 +1843,9 @@ let add_program_content ?path dump_symbol_refs buf hhas_prog =
   let symbol_refs = Hhas_program.symbol_refs hhas_prog in
   add_data_region buf adata;
   add_top_level buf top_level_body;
-  List.iter (add_fun_def buf) functions;
-  List.iter (add_class_def buf) classes;
-  List.iter (add_typedef buf) (Hhas_program.typedefs hhas_prog);
+  List.iter ~f:(add_fun_def buf) functions;
+  List.iter ~f:(add_class_def buf) classes;
+  List.iter ~f:(add_typedef buf) (Hhas_program.typedefs hhas_prog);
   if dump_symbol_refs then begin
     let opts = !Hhbc_options.compiler_options in
     add_include_region ?path buf symbol_refs.Hhas_symbol_refs.includes
@@ -1880,4 +1880,4 @@ let to_segments ?path ?(dump_symbol_refs=false) hhas_prog =
   Acc.segments buf
 
 let to_string ?path ?dump_symbol_refs =
-  Fn.compose (String.concat "") (to_segments ?path ?dump_symbol_refs)
+  Fn.compose (String.concat ~sep:"") (to_segments ?path ?dump_symbol_refs)

@@ -10,7 +10,7 @@
 open Instruction_sequence
 open Hhbc_ast
 open Hhbc_string_utils
-open Hh_core
+open Core_kernel
 module A = Ast
 module SN = Naming_special_names
 module SU = Hhbc_string_utils
@@ -65,8 +65,8 @@ let valid_tc_for_prop tc =
   | Some name ->
      not (is_self name) &&
      not (is_parent name) &&
-     not (String.lowercase_ascii name = "callable") &&
-     not (String.lowercase_ascii name = "hh\\noreturn")
+     not (String.lowercase name = "callable") &&
+     not (String.lowercase name = "hh\\noreturn")
 
 let from_ast
     ast_class
@@ -86,12 +86,12 @@ let from_ast
     Hhas_attribute.has_const attributes in
   let is_lsb = Hhas_attribute.has_lsb attributes in
   let is_late_init = Hhas_attribute.has_late_init attributes in
-  let is_private = Hh_core.List.mem cv_kind_list Ast.Private in
-  let is_protected = Hh_core.List.mem cv_kind_list Ast.Protected in
+  let is_private = List.mem ~equal:(=) cv_kind_list Ast.Private in
+  let is_protected = List.mem ~equal:(=) cv_kind_list Ast.Protected in
   let is_public =
-    List.mem cv_kind_list Ast.Public
+    List.mem ~equal:(=) cv_kind_list Ast.Public
     || (not is_private && not is_protected) in
-  let is_static = Hh_core.List.mem cv_kind_list Ast.Static in
+  let is_static = List.mem ~equal:(=) cv_kind_list Ast.Static in
   if not is_static
     && ast_class.Ast.c_final
     && ast_class.Ast.c_kind = Ast.Cabstract

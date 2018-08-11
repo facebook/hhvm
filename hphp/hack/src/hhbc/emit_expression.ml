@@ -7,7 +7,7 @@
  *
 *)
 
-open Hh_core
+open Core_kernel
 open Hhbc_ast
 open Instruction_sequence
 open Ast_class_expr
@@ -83,7 +83,7 @@ module InoutLocals = struct
   }
 
   let not_aliased =
-    { first_inout = max_int; last_write = min_int; num_uses = 0; }
+    { first_inout = Int.max_value; last_write = Int.min_value; num_uses = 0; }
 
   let add_inout i r =
     if i < r.first_inout then { r with first_inout = i } else r
@@ -266,7 +266,7 @@ let is_special_function env e args =
   | A.Id (_, s) ->
   begin
     let n = List.length args in
-    match String.lowercase_ascii s with
+    match String.lowercase s with
     | "isset" -> n > 0
     | "__hhas_adata"
     | "empty" -> n = 1
@@ -702,7 +702,7 @@ and emit_cast env pos hint expr =
   let op =
     begin match hint with
     | A.Happly((_, id), []) ->
-      let id = String.lowercase_ascii id in
+      let id = String.lowercase id in
       begin match id with
       | _ when id = SN.Typehints.int
             || id = SN.Typehints.integer -> instr (IOp CastInt)
@@ -1067,7 +1067,7 @@ and emit_lambda env fundef ids =
   ]
 
 and emit_id env (p, s as id) =
-  let s = String.uppercase_ascii s in
+  let s = String.uppercase s in
   match s with
   | "__FILE__" -> instr (ILitConst File)
   | "__DIR__" -> instr (ILitConst Dir)
@@ -1337,7 +1337,7 @@ and try_inline_gen_call env e =
   if not (can_inline_gen_functions ()) then None
   else match snd e with
   | A.Call ((_, A.Id (_, s)), _, [arg], [])
-    when String.lowercase_ascii (SU.strip_global_ns s) = "gena"->
+    when String.lowercase (SU.strip_global_ns s) = "gena"->
     Some (inline_gena_call env arg)
   | _ ->
     try_inline_genva_call env e GI_expression
@@ -1346,7 +1346,7 @@ and try_inline_genva_call env e inline_context =
   if not (can_inline_gen_functions ()) then None
   else match e with
   | pos, A.Call ((_, A.Id (_, s)), _, args, uargs)
-    when String.lowercase_ascii (SU.strip_global_ns s) = "genva"->
+    when String.lowercase (SU.strip_global_ns s) = "genva"->
     try_inline_genva_call_ env pos args uargs inline_context
   | _ -> None
 
@@ -1444,7 +1444,7 @@ and inline_gena_call env arg = Local.scope @@ fun () ->
 and try_inline_genva_call_ env pos args uargs inline_context =
   let args_count = List.length args in
   let is_valid_list_assignment l =
-    Core_list.findi l ~f:(fun i (_, x) -> i >= args_count && x <> A.Omitted)
+    List.findi l ~f:(fun i (_, x) -> i >= args_count && x <> A.Omitted)
     |> Option.is_none in
   let emit_list_assignment lhs rhs =
     let rec combine lhs rhs =
@@ -1464,7 +1464,7 @@ and try_inline_genva_call_ env pos args uargs inline_context =
           emit_lval_op_list ~last_usage:true env pos (Some rhs) [] lhs in
         aux (lhs_instrs::lhs_acc) (set_instrs::set_acc) tail in
       aux [] [] (if is_ltr then values else List.rev values) in
-    let reify = gather @@ Core_list.map rhs ~f:begin fun l ->
+    let reify = gather @@ List.map rhs ~f:begin fun l ->
       let label_done = Label.next_regular () in
       gather [
         instr_istypel l OpNull;
@@ -1481,7 +1481,7 @@ and try_inline_genva_call_ env pos args uargs inline_context =
       reify;
       gather lhs;
       gather set;
-      gather @@ Core_list.map pairs
+      gather @@ List.map pairs
         ~f:(function (_, A.Omitted), l -> instr_unsetl l | _ -> empty);
     ] in
   match inline_context with
@@ -1498,7 +1498,7 @@ and try_inline_genva_call_ env pos args uargs inline_context =
   | _ ->
   Local.scope @@ begin fun () ->
   let load_args =
-    gather @@ Core_list.map args ~f:begin fun arg ->
+    gather @@ List.map args ~f:begin fun arg ->
       emit_expr ~need_ref:false env arg
     end in
   let reserved_locals =
@@ -1506,7 +1506,7 @@ and try_inline_genva_call_ env pos args uargs inline_context =
   let reserved_locals_reversed =
     List.rev reserved_locals in
   let init_locals =
-    gather @@ Core_list.map reserved_locals_reversed ~f:begin fun l ->
+    gather @@ List.map reserved_locals_reversed ~f:begin fun l ->
       gather [
         instr_setl l;
         instr_popc;
@@ -1521,7 +1521,7 @@ and try_inline_genva_call_ env pos args uargs inline_context =
         ] in
       let process_results =
         let reify ~pop_result =
-          gather @@ Core_list.map reserved_locals ~f:begin fun l ->
+          gather @@ List.map reserved_locals ~f:begin fun l ->
             let label_done = Label.next_regular() in
             gather [
               instr_pushl l;
@@ -1651,18 +1651,18 @@ and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
     fst (emit_obj_get ~need_ref env pos query_op expr prop nullflavor)
 
   | A.Call ((_, A.Id (_, id)), _, exprs, [])
-    when String.lowercase_ascii id = "isset" ->
+    when String.lowercase id = "isset" ->
     emit_box_if_necessary pos need_ref @@ emit_call_isset_exprs env pos exprs
   | A.Call ((_, A.Id (_, id)), _, [expr], [])
-    when String.lowercase_ascii id = "empty" ->
+    when String.lowercase id = "empty" ->
     emit_box_if_necessary pos need_ref @@ emit_call_empty_expr env pos expr
   | A.Call ((_, A.Id (_, id)), _, ([_; _] | [_; _; _] as es), _)
-    when  String.lowercase_ascii id = "idx" && not (jit_enable_rename_function ()) ->
+    when  String.lowercase id = "idx" && not (jit_enable_rename_function ()) ->
     emit_box_if_necessary pos need_ref @@ emit_idx env pos es
   | A.Call ((_, A.Id (_, id)), _, [(_, A.String s); e], _)
-    when String.lowercase_ascii id = "define" && is_global_namespace env ->
+    when String.lowercase id = "define" && is_global_namespace env ->
     emit_box_if_necessary pos need_ref @@ emit_define env pos s e
-  | A.Call ((_, A.Id (_, id)), _, [expr], _) when String.lowercase_ascii id = "eval" ->
+  | A.Call ((_, A.Id (_, id)), _, [expr], _) when String.lowercase id = "eval" ->
     emit_box_if_necessary pos need_ref @@ emit_eval env pos expr
   | A.Call ((_, A.Id (_, "class_alias")), _, es, _)
     when is_global_namespace env ->
@@ -1671,7 +1671,7 @@ and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
   | A.Call ((_, A.Id (_, "get_class")), _, [], _) ->
     emit_box_if_necessary pos need_ref @@ emit_get_class_no_args ()
   | A.Call ((_, A.Id (_, s)), _, es, _)
-    when (String.lowercase_ascii s = "exit" || String.lowercase_ascii s = "die") ->
+    when (String.lowercase s = "exit" || String.lowercase s = "die") ->
     emit_pos_then pos @@
     emit_exit env (List.hd es)
   | A.Call _
@@ -1892,7 +1892,7 @@ and is_struct_init env es allow_numerics =
   && not has_duplicate_keys
   && not has_references
   && num_keys <= limit
-  && num_keys != 0
+  && num_keys <> 0
 
 (* transform_to_collection argument keeps track of
  * what collection to transform to *)
@@ -2898,11 +2898,11 @@ and emit_args_and_call env call_pos args uargs =
   let rec aux i rem_args inout_setters =
     match rem_args with
     | [] ->
-      let use_unpack = (uargs != []) in
+      let use_unpack = uargs <> [] in
       let num_inout = List.length inout_setters in
       let nargs = List.length args in
       let instr_enforce_hint =
-        if throw_on_mismatch && (args != [])
+        if throw_on_mismatch && args <> []
         then instr_fthrow_on_ref_mismatch (List.map args expr_starts_with_ref)
         else empty
       in
@@ -2987,7 +2987,7 @@ and emit_args_and_call env call_pos args uargs =
           emit_expr_as_ref env expr;
         | _ ->
           let instrs, flavor = emit_flavored_expr env ~last_pos:call_pos expr in
-          if flavor != Flavor.ReturnVal then instrs else
+          if flavor <> Flavor.ReturnVal then instrs else
           gather [
             instrs;
             emit_pos param_pos;
@@ -3238,7 +3238,7 @@ and emit_special_function env pos id args uargs default =
   (* Make sure that we do not treat a special function that is aliased as not
    * aliased *)
   let lower_fq_name =
-    String.lowercase_ascii (Hhbc_id.Function.to_raw_string fq_id) in
+    String.lowercase (Hhbc_id.Function.to_raw_string fq_id) in
   let hh_enabled = Emit_env.is_hh_syntax_enabled () in
   match lower_fq_name, args with
   | id, _ when id = SN.SpecialFunctions.echo ->
@@ -3254,7 +3254,7 @@ and emit_special_function env pos id args uargs default =
   | "array_slice", [
     _, A.Call ((_, A.Id (_, s)), _, [], []); (_, A.Int _ as count)
     ] when not (jit_enable_rename_function ())
-           && String.lowercase_ascii @@ SU.strip_ns s = "func_get_args"->
+           && String.lowercase @@ SU.strip_ns s = "func_get_args"->
     let p = Pos.none in
     Some (emit_call env pos (p,
         A.Id (p, "\\__SystemLib\\func_slice_args")) [count] [])
@@ -3476,7 +3476,7 @@ and emit_array_get_fixed last_usage local indices =
 
 and can_use_as_rhs_in_list_assignment expr =
   match expr with
-  | A.Call ((_, A.Id (_, s)), _, _, _) when String.lowercase_ascii s = "echo" ->
+  | A.Call ((_, A.Id (_, s)), _, _, _) when String.lowercase s = "echo" ->
     false
   | A.Lvar _
   | A.Dollar _
@@ -3529,13 +3529,13 @@ and emit_lval_op_list ?(last_usage=false) env outer_pos local indices expr =
         if is_ltr
         then
           exprs
-          |> Core_list.foldi ~init:None
+          |> List.foldi ~init:None
             ~f:(fun i acc (_, v) -> if v = A.Omitted then acc else Some i)
         (* in right-to-left case result list will be reversed
            so we need to find first non-omitted expression *)
         else
           exprs
-          |> Core_list.findi ~f:(fun _ (_, v) -> v <> A.Omitted)
+          |> List.findi ~f:(fun _ (_, v) -> v <> A.Omitted)
           |> Option.map ~f:fst
       end
       else None in

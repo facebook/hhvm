@@ -7,12 +7,12 @@
  *
 *)
 
+open Core_kernel
 module Acc = Mutable_accumulator
 module SU = Hhbc_string_utils
 module TV = Typed_value
 module TVMap = Typed_value.TVMap
 open Hhbc_ast
-open Hh_core
 
 let hack_arr_dv_arrs () =
   Hhbc_options.hack_arr_dv_arrs !Hhbc_options.compiler_options
@@ -33,7 +33,7 @@ let adata_mapped_argument_to_buffer b col_type pairs f =
   let num = List.length pairs in
   Printf.sprintf "%s:%d:{" col_type num
     |> Acc.add b;
-  Core_list.iter pairs ~f:(f b);
+  List.iter pairs ~f:(f b);
   Acc.add b "}"
 
 let rec adata_to_buffer b argument =
@@ -80,7 +80,7 @@ let attribute_to_string a =
     |> Acc.add b;
   List.iter args ~f:(adata_to_buffer b);
   Acc.add b "}\"\"\")";
-  String.concat "" (Acc.segments b)
+  String.concat ~sep:"" (Acc.segments b)
 
 let attributes_to_strings al =
   let al = List.sort
@@ -88,14 +88,14 @@ let attributes_to_strings al =
       (Hhas_attribute.name a2)) al in
   (* Adjust for underscore coming before alphabet *)
   let with_underscores, no_underscores =
-    Hh_core.List.partition_map
+    List.partition_map
       ~f:(fun x ->
         let has_underscore = String_utils.string_starts_with (Hhas_attribute.name x) "__" in
         let str = attribute_to_string x in
         if has_underscore then `Fst str else `Snd str)
       al
   in
-  Core_list.append with_underscores no_underscores
+  List.append with_underscores no_underscores
 
 (* Array identifier map. Maintain list as well, in generated order *)
 let array_identifier_counter = ref 0

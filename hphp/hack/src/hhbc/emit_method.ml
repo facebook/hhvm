@@ -10,7 +10,7 @@
 module SU = Hhbc_string_utils
 module SN = Naming_special_names
 
-open Hh_core
+open Core_kernel
 open Instruction_sequence
 
 let has_valid_access_modifiers kind_list =
@@ -54,7 +54,7 @@ let extract_inout_or_ref_param_locations is_closure_or_func md  =
       ~is_closure_or_func md in
   l
 
-let has_kind m k = List.mem m.Ast.m_kind k
+let has_kind m k = List.mem ~equal:(=) m.Ast.m_kind k
 
 let from_ast_wrapper : bool -> _ ->
   Ast.class_ -> Ast.method_ -> Hhas_method.t list =
@@ -159,7 +159,7 @@ let from_ast_wrapper : bool -> _ ->
       if ast_class.Ast.c_kind = Ast.Cinterface || ast_class.Ast.c_kind = Ast.Ctrait
       then Emit_fatal.raise_fatal_parse pos
         "Constructor parameter promotion not allowed on traits or interfaces";
-      if List.mem ast_method.Ast.m_kind Ast.Abstract
+      if List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Abstract
       then Emit_fatal.raise_fatal_parse pos
         "parameter modifiers not allowed on abstract __construct";
       end
@@ -174,7 +174,7 @@ let from_ast_wrapper : bool -> _ ->
   then Emit_fatal.raise_fatal_parse pos @@
     Printf.sprintf "Method %s::__call() cannot take a variadic argument" class_name;
   let default_dropthrough =
-    if List.mem ast_method.Ast.m_kind Ast.Abstract
+    if List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Abstract
     then Some (Emit_fatal.emit_fatal_runtimeomitframe pos
       ("Cannot call abstract method " ^ class_name
         ^ "::" ^ original_name ^ "()"))

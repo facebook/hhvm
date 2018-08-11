@@ -7,8 +7,8 @@
  *
 *)
 
+open Core_kernel
 open Instruction_sequence
-open Hh_core
 open Emit_memoize_helpers
 open Hhbc_ast
 
@@ -42,7 +42,7 @@ let make_info ast_class class_id ast_methods =
     if ast_class.Ast.c_kind = Ast.Cinterface
     then Emit_fatal.raise_fatal_runtime pos
       "<<__Memoize>> cannot be used in interfaces"
-    else if List.mem ast_method.Ast.m_kind Ast.Abstract
+    else if List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Abstract
     then Emit_fatal.raise_fatal_parse pos
       ("Abstract method " ^ Hhbc_id.Class.to_raw_string class_id ^ "::" ^
       snd ast_method.Ast.m_name ^ " cannot be memoized")
@@ -51,11 +51,11 @@ let make_info ast_class class_id ast_methods =
   let is_trait = ast_class.Ast.c_kind = Ast.Ctrait in
   let class_prefix =
     if is_trait
-    then "$" ^ String.lowercase_ascii (Hhbc_id.Class.to_raw_string class_id)
+    then "$" ^ String.lowercase (Hhbc_id.Class.to_raw_string class_id)
     else "" in
   let instance_count =
     List.count ast_methods (fun ast_method -> is_memoize ast_method &&
-        not (List.mem ast_method.Ast.m_kind Ast.Static)) in
+        not (List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Static)) in
   {
     memoize_is_trait = is_trait;
     memoize_class_prefix = class_prefix;
@@ -216,9 +216,9 @@ let emit ~pos env info return_type_info scope
 
 let emit_memoize_wrapper_body env memoize_info ast_method
                               ~namespace scope deprecation_info params ret =
-    let is_static =List.mem ast_method.Ast.m_kind Ast.Static in
+    let is_static = List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Static in
     let tparams =
-      Hh_core.List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _, _) -> s) in
+      List.map (Ast_scope.Scope.get_tparams scope) ~f:(fun (_, (_, s), _, _) -> s) in
     let return_type_info =
       Emit_body.emit_return_type_info ~scope ~skipawaitable:false ~namespace ret in
     let params =
@@ -236,17 +236,17 @@ let make_memoize_wrapper_method env info ast_class ast_method =
   (* This is cut-and-paste from emit_method above, with special casing for
    * wrappers *)
   let method_is_abstract =
-    List.mem ast_method.Ast.m_kind Ast.Abstract in
-  let method_is_final = List.mem ast_method.Ast.m_kind Ast.Final in
-  let method_is_static = List.mem ast_method.Ast.m_kind Ast.Static in
+    List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Abstract in
+  let method_is_final = List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Final in
+  let method_is_static = List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Static in
   let method_attributes =
     Emit_attribute.from_asts (Emit_env.get_namespace env) ast_method.Ast.m_user_attributes in
   let method_is_private =
-    List.mem ast_method.Ast.m_kind Ast.Private in
+    List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Private in
   let method_is_protected =
-    List.mem ast_method.Ast.m_kind Ast.Protected in
+    List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Protected in
   let method_is_public =
-    List.mem ast_method.Ast.m_kind Ast.Public ||
+    List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Public ||
     (not method_is_private && not method_is_protected) in
   let (_, original_name) = ast_method.Ast.m_name in
   let ret =

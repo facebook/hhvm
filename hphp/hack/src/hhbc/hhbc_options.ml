@@ -7,7 +7,7 @@
  *
 *)
 
-open Hh_core
+open Core_kernel
 
 module J = Hh_json
 
@@ -118,12 +118,12 @@ let enable_perf_logging o = o.option_enable_perf_logging
 let disable_return_by_reference o = o.option_disable_return_by_reference
 let to_string o =
   let dynamic_invokes =
-    String.concat ", " (SSet.elements (dynamic_invoke_functions o)) in
-  let search_paths = String.concat ", " (include_search_paths o) in
+    String.concat ~sep:", " (SSet.elements (dynamic_invoke_functions o)) in
+  let search_paths = String.concat ~sep:", " (include_search_paths o) in
   let inc_roots = SMap.bindings (include_roots o)
     |> List.map ~f:(fun (root, path) -> root ^ ": " ^ path)
-    |> String.concat ", " in
-  String.concat "\n"
+    |> String.concat ~sep:", " in
+  String.concat ~sep:"\n"
     [ Printf.sprintf "enable_hiphop_syntax: %B" @@ enable_hiphop_syntax o
     ; Printf.sprintf "php7_scalar_types: %B" @@ php7_scalar_types o
     ; Printf.sprintf "enable_xhp: %B" @@ enable_xhp o
@@ -169,13 +169,13 @@ let ints_overflow_to_ints options =
   | None -> options.option_enable_hiphop_syntax
 
 let as_bool s =
-  match String.lowercase_ascii s with
+  match String.lowercase s with
   | "0" | "false" -> false
   | "1" | "true"  -> true
   | _             -> raise (Arg.Bad (s ^ " can't be cast to bool"))
 
 let set_option options name value =
-  match String.lowercase_ascii name with
+  match String.lowercase name with
   | "eval.enablehiphopsyntax" ->
     { options with option_enable_hiphop_syntax = as_bool value }
   | "hack.lang.intsoverflowtoints" ->
@@ -322,7 +322,7 @@ let value_setters = [
     fun opts v -> { opts with option_hack_arr_dv_arrs = (v = 1) });
   (set_value "hhvm.dynamic_invoke_functions" get_value_from_config_string_array @@
     fun opts v -> {opts with option_dynamic_invoke_functions =
-        SSet.of_list (List.map v String.lowercase_ascii)});
+        SSet.of_list (List.map v String.lowercase)});
   (set_value "hhvm.repo.authoritative" get_value_from_config_int @@
     fun opts v -> { opts with option_repo_authoritative = (v = 1) });
   (set_value "hhvm.jit_enable_rename_function" get_value_from_config_int @@

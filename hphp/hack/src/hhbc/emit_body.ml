@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
 *)
-open Hh_core
+open Core_kernel
 open Hhbc_ast
 open Instruction_sequence
 module SU = Hhbc_string_utils
@@ -165,7 +165,7 @@ let make_body_ function_directives_opt body_instrs decl_vars
       check_num_iters num_iters iters_hhas,
       check_num_cls_ref_slots num_cls_ref_slots cls_ref_slots_hhas,
       is_memoize_wrapper || is_memoize_wrapper_hhas,
-      deduplicate @@ Core_list.append static_inits static_inits_hhas
+      deduplicate @@ List.append static_inits static_inits_hhas
     | None -> num_iters, num_cls_ref_slots, is_memoize_wrapper, static_inits in
   Hhas_body.make
     body_instrs
@@ -207,11 +207,11 @@ let prepare_inline_hhas_blocks decl_vars params hhas_blocks =
     let can_use v = not @@ is_param v in
     let locals =
       Instruction_sequence.collect_locals can_use (Hhas_asm.instrs b) in
-    Core_list.append used_vars (Unique_list_string.items locals),
+    List.append used_vars (Unique_list_string.items locals),
     check_num_iters num_iters (Hhas_asm.num_iters b),
     check_num_cls_ref_slots num_cls_ref_slots (Hhas_asm.num_cls_ref_slots b),
     is_memoize || (Hhas_asm.is_memoize_wrapper b),
-    Core_list.append static_init (Hhas_asm.static_inits b) in
+    List.append static_init (Hhas_asm.static_inits b) in
   let decl_vars, num_iters, num_cls_ref_slots, is_memoize, static_init =
     List.fold_left hhas_blocks ~init:(decl_vars, 0, 0, false, []) ~f:combine in
   deduplicate decl_vars,
@@ -262,7 +262,7 @@ let emit_deprecation_warning scope = function
     let error_code = if Emit_env.is_systemlib () then
       8192 (* E_DEPRECATED *) else 16384 (* E_USER_DEPRECATED *)
     in
-    if Int64.to_int sampling_rate <= 0 then empty else
+    if Int64.to_int_exn sampling_rate <= 0 then empty else
     gather [
       trait_instrs;
       instr_string deprecation_string;
@@ -385,7 +385,7 @@ let emit_body
     List.filter vars (fun s -> s <> "$this") in
 
   let move_this vars =
-    if List.mem vars "$this"
+    if List.mem ~equal:(=) vars "$this"
     then remove_this vars @ ["$this"]
     else vars in
 
@@ -427,7 +427,7 @@ let emit_body
           | _ -> []) in
       "$0Closure" ::
       captured_vars @
-      List.filter (move_this decl_vars) (fun v -> not (List.mem captured_vars v))
+      List.filter (move_this decl_vars) (fun v -> not (List.mem ~equal:(=) captured_vars v))
     else
       match scope with
       | _ :: Ast_scope.ScopeItem.Class _ :: _ -> move_this decl_vars

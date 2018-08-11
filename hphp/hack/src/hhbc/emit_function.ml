@@ -7,9 +7,9 @@
  *
 *)
 
+open Core_kernel
 open Instruction_sequence
 module A = Ast
-open Hh_core
 
 (* Given a function definition, emit code, and in the case of <<__Memoize>>,
  * a wrapper function

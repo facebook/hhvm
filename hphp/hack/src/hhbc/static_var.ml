@@ -1,4 +1,4 @@
-open Hh_core
+open Core_kernel
 
 module A = Ast
 

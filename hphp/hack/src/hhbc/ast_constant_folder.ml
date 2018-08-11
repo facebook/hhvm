@@ -12,7 +12,7 @@ module SN = Naming_special_names
 module SU = Hhbc_string_utils
 module TVL = Unique_list_typed_value
 open Ast_class_expr
-open Hh_core
+open Core_kernel
 
 exception NotLiteral
 exception UserDefinedConstant
@@ -56,7 +56,7 @@ either somewhere around here or in the lexer. *)
 let int64_of_octal_opt (s : string) (truncate : bool) : Int64.t option =
   (* If we have a partial result that is strictly larger than this value,
    * then we are in danger of overflowing and should return None *)
-  let limit = Int64.div Int64.max_int (Int64.of_int 8) in
+  let limit = Int64.(/) Caml.Int64.max_int (Int64.of_int 8) in
   let to_int64 c = Int64.of_int @@ int_of_char c - 48 in
   let is_octal_digit ch = '0' <= ch && ch <= '7' in
   let rec loop (idx : int) (acc : Int64.t) =
@@ -65,7 +65,7 @@ let int64_of_octal_opt (s : string) (truncate : bool) : Int64.t option =
      * [(push 0o133 0o7) = 0o1337]
      *)
     let push base digit =
-      Int64.add (Int64.mul base (Int64.of_int 8)) digit in
+      Int64.(+) (Int64.( * ) base (Int64.of_int 8)) digit in
     if idx >= String.length s then
       Some acc
     else if Int64.compare acc limit > 0 then
@@ -83,7 +83,7 @@ let try_type_intlike (s : string) : TV.t option =
   | `Dec ->
     (* Ocaml source: ints.c: parse_sign_and_base treat
        dec form as signed so overflows are properly detected and reported *)
-    Option.map (Int64.of_string_opt s) ~f:(fun v -> TV.Int v)
+    Option.map (Caml.Int64.of_string_opt s) ~f:(fun v -> TV.Int v)
   | `Bin | `Hex -> begin
     (* Ocaml source: ints.c: parse_sign_and_base interprets hex/bin forms as
        unsigned so if the input exceeds Int64.max_int it is converted
@@ -111,7 +111,7 @@ let rec expr_to_typed_value
     | Some v -> v
     | None ->
       if Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options
-      then TV.Int Int64.max_int
+      then TV.Int Caml.Int64.max_int
       else TV.Float (float_of_string_custom s)
   end
   | A.True -> TV.Bool true
@@ -119,8 +119,8 @@ let rec expr_to_typed_value
   | A.Null -> TV.null
   | A.String s -> TV.String s
   | A.Float s -> TV.Float (float_of_string s)
-  | A.Id (_, id) when id = "NAN" -> TV.Float nan
-  | A.Id (_, id) when id = "INF" -> TV.Float infinity
+  | A.Id (_, id) when id = "NAN" -> TV.Float Float.nan
+  | A.Id (_, id) when id = "INF" -> TV.Float Float.infinity
   | A.Call ((_, A.Id (_, "__hhas_adata")), _, [ (_, A.String data) ], [])
     ->
       TV.HhasAdata data
@@ -195,7 +195,7 @@ and class_const_to_typed_value ns cid id =
 and array_to_typed_value ns fields =
   let update_max_index newindex maxindex =
     if Int64.compare newindex maxindex >= 0 then
-      Int64.add newindex Int64.one else maxindex in
+      Int64.(+) newindex Int64.one else maxindex in
   let default key value pairs maxindex =
     let k_tv = key_expr_to_typed_value ns key in
     let maxindex = match k_tv with
@@ -231,7 +231,7 @@ and array_to_typed_value ns fields =
           default key value pairs maxindex
         | A.AFvalue value ->
           (TV.Int maxindex, expr_to_typed_value ns value) :: pairs,
-            Int64.add maxindex Int64.one)
+            Int64.(+) maxindex Int64.one)
   in
   let a = update_duplicates_in_map @@ List.rev pairs in
   TV.Array a
@@ -432,7 +432,7 @@ object (self)
   method! on_Cast env cast_expr hint e =
     let enew = self#on_expr env e in
     let default () =
-      if enew == e
+      if phys_equal enew e
       then cast_expr
       else A.Cast(hint, enew) in
     match expr_to_opt_typed_value env enew with
@@ -446,7 +446,7 @@ object (self)
   method! on_Unop env unop_expr unop e =
     let enew = self#on_expr env e in
     let default () =
-      if enew == e
+      if phys_equal enew e
       then unop_expr
       else A.Unop(unop, enew) in
     match expr_to_opt_typed_value env enew with
@@ -461,7 +461,7 @@ object (self)
     let e1new = self#on_expr env e1 in
     let e2new = self#on_expr env e2 in
     let default () =
-      if e1new == e1 && e2new == e2
+      if phys_equal e1new e1 && phys_equal e2new e2
       then binop_expr
       else (A.Binop(binop, e1new, e2new)) in
     match expr_to_opt_typed_value env e1new,

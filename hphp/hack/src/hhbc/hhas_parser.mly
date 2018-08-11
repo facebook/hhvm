@@ -8,6 +8,7 @@
    *
   *)
 
+open Core_kernel
 open Hhas_parser_actions
 %}
 
@@ -89,7 +90,7 @@ maindecl:
 ;
 numiters:
     | /* empty */ {0}
-    | NUMITERSDIRECTIVE INT SEMI nl {Int64.to_int $2}
+    | NUMITERSDIRECTIVE INT SEMI nl {Int64.to_int_exn $2}
 ;
 datadecl:
     | DATADECLDIRECTIVE ID EQUALS nonclassattribute SEMI nl
@@ -123,11 +124,11 @@ fundecl:
             (isasync $7)
             (isgenerator $7)
             (ispairgenerator $7)
-            (not (List.mem "nontop" attrs))
-            (List.mem "no_injection" attrs)
-            (List.mem "inout_wrapper" attrs)
-            (List.mem "reference" attrs)
-            (List.mem "interceptable" attrs)
+            (not (List.mem ~equal:(=) attrs "nontop"))
+            (List.mem ~equal:(=) attrs "no_injection")
+            (List.mem ~equal:(=) attrs "inout_wrapper")
+            (List.mem ~equal:(=) attrs "reference")
+            (List.mem ~equal:(=) attrs "interceptable")
             false (* is_memoize_impl *)
         }
 ;
@@ -181,7 +182,7 @@ fparams:
     | LPAR param_list RPAR {$2}
 ;
 span:
-    | LPAR INT COMMA INT RPAR { (Int64.to_int $2, Int64.to_int $4) }
+    | LPAR INT COMMA INT RPAR { (Int64.to_int_exn $2, Int64.to_int_exn $4) }
     | /* empty */ { (-1, -1) }
 ;
 param_list:
@@ -205,7 +206,7 @@ is_variadic:
   | DOTDOTDOT {true}
 is_inout:
   | /* empty */ {false}
-  | ID {String.lowercase_ascii $1 = "inout"}
+  | ID {String.lowercase $1 = "inout"}
 param:
     | attributes is_inout is_variadic typeinfooption possibleampersand vname paramdefaultvalueopt
       {Hhas_param.make
@@ -232,16 +233,16 @@ classdecl:
           (snd $5) (*implements*)
           (Hhbc_id.Class.from_raw_string $3)(*name*)
           $4 (*span *)
-          (List.mem "final"     attrs) (*isfinal*)
-          (List.mem "sealed"    attrs) (*sealed*)
-          (List.mem "abstract"  attrs) (*isabstract*)
-          (List.mem "interface" attrs) (*isinterface*)
-          (List.mem "trait"     attrs) (*istrait*)
+          (List.mem attrs ~equal:(=) "final") (*isfinal*)
+          (List.mem attrs ~equal:(=) "sealed") (*sealed*)
+          (List.mem attrs ~equal:(=) "abstract") (*isabstract*)
+          (List.mem attrs ~equal:(=) "interface") (*isinterface*)
+          (List.mem attrs ~equal:(=) "trait") (*istrait*)
           false (*isxhp*)
-          (not (List.mem "nontop" attrs)) (*istop*)
-          (List.mem "is_immutable" attrs) (*is_immutable*)
-          (List.mem "has_immutable" attrs) (*has_immutable*)
-          (List.mem "no_dynamic_props" attrs) (*no_dynamic_props*)
+          (not (List.mem attrs ~equal:(=) "nontop")) (*istop*)
+          (List.mem attrs ~equal:(=) "is_immutable") (*is_immutable*)
+          (List.mem attrs ~equal:(=) "has_immutable") (*has_immutable*)
+          (List.mem attrs ~equal:(=) "no_dynamic_props") (*no_dynamic_props*)
           ((fun (x, _, _) -> x) $8)(*uses*)
           ((fun (_, x, _) -> x) $8)(*use_aliases*)
           ((fun (_, _, x) -> x) $8)(*use_precedences*)
@@ -265,14 +266,14 @@ methoddecl:
     LBRACE nl functionbodywithdirectives RBRACE nl
   {Hhas_method.make
     (fst $2) (* attributes *)
-    (List.mem "protected" (snd $2))
-    (List.mem "public" (snd $2))
-    (List.mem "private" (snd $2))
-    (List.mem "static" (snd $2))
-    (List.mem "final" (snd $2))
-    (List.mem "abstract" (snd $2))
-    (List.mem "no_injection" (snd $2))
-    (List.mem "inout_wrapper" (snd $2))
+    (List.mem ~equal:(=) (snd $2) "protected" )
+    (List.mem ~equal:(=) (snd $2) "public")
+    (List.mem ~equal:(=) (snd $2) "private")
+    (List.mem ~equal:(=) (snd $2) "static")
+    (List.mem ~equal:(=) (snd $2) "final")
+    (List.mem ~equal:(=) (snd $2) "abstract")
+    (List.mem ~equal:(=) (snd $2) "no_injection")
+    (List.mem ~equal:(=) (snd $2) "inout_wrapper")
     (Hhbc_id.Method.from_raw_string $5) (* name *)
     (Hhas_body.make
       (Hhas_asm.instrs $10)
@@ -288,26 +289,26 @@ methoddecl:
       None (* env *)
       )
     $3
-    (List.mem "isAsync" $7)
-    (List.mem "isGenerator" $7)
-    (List.mem "isPairGenerator" $7)
-    (List.mem "isClosureBody" $7)
-    (List.mem "reference" $7)
-    (List.mem "interceptable" $7)
+    (List.mem ~equal:(=) $7 "isAsync")
+    (List.mem ~equal:(=) $7 "isGenerator")
+    (List.mem ~equal:(=) $7 "isPairGenerator")
+    (List.mem ~equal:(=) $7 "isClosureBody")
+    (List.mem ~equal:(=) $7 "reference")
+    (List.mem ~equal:(=) $7 "interceptable")
     false (* is_memoize_impl *)
   }
 ;
 numclsrefslots:
  | /* empty */ {0}
- | NUMCLSREFSLOTSDIRECTIVE INT SEMI nl {Int64.to_int $2}
+ | NUMCLSREFSLOTSDIRECTIVE INT SEMI nl {Int64.to_int_exn $2}
 ;
 srcloc:
  | SRCLOCDIRECTIVE INT COLON INT COMMA INT COLON INT SEMI
    { Hhbc_ast.{
-     line_begin = Int64.to_int $2;
-     col_begin = Int64.to_int $4;
-     line_end = Int64.to_int $6;
-     col_end = Int64.to_int $8 } }
+     line_begin = Int64.to_int_exn $2;
+     col_begin = Int64.to_int_exn $4;
+     line_end = Int64.to_int_exn $6;
+     col_end = Int64.to_int_exn $8 } }
 ;
 
 metadata:
@@ -334,18 +335,18 @@ classproperty:
     let user_attrs, attrs = $2 in
     Hhas_property.make
       user_attrs
-      (List.mem "private" attrs)
-      (List.mem "protected" attrs)
-      (List.mem "public" attrs)
-      (List.mem "static" attrs)
-      (List.mem "deep_init" attrs)
-      (List.mem "is_immutable" attrs)
-      (List.mem "lsb" attrs)
-      (List.mem "no_bad_redeclare" attrs)
-      (List.mem "sys_initial_val" attrs)
-      (List.mem "no_implicit_null" attrs)
-      (List.mem "initial_satisfies_tc" attrs)
-      (List.mem "late_init" attrs)
+      (List.mem ~equal:(=) attrs "private")
+      (List.mem ~equal:(=) attrs "protected")
+      (List.mem ~equal:(=) attrs "public")
+      (List.mem ~equal:(=) attrs "static")
+      (List.mem ~equal:(=) attrs "deep_init")
+      (List.mem ~equal:(=) attrs "is_immutable")
+      (List.mem ~equal:(=) attrs "lsb")
+      (List.mem ~equal:(=) attrs "no_bad_redeclare")
+      (List.mem ~equal:(=) attrs "sys_initial_val")
+      (List.mem ~equal:(=) attrs "no_implicit_null")
+      (List.mem ~equal:(=) attrs "initial_satisfies_tc")
+      (List.mem ~equal:(=) attrs "late_init")
       (Hhbc_id.Prop.from_raw_string $5) (*name *)
       $8 (*initial value *)
       None (* initializer instructions. already been emitted elsewhere *)
@@ -435,11 +436,11 @@ extendsimplements:
            then (Some (Hhbc_id.Class.from_raw_string $2), [])
            else report_error "bad extends implements 1"}
   | ID LPAR idlist RPAR {if $1 = "implements"
-                then (None, List.map Hhbc_id.Class.from_raw_string $3)
+                then (None, List.map ~f:Hhbc_id.Class.from_raw_string $3)
                 else report_error "bad extends implements 2"}
   | ID ID ID LPAR idlist RPAR {if $1="extends" && $3 = "implements"
      then (Some (Hhbc_id.Class.from_raw_string $2),
-        List.map Hhbc_id.Class.from_raw_string $5)
+        List.map ~f:Hhbc_id.Class.from_raw_string $5)
       else report_error "bad extends implements 3"}
 idlist:
   | /* empty */ {[]}
@@ -588,12 +589,12 @@ iarg:
     | LANGLE iterbreaklist RANGLE {IAArglist $2}
     | ID LPAR iarglist RPAR
       {let inner_string_list = List.map
-        (function | IAString s -> s | IAId s -> s| _ -> report_error "bad AssertRATL list") $3 in
-       IAString ($1 ^ "(" ^ String.concat "," inner_string_list ^ ")")}
+        ~f:(function | IAString s -> s | IAId s -> s| _ -> report_error "bad AssertRATL list") $3 in
+       IAString ($1 ^ "(" ^ String.concat ~sep:"," inner_string_list ^ ")")}
     | ID LPAR LBRACK iarglist RBRACK RPAR
       {let inner_string_list = List.map
-        (function | IAString s -> s | IAId s -> s| _ -> report_error "bad AssertRATL list") $4 in
-       IAString ($1 ^ "([" ^ String.concat "," inner_string_list ^ "])")}
+        ~f:(function | IAString s -> s | IAId s -> s| _ -> report_error "bad AssertRATL list") $4 in
+       IAString ($1 ^ "([" ^ String.concat ~sep:"," inner_string_list ^ "])")}
 ;
 iarglist:
     | /* empty */ {[]}
@@ -622,7 +623,7 @@ includesdecl:
           if Filename.is_relative s
           then Hhas_symbol_refs.SearchPathRelative s
           else Hhas_symbol_refs.Absolute s in
-        Hhas_symbol_refs.IncludePathSet.of_list (List.map make_ip path_list)
+        Hhas_symbol_refs.IncludePathSet.of_list (List.map ~f:make_ip path_list)
     }
 ;
 nlidlist:

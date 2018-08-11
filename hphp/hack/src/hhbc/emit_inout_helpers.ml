@@ -7,7 +7,7 @@
  *
 *)
 open Instruction_sequence
-open Hh_core
+open Core_kernel
 
 module H = Hhbc_ast
 
@@ -58,7 +58,7 @@ let extract_method_inout_or_ref_param_locations md ~is_closure_or_func =
 let inout_suffix param_location =
   let param_location = List.map ~f:string_of_int param_location in
   "$"
-  ^ (String.concat ";" param_location)
+  ^ (String.concat ~sep:";" param_location)
   ^ "$inout"
 
 let emit_set_instrs ?(is_last=false) opt_base (index, set_instrs) =

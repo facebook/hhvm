@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Sys_utils
 
 module P = Printf
@@ -198,7 +198,7 @@ let parse_options () =
     if needs_file then
       match !fn_ref with
         | Some fn -> if !mode = CLI then fn else die usage
-        | None    -> if !mode = CLI then die usage else read_line ()
+        | None    -> if !mode = CLI then die usage else Caml.read_line ()
     else
       ""
   in
@@ -234,7 +234,7 @@ let rec dispatch_loop handlers =
   let open Hh_json in
   let open Access in
   let read_message () =
-    let line = read_line () in
+    let line = Caml.read_line () in
     let header = json_of_string line in
     let file = get_field_opt (get_string "file") header in
     let bytes = get_field (get_number_int "bytes") (fun _af -> 0) header in
@@ -242,10 +242,10 @@ let rec dispatch_loop handlers =
     Emit_env.set_is_systemlib @@ Option.value ~default:false is_systemlib;
     let body = Bytes.create bytes in begin
     try
-      really_input stdin body 0 bytes;
+      Caml.really_input Caml.stdin body 0 bytes;
       header, body
     with exc ->
-      fail_daemon file ("Exception reading message body: " ^ (Printexc.to_string exc))
+      fail_daemon file ("Exception reading message body: " ^ (Caml.Printexc.to_string exc))
     end in
   let header, body = read_message () in
   let msg_type = get_field
@@ -267,7 +267,7 @@ let set_stats_if_enabled ~compiler_options =
 let write_stats_if_enabled ~compiler_options =
   if compiler_options.dump_stats then
     match (Stats_container.get_instance ()) with
-    | Some s -> Stats_container.write_out ~out:stderr s
+    | Some s -> Stats_container.write_out ~out:Caml.stderr s
     | None -> ()
 
 let parse_text compiler_options popt fn text =
@@ -328,13 +328,13 @@ let add_to_time_ref r t0 =
   t
 
 let print_debug_time_info filename debug_time =
-  let stat = Gc.stat () in
+  let stat = Caml.Gc.stat () in
   (P.eprintf "File %s:\n" (Relative_path.to_absolute filename);
   P.eprintf "Parsing: %0.3f s\n" !(debug_time.parsing_t);
   P.eprintf "Codegen: %0.3f s\n" !(debug_time.codegen_t);
   P.eprintf "Printing: %0.3f s\n" !(debug_time.printing_t);
-  P.eprintf "MinorWords: %0.3f\n" stat.Gc.minor_words;
-  P.eprintf "PromotedWords: %0.3f\n" stat.Gc.promoted_words)
+  P.eprintf "MinorWords: %0.3f\n" stat.Caml.Gc.minor_words;
+  P.eprintf "PromotedWords: %0.3f\n" stat.Caml.Gc.promoted_words)
 
 let mode_to_string = function
   | CLI -> "CLI"
@@ -352,7 +352,7 @@ let log_fail compiler_options filename exc =
   Logger.fail
     ~filename:(Relative_path.to_absolute filename)
     ~mode:(mode_to_string compiler_options.mode)
-    ~exc:(Printexc.to_string exc ^ "\n" ^ Printexc.get_backtrace ())
+    ~exc:(Caml.Printexc.to_string exc ^ "\n" ^ Caml.Printexc.get_backtrace ())
 
 let modify_prog_for_debugger_eval ast hhas_prog =
   (* The AST currently always starts with a Markup statement, so a length of 2
@@ -475,7 +475,7 @@ let decl_and_run_mode compiler_options popt =
   let open Access in
 
   let print_and_flush_strings strings =
-    Core_list.iter ~f:(P.printf "%s") strings;
+    List.iter ~f:(P.printf "%s") strings;
     P.printf "%!" in
 
   let set_compiler_options config_json =
@@ -521,7 +521,7 @@ let decl_and_run_mode compiler_options popt =
         let msg = json_to_string @@ JSON_Object
           [ ("type", JSON_String "error")
           ; ("file", JSON_String abs_path)
-          ; ("error", JSON_String (Printexc.to_string exc))
+          ; ("error", JSON_String (Caml.Printexc.to_string exc))
           ] in
         P.printf "%s\n%!" msg in
       let handlers =
@@ -579,7 +579,7 @@ let decl_and_run_mode compiler_options popt =
         then
           P.eprintf "Error in file %s: %s\n"
             (Relative_path.to_absolute filename)
-            (Printexc.to_string exc) in
+            (Caml.Printexc.to_string exc) in
 
       let process_single_file handle_output filename =
         let filename = Relative_path.create Relative_path.Dummy filename in
@@ -591,10 +591,10 @@ let decl_and_run_mode compiler_options popt =
         (* List of source files explicitly given *)
         | Some input_file_list ->
           let get_lines_in_file filename =
-            let inch = open_in filename in
+            let inch = Caml.open_in filename in
             let rec go lines =
-              match input_line inch with
-              | line -> go (String.trim line :: lines)
+              match Caml.input_line inch with
+              | line -> go (Caml.String.trim line :: lines)
               | exception End_of_file -> lines in
             go [] in
           let handle_output _filename output _debug_time =
@@ -614,7 +614,7 @@ let decl_and_run_mode compiler_options popt =
                 | [] -> []
                 | dir :: dirs ->
                   let ds, fs = Sys.readdir dir
-                |> Array.map (Filename.concat dir)
+                |> Array.map ~f:(Filename.concat dir)
                 |> Array.to_list
                 |> List.partition_tf ~f: Sys.is_directory in
                   fs @ go (ds @ dirs) in
@@ -626,7 +626,7 @@ let decl_and_run_mode compiler_options popt =
                 if Sys.file_exists output_file
                 then (
                   if not compiler_options.quiet_mode
-                  then P.fprintf stderr "Output file %s already exists\n" output_file)
+                  then Caml.Printf.fprintf Caml.stderr "Output file %s already exists\n" output_file)
                 else
                   Sys_utils.write_strings_to_file ~file:output_file output
             in files_in_dir, handle_output
@@ -664,10 +664,10 @@ let _ =
        stdout.  The 'text mode' would not hurt the user in general, but
        it breaks the testsuite where the output is compared to the
        expected one (i.e. in given file without CRLF). *)
-      set_binary_mode_out stdout true;
+      Caml.set_binary_mode_out Caml.stdout true;
     let _handle = SharedMem.init GlobalConfig.default_sharedmem_config in
     let options = parse_options () in
     main_hack options
   with exc ->
-    Printexc.get_backtrace () |> prerr_endline;
-    die (Printexc.to_string exc)
+    Caml.Printexc.get_backtrace () |> prerr_endline;
+    die (Caml.Printexc.to_string exc)

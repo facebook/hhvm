@@ -7,7 +7,7 @@
  *
 *)
 
-open Hh_core
+open Core_kernel
 open Emit_expression
 
 let from_attribute_base namespace attribute_id arguments =

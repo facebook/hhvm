@@ -7,7 +7,7 @@
  *
 *)
 
-open Hh_core
+open Core_kernel
 open Hhbc_string_utils
 
 module A = Ast
@@ -23,7 +23,7 @@ type type_hint_kind =
 
 let fmt_name_or_prim ~tparams ~namespace x =
   let name = snd x in
-  if List.mem tparams name || is_self name || is_parent name
+  if List.mem ~equal:(=) tparams name || is_self name || is_parent name
   then name
   else
     let needs_unmangling = Xhp.is_xhp (strip_ns name) in
@@ -55,7 +55,7 @@ let rec fmt_hint ~tparams ~namespace ?(strip_tparams=false) (_, h) =
 
   | A.Haccess (h1, h2, accesses) ->
     fmt_name_or_prim ~tparams ~namespace h1 ^ "::" ^
-      String.concat "::" (List.map (h2::accesses) snd)
+      String.concat ~sep:"::" (List.map (h2::accesses) snd)
 
   (* Follow HHVM order: soft -> option *)
   | A.Hoption (_, A.Hsoft t) -> "@?" ^ fmt_hint ~tparams ~namespace t
@@ -77,10 +77,10 @@ let rec fmt_hint ~tparams ~namespace ?(strip_tparams=false) (_, h) =
     let shape_fields =
       List.map ~f:format_shape_field si_shape_field_list in
     prefix_namespace "HH" "shape(" ^
-      String.concat ", " shape_fields ^ ")"
+      String.concat ~sep:", " shape_fields ^ ")"
 
 and fmt_hints ~tparams ~namespace hints =
-  String.concat ", " (List.map hints (fmt_hint ~tparams ~namespace))
+  String.concat ~sep:", " (List.map hints (fmt_hint ~tparams ~namespace))
 
 let can_be_nullable h =
   not (Emit_env.is_hh_syntax_enabled ())
@@ -110,7 +110,7 @@ let rec hint_to_type_constraint
     then TC.make None []
     else TC.make (Some "mixed") []
 
-  | A.Happly ((_, s), []) when String.lowercase_ascii s = "void" && kind <> TypeDef ->
+  | A.Happly ((_, s), []) when String.lowercase s = "void" && kind <> TypeDef ->
     if Emit_env.is_hh_syntax_enabled ()
     || Hhbc_options.php7_scalar_types !Hhbc_options.compiler_options
     then TC.make None []
@@ -146,7 +146,7 @@ let rec hint_to_type_constraint
 
   (* Need to differentiate between type params and classes *)
   | A.Happly ((pos,name) as id, _) ->
-    if List.mem tparams name then
+    if List.mem ~equal:(=) tparams name then
       let tc_name = Some "" in
       let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeVar] in
       TC.make tc_name tc_flags
@@ -192,11 +192,11 @@ and make_tc_with_flags_if_non_empty_flags
   match tc_name, tc_flags with
   | None, [] -> tc
   | _ ->
-  let tc_flags = List.dedup (flags @ tc_flags) in
+  let tc_flags = List.stable_dedup (flags @ tc_flags) in
   TC.make tc_name tc_flags
 
 let add_nullable ~nullable flags =
-  if nullable then List.dedup (TC.Nullable :: flags) else flags
+  if nullable then List.stable_dedup (TC.Nullable :: flags) else flags
 
 let try_add_nullable ~nullable h flags =
   add_nullable ~nullable:(nullable && can_be_nullable h) flags
@@ -216,7 +216,7 @@ let param_hint_to_type_info
     | A.Happly ((_, "dynamic"), [])
     | A.Happly ((_, "nonnull"), [])
     | A.Happly ((_, "mixed"), []) -> false
-    | A.Happly ((_, id), _) when List.mem tparams id -> false
+    | A.Happly ((_, id), _) when List.mem ~equal:(=) tparams id -> false
     | _ -> true
   in
   let tc = hint_to_type_constraint ~kind ~tparams ~skipawaitable ~namespace h in
@@ -272,7 +272,7 @@ let hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams ~namespace h =
     let tc_flags = TC.flags tc in
     let tc_flags =
       if (kind = Return || kind = Property) && tc_name <> None
-      then List.dedup (TC.ExtendedHint :: tc_flags)
+      then List.stable_dedup (TC.ExtendedHint :: tc_flags)
       else tc_flags in
     let tc_flags =
       if kind = TypeDef then add_nullable ~nullable tc_flags
@@ -306,7 +306,7 @@ let emit_type_constraint_for_native_function tparams ret ti =
         | A.Hoption x -> TC.Nullable :: (get_flags x flags)
         | A.Hsoft x -> TC.Soft :: (get_flags x flags)
         | A.Haccess _ -> TC.TypeConstant :: flags
-        | A.Happly ((_, name), _) when List.mem tparams name ->
+        | A.Happly ((_, name), _) when List.mem ~equal:(=) tparams name ->
           TC.TypeVar :: flags
         | _ -> flags
       in

@@ -7,6 +7,8 @@
  *
 *)
 
+open Core_kernel
+
 module A = Ast
 module SN = Naming_special_names
 module SU = Hhbc_string_utils

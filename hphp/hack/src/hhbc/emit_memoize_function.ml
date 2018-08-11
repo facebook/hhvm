@@ -7,8 +7,8 @@
  *
 *)
 
+open Core_kernel
 open Instruction_sequence
-open Hh_core
 open Emit_memoize_helpers
 
 let make_memoize_function_no_params_code

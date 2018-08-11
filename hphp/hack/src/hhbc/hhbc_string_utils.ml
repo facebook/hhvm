@@ -6,6 +6,8 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
 *)
+open Core_kernel
+
 module SN = Naming_special_names
 
 let quote_string s = "\"" ^ Php_escaping.escape s ^ "\""
@@ -34,7 +36,7 @@ let strip_type_list =
 let cmp ?(case_sensitive=true) ?(ignore_ns=false) s1 s2 =
   let s1, s2 =
     if case_sensitive then s1, s2 else
-    String.lowercase_ascii s1, String.lowercase_ascii s2
+    String.lowercase s1, String.lowercase s2
   in
   let s1, s2 =
     if not ignore_ns then s1, s2 else
@@ -43,19 +45,19 @@ let cmp ?(case_sensitive=true) ?(ignore_ns=false) s1 s2 =
   s1 = s2
 
 let is_self s =
-  String.lowercase_ascii s = SN.Classes.cSelf
+  String.lowercase s = SN.Classes.cSelf
 
 let is_parent s =
-  String.lowercase_ascii s = SN.Classes.cParent
+  String.lowercase s = SN.Classes.cParent
 
 let is_static s =
-  String.lowercase_ascii s = SN.Classes.cStatic
+  String.lowercase s = SN.Classes.cStatic
 
 let is_class s =
-  String.lowercase_ascii s = SN.Members.mClass
+  String.lowercase s = SN.Members.mClass
 
 module Types = struct
-  let fix_casing s = match String.lowercase_ascii s with
+  let fix_casing s = match String.lowercase s with
     | "vector" -> "Vector"
     | "immvector" -> "ImmVector"
     | "set" -> "Set"
@@ -212,7 +214,7 @@ module Xhp = struct
       match List.rev (Str.split_delim rx s) with
       | [] -> ""
       | id::rest ->
-        String.concat "\\" (List.rev (mangle_id_worker id :: rest))
+        String.concat ~sep:"\\" (List.rev (mangle_id_worker id :: rest))
 
   let unmangle_id_worker =
     let rx_dunder = Str.regexp "__" in
@@ -234,6 +236,6 @@ module Xhp = struct
       match List.rev (Str.split_delim rx s) with
       | [] -> ""
       | id::rest ->
-        String.concat "\\" (List.rev (unmangle_id_worker id :: rest))
+        String.concat ~sep:"\\" (List.rev (unmangle_id_worker id :: rest))
 
 end

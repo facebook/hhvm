@@ -7,6 +7,8 @@
  *
 *)
 
+open Core_kernel
+
 module SU = Hhbc_string_utils
 
 (* We introduce a type for Hack/PHP values, mimicking what happens at runtime.
@@ -65,7 +67,7 @@ module StringOps = struct
 
   let bitwise_not s =
     let result = Bytes.create (String.length s) in
-    String.iteri (fun i c ->
+    Caml.String.iteri (fun i c ->
       (* keep only last byte *)
       let b = lnot (int_of_char c) land 0xFF in
       Bytes.set result i (char_of_int b);
@@ -110,8 +112,8 @@ let string_to_int_opt ~allow_following ~allow_inf s =
       else
         try
           let s = float_of_string s in
-          if not allow_inf && (s = infinity || s = neg_infinity) then None else
-          Some (Int64.of_float s)
+          if not allow_inf && (s = Float.infinity || s = Float.neg_infinity)
+          then None else Some (Int64.of_float s)
         with _ -> None
     end
   | x -> x
@@ -142,7 +144,7 @@ let to_int v =
     end
   | Int i -> Some i
   | Float f ->
-    let fpClass = classify_float f in
+    let fpClass = Float.classify f in
     begin match fpClass with
       (* Here's a handy dandy chart of all possible values based on language
        * | float | PHP 5   | HHVM    | PHP 7
@@ -156,16 +158,16 @@ let to_int v =
        * For PHP7, the value is always 0
        * Thus if the float is infinity OR we're in PHP7, set it to 0
        *)
-      | FP_nan
-      | FP_infinite ->
-        if f = infinity || php7_int_semantics () then
-        Some Int64.zero else Some Int64.min_int
+      | Float.Class.Nan
+      | Float.Class.Infinite ->
+        if f = Float.infinity || php7_int_semantics () then
+        Some Int64.zero else Some Caml.Int64.min_int
       | _ ->
       (* mimic double-to-int64.h *)
       let cast v = try Some (Int64.of_float v) with Failure _ -> None in
       if f >= 0.0 then
       begin
-        if f < Int64.to_float Int64.max_int
+        if f < Int64.to_float Caml.Int64.max_int
         then cast f
         else Some 0L
       end
@@ -215,18 +217,18 @@ let ints_overflow_to_ints () =
  * overflow-to-float semantics *)
 let add_int i1 i2 =
   if ints_overflow_to_ints ()
-  then Some (Int (Int64.add i1 i2))
+  then Some (Int (Int64.(+) i1 i2))
   else None
 
 let neg i =
   match i with
-  | Int i -> Some (Int (Int64.sub 0L i))
+  | Int i -> Some (Int (Int64.neg i))
   | Float f -> Some (Float (0.0 -. f))
   | _ -> None
 
 let sub_int i1 i2 =
   if ints_overflow_to_ints ()
-  then Some (Int (Int64.sub i1 i2))
+  then Some (Int (Int64.(-) i1 i2))
   else None
 
 (* Arithmetic. For now, only on pure integer or float operands *)
@@ -238,7 +240,7 @@ let sub v1 v2 =
 
 let mul_int i1 i2 =
   if ints_overflow_to_ints ()
-  then Some (Int (Int64.mul i1 i2))
+  then Some (Int (Int64.( * ) i1 i2))
   else None
 
 (* Arithmetic. For now, only on pure integer or float operands *)
@@ -254,7 +256,7 @@ let mul v1 v2 =
 let div v1 v2 =
   match v1, v2 with
   | Int i1, Int i2 when i2 <> 0L ->
-    if Int64.rem i1 i2 = 0L then Some (Int (Int64.div i1 i2))
+    if Int64.rem i1 i2 = 0L then Some (Int (Int64.(/) i1 i2))
     else Some (Float (Int64.to_float i1 /. Int64.to_float i2))
   | Float f1, Float f2 when f2 <> 0.0 -> Some (Float (f1 /. f2))
   | Int i1, Float f2 when f2 <> 0.0 -> Some (Float ((Int64.to_float i1) /. f2))
@@ -274,7 +276,7 @@ let shift_left v1 v2 =
   match v1, v2 with
   | Int i1, Int i2 when i2 >= 0L && (i2 < 64L || not @@ php7_int_semantics()) ->
     begin try
-      let v = Int64.to_int i2 in
+      let v = Int64.to_int_exn i2 in
       Some (Int (Int64.shift_left i1 v))
     with _ -> None
     end
@@ -283,7 +285,7 @@ let shift_left v1 v2 =
 (* Arithmetic. For now, only on pure integer operands *)
 let bitwise_or v1 v2 =
   match v1, v2 with
-  | Int i1, Int i2 -> Some (Int (Int64.logor i1 i2))
+  | Int i1, Int i2 -> Some (Int (Int64.(lor) i1 i2))
   | _ -> None
 
 (* String concatenation *)
@@ -295,7 +297,7 @@ let concat v1 v2 =
 (* Bitwise operations. *)
 let bitwise_not v =
   match v with
-  | Int i -> Some (Int (Int64.lognot i))
+  | Int i -> Some (Int (Int64.lnot i))
   | String s -> Some (String (StringOps.bitwise_not s))
   | _ -> None
 

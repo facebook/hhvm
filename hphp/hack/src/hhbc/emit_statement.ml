@@ -7,7 +7,7 @@
  *
 *)
 
-open Hh_core
+open Core_kernel
 open Hhbc_ast
 open Instruction_sequence
 open Emit_expression
@@ -136,7 +136,7 @@ let rec emit_stmt env (pos, st_) =
       emit_return ~need_ref:false env;
     ]
   | A.Expr (_, A.Call ((_, A.Id (_, s)), _, exprl, []))
-    when String.lowercase_ascii s = "unset" ->
+    when String.lowercase s = "unset" ->
     gather (List.map exprl (emit_unset_expr env))
   | A.Return (Some (inner_pos, A.Await e)) ->
     gather [
@@ -384,7 +384,7 @@ and emit_global_vars env p es =
   let _, instrs = List.fold es ~init:([], [])
     ~f:begin fun (seen, instrs)  e ->
       match snd e with
-      | A.Id (_, name) when List.mem seen name ->
+      | A.Id (_, name) when List.mem ~equal:(=) seen name ->
         seen, instrs
       | A.Id (_, name) ->
         name::seen, (emit_global_var e)::instrs

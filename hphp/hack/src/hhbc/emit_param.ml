@@ -7,7 +7,7 @@
  *
 *)
 
-open Hh_core
+open Core_kernel
 open Instruction_sequence
 open Ast_class_expr
 module A = Ast

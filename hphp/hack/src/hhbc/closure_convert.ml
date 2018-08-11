@@ -7,9 +7,10 @@
  *
  *)
 
-open Hh_core
 open Ast
 open Ast_scope
+open Core_kernel
+open Common
 
 module ULS = Unique_list_string
 module SN = Naming_special_names
@@ -486,7 +487,7 @@ let inline_class_name_if_possible env ~trait ~fallback_to_empty_string p pe =
  * literal strings. It's necessary to do this before closure conversion
  * because the enclosing class will be changed. *)
 let convert_id (env:env) p (pid, str as id) =
-  let str = String.uppercase_ascii str in
+  let str = String.uppercase str in
   let return newstr = (p, String newstr) in
   match str with
   | "__CLASS__" | "__TRAIT__"->
@@ -511,7 +512,7 @@ let convert_id (env:env) p (pid, str as id) =
       if not is_trait then env.scope
       (* for lambdas nested in trait methods HHVM replaces __METHOD__
          with enclosing method name - do the same and bubble up from lambdas *)
-      else Core_list.drop_while env.scope ~f:(function
+      else List.drop_while env.scope ~f:(function
         | ScopeItem.Lambda | ScopeItem.LongLambda _ -> true
         | _ -> false) in
     begin match scope with
@@ -617,14 +618,14 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, el3 = convert_exprs env st el3 in
     st, (p, Call(e, el1, el2, el3))
   | Call ((_, Id (_, id)), _, es, _)
-    when String.lowercase_ascii id = "tuple" &&
+    when String.lowercase id = "tuple" &&
       Emit_env.is_hh_syntax_enabled () ->
     convert_expr env st (p, Varray es)
   | Call (e, el1, el2, el3) ->
     let st =
       begin match snd e, el2 with
       | Id (_, s), [_, String arg] when
-        String.lowercase_ascii @@ SU.strip_global_ns s = "hh\\asm"->
+        String.lowercase @@ SU.strip_global_ns s = "hh\\asm"->
         set_inline_hhas st arg
       | _ -> st
       end in
@@ -806,7 +807,8 @@ and convert_lambda env st p fd use_vars_opt =
   let st, block, function_state = convert_function_like_body env st fd.f_body in
   let st = { st with closure_cnt_per_fun = st.closure_cnt_per_fun + 1 } in
   (* HHVM lists lambda vars in descending order - do the same *)
-  let lambda_vars = List.sort ~cmp:(fun a b -> compare b a) @@ ULS.items st.captured_vars in
+  let lambda_vars =
+    List.sort ~compare:(fun a b -> compare b a) @@ ULS.items st.captured_vars in
   (* For lambdas without explicit `use` variables, we ignore the computed
    * capture set and instead use the explicit set *)
   let lambda_vars, use_vars =
@@ -833,7 +835,7 @@ and convert_lambda env st p fd use_vars_opt =
       is_static || is_scope_static scope
     | ScopeItem.Function _ :: _ -> false
     | ScopeItem.Method md :: _ ->
-      List.mem md.m_kind Static
+      List.mem ~equal:(=) md.m_kind Static
     | ScopeItem.Lambda :: scope ->
       is_scope_static scope
     | _ -> false in

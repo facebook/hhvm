@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
 *)
-open Hh_core
+open Core_kernel
 
 module ULS = Unique_list_string
 module SN = Naming_special_names
@@ -190,7 +190,7 @@ class declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body
     let acc =
       match e with
       | (_, Ast.Id (_, s))
-        when SSet.mem (String.lowercase_ascii s) dynamic_functions ->
+        when SSet.mem (String.lowercase s) dynamic_functions ->
         with_dynamic_var_access acc
       | _ -> acc in
     let barethis =

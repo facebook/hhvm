@@ -229,7 +229,7 @@ Vreg getLSBMemoHandle(
   v << load{extra[Class::lsbMemoExtraHandlesOffset()], handles};
 
   /* Pre-compute the slot */
-  auto const slot = func->baseCls()->lsbMemoSlot(func, forValue);
+  auto const slot = func->cls()->lsbMemoSlot(func, forValue);
 
   // Grab the handle
   auto const handle = v.makeReg();

@@ -987,13 +987,14 @@ bool ObjectData::equal(const ObjectData& other) const {
     return DateTimeData::compare(this, &other) == 0;
   }
   if (getVMClass() != other.getVMClass()) return false;
-  if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass))) {
+  if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass)) ||
+      UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
     // Compare the whole object, not just the array representation
     auto ar1 = Array::Create();
     auto ar2 = Array::Create();
     o_getArray(ar1);
     other.o_getArray(ar2);
-    return ar1->equal(ar2.get(), false);
+    return ArrayData::Equal(ar1.get(), ar2.get());
   }
   if (UNLIKELY(instanceof(c_Closure::classof()))) {
     // First comparison already proves they are different
@@ -1011,11 +1012,20 @@ bool ObjectData::less(const ObjectData& other) const {
                other.instanceof(SystemLib::s_DateTimeInterfaceClass))) {
     return DateTimeData::compare(this, &other) == -1;
   }
+  if (getVMClass() != other.getVMClass()) return false;
+  if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass)) ||
+      UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
+    // Compare the whole object, not just the array representation
+    auto ar1 = Array::Create();
+    auto ar2 = Array::Create();
+    o_getArray(ar1);
+    other.o_getArray(ar2);
+    return ArrayData::Lt(ar1.get(), ar2.get());
+  }
   if (UNLIKELY(instanceof(c_Closure::classof()))) {
-    // First comparison already proves they are different
+    // comparing different closures with < always returns false
     return false;
   }
-  if (getVMClass() != other.getVMClass()) return false;
   return toArray().less(other.toArray());
 }
 
@@ -1028,11 +1038,20 @@ bool ObjectData::more(const ObjectData& other) const {
                other.instanceof(SystemLib::s_DateTimeInterfaceClass))) {
     return DateTimeData::compare(this, &other) == 1;
   }
+  if (getVMClass() != other.getVMClass()) return false;
+  if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass)) ||
+      UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
+    // Compare the whole object, not just the array representation
+    auto ar1 = Array::Create();
+    auto ar2 = Array::Create();
+    o_getArray(ar1);
+    other.o_getArray(ar2);
+    return ArrayData::Gt(ar1.get(), ar2.get());
+  }
   if (UNLIKELY(instanceof(c_Closure::classof()))) {
-    // First comparison already proves they are different
+    // comparing different closures with > always returns false
     return false;
   }
-  if (getVMClass() != other.getVMClass()) return false;
   return toArray().more(other.toArray());
 }
 
@@ -1048,11 +1067,20 @@ int64_t ObjectData::compare(const ObjectData& other) const {
     return (t1 < t2) ? -1 : ((t1 > t2) ? 1 : 0);
   }
   // Return 1 for different classes to match PHP7 behavior.
+  if (getVMClass() != other.getVMClass()) return 1;
+  if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass)) ||
+      UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
+    // Compare the whole object, not just the array representation
+    auto ar1 = Array::Create();
+    auto ar2 = Array::Create();
+    o_getArray(ar1);
+    other.o_getArray(ar2);
+    return ArrayData::Compare(ar1.get(), ar2.get());
+  }
   if (UNLIKELY(instanceof(c_Closure::classof()))) {
-    // First comparison already proves they are different
+    // comparing different closures with <=> always returns 1
     return 1;
   }
-  if (getVMClass() != other.getVMClass()) return 1;
   return toArray().compare(other.toArray());
 }
 

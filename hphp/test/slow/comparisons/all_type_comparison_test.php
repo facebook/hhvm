@@ -297,6 +297,36 @@ function test() {
   imagedestroy($f1);
   imagedestroy($f2);
   imagedestroy($f3);
+
+  // also test some pairs that are not interesting to compare in an O(n^2) way
+  // to everything above, but we want to see how they compare to each other
+  $aobj1 = new ArrayObject(array('a' => 'b'));
+  $aobj2 = new ArrayObject(array('a' => 'b')); $aobj2->c = 'd';
+  $aiter1 = new ArrayIterator(array('a' => 'b'));
+  $aiter2 = new ArrayIterator(array('a' => 'b')); $aiter2->c = 'd';
+  $xml1 = simplexml_load_string("<apple />");
+  $xml2 = simplexml_load_string("<pie><apple /></pie>");
+
+  $pairs = array(
+    array(
+      array('k' => 'ArrayObject 1', 'v' => $aobj1),
+      array('k' => 'ArrayObject 2', 'v' => $aobj2),
+    ),
+    array(
+      array('k' => 'ArrayIterator 1', 'v' => $aiter1),
+      array('k' => 'ArrayIterator 2', 'v' => $aiter2),
+    ),
+    array(
+      array('k' => 'SimpleXMLElement 1', 'v' => $xml1),
+      array('k' => 'SimpleXMLElement 2', 'v' => $xml2),
+    ),
+  );
+
+  echo "\nsame    nsame   lt      lte     eq      neq     gte     gt      cmp\n\n";
+  foreach ($pairs as $p) {
+    test_pair($p[0]['k'], $p[0]['v'], $p[1]['k'], $p[1]['v']);
+    test_pair($p[1]['k'], $p[1]['v'], $p[0]['k'], $p[0]['v']);
+  }
 }
 
 test();

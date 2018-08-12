@@ -32258,3 +32258,18 @@ resource f3 cmp resource f2:
 F       T       F       F       F       T       T       T       1
 resource f3 cmp resource f3:
 T       F       F       T       T       F       T       F       0
+
+same    nsame   lt      lte     eq      neq     gte     gt      cmp
+
+ArrayObject 1 cmp ArrayObject 2:
+F       T       T       T       F       T       F       F       -1
+ArrayObject 2 cmp ArrayObject 1:
+F       T       F       F       F       T       T       T       1
+ArrayIterator 1 cmp ArrayIterator 2:
+F       T       T       T       F       T       F       F       -1
+ArrayIterator 2 cmp ArrayIterator 1:
+F       T       F       F       F       T       T       T       1
+SimpleXMLElement 1 cmp SimpleXMLElement 2:
+F       T       T       T       F       T       F       F       -1
+SimpleXMLElement 2 cmp SimpleXMLElement 1:
+F       T       F       F       F       T       T       T       1

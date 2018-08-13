@@ -1762,10 +1762,11 @@ module WithExpressionAndStatementAndTypeParser
     | Trait
     | Class -> parse_classish_declaration parser1 attribute_specification
     | _ ->
-      (* ERROR RECOVERY TODO: Produce an error here. *)
+      (* ERROR RECOVERY: we encountered an unexpected token, raise an error and continue  *)
       (* TODO: This is wrong; we have lost the attribute specification
       from the tree. *)
-      let (parser, token) = Make.token parser2 token in
+      let parser = with_error parser2 (SyntaxError.error1057 (Token.text token)) in
+      let (parser, token) = Make.token parser token in
       Make.error parser token
 
   and parse_declaration parser =

@@ -2,6 +2,7 @@ name: string(1) "a"
 position: int(0)
 canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
+isInOut: bool(false)
 hasType: bool(true)
 getType: object(ReflectionType)#%d (1) {
   ["type_hint_info":"ReflectionType":private]=>
@@ -32,6 +33,7 @@ name: string(1) "b"
 position: int(1)
 canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
+isInOut: bool(false)
 hasType: bool(true)
 getType: object(ReflectionType)#%d (1) {
   ["type_hint_info":"ReflectionType":private]=>
@@ -62,6 +64,7 @@ name: string(1) "c"
 position: int(2)
 canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
+isInOut: bool(false)
 hasType: bool(true)
 getType: object(ReflectionType)#%d (1) {
   ["type_hint_info":"ReflectionType":private]=>
@@ -92,6 +95,7 @@ name: string(1) "d"
 position: int(3)
 canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
+isInOut: bool(false)
 hasType: bool(true)
 getType: object(ReflectionType)#%d (1) {
   ["type_hint_info":"ReflectionType":private]=>
@@ -122,6 +126,7 @@ name: string(1) "e"
 position: int(4)
 canBePassedByValue: bool(false)
 isPassedByReference: bool(true)
+isInOut: bool(false)
 hasType: bool(true)
 getType: object(ReflectionType)#%d (1) {
   ["type_hint_info":"ReflectionType":private]=>
@@ -152,6 +157,7 @@ name: string(1) "f"
 position: int(5)
 canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
+isInOut: bool(false)
 hasType: bool(true)
 getType: object(ReflectionType)#%d (1) {
   ["type_hint_info":"ReflectionType":private]=>
@@ -182,6 +188,7 @@ name: string(1) "g"
 position: int(6)
 canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
+isInOut: bool(false)
 hasType: bool(true)
 getType: object(ReflectionType)#%d (1) {
   ["type_hint_info":"ReflectionType":private]=>
@@ -212,6 +219,7 @@ name: string(6) "noType"
 position: int(7)
 canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
+isInOut: bool(false)
 hasType: bool(false)
 getType: NULL
 type isBuiltin: bool(false)

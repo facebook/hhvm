@@ -12,6 +12,8 @@ foreach ($reflectionFunction->getParameters() as $parameter) {
   var_dump($parameter->canBePassedByValue());
   echo 'isPassedByReference: ';
   var_dump($parameter->isPassedByReference());
+  echo 'isInOut: ';
+  var_dump($parameter->isInOut());
   echo 'hasType: ';
   var_dump($parameter->hasType());
   echo 'getType: ';

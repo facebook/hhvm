@@ -69,6 +69,7 @@ const StaticString
   s_class("class"),
   s_prototype("prototype"),
   s_ref("ref"),
+  s_inout("inout"),
   s_index("index"),
   s_type("type"),
   s_nullable("nullable"),
@@ -802,6 +803,9 @@ static Array get_function_param_info(const Func* func) {
 
     if (func->byRef(i)) {
       param.set(s_ref, true_varNR.tv());
+    }
+    if (func->isInOutWrapper() || fpi.inout) {
+      param.set(s_inout, true_varNR.tv());
     }
     if (fpi.isVariadic()) {
       param.set(s_is_variadic, true_varNR.tv());

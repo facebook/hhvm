@@ -82,9 +82,7 @@ let go tcopt workers query type_ =
         []
       end
     | _  ->
-      match SignatureSearchParser.parse_query query with
-      | Some signature_query -> SignatureSearchService.go tcopt signature_query
-      | None -> HackSearchService.MasterApi.query tcopt ~fuzzy workers query type_
+      HackSearchService.MasterApi.query tcopt ~fuzzy workers query type_
   in
 
   List.map results SearchUtils.to_absolute

@@ -772,9 +772,6 @@ end = functor(CheckKind:CheckKindType) -> struct
     let _ : bool = Typing_deps.allow_dependency_table_reads
       deptable_unlocked in
 
-    (* Build SignatureSearch Index after Type-decl phase *)
-    SignatureSearchService.build env.tcopt env.files_info;
-
     (* TYPE CHECKING *)
     let fast, lazy_check_later = CheckKind.get_defs_to_recheck
       files_to_parse fast files_info to_recheck env in

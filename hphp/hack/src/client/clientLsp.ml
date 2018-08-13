@@ -862,13 +862,11 @@ let do_definition (conn: server_conn) (ref_unblocked_time: float ref) (params: D
       then List.filter results ~f:is_result_constructor
       else results
   in
-  let rec hack_to_lsp = function
-    | [] -> []
-    | (_occurrence, definition) :: l ->
-      (hack_symbol_definition_to_lsp_identifier_location definition ~default_path:file)
-        :: (hack_to_lsp l)
-  in
-  hack_to_lsp filtered_results
+  List.map filtered_results ~f:begin fun (_occurrence, definition) ->
+    hack_symbol_definition_to_lsp_identifier_location
+      definition
+      ~default_path:file
+  end
 
 let make_ide_completion_response
   (result:AutocompleteTypes.ide_result)

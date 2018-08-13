@@ -47,7 +47,7 @@ let go content line char (tcopt : TypecheckerOptions.t) =
       if stop then
         (* We're stopping here, but also include the other suggestions for
            this span. *)
-        first :: List.take_while rest ~f:(fun x -> by_nesting first x == 0)
+        first :: List.take_while rest ~f:(fun x -> by_nesting first x = 0)
       else first :: take_best_suggestions rest
     | [] -> []
   in

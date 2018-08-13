@@ -36,6 +36,17 @@ checkObjEqualRecursively($msg, $exnBpResp);
 resumeTarget();
 checkForOutput($testProcess, "hello world.\n", "stdout");
 
+// See the exception output.
+$msg = json_decode(getNextVsDebugMessage(), true);
+checkObjEqualRecursively($msg, array(
+  "type" => "event",
+  "event" => "output",
+  "body" => array(
+      "category" => "console",
+      "output" =>
+        "Request 1: Exception (UnexpectedValueException) thrown: Exn thrown!"
+  )));
+
 // Verify we stopped on exception thrown.
 $exnStopObj = array(
   "type" => "event",

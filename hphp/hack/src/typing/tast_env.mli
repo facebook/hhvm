@@ -200,3 +200,8 @@ val set_ppl_lambda : env -> env
 val get_anonymous_lambda_types : env -> int -> Tast.ty list
 
 val typing_env_as_tast_env : Typing_env.env -> env
+
+val can_coerce : env -> Tast.ty -> Tast.ty -> env option
+(** Return None when coercion cannot occur from the second arg to the third,
+    otherwise return Some env where env is the first arg updated with coercion
+    constraints. *)

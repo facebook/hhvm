@@ -23,8 +23,6 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -989,38 +987,20 @@ bool ObjectData::equal(const ObjectData& other) const {
     return DateTimeData::compare(this, &other) == 0;
   }
   if (getVMClass() != other.getVMClass()) return false;
-  if (UNLIKELY(instanceof(SimpleXMLElement_classof()))) {
-    // Compare the whole object (including native data), not just props
-    auto ar1 = SimpleXMLElement_objectCast(this, KindOfArray).toArray();
-    auto ar2 = SimpleXMLElement_objectCast(&other, KindOfArray).toArray();
+  if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass)) ||
+      UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
+    // Compare the whole object, not just the array representation
+    auto ar1 = Array::Create();
+    auto ar2 = Array::Create();
+    o_getArray(ar1);
+    other.o_getArray(ar2);
     return ArrayData::Equal(ar1.get(), ar2.get());
   }
   if (UNLIKELY(instanceof(c_Closure::classof()))) {
     // First comparison already proves they are different
     return false;
   }
-
-  // check for dynamic props first because we need to short-circuit if there's
-  // a different number of them
-  if (UNLIKELY(getAttribute(HasDynPropArr))) {
-    if (!other.getAttribute(HasDynPropArr) ||
-        !dynPropArray()->equal(other.dynPropArray().get(), false)) {
-      return false;
-    }
-  } else if (UNLIKELY(other.getAttribute(HasDynPropArr))) {
-    return false;
-  }
-
-  // Prevent circular referenced objects/arrays or deep ones.
-  check_recursion_error();
-
-  auto props = propVec();
-  auto end = props + m_cls->numDeclProperties();
-  auto otherProps = other.propVec();
-  for (; props != end; ++props, ++otherProps) {
-    if (!tvEqual(*props, *otherProps)) return false;
-  }
-  return true;
+  return toArray()->equal(other.toArray().get(), false);
 }
 
 bool ObjectData::less(const ObjectData& other) const {

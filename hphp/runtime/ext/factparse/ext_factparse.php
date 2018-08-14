@@ -67,10 +67,10 @@ enum FactTypeFlags : int {
 <<__Native>>
 function facts_parse(
   ?string $root,
-  array<string> $pathList,
+  varray<string> $pathList,
   bool $allowHipHopSyntax,
   bool $useThreads,
-): array<string, ?array<string, mixed>>;
+): darray<string, ?darray<string, mixed>>;
 
 /**
  * This should be bumped with every non-backwards compatible API change

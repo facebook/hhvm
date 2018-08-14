@@ -91,7 +91,7 @@ template<class T>
 void facts_parse_sequential(
   const std::string& root,
   const Array& pathList,
-  ArrayInit& outResArr,
+  DArrayInit& outResArr,
   bool allowHipHopSyntax
 ) {
   const auto state = T::init_state();
@@ -163,7 +163,7 @@ template<class T>
 void facts_parse_threaded(
   const std::string& root,
   const Array& pathList,
-  ArrayInit& outResArr,
+  DArrayInit& outResArr,
   bool allowHipHopSyntax
 ) {
   auto numPaths = pathList->size();
@@ -241,7 +241,7 @@ struct HackCFactsExtractor {
 
   static void merge_result(
     result_type& workerResult,
-    ArrayInit& outResArr,
+    DArrayInit& outResArr,
     const HPHP::String& path
   ) {
     try {
@@ -249,7 +249,7 @@ struct HackCFactsExtractor {
         outResArr.set(
           path,
           f_json_decode(String(workerResult.value().value), true, 512,
-            k_JSON_FB_LOOSE));
+            k_JSON_FB_LOOSE | k_JSON_FB_DARRAYS_AND_VARRAYS));
       }
       else {
         outResArr.set(path, uninit_null());
@@ -276,7 +276,7 @@ Array HHVM_FUNCTION(
   auto root = _root.isNull() ?
     "" : _root.toString().toCppString();
 
-  ArrayInit outResArr(pathList->size(), ArrayInit::Map{});
+  DArrayInit outResArr(pathList->size());
 
   if (!pathList.isNull() && pathList->size()) {
     if (useThreads) {

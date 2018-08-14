@@ -246,6 +246,10 @@ and localize ~ety_env env ty =
  * the type parameters to the provided types.
  *)
 and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety_env env ft =
+  (* set reactivity to Nonreactive to prevent occasional setting
+     of condition types when expanding type constants *)
+  let saved_r = Env.env_reactivity env in
+  let env = Env.set_env_reactive env Nonreactive in
   (* If no explicit type parameters are provided, set the instantiated type parameter to
    * initially point to unresolved, so that it can grow and eventually be a subtype of
    * something like "mixed".
@@ -284,6 +288,12 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
     let env, ty = localize ~ety_env env param.fp_type in
     env, { param with fp_type = ty }
   end in
+  (* restore reactivity *)
+  let env =
+    if saved_r <> Env.env_reactivity env
+    then Env.set_env_reactive env saved_r
+    else env
+  in
 
   (* Localize the constraints for a type parameter declaration *)
   let localize_tparam env (var, name, cstrl, reified) =

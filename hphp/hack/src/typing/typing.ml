@@ -353,23 +353,7 @@ let make_param_local_ty env param =
         let adjusted_ty = make_function_type_rxvar expanded_ty  in
         env, if phys_equal adjusted_ty expanded_ty then ty else adjusted_ty
       | _ ->
-        let env, loc_ty = Phase.localize ~ety_env env ty in
-        begin match ty, TR.condition_type_from_reactivity (Env.env_reactivity env) with
-        (* declared type is type constant root::ids *)
-        | (_, Taccess ((_, Tthis), ((_, h)::_ as ids))), Some cond_ty ->
-          begin match SubType.ConditionTypes.try_get_class_for_condition_type env cond_ty with
-          (* if condition type CT has type constant with the same name N -
-             replace declared type of parameter with type parameter constrained to generic
-             type and associate condition type CT::N with this type, as if parameter
-             was written with <<__OnlyRxIfImpl(CT::N::class)>> *)
-          | Some (_, cls) when SMap.mem h cls.tc_typeconsts ->
-            let cond_ty = (Reason.none, Taccess (cond_ty, ids)) in
-            Option.value (TR.try_substitute_type_with_condition env cond_ty loc_ty)
-              ~default:(env, loc_ty)
-          | _ -> env, loc_ty
-          end
-        | _ -> env, loc_ty
-        end
+        Phase.localize ~ety_env env ty
       end
   in
   let ty = match ty with
@@ -798,6 +782,7 @@ and stmt env = function
         | Array_get _ -> Errors.return_ref_in_array p
         | _ -> ()
       end;
+      let return_type = TR.strip_condition_type_in_return env return_type in
       let rty = Typing_return.wrap_awaitable env p rty in
       let env, rty = (match snd (Env.expand_type env return_type) with
         | r, Tprim Tvoid when not (TUtils.is_void_type_of_null env) ->

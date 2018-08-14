@@ -333,7 +333,9 @@ let verify_void_return_to_rx ~is_expr_statement p env ft =
 let try_substitute_type_with_condition env cond_ty ty =
   generate_fresh_name_for_target_of_condition_type env ty cond_ty
   |> Option.map ~f:begin fun fresh_type_argument_name ->
-    let param_ty = Reason.none, Tabstract ((AKgeneric fresh_type_argument_name), None) in
+    let param_ty =
+      (Reason.Rwitness (Reason.to_pos (fst ty))),
+      Tabstract ((AKgeneric fresh_type_argument_name), None) in
     (* if generic type is already registered this means we already saw
        parameter with the same pair (declared type * condition type) so there
        is no need to add condition type to env again  *)
@@ -352,6 +354,33 @@ let try_substitute_type_with_condition env cond_ty ty =
     end
   end
 
+(* for cases like
+   <<__OnlyRxIfImpl(Rx::class)>>
+   function f(): this::T {
+     if (Rx_ENABLED {
+       return get_rx();
+     }
+    else {
+      return get_cached_rx(); // returns this::T
+    }
+   }
+   return type of f will be represented as (<TFresh>#Rx) as this::T
+   so we can use name of fresh parameter to track condition type. This in turn will
+   lead to error in else branch of if statement because get_cached_rx will return this::T
+   and it is not assignable to fresh type parameter. To handle this for returns we reduce
+   return type to its upper bound if return type is TFresh and current context is non-reactive *)
+let strip_condition_type_in_return env ty =
+  if Env.env_reactivity env <> Nonreactive then ty
+  else begin match ty with
+  | _, Tabstract ((AKgeneric n), _)
+    when Option.is_some (Env.get_condition_type env n) ->
+    let upper_bounds = Env.get_upper_bounds env n in
+    begin match Typing_set.elements upper_bounds with
+    | [ty] -> ty
+    | _ ->  ty
+    end
+  | _ -> ty
+  end
 let get_adjusted_return_type env receiver_info ret_ty =
   match try_get_method_from_condition_type env receiver_info with
   | None -> env, ret_ty

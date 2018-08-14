@@ -16,6 +16,8 @@ module Reason = Typing_reason
 module Env = Typing_env
 module Phase = Typing_phase
 module TySet = Typing_set
+module TR = Typing_reactivity
+module CT = Typing_subtype.ConditionTypes
 
 type env = {
   tenv : Env.env;
@@ -70,6 +72,25 @@ and expand_with_env_ ety_env env reason root ids =
   let ty = reason_func root_r, root_ty in
   let deps = List.map env.dep_tys (fun (x, y) -> reason_func x, y) in
   let tenv, ty = ExprDepTy.apply env.tenv deps ty in
+  let tenv, ty =
+    (* if type constant has type this::ID and method has associated condition type ROOTCOND_TY
+       for the receiver - check if condition type has type constant at the same path.
+       If yes - attach a condition type ROOTCOND_TY::ID to a result type *)
+       begin match root, ids, TR.condition_type_from_reactivity (Env.env_reactivity tenv) with
+       | (_, Tabstract (AKdependent (`static, []),
+                       Some (_, Tabstract (AKdependent (`this, []), _)))),
+         [_, id],
+         Some cond_ty ->
+         begin match CT.try_get_class_for_condition_type tenv cond_ty with
+         | Some (_, cls) when SMap.mem id cls.tc_typeconsts ->
+          let cond_ty = (Reason.none, Taccess (cond_ty, ids)) in
+          Option.value (TR.try_substitute_type_with_condition tenv cond_ty ty)
+            ~default:(tenv, ty)
+         | _ ->  tenv, ty
+         end
+       | _ -> tenv, ty
+       end in
+
   tenv, env, ty
 
 and referenced_typeconsts tenv ety_env r (root, ids) =

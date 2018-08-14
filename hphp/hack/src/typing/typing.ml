@@ -4349,14 +4349,15 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
       env, (Reason.Rwitness p, Typing_utils.terr env)
     end in
   let type_index env p ty_have ty_expect reason =
-    (* let it work out if they subtype, in order to resolve unresolved etc.*)
-    if SubType.is_sub_type env ty_have ty_expect
-    then Type.coerce_type p reason env ty_have ty_expect
-    (* else if ty_have is dynamic, just let it be used b/c dynamic can be used any way *)
-    else if SubType.is_sub_type env ty_have (fst ty_have, Tdynamic)
-    then env
-    (* otherwise try to coerce and fail with a useful error *)
-    else Type.coerce_type p reason env ty_have ty_expect
+    (* coerce if possible *)
+    match Typing_coercion.try_coerce p reason env ty_have ty_expect with
+    | Some e -> e
+    | None ->
+        (* if subtype of dynamic, allow it to be used *)
+        if SubType.is_sub_type env ty_have (fst ty_have, Tdynamic)
+        then env
+        (* fail with useful error *)
+        else Typing_ops.sub_type p reason env ty_have ty_expect
   in
   match snd ety1 with
   | Tunresolved tyl ->

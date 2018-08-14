@@ -153,4 +153,4 @@ let get_anonymous_lambda_types env id =
 
 let typing_env_as_tast_env env = env
 
-let can_coerce = Typing_ops.can_coerce ~seen:[]
+let can_coerce = Typing_ops.can_coerce

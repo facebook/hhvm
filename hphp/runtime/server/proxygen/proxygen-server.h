@@ -90,7 +90,7 @@ using ResponseMessageQueue = folly::NotificationQueue<ResponseMessage>;
 
 struct HPHPWorkerThread : proxygen::WorkerThread {
   explicit HPHPWorkerThread(folly::EventBaseManager* ebm)
-      : WorkerThread(ebm) {}
+      : WorkerThread(ebm, "ProxygenWorker") {}
   ~HPHPWorkerThread() override {}
   void setup() override;
   void cleanup() override;

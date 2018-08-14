@@ -74,7 +74,7 @@ function get_random_port($exclude1, $exclude2) {
 
 # Return the command line to start the server with the specified options
 function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
-                      $customArgs = '', $serverId = null) {
+                      $customArgs = '', $serverId = null, $repoArgs = '') {
   global $test_run_id, $LOG_ROOT;
   $portConfig = ' -vServer.Port='.$serverPort;
   $serverConfig = ' --config='.$home.'/config/server.ini';
@@ -98,7 +98,7 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
 
   if (ini_get('hhvm.repo.authoritative')) {
     $cmd = "$hhvm --hphp -k1 -l2 -t hhbc -o ${LOG_ROOT}_bytecode$test_run_id ".
-      "--input-dir $root";
+      "--input-dir $root $repoArgs";
     tlog('Building repo with command: '.$cmd);
     tlog(exec($cmd));
     $repoConfig .=
@@ -122,7 +122,7 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
 }
 
 function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
-                     $customArgs = '', $serverId = null) {
+                     $customArgs = '', $serverId = null, $repoArgs = '') {
   global $test_run_id, $LOG_ROOT;
 
   $chooseServer = $serverPort === null;
@@ -137,7 +137,7 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
     if ($chooseDebug) $debugPort = get_random_port($serverPort, $adminPort);
 
     $cmd = getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
-                        $customArgs, $serverId);
+                        $customArgs, $serverId, $repoArgs);
     tlog('Starting server with command: '.$cmd);
     $pipes = array();
     $serverProc = proc_open($cmd, array(), &$pipes);
@@ -259,7 +259,7 @@ function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
   return implode("\n", $result);
 }
 
-function requestAll(array $requests, $customArgs = '') {
+function requestAll(array $requests, $customArgs = '', $repoArgs = '') {
   runTest(
     function($serverPort) use ($requests) {
       foreach ($requests as $request) {
@@ -268,7 +268,8 @@ function requestAll(array $requests, $customArgs = '') {
         var_dump(request(php_uname('n'), $serverPort, $request));
       }
     },
-    $customArgs
+    $customArgs,
+    $repoArgs,
   );
 }
 

@@ -372,6 +372,7 @@ and reactivity =
   | Shallow of decl ty option
   | Reactive of decl ty option
   | MaybeReactive of reactivity
+  | RxVar of reactivity option
 
 and param_mutability =
   | Param_mutable
@@ -414,8 +415,8 @@ and param_mode =
   | FPref
   | FPinout
 
-and param_rx_condition =
-  | Param_rxfunc
+and param_rx_annotation =
+  | Param_rx_var
   | Param_rx_if_impl of decl ty
 
 and 'phase fun_param = {
@@ -425,7 +426,7 @@ and 'phase fun_param = {
   fp_kind : param_mode;
   fp_accept_disposable : bool;
   fp_mutability           : param_mutability option;
-  fp_rx_condition: param_rx_condition option;
+  fp_rx_annotation: param_rx_annotation option;
 }
 
 and 'phase fun_params = 'phase fun_param list
@@ -804,18 +805,11 @@ let rec ty_compare ty1 ty2 =
 
 let ty_equal ty1 ty2 = ty_compare ty1 ty2 = 0
 
-let make_function_type_mayberx reactivity param_ty =
-  (* strip conditional reactivity if parent has one *)
-  let reactivity =
-    match reactivity with
-    | Local _ | MaybeReactive (Local _) -> Local None
-    | Shallow _ | MaybeReactive (Shallow _) -> Shallow None
-    | Reactive _ | MaybeReactive (Reactive _) -> Reactive None
-    | r -> r in
+let make_function_type_rxvar param_ty =
   match param_ty with
   | (r, Tfun tfun) ->
-    r, Tfun { tfun with ft_reactive = MaybeReactive reactivity }
+    r, Tfun { tfun with ft_reactive = RxVar None }
   | (r, Toption (r1, Tfun tfun)) ->
-    r, Toption (r1, Tfun { tfun with ft_reactive = MaybeReactive reactivity })
+    r, Toption (r1, Tfun { tfun with ft_reactive = RxVar None })
   | _ ->
     param_ty

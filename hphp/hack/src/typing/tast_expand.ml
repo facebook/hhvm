@@ -67,9 +67,9 @@ let expand_ty env ty =
   }
 
   and exp_fun_param { fp_pos; fp_name; fp_kind; fp_type; fp_mutability;
-                      fp_accept_disposable; fp_rx_condition; } =
+                      fp_accept_disposable; fp_rx_annotation; } =
   { fp_pos; fp_name; fp_kind; fp_accept_disposable; fp_mutability;
-    fp_type = exp_ty fp_type; fp_rx_condition;
+    fp_type = exp_ty fp_type; fp_rx_annotation;
   }
 
   and exp_sft { sft_optional; sft_ty } =

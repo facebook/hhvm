@@ -171,10 +171,10 @@ let rec ty (p, x) =
     { param with
       fp_pos = pos param.fp_pos;
       fp_type = ty param.fp_type;
-      fp_rx_condition = param_rx_condition param.fp_rx_condition
+      fp_rx_annotation = param_rx_annotation param.fp_rx_annotation
     }
 
-  and param_rx_condition = function
+  and param_rx_annotation = function
     | Some (Param_rx_if_impl t) -> Some (Param_rx_if_impl (ty t))
     | c -> c
 

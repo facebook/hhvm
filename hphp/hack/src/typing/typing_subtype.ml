@@ -784,6 +784,8 @@ and subtype_reactivity
       end
     | _ -> false in
   match r_sub, r_super, extra_info with
+  (* anything is a subtype of nonreactive functions *)
+  | _, Nonreactive, _ -> true
   (* to compare two maybe reactive values we need to unwrap them *)
   | MaybeReactive sub, MaybeReactive super, _ ->
     subtype_reactivity ?extra_info ~is_call_site env sub super
@@ -799,8 +801,22 @@ and subtype_reactivity
      function is conditionally reactive we'll do the proper check
      in typing_reactivity.check_call. *)
   | _, MaybeReactive _, _ when not is_call_site -> true
-  (* anything is a subtype of nonreactive functions *)
-  | _, Nonreactive, _ -> true
+  (* ok:
+    class A { function f((function(): int) $f) {} }
+    class B extends A {
+      <<__Rx>>
+      function f(<<__AtMostRxAsFunc>> (function(): int) $f);
+    }
+    reactivity for arguments is checked contravariantly *)
+  | _, RxVar None, _
+  (* ok:
+     <<__Rx>>
+     function f(<<__AtMostRxAsFunc>> (function(): int) $f) { return $f() }  *)
+  | RxVar None, RxVar _, _ -> true
+  | RxVar (Some sub), RxVar (Some super), _
+  | sub, RxVar (Some super), _ ->
+    subtype_reactivity ?extra_info ~is_call_site env sub super
+  | RxVar _, _, _ -> false
   | (Local cond_sub | Shallow cond_sub | Reactive cond_sub), Local cond_super, _
   | (Shallow cond_sub | Reactive cond_sub), Shallow cond_super, _
   | Reactive cond_sub, Reactive cond_super, _
@@ -901,12 +917,12 @@ and subtype_fun_params_reactivity
   (p_sub: locl fun_param)
   (p_super: locl fun_param)
   res =
-  match p_sub.fp_rx_condition, p_super.fp_rx_condition with
+  match p_sub.fp_rx_annotation, p_super.fp_rx_annotation with
   (* no conditions on parameters - do nothing *)
   | None, None -> res
   (* both parameters are conditioned to be rx function - no need to check anything *)
-  | Some Param_rxfunc, Some Param_rxfunc -> res
-  | None, Some Param_rxfunc ->
+  | Some Param_rx_var, Some Param_rx_var -> res
+  | None, Some Param_rx_var ->
     (* parameter is conditionally reactive in supertype and missing condition
       in subtype - this is ok only if parameter in subtype is reactive
       <<__Rx>>

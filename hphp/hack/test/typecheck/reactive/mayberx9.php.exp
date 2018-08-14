@@ -1,6 +1,4 @@
 File "mayberx9.php", line 11, characters 10-44:
-Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
-File "mayberx9.php", line 11, characters 18-43:
-Argument type is must be local reactive function, non-reactive given.
+Reactive functions can only call other reactive functions. (Typing[4200])
 File "mayberx9.php", line 4, characters 10-16:
-This is the function declaration
+This function is local reactive.

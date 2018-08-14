@@ -1,6 +1,6 @@
 File "nullable_mayberx2.php", line 10, characters 3-44:
-Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
-File "nullable_mayberx2.php", line 10, characters 5-43:
-Argument type is must be reactive function, non-reactive given.
+Reactive functions can only call other reactive functions. (Typing[4200])
 File "nullable_mayberx2.php", line 4, characters 10-10:
-This is the function declaration
+This function is non-reactive.
+File "nullable_mayberx2.php", line 10, characters 5-43:
+This argument caused function to be non-reactive.

@@ -349,6 +349,10 @@ and pp_reactivity : Format.formatter -> reactivity -> unit = fun fmt r ->
   match r with
   | Nonreactive ->
     Format.pp_print_string fmt "Nonreactive"
+  | RxVar v ->
+    Format.pp_print_string fmt "RxVar {";
+    Option.iter v (pp_reactivity fmt);
+    Format.pp_print_string fmt "}"
   | MaybeReactive v ->
     Format.pp_print_string fmt "MaybeReactive {";
     pp_reactivity fmt v;

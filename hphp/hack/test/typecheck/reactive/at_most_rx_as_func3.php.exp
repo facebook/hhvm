@@ -1,0 +1,6 @@
+File "at_most_rx_as_func3.php", line 11, characters 10-36:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "at_most_rx_as_func3.php", line 4, characters 10-10:
+This function is shallow reactive.
+File "at_most_rx_as_func3.php", line 11, characters 12-35:
+This argument caused function to be shallow reactive.

@@ -278,7 +278,8 @@ let reactivity_to_string env r =
     | Local None -> "local reactive"
     | Local (Some ty) -> cond_reactive "conditionally local reactive" ty
     | MaybeReactive n -> "maybe (" ^ (aux n) ^ ")"
-    | Nonreactive -> "non-reactive" in
+    | Nonreactive -> "non-reactive"
+    | RxVar _ -> "maybe reactive" in
   aux r
 
 (*****************************************************************************)
@@ -710,7 +711,7 @@ let default_fun_param ?(pos=Pos.none) ty : 'a fun_param = {
   fp_kind = FPnormal;
   fp_accept_disposable = false;
   fp_mutability = None;
-  fp_rx_condition = None;
+  fp_rx_annotation = None;
 }
 
 let fun_mutable user_attributes =

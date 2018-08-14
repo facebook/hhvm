@@ -254,12 +254,32 @@ let enforce_param_not_disposable env param ty =
   | None ->
     ()
 
-let fun_reactivity env attrs =
+let param_has_at_most_rx_as_func p =
+  let module UA = SN.UserAttributes in
+  Attributes.mem2 UA.uaAtMostRxAsFunc UA.uaOnlyRxIfRxFunc_do_not_use p.param_user_attributes
+
+let fun_reactivity env attrs params =
   let r = Decl.fun_reactivity env attrs in
   let module UA = Naming_special_names.UserAttributes in
-  if Attributes.mem2 UA.uaOnlyRxIfArgs_do_not_use UA.uaAtMostRxAsArgs attrs
-  then MaybeReactive r
-  else r
+
+  let r =
+    (* if at least one of parameters has <<__AtMostRxAsFunc>> attribute -
+      treat function reactivity as generic that is determined from the reactivity
+      of arguments annotated with __AtMostRxAsFunc. Declared reactivity is used as a
+      upper boundary of the reactivity function can have. *)
+    if Core_list.exists params ~f:param_has_at_most_rx_as_func
+    then RxVar (Some r)
+    else r in
+
+  let r =
+    (* if at least one of arguments have <<__OnlyRxIfImpl>> attribute -
+      treat function reactivity as conditional that is determined at the callsite *)
+    if Core_list.exists params
+      ~f:(fun { param_user_attributes = p; _ } ->
+        Attributes.mem UA.uaOnlyRxIfImpl p)
+    then MaybeReactive r
+    else r in
+  r
 
 (* This function is used to determine the type of an argument.
  * When we want to type-check the body of a function, we need to
@@ -301,7 +321,7 @@ let fun_reactivity env attrs =
  *
  * A similar line of reasoning is applied for the static method create.
  *)
-let make_param_local_ty attrs env param =
+let make_param_local_ty env param =
   let ety_env =
     { (Phase.env_with_self env) with from_class = Some CIstatic; } in
   let env, ty =
@@ -325,13 +345,12 @@ let make_param_local_ty attrs env param =
         | Some r -> r
         | None -> env, ty
         end
-      | _ when Attributes.mem2 SN.UserAttributes.uaOnlyRxIfArgs_do_not_use
-                SN.UserAttributes.uaAtMostRxAsArgs attrs ->
+      | _ when Attributes.mem2 SN.UserAttributes.uaOnlyRxIfRxFunc_do_not_use
+                SN.UserAttributes.uaAtMostRxAsFunc param.param_user_attributes ->
         let env, ty = Phase.localize ~ety_env env ty in
         (* expand type to track aliased function types *)
         let env, expanded_ty = Env.expand_type env ty in
-        let adjusted_ty =
-          make_function_type_mayberx (Env.env_reactivity env) expanded_ty in
+        let adjusted_ty = make_function_type_rxvar expanded_ty  in
         env, if phys_equal adjusted_ty expanded_ty then ty else adjusted_ty
       | _ ->
         let env, loc_ty = Phase.localize ~ety_env env ty in
@@ -458,7 +477,7 @@ and fun_def tcopt f =
   );
   let env = Env.set_env_function_pos env pos in
   let env = Typing_attributes.check_def env new_object SN.AttributeKinds.fn f.f_user_attributes in
-  let reactive = fun_reactivity env.Env.decl_env f.f_user_attributes in
+  let reactive = fun_reactivity env.Env.decl_env f.f_user_attributes f.f_params in
   let mut = TUtils.fun_mutable f.f_user_attributes in
   let env = Env.set_env_reactive env reactive in
   let env = Env.set_fun_mutable env mut in
@@ -486,7 +505,7 @@ and fun_def tcopt f =
       TI.check_params_instantiable env f.f_params;
       TI.check_tparams_instantiable env f.f_tparams;
       let env, param_tys =
-        List.map_env env f.f_params (make_param_local_ty f.f_user_attributes) in
+        List.map_env env f.f_params make_param_local_ty in
       if Env.is_strict env then
         List.iter2_exn ~f:(check_param env) f.f_params param_tys;
       Typing_memoize.check_function env f;
@@ -495,7 +514,7 @@ and fun_def tcopt f =
       let env, t_variadic = match f.f_variadic with
         | FVvariadicArg vparam ->
           TI.check_param_instantiable env vparam;
-          let env, ty = make_param_local_ty f.f_user_attributes env vparam in
+          let env, ty = make_param_local_ty env vparam in
           if Env.is_strict env then
             check_param env vparam ty;
           let env, t_vparam = bind_param env (ty, vparam) in
@@ -2411,7 +2430,7 @@ and expr_
         (* if lambda is annotated with <<__RxOfScope>> use reactivity of enclosing
           function as reactivity of lambda *)
         if has_rx_of_scope then TR.strip_conditional_reactivity (Env.env_reactivity env)
-        else fun_reactivity env.Env.decl_env f.f_user_attributes in
+        else fun_reactivity env.Env.decl_env f.f_user_attributes f.f_params in
       let check_body_under_known_params ?ret_ty ft =
         let old_reactivity = Env.env_reactivity env in
         let env = Env.set_env_reactive env reactivity in
@@ -2515,7 +2534,7 @@ and expr_
                 ("Typing.expr Efun unknown params",
                   [Typing_log.Log_type ("declared_ft", (Reason.Rwitness p, Tfun declared_ft))])];
             (* check for recursive function calls *)
-            let reactivity = fun_reactivity env.Env.decl_env f.f_user_attributes in
+            let reactivity = fun_reactivity env.Env.decl_env f.f_user_attributes f.f_params in
             let old_reactivity = Env.env_reactivity env in
             let env = Env.set_env_reactive env reactivity in
             let is_coroutine, counter, pos, anon = anon_make env p f declared_ft idl in
@@ -5623,7 +5642,7 @@ and call_ ~expected ~method_call_info ~is_expr_statement pos env fty el uel =
              fp_kind = FPnormal;
              fp_accept_disposable = false;
              fp_mutability = None;
-             fp_rx_condition = None;
+             fp_rx_annotation = None;
            }
          in
          env, Fvariadic (min_arity, param)
@@ -6865,7 +6884,7 @@ and method_def env m =
   let env = Env.set_env_function_pos env pos in
   let env = Typing_attributes.check_def env new_object
     SN.AttributeKinds.mthd m.m_user_attributes in
-  let reactive = fun_reactivity env.Env.decl_env m.m_user_attributes in
+  let reactive = fun_reactivity env.Env.decl_env m.m_user_attributes m.m_params in
   let mut =
     TUtils.fun_mutable m.m_user_attributes ||
     (* <<__Mutable>> is implicit on constructors  *)
@@ -6909,7 +6928,7 @@ and method_def env m =
     ~is_explicit:(Option.is_some m.m_ret) ~is_by_ref:m.m_ret_by_ref ty in
   TI.check_params_instantiable env m.m_params;
   let env, param_tys =
-    List.map_env env m.m_params (make_param_local_ty m.m_user_attributes) in
+    List.map_env env m.m_params make_param_local_ty in
   if Env.is_strict env then begin
     List.iter2_exn ~f:(check_param env) m.m_params param_tys;
   end;
@@ -6919,7 +6938,7 @@ and method_def env m =
   let env, t_variadic = match m.m_variadic with
     | FVvariadicArg vparam ->
       TI.check_param_instantiable env vparam;
-      let env, ty = make_param_local_ty m.m_user_attributes env vparam in
+      let env, ty = make_param_local_ty env vparam in
       if Env.is_strict env then
         check_param env vparam ty;
       let env, t_variadic = bind_param env (ty, vparam) in

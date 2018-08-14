@@ -514,11 +514,11 @@ module type S = sig
   val inout_params_ret_by_ref : Pos.t -> Pos.t -> unit
   val xhp_required : Pos.t -> string -> (Pos.t * string) list -> unit
   val illegal_xhp_child : Pos.t -> (Pos.t * string) list -> unit
-  val nonreactive_function_call : Pos.t -> Pos.t -> unit
+  val nonreactive_function_call : Pos.t -> Pos.t -> string -> Pos.t option -> unit
   val nonreactive_append : Pos.t -> unit
   val inout_argument_bad_expr : Pos.t -> unit
   val inout_argument_bad_type : Pos.t -> (Pos.t * string) list -> unit
-  val nonreactive_call_from_shallow : Pos.t -> Pos.t -> unit
+  val nonreactive_call_from_shallow : Pos.t -> Pos.t -> string -> Pos.t option -> unit
   val illegal_destructor : Pos.t -> unit
   val rx_enabled_in_non_rx_context : Pos.t -> unit
   val rx_enabled_in_lambdas : Pos.t -> unit
@@ -567,7 +567,7 @@ module type S = sig
     is_receiver: bool -> Pos.t -> Pos.t -> Pos.t -> string -> string -> unit
   val invalid_function_type_for_condition_in_rx:
     Pos.t -> Pos.t -> Pos.t -> string -> string -> unit
-  val callsite_reactivity_mismatch: Pos.t -> Pos.t -> string -> string -> unit
+  val callsite_reactivity_mismatch: Pos.t -> Pos.t -> string -> Pos.t option -> string -> unit
   val rx_parameter_condition_mismatch: string -> Pos.t -> Pos.t -> unit
   val maybe_mutable_attribute_on_function: Pos.t -> unit
   val conflicting_mutable_and_maybe_mutable_attributes: Pos.t -> unit

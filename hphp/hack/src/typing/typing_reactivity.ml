@@ -41,6 +41,7 @@ let rec condition_type_from_reactivity r =
   match r with
   | Reactive (Some t) | Shallow (Some t) | Local (Some t) -> Some t
   | MaybeReactive r -> condition_type_from_reactivity r
+  | RxVar v -> Option.bind v condition_type_from_reactivity
   | _ -> None
 
 (* Obtains condition type associated with ty
@@ -67,6 +68,7 @@ let rec strip_conditional_reactivity r =
   | Shallow (Some _) -> Shallow None
   | Local (Some _) -> Local None
   | MaybeReactive r -> MaybeReactive (strip_conditional_reactivity r)
+  | RxVar v -> RxVar (Option.map v strip_conditional_reactivity)
   | r -> r
 
 (* checks if condition type associated with ty matches the condition
@@ -96,52 +98,6 @@ let check_only_rx_if_impl env ~is_receiver ~is_self pos reason ty cond_ty =
   end;
   ok
 
-(* checks if function type (arg_ty) mets the __OnlyRxIfRxFunc criteria
-   specified by param_ty *)
-let check_only_rx_if_rx_func env pos reason caller_r arg_ty param_ty =
-  (*  strip options and expand type aliases *)
-  let env, arg_ty = TU.non_null env arg_ty in
-  let env, arg_ty = Env.expand_type env arg_ty in
-  let env, param_ty = TU.non_null env param_ty in
-  let env, param_ty = Env.expand_type env param_ty in
-  let error arg_r param_r =
-    let arg_str = TU.reactivity_to_string env arg_r in
-    let param_str = TU.reactivity_to_string env param_r in
-    Errors.invalid_function_type_for_condition_in_rx
-      pos (Reason.to_pos reason) (Reason.to_pos (fst arg_ty))
-      arg_str param_str in
-  (* __OnlyRxIfRxFunc condition for some argument type matches if
-   - argument type is definitely reactive or argument type is
-     maybe reactive and current reactivity context is maybe reactive
-   - reactivity of function type is a subtype of required reactivity for the argument  *)
-  match arg_ty, param_ty with
-  | (_, Tfun { ft_reactive = arg_r; _ }),
-    (_, Tfun { ft_reactive = MaybeReactive param_r; _ }) ->
-    begin match arg_r, caller_r with
-    (* argument is non-reactive - check failed *)
-    | Nonreactive, _ ->
-      error arg_r param_r;
-      false
-    (* argument is maybe reactive and caller context is maybe reactive
-       - might be ok *)
-    | MaybeReactive arg_r, MaybeReactive _ ->
-      if SubType.subtype_reactivity ~is_call_site:true env arg_r param_r then true
-      else begin
-        error arg_r param_r;
-        false
-      end
-    | MaybeReactive _, _ ->
-      error arg_r param_r;
-      false
-    | arg_r, _ ->
-      if SubType.subtype_reactivity ~is_call_site:true env arg_r param_r then true
-      else begin
-        error arg_r param_r;
-        false
-      end
-    end
-  | _ -> false
-
 let bind o ~f = Option.bind o f
 
 let try_get_method_from_condition_type env receiver_info =
@@ -170,25 +126,57 @@ let try_get_reactivity_from_condition_type env receiver_info =
     | { ft_reactive = r; _ } -> MaybeReactive r
     end
 
-let check_reactivity_matches env pos reason caller_reactivity callee_reactivity =
+let check_reactivity_matches env pos reason caller_reactivity (callee_reactivity, cause_pos) =
   let callee_reactivity = strip_conditional_reactivity callee_reactivity in
   let ok = SubType.subtype_reactivity ~is_call_site:true env callee_reactivity caller_reactivity in
   if ok then true
   else begin
+    (* for better error reporting remove rxvar from caller reactivity *)
+    let caller_reactivity =
+      match caller_reactivity with
+      | MaybeReactive (RxVar (Some r)) -> MaybeReactive r
+      | RxVar (Some r) -> r
+      | r -> r in
     begin match caller_reactivity, callee_reactivity with
     | (MaybeReactive (Reactive _) | Reactive _),
       (MaybeReactive (Shallow _ | Local _ | Nonreactive) | (Shallow _ | Local _ | Nonreactive)) ->
-      Errors.nonreactive_function_call pos (Reason.to_pos reason)
+      Errors.nonreactive_function_call pos
+        (Reason.to_pos reason)
+        (TU.reactivity_to_string env callee_reactivity)
+        cause_pos
     | (MaybeReactive (Shallow _) | Shallow _), Nonreactive ->
-      Errors.nonreactive_call_from_shallow pos (Reason.to_pos reason)
+      Errors.nonreactive_call_from_shallow pos
+        (Reason.to_pos reason)
+        (TU.reactivity_to_string env callee_reactivity)
+        cause_pos
     | _ ->
       Errors.callsite_reactivity_mismatch
         pos (Reason.to_pos reason)
         (TU.reactivity_to_string env callee_reactivity)
+        cause_pos
         (TU.reactivity_to_string env caller_reactivity)
       end;
     false
   end
+
+let get_effective_reactivity env r ft arg_types =
+  let go ((res, _) as acc) (p, arg_ty) =
+    if p.fp_rx_annotation = Some Param_rx_var
+    then begin
+      match arg_ty with
+      | reason, Tfun { ft_reactive = r; _ } ->
+        if SubType.subtype_reactivity env ~is_call_site:true r res
+        then acc
+        else r, Some (Reason.to_pos reason)
+      | _ -> acc
+    end
+    else acc in
+  match r with
+  | RxVar (Some rx) | MaybeReactive (RxVar (Some rx)) | rx ->
+    begin match Core_list.zip ft.ft_params arg_types with
+    | Some l -> Core_list.fold ~init:(rx, None) ~f:go l
+    | None -> r, None
+    end
 
 let check_call env method_info pos reason ft arg_types =
   (* do nothing if unsafe_rx is set *)
@@ -204,14 +192,16 @@ let check_call env method_info pos reason ft arg_types =
      2. check that reactivity of the callee matches reactivity of the caller with
        stripped condition types (they were checked on step 1) *)
   let caller_reactivity =
-    match Env.env_reactivity env with
+    let rec go = function
     | Reactive (Some _)
     | MaybeReactive (Reactive (Some _)) -> MaybeReactive (Reactive None)
     | Shallow (Some _)
     | MaybeReactive (Shallow (Some _)) -> MaybeReactive (Shallow None)
     | Local (Some _)
     | MaybeReactive (Local (Some _)) -> MaybeReactive (Local None)
+    | MaybeReactive (RxVar (Some v)) -> MaybeReactive (RxVar (Some (go v)))
     | r -> r in
+    go (Env.env_reactivity env) in
   (* check that all conditions are met if we are calling something
      conditionally reactive *)
   let callee_is_conditionally_reactive =
@@ -219,7 +209,8 @@ let check_call env method_info pos reason ft arg_types =
     Option.is_some (condition_type_from_reactivity ft.ft_reactive) ||
     (* one of arguments is conditionally reactive *)
     Core_list.exists ft.ft_params ~f:begin function
-    | { fp_rx_condition; _ } -> Option.is_some fp_rx_condition
+    | { fp_rx_annotation = Some (Param_rx_if_impl _); _ } -> true
+    | _ -> false
     end in
   let allow_call =
     if callee_is_conditionally_reactive then begin
@@ -240,11 +231,11 @@ let check_call env method_info pos reason ft arg_types =
       | None -> false
       | Some l ->
         Core_list.for_all l ~f:begin function
-        | { fp_rx_condition = None; _ }, _ ->  true
-        | { fp_rx_condition = Some Param_rx_if_impl ty; _ }, arg_ty ->
+        | { fp_rx_annotation = Some Param_rx_if_impl ty; _ }, arg_ty ->
           check_only_rx_if_impl env ~is_receiver:false ~is_self:false pos reason arg_ty ty
-        | { fp_rx_condition = Some Param_rxfunc; fp_type; _ }, arg_ty ->
-          check_only_rx_if_rx_func env pos reason caller_reactivity arg_ty fp_type
+        (* | { fp_rx_condition = Some Param_rxfunc; fp_type; _ }, arg_ty ->
+          check_only_rx_if_rx_func env pos reason caller_reactivity arg_ty fp_type *)
+        | { fp_rx_annotation = _; _ }, _ ->  true
         end
       end
     end
@@ -256,10 +247,11 @@ let check_call env method_info pos reason ft arg_types =
     (* pick the function we are trying to invoke *)
     let ok =
       Option.value_map (try_get_reactivity_from_condition_type env method_info)
-        ~f:(check_reactivity_matches env pos reason caller_reactivity)
+        ~f:(fun r -> check_reactivity_matches env pos reason caller_reactivity (r, None))
         ~default: false in
     if not ok then
-      check_reactivity_matches env pos reason caller_reactivity ft.ft_reactive
+      check_reactivity_matches env pos reason caller_reactivity
+        (get_effective_reactivity env ft.ft_reactive ft arg_types)
       |> ignore
   end
 
@@ -348,6 +340,10 @@ let try_substitute_type_with_condition env cond_ty ty =
     if Env.is_generic_parameter env fresh_type_argument_name
     then env, param_ty
     else begin
+      let param_ty, ty =
+        match ty with
+        | _, Toption ty -> ((fst param_ty), Toption param_ty), ty
+        | _ -> param_ty, ty in
       (* constraint type argument to hint *)
       let env = Env.add_upper_bound_global env fresh_type_argument_name ty in
       (* link type argument name to condition type *)

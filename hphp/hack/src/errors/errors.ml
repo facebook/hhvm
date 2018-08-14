@@ -2499,13 +2499,14 @@ let invalid_argument_type_for_condition_in_rx
     def_pos, "This is the function declaration";
   ]
 
-let callsite_reactivity_mismatch f_pos def_pos callee_reactivity caller_reactivity =
-  add_list (Typing.err_code Typing.CallSiteReactivityMismatch) [
+let callsite_reactivity_mismatch f_pos def_pos callee_reactivity cause_pos_opt caller_reactivity =
+  add_list (Typing.err_code Typing.CallSiteReactivityMismatch) ([
     f_pos, "Reactivity mismatch: " ^ caller_reactivity ^ " function cannot call " ^
            callee_reactivity ^ " function.";
     def_pos, "This is declaration of the function being called."
-  ]
-
+  ] @ Option.value_map cause_pos_opt ~default:[] ~f:(fun cause_pos ->
+    [cause_pos, "Reactivity of this argument was used as reactivity of the callee."]
+  ))
 let invalid_function_type_for_condition_in_rx
   f_pos def_pos arg_pos actual_reactivity expected_reactivity =
   let arg_msg =
@@ -3094,18 +3095,21 @@ let invalid_return_disposable pos =
     "Return expression must be new disposable in function marked <<__ReturnDisposable>>" in
   add (Typing.err_code Typing.InvalidReturnDisposable) pos msg
 
-let nonreactive_function_call pos decl_pos =
-  add_list (Typing.err_code Typing.NonreactiveFunctionCall) [
+let nonreactive_function_call pos decl_pos callee_reactivity cause_pos_opt =
+  add_list (Typing.err_code Typing.NonreactiveFunctionCall) ([
     pos, "Reactive functions can only call other reactive functions.";
-    decl_pos, "This function is not reactive."
-  ]
+    decl_pos, "This function is " ^ callee_reactivity ^ "."
+  ] @ Option.value_map cause_pos_opt ~default:[] ~f:(fun cause_pos ->
+    [cause_pos, "This argument caused function to be " ^ callee_reactivity ^ "."]
+  ))
 
-let nonreactive_call_from_shallow pos decl_pos =
-  add_list (Typing.err_code Typing.NonreactiveCallFromShallow) [
+let nonreactive_call_from_shallow pos decl_pos callee_reactivity cause_pos_opt=
+  add_list (Typing.err_code Typing.NonreactiveCallFromShallow) ([
       pos, "Shallow reactive functions cannot call non-reactive functions.";
-      decl_pos, "This function is not reactive."
-  ]
-
+      decl_pos, "This function is " ^ callee_reactivity ^ "."
+  ] @ Option.value_map cause_pos_opt ~default:[] ~f:(fun cause_pos ->
+    [cause_pos, "This argument caused function to be " ^ callee_reactivity ^ "."]
+  ))
 let rx_enabled_in_non_rx_context pos =
   add (Typing.err_code Typing.RxEnabledInNonRxContext) pos (
     "\\HH\\Rx\\IS_ENABLED can only be used in reactive functions."

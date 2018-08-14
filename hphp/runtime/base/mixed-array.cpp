@@ -1664,6 +1664,8 @@ ArrayData* MixedArray::ToDict(ArrayData* ad, bool copy) {
   auto a = asMixed(ad);
   assertx(a->isMixed());
 
+  if (a->empty() && a->m_nextKI == 0) return staticEmptyDictArray();
+
   if (copy) {
     return CopyMixed(*a, AllocMode::Request,
                      HeaderKind::Dict, ArrayData::kNotDVArray);

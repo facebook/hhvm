@@ -318,8 +318,7 @@ ArrayData* APCLocalArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   if (ret != elems) {
     elems->release();
   }
-  assertx(ret->hasExactlyOneRef());
-  assertx(!ret->isStatic());
+  assertx(ret->empty() || ret->hasExactlyOneRef());
   return ret;
 }
 

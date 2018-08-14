@@ -186,7 +186,7 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   if (ad->m_size <= 1) {
     if (ad->isVecArray()) {
       auto ret = PackedArray::ToDictVec(ad, ad->cowCheck());
-      assertx(ret->hasExactlyOneRef());
+      assertx(ret->empty() || ret->hasExactlyOneRef());
       return ret;
     }
     return ad;
@@ -195,7 +195,7 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   auto ret = ad->isVecArray()
     ? PackedArray::ToDictVec(ad, ad->cowCheck())
     : ToMixedCopy(ad);
-  assertx(ret->hasExactlyOneRef());
+  assertx(ret->empty() || ret->hasExactlyOneRef());
   return ret;
 }
 

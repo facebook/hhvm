@@ -1259,6 +1259,7 @@ ArrayData* PackedArray::ToDArray(ArrayData* adIn, bool /*copy*/) {
 ArrayData* PackedArray::ToPHPArrayVec(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isVecArray());
+  if (adIn->empty()) return staticEmptyArray();
   ArrayData* ad = copy ? Copy(adIn) : adIn;
   ad->m_kind = HeaderKind::Packed;
   assertx(ad->isNotDVArray());
@@ -1284,6 +1285,8 @@ ArrayData* PackedArray::ToDict(ArrayData* ad, bool copy) {
   assertx(checkInvariants(ad));
   assertx(ad->isPacked());
 
+  if (ad->empty()) return staticEmptyDictArray();
+
   auto mixed = [&] {
     switch (ArrayCommon::CheckForRefs(ad)) {
       case ArrayCommon::RefCheckResult::Pass:
@@ -1303,6 +1306,7 @@ ArrayData* PackedArray::ToDict(ArrayData* ad, bool copy) {
 ArrayData* PackedArray::ToDictVec(ArrayData* ad, bool copy) {
   assertx(checkInvariants(ad));
   assertx(ad->isVecArray());
+  if (ad->empty()) return staticEmptyDictArray();
   auto mixed = copy ? ToMixedCopy(ad) : ToMixed(ad);
   return MixedArray::ToDictInPlace(mixed);
 }
@@ -1310,6 +1314,8 @@ ArrayData* PackedArray::ToDictVec(ArrayData* ad, bool copy) {
 ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isPacked());
+
+  if (adIn->empty()) return staticEmptyVecArray();
 
   auto const do_copy = [&] {
     // CopyPackedHelper will copy the header and m_sizeAndPos; since we pass

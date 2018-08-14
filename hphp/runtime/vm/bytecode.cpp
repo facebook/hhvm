@@ -574,7 +574,9 @@ Array VarEnv::getDefinedVariables() const {
   {
     // Make result independent of the hashtable implementation.
     ArrayData* sorted = ret->escalateForSort(SORTFUNC_KSORT);
-    assertx(sorted == ret.get() || sorted->hasExactlyOneRef());
+    assertx(sorted == ret.get() ||
+            sorted->empty() ||
+            sorted->hasExactlyOneRef());
     SCOPE_EXIT {
       if (sorted != ret.get()) {
         ret = Array::attach(sorted);

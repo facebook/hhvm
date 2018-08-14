@@ -2483,7 +2483,9 @@ namespace {
 struct ArraySortTmp {
   explicit ArraySortTmp(TypedValue* arr, SortFunction sf) : m_arr(arr) {
     m_ad = arr->m_data.parr->escalateForSort(sf);
-    assertx(m_ad == arr->m_data.parr || m_ad->hasExactlyOneRef());
+    assertx(m_ad == arr->m_data.parr ||
+            m_ad->empty() ||
+            m_ad->hasExactlyOneRef());
   }
   ~ArraySortTmp() {
     if (m_ad != m_arr->m_data.parr) {

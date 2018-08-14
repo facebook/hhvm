@@ -59,6 +59,7 @@ const int64_t k_JSON_FB_HACK_ARRAYS    = 1<<25;
 const int64_t k_JSON_FB_FORCE_PHP_ARRAYS = 1<<26;
 const int64_t k_JSON_FB_WARN_DICTS       = 1<<27;
 const int64_t k_JSON_FB_WARN_PHP_ARRAYS  = 1<<28;
+const int64_t k_JSON_FB_DARRAYS_AND_VARRAYS = 1<<29;
 
 const int64_t k_JSON_ERROR_NONE
   = json_error_codes::JSON_ERROR_NONE;
@@ -159,7 +160,8 @@ TypedValue HHVM_FUNCTION(json_decode, const String& json,
     k_JSON_FB_STABLE_MAPS |
     k_JSON_BIGINT_AS_STRING |
     k_JSON_FB_HACK_ARRAYS |
-    k_JSON_FB_DARRAYS;
+    k_JSON_FB_DARRAYS |
+    k_JSON_FB_DARRAYS_AND_VARRAYS;
   int64_t parser_options = options & supported_options;
   Variant z;
   const auto ok =

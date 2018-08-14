@@ -33,6 +33,7 @@ enum class JSONContainerType {
   COLLECTIONS = 2,
   HACK_ARRAYS = 3,
   DARRAYS = 4,
+  DARRAYS_AND_VARRAYS = 5,
 };
 
 struct StringBuffer;

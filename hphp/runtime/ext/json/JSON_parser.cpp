@@ -897,7 +897,8 @@ static void object_set(Variant &var,
       collections::set(var.getObjectData(), &keyTV, value.asCell());
     } else if (container_type == JSONContainerType::HACK_ARRAYS) {
       forceToDict(var).set(key, value);
-    } else if (container_type == JSONContainerType::DARRAYS) {
+    } else if (container_type == JSONContainerType::DARRAYS ||
+               container_type == JSONContainerType::DARRAYS_AND_VARRAYS) {
       forceToDArray(var).set(key, value);
     } else {
       forceToArray(var).set(key, value);
@@ -942,6 +943,10 @@ JSONContainerType get_container_type_from_options(int64_t options) {
     return JSONContainerType::DARRAYS;
   }
 
+  if (options & k_JSON_FB_DARRAYS_AND_VARRAYS) {
+    return JSONContainerType::DARRAYS_AND_VARRAYS;
+  }
+
   return JSONContainerType::PHP_ARRAYS;
 }
 
@@ -953,27 +958,32 @@ JSONContainerType get_container_type_from_options(int64_t options) {
  * machine with a stack.
  *
  * The behavior is as follows:
- * Container Type | is_assoc | JSON input => output type
+ * Container Type       | is_assoc | JSON input => output type
  *
- * COLLECTIONS    | true     | "{}"       => c_Map
- * COLLECTIONS    | false    | "{}"       => c_Map
- * COLLECTIONS    | true     | "[]"       => c_Vector
- * COLLECTIONS    | false    | "[]"       => c_Vector
+ * COLLECTIONS          | true     | "{}"       => c_Map
+ * COLLECTIONS          | false    | "{}"       => c_Map
+ * COLLECTIONS          | true     | "[]"       => c_Vector
+ * COLLECTIONS          | false    | "[]"       => c_Vector
  *
- * HACK_ARRAYS    | true     | "{}"       => dict
- * HACK_ARRAYS    | false    | "{}"       => stdClass
- * HACK_ARRAYS    | true     | "[]"       => vec
- * HACK_ARRAYS    | false    | "[]"       => stdClass
+ * HACK_ARRAYS          | true     | "{}"       => dict
+ * HACK_ARRAYS          | false    | "{}"       => stdClass
+ * HACK_ARRAYS          | true     | "[]"       => vec
+ * HACK_ARRAYS          | false    | "[]"       => stdClass
  *
- * DARRAYS        | true     | "{}"       => darray
- * DARRAYS        | false    | "{}"       => stdClass
- * DARRAYS        | true     | "[]"       => darray
- * DARRAYS        | false    | "[]"       => stdClass
+ * DARRAYS              | true     | "{}"       => darray
+ * DARRAYS              | false    | "{}"       => stdClass
+ * DARRAYS              | true     | "[]"       => darray
+ * DARRAYS              | false    | "[]"       => stdClass
  *
- * PHP_ARRAYS     | true     | "{}"       => array
- * PHP_ARRAYS     | false    | "{}"       => stdClass
- * PHP_ARRAYS     | true     | "[]"       => array
- * PHP_ARRAYS     | false    | "[]"       => stdClass
+ * PHP_ARRAYS           | true     | "{}"       => array
+ * PHP_ARRAYS           | false    | "{}"       => stdClass
+ * PHP_ARRAYS           | true     | "[]"       => array
+ * PHP_ARRAYS           | false    | "[]"       => stdClass
+ *
+ * DARRAYS_AND_VARRAYS  | true     | "{}"       => darray
+ * DARRAYS_AND_VARRAYS  | false    | "{}"       => stdClass
+ * DARRAYS_AND_VARRAYS  | true     | "[]"       => varray
+ * DARRAYS_AND_VARRAYS  | false    | "[]"       => stdClass
  */
 bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
                  int depth, int64_t options) {
@@ -1134,7 +1144,9 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             /* <fb> */
             } else if (container_type == JSONContainerType::HACK_ARRAYS) {
               top = Array::CreateDict();
-            } else if (container_type == JSONContainerType::DARRAYS) {
+            } else if (container_type == JSONContainerType::DARRAYS ||
+                       container_type == JSONContainerType::DARRAYS_AND_VARRAYS)
+            {
               top = Array::CreateDArray();
             /* </fb> */
             } else {
@@ -1206,6 +1218,8 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             top = req::make<c_Vector>();
           } else if (container_type == JSONContainerType::HACK_ARRAYS) {
             top = Array::CreateVec();
+          } else if (container_type == JSONContainerType::DARRAYS_AND_VARRAYS) {
+            top = Array::CreateVArray();
           } else if (container_type == JSONContainerType::DARRAYS) {
             top = Array::CreateDArray();
           } else {

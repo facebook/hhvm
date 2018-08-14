@@ -263,7 +263,18 @@ module Revision_map = struct
               not_yet_ready
           end
 
-    let find ~start_t hg_rev t =
+    (**
+    * Looks up the SVN revision for this hg_rev, and prefetches the Saved State for that SVN
+    * rev. Converting hg_rev to an SVN rev takes on the order of seconds, and prefetching
+    * 10-20 seconds. This will run those operations asynchronously, stash those operations
+    * away for later checking.
+    *
+    * Returns the actual result after both operations have completed.
+    *
+    * Returns None while those operations are still in progress (on a None
+    * result, you should check again later).
+    * *)
+    let find_and_prefetch ~start_t hg_rev t =
       let svn_rev = find_svn_rev hg_rev t in
       let open Option in
       svn_rev >>= fun svn_rev ->
@@ -445,9 +456,6 @@ module Revision_tracker = struct
         && (elapsed_t <= 0.0 || (((float_of_int jump_distance) /. elapsed_t) > 2.0)) in
     result
 
-  let cached_svn_rev ~start_t revision_map hg_rev =
-    Revision_map.find ~start_t hg_rev revision_map
-
   (** Form a decision about whether or not we'd like to start a new server.
    * transition: The state transition for which we are forming a decision
    * svn_rev: The corresponding SVN rev for this transition's hg rev.
@@ -520,7 +528,7 @@ module Revision_tracker = struct
       | State_leave hg_rev
       | Changed_merge_base (hg_rev, _, _) -> hg_rev
     in
-    match cached_svn_rev ~start_t:timestamp env.rev_map hg_rev with
+    match Revision_map.find_and_prefetch ~start_t:timestamp hg_rev env.rev_map with
     | None ->
       None
     | Some (svn_rev, xdb_results, is_tiny) ->

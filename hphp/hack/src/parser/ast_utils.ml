@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Ast
 
 (* Given a Ast.program, give me the list of entities it defines *)
@@ -67,7 +67,7 @@ let ast_deregister_attributes_mapper = object (self)
 
   method ignored_attr env l =
     List.exists l
-      (fun attr -> List.mem (env.ignored_attributes) (snd attr.ua_name))
+      (fun attr -> List.mem (env.ignored_attributes) (snd attr.ua_name) ~equal:(=))
 
   (* Filter all functions and classes with the user attributes banned *)
   method! on_program env toplevels =

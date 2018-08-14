@@ -18,6 +18,7 @@
  * https://dev.w3.org/html5/html-author/charref on 09/27/2017.
  *)
 
+open Core_kernel
 
 module B = Bytes
 
@@ -281,11 +282,11 @@ let decode_table =
     { start_char = 9674; table = ent_uni_9674 };
     { start_char = 9824; table = ent_uni_9824_9830 };
   ] in
-  let decode_table = Hashtbl.create 0 in
-  Core_list.iter utf_entity_maps ~f: begin fun { start_char; table } ->
-    Core_list.iteri table ~f: begin fun i entity ->
+  let decode_table = Caml.Hashtbl.create 0 in
+  List.iter utf_entity_maps ~f: begin fun { start_char; table } ->
+    List.iteri table ~f: begin fun i entity ->
       if String.length entity <> 0 then
-        Hashtbl.add decode_table entity (utf32_to_utf8 (start_char + i))
+        Caml.Hashtbl.add decode_table entity (utf32_to_utf8 (start_char + i))
     end
   end;
   let predefined = [
@@ -301,7 +302,7 @@ let decode_table =
     "comet", utf32_to_utf8 0x2604;
     "thunderstorm", utf32_to_utf8 0x2608
   ] in
-  Core_list.iter predefined ~f:(fun (k, v) -> Hashtbl.add decode_table k v);
+  List.iter predefined ~f:(fun (k, v) -> Caml.Hashtbl.add decode_table k v);
   decode_table
 
 let decode_entity s =
@@ -323,7 +324,7 @@ let decode_entity s =
     assert (String.length s >= 2);
     (* strip & and ; from the value and lookup result in decode table *)
     String.sub s 1 (String.length s - 2)
-    |> Hashtbl.find_opt decode_table
+    |> Caml.Hashtbl.find_opt decode_table
     |> Option.value ~default:s
   end
 

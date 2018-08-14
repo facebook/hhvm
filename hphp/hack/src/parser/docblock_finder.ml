@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 module Syntax = Full_fidelity_positioned_syntax
 module Trivia = Full_fidelity_positioned_trivia
 module TriviaKind = Full_fidelity_trivia_kind
@@ -100,14 +100,14 @@ let tidy_delimited_comment comment =
   let lines = String_utils.split_into_lines comment in
   let line_trimmer = match lines with
     | []
-    | [_] -> String.trim
+    | [_] -> Caml.String.trim
     | _hd :: tail ->
       let get_whitespace_count x =
         String_utils.index_not_opt x " "
       in
       let counts = List.filter_map ~f:get_whitespace_count tail in
       let min =
-        List.min_elt counts ~cmp:(fun a b -> a - b)
+        List.min_elt counts ~compare:(fun a b -> a - b)
         |> Option.value ~default:0
       in
       let removal = Str.regexp (Printf.sprintf "^%s\\(\\* ?\\)?" (String.make min ' ')) in
@@ -115,7 +115,7 @@ let tidy_delimited_comment comment =
   in
   lines
   |> List.map ~f:line_trimmer
-  |> String.concat "\n"
+  |> String.concat ~sep:"\n"
 
 let find_docblock (finder : finder)
                   (last_line : int)
@@ -127,7 +127,7 @@ let find_docblock (finder : finder)
       if is_line_comment then begin
         match merge_line_comments finder comment_index last_line line [] with
         | [] -> None
-        | lines -> Some (String.trim (String.concat "" lines))
+        | lines -> Some (Caml.String.trim (String.concat ~sep:"" lines))
       end
       else if comment_line > last_line && comment_line >= line - 2 then
         Some ("/*" ^ str ^ "*/")
@@ -143,7 +143,7 @@ let find_inline_comment (finder : finder) (line : int) : string option =
       Array.get finder.comments last_comment_index in
     if comment_line = line then begin
       if is_line_comment then
-        Some (String.trim ("//" ^ str))
+        Some (Caml.String.trim ("//" ^ str))
       else
         Some ("/*" ^ str ^ "*/")
     end
@@ -164,8 +164,8 @@ let get_docblock node =
         let comment =
           comments
           |> List.map ~f:(Str.replace_first line_comment_prefix "")
-          |> String.concat "\n"
-          |> String.trim
+          |> String.concat ~sep:"\n"
+          |> Caml.String.trim
         in
         Some comment
       end

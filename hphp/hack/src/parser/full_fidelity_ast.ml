@@ -8,8 +8,8 @@
  *)
 
 module SyntaxError = Full_fidelity_syntax_error
+open Core_kernel
 open Prim_defs
-open Hh_core
 (* What we are lowering to *)
 open Ast
 
@@ -324,7 +324,7 @@ let in_string l =
     | QualifiedName {
         qualified_name_parts = { syntax = SyntaxList l; _ };
       } ->
-      String.concat "" @@ List.map ~f:aux l
+      String.concat ~sep:"" @@ List.map ~f:aux l
     | _ -> missing_syntax "qualified name" node env in
   p, name
 
@@ -470,7 +470,7 @@ let pModifiers check_modifier node env =
     | Some TK.Coroutine -> has_async, true, kinds
     | _ -> missing_syntax "kind" node env in
   let (has_async, has_coroutine, kinds) =
-    Core_list.fold_left ~init:(false, false, []) ~f (as_list node) in
+    List.fold_left ~init:(false, false, []) ~f (as_list node) in
   { has_async; has_coroutine; kinds = List.rev kinds }
 
 let pKinds check_modifier node env =
@@ -512,14 +512,14 @@ let prepString2 env : node list -> node list =
       | [{ syntax = Token t; _ }] when (Token.width t) > 0 ->
         let content = Token.text t in
         let len = (Token.width t) in
-        let n = len - (String.rindex_from content (len - 2) '\n') in
+        let n = len - (String.rindex_from_exn content (len - 2) '\n') in
         let s = make_token (trimRight ~n t) in
         if width s > 0 then [s] else []
       | x :: xs -> x :: unwind xs
       | _ -> raise_parsing_error env (`Node node) "Malformed String2 SyntaxList"; []
     in
     let content = Token.text t in
-    let n = (String.index content '\n') + 1 in
+    let n = (String.index_exn content '\n') + 1 in
     let s = make_token (trimLeft ~n t) in
     if width s > 0 then s :: unwind ss else unwind ss
   | x -> x (* unchanged *)
@@ -534,8 +534,8 @@ let extract_unquoted_string ~start ~len content =
         * semicolon followed by a blank line. We need to drop the opening line
         * as well as the blank line and preceding terminator line.
         *)
-       let start_ = String.index_from content start '\n' + 1 in
-       let end_ = String.rindex_from content (start + len - 2) '\n' in
+       let start_ = String.index_from_exn content start '\n' + 1 in
+       let end_ = String.rindex_from_exn content (start + len - 2) '\n' in
        (* An empty heredoc, this way, will have start >= end *)
        if start_ >= end_ then "" else String.sub content start_ (end_ - start_)
     else
@@ -547,7 +547,7 @@ let extract_unquoted_string ~start ~len content =
               content
             else
               String.sub content start len
-  with Invalid_argument _ | Not_found -> content
+  with Invalid_argument _ | Not_found_s _ | Caml.Not_found -> content
 
 let mkStr env node : (string -> string) -> string -> string = fun unescaper content ->
   let content = if String.length content > 0 && content.[0] = 'b'
@@ -925,7 +925,7 @@ and pFunParam : fun_param parser = fun node env ->
     ; param_modifier =
       let rec go = function
       | [] -> None
-      | x :: _ when List.mem [Private; Public; Protected] x -> Some x
+      | x :: _ when List.mem [Private; Public; Protected] x ~equal:(=) -> Some x
       | _ :: xs -> go xs
       in
       go (pKinds (fun _ -> ()) parameter_visibility env)
@@ -1519,13 +1519,13 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | _, Some TK.NowdocStringLiteral       ->
           String (mkStr env expr Php_escaping.unescape_nowdoc s)
         | _, Some TK.NullLiteral               ->
-          if not env.codegen && s <> String.lowercase_ascii s then
+          if not env.codegen && s <> String.lowercase s then
             Lint.lowercase_constant pos s;
           Null
         | _, Some TK.BooleanLiteral            ->
-          if not env.codegen && s <> String.lowercase_ascii s then
+          if not env.codegen && s <> String.lowercase s then
             Lint.lowercase_constant pos s;
-          (match String.lowercase_ascii s with
+          (match String.lowercase s with
           | "false" -> False
           | "true"  -> True
           | _       -> missing_syntax ("boolean (not: " ^ s ^ ")") expr env
@@ -1660,7 +1660,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           attr = UA.uaShallowReactive || attr = UA.uaLocalReactive in
         (* for now add uaRxOfScope only for typechecker *)
         if not (is_typechecker env) ||
-           Core_list.exists attrs ~f:(fun { ua_name = (_, n); _ } -> check n)
+           List.exists attrs ~f:(fun { ua_name = (_, n); _ } -> check n)
         then attrs
         else { ua_name = (Pos.none, UA.uaRxOfScope); ua_params = [] } :: attrs in
       let body =
@@ -2190,7 +2190,7 @@ and pFunHdr check_modifier : fun_hdr parser = fun node env ->
     ; function_type
     ; _ } ->
       let is_autoload =
-        String.lowercase_ascii @@ (text function_name)
+        String.lowercase @@ (text function_name)
           = Naming_special_names.SpecialFunctions.autoload in
       let num_params = List.length (syntax_to_list_no_separators function_parameter_list) in
       if is_autoload && num_params > 1 then
@@ -2251,7 +2251,7 @@ and pFunHdr check_modifier : fun_hdr parser = fun node env ->
   | Token _ -> empty_fun_hdr
   | _ -> missing_syntax "function header" node env
 
-and docblock_stack = Stack.create ()
+and docblock_stack = Caml.Stack.create ()
 
 and extract_docblock = fun node ->
   let source_text = leading_text node in
@@ -2307,7 +2307,7 @@ and extract_docblock = fun node ->
 
 and extract_and_push_docblock node =
   let docblock = extract_docblock node in
-  Stack.push docblock docblock_stack
+  Caml.Stack.push docblock docblock_stack
 
 and handle_loop_body pos stmts tail env =
   let rec conv acc stmts =
@@ -2337,15 +2337,15 @@ and handle_loop_body pos stmts tail env =
 
 and pop_docblock () =
   try
-    let _ = Stack.pop docblock_stack in ()
+    let _ = Caml.Stack.pop docblock_stack in ()
   with
-  | Stack.Empty -> ()
+  | Caml.Stack.Empty -> ()
 
 and top_docblock () =
   try
-    Stack.top docblock_stack
+    Caml.Stack.top docblock_stack
   with
-  | Stack.Empty -> None
+  | Caml.Stack.Empty -> None
 
 and pClassElt : class_elt list parser = fun node env ->
   let doc_comment_opt = extract_docblock node in
@@ -2530,7 +2530,7 @@ and pClassElt : class_elt list parser = fun node env ->
           | _ -> None, pos_name aliasing_name env
         in
         let modifiers = pKinds (fun _ -> ()) modifiers env in
-        Core_list.iter modifiers ~f:(fun modifier ->
+        List.iter modifiers ~f:(fun modifier ->
           match modifier with
           | Public | Private | Protected | Final ->  ();
           | _ ->
@@ -2657,7 +2657,7 @@ and pNamespaceUseClause ~prefix env kind node =
     let key = drop_pstr x name in
     let kind = if is_missing clause_kind then kind else clause_kind in
     let alias = if is_missing alias then key else pos_name alias env in
-    begin match String.lowercase_ascii (snd alias) with
+    begin match String.lowercase (snd alias) with
     | "null" | "true" | "false" -> env.saw_std_constant_redefinition <- true
     | _ -> ()
     end;
@@ -2726,7 +2726,7 @@ and pDef : def list parser = fun node env ->
       let c_mode = mode_annotation env.fi_mode in
       let c_user_attributes = pUserAttributes env attr in
       let kinds = pKinds (fun _ -> ()) mods env in
-      let c_final = List.mem kinds Final in
+      let c_final = List.mem kinds Final ~equal:(=) in
       let c_is_xhp =
         match token_kind name with
         | Some (TK.XHPElementName | TK.XHPClassName) -> true
@@ -2750,7 +2750,7 @@ and pDef : def list parser = fun node env ->
       let c_enum = None in
       let c_span = pPos node env in
       let c_kind =
-        let is_abs = List.mem kinds Abstract in
+        let is_abs = List.mem kinds Abstract ~equal:(=) in
         match token_kind kw with
         | Some TK.Class when is_abs -> Cabstract
         | Some TK.Class             -> Cnormal
@@ -3080,7 +3080,7 @@ let scour_comments
            let open Str in
            let pos = pPos node env in
            let line = Pos.line pos in
-           let ignores = try IMap.find line fm with Not_found -> IMap.empty in
+           let ignores = try IMap.find line fm with Caml.Not_found -> IMap.empty in
            let txt = Trivia.text t in
            try
              ignore (search_forward ignore_error txt 0);
@@ -3089,7 +3089,8 @@ let scour_comments
              let ignores = IMap.add code p ignores in
              cmts, IMap.add line ignores fm
            with
-           | Not_found ->
+           | Not_found_s _
+           | Caml.Not_found ->
              Errors.fixme_format pos;
              cmts, fm
     in
@@ -3322,7 +3323,7 @@ let lower_tree
   let mode = if lang = FileInfo.PhpFile then FileInfo.Mphp else mode in
   let mode = if mode = FileInfo.Mdecl && env.codegen then FileInfo.Mphp else mode in
   let env = { env with fi_mode = mode } in
-  let env = { env with is_hh_file = lang == FileInfo.HhFile } in
+  let env = { env with is_hh_file = lang = FileInfo.HhFile } in
   let popt = env.parser_options in
   (* If we are generating code and this is an hh file or hh syntax is enabled,
    * then we want to inject auto import types into HH namespace during namespace
@@ -3409,7 +3410,7 @@ let defensive_program
       let source = Full_fidelity_source_text.make fn content in
       snd @@ Full_fidelity_parser.get_language_and_mode source
     with _ -> None in
-    let err = Printexc.to_string e in
+    let err = Exn.to_string e in
     let fn = Relative_path.suffix fn in
     (* If we've already found a parsing error, it's okay for lowering to fail *)
     if not (Errors.currently_has_errors ()) then

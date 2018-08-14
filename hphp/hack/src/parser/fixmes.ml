@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 
 (*****************************************************************************)
 (* Table containing all the HH_FIXMEs found in the source code.
@@ -87,7 +87,7 @@ let get_unused_fixmes_for codes applied_fixme_map fn acc =
   | Some fixme_map ->
     IMap.fold (fun line code_map acc ->
       IMap.fold (fun code fixme_pos acc ->
-        if (List.mem codes code || (List.is_empty codes && code < 5000))
+        if (List.mem codes code ~equal:(=) || (List.is_empty codes && code < 5000))
            && not (fixme_was_applied applied_fixme_map fn line code)
         then fixme_pos :: acc
         else acc) code_map acc) fixme_map acc

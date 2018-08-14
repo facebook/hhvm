@@ -7,6 +7,8 @@
  *
  *)
 
+open Core_kernel
+
 type env = {
   ns_ns_uses: string SMap.t;
   ns_class_uses: string SMap.t;

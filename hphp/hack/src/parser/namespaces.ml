@@ -7,8 +7,8 @@
  *
  *)
 
+open Core_kernel
 open Ast
-open Hh_core
 open Namespace_env
 
 (* When dealing with an <?hh file, HHVM automatically imports a few
@@ -206,8 +206,9 @@ let elaborate_id_impl ~autoimport nsenv kind (p, id) =
     begin
       (* Expand "use" imports. *)
       let (bslash_loc, has_bslash) =
-        try String.index id '\\', true
-        with Not_found -> String.length id, false in
+        match String.index id '\\' with
+          | Some i -> i, true
+          | None -> String.length id, false in
       (* "use function" and "use const" only apply if the id is completely
        * unqualified, otherwise the normal "use" imports apply. *)
       let uses = if has_bslash then nsenv.ns_ns_uses else match kind with

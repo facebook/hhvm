@@ -6,8 +6,9 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
+open Core_kernel
 open Ast
-open Hh_core
 open Lexer_hack
 open Parser_return
 module L = Lexer_hack
@@ -113,7 +114,7 @@ let try_parse_with_errors (env : env) (f : env -> 'a) : 'a option =
   let parse env =
     let error_state = !(env.errors) in
     let result = f env in
-    if !(env.errors) == error_state then
+    if phys_equal !(env.errors) error_state then
         Some result
     else
       (
@@ -315,13 +316,13 @@ let priorities = [
 
 let get_priority =
   (* Creating the table of assocs/priorities at initialization time. *)
-  let ptable = Hashtbl.create 23 in
+  let ptable = Caml.Hashtbl.create 23 in
   (* Lowest priority = 0 *)
   let priority = ref 0 in
   List.iter priorities begin fun (assoc, tokl) ->
     List.iter tokl begin fun token ->
       (* Associates operator => (associativity, priority) *)
-      Hashtbl.add ptable token (assoc, !priority)
+      Caml.Hashtbl.add ptable token (assoc, !priority)
     end;
     (* This is a bit subtle:
      *
@@ -343,8 +344,8 @@ let get_priority =
     priority := !priority + 2
   end;
   fun tok ->
-    assert (Hashtbl.mem ptable tok);
-    Hashtbl.find ptable tok
+    assert (Caml.Hashtbl.mem ptable tok);
+    Caml.Hashtbl.find ptable tok
 
 let with_priority env op f =
   let _, prio = get_priority op in
@@ -376,7 +377,7 @@ let ref_opt env =
 
 let eliminate_underscores s = s
                               |> Str.split (Str.regexp "_")
-                              |> String.concat ""
+                              |> String.concat ~sep:""
 
 (*****************************************************************************)
 (* Identifiers *)
@@ -638,7 +639,7 @@ and toplevel acc env terminate =
       let error_state = !(env.errors) in
       let stmt = Stmt (statement env) in
       check_toplevel env pos;
-      if error_state != !(env.errors)
+      if not (phys_equal !(env.errors) error_state)
       then ignore_toplevel None ~attr:[] (stmt :: acc) env terminate
       else toplevel (stmt :: acc) env terminate
 
@@ -962,7 +963,7 @@ and class_extends_list env =
   | Tlcb ->
       L.back env.lb; [c]
   | Tcomma ->
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
       then [c]
       else c :: class_extends_list env
   | Tword ->
@@ -988,7 +989,7 @@ and class_param_list env =
   | Tgt ->
       [cst]
   | Tcomma ->
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
       then [cst]
       else cst :: class_param_list_remain env
   | _ ->
@@ -1006,7 +1007,7 @@ and class_param_list_remain env =
       | Tgt ->
           [cst]
       | Tcomma ->
-          if !(env.errors) != error_state
+          if not (phys_equal !(env.errors) error_state)
           then [cst]
           else cst :: class_param_list_remain env
       | _ -> error_expect env ">"; [cst]
@@ -1084,7 +1085,7 @@ and class_hint_param_list env =
   | Tgt ->
       [h]
   | Tcomma ->
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
       then [h]
       else h :: class_hint_param_list_remain env
   | _ ->
@@ -1101,7 +1102,7 @@ and class_hint_param_list_remain env =
       | Tgt ->
           [h]
       | Tcomma ->
-          if !(env.errors) != error_state
+          if not (phys_equal !(env.errors) error_state)
           then [h]
           else h :: class_hint_param_list_remain env
       | _ -> error_expect env ">"; [h]
@@ -1229,7 +1230,7 @@ and hint_list env =
   | Trp ->
       [h]
   | Tcomma ->
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
       then [h]
       else h :: hint_list_remain env
   | _ ->
@@ -1246,7 +1247,7 @@ and hint_list_remain env =
       | Trp ->
           [h]
       | Tcomma ->
-          if !(env.errors) != error_state
+          if not (phys_equal !(env.errors) error_state)
           then [h]
           else h :: hint_list_remain env
       | _ ->
@@ -1293,7 +1294,7 @@ and hint_function_params_remain env =
   let h = hint env in
   match L.token env.file env.lb with
   | Tcomma ->
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
       then ([h], [k], Hnon_variadic)
       else
         let hl, kl, variadic_hint = hint_function_params env in
@@ -1322,7 +1323,7 @@ and xhp_enum_decl_list_remain env =
   | Trcb ->
       [v]
   | Tcomma ->
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
         then [v]
         else v :: xhp_enum_decl_list env
   | _ ->
@@ -1362,7 +1363,7 @@ and hint_return_opt env =
 and class_body env =
   let error_state = !(env.errors) in
   expect env Tlcb;
-  if error_state != !(env.errors)
+  if not (phys_equal !(env.errors) error_state)
   then L.look_for_open_cb env.lb;
   class_defs env
 
@@ -1380,7 +1381,7 @@ and class_defs env =
       L.back env.lb;
       let error_state = !(env.errors) in
       let m = class_member_def env in
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
       then [m]
       else m :: class_defs env
   | _ ->
@@ -1408,7 +1409,7 @@ and class_toplevel_word env word =
         | Some tconst -> tconst
         | None -> class_const_def env
       in
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
       then [def]
       else def :: class_defs env
   | "use" ->
@@ -1421,7 +1422,7 @@ and class_toplevel_word env word =
       let start = Pos.make env.file env.lb in
       let error_state = !(env.errors) in
       let m = xhp_attr_list env in
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
       then look_for_next_method start env;
       m @ class_defs env
   | "abstract" ->
@@ -1441,7 +1442,7 @@ and on_class_member_word env =
   let start = Pos.make env.file env.lb in
   let error_state = !(env.errors) in
   let m = class_member_def env in
-  if !(env.errors) != error_state
+  if not (phys_equal !(env.errors) error_state)
   then look_for_next_method start env;
   m :: class_defs env
 
@@ -1475,7 +1476,7 @@ and class_use_list env =
   | Tsc ->
       [cst]
   | Tcomma ->
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
       then [cst]
       else cst :: class_use_list env
   | _ ->
@@ -1585,7 +1586,7 @@ and class_const_list env =
   | Tsc ->
       [cst]
   | Tcomma ->
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
       then [cst]
       else cst :: class_const_list_remain env
   | _ ->
@@ -1602,7 +1603,7 @@ and class_const_list_remain env =
       | Tsc ->
           [cst]
       | Tcomma ->
-          if !(env.errors) != error_state
+          if not (phys_equal !(env.errors) error_state)
           then [cst]
           else  cst :: class_const_list_remain env
       | _ ->
@@ -1720,7 +1721,7 @@ and class_member_def env =
 and class_var_list env =
   let error_state = !(env.errors) in
   let cvar = class_var env in
-  if !(env.errors) != error_state
+  if not (phys_equal !(env.errors) error_state)
   then [cvar]
   else cvar :: class_var_list_remain env
 
@@ -1736,7 +1737,7 @@ and class_var_list_remain env =
           L.back env.lb;
           let error_state = !(env.errors) in
           let var = class_var env in
-          if !(env.errors) != error_state
+          if not (phys_equal !(env.errors) error_state)
           then [var]
           else var :: class_var_list_remain env
       )
@@ -1787,7 +1788,7 @@ and xhp_attr env =
 and xhp_attr_list env =
   let error_state = !(env.errors) in
   let a = xhp_attr env in
-  if !(env.errors) != error_state
+  if not (phys_equal !(env.errors) error_state)
     then [a]
     else [a] @ xhp_attr_list_remain env
 
@@ -1828,7 +1829,7 @@ and xhp_category_list_remain env =
 and xhp_category_list env =
   let error_state = !(env.errors) in
   let a = xhp_category env in
-  if !(env.errors) != error_state
+  if not (phys_equal !(env.errors) error_state)
     then [a]
     else [a] @ xhp_category_list_remain env
 
@@ -2109,7 +2110,7 @@ and statement_list ~is_block_scope env =
       L.back env.lb;
       let error_state = !(env.errors) in
       let stmt = statement env in
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
       then L.next_newline_or_close_cb env.lb;
       if is_block_scope then enforce_block_scope_using env stmt;
       stmt :: statement_list ~is_block_scope env
@@ -2127,7 +2128,7 @@ and using_statement_list env =
       L.back env.lb;
       let error_state = !(env.errors) in
       let stmt = statement env in
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
       then L.next_newline_or_close_cb env.lb;
       stmt :: using_statement_list env
 
@@ -2325,7 +2326,7 @@ and static_var_list env =
   | Tsc ->
       [cst]
   | Tcomma ->
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
       then [cst]
       else cst :: static_var_list_remain env
   | _ -> error_expect env ";"; [cst]
@@ -2341,7 +2342,7 @@ and static_var_list_remain env =
       | Tsc ->
           [cst]
       | Tcomma ->
-          if !(env.errors) != error_state
+          if not (phys_equal !(env.errors) error_state)
           then [cst]
           else cst :: static_var_list_remain env
       | _ ->
@@ -2402,7 +2403,7 @@ and case_body env =
           L.back env.lb;
           let error_state = !(env.errors) in
           let st = statement env in
-          if !(env.errors) != error_state
+          if not (phys_equal !(env.errors) error_state)
           then [st]
           else st :: case_body env
       )
@@ -2412,7 +2413,7 @@ and case_body env =
       L.back env.lb;
       let error_state = !(env.errors) in
       let st = statement env in
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
       then [st]
       else st :: case_body env
 
@@ -2560,7 +2561,7 @@ and for_expr env =
       match L.token env.file env.lb with
       | Tsc ->
           Pos.make env.file env.lb, [e]
-      | _ when !(env.errors) != error_state ->
+      | _ when not (phys_equal !(env.errors) error_state) ->
           L.back env.lb;
           Pos.make env.file env.lb, [e]
       | Tcomma ->
@@ -2581,7 +2582,7 @@ and for_last_expr env =
       match L.token env.file env.lb with
       | Trp ->
           Pos.make env.file env.lb, [e]
-      | _ when !(env.errors) != error_state ->
+      | _ when not (phys_equal !(env.errors) error_state) ->
           L.back env.lb;
           Pos.make env.file env.lb, [e]
       | Tcomma ->
@@ -2716,7 +2717,7 @@ and parameter_list_remain env =
       | Trp ->
           [p]
       | Tcomma ->
-          if !(env.errors) != error_state
+          if not (phys_equal !(env.errors) error_state)
           then [p]
           else p :: parameter_list_remain env
       | _ ->
@@ -2860,7 +2861,7 @@ and where_clause_constraints env =
     let constr = (t1, c, t2) in
     match L.token env.file env.lb with
     | Tcomma ->
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
       then [constr]
       else constr :: where_clause_constraints env
     | Tlcb | Tsc -> L.back env.lb; [constr]
@@ -2897,7 +2898,7 @@ and expr_list_remain env =
       | Trp ->
           [e]
       | Tcomma ->
-          if !(env.errors) != error_state
+          if not (phys_equal !(env.errors) error_state)
           then [e]
           else e :: expr_list_remain env
       | _ -> error_expect env ")"; [e]
@@ -3157,12 +3158,12 @@ and try_short_lambda ~attrs env =
   try_parse env begin fun env ->
     let error_state = !(env.errors) in
     let param_list = parameter_list_remain env in
-    if !(env.errors) != error_state then begin
+    if not (phys_equal !(env.errors) error_state) then begin
       env.errors := error_state;
       None
     end else begin
       let ret = hint_return_opt env in
-      if !(env.errors) != error_state then begin
+      if not (phys_equal !(env.errors) error_state) then begin
         env.errors := error_state;
         None
       end else if not (peek env = Tlambda)
@@ -3361,16 +3362,16 @@ and expr_atomic_word ~allow_class ~class_const ~attrs env pos = function
           ("Parse error: "^r^" is supported only as a toplevel "^
           "declaration");
       expr_import r env pos
-  | x when not class_const && String.lowercase_ascii x = "true" ->
+  | x when not class_const && String.lowercase x = "true" ->
       Lint.lowercase_constant pos x;
       pos, True
-  | x when not class_const && String.lowercase_ascii x = "false" ->
+  | x when not class_const && String.lowercase x = "false" ->
       Lint.lowercase_constant pos x;
       pos, False
-  | x when not class_const && String.lowercase_ascii x = "null" ->
+  | x when not class_const && String.lowercase x = "null" ->
       Lint.lowercase_constant pos x;
       pos, Null
-  | x when String.lowercase_ascii x = "array" ->
+  | x when String.lowercase x = "array" ->
       expr_array env pos
   | x ->
       pos, Id (pos, x)
@@ -3513,7 +3514,7 @@ and expr_call_list_element env =
   match L.token env.file env.lb with
     | Trp -> [e], []
     | Tcomma ->
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
       then [e], []
       else begin
         let reg, unpack = expr_call_list_remain env
@@ -3571,7 +3572,7 @@ and collection_field_list_remain env end_sentinel =
       | x when x = end_sentinel ->
           [fd]
       | Tcomma ->
-          if !(env.errors) != error_state
+          if not (phys_equal !(env.errors) error_state)
           then [fd]
           else fd :: collection_field_list_remain env end_sentinel
       | _ ->
@@ -3582,7 +3583,7 @@ and collection_field_list_remain env end_sentinel =
 (*****************************************************************************)
 
 and is_import r =
-  List.mem ["require"; "require_once"; "include"; "include_once"] r
+  List.mem ["require"; "require_once"; "include"; "include_once"] r ~equal:(=)
 
 and expr_import r env start =
   let flavor = match r with
@@ -3749,7 +3750,7 @@ and use_list env =
       let var = ref_variable env in
       match L.token env.file env.lb with
       | Tcomma ->
-          if !(env.errors) != error_state
+          if not (phys_equal !(env.errors) error_state)
           then [var]
           else var :: use_list env
       | Trp ->
@@ -3987,7 +3988,7 @@ and encapsed_nested_inner start frag env =
           (match L.string2 env.file env.lb with
           | Trcb -> ()
           | _ -> error_expect env "}");
-          if !(env.errors) != error_state
+          if not (phys_equal !(env.errors) error_state)
           then [e]
           else get_text () @ e :: encapsed_nested start env
       | _ ->
@@ -4013,7 +4014,7 @@ and encapsed_nested_inner start frag env =
               error_expect env "variable";
               Pos.make env.file env.lb, Null) in
           expect env Trcb;
-          if !(env.errors) != error_state
+          if not (phys_equal !(env.errors) error_state)
           then [result]
           else get_text () @ result :: encapsed_nested start env
       | _ ->
@@ -4024,7 +4025,7 @@ and encapsed_nested_inner start frag env =
       restore_lexbuf_state env.lb saved;
       let error_state = !(env.errors) in
       let e = encapsed_expr env in
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
       then [e]
       else get_text () @ e :: encapsed_nested start env
   | _ -> encapsed_nested_inner start frag env
@@ -4197,7 +4198,7 @@ and array_field_list_remain env terminal acc =
       | x when x = terminal ->
           List.rev acc
       | Tcomma ->
-          if !(env.errors) != error_state
+          if not (phys_equal !(env.errors) error_state)
           then List.rev acc
           else array_field_list_remain env terminal acc
       | _ -> error_expect env ")"; [fd]
@@ -4229,7 +4230,7 @@ and darray_field_list_remain env acc =
       | x when x = Trb ->
           List.rev acc
       | Tcomma ->
-          if !(env.errors) != error_state
+          if not (phys_equal !(env.errors) error_state)
           then List.rev acc
           else darray_field_list_remain env acc
       | _ -> error_expect env "]"; [fd]
@@ -4257,7 +4258,7 @@ and varray_field_list_remain env acc =
       | x when x = Trb ->
           List.rev acc
       | Tcomma ->
-          if !(env.errors) != error_state
+          if not (phys_equal !(env.errors) error_state)
           then List.rev acc
           else varray_field_list_remain env acc
       | _ -> error_expect env "]"; [fd]
@@ -4289,7 +4290,7 @@ and shape_field_list_remain env =
       | Trp ->
           [fd]
       | Tcomma ->
-          if !(env.errors) != error_state
+          if not (phys_equal !(env.errors) error_state)
           then [fd]
           else fd :: shape_field_list_remain env
       | _ -> error_expect env ")"; [fd]
@@ -4417,7 +4418,7 @@ and xhp_attributes env =
       expect env Teq;
       let attr_value = xhp_attribute_value env in
       let attr = Xhp_simple (attr_name, attr_value) in
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
       then
         [attr], true
       else
@@ -4502,7 +4503,7 @@ and xhp_body_inner pos name env =
       let error_state = !(env.errors) in
       let e = expr { env with priority = 0 } in
       expect env Trcb;
-      if !(env.errors) != error_state
+      if not (phys_equal !(env.errors) error_state)
       then [e]
       else e :: xhp_body pos name env
   | Tlt ->
@@ -4610,7 +4611,7 @@ and hint_shape_info_remain env =
             si_shape_field_list = [fd];
           }
       | Tcomma ->
-          if !(env.errors) != error_state
+          if not (phys_equal !(env.errors) error_state)
           then {
             si_allows_unknown_fields = false;
             si_shape_field_list = [fd];
@@ -4727,7 +4728,9 @@ and namespace_use_list env allow_change_kind end_token kind acc =
     | _ ->
         L.back env.lb;
         let str = snd id1 in
-        let start = try (String.rindex str '\\') + 1 with Not_found -> 0 in
+        let start = match String.rindex str '\\' with
+          | Some i -> i + 1
+          | None -> 0 in
         let len = (String.length str) - start in
         fst id1, String.sub str start len
   in

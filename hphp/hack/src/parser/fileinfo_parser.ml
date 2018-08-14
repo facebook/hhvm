@@ -8,7 +8,7 @@
  *)
 
 (*  Quick FileInfo parser that parses only the basics *)
-open Hh_core
+open Core_kernel
 open FileInfo
 
 open Lexer_hack

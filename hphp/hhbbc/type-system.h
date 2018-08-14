@@ -600,6 +600,7 @@ private:
   friend bool is_ref_with_inner(const Type&);
   friend Type wait_handle_inner(const Type&);
   friend Type sval(SString);
+  friend Type sval_nonstatic(SString);
   friend Type ival(int64_t);
   friend Type dval(double);
   friend Type aval(SArray);
@@ -967,6 +968,7 @@ Type aval(SArray);
 Type vec_val(SArray);
 Type dict_val(SArray);
 Type keyset_val(SArray);
+Type sval_nonstatic(SString);
 
 /*
  * Create static empty array or string types.

@@ -219,6 +219,7 @@ auto const with_data = folly::lazy([] {
     ival(2),
     dval(2.0),
     sval(s_test.get()),
+    sval_nonstatic(s_test.get()),
     aval(test_array_map_value()),
     aval(test_array_packed_value())
   };
@@ -601,8 +602,19 @@ TEST(Type, CouldBeValues) {
     aval(test_array_packed_value())));
   EXPECT_TRUE(dval(2.0).couldBe(dval(2.0)));
   EXPECT_FALSE(dval(2.0).couldBe(dval(3.0)));
+
   EXPECT_FALSE(sval(s_test.get()).couldBe(sval(s_A.get())));
   EXPECT_TRUE(sval(s_test.get()).couldBe(sval(s_test.get())));
+  EXPECT_FALSE(
+    sval_nonstatic(s_test.get()).couldBe(sval_nonstatic(s_A.get()))
+  );
+  EXPECT_TRUE(
+    sval_nonstatic(s_test.get()).couldBe(sval_nonstatic(s_test.get()))
+  );
+  EXPECT_TRUE(sval(s_test.get()).couldBe(sval_nonstatic(s_test.get())));
+  EXPECT_TRUE(sval_nonstatic(s_test.get()).couldBe(sval(s_test.get())));
+  EXPECT_FALSE(sval(s_test.get()).couldBe(sval_nonstatic(s_A.get())));
+  EXPECT_FALSE(sval_nonstatic(s_test.get()).couldBe(sval(s_A.get())));
 }
 
 TEST(Type, Unc) {
@@ -667,6 +679,8 @@ TEST(Type, Option) {
   EXPECT_TRUE(dval(3.0).subtypeOf(BOptDbl));
 
   EXPECT_TRUE(sval(s_test.get()).subtypeOf(BOptSStr));
+  EXPECT_TRUE(sval(s_test.get()).subtypeOf(BOptStr));
+  EXPECT_TRUE(sval_nonstatic(s_test.get()).subtypeOf(BOptStr));
   EXPECT_TRUE(TSStr.subtypeOf(BOptSStr));
   EXPECT_TRUE(TInitNull.subtypeOf(BOptSStr));
   EXPECT_TRUE(!TUninit.subtypeOf(BOptSStr));
@@ -709,10 +723,12 @@ TEST(Type, Option) {
   }
 
   EXPECT_TRUE(is_opt(opt(sval(s_test.get()))));
+  EXPECT_TRUE(is_opt(opt(sval_nonstatic(s_test.get()))));
   EXPECT_TRUE(is_opt(opt(ival(2))));
   EXPECT_TRUE(is_opt(opt(dval(2.0))));
 
   EXPECT_FALSE(is_opt(sval(s_test.get())));
+  EXPECT_FALSE(is_opt(sval_nonstatic(s_test.get())));
   EXPECT_FALSE(is_opt(ival(2)));
   EXPECT_FALSE(is_opt(dval(2.0)));
 
@@ -730,7 +746,11 @@ TEST(Type, OptUnionOf) {
   EXPECT_EQ(opt(ival(2)), union_of(ival(2), TInitNull));
   EXPECT_EQ(opt(dval(2.0)), union_of(TInitNull, dval(2.0)));
   EXPECT_EQ(opt(sval(s_test.get())), union_of(sval(s_test.get()), TInitNull));
+  EXPECT_EQ(opt(sval_nonstatic(s_test.get())),
+            union_of(sval_nonstatic(s_test.get()), TInitNull));
   EXPECT_EQ(opt(sval(s_test.get())), union_of(TInitNull, sval(s_test.get())));
+  EXPECT_EQ(opt(sval_nonstatic(s_test.get())),
+            union_of(TInitNull, sval_nonstatic(s_test.get())));
 
   EXPECT_EQ(TOptBool, union_of(TOptFalse, TOptTrue));
   EXPECT_EQ(TOptBool, union_of(TOptTrue, TOptFalse));
@@ -745,6 +765,9 @@ TEST(Type, OptUnionOf) {
 
   EXPECT_EQ(TOptSStr,
             union_of(opt(sval(s_test.get())), opt(sval(s_TestClass.get()))));
+  EXPECT_EQ(TOptStr,
+            union_of(opt(sval_nonstatic(s_test.get())),
+                     opt(sval_nonstatic(s_TestClass.get()))));
 
   EXPECT_EQ(TOptInt, union_of(opt(ival(2)), opt(ival(3))));
   EXPECT_EQ(TOptDbl, union_of(opt(dval(2.0)), opt(dval(3.0))));
@@ -780,6 +803,7 @@ TEST(Type, OptUnionOf) {
 TEST(Type, OptTV) {
   EXPECT_TRUE(!tv(opt(ival(2))));
   EXPECT_TRUE(!tv(opt(sval(s_test.get()))));
+  EXPECT_TRUE(!tv(opt(sval_nonstatic(s_test.get()))));
   EXPECT_TRUE(!tv(opt(dval(2.0))));
   EXPECT_TRUE(!tv(TOptFalse));
   EXPECT_TRUE(!tv(TOptTrue));
@@ -796,6 +820,13 @@ TEST(Type, OptCouldBe) {
     { opt(sval(s_test.get())), TInitNull },
     { opt(sval(s_test.get())), TSStr },
     { opt(sval(s_test.get())), sval(s_test.get()) },
+    { opt(sval(s_test.get())), sval_nonstatic(s_test.get()) },
+
+    { opt(sval_nonstatic(s_test.get())), TStr },
+    { opt(sval_nonstatic(s_test.get())), TInitNull },
+    { opt(sval_nonstatic(s_test.get())), TSStr },
+    { opt(sval_nonstatic(s_test.get())), sval_nonstatic(s_test.get()) },
+    { opt(sval_nonstatic(s_test.get())), sval(s_test.get()) },
 
     { opt(ival(2)), TInt },
     { opt(ival(2)), TInitNull },
@@ -2100,6 +2131,7 @@ TEST(Type, ArrKey) {
   EXPECT_TRUE(TStr.subtypeOf(BArrKey));
   EXPECT_TRUE(ival(0).subtypeOf(BArrKey));
   EXPECT_TRUE(sval(s_test.get()).subtypeOf(BArrKey));
+  EXPECT_TRUE(sval_nonstatic(s_test.get()).subtypeOf(BArrKey));
 
   EXPECT_TRUE(TInt.subtypeOrNull(BArrKey));
   EXPECT_TRUE(TStr.subtypeOrNull(BArrKey));
@@ -2135,6 +2167,7 @@ TEST(Type, ArrKey) {
   EXPECT_TRUE(union_of(TInt, TSStr) == TUncArrKey);
   EXPECT_TRUE(union_of(ival(1), TStr) == TArrKey);
   EXPECT_TRUE(union_of(ival(1), sval(s_test.get())) == TUncArrKey);
+  EXPECT_TRUE(union_of(ival(1), sval_nonstatic(s_test.get())) == TArrKey);
   EXPECT_TRUE(union_of(TArrKey, TInitNull) == TOptArrKey);
   EXPECT_TRUE(union_of(TUncArrKey, TInitNull) == TOptUncArrKey);
 
@@ -2199,7 +2232,7 @@ TEST(Type, LoosenStaticness) {
     { TUncArrKey, TArrKey },
     { TUnc, TCell },
     { TInitUnc, TInitCell },
-    { sval(s_test.get()), TStr },
+    { sval(s_test.get()), sval_nonstatic(s_test.get()) },
     { sarr_packedn(TInt), arr_packedn(TInt) },
     { sarr_packed({TInt, TBool}), arr_packed({TInt, TBool}) },
     { sarr_mapn(TSStr, TInt), arr_mapn(TStr, TInt) },
@@ -2305,6 +2338,7 @@ TEST(Type, LoosenValues) {
     { ival(123), TInt },
     { dval(3.14), TDbl },
     { sval(s_test.get()), TSStr },
+    { sval_nonstatic(s_test.get()), TStr },
     { aval(test_array_packed_value()), TSPArrN },
     { ref_to(TInt), TRef },
     { arr_packedn(TInt), TPArrN },
@@ -2400,6 +2434,69 @@ TEST(Type, LoosenDVArrayness) {
     EXPECT_EQ(loosen_dvarrayness(p.first), p.second);
     EXPECT_EQ(loosen_dvarrayness(opt(p.first)), opt(p.second));
   }
+}
+
+TEST(Type, StrValues) {
+  auto const t1 = sval(s_test.get());
+  auto const t2 = sval_nonstatic(s_test.get());
+  auto const t3 = sval(s_A.get());
+  auto const t4 = sval_nonstatic(s_test.get());
+  auto const t5 = sval_nonstatic(s_A.get());
+
+  EXPECT_TRUE(t1.subtypeOf(t2));
+  EXPECT_TRUE(t1.subtypeOf(TSStr));
+  EXPECT_TRUE(t1.subtypeOf(TStr));
+  EXPECT_FALSE(t1.subtypeOf(t3));
+
+  EXPECT_FALSE(t2.subtypeOf(t1));
+  EXPECT_FALSE(t2.subtypeOf(TSStr));
+  EXPECT_TRUE(t2.subtypeOf(TStr));
+  EXPECT_FALSE(t2.subtypeOf(t3));
+  EXPECT_TRUE(t2.subtypeOf(t4));
+  EXPECT_FALSE(t2.subtypeOf(t5));
+
+  EXPECT_FALSE(TStr.subtypeOf(t1));
+  EXPECT_FALSE(TSStr.subtypeOf(t2));
+  EXPECT_FALSE(TStr.subtypeOf(t2));
+  EXPECT_FALSE(TSStr.subtypeOf(t2));
+  EXPECT_FALSE(t2.subtypeOf(t1));
+  EXPECT_FALSE(t3.subtypeOf(t2));
+  EXPECT_TRUE(t4.subtypeOf(t2));
+  EXPECT_FALSE(t5.subtypeOf(t2));
+
+  EXPECT_TRUE(t1.couldBe(t2));
+  EXPECT_FALSE(t1.couldBe(t3));
+  EXPECT_TRUE(t1.couldBe(TStr));
+  EXPECT_TRUE(t1.couldBe(TSStr));
+
+  EXPECT_TRUE(t2.couldBe(t1));
+  EXPECT_FALSE(t2.couldBe(t3));
+  EXPECT_TRUE(t2.couldBe(t4));
+  EXPECT_FALSE(t2.couldBe(t5));
+  EXPECT_TRUE(t2.couldBe(TStr));
+  EXPECT_TRUE(t2.couldBe(TSStr));
+
+  EXPECT_TRUE(TSStr.couldBe(t1));
+  EXPECT_TRUE(TStr.couldBe(t1));
+  EXPECT_TRUE(TSStr.couldBe(t2));
+  EXPECT_TRUE(TStr.couldBe(t2));
+  EXPECT_FALSE(t3.couldBe(t1));
+  EXPECT_FALSE(t3.couldBe(t2));
+  EXPECT_TRUE(t4.couldBe(t2));
+  EXPECT_FALSE(t5.couldBe(t2));
+
+  EXPECT_TRUE(union_of(t1, t1) == t1);
+  EXPECT_TRUE(union_of(t2, t2) == t2);
+  EXPECT_TRUE(union_of(t1, t2) == t2);
+  EXPECT_TRUE(union_of(t2, t1) == t2);
+  EXPECT_TRUE(union_of(t1, t3) == TSStr);
+  EXPECT_TRUE(union_of(t3, t1) == TSStr);
+  EXPECT_TRUE(union_of(t2, t3) == TStr);
+  EXPECT_TRUE(union_of(t3, t2) == TStr);
+  EXPECT_TRUE(union_of(t2, t4) == t2);
+  EXPECT_TRUE(union_of(t4, t2) == t2);
+  EXPECT_TRUE(union_of(t2, t5) == TStr);
+  EXPECT_TRUE(union_of(t5, t2) == TStr);
 }
 
 TEST(Type, ContextDependent) {

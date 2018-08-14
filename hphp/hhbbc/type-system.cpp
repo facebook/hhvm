@@ -67,8 +67,10 @@ constexpr int kTypeWidenMaxDepth = 8;
 bool mayHaveData(trep bits) {
   bits &= ~BUninit;
   switch (bits) {
-  case BSStr:    case BObj:    case BInt:    case BDbl:
-  case BOptSStr: case BOptObj: case BOptInt: case BOptDbl:
+  case BSStr:    case BStr:
+  case BOptSStr: case BOptStr:
+  case BObj:     case BInt:    case BDbl:
+  case BOptObj:  case BOptInt: case BOptDbl:
   case BCls:
   case BArr:     case BSArr:     case BCArr:
   case BArrN:    case BSArrN:    case BCArrN:
@@ -130,7 +132,6 @@ bool mayHaveData(trep bits) {
   case BNull:
   case BNum:
   case BBool:
-  case BStr:
   case BArrE:
   case BVecE:
   case BDictE:
@@ -146,7 +147,6 @@ bool mayHaveData(trep bits) {
   case BOptBool:
   case BOptNum:
   case BOptCStr:
-  case BOptStr:
   case BOptSArrE:
   case BOptCArrE:
   case BOptArrE:
@@ -1844,7 +1844,7 @@ bool Type::couldBe(const Type& o) const {
   if (isect == 0) return false;
   // just an optimization; if the intersection contains one of these,
   // we're done because they don't support data.
-  if (isect & (BNull | BBool | BArrLikeE | BCStr)) return true;
+  if (isect & (BNull | BBool | BArrLikeE)) return true;
   // hasData is actually cheaper than mayHaveData, so do those checks first
   if (!hasData() || !o.hasData()) return true;
   // This looks like it could be problematic - eg BCell does not
@@ -2005,6 +2005,14 @@ Type wait_handle_inner(const Type& t) {
 Type sval(SString val) {
   assert(val->isStatic());
   auto r        = Type { BSStr };
+  r.m_data.sval = val;
+  r.m_dataTag   = DataTag::Str;
+  return r;
+}
+
+Type sval_nonstatic(SString val) {
+  assert(val->isStatic());
+  auto r        = Type { BStr };
   r.m_data.sval = val;
   r.m_dataTag   = DataTag::Str;
   return r;
@@ -2786,10 +2794,12 @@ Type scalarize(Type t) {
       t.m_bits &= BNull | BBool | BSArrE | BSVecE | BSDictE | BSKeysetE;
     case DataTag::Int:
     case DataTag::Dbl:
-    case DataTag::Str:
       return t;
     case DataTag::ArrLikeVal:
       t.m_bits &= BSArrN | BSVecN | BSDictN | BSKeysetN;
+      return t;
+    case DataTag::Str:
+      t.m_bits &= BSStr;
       return t;
     case DataTag::ArrLikeMap:
     case DataTag::ArrLikePacked:
@@ -3534,12 +3544,13 @@ Type stack_flav(Type a) {
 }
 
 Type loosen_staticness(Type t) {
+  auto bits = t.m_bits;
+  if (TInitUnc.subtypeOf(bits)) return union_of(t, TInitCell);
+
   auto const check = [&] (trep a) {
-    if (t.m_bits & a) t.m_bits |= a;
+    if (bits & a) bits |= a;
   };
-  // Need to remove any constant value from a string because a TStr cannot have
-  // one.
-  if (t.couldBe(BStr)) t |= TStr;
+  check(BStr);
   check(BPArrE);
   check(BPArrN);
   check(BVArrE);
@@ -3552,6 +3563,9 @@ Type loosen_staticness(Type t) {
   check(BDictN);
   check(BKeysetE);
   check(BKeysetN);
+
+  assertx(isPredefined(bits));
+  t.m_bits = bits;
 
   switch (t.m_dataTag) {
     case DataTag::None:

@@ -543,15 +543,15 @@ module type S = sig
   val cannot_return_borrowed_value_as_immutable: Pos.t -> Pos.t -> unit
   val decl_override_missing_hint: Pos.t -> unit
   val let_var_immutability_violation : Pos.t -> string -> unit
-  val onlyrx_if_rxfunc_invalid_location: Pos.t -> unit
-  val no_onlyrx_if_rxfunc_for_rx_if_args: Pos.t -> unit
+  val atmost_rx_as_rxfunc_invalid_location: Pos.t -> unit
+  val no_atmost_rx_as_rxfunc_for_rx_if_args: Pos.t -> unit
   val coroutine_in_constructor: Pos.t -> unit
   val illegal_return_by_ref: Pos.t -> unit
   val illegal_by_ref_expr: Pos.t -> string -> unit
   val variadic_byref_param: Pos.t -> unit
   val reference_in_strict_mode: Pos.t -> unit
-  val invalid_type_for_onlyrx_if_rxfunc_parameter: Pos.t -> string -> unit
-  val missing_annotation_for_onlyrx_if_rxfunc_parameter: Pos.t -> unit
+  val invalid_type_for_atmost_rx_as_rxfunc_parameter: Pos.t -> string -> unit
+  val missing_annotation_for_atmost_rx_as_rxfunc_parameter: Pos.t -> unit
   val mutable_in_nonreactive_context: Pos.t -> unit
   val invalid_argument_of_rx_mutable_function: Pos.t -> unit
   val return_void_to_rx_mismatch: pos1_has_attribute:bool -> Pos.t -> Pos.t -> unit

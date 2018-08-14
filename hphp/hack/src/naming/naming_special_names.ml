@@ -131,8 +131,12 @@ module UserAttributes = struct
   let uaOptionalDestruct    = "__OptionalDestruct"
   let uaOnlyRxIfImpl        = "__OnlyRxIfImpl"
   let uaProbabilisticModel  = "__PPL"
-  let uaOnlyRxIfRxFunc      = "__OnlyRxIfRxFunc"
-  let uaOnlyRxIfArgs        = "__OnlyRxIfArgs"
+  (* DEPRECATED: remove after codemodding www *)
+  let uaOnlyRxIfRxFunc_do_not_use = "__OnlyRxIfRxFunc"
+  let uaAtMostRxAsFunc      = "__AtMostRxAsFunc"
+  (* DEPRECATED: remove after codemodding www *)
+  let uaOnlyRxIfArgs_do_not_use = "__OnlyRxIfArgs"
+  let uaAtMostRxAsArgs      = "__AtMostRxAsArgs"
   let uaSealed              = "__Sealed"
   let uaReturnsVoidToRx     = "__ReturnsVoidToRx"
   let uaMaybeMutable        = "__MaybeMutable"
@@ -160,13 +164,15 @@ module UserAttributes = struct
       uaOptionalDestruct;
       uaOnlyRxIfImpl;
       uaProbabilisticModel;
-      uaOnlyRxIfRxFunc;
-      uaOnlyRxIfArgs;
+      uaOnlyRxIfRxFunc_do_not_use;
+      uaOnlyRxIfArgs_do_not_use;
       uaSealed;
       uaReturnsVoidToRx;
       uaMaybeMutable;
       uaRxOfScope;
       uaLateInit;
+      uaAtMostRxAsFunc;
+      uaAtMostRxAsArgs;
     ]
 end
 

@@ -936,7 +936,7 @@ and subtype_fun_params_reactivity
     | _, Tfun tfun when tfun.ft_reactive <> Nonreactive -> res
     | _, Tfun _ ->
       with_error (fun () -> Errors.rx_parameter_condition_mismatch
-        SN.UserAttributes.uaOnlyRxIfRxFunc p_sub.fp_pos p_super.fp_pos) res
+        SN.UserAttributes.uaAtMostRxAsFunc p_sub.fp_pos p_super.fp_pos) res
     (* parameter type is not function - error will be reported in different place *)
     | _ -> res
     end

@@ -256,7 +256,8 @@ let enforce_param_not_disposable env param ty =
 
 let fun_reactivity env attrs =
   let r = Decl.fun_reactivity env attrs in
-  if Attributes.mem Naming_special_names.UserAttributes.uaOnlyRxIfArgs attrs
+  let module UA = Naming_special_names.UserAttributes in
+  if Attributes.mem2 UA.uaOnlyRxIfArgs_do_not_use UA.uaAtMostRxAsArgs attrs
   then MaybeReactive r
   else r
 
@@ -324,7 +325,8 @@ let make_param_local_ty attrs env param =
         | Some r -> r
         | None -> env, ty
         end
-      | _ when Attributes.mem SN.UserAttributes.uaOnlyRxIfArgs attrs ->
+      | _ when Attributes.mem2 SN.UserAttributes.uaOnlyRxIfArgs_do_not_use
+                SN.UserAttributes.uaAtMostRxAsArgs attrs ->
         let env, ty = Phase.localize ~ety_env env ty in
         (* expand type to track aliased function types *)
         let env, expanded_ty = Env.expand_type env ty in
@@ -360,7 +362,7 @@ let make_param_local_ty attrs env param =
       r, Tarraykind (AKvarray arr_values)
     | x -> x
   in
-  Typing_reactivity.disallow_onlyrx_if_rxfunc_on_non_functions env param ty;
+  Typing_reactivity.disallow_atmost_rx_as_rxfunc_on_non_functions env param ty;
   env, ty
 
 (* Given a localized parameter type and parameter information, infer

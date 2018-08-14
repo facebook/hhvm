@@ -16,8 +16,14 @@ module SN = Naming_special_names
 let mem x xs =
   List.exists xs (fun { ua_name; _ } -> x = snd ua_name)
 
+let mem2 x1 x2 xs =
+  List.exists xs (fun { ua_name = (_, n); _ } -> x1 = n || x2 = n)
+
 let find x xs =
   List.find xs (fun { ua_name; _ } -> x = snd ua_name)
+
+let find2 x1 x2 xs =
+  List.find xs (fun { ua_name = (_, n); _ } -> x1 = n || x2 = n)
 
 (* TODO: generalize the arity check / argument check here to handle attributes
  * in general, not just __Deprecated *)

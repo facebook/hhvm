@@ -305,18 +305,19 @@ let check_foreach_collection env p t =
       else true in
   ignore (check t)
 
-let disallow_onlyrx_if_rxfunc_on_non_functions env param param_ty =
+let disallow_atmost_rx_as_rxfunc_on_non_functions env param param_ty =
   let module UA = Naming_special_names.UserAttributes in
-  if Attributes.mem UA.uaOnlyRxIfRxFunc param.Nast.param_user_attributes
+  if Attributes.mem2 UA.uaOnlyRxIfRxFunc_do_not_use
+    UA.uaAtMostRxAsFunc param.Nast.param_user_attributes
   then begin
     if param.Nast.param_hint = None
-    then Errors.missing_annotation_for_onlyrx_if_rxfunc_parameter param.Nast.param_pos
+    then Errors.missing_annotation_for_atmost_rx_as_rxfunc_parameter param.Nast.param_pos
     else match TU.non_null env param_ty with
     (* if parameter has <<__OnlyRxIfRxFunc>> annotation then:
        - parameter should be typed as function *)
     | _, (_, Tfun _) -> ()
     | _ ->
-      Errors.invalid_type_for_onlyrx_if_rxfunc_parameter
+      Errors.invalid_type_for_atmost_rx_as_rxfunc_parameter
         (Reason.to_pos (fst param_ty))
         (Typing_print.full env param_ty)
   end

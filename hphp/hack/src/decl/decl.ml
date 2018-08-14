@@ -57,7 +57,8 @@ let fun_reactivity env user_attributes =
   else Nonreactive
 
 let adjust_reactivity_of_mayberx_parameter attrs reactivity param_ty =
-  if Attributes.mem SN.UserAttributes.uaOnlyRxIfArgs attrs
+  if Attributes.mem2 SN.UserAttributes.uaAtMostRxAsArgs
+      SN.UserAttributes.uaOnlyRxIfArgs_do_not_use attrs
   then make_function_type_mayberx reactivity param_ty
   else param_ty
 
@@ -259,7 +260,8 @@ and make_param_ty env attrs reactivity param =
   let ty = adjust_reactivity_of_mayberx_parameter attrs reactivity ty in
   let mode = get_param_mode param.param_is_reference param.param_callconv in
   let rx_condition =
-    if Attributes.mem SN.UserAttributes.uaOnlyRxIfRxFunc param.param_user_attributes
+    if Attributes.mem2 SN.UserAttributes.uaOnlyRxIfRxFunc_do_not_use
+      SN.UserAttributes.uaAtMostRxAsFunc param.param_user_attributes
     then Some Param_rxfunc
     else
       Attributes.find SN.UserAttributes.uaOnlyRxIfImpl param.param_user_attributes

@@ -1493,17 +1493,17 @@ let rx_is_enabled_invalid_location pos =
     "and that if-statement must be the only statement in the function body."
   )
 
-let onlyrx_if_rxfunc_invalid_location pos =
+let atmost_rx_as_rxfunc_invalid_location pos =
   add (NastCheck.err_code NastCheck.MaybeRxInvalidLocation) pos (
-    "<<__OnlyRxIfRxFunc>> attribute can only be put on parameters of \
+    "<<__AtMostRxAsFunc>> attribute can only be put on parameters of \
     conditionally reactive function or method annotated with \
-    <<__OnlyRxIfArgs>> attribute."
+    <<__AtMostRxAsArgs>> attribute."
   )
 
-let no_onlyrx_if_rxfunc_for_rx_if_args pos =
+let no_atmost_rx_as_rxfunc_for_rx_if_args pos =
   add (NastCheck.err_code NastCheck.NoOnlyrxIfRxfuncForRxIfArgs) pos (
-    "Function or method annotated with <<__OnlyRxIfArgs>> attribute \
-    should have at least one parameter with <<__OnlyRxIfRxFunc>> or \
+    "Function or method annotated with <<__AtMostRxAsArgs>> attribute \
+    should have at least one parameter with <<__AtMostRxAsFunc>> or \
     <<__OnlyRxIfImpl>> annotations."
   )
 
@@ -3190,15 +3190,15 @@ let let_var_immutability_violation pos id =
   add (Typing.err_code Typing.LetVarImmutabilityViolation) pos
     ("Let variables are immutable. Using let variable " ^ id ^ " in write context is not allowed.")
 
-let invalid_type_for_onlyrx_if_rxfunc_parameter pos type_str =
+let invalid_type_for_atmost_rx_as_rxfunc_parameter pos type_str =
   add (Typing.err_code Typing.InvalidTypeForOnlyrxIfRxfuncParameter) pos (
-    "Parameter annotated with <<__OnlyRxIfRxFunc>> attribute must be function, \
+    "Parameter annotated with <<__AtMostRxAsFunc>> attribute must be function, \
     now '" ^ type_str ^ "'."
   )
 
-let missing_annotation_for_onlyrx_if_rxfunc_parameter pos =
+let missing_annotation_for_atmost_rx_as_rxfunc_parameter pos =
   add (Typing.err_code Typing.MissingAnnotationForOnlyrxIfRxfuncParameter) pos (
-    "Missing function type annotation on parameter marked with <<__OnlyRxIfRxFunc>> attribute."
+    "Missing function type annotation on parameter marked with <<__AtMostRxAsFunc>> attribute."
   )
 
 let binding_ref_in_array pos =

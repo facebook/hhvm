@@ -80,9 +80,11 @@ let error_if_has_rx_on_scope env attrs =
   error_on_attr env attrs
     SN.UserAttributes.uaRxOfScope Errors.misplaced_rx_of_scope
 
-let error_if_has_onlyrx_if_rxfunc_attribute env attrs =
+let error_if_has_atmost_rx_as_rxfunc_attribute env attrs =
   error_on_attr env attrs
-    SN.UserAttributes.uaOnlyRxIfRxFunc Errors.onlyrx_if_rxfunc_invalid_location
+    SN.UserAttributes.uaOnlyRxIfRxFunc_do_not_use Errors.atmost_rx_as_rxfunc_invalid_location;
+  error_on_attr env attrs
+    SN.UserAttributes.uaAtMostRxAsFunc Errors.atmost_rx_as_rxfunc_invalid_location;
 
 module CheckFunctionBody = struct
   let rec stmt f_type env st = match f_type, st with
@@ -473,7 +475,7 @@ and func ~is_efun env f named_body =
   if env.is_reactive
   then ensure_single_reactivity_attribute f.f_user_attributes;
 
-  error_if_has_onlyrx_if_rxfunc_attribute env f.f_user_attributes;
+  error_if_has_atmost_rx_as_rxfunc_attribute env f.f_user_attributes;
   check_maybe_rx_attributes_on_params env f.f_user_attributes f.f_params;
 
   if f.f_ret_by_ref
@@ -647,7 +649,7 @@ and class_ tenv c =
   let tenv = add_constraints (fst c.c_name) tenv constraints in
   let env = { env with tenv = Env.set_mode tenv c.c_mode } in
 
-  error_if_has_onlyrx_if_rxfunc_attribute env c.c_user_attributes;
+  error_if_has_atmost_rx_as_rxfunc_attribute env c.c_user_attributes;
   error_if_has_rx_on_scope env c.c_user_attributes;
 
   (* Const handling:
@@ -991,7 +993,7 @@ and method_ (env, is_static) m =
   then ensure_single_reactivity_attribute m.m_user_attributes;
 
   check_conditionally_reactive_annotations env.is_reactive p name m.m_user_attributes;
-  error_if_has_onlyrx_if_rxfunc_attribute env m.m_user_attributes;
+  error_if_has_atmost_rx_as_rxfunc_attribute env m.m_user_attributes;
   check_maybe_rx_attributes_on_params env m.m_user_attributes m.m_params;
 
   let byref = List.find m.m_params ~f:(fun x -> x.param_is_reference) in
@@ -1038,28 +1040,30 @@ and method_ (env, is_static) m =
 
 and check_maybe_rx_attributes_on_params env parent_attrs params =
   let parent_only_rx_if_args =
-    Attributes.find SN.UserAttributes.uaOnlyRxIfArgs parent_attrs in
-  let check_param seen_onlyrx_if_rxfunc p =
+    Attributes.find2 SN.UserAttributes.uaOnlyRxIfArgs_do_not_use
+      SN.UserAttributes.uaAtMostRxAsArgs parent_attrs in
+  let check_param seen_atmost_rx_as_rxfunc p =
     let only_rx_if_rxfunc_attr =
-      Attributes.find SN.UserAttributes.uaOnlyRxIfRxFunc p.param_user_attributes in
+      Attributes.find2 SN.UserAttributes.uaOnlyRxIfRxFunc_do_not_use
+        SN.UserAttributes.uaAtMostRxAsFunc p.param_user_attributes in
     let only_rx_if_impl_attr =
       Attributes.find SN.UserAttributes.uaOnlyRxIfImpl p.param_user_attributes in
     match only_rx_if_rxfunc_attr, only_rx_if_impl_attr with
     | Some { ua_name = (p, _); _ }, _ ->
       if parent_only_rx_if_args = None || not env.is_reactive
-      then Errors.onlyrx_if_rxfunc_invalid_location p;
+      then Errors.atmost_rx_as_rxfunc_invalid_location p;
       true
     | _, Some { ua_name = (p, _); ua_params; _ } ->
       if parent_only_rx_if_args = None || not env.is_reactive
-      then Errors.onlyrx_if_rxfunc_invalid_location p
+      then Errors.atmost_rx_as_rxfunc_invalid_location p
       else check_conditionally_reactive_annotation_params ~is_method:false p ua_params;
       true
-    | _ ->  seen_onlyrx_if_rxfunc in
-  let has_param_with_onlyrx_if_rxfunc =
+    | _ ->  seen_atmost_rx_as_rxfunc in
+  let has_param_with_atmost_rx_as_rxfunc =
     Core_list.fold_left params ~init:false ~f:check_param in
-  match parent_only_rx_if_args, has_param_with_onlyrx_if_rxfunc with
+  match parent_only_rx_if_args, has_param_with_atmost_rx_as_rxfunc with
   | Some { ua_name = (p, _); _ }, false ->
-    Errors.no_onlyrx_if_rxfunc_for_rx_if_args p
+    Errors.no_atmost_rx_as_rxfunc_for_rx_if_args p
   | _ -> ()
 
 and param_is_mutable p =

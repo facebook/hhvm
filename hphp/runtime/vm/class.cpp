@@ -2533,7 +2533,9 @@ void Class::setProperties() {
 
           lateInitCheck(prop);
 
-          prop.cls = this;
+          if (!(preProp->attrs() & AttrTrait)) {
+            prop.cls = this;
+          }
           prop.docComment = preProp->docComment();
 
           auto const& tc = preProp->typeConstraint();
@@ -2598,7 +2600,9 @@ void Class::setProperties() {
 
           lateInitCheck(prop);
 
-          prop.cls = this;
+          if (!(preProp->attrs() & AttrTrait)) {
+            prop.cls = this;
+          }
           prop.docComment = preProp->docComment();
           if ((prop.attrs & (AttrPublic|AttrProtected|AttrPrivate))
               == AttrProtected) {

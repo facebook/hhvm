@@ -195,6 +195,7 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
   if (m_attrs & AttrPrivate) { out << "private "; }
   if (m_attrs & AttrPersistent) { out << "(persistent) "; }
   if (m_attrs & AttrIsImmutable) { out << "(immutable) "; }
+  if (m_attrs & AttrTrait) { out << "(trait) "; }
   if (m_attrs & AttrNoBadRedeclare) { out << "(no-bad-redeclare) "; }
   if (m_attrs & AttrNoOverride) { out << "(no-override) "; }
   if (m_attrs & AttrSystemInitialValue) { out << "(system-initial-val) "; }

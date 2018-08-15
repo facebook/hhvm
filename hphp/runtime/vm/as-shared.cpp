@@ -51,7 +51,7 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrNoOverride,           C|F|T,   "no_override");      \
   X(AttrFinal,                C|F|T,   "final");            \
   X(AttrSealed,               C,       "sealed");           \
-  X(AttrTrait,                C|F,     "trait");            \
+  X(AttrTrait,                C|F|P,   "trait");            \
   X(AttrUnique,               C|F,     "unique");           \
   X(AttrBuiltin,              C|F,     "builtin");          \
   X(AttrPersistent,           C|F|A,   "persistent");       \

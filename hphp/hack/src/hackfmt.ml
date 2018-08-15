@@ -450,40 +450,37 @@ let () =
   let start_time = Unix.gettimeofday () in
   if not env.Env.test then Logger.init start_time;
 
-  try
-    let options = validate_options env options in
-    main env options;
+  let err_msg, exit_code =
+    try
+      let options = validate_options env options in
+      main env options;
+      None, 0
+    with exn ->
+      let exit_code = get_exception_exit_value exn in
+      if exit_code = 255 then Printexc.print_backtrace stderr;
+      let err_str = get_error_string_from_exn exn in
+      let err_msg = match exn with
+        | InvalidSyntax ->
+          err_str
+        | InvalidCliArg s
+        | InvalidDiff s ->
+          err_str ^ ": " ^ s
+        | _ ->
+          err_str ^ ": " ^ (Printexc.to_string exn)
+      in
+      Some err_msg, exit_code
+  in
 
+  if not env.Env.test then begin
     let time_taken = Unix.gettimeofday () -. start_time in
-    if not env.Env.test then
-      Logger.exit
-        ~time_taken
-        ~error:None
-        ~exit_code:None
-        ~mode:env.Env.mode
-        ~file:(text_source_to_filename env.Env.text_source)
-        ~root:env.Env.root;
-  with exn ->
-    let exit_code = get_exception_exit_value exn in
-    if exit_code = 255 then Printexc.print_backtrace stderr;
-    let err_str = get_error_string_from_exn exn in
-    let msg = match exn with
-      | InvalidSyntax ->
-        err_str
-      | InvalidCliArg s
-      | InvalidDiff s ->
-        err_str ^ ": " ^ s
-      | _ ->
-        err_str ^ ": " ^ (Printexc.to_string exn)
-    in
-    let time_taken = Unix.gettimeofday () -. start_time in
-    if not env.Env.test then
-      Logger.exit
-        ~time_taken
-        ~error:(Some msg)
-        ~exit_code:(Some exit_code)
-        ~mode:env.Env.mode
-        ~file:(text_source_to_filename env.Env.text_source)
-        ~root:env.Env.root;
-    eprintf "%s\n" msg;
-    exit exit_code
+    Logger.exit
+      ~time_taken
+      ~error:err_msg
+      ~exit_code:(Some exit_code)
+      ~mode:env.Env.mode
+      ~file:(text_source_to_filename env.Env.text_source)
+      ~root:env.Env.root;
+  end;
+
+  Option.iter err_msg (eprintf "%s\n");
+  exit exit_code

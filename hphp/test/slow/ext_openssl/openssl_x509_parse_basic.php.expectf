@@ -1,4 +1,4 @@
-array(12) {
+array(13) {
   ["name"]=>
   string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"
   ["subject"]=>
@@ -33,6 +33,8 @@ array(12) {
   int(2)
   ["serialNumber"]=>
   string(20) "12593567369101004962"
+  ["signatureAlgorithm"]=>
+  string(21) "sha1WithRSAEncryption"
   ["validFrom"]=>
   string(13) "080630102843Z"
   ["validTo"]=>
@@ -138,7 +140,7 @@ serial:AE:C5:56:CC:72:37:50:A2
     string(7) "CA:TRUE"
   }
 }
-array(12) {
+array(13) {
   ["name"]=>
   string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"
   ["subject"]=>
@@ -173,6 +175,8 @@ array(12) {
   int(2)
   ["serialNumber"]=>
   string(20) "12593567369101004962"
+  ["signatureAlgorithm"]=>
+  string(21) "sha1WithRSAEncryption"
   ["validFrom"]=>
   string(13) "080630102843Z"
   ["validTo"]=>

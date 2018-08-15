@@ -1847,6 +1847,7 @@ const StaticString
   s_hash("hash"),
   s_version("version"),
   s_serialNumber("serialNumber"),
+  s_signatureAlgorithm("signatureAlgorithm"),
   s_validFrom("validFrom"),
   s_validTo("validTo"),
   s_validFrom_time_t("validFrom_time_t"),
@@ -2709,6 +2710,15 @@ Variant HHVM_FUNCTION(openssl_x509_parse, const Variant& x509cert,
 
   ret.set(s_serialNumber, String
           (i2s_ASN1_INTEGER(nullptr, X509_get_serialNumber(cert)), AttachString));
+  // Adding Signature Algorithm
+  BIO *bio_out = BIO_new(BIO_s_mem());
+  SCOPE_EXIT { BIO_free(bio_out); };
+  if (i2a_ASN1_OBJECT(bio_out, X509_get0_tbs_sigalg(cert)->algorithm) > 0) {
+    BUF_MEM *bio_buf;
+    BIO_get_mem_ptr(bio_out, &bio_buf);
+    ret.set(s_signatureAlgorithm,
+            String((char*)bio_buf->data, bio_buf->length, CopyString));
+  }
 
   ASN1_STRING *str = X509_get_notBefore(cert);
   ret.set(s_validFrom, String((char*)str->data, str->length, CopyString));

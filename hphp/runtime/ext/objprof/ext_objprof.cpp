@@ -471,7 +471,10 @@ std::pair<int, double> tvGetSize(
             obj_ref_count,
             ref_adjust
           );
-          if (obj_ref_count > 0) {
+          if (one_bit_refcount) {
+            sized += obj_size_pair.second;
+          } else {
+            assertx(obj_ref_count > 0);
             sized += obj_size_pair.second / (double)(obj_ref_count);
           }
         }
@@ -528,7 +531,11 @@ std::pair<int, double> tvGetSize(
         );
         size += sizeof(*arr);
         size += size_of_array_pair.first;
-        if (arr_ref_count > 0) {
+        if (one_bit_refcount) {
+          sized += sizeof(*arr);
+          sized += size_of_array_pair.second;
+        } else {
+          assertx(arr_ref_count > 0);
           sized += sizeof(*arr) / (double)arr_ref_count;
           sized += size_of_array_pair.second / (double)(arr_ref_count);
         }
@@ -548,7 +555,10 @@ std::pair<int, double> tvGetSize(
       auto resource = tv.m_data.pres;
       auto resource_size = resource->heapSize();
       size += resource_size;
-      if (res_ref_count > 0) {
+      if (one_bit_refcount) {
+        sized += resource_size;
+      } else {
+        assertx(res_ref_count > 0);
         sized += resource_size / (double)(res_ref_count);
       }
       break;
@@ -578,7 +588,10 @@ std::pair<int, double> tvGetSize(
       );
       size += size_of_tv_pair.first;
 
-      if (ref_ref_count > 0) {
+      if (one_bit_refcount) {
+        sized += size_of_tv_pair.second;
+      } else {
+        assertx(ref_ref_count > 0);
         sized += size_of_tv_pair.second / (double)(ref_ref_count);
       }
       break;
@@ -595,7 +608,10 @@ std::pair<int, double> tvGetSize(
           str_ref_count,
           ref_adjust
         );
-        if (str_ref_count > 0) {
+        if (one_bit_refcount) {
+          sized += str->size();
+        } else {
+          assertx(str_ref_count > 0);
           sized += (str->size() / (double)(str_ref_count));
         }
       } else {
@@ -1166,7 +1182,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
       stack.push_back(refname);
       tvGetSize(
         *tv,
-        -1, /* ref_adjust */
+        0, /* ref_adjust */
         nullptr, /* source */
         &stack,
         &pathsToObject,

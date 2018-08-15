@@ -140,10 +140,6 @@ struct Class : AtomicCountable {
    * Instance property information.
    */
   struct Prop {
-    /*
-     * name is "" for inaccessible properties (i.e. private properties declared
-     * by parents).
-     */
     LowStringPtr name;
     LowStringPtr mangledName;
 

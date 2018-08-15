@@ -306,6 +306,15 @@ function test() {
   $aiter2 = new ArrayIterator(array('a' => 'b')); $aiter2->c = 'd';
   $xml1 = simplexml_load_string("<apple />");
   $xml2 = simplexml_load_string("<pie><apple /></pie>");
+  $aa1 = new A(new ToStringThrower());
+  $aa2 = new A(); $aa2->a = 6;
+  $dynamicA = new stdClass(); $dynamicA->a = 'a';
+  $dynamicB = new stdClass(); $dynamicB->b = 'a';
+  $dynamicANAN = new stdClass(); $dynamicANAN->a = NAN;
+  $dynamicAB = new stdClass(); $dynamicAB->a = 'a'; $dynamicAB->b = 'b';
+  $dynamicBCThrows = new stdClass();
+  $dynamicBCThrows->b = new ToStringThrower();
+  $dynamicBCThrows->c = 'c';
 
   $pairs = array(
     array(
@@ -319,6 +328,27 @@ function test() {
     array(
       array('k' => 'SimpleXMLElement 1', 'v' => $xml1),
       array('k' => 'SimpleXMLElement 2', 'v' => $xml2),
+    ),
+    array(
+      // the first property is different, so we should always short-circuit
+      // and never throw
+      array('k' => 'object aa1', 'v' => $aa1),
+      array('k' => 'object aa2', 'v' => $aa2),
+    ),
+    array(
+      // same number of dynamic properties with the same value, but diff name
+      array('k' => 'Dynamic property a', 'v' => $dynamicA),
+      array('k' => 'Dynamic property b', 'v' => $dynamicB),
+    ),
+    array(
+      array('k' => 'Dynamic property a', 'v' => $dynamicA),
+      array('k' => 'Dynamic property NAN', 'v' => $dynamicANAN),
+    ),
+    array(
+      // depending on which operand in the comparison we traverse, we'll either
+      // short-circuit or throw
+      array('k' => 'Dynamic props (a, b)', 'v' => $dynamicAB),
+      array('k' => 'Dynamic props (b, c)', 'v' => $dynamicBCThrows),
     ),
   );
 

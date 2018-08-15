@@ -32273,3 +32273,19 @@ SimpleXMLElement 1 cmp SimpleXMLElement 2:
 F       T       T       T       F       T       F       F       -1
 SimpleXMLElement 2 cmp SimpleXMLElement 1:
 F       T       F       F       F       T       T       T       1
+object aa1 cmp object aa2:
+F       T       T       T       F       T       F       F       -1
+object aa2 cmp object aa1:
+F       T       F       F       F       T       T       T       1
+Dynamic property a cmp Dynamic property b:
+F       T       F       F       F       T       F       F       1
+Dynamic property b cmp Dynamic property a:
+F       T       F       F       F       T       F       F       1
+Dynamic property a cmp Dynamic property NAN:
+F       T       T       T       F       T       T       T       -1
+Dynamic property NAN cmp Dynamic property a:
+F       T       T       T       F       T       T       T       -1
+Dynamic props (a, b) cmp Dynamic props (b, c):
+F       T       F       F       F       T       Err     Err     1
+Dynamic props (b, c) cmp Dynamic props (a, b):
+F       T       Err     Err     Err     Err     Err     F       Err

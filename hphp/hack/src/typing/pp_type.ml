@@ -597,6 +597,11 @@ and pp_class_elt : Format.formatter -> class_elt -> unit = fun fmt x ->
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 
+  Format.fprintf fmt "@[%s =@ " "ce_memoizelsb";
+  Format.fprintf fmt "%B" x.ce_memoizelsb;
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
   Format.fprintf fmt "@[%s =@ " "ce_synthesized";
   Format.fprintf fmt "%B" x.ce_synthesized;
   Format.fprintf fmt "@]";

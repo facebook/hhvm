@@ -92,6 +92,7 @@ and element = {
 
   (* Only relevant for methods *)
   elt_override : bool;
+  elt_memoizelsb : bool;
   elt_abstract : bool;
   elt_reactivity : method_reactivity option;
 

@@ -2853,6 +2853,11 @@ let override_final ~parent ~child =
   add_list (Typing.err_code Typing.OverrideFinal) [child, "You cannot override this method";
             parent, "It was declared as final"]
 
+let override_memoizelsb ~parent ~child =
+  add_list (Typing.err_code Typing.OverrideMemoizeLSB) [
+    child, "__MemoizeLSB method may not be an override (temporary due to HHVM bug)";
+    parent, "This method is being overridden"]
+
 let should_be_override pos class_id id =
   add (Typing.err_code Typing.ShouldBeOverride) pos
     ((Utils.strip_ns class_id)^"::"^id^"() is marked as override; \

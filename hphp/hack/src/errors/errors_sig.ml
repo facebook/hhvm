@@ -271,6 +271,7 @@ module type S = sig
   val partially_valid_is_as_expression_hint :
     string -> Pos.t -> Pos.t -> string -> unit
   val override_final : parent:Pos.t -> child:Pos.t -> unit
+  val override_memoizelsb : parent:Pos.t -> child:Pos.t -> unit
   val should_be_override : Pos.t -> string -> string -> unit
   val override_per_trait : Pos.t * string -> string -> Pos.t -> unit
   val missing_assign : Pos.t -> unit

@@ -435,6 +435,7 @@ and class_elt = {
   ce_final       : bool;
   ce_is_xhp_attr : bool;
   ce_override    : bool;
+  ce_memoizelsb  : bool;
   (* true if this elt arose from require-extends or other mechanisms
      of hack "synthesizing" methods that were not written by the
      programmer. The eventual purpose of this is to make sure that

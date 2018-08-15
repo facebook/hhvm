@@ -556,6 +556,12 @@ public:
    */
   bool hasCall() const;
 
+  /*
+   * Has this class's constructor been replaced with one that always fatals, to
+   * prevent constructing instances of it?
+   */
+  bool hasDisabledCtor() const;
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Builtin classes.                                                   [const]

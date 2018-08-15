@@ -242,6 +242,10 @@ ReadWriteMutex s_scope_cache_mutex;
 
 }
 
+bool Class::hasDisabledCtor() const {
+  return m_extra->m_instanceCtor == destructorFatalInstanceCtor;
+}
+
 Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const classVecLen = parent != nullptr ? parent->m_classVecLen + 1 : 1;
   auto funcVecLen = (parent != nullptr ? parent->m_methods.size() : 0)

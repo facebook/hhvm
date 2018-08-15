@@ -979,11 +979,11 @@ void VariableUnserializer::unserializeVariant(
 
       Object obj;
       if (cls) {
-        // Only unserialize CPP extension types which can actually
-        // support it. Otherwise, we risk creating a CPP object
-        // without having it initialized completely.
+        // Only unserialize CPP extension types which can actually support
+        // it. Otherwise, we risk creating a CPP object without having it
+        // initialized completely.
         if (cls->instanceCtor() && !cls->isCppSerializable() &&
-            !cls->isCollectionClass()) {
+            !cls->isCollectionClass() && !cls->hasDisabledCtor()) {
           assertx(obj.isNull());
           throw_null_pointer_exception();
         } else {

@@ -3041,7 +3041,8 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
       begin
         match res with
         | [] ->
-          let _ = exprs env el in
+          let env, tel, _ = exprs env el in
+          let env, tuel, _ = exprs env uel in
           let r = Reason.Runknown_class p in
           finish env tcid tel tuel (r, Tobject) (r, TUtils.terr env)
         | [ty,ctor_fty] -> finish env tcid tel tuel ty ctor_fty

@@ -993,77 +993,56 @@ bool ObjectData::equal(const ObjectData& other) const {
 
   // check for dynamic props first because we need to short-circuit if there's
   // a different number of them
-  if (UNLIKELY(getAttribute(HasDynPropArr))) {
-    if (!other.getAttribute(HasDynPropArr) ||
-        !dynPropArray()->equal(other.dynPropArray().get(), false)) {
-      return false;
-    }
-  } else if (UNLIKELY(other.getAttribute(HasDynPropArr))) {
-    return false;
+  auto thisSize = UNLIKELY(getAttribute(HasDynPropArr)) ?
+    dynPropArray().size() : 0;
+  size_t otherSize = 0;
+  ArrayData* otherDynProps = nullptr;
+  if (UNLIKELY(other.getAttribute(HasDynPropArr))) {
+    otherDynProps = other.dynPropArray().get();
+    otherSize = otherDynProps->size();
   }
+  if (thisSize != otherSize) return false;
 
   // Prevent circular referenced objects/arrays or deep ones.
   check_recursion_error();
 
-  auto props = propVec();
-  auto end = props + m_cls->numDeclProperties();
-  auto otherProps = other.propVec();
-  for (; props != end; ++props, ++otherProps) {
-    if (!tvEqual(*props, *otherProps)) return false;
-  }
-  return true;
+  bool result = true;
+  auto cls = m_cls;
+  IteratePropMemOrderNoInc(
+    this,
+    [&](Slot slot, const Class::Prop& prop, tv_rval thisVal) {
+      auto otherVal = other.propRvalAtOffset(slot);
+      if ((UNLIKELY(thisVal.type() == KindOfUninit) ||
+           UNLIKELY(otherVal.type() == KindOfUninit)) &&
+          (prop.attrs & AttrLateInit)) {
+        throw_late_init_prop(cls, prop.name, false);
+      }
+      if (!tvEqual(thisVal.tv(), otherVal.tv())) {
+        result = false;
+        return true;
+      }
+      return false;
+    },
+    [&](Cell key, TypedValue thisVal) {
+      if (!otherDynProps->exists(key) ||
+          !tvEqual(thisVal, otherDynProps->get(key).tv())) {
+        result = false;
+        return true;
+      }
+      return false;
+    }
+  );
+  return result;
 }
 
 bool ObjectData::less(const ObjectData& other) const {
-  if (isCollection() || other.isCollection()) {
-    throw_collection_compare_exception();
-  }
-  if (this == &other) return false;
-  if (UNLIKELY(instanceof(SystemLib::s_DateTimeInterfaceClass) &&
-               other.instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-    return DateTimeData::compare(this, &other) == -1;
-  }
-  if (getVMClass() != other.getVMClass()) return false;
-  if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass)) ||
-      UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
-    // Compare the whole object, not just the array representation
-    auto ar1 = Array::Create();
-    auto ar2 = Array::Create();
-    o_getArray(ar1);
-    other.o_getArray(ar2);
-    return ArrayData::Lt(ar1.get(), ar2.get());
-  }
-  if (UNLIKELY(instanceof(c_Closure::classof()))) {
-    // comparing different closures with < always returns false
-    return false;
-  }
-  return toArray().less(other.toArray());
+  // compare is not symmetrical; order of operands matters here
+  return compare(other) < 0;
 }
 
 bool ObjectData::more(const ObjectData& other) const {
-  if (isCollection() || other.isCollection()) {
-    throw_collection_compare_exception();
-  }
-  if (this == &other) return false;
-  if (UNLIKELY(instanceof(SystemLib::s_DateTimeInterfaceClass) &&
-               other.instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-    return DateTimeData::compare(this, &other) == 1;
-  }
-  if (getVMClass() != other.getVMClass()) return false;
-  if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass)) ||
-      UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
-    // Compare the whole object, not just the array representation
-    auto ar1 = Array::Create();
-    auto ar2 = Array::Create();
-    o_getArray(ar1);
-    other.o_getArray(ar2);
-    return ArrayData::Gt(ar1.get(), ar2.get());
-  }
-  if (UNLIKELY(instanceof(c_Closure::classof()))) {
-    // comparing different closures with > always returns false
-    return false;
-  }
-  return toArray().more(other.toArray());
+  // compare is not symmetrical; order of operands matters here
+  return other.compare(*this) < 0;
 }
 
 int64_t ObjectData::compare(const ObjectData& other) const {
@@ -1073,26 +1052,72 @@ int64_t ObjectData::compare(const ObjectData& other) const {
   if (this == &other) return 0;
   if (UNLIKELY(instanceof(SystemLib::s_DateTimeInterfaceClass) &&
                other.instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-    auto t1 = DateTimeData::getTimestamp(this);
-    auto t2 = DateTimeData::getTimestamp(&other);
-    return (t1 < t2) ? -1 : ((t1 > t2) ? 1 : 0);
+    return DateTimeData::compare(this, &other);
   }
   // Return 1 for different classes to match PHP7 behavior.
   if (getVMClass() != other.getVMClass()) return 1;
-  if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass)) ||
-      UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
-    // Compare the whole object, not just the array representation
-    auto ar1 = Array::Create();
-    auto ar2 = Array::Create();
-    o_getArray(ar1);
-    other.o_getArray(ar2);
+  if (UNLIKELY(instanceof(SimpleXMLElement_classof()))) {
+    // Compare the whole object (including native data), not just props
+    auto ar1 = SimpleXMLElement_objectCast(this, KindOfArray).toArray();
+    auto ar2 = SimpleXMLElement_objectCast(&other, KindOfArray).toArray();
     return ArrayData::Compare(ar1.get(), ar2.get());
   }
   if (UNLIKELY(instanceof(c_Closure::classof()))) {
     // comparing different closures with <=> always returns 1
     return 1;
   }
-  return toArray().compare(other.toArray());
+
+  // check for dynamic props first, because we need to short circuit if there's
+  // a different number of them
+  auto thisSize = UNLIKELY(getAttribute(HasDynPropArr)) ?
+    dynPropArray().size() : 0;
+  size_t otherSize = 0;
+  ArrayData* otherDynProps = nullptr;
+  if (UNLIKELY(other.getAttribute(HasDynPropArr))) {
+    otherDynProps = other.dynPropArray().get();
+    otherSize = otherDynProps->size();
+  }
+  if (thisSize > otherSize) {
+    return 1;
+  } else if (thisSize < otherSize) {
+    return -1;
+  }
+
+  // Prevent circular referenced objects/arrays or deep ones.
+  check_recursion_error();
+
+  int64_t result = 0;
+  auto cls = m_cls;
+  IteratePropToArrayOrderNoInc(
+    this,
+    [&](Slot slot, const Class::Prop& prop, tv_rval thisVal) {
+      auto otherVal = other.propRvalAtOffset(slot);
+      if ((UNLIKELY(thisVal.type() == KindOfUninit) ||
+           UNLIKELY(otherVal.type() == KindOfUninit)) &&
+          (prop.attrs & AttrLateInit)) {
+        throw_late_init_prop(cls, prop.name, false);
+      }
+      auto cmp = tvCompare(thisVal.tv(), otherVal.tv());
+      if (cmp != 0) {
+        result = cmp;
+        return true;
+      }
+      return false;
+    },
+    [&](Cell key, TypedValue thisVal) {
+      if (!otherDynProps->exists(key)) {
+        result = 1;
+        return true;
+      }
+      auto cmp = tvCompare(thisVal, otherDynProps->get(key).tv());
+      if (cmp != 0) {
+        result = cmp;
+        return true;
+      }
+      return false;
+    }
+  );
+  return result;
 }
 
 Variant ObjectData::offsetGet(Variant key) {

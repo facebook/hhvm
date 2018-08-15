@@ -1,0 +1,40 @@
+==== never set ====
+bool(false)
+bool(true)
+Accessing <<__LateInit>> property 'A::y' before initialization
+Accessing <<__LateInit>> property 'A::y' before initialization
+Accessing <<__LateInit>> property 'A::y' before initialization
+Accessing <<__LateInit>> property 'A::y' before initialization
+Accessing <<__LateInit>> property 'A::y' before initialization
+Accessing <<__LateInit>> property 'A::y' before initialization
+Accessing <<__LateInit>> property 'A::y' before initialization
+==== set ====
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+int(0)
+==== unset ====
+bool(false)
+bool(true)
+Accessing <<__LateInit>> property 'A::y' before initialization
+Accessing <<__LateInit>> property 'A::y' before initialization
+Accessing <<__LateInit>> property 'A::y' before initialization
+Accessing <<__LateInit>> property 'A::y' before initialization
+Accessing <<__LateInit>> property 'A::y' before initialization
+Accessing <<__LateInit>> property 'A::y' before initialization
+Accessing <<__LateInit>> property 'A::y' before initialization
+==== short-circuit ====
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+int(1)

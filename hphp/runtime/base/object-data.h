@@ -513,16 +513,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   InvokeResult invokeNativeIssetProp(const StringData* key);
   bool invokeNativeUnsetProp(const StringData* key);
 
-  void getProp(const Class* klass, bool pubOnly, bool ignoreLateInit,
-               const PreClass::Prop* prop, Array& props,
-               std::vector<bool>& inserted) const;
-  void getProps(const Class* klass, bool pubOnly, bool ignoreLateInit,
-                const PreClass* pc, Array& props,
-                std::vector<bool>& inserted) const;
-  void getTraitProps(const Class* klass, bool pubOnly, bool ignoreLateInit,
-                     const Class* trait, Array& props,
-                     std::vector<bool>& inserted) const;
-
  public:
   tv_lval prop(TypedValue* tvRef, const Class* ctx, const StringData* key);
   tv_lval propW(TypedValue* tvRef, const Class* ctx, const StringData* key);

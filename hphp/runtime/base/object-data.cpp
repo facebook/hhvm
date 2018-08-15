@@ -22,13 +22,14 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/object-iterator.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
 
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
@@ -596,38 +597,28 @@ void ObjectData::o_getArray(Array& props,
     }
     return;
   }
-  // The declared properties in the resultant array should be a permutation of
-  // propVec. They appear in the following order: go most-to-least-derived in
-  // the inheritance hierarchy, inserting properties in declaration order (with
-  // the wrinkle that overridden properties should appear only once, with the
-  // access level given to it in its most-derived declaration).
 
-  // This is needed to keep track of which elements have been inserted. This is
-  // the smoothest way to get overridden properties right.
-  std::vector<bool> inserted(m_cls->numDeclProperties(), false);
-
-  // Iterate over declared properties and insert {mangled name --> prop} pairs.
-  const Class* cls = m_cls;
-  do {
-    getProps(cls, pubOnly, ignoreLateInit, cls->preClass(), props, inserted);
-    for (auto const& traitCls : cls->usedTraitClasses()) {
-      getTraitProps(cls, pubOnly, ignoreLateInit,
-                    traitCls.get(), props, inserted);
-    }
-    cls = cls->parent();
-  } while (cls);
-
-  // Iterate over dynamic properties and insert {name --> prop} pairs.
-  if (UNLIKELY(getAttribute(HasDynPropArr))) {
-    auto& dynProps = dynPropArray();
-    IterateKV(dynProps.get(), [&](Cell k, TypedValue v) {
-      props.setWithRef(k, v, true);
+  auto cls = m_cls;
+  IteratePropToArrayOrderNoInc(
+    this,
+    [&](Slot slot, const Class::Prop& prop, tv_rval val) {
+      assertx(assertTypeHint(cls, val, slot));
+      if (UNLIKELY(val.type() == KindOfUninit)) {
+        if ((prop.attrs & AttrLateInit) && !ignoreLateInit) {
+          throw_late_init_prop(cls, prop.name, false);
+        }
+      } else if (!pubOnly || (prop.attrs & AttrPublic)) {
+        props.setWithRef(StrNR(prop.mangledName).asString(), val.tv());
+      }
+    },
+    [&](Cell key_tv, TypedValue val) {
+      props.setWithRef(key_tv, val, true);
       if (RuntimeOption::EvalNoticeOnReadDynamicProp) {
-        auto const key = tvCastToString(k);
+        auto const key = tvCastToString(key_tv);
         raiseReadDynamicProp(key.get());
       }
-    });
-  }
+    }
+  );
 }
 
 // a constant for arrayobjects that changes the way the array is
@@ -2142,66 +2133,6 @@ void ObjectData::raiseReadDynamicProp(const StringData* key) const {
   } else {
     raise_notice("Read dynamic property with dynamic name %s::%s",
                  m_cls->name()->data(), key->data());
-  }
-}
-
-void ObjectData::getProp(const Class* klass,
-                         bool pubOnly,
-                         bool ignoreLateInit,
-                         const PreClass::Prop* prop,
-                         Array& props,
-                         std::vector<bool>& inserted) const {
-  if (prop->attrs() & AttrStatic) {
-    // statics aren't part of individual instances
-    return;
-  }
-
-  Slot propInd = klass->lookupDeclProp(prop->name());
-  assertx(propInd != kInvalidSlot);
-  const TypedValue* propVal = &propVec()[propInd];
-  assertx(assertTypeHint(klass, propVal, propInd));
-
-  if (UNLIKELY(propVal->m_type == KindOfUninit) &&
-      (prop->attrs() & AttrLateInit) && !ignoreLateInit) {
-    throw_late_init_prop(klass, prop->name(), false);
-  }
-
-  if ((!pubOnly || (prop->attrs() & AttrPublic)) &&
-      propVal->m_type != KindOfUninit &&
-      !inserted[propInd]) {
-    inserted[propInd] = true;
-    props.setWithRef(
-      StrNR(klass->declProperties()[propInd].mangledName).asString(),
-      tvAsCVarRef(propVal));
-  }
-}
-
-void ObjectData::getProps(const Class* klass,
-                          bool pubOnly,
-                          bool ignoreLateInit,
-                          const PreClass* pc,
-                          Array& props,
-                          std::vector<bool>& inserted) const {
-  PreClass::Prop const* propVec = pc->properties();
-  size_t count = pc->numProperties();
-  for (size_t i = 0; i < count; ++i) {
-    getProp(klass, pubOnly, ignoreLateInit, &propVec[i], props, inserted);
-  }
-}
-
-void ObjectData::getTraitProps(const Class* klass,
-                               bool pubOnly, bool ignoreLateInit,
-                               const Class* trait, Array& props,
-                               std::vector<bool>& inserted) const {
-  assertx(isNormalClass(klass));
-  assertx(isTrait(trait));
-
-  getProps(klass, pubOnly, ignoreLateInit, trait->preClass(), props, inserted);
-  for (auto const& traitCls : trait->usedTraitClasses()) {
-    getProps(klass, pubOnly, ignoreLateInit, traitCls->preClass(),
-             props, inserted);
-    getTraitProps(klass, pubOnly, ignoreLateInit, traitCls.get(),
-                  props, inserted);
   }
 }
 

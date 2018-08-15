@@ -351,7 +351,7 @@ template <typename S> struct Key {
   }
 
   TYPE_SCAN_CUSTOM() {
-    for (size_t i = 0; i < storage.size(); ++i) {
+    for (size_t i = 0, n = storage.size(); i < n; ++i) {
       if (storage.isString(i)) scanner.scan(storage.elem(i).s);
     }
   }
@@ -672,13 +672,14 @@ namespace memoCacheDetail {
 
 // For the specialized and generic caches
 template <typename K> struct MemoCache : MemoCacheBase {
-  folly::F14ValueMap<
+  using Cache = folly::F14ValueMap<
     K,
     CellWrapper,
     KeyHasher<K>,
     KeyEquals<K>,
     req::ConservativeAllocator<std::pair<const K, CellWrapper>>
-  > cache;
+  >;
+  Cache cache;
 
   MemoCache() = default;
   MemoCache(const MemoCache&) = delete;
@@ -687,19 +688,24 @@ template <typename K> struct MemoCache : MemoCacheBase {
   MemoCache& operator=(MemoCache&&) = delete;
 
   TYPE_SCAN_CUSTOM() {
-    for (auto const& pair : cache) scanner.scan(pair);
+    using value_type = typename Cache::value_type; // pair
+    cache.visitContiguousRanges(
+      [&](value_type const* start, value_type const* end) {
+        scanner.scan(*start, (const char*)end - (const char*)start);
+      });
   }
 };
 
 // For the shared-only caches (which do not need any of the key machinery).
 struct SharedOnlyMemoCache : MemoCacheBase {
-  folly::F14ValueMap<
+  using Cache = folly::F14ValueMap<
     SharedOnlyKey,
     CellWrapper,
     SharedOnlyKeyHasher,
     std::equal_to<SharedOnlyKey>,
     req::ConservativeAllocator<std::pair<const SharedOnlyKey, CellWrapper>>
-  > cache;
+  >;
+  Cache cache;
 
   SharedOnlyMemoCache() = default;
   SharedOnlyMemoCache(const SharedOnlyMemoCache&) = delete;
@@ -708,7 +714,11 @@ struct SharedOnlyMemoCache : MemoCacheBase {
   SharedOnlyMemoCache& operator=(SharedOnlyMemoCache&&) = delete;
 
   TYPE_SCAN_CUSTOM() {
-    for (auto const& pair : cache) scanner.scan(pair.second);
+    using value_type = typename Cache::value_type; // pair
+    cache.visitContiguousRanges(
+      [&](value_type const* start, value_type const* end) {
+        scanner.scan(*start, (const char*)end - (const char*)start);
+      });
   }
 };
 

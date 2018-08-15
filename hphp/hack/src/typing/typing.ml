@@ -816,7 +816,6 @@ and stmt env = function
       (fun env ->
         let env = LEnv.save_and_merge_next_in_cont env C.Do in
         let env, _ = block env b in
-        let env, te, _ = if_next_expr env e in
         (* saving the locals in continue here even if there is no continue
          * statement because they must be merged at the end of the loop, in
          * case there is no iteration *)
@@ -826,19 +825,21 @@ and stmt env = function
         let env, tb = Env.in_loop env begin
           iter_n_acc alias_depth begin fun env ->
             let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
-            (* Reset let variables *)
+            (* The following is necessary in case there is an assignment in the
+             * expression *)
+            let env, _, _ = if_next_expr env e in
             let env = if_next_condition env true e in
             let env = LEnv.update_next_from_conts env [C.Do; C.Next] in
             let env, tb = block env b in
             env, tb
           end end in
         let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
+        let env, te, _ = if_next_expr env e in
         let env = if_next_condition env false e in
         let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
         env, (tb, te)) in
     env, T.Do(tb, te)
   | While (e, b) as st ->
-    let env, te, _ = expr env e in
     let env, (te, tb) = LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
       let env = LEnv.save_and_merge_next_in_cont env C.Continue in
       let alias_depth =
@@ -846,7 +847,9 @@ and stmt env = function
       let env, tb = Env.in_loop env begin
         iter_n_acc alias_depth begin fun env ->
           let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
-          (* Reset let variables *)
+          (* The following is necessary in case there is an assignment in the
+           * expression *)
+          let env, _, _ = expr env e in
           let env = if_next_condition env true e in
           (* TODO TAST: avoid repeated generation of block *)
           let env, tb = block env b in
@@ -854,6 +857,7 @@ and stmt env = function
         end
       end in
       let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
+      let env, te, _ = expr env e in
       let env = if_next_condition env false e in
       let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
       env, (te, tb)) in
@@ -866,19 +870,20 @@ and stmt env = function
       let env = List.fold_left using_vars ~init:env ~f:Env.unset_local in
       env, T.Using (has_await, typed_using_clause, typed_using_block)
   | For (e1, e2, e3, b) as st ->
-    (* For loops leak their initalizer, but nothing that's defined in the
-       body
-     *)
-    let (env, te1, _) = expr env e1 in      (* initializer *)
-    let (env, te2, _) = expr env e2 in
     let env, (te1, te2, te3, tb) = LEnv.stash_and_do env [C.Continue; C.Break]
       (fun env ->
+        (* For loops leak their initalizer, but nothing that's defined in the
+           body
+         *)
+        let (env, te1, _) = expr env e1 in      (* initializer *)
         let env = LEnv.save_and_merge_next_in_cont env C.Continue in
         let alias_depth =
           if env.Env.in_loop then 1 else Typing_alias.get_depth st in
         let env, (tb, te3) = Env.in_loop env begin
           iter_n_acc alias_depth begin fun env ->
-            (* Reset let variables *)
+            (* The following is necessary in case there is an assignment in the
+             * expression *)
+            let env, _, _ = expr env e2 in
             let env = if_next_condition env true e2 in
             let env, tb = block env b in
             let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
@@ -887,6 +892,7 @@ and stmt env = function
           end
         end in
         let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
+        let (env, te2, _) = expr env e2 in
         let env = if_next_condition env false e2 in
         let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
         env, (te1, te2, te3, tb)) in

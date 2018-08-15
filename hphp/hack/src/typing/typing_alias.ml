@@ -59,7 +59,7 @@ module Dep = struct
 
   let visitor local =
     object
-      inherit [string list SMap.t] Nast.Visitor.visitor as parent
+      inherit [string list SMap.t] Nast.Visitor_DEPRECATED.visitor as parent
 
       method! on_expr acc (_, e_ as e) =
         match e_ with
@@ -100,7 +100,7 @@ end = struct
 
   let visitor =
     object(this)
-      inherit [string list SMap.t] Nast.Visitor.visitor as parent
+      inherit [string list SMap.t] Nast.Visitor_DEPRECATED.visitor as parent
 
       method! on_expr acc (_, e_ as e) =
         match e_ with

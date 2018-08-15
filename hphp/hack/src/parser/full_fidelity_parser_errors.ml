@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 module WithSmartConstructors(SCI : SmartConstructors.SmartConstructors_S
@@ -206,11 +207,9 @@ let empty_trait_require_clauses = NoCase LSMap.empty
 
 let get_short_name_from_qualified_name name alias =
   if String.length alias <> 0 then alias
-  else
-  try
-    let i = String.rindex name '\\' in
-    String.sub name (i + 1) (String.length name - i - 1)
-  with Not_found -> name
+  else match String.rindex name '\\' with
+    | Some i -> String.sub name (i + 1) (String.length name - i - 1)
+    | None -> name
 
 type accumulator = {
   errors : SyntaxError.t list;
@@ -222,11 +221,11 @@ type accumulator = {
 
 let make_acc
   acc errors namespace_type names namespace_name trait_require_clauses =
-  if acc.errors == errors &&
-     acc.namespace_type == namespace_type &&
-     acc.names == names &&
-     acc.namespace_name == namespace_name &&
-     acc.trait_require_clauses == trait_require_clauses
+  if phys_equal acc.errors errors &&
+     phys_equal acc.namespace_type namespace_type &&
+     phys_equal acc.names names &&
+     phys_equal acc.namespace_name namespace_name &&
+     phys_equal acc.trait_require_clauses trait_require_clauses
   then acc
   else { errors
        ; namespace_type
@@ -237,7 +236,7 @@ let make_acc
 
 let fold_child_nodes ?(cleanup = (fun x -> x)) f node parents acc =
   Syntax.children node
-  |> Core_list.fold_left ~init:acc ~f:(fun acc c -> f acc c (node :: parents))
+  |> List.fold_left ~init:acc ~f:(fun acc c -> f acc c (node :: parents))
   |> cleanup
 
 (* Turns a syntax node into a list of nodes; if it is a separated syntax
@@ -365,7 +364,7 @@ let matches_first f items =
 let list_contains_predicate p node =
   match syntax node with
   | SyntaxList lst ->
-    List.exists p lst
+    List.exists ~f:p lst
   | _ -> false
 
 (* test a node is a syntaxlist and that the list contains multiple elements
@@ -374,11 +373,11 @@ let list_contains_multiple_predicate p node =
   match syntax node with
   | SyntaxList lst ->
     let count_fun acc el = if p el then acc + 1 else acc in
-    (List.fold_left count_fun 0 lst) > 1
+    (List.fold_left ~f:count_fun ~init:0 lst) > 1
   | _ -> false
 
 let list_contains_duplicate node =
-  let module SyntaxMap = Map.Make (
+  let module SyntaxMap = Caml.Map.Make (
     struct
       type t = Syntax.t
       let compare a b = match syntax a, syntax b with
@@ -393,7 +392,7 @@ let list_contains_duplicate node =
       if SyntaxMap.mem el tbl then (tbl, true)
       else (SyntaxMap.add el () tbl, acc)
     in
-    let (_, result) = List.fold_left check_fun (SyntaxMap.empty, false) lst in
+    let (_, result) = List.fold_left ~f:check_fun ~init:(SyntaxMap.empty, false) lst in
     result
   | _ ->  false
 
@@ -460,8 +459,8 @@ let is_visibility x =
 
 let contains_async_not_last mods =
   let mod_list = syntax_to_list_no_separators mods in
-  List.exists is_async mod_list
-    && not @@ is_async @@ List.nth mod_list (List.length mod_list - 1)
+  List.exists ~f:is_async mod_list
+    && not @@ is_async @@ List.nth_exn mod_list (List.length mod_list - 1)
 
 let has_static node parents f =
   match node with
@@ -479,7 +478,7 @@ let declaration_multiple_visibility node =
  * and that the methodish containing it has a static keyword *)
 
 let is_clone label =
-  String.lowercase_ascii (text label) = SN.SpecialFunctions.clone
+  String.lowercase (text label) = SN.SpecialFunctions.clone
 
 let class_constructor_has_static node parents =
   has_static node parents is_construct
@@ -504,7 +503,7 @@ let class_non_constructor_has_visibility_param node _parents =
     in
     let label = node.function_name in
     let params = syntax_to_list_no_separators node.function_parameter_list in
-    (not (is_construct label)) && (List.exists has_visibility params)
+    (not (is_construct label)) && (List.exists ~f:has_visibility params)
   | _ -> false
 
 (* check that a constructor or a destructor is type annotated *)
@@ -528,9 +527,9 @@ let class_constructor_destructor_has_non_void_type env node _parents =
 let async_magic_method node _parents =
   match node with
   | FunctionDeclarationHeader node ->
-    let name = String.lowercase_ascii @@ text node.function_name in
+    let name = String.lowercase @@ text node.function_name in
     begin match name with
-    | _ when name = String.lowercase_ascii SN.Members.__disposeAsync -> false
+    | _ when name = String.lowercase SN.Members.__disposeAsync -> false
     | _ when SSet.mem name SN.Members.as_lowercase_set ->
       list_contains_predicate is_async node.function_modifiers
     | _ -> false
@@ -565,9 +564,9 @@ let methodish_is_native node =
       syntax = AttributeSpecification {
         attribute_specification_attributes = attrs; _}; _}; _} ->
     let attrs = syntax_to_list_no_separators attrs in
-    Hh_core.List.exists attrs
+    List.exists attrs
       ~f:(function { syntax = Attribute {attribute_name; _}; _} ->
-            String.lowercase_ascii @@ text attribute_name = "__native"
+            String.lowercase @@ text attribute_name = "__native"
           | _ -> false)
   | _ -> false
 
@@ -659,11 +658,11 @@ let xhp_errors env node errors =
     make_error_from_node enumType.xhp_enum_values SyntaxError.error2055 :: errors
   | XHPEnumType enumType when
     (is_typechecker env) ->
-    let invalid_enum_items = List.filter is_invalid_xhp_attr_enum_item
+    let invalid_enum_items = List.filter ~f:is_invalid_xhp_attr_enum_item
       (syntax_to_list_no_separators enumType.xhp_enum_values) in
     let mapper errors item =
       make_error_from_node item SyntaxError.error2063 :: errors in
-    List.fold_left mapper errors invalid_enum_items
+    List.fold_left ~f:mapper ~init:errors invalid_enum_items
   | XHPExpression
     { xhp_open =
       { syntax = XHPOpen { xhp_open_name; _ }; _ }
@@ -710,7 +709,7 @@ let produce_error_for_header acc check node error error_node =
 let is_reserved_keyword env classish_name =
   let name = text classish_name in
   (* TODO: What else goes here? *)
-  match String.lowercase_ascii name with
+  match String.lowercase name with
   | "eval" | "isset" | "unset" | "empty" | "const" | "new"
   | "and"  | "or"    | "xor"  | "as" | "print" | "throw"
   | "array" | "instanceof" | "trait" | "class" | "interface"
@@ -732,7 +731,7 @@ let extract_function_name header_node =
 (* Return, as a string opt, the name of the function with the earliest
  * declaration node in the list of parents. *)
 let first_parent_function_name parents =
-  Hh_core.List.find_map parents ~f:begin fun node ->
+  List.find_map parents ~f:begin fun node ->
     match syntax node with
     | FunctionDeclaration {function_declaration_header = header; _ }
     | MethodishDeclaration {methodish_function_decl_header = header; _ } ->
@@ -761,7 +760,7 @@ let rec is_immediately_in_lambda = function
 
 (* Returns the whether the current context is in an active class scope *)
 let is_in_active_class_scope parents =
-  Hh_core.List.exists parents ~f:begin fun node ->
+  List.exists parents ~f:begin fun node ->
   match syntax node with
   | ClassishDeclaration _ -> true
   | _ -> false
@@ -770,7 +769,7 @@ let is_in_active_class_scope parents =
 (* Returns the first ClassishDeclaration node in the list of parents,
  * or None if there isn't one. *)
 let first_parent_classish_node classish_kind parents =
-  Hh_core.List.find_map parents ~f:begin fun node ->
+  List.find_map parents ~f:begin fun node ->
   match syntax node with
   | ClassishDeclaration cd
     when is_token_kind cd.classish_keyword classish_kind -> Some node
@@ -790,7 +789,7 @@ let first_parent_class_name parents =
 (* Return, as a string opt, the name of the closest enclosing classish entity in
   the list of parents(not just Classes ) *)
 let enclosing_classish_name parents =
-  Hh_core.List.find_map parents ~f:begin fun node ->
+  List.find_map parents ~f:begin fun node ->
   match syntax node with
   | ClassishDeclaration cd -> Syntax.extract_text cd.classish_name
   | _ -> None
@@ -801,7 +800,7 @@ let enclosing_classish_name parents =
    from its list of modifiers, or None if there isn't one. *)
 let extract_keyword modifier declaration_node =
   let aux modifiers_list =
-    Hh_core.List.find ~f:modifier (syntax_to_list_no_separators modifiers_list)
+    List.find ~f:modifier (syntax_to_list_no_separators modifiers_list)
   in
 
   match syntax declaration_node with
@@ -837,16 +836,16 @@ let is_generalized_abstract_method md_node parents =
 let extract_async_node md_node =
   get_modifiers_of_declaration md_node
   |> Option.value_map ~default:[] ~f:syntax_to_list_no_separators
-  |> Hh_core.List.find ~f:is_async
+  |> List.find ~f:is_async
 
 let get_params_and_is_async_for_first_parent_function_or_lambda parents =
-  Hh_core.List.find_map parents ~f:begin fun node ->
+  List.find_map parents ~f:begin fun node ->
     match syntax node with
     | FunctionDeclaration { function_declaration_header = header; _ }
     | MethodishDeclaration { methodish_function_decl_header = header; _ } ->
       begin match syntax header with
       | FunctionDeclarationHeader fdh ->
-        let is_async = Hh_core.List.exists ~f:is_async @@
+        let is_async = List.exists ~f:is_async @@
           syntax_to_list_no_separators fdh.function_modifiers in
         Some (fdh.function_parameter_list, is_async)
       | _ -> None
@@ -861,7 +860,7 @@ let get_params_and_is_async_for_first_parent_function_or_lambda parents =
     end
 
 let first_parent_function_attributes_contains parents name =
-  Hh_core.List.exists parents ~f:begin fun node ->
+  List.exists parents ~f:begin fun node ->
     match syntax node with
     | FunctionDeclaration { function_attribute_spec = {
         syntax = AttributeSpecification {
@@ -871,7 +870,7 @@ let first_parent_function_attributes_contains parents name =
           attribute_specification_attributes; _ }; _ }; _ } ->
       let attrs =
         syntax_to_list_no_separators attribute_specification_attributes in
-      Hh_core.List.exists attrs
+      List.exists attrs
         ~f:(function { syntax = Attribute { attribute_name; _}; _} ->
           text attribute_name = name | _ -> false)
     | _ -> false
@@ -891,7 +890,7 @@ let has_inout_params parents =
   match get_params_and_is_async_for_first_parent_function_or_lambda parents with
   | Some (function_parameter_list, _) ->
     let params = syntax_to_list_no_separators function_parameter_list in
-    Hh_core.List.exists params ~f:is_parameter_with_callconv
+    List.exists params ~f:is_parameter_with_callconv
   | _ -> false
 
 let is_inside_async_method parents =
@@ -924,7 +923,7 @@ let check_type_name_reference env name_text location names errors =
 let check_type_hint env node names errors =
   let rec check (names, errors) node =
     let names, errors =
-      Core_list.fold_left (Syntax.children node) ~f:check ~init:(names, errors) in
+      List.fold_left (Syntax.children node) ~f:check ~init:(names, errors) in
     match syntax node with
     | SimpleTypeSpecifier { simple_type_specifier = s; _ }
     | GenericTypeSpecifier { generic_class_type = s; _ } ->
@@ -957,7 +956,7 @@ let extract_callconv_node node =
 (* Test if a list_expression is the value clause of a foreach_statement *)
 let is_value_of_foreach le_node p1 =
   match syntax p1 with
-  | ForeachStatement { foreach_value; _ } -> le_node == foreach_value
+  | ForeachStatement { foreach_value; _ } -> phys_equal le_node foreach_value
   | _ -> false
 
 (* Given a node, checks if it is a abstract ConstDeclaration *)
@@ -1014,7 +1013,7 @@ let is_param_by_ref node =
 let attribute_specification_contains node name =
   match syntax node with
   | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
-    Hh_core.List.exists (syntax_node_to_list attrs) ~f:begin fun n ->
+    List.exists (syntax_node_to_list attrs) ~f:begin fun n ->
       match syntax n with
       | ListItem {
           list_item = { syntax = Attribute { attribute_name; _ }; _ }; _
@@ -1048,7 +1047,7 @@ let function_declaration_contains_memoize_lsb node =
   | _ -> false
 
 let function_declaration_header_memoize_lsb parents errors =
-  let node = List.hd parents in
+  let node = List.hd_exn parents in
   if function_declaration_contains_memoize_lsb node
   then
     let e = make_error_from_node node SyntaxError.memoize_lsb_on_non_method
@@ -1058,20 +1057,20 @@ let function_declaration_header_memoize_lsb parents errors =
 let special_method_param_errors node parents errors =
   match syntax node with
   | FunctionDeclarationHeader {function_name; function_parameter_list; _}
-    when SSet.mem (String.lowercase_ascii @@ text function_name)
+    when SSet.mem (String.lowercase @@ text function_name)
                   SN.Members.as_lowercase_set ->
     let params = syntax_to_list_no_separators function_parameter_list in
-    let len = Hh_core.List.length params in
+    let len = List.length params in
     let name = text function_name in
     let full_name = match first_parent_class_name parents with
       | None -> name
       | Some c_name -> c_name ^ "::" ^ name ^ "()"
     in
-    let s = String.lowercase_ascii name in
+    let s = String.lowercase name in
     let num_args_opt =
       match s with
       | _ when s = SN.Members.__call && len <> 2 -> Some 2
-      | _ when s = String.lowercase_ascii SN.Members.__callStatic && len <> 2 -> Some 2
+      | _ when s = String.lowercase SN.Members.__callStatic && len <> 2 -> Some 2
       | _ when s = SN.Members.__get && len <> 1 -> Some 1
       | _ when s = SN.Members.__set && len <> 2 -> Some 2
       | _ when s = SN.Members.__isset && len <> 1 -> Some 1
@@ -1085,12 +1084,12 @@ let special_method_param_errors node parents errors =
           node (SyntaxError.invalid_number_of_args full_name n) :: errors
     in
     let errors = if (s = SN.Members.__call
-                  || s = String.lowercase_ascii SN.Members.__callStatic
+                  || s = String.lowercase SN.Members.__callStatic
                   || s = SN.Members.__get
                   || s = SN.Members.__set
                   || s = SN.Members.__isset
                   || s = SN.Members.__unset)
-                  && Hh_core.List.exists ~f:is_param_by_ref params then
+                  && List.exists ~f:is_param_by_ref params then
         make_error_from_node
           node (SyntaxError.invalid_args_by_ref full_name) :: errors
       else errors
@@ -1192,7 +1191,7 @@ let is_hashbang text =
 
 
 let is_in_namespace parents =
-  Hh_core.List.exists parents ~f:(fun node ->
+  List.exists parents ~f:(fun node ->
     match syntax node with
     | NamespaceDeclaration {namespace_name; _}
       when not @@ is_missing namespace_name && text namespace_name <> "" -> true
@@ -1205,12 +1204,12 @@ let class_has_a_construct_method parents =
               { syntax = ClassishBody
                 { classish_body_elements = methods; _}; _}; _}; _}) ->
     let methods = syntax_to_list_no_separators methods in
-    Hh_core.List.exists methods ~f:(function
+    List.exists methods ~f:(function
       { syntax = MethodishDeclaration
           { methodish_function_decl_header =
             { syntax = FunctionDeclarationHeader
               { function_name; _}; _}; _}; _} ->
-        String.lowercase_ascii @@ text function_name = SN.Members.__construct
+        String.lowercase @@ text function_name = SN.Members.__construct
       | _ -> false)
   | _ -> false
 
@@ -1219,12 +1218,12 @@ let is_in_construct_method parents =
   | _ when is_immediately_in_lambda parents -> false
   | None, _ -> false
   (* Function name is __construct *)
-  | Some s, _ when String.lowercase_ascii s = SN.Members.__construct -> true
+  | Some s, _ when String.lowercase s = SN.Members.__construct -> true
   (* Function name is same as class name *)
   | Some s1, Some s2 ->
     not @@ is_in_namespace parents &&
     not @@ class_has_a_construct_method parents &&
-    String.lowercase_ascii s1 = String.lowercase_ascii s2
+    String.lowercase s1 = String.lowercase s2
   | _ -> false
 
 
@@ -1267,7 +1266,7 @@ let params_errors _env params _namespace_name names errors =
     params SyntaxError.error2073 in
   let param_list = syntax_to_list_no_separators params in
   let has_inout_param, has_reference_param, has_inout_and_ref_param =
-    Hh_core.List.fold_right param_list ~init:(false, false, false)
+    List.fold_right param_list ~init:(false, false, false)
       ~f:begin fun p (b1, b2, b3) ->
         let is_inout = is_parameter_with_callconv p in
         let is_ref = is_param_by_ref p in
@@ -1458,7 +1457,7 @@ let check_collection_member errors m =
 
 let check_collection_members members errors =
   syntax_to_list_no_separators members
-  |> Core_list.fold_left ~init:errors ~f:check_collection_member
+  |> List.fold_left ~init:errors ~f:check_collection_member
 
 let invalid_shape_initializer_name env node errors =
   match syntax node with
@@ -1501,16 +1500,16 @@ let is_in_unyieldable_magic_method parents =
   match first_parent_function_name parents with
   | None -> false
   | Some s ->
-    let s = String.lowercase_ascii s in
+    let s = String.lowercase s in
     begin match s with
     | _ when s = SN.Members.__call -> false
     | _ when s = SN.Members.__invoke -> false
-    | _ when s = String.lowercase_ascii SN.Members.__callStatic -> false
+    | _ when s = String.lowercase SN.Members.__callStatic -> false
     | _ -> SSet.mem s SN.Members.as_lowercase_set
     end
 
 let is_in_function parents =
-  Hh_core.List.exists parents ~f:begin fun node ->
+  List.exists parents ~f:begin fun node ->
     match syntax node with
     | FunctionDeclaration _
     | MethodishDeclaration _
@@ -1580,7 +1579,7 @@ let no_async_before_lambda_body env body_node errors =
 let no_memoize_attribute_on_lambda node errors =
   match syntax node with
   | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
-    Core_list.fold (syntax_node_to_list attrs) ~init:errors ~f:begin fun errors n ->
+    List.fold (syntax_node_to_list attrs) ~init:errors ~f:begin fun errors n ->
       match syntax n with
       | ListItem {
           list_item = ({ syntax = Attribute { attribute_name; _ }; _ } as attr);_
@@ -1736,7 +1735,7 @@ let expression_errors env namespace_name node parents errors =
     make_error_from_node node SyntaxError.error2020 :: errors
   | HaltCompilerExpression { halt_compiler_argument_list = args; _ } ->
     let errors =
-      if Core_list.is_empty (syntax_to_list_no_separators args) then errors
+      if List.is_empty (syntax_to_list_no_separators args) then errors
       else make_error_from_node node SyntaxError.no_args_in_halt_compiler :: errors in
     let errors =
       match parents with
@@ -1755,7 +1754,7 @@ let expression_errors env namespace_name node parents errors =
       | None -> errors
     in
     let arg_list = syntax_to_list_no_separators arg_list in
-    let errors = Hh_core.List.fold_right arg_list ~init:errors
+    let errors = List.fold_right arg_list ~init:errors
       ~f:(fun p acc -> function_call_argument_errors p acc)
     in
     let errors =
@@ -1774,8 +1773,8 @@ let expression_errors env namespace_name node parents errors =
     | _ -> errors
     end
   | ShapeExpression { shape_expression_fields; _} ->
-    List.fold_right (invalid_shape_field_check env)
-      (syntax_to_list_no_separators shape_expression_fields) errors
+    List.fold_right ~f:(invalid_shape_field_check env)
+      (syntax_to_list_no_separators shape_expression_fields) ~init:errors
   | DecoratedExpression
     { decorated_expression_decorator = decorator
     ; decorated_expression_expression =
@@ -1852,13 +1851,13 @@ let expression_errors env namespace_name node parents errors =
         make_error_from_node
           node SyntaxError.invalid_scope_resolution_qualifier :: errors
         else errors in
-      let is_name_class = String.lowercase_ascii @@ text name = "class" in
+      let is_name_class = String.lowercase @@ text name = "class" in
       let errors = if is_dynamic_name && is_name_class then
         make_error_from_node
           node SyntaxError.coloncolonclass_on_dynamic :: errors
         else errors in
       let text_name = text qualifier in
-      let is_name_namespace = String.lowercase_ascii @@ text_name = "namespace" in
+      let is_name_namespace = String.lowercase @@ text_name = "namespace" in
       let errors = if is_name_namespace
         then make_error_from_node ~error_type:SyntaxError.ParseError
           node (SyntaxError.namespace_not_a_classname)::errors
@@ -1954,8 +1953,8 @@ let expression_errors env namespace_name node parents errors =
     let is_qualified_std_collection l r =
       token_kind l = Some TokenKind.Name &&
       token_kind r = Some TokenKind.Name &&
-      String.lowercase_ascii (text l) = "hh" &&
-      is_standard_collection (String.lowercase_ascii (text r)) in
+      String.lowercase (text l) = "hh" &&
+      is_standard_collection (String.lowercase (text r)) in
     let status =
       match syntax n with
       (* non-qualified name *)
@@ -1966,7 +1965,7 @@ let expression_errors env namespace_name node parents errors =
           syntax = Token t; _
         } as n);_ }
         when Token.kind t = TokenKind.Name ->
-        begin match String.lowercase_ascii (text n) with
+        begin match String.lowercase (text n) with
         | "dict" | "vec" | "keyset" -> `InvalidBraceKind
         | n -> if is_standard_collection n then `ValidClass n else `InvalidClass
         end
@@ -1982,11 +1981,11 @@ let expression_errors env namespace_name node parents errors =
         | [l; r]
           when namespace_name = global_namespace_name &&
           is_qualified_std_collection l r ->
-          `ValidClass (String.lowercase_ascii (text r))
+          `ValidClass (String.lowercase (text r))
         (* \HH\Vector *)
         | [{ syntax = Missing; _}; l; r]
           when is_qualified_std_collection l r ->
-          `ValidClass (String.lowercase_ascii (text r))
+          `ValidClass (String.lowercase (text r))
         | _ -> `InvalidClass
         end
       | _ -> `InvalidClass in
@@ -2049,7 +2048,7 @@ let check_repeated_properties namespace_name class_name (errors, p_names) prop =
   match syntax prop with
   | PropertyDeclaration { property_declarators; _} ->
     let declarators = syntax_to_list_no_separators property_declarators in
-      Hh_core.List.fold declarators ~init:(errors, p_names)
+      List.fold declarators ~init:(errors, p_names)
         ~f:begin fun (errors, p_names) prop ->
             match syntax prop with
             | PropertyDeclarator {property_name; _} ->
@@ -2119,7 +2118,7 @@ let check_type_name syntax_tree name namespace_name name_text location names err
 
 let get_type_params_and_emit_shadowing_errors l errors =
   syntax_to_list_no_separators l
-  |> Hh_core.List.fold_right ~init:(SSet.empty, errors)
+  |> List.fold_right ~init:(SSet.empty, errors)
       ~f:(fun p (s, e) -> match syntax p with
         | TypeParameter { type_reified; type_name; _}
           when not @@ is_missing type_reified ->
@@ -2161,12 +2160,12 @@ let class_reified_param_errors node errors =
                 syntax = TypeParameters {
                   type_parameters_parameters; _}; _}; _}; _}; _} ->
         syntax_to_list_no_separators type_parameters_parameters
-        |> Hh_core.List.fold_right ~init:acc ~f:add_error
+        |> List.fold_right ~init:acc ~f:add_error
       | _ -> acc in
     let errors = match syntax cd.classish_body with
       | ClassishBody { classish_body_elements; _} ->
         syntax_to_list_no_separators classish_body_elements
-        |> Hh_core.List.fold_right ~init:errors ~f:check_method
+        |> List.fold_right ~init:errors ~f:check_method
       | _ -> errors in
     errors
   | _ -> errors
@@ -2186,7 +2185,7 @@ let classish_errors env node parents namespace_name names errors =
     let classish_declaration_check _ =
       (* Only check this in strict mode. *)
       if not @@ is_strict env then false else
-      match List.map syntax parents with
+      match List.map ~f:syntax parents with
       | [SyntaxList _; Script _]
       | [SyntaxList _; NamespaceBody _; NamespaceDeclaration _; SyntaxList _; Script _] -> false
       | _ -> true
@@ -2198,11 +2197,11 @@ let classish_errors env node parents namespace_name names errors =
       match cd.classish_attribute.syntax with
       | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
         let attrs = syntax_to_list_no_separators attrs in
-        Hh_core.List.exists attrs (fun e ->
+        List.exists attrs (fun e ->
           match syntax e with
           | Attribute {attribute_values; attribute_name; _ } ->
             text attribute_name = SN.UserAttributes.uaSealed &&
-            Hh_core.List.exists (syntax_to_list_no_separators attribute_values) (fun e ->
+            List.exists (syntax_to_list_no_separators attribute_values) (fun e ->
               match syntax e with
               | ScopeResolutionExpression {scope_resolution_name; _ } ->
                 text scope_resolution_name <> "class"
@@ -2214,7 +2213,7 @@ let classish_errors env node parents namespace_name names errors =
       match cd.classish_attribute.syntax with
       | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
         let attrs = syntax_to_list_no_separators attrs in
-        Hh_core.List.exists attrs (fun e ->
+        List.exists attrs (fun e ->
           match syntax e with
           | Attribute {attribute_name; _ } ->
             text attribute_name = SN.UserAttributes.uaSealed
@@ -2280,15 +2279,15 @@ let classish_errors env node parents namespace_name names errors =
         let declared_name_str =
           Option.value ~default:"" (Syntax.extract_text cd.classish_name) in
         let errors, _ =
-          Hh_core.List.fold methods ~f:(check_repeated_properties namespace_name declared_name_str)
+          List.fold methods ~f:(check_repeated_properties namespace_name declared_name_str)
           ~init:(errors, SSet.empty) in
         let has_abstract_fn =
-          Hh_core.List.exists methods ~f:methodish_contains_abstract in
+          List.exists methods ~f:methodish_contains_abstract in
         let has_private_method =
-          Hh_core.List.exists methods
+          List.exists methods
             ~f:(methodish_modifier_contains_helper is_private) in
         let has_multiple_xhp_category_decls =
-          let cats = Hh_core.List.filter methods ~f:(fun m ->
+          let cats = List.filter methods ~f:(fun m ->
             match syntax m with
             | XHPCategoryDeclaration _ -> true
             | _ -> false) in
@@ -2385,11 +2384,11 @@ let group_use_errors _env node errors =
     ; namespace_group_use_kind = kind
     ; _} ->
       let errors =
-        let invalid_clauses = List.filter (is_invalid_group_use_clause kind)
+        let invalid_clauses = List.filter ~f:(is_invalid_group_use_clause kind)
           (syntax_to_list_no_separators clauses) in
         let mapper errors clause =
           make_error_from_node clause SyntaxError.error2049 :: errors in
-        List.fold_left mapper errors invalid_clauses in
+        List.fold_left ~f:mapper ~init:errors invalid_clauses in
       produce_error errors is_invalid_group_use_prefix prefix
         SyntaxError.error2048 prefix
   | _ -> errors
@@ -2419,7 +2418,7 @@ let use_class_or_namespace_clause_errors
       let find_name name =
         if case_sensitive
         then short_name = name
-        else (String.lowercase_ascii short_name) = String.lowercase_ascii name in
+        else (String.lowercase short_name) = String.lowercase name in
       let map = get_map names in
       match strmap_find_first_opt find_name map with
       | Some (_, { f_location = location; f_kind; f_global; _ }) ->
@@ -2537,7 +2536,7 @@ let namespace_use_declaration_errors
     let f =
       use_class_or_namespace_clause_errors
         env is_global_namespace None kind in
-    List.fold_left f (names, errors) (syntax_to_list_no_separators clauses)
+    List.fold_left ~f ~init:(names, errors) (syntax_to_list_no_separators clauses)
   | NamespaceGroupUseDeclaration {
       namespace_group_use_kind = kind;
       namespace_group_use_clauses = clauses;
@@ -2545,7 +2544,7 @@ let namespace_use_declaration_errors
     let f =
       use_class_or_namespace_clause_errors
         env is_global_namespace (Some (text prefix)) kind in
-    List.fold_left f (names, errors) (syntax_to_list_no_separators clauses)
+    List.fold_left ~f ~init:(names, errors) (syntax_to_list_no_separators clauses)
   | _ -> names, errors
 
 
@@ -2634,7 +2633,7 @@ let rec check_constant_expression errors node =
     ; _
     } when is_namey token ->
       syntax_to_list_no_separators lst
-      |> Core_list.fold_left ~init:errors ~f:check_constant_expression
+      |> List.fold_left ~init:errors ~f:check_constant_expression
   | TupleExpression { tuple_expression_items = lst; _ }
   | KeysetIntrinsicExpression { keyset_intrinsic_members = lst; _}
   | VarrayIntrinsicExpression { varray_intrinsic_members = lst; _ }
@@ -2645,7 +2644,7 @@ let rec check_constant_expression errors node =
   | ArrayCreationExpression { array_creation_members = lst; _ }
   | ShapeExpression { shape_expression_fields = lst; _ } ->
     syntax_to_list_no_separators lst
-    |> Core_list.fold_left ~init:errors ~f:check_constant_expression
+    |> List.fold_left ~init:errors ~f:check_constant_expression
   | ElementInitializer { element_key = n; element_value = v; _ }
   | FieldInitializer { field_initializer_name = n; field_initializer_value = v; _ } ->
     let errors = check_constant_expression errors n in
@@ -2672,7 +2671,7 @@ let check_static_in_constant_decl constant_declarator_initializer  =
   } ->
     begin match Token.kind t with
       | TokenKind.Static -> true
-      | TokenKind.Parent when (String.lowercase_ascii @@ text name = "class") -> true
+      | TokenKind.Parent when (String.lowercase @@ text name = "class") -> true
       | _ -> false
     end
   | _ -> false
@@ -2772,10 +2771,10 @@ let mixed_namespace_errors env node parents namespace_type errors =
         let decls = syntax_to_list_no_separators decls in
         let decls = if not (is_systemlib_compat env) then decls else
           (* Drop everything before yourself *)
-          fst @@ Hh_core.List.fold_right decls
+          fst @@ List.fold_right decls
             ~init:([], false)
             ~f:(fun n (l, seen as acc) ->
-              if seen then acc else (n::l, n == node))
+              if seen then acc else (n::l, phys_equal n node))
         in
         let rec is_first l =
           match l with
@@ -2790,7 +2789,7 @@ let mixed_namespace_errors env node parents namespace_type errors =
         in
         let has_code_outside_namespace =
           not (is_namespace_empty_body namespace_body) &&
-          Hh_core.List.exists decls
+          List.exists decls
             ~f:(function | { syntax = MarkupSection { markup_text; _}; _}
                            when width markup_text = 0
                              || is_hashbang markup_text -> false
@@ -2821,7 +2820,7 @@ let mixed_namespace_errors env node parents namespace_type errors =
 let enum_errors node errors =
   match syntax node with
   | Enumerator { enumerator_name = name; enumerator_value = value; _} ->
-    let errors = if String.lowercase_ascii @@ text name = "class" then
+    let errors = if String.lowercase @@ text name = "class" then
       make_error_from_node node SyntaxError.enum_elem_name_is_class :: errors
       else errors in
     let errors = check_constant_expression errors value in
@@ -2856,7 +2855,7 @@ let assignment_errors _env node errors =
     match syntax loperand with
       | ListExpression { list_members = members; _ } ->
         let members = syntax_to_list_no_separators members in
-        List.fold_left (fun e n -> check_lvalue n e) errors members
+        List.fold_left ~f:(fun e n -> check_lvalue n e) ~init:errors members
       | SafeMemberSelectionExpression _ ->
         err (SyntaxError.not_allowed_in_write "?-> operator")
       | MemberSelectionExpression { member_name; _ }
@@ -2864,7 +2863,7 @@ let assignment_errors _env node errors =
         err (SyntaxError.not_allowed_in_write "->: operator")
       | VariableExpression { variable_expression }
         when not allow_reassign_this
-          && String.lowercase_ascii (text variable_expression) = SN.SpecialIdents.this ->
+          && String.lowercase (text variable_expression) = SN.SpecialIdents.this ->
         err SyntaxError.reassign_this
       | DecoratedExpression { decorated_expression_decorator = op; _ }
         when token_kind op = Some TokenKind.Clone ->
@@ -3004,13 +3003,13 @@ let declare_errors _env node parents errors =
         { binary_left_operand = loper
         ; binary_operator = op
         ; _} when token_kind op = Some TokenKind.Equal
-             && String.lowercase_ascii @@ text loper = "strict_types" ->
+             && String.lowercase @@ text loper = "strict_types" ->
         (* Checks if there are only other declares nodes
          * in front of the node in question *)
         let rec is_only_declares_nodes = function
           | ({ syntax = DeclareDirectiveStatement _; _} as e) :: es
           | ({ syntax = DeclareBlockStatement _; _} as e) :: es ->
-            e == node || is_only_declares_nodes es
+            phys_equal e node || is_only_declares_nodes es
           | _ -> false
         in
         let errors =
@@ -3254,7 +3253,7 @@ let parse_errors_impl env =
   let errors2 =
     if env.level = Minimum && errors1 <> [] then []
     else find_syntax_errors env in
-  List.sort SyntaxError.compare (Core_list.append errors1 errors2)
+  List.sort SyntaxError.compare (List.append errors1 errors2)
 
 let parse_errors env =
   Stats_container.wrap_nullary_fn_timing

@@ -20,6 +20,8 @@
  
  *)
 
+open Core_kernel
+
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
   module Token = Syntax.Token
   type t = Syntax.t list [@@deriving show]
@@ -32,7 +34,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 
   let verify ~stack params args cons_name =
     let equals e1 e2 =
-      if e1 != e2 then
+      if not (phys_equal e1 e2) then
         if e1 = e2
         then
           raise @@ NotPhysicallyEquals
@@ -49,7 +51,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
             , args
             )
     in
-    Core_list.iter2_exn ~f:equals params args
+    List.iter2_exn ~f:equals params args
 
   let initial_state _ = []
 
@@ -63,7 +65,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 
   let make_list (s, o) items stack =
     if items <> [] then
-      let (h, t) = Core_list.split_n stack (List.length items) in
+      let (h, t) = List.split_n stack (List.length items) in
       let () = verify ~stack items (List.rev h) "list" in
       let lst = Syntax.make_list s o items in
       lst :: t, lst

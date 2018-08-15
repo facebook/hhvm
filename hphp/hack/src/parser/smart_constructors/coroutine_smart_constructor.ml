@@ -3,6 +3,9 @@
  * appears in the file so that we know whether to lower coroutines through
  * a conversion of the positioned syntax to an editable positioned syntax
  *)
+
+open Core_kernel
+
 module ParserEnv = Full_fidelity_parser_env
 module TokenKind = Full_fidelity_token_kind
 
@@ -33,7 +36,7 @@ module WithSyntax(Syntax : Positioned_syntax_sig.PositionedSyntax_S) = struct
   let make_function_declaration_header modifiers r2 r3 r4 r5 r6 r7 r8 r9 r10 r11 state =
     let state = state ||
       (Syntax.syntax_node_to_list modifiers |>
-      List.exists is_coroutine) in
+      List.exists ~f:is_coroutine) in
     state, Syntax.make_function_declaration_header modifiers r2 r3 r4 r5 r6 r7 r8 r9 r10 r11
 
   let make_closure_type_specifier r1 coroutine r3 r4 r5 r6 r7 r8 r9 state =

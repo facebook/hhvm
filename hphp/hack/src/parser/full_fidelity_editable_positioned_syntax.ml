@@ -21,6 +21,8 @@
  *     synthetic.
  *)
 
+open Core_kernel
+
 module Token = Full_fidelity_editable_positioned_token
 module PositionedSyntax = Full_fidelity_positioned_syntax
 module SourceData = Full_fidelity_editable_positioned_original_source_data
@@ -72,7 +74,7 @@ let rec from_positioned_syntax node =
     | _ ->
         node
           |> PositionedSyntax.children
-          |> Core_list.map ~f:from_positioned_syntax
+          |> List.map ~f:from_positioned_syntax
           |> syntax_from_children (PositionedSyntax.kind node) in
   make syntax (Value.from_positioned_syntax node)
 
@@ -87,14 +89,14 @@ let text node =
   | [] -> ""
   | hd :: [] -> Token.text hd
   | hd :: tl ->
-      match Core_list.rev tl with
+      match List.rev tl with
       | [] -> assert false
       | last :: interior_tokens_rev ->
           let interior_full_text =
             interior_tokens_rev
-              |> Core_list.rev
-              |> Core_list.map ~f:Token.full_text
-              |> String.concat "" in
+              |> List.rev
+              |> List.map ~f:Token.full_text
+              |> String.concat ~sep:"" in
           Token.text hd ^
           Token.trailing_text hd ^
           interior_full_text ^
@@ -110,8 +112,8 @@ let trailing_text node =
 let full_text node =
   node
     |> all_tokens
-    |> Core_list.map ~f:Token.full_text
-    |> String.concat ""
+    |> List.map ~f:Token.full_text
+    |> String.concat ~sep:""
 
 let original_source_data_or_default node =
   match value node with
@@ -179,7 +181,7 @@ module ValueBuilder = struct
         (* Missing node case: we consider Missing to be Synthetic. *)
         Synthetic
     | hd :: tl ->
-        match value hd, Option.map ~f:value (Core_list.last tl) with
+        match value hd, Option.map ~f:value (List.last tl) with
         | _, None ->
             (* Single node case: use that node's value. *)
             value hd

@@ -7,6 +7,9 @@
  *
  *)
 
+open Core_kernel
+open Common
+
 module SourceText = Full_fidelity_source_text
 
 module type RewritableType = sig
@@ -56,10 +59,10 @@ module WithSyntax(Syntax: RewritableType) = struct
         | (acc, Remove) -> ((acc, true), None)
       in
       let ((acc, child_changed), option_new_children) =
-        Hh_core.List.map_env (acc, false) (Syntax.children node) ~f:mapper in
+        List.map_env (acc, false) (Syntax.children node) ~f:mapper in
       let node =
         if child_changed then
-          let new_children = Hh_core.List.filter_opt option_new_children in
+          let new_children = List.filter_opt option_new_children in
           Syntax.from_children SourceText.empty 0 (Syntax.kind node) new_children
         else
           node
@@ -110,10 +113,10 @@ module WithSyntax(Syntax: RewritableType) = struct
       let rewrite_children node_changed node acc =
         let children = Syntax.children node in
         let ((acc, child_changed), option_new_children) =
-          Hh_core.List.map_env (acc, false) children ~f:mapper in
+          List.map_env (acc, false) children ~f:mapper in
         let result =
           if child_changed then
-            let new_children = Hh_core.List.filter_opt option_new_children in
+            let new_children = List.filter_opt option_new_children in
             let node = Syntax.from_children
               SourceText.empty 0 (Syntax.kind node) new_children in
             Replace node
@@ -159,11 +162,11 @@ module WithSyntax(Syntax: RewritableType) = struct
         let rewrite_children node acc =
           let children = Syntax.children node in
           let (acc, changed), option_new_children =
-            Hh_core.List.map_env (acc, false) children ~f:mapping_fun in
+            List.map_env (acc, false) children ~f:mapping_fun in
           if not changed
           then (acc, Keep)
           else
-            let new_children = Hh_core.List.filter_opt option_new_children in
+            let new_children = List.filter_opt option_new_children in
             let node = Syntax.from_children
               SourceText.empty 0 (Syntax.kind node) new_children in
             (acc, Replace node)

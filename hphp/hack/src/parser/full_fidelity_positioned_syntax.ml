@@ -18,6 +18,8 @@
  *
  *)
 
+open Core_kernel
+
 module SourceText = Full_fidelity_source_text
 module Token = Full_fidelity_positioned_token
 
@@ -79,7 +81,6 @@ end
 module PositionedWithValue =
   SyntaxWithPositionedToken.WithSyntaxValue(PositionedSyntaxValue)
 
-open Hh_core
 include PositionedWithValue
 
 module PositionedValueBuilder = struct
@@ -99,7 +100,7 @@ module PositionedValueBuilder = struct
     | PSV.TokenValue l, PSV.TokenSpan { right = r; _ }
     | PSV.TokenSpan { left = l; _ }, PSV.TokenValue r
     | PSV.TokenSpan { left = l; _ }, PSV.TokenSpan { right = r; _ }
-      -> if l == r
+      -> if phys_equal l r
          then PSV.TokenValue l
          else PSV.TokenSpan { left = l; right = r }
 

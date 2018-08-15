@@ -6,7 +6,9 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-module List = Core_list
+
+open Core_kernel
+
 module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_editable_positioned_syntax
 module Token = Syntax.Token

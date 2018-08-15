@@ -7,6 +7,8 @@
  *
  *)
 
+open Core_kernel
+
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 
 module Token = Syntax.Token
@@ -1576,7 +1578,7 @@ module WithExpressionAndStatementAndTypeParser
     Make.where_clause parser keyword constraints
 
   and parse_where_clause_opt parser =
-    if peek_token_kind parser != Where then
+    if peek_token_kind parser <> Where then
       Make.missing parser (pos parser)
     else
       parse_where_clause parser
@@ -1732,7 +1734,7 @@ module WithExpressionAndStatementAndTypeParser
       | _ -> (parser, List.rev acc)
     in
     let (parser, items) = aux parser [] in
-    let contains_abstract = List.exists SC.is_abstract items in
+    let contains_abstract = List.exists ~f:SC.is_abstract items in
     let (parser, items_list) = make_list parser items in
     (parser, items_list, contains_abstract)
 

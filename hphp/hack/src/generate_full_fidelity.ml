@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 open Printf
 open Full_fidelity_schema
 
@@ -57,7 +58,7 @@ type valign =
 let all_tokens = given_text_tokens @ variable_text_tokens @ no_text_tokens
 let align_fmt : 'a . ('a -> string) -> 'a list -> valign = fun f xs ->
   let folder acc x = max acc (String.length (f x)) in
-  let width = List.fold_left folder 0 xs in
+  let width = List.fold_left ~f:folder ~init:0 xs in
   Scanf.format_from_string (sprintf "%%-%ds" width) "%-1s"
 let kind_name_fmt   = align_fmt (fun x -> x.kind_name  ) schema
 let type_name_fmt   = align_fmt (fun x -> x.type_name  ) schema
@@ -99,7 +100,7 @@ module GenerateFFValidatedSyntax = struct
           (validator_of t)
           x.prefix f
       in
-      let fields = List.rev_map mapper x.fields in
+      let fields = List.rev_map ~f:mapper x.fields in
 
       let mapper (f,t) =
         sprintf "%s_%s = %s x.%s_%s"
@@ -107,7 +108,7 @@ module GenerateFFValidatedSyntax = struct
           (validator_of ~n:"invalidate" t)
           x.prefix f
       in
-      let invalidations = List.map mapper x.fields in
+      let invalidations = List.map ~f:mapper x.fields in
       sprintf
 "  and validate_%s : %s validator = function
   | { Syntax.syntax = Syntax.%s x; value = v } -> v,
@@ -126,13 +127,13 @@ module GenerateFFValidatedSyntax = struct
         x.type_name
         x.type_name
         x.kind_name
-        (String.concat "\n    ; " fields)
+        (String.concat ~sep:"\n    ; " fields)
         x.kind_name
         (* invalidator *)
         x.type_name
         x.type_name
         x.kind_name
-        (String.concat "\n      ; " invalidations)
+        (String.concat ~sep:"\n      ; " invalidations)
     end
 
   let to_aggregate_validation x =
@@ -326,8 +327,8 @@ module GenerateFFSyntaxType = struct
         prefix (compact ty.kind_name)
         ty.type_name
     in
-    let type_body = List.map make_constructor aggregated_types in
-    sprintf "  and %s =\n  | %s\n" type_name (String.concat "\n  | " type_body)
+    let type_body = List.map ~f:make_constructor aggregated_types in
+    sprintf "  and %s =\n  | %s\n" type_name (String.concat ~sep:"\n  | " type_body)
 
   let to_validated_syntax x =
     (* Not proud of this, but we have to exclude these things that don't occur
@@ -578,9 +579,9 @@ module GenerateFFSmartConstructors = struct
     sprintf "  val make_%s : %s -> t -> t * r\n" x.type_name args
 
   let to_make_methods x =
-    let fields = Core_list.mapi x.fields ~f:(fun i _ -> "arg" ^ string_of_int i)
+    let fields = List.mapi x.fields ~f:(fun i _ -> "arg" ^ string_of_int i)
     in
-    let stack = String.concat " " fields in
+    let stack = String.concat ~sep:" " fields in
     sprintf "    let %s parser %s = call parser (SCI.make_%s %s)\n"
       x.type_name stack x.type_name stack
 
@@ -703,8 +704,8 @@ end (* GenerateFFParserSig *)
 
 module GenerateFFVerifySmartConstructors = struct
   let to_constructor_methods x =
-    let params = Core_list.mapi x.fields ~f:(fun i _ -> sprintf "p%d" i) in
-    let args = Core_list.mapi x.fields ~f:(fun i _ -> sprintf "a%d" i) in
+    let params = List.mapi x.fields ~f:(fun i _ -> sprintf "p%d" i) in
+    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "a%d" i) in
     sprintf "
   let make_%s %s stack =
     match stack with
@@ -715,19 +716,21 @@ module GenerateFFVerifySmartConstructors = struct
     | _ -> failwith \"Unexpected stack state\"
     "
     x.type_name
-    (String.concat " " params)
-    (String.concat " :: " (List.rev args))
-    (String.concat "; " params)
-    (String.concat "; " args)
+    (String.concat ~sep:" " params)
+    (String.concat ~sep:" :: " (List.rev args))
+    (String.concat ~sep:"; " params)
+    (String.concat ~sep:"; " args)
     x.type_name
     x.type_name
-    (String.concat " " params)
+    (String.concat ~sep:" " params)
 
   let full_fidelity_verify_smart_constructors_template: string =
     (make_header MLStyle "
  * This module contains smart constructors implementation that can be used to
  * build AST.
  ") ^ "
+
+open Core_kernel
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
   module Token = Syntax.Token
@@ -741,7 +744,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 
   let verify ~stack params args cons_name =
     let equals e1 e2 =
-      if e1 != e2 then
+      if not (phys_equal e1 e2) then
         if e1 = e2
         then
           raise @@ NotPhysicallyEquals
@@ -758,7 +761,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
             , args
             )
     in
-    Core_list.iter2_exn ~f:equals params args
+    List.iter2_exn ~f:equals params args
 
   let initial_state _ = []
 
@@ -772,7 +775,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 
   let make_list (s, o) items stack =
     if items <> [] then
-      let (h, t) = Core_list.split_n stack (List.length items) in
+      let (h, t) = List.split_n stack (List.length items) in
       let () = verify ~stack items (List.rev h) \"list\" in
       let lst = Syntax.make_list s o items in
       lst :: t, lst
@@ -799,10 +802,10 @@ end (* GenerateFFVerifySmartConstructors *)
 
 module GenerateFFSyntaxSmartConstructors = struct
   let to_constructor_methods x =
-    let fields = Core_list.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i)
+    let fields = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i)
     in
-    let stack = String.concat " " fields in
-    let arr = String.concat "; " fields in
+    let stack = String.concat ~sep:" " fields in
+    let arr = String.concat ~sep:"; " fields in
     sprintf "    let make_%s %s state = State.next state [%s], Syntax.make_%s %s\n"
       x.type_name stack arr x.type_name stack
 
@@ -811,6 +814,8 @@ module GenerateFFSyntaxSmartConstructors = struct
  * This module contains smart constructors implementation that can be used to
  * build AST.
  ") ^ "
+
+open Core_kernel
 
 module type SC_S = SmartConstructors.SmartConstructors_S
 module ParserEnv = Full_fidelity_parser_env
@@ -867,13 +872,13 @@ end (* GenerateFFSyntaxSmartConstructors *)
 
 module GenerateFlattenSmartConstructors = struct
   let to_constructor_methods x =
-    let fields = Core_list.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i)
+    let fields = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i)
     in
-    let stack = String.concat " " fields in
-    let arr = String.concat "; " fields in
+    let stack = String.concat ~sep:" " fields in
+    let arr = String.concat ~sep:"; " fields in
     let is_zero =
-      Core_list.map fields (sprintf "Op.is_zero %s")
-      |> String.concat " && " in
+      List.map fields (sprintf "Op.is_zero %s")
+      |> String.concat ~sep:" && " in
     sprintf "  let make_%s %s state =\n    \
         if %s then state, Op.zero\n    \
         else state, Op.flatten [%s]\n"
@@ -920,9 +925,9 @@ end (* GenerateFFSyntaxSmartConstructors *)
 
 module GenerateFFSmartConstructorsWrappers = struct
   let to_constructor_methods x =
-    let fields = Core_list.mapi x.fields ~f:(fun i _ -> "arg" ^ string_of_int i)
+    let fields = List.mapi x.fields ~f:(fun i _ -> "arg" ^ string_of_int i)
     in
-    let stack = String.concat " " fields in
+    let stack = String.concat ~sep:" " fields in
     let raw_stack =
       map_and_concat_separated " " (fun x -> "(snd " ^ x ^ ")") fields
     in
@@ -943,6 +948,8 @@ module GenerateFFSmartConstructorsWrappers = struct
  * This module contains smart constructors implementation that can be used to
  * build AST.
  ") ^ "
+
+open Core_kernel
 
 module type SC_S = SmartConstructors.SmartConstructors_S
 module SK = Full_fidelity_syntax_kind
@@ -979,7 +986,7 @@ module SyntaxKind(SC : SC_S)
   let make_missing p state = compose SK.Missing (SC.make_missing p state)
   let make_list p items state =
     let kind = if items <> [] then SK.SyntaxList else SK.Missing in
-    compose kind (SC.make_list p (Core_list.map ~f:snd items) state)
+    compose kind (SC.make_list p (List.map ~f:snd items) state)
 CONSTRUCTOR_METHODS
 
   let has_kind kind node = kind_of node = kind
@@ -1102,7 +1109,9 @@ module GenerateFFSyntax = struct
  * This module also provides some useful helper functions, like an iterator,
  * a rewriting visitor, and so on." ^ "
 
+open Core_kernel
 open Full_fidelity_syntax_type
+
 module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module Operator = Full_fidelity_operator
@@ -1171,7 +1180,7 @@ TYPE_TESTS
     let is_namespace_prefix node =
       match syntax node with
       | QualifiedName e ->
-        begin match Core_list.last (syntax_node_to_list e.qualified_name_parts) with
+        begin match List.last (syntax_node_to_list e.qualified_name_parts) with
         | None -> false
         | Some p ->
           begin match syntax p with
@@ -1182,7 +1191,7 @@ TYPE_TESTS
       | _ -> false
 
     let has_leading_trivia kind token =
-      Hh_core.List.exists (Token.leading token)
+      List.exists (Token.leading token)
         ~f:(fun trivia ->  Token.Trivia.kind trivia = kind)
 
     let is_semicolon  = is_specific_token TokenKind.Semicolon
@@ -1211,7 +1220,7 @@ TYPE_TESTS
       | Missing -> acc
       | Token _ -> acc
       | SyntaxList items ->
-        List.fold_left f acc items
+        List.fold_left ~f ~init:acc items
 FOLD_FROM_SYNTAX
 
     (* The order that the children are returned in should match the order
@@ -1238,7 +1247,7 @@ CHILDREN_NAMES
       let ch = match node.syntax with
       | Token t -> [ \"token\", Token.to_json t ]
       | SyntaxList x -> [ (\"elements\",
-        JSON_Array (List.map (to_json ~with_value) x)) ]
+        JSON_Array (List.map ~f:(to_json ~with_value) x)) ]
       | _ ->
         let rec aux acc c n =
           match c, n with
@@ -2147,7 +2156,7 @@ module GenerateFFTokenKind = struct
 
   let given_text_width =
     let folder acc x = max acc (String.length x.token_text) in
-    List.fold_left folder 0 given_text_tokens
+    List.fold_left ~f:folder ~init:0 given_text_tokens
 
   let to_kind_declaration x =
     sprintf "  | %s\n" x.token_kind

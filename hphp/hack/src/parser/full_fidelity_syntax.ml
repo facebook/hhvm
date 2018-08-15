@@ -27,7 +27,9 @@
  * a rewriting visitor, and so on.
  *)
 
+open Core_kernel
 open Full_fidelity_syntax_type
+
 module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module Operator = Full_fidelity_operator
@@ -434,7 +436,7 @@ module WithToken(Token: TokenType) = struct
     let is_namespace_prefix node =
       match syntax node with
       | QualifiedName e ->
-        begin match Core_list.last (syntax_node_to_list e.qualified_name_parts) with
+        begin match List.last (syntax_node_to_list e.qualified_name_parts) with
         | None -> false
         | Some p ->
           begin match syntax p with
@@ -445,7 +447,7 @@ module WithToken(Token: TokenType) = struct
       | _ -> false
 
     let has_leading_trivia kind token =
-      Hh_core.List.exists (Token.leading token)
+      List.exists (Token.leading token)
         ~f:(fun trivia ->  Token.Trivia.kind trivia = kind)
 
     let is_semicolon  = is_specific_token TokenKind.Semicolon
@@ -474,7 +476,7 @@ module WithToken(Token: TokenType) = struct
       | Missing -> acc
       | Token _ -> acc
       | SyntaxList items ->
-        List.fold_left f acc items
+        List.fold_left ~f ~init:acc items
       | EndOfFile {
         end_of_file_token;
       } ->
@@ -6042,7 +6044,7 @@ module WithToken(Token: TokenType) = struct
       let ch = match node.syntax with
       | Token t -> [ "token", Token.to_json t ]
       | SyntaxList x -> [ ("elements",
-        JSON_Array (List.map (to_json ~with_value) x)) ]
+        JSON_Array (List.map ~f:(to_json ~with_value) x)) ]
       | _ ->
         let rec aux acc c n =
           match c, n with

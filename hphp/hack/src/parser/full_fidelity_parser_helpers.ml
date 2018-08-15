@@ -7,6 +7,8 @@
  *
  *)
 
+open Core_kernel
+
 module WithSyntax(Syntax: Syntax_sig.Syntax_S) = struct
 
 module Token = Syntax.Token
@@ -50,14 +52,14 @@ module WithParser(Parser : Parser_S) = struct
              * token's trailing trivia, then push the "trivialised" token itself,
              * followed by the leading trivia. *)
              let prepend_onto elt_list elt = List.cons elt elt_list in
-             let acc = List.fold_left prepend_onto acc (Token.trailing t) in
+             let acc = List.fold_left ~f:prepend_onto ~init:acc (Token.trailing t) in
                let acc = Trivia.make_extra_token_error
                   (Lexer.source lexer) (Lexer.start_offset lexer) (Token.width t)
                   :: acc in
-             List.fold_left prepend_onto acc (Token.leading t)
+             List.fold_left ~f:prepend_onto ~init:acc (Token.leading t)
            in
            let leading =
-             List.fold_left trivialise_token (Token.leading token) skipped_tokens
+             List.fold_left ~f:trivialise_token ~init:(Token.leading token) skipped_tokens
            in
            let token = Token.with_leading leading token in
            let parser = clear_skipped_tokens parser in
@@ -172,7 +174,7 @@ module WithParser(Parser : Parser_S) = struct
   (* Returns true if the strings underlying two tokens are of the same length
    * but with one character different. *)
   let one_character_different str1 str2 =
-    if String.length str1 != String.length str2 then false
+    if String.length str1 <> String.length str2 then false
     else begin
       let rec off_by_one str1 str2 =
         let str_len = String.length str1 in (* both strings have same length *)
@@ -199,13 +201,13 @@ module WithParser(Parser : Parser_S) = struct
       one_character_different tokenkind_str token_str
 
   let is_misspelled_from kind_list token_str =
-    List.exists (fun kind -> is_misspelled_kind kind token_str) kind_list
+    List.exists ~f:(fun kind -> is_misspelled_kind kind token_str) kind_list
 
   (* If token_str is a misspelling (by our narrow definition of misspelling)
    * of a TokenKind from kind_list, return the TokenKind that token_str is a
    * misspelling of. Otherwise, return None. *)
   let suggested_kind_from kind_list token_str =
-    Hh_core.List.find_map kind_list ~f:(fun kind ->
+    List.find_map kind_list ~f:(fun kind ->
       if is_misspelled_kind kind token_str then Some kind else None)
 
   let skip_and_log_misspelled_token parser required_kind =
@@ -244,7 +246,7 @@ module WithParser(Parser : Parser_S) = struct
 
   let require_token_one_of parser kinds error =
     let (parser1, token) = next_token parser in
-    if List.mem (Token.kind token) kinds
+    if List.mem kinds (Token.kind token) ~equal:(=)
     then Make.token parser1 token
     else begin
       (* ERROR RECOVERY: Look at the next token after this. Is it the one we
@@ -252,7 +254,7 @@ module WithParser(Parser : Parser_S) = struct
        * one. Otherwise, create a missing token for what we required,
        * and continue on from the current token (don't skip it). *)
       let next_kind = peek_token_kind ~lookahead:1 parser in
-      if List.mem next_kind kinds then
+      if List.mem kinds next_kind ~equal:(=) then
         let parser = skip_and_log_unexpected_token parser in
         let (parser, token) = next_token parser in
         Make.token parser token
@@ -263,8 +265,8 @@ module WithParser(Parser : Parser_S) = struct
         let is_misspelling k =
           is_misspelled_kind k (current_token_text parser)
         in
-        if List.exists is_misspelling kinds then
-          let kind = List.(hd @@ filter is_misspelling kinds) in
+        if List.exists ~f:is_misspelling kinds then
+          let kind = List.(hd_exn @@ filter kinds is_misspelling) in
           let parser = skip_and_log_misspelled_token parser kind in
           Make.missing parser (pos parser)
         else
@@ -324,7 +326,7 @@ module WithParser(Parser : Parser_S) = struct
     let end_offset = Lexer.end_offset @@ lexer parser1 in
     let source = Lexer.source @@ lexer parser in
     let text = SourceText.sub source start_offset (end_offset - start_offset) in
-    match String.lowercase_ascii text with
+    match String.lowercase text with
     | "true" | "false" | "null" -> (parser1, token)
     | _ -> require_name parser
 
@@ -707,7 +709,7 @@ module WithParser(Parser : Parser_S) = struct
           (* TODO(T25649779) *)
           (parser, (list_item :: acc)) in
     let (parser, items) = aux parser [] in
-    let no_arg_is_missing = List.for_all (fun c -> not (SC.is_missing c)) items in
+    let no_arg_is_missing = List.for_all items (fun c -> not (SC.is_missing c)) in
     let (parser, item_list) = make_list parser (List.rev items) in
     parser, item_list, no_arg_is_missing
 
@@ -870,7 +872,7 @@ module WithParser(Parser : Parser_S) = struct
     make_list parser (List.rev items)
 
   let parse_terminated_list parser parse_item terminator =
-    let predicate parser = peek_token_kind parser != terminator in
+    let predicate parser = peek_token_kind parser <> terminator in
     parse_list_while parser parse_item predicate
 
   let parse_alternate_if_block parser parse_item =

@@ -16,6 +16,8 @@
  *
  *)
 
+open Core_kernel
+
 module SourceText = Full_fidelity_source_text
 module Env = Full_fidelity_parser_env
 module SyntaxError = Full_fidelity_syntax_error
@@ -42,10 +44,10 @@ type t = {
 } [@@deriving show]
 
 let parse_mode_comment s =
-  let s = String.trim s in
+  let s = String.strip s in
   let len = String.length s in
   if len >= 2 && (String.get s 0) = '/' && (String.get s 1) = '/' then
-    String.trim @@ String.sub s 2 (len - 2)
+    String.strip @@ String.sub s 2 (len - 2)
   else
     ""
 
@@ -77,7 +79,7 @@ let analyze_header text script =
       let language = SourceText.sub text (prefix_width + text_width +
         ltq_width + name_leading) name_width
       in
-      let language = String.lowercase_ascii language in
+      let language = String.lowercase language in
       let mode = SourceText.sub text (prefix_width + text_width +
         ltq_width + name_leading + name_width) name_trailing
       in
@@ -191,7 +193,7 @@ let is_decl tree =
 let errors_no_bodies tree =
   let not_in_body error =
     not (is_in_body tree.root error.SyntaxError.start_offset) in
-  List.filter not_in_body tree.errors
+  List.filter ~f:not_in_body tree.errors
 
 (* By default we strip out (1) all cascading errors, and (2) in decl mode,
 all errors that happen in a body. *)

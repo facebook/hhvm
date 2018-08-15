@@ -20,6 +20,8 @@
  
  *)
 
+open Core_kernel
+
 module type SC_S = SmartConstructors.SmartConstructors_S
 module ParserEnv = Full_fidelity_parser_env
 

@@ -27,10 +27,6 @@ class virtual iter = object (self)
   method! on_static_method env = super#on_static_method (Env.set_static env)
 
   method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
-  method! on_Do env = super#on_Do (Env.set_in_loop env)
-  method! on_While env = super#on_While (Env.set_in_loop env)
-  method! on_For env = super#on_For (Env.set_in_loop env)
-  method! on_Foreach env = super#on_Foreach (Env.set_in_loop env)
 
   (* By default, ignore unsafe code. To visit it, use {!iter_unsafe}. *)
   method! on_Unsafe_expr _ _ = ()
@@ -61,10 +57,6 @@ class virtual ['a] reduce = object (self)
   method! on_static_method env = super#on_static_method (Env.set_static env)
 
   method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
-  method! on_Do env = super#on_Do (Env.set_in_loop env)
-  method! on_While env = super#on_While (Env.set_in_loop env)
-  method! on_For env = super#on_For (Env.set_in_loop env)
-  method! on_Foreach env = super#on_Foreach (Env.set_in_loop env)
 
   (* By default, ignore unsafe code. To visit it, use {!reduce_unsafe}. *)
   method! on_Unsafe_expr _ _ = self#zero
@@ -96,10 +88,6 @@ class virtual map = object (self)
   method! on_static_method env = super#on_static_method (Env.set_static env)
 
   method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
-  method! on_Do env = super#on_Do (Env.set_in_loop env)
-  method! on_While env = super#on_While (Env.set_in_loop env)
-  method! on_For env = super#on_For (Env.set_in_loop env)
-  method! on_Foreach env = super#on_Foreach (Env.set_in_loop env)
 
   (* By default, ignore unsafe code. To visit it, use {!map_unsafe}. *)
   method! on_Unsafe_expr _ e = Tast.Unsafe_expr e
@@ -130,10 +118,6 @@ class virtual endo = object (self)
   method! on_static_method env = super#on_static_method (Env.set_static env)
 
   method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
-  method! on_Do env = super#on_Do (Env.set_in_loop env)
-  method! on_While env = super#on_While (Env.set_in_loop env)
-  method! on_For env = super#on_For (Env.set_in_loop env)
-  method! on_Foreach env = super#on_Foreach (Env.set_in_loop env)
 
   (* By default, ignore unsafe code. To visit it, use {!endo_unsafe}. *)
   method! on_Unsafe_expr _ x _ = x

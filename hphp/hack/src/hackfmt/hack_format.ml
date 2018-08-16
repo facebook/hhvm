@@ -28,6 +28,11 @@ let make_missing () = Syntax.make_missing SourceText.empty 0
  *
  * Exported via the `transform` alias below. *)
 let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
+  (* Leave this node as it was in the original source if it is preceded by a
+     hackfmt-ignore comment. *)
+  match transform_node_if_ignored node with
+  | Some doc -> doc
+  | None ->
   match Syntax.syntax node with
   | Syntax.Missing ->
     Nothing
@@ -57,11 +62,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         | TokenKind.HeredocStringLiteralHead
         | TokenKind.HeredocStringLiteralTail
         | TokenKind.NowdocStringLiteral ->
-          let split_text = (Str.split_delim (Str.regexp "\n") (Token.text x)) in
-          begin match split_text with
-            | [_] -> Text (Token.text x, Token.width x)
-            | _ -> MultilineString (split_text, Token.width x)
-          end
+          make_string (Token.text x) (Token.width x)
         | _ -> Text (Token.text x, Token.width x)
       end;
       transform_trailing_trivia (Token.trailing x);
@@ -2827,6 +2828,19 @@ and transform_container_literal env
       ~spaces ~force_newlines ?allow_trailing left_p members right_p;
   ]
 
+and replace_leading_trivia node new_leading_trivia =
+  match Syntax.leading_token node with
+  | None -> node
+  | Some leading_token ->
+    let rewritten_node = Rewriter.rewrite_pre (fun node_to_rewrite ->
+      match Syntax.syntax node_to_rewrite with
+      | Syntax.Token t when t == leading_token ->
+        Rewriter.Replace
+          (Syntax.make_token {t with Token.leading = new_leading_trivia})
+      | _  -> Rewriter.Keep
+    ) node in
+  rewritten_node
+
 and remove_leading_trivia node =
   match Syntax.leading_token node with
   | None -> [], node
@@ -3024,6 +3038,43 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
       | _ ->
         failwith "Expected non empty list of binary expression pieces"
     ]
+
+and make_string text width =
+  let split_text = (Str.split_delim (Str.regexp "\n") text) in
+  begin match split_text with
+    | [_] -> Text (text, width)
+    | _ -> MultilineString (split_text, width)
+  end
+
+(* Check the leading trivia of the node's leading token.
+   Treat the node's text as a multiline string if the leading trivia contains
+   an ignore comment. *)
+and transform_node_if_ignored node =
+  let leading_before, leading_including_and_after =
+    leading_ignore_comment (Syntax.leading_trivia node) in
+  if List.length leading_including_and_after > 0 then
+    let node = replace_leading_trivia node leading_including_and_after in
+    let node, trailing_trivia = remove_trailing_trivia node in
+    Some(Concat[
+      transform_leading_trivia leading_before;
+      Newline;
+      make_string (Syntax.text node) (Syntax.width node);
+      transform_trailing_trivia trailing_trivia;
+      if has_newline trailing_trivia then Newline else Nothing;
+    ])
+  else
+    None
+
+and ignore_re = Str.regexp_string "hackfmt-ignore"
+
+and leading_ignore_comment trivia_list =
+  let before = List.take_while
+    trivia_list
+    ~f:(fun trivia ->
+      try (Str.search_forward ignore_re (Trivia.text trivia) 0) < 0
+      with Not_found -> true) in
+  let _, including_and_after = List.split_n trivia_list (List.length before) in
+  (before, including_and_after)
 
 (* True if the trivia list contains WhiteSpace trivia.
  * Note that WhiteSpace includes spaces and tabs, but not newlines. *)

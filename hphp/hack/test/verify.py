@@ -15,7 +15,11 @@ verbose = False
 dump_on_failure = False
 
 
-Failure = namedtuple('Failure', ['fname', 'expected', 'output'])
+TestCase = namedtuple('TestCase', ['file_path', 'input', 'expected'])
+
+
+Result = namedtuple('Result', ['test_case', 'output', 'is_failure'])
+
 
 """
 Per-test flags passed to test executable. Expected to be in a file with
@@ -33,41 +37,34 @@ def get_test_flags(f):
         return shlex.split(f.read().strip())
 
 
-def run_test_program(files, program, expect_ext, get_flags, use_stdin):
+def run_test_program(test_cases, program, get_flags):
     """
     Run the program and return a list of Failures.
     """
-    def run(f):
-        test_dir, test_name = os.path.split(f)
+    def run(test_case):
+        test_dir, test_name = os.path.split(test_case.file_path)
         flags = get_flags(test_dir)
-        test_flags = get_test_flags(f)
+        test_flags = get_test_flags(test_case.file_path)
         cmd = [program]
-        if not use_stdin:
+        if test_case.input is None:
             cmd.append(test_name)
         cmd += flags + test_flags
         if verbose:
             print('Executing', ' '.join(cmd))
         try:
-            def go(stdin=None):
-                return subprocess.check_output(
-                    cmd, stderr=subprocess.STDOUT, cwd=test_dir,
-                    universal_newlines=True, stdin=stdin)
-            if use_stdin:
-                with open(f) as stdin:
-                    output = go(stdin)
-            else:
-                output = go()
+            output = subprocess.check_output(
+                cmd, stderr=subprocess.STDOUT, cwd=test_dir,
+                universal_newlines=True, input=test_case.input)
         except subprocess.CalledProcessError as e:
             # we don't care about nonzero exit codes... for instance, type
             # errors cause hh_single_type_check to produce them
             output = e.output
-        return check_result(f, expect_ext, output)
+        return check_result(test_case, output)
 
     executor = ThreadPoolExecutor(max_workers=max_workers)
-    futures = [executor.submit(run, f) for f in files]
+    futures = [executor.submit(run, test_case) for test_case in test_cases]
 
-    results = [f.result() for f in futures]
-    return [r for r in results if r is not None]
+    return [future.result() for future in futures]
 
 
 def filter_ocaml_stacktrace(text):
@@ -89,31 +86,29 @@ def filter_ocaml_stacktrace(text):
     return "\n".join(out) + "\n"
 
 
-def check_result(fname, expect_exp, out):
-    try:
-        with open(fname + expect_exp, 'rt') as fexp:
-            exp = fexp.read()
-    except FileNotFoundError:
-        exp = ''
-    if exp != out and exp != filter_ocaml_stacktrace(out):
-        return Failure(fname=fname, expected=exp, output=out)
+def check_result(test_case, out):
+    is_failure = (
+        test_case.expected != out and
+        test_case.expected != filter_ocaml_stacktrace(out))
+
+    return Result(test_case=test_case, output=out, is_failure=is_failure)
 
 
-def record_failures(failures, out_ext):
-    for failure in failures:
-        outfile = failure.fname + out_ext
+def record_results(results, out_ext):
+    for result in results:
+        outfile = result.test_case.file_path + out_ext
         with open(outfile, 'wb') as f:
-            f.write(bytes(failure.output, 'UTF-8'))
+            f.write(bytes(result.output, 'UTF-8'))
 
 
 def dump_failures(failures):
     for f in failures:
-        expected = f.expected
+        expected = f.test_case.expected
         actual = f.output
         diff = difflib.ndiff(
             expected.splitlines(1),
             actual.splitlines(1))
-        print("Details for the failed test %s:" % f.fname)
+        print("Details for the failed test %s:" % f.test_case.file_path)
         print("\n>>>>>  Expected output  >>>>>>\n")
         print(expected)
         print("\n=====   Actual output   ======\n")
@@ -173,6 +168,14 @@ def list_test_files(root, disabled_ext, test_ext):
             args.test_path)
 
 
+def get_content(file_path, ext=''):
+    try:
+        with open(file_path + ext, 'r') as fexp:
+            return fexp.read()
+    except FileNotFoundError:
+        return ''
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('test_path', help='A file or a directory. ')
@@ -181,11 +184,12 @@ if __name__ == '__main__':
     parser.add_argument('--expect-extension', type=str, default='.exp')
     parser.add_argument('--in-extension', type=str, default='.php')
     parser.add_argument('--disabled-extension', type=str,
-            default='.no_typecheck')
+                        default='.no_typecheck')
     parser.add_argument('--verbose', action='store_true')
     parser.add_argument('--max-workers', type=int, default='48')
     parser.add_argument('--diff', action='store_true',
-                       help='On test failure, show the content of the files and a diff')
+                        help="On test failure, show the content of "
+                        "the files and a diff")
     parser.add_argument('--flags', nargs=argparse.REMAINDER)
     parser.add_argument('--stdin', action='store_true',
                         help='Pass test input file via stdin')
@@ -226,14 +230,24 @@ if __name__ == '__main__':
             flags = flags_cache[test_dir]
         return flags
 
-    failures = run_test_program(
-        files, args.program, args.expect_extension, get_flags, args.stdin)
+    # for each file, create a test case
+
+    test_cases = []
+    for f in files:
+        exp = get_content(f, args.expect_extension)
+        input = get_content(f) if args.stdin else None
+        test_cases.append(TestCase(file_path=f, expected=exp, input=input))
+
+    results = run_test_program(test_cases, args.program, get_flags)
+
+    failures = [r for r in results if r.is_failure]
+
     total = len(files)
     if failures == []:
         print("All %d tests passed!\n" % total)
     else:
-        record_failures(failures, args.out_extension)
-        fnames = [failure.fname for failure in failures]
+        record_results(failures, args.out_extension)
+        fnames = [failure.test_case.file_path for failure in failures]
         print("To review the failures, use the following command: ")
         print("OUT_EXT=%s EXP_EXT=%s ./hphp/hack/test/review.sh %s" %
                 (args.out_extension, args.expect_extension, " ".join(fnames)))

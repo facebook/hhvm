@@ -393,6 +393,10 @@ struct Generator {
   // into this table for its associated layout.
   std::vector<Layout> m_layouts;
 
+  // Set of objects whose layout is currently being generated. Used to detect
+  // possible infinite recursion.
+  mutable fast_set<const Object*> m_layout_being_generated;
+
   // Static strings used to identify certain special types in the debug info,
   // which serve as markers for special actions. These strings should stay in
   // sync with the types in type-scan.h.
@@ -2376,6 +2380,18 @@ void Generator::genLayout(const Object& object,
       !m_scannable_collectable.count(&object)) {
     return;
   }
+
+  if (!m_layout_being_generated.emplace(&object).second) {
+    throw LayoutError{
+      folly::sformat(
+        "'{}' is contained within a recursive definition. "
+        "This can only happen with invalid debug information "
+        "or a type-scanner generator bug.",
+        object.name.name
+      )
+    };
+  }
+  SCOPE_EXIT { m_layout_being_generated.erase(&object); };
 
   const auto& action = getAction(object, conservative_everything);
 

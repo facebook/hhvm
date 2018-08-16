@@ -671,6 +671,15 @@ bool FuncChecker::checkImmLAR(PC& pc, PC const instr) {
   return ok;
 }
 
+bool FuncChecker::checkImmFCA(PC& pc, PC const instr) {
+  auto fca = decodeFCallArgs(pc);
+  if (fca.numRets == 0) {
+    ferror("FCall at {} must return at least one value\n", offset(instr));
+    return false;
+  }
+  return true;
+}
+
 IterKindIdTable FuncChecker::iterBreakIds(PC& pc) const {
   IterKindIdTable ret;
   auto const length = decode_iva(pc);
@@ -834,15 +843,13 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = CVV;
     }
     return m_tmp_sig;
-  case Op::FCall: {      // FIVE(IVA,IVA,IVA,SA,SA), FCALL, FCALL
-    auto const numArgs = getImm(pc, 0).u_IVA;
-    auto const unpack = getImm(pc, 1).u_IVA;
-    auto const numRets = getImm(pc, 2).u_IVA;
-    assertx(numRets != 0);
+  case Op::FCall: {      // THREE(FCA,SA,SA), FCALL, FCALL
+    auto const fca = getImm(pc, 0).u_FCA;
+    assertx(fca.numRets != 0);
     auto idx = 0;
-    for (int i = 0; i < numRets - 1; ++i) m_tmp_sig[idx++] = UV;
-    for (int i = 0; i < numArgs; ++i) m_tmp_sig[idx++] = CVV;
-    if (unpack) m_tmp_sig[idx++] = CV;
+    for (int i = 0; i < fca.numRets - 1; ++i) m_tmp_sig[idx++] = UV;
+    for (int i = 0; i < fca.numArgs; ++i) m_tmp_sig[idx++] = CVV;
+    if (fca.hasUnpack) m_tmp_sig[idx++] = CV;
     assertx(idx == instrNumPops(pc));
     return m_tmp_sig;
   }
@@ -1015,20 +1022,34 @@ bool FuncChecker::checkFpi(State* cur, PC pc) {
   FpiState& fpi = cur->fpi[cur->fpilen - 1];
   auto const op = peek_op(pc);
 
-  if (isFCallStar(op)) {
+  if (op == OpFCallAwait) {
     --cur->fpilen;
     int call_params = getImmIva(pc);
-    if (op == OpFCall) call_params += getImm(pc, 1).u_IVA;
     int push_params = getImmIva(at(fpi.fpush));
     if (call_params != push_params) {
       error("FCall* param_count (%d) doesn't match FPush* (%d)\n",
              call_params, push_params);
       ok = false;
     }
-    auto const adjust = op == OpFCall ? getImm(pc, 2).u_IVA - 1 : 0;
-    if (cur->stklen != fpi.stkmin - adjust) {
+    if (cur->stklen != fpi.stkmin) {
       error("wrong # of params were passed; got %d expected %d\n",
-            push_params + cur->stklen + adjust - fpi.stkmin, push_params);
+            push_params + cur->stklen - fpi.stkmin, push_params);
+      ok = false;
+    }
+  } else if (isFCallStar(op)) {
+    --cur->fpilen;
+    auto const fca = getImm(pc, 0).u_FCA;
+    int call_params = fca.numArgs + (fca.hasUnpack ? 1 : 0);
+    int push_params = getImmIva(at(fpi.fpush));
+    if (call_params != push_params) {
+      error("FCall* param_count (%d) doesn't match FPush* (%d)\n",
+             call_params, push_params);
+      ok = false;
+    }
+    if (cur->stklen != fpi.stkmin - fca.numRets + 1) {
+      error("wrong # of params were passed; got %d expected %d\n",
+            push_params + cur->stklen + fca.numRets - 1 - fpi.stkmin,
+            push_params);
       ok = false;
     }
   } else if (op == Op::FThrowOnRefMismatch) {
@@ -1149,6 +1170,7 @@ std::set<int> localImmediates(Op op) {
 #define VSA(n)
 #define KA(n)
 #define LAR(n)
+#define FCA(n)
 #define O(name, imm, in, out, flags) case Op::name: imm; break;
     OPCODES
 #undef NA
@@ -1179,6 +1201,7 @@ std::set<int> localImmediates(Op op) {
 #undef VSA
 #undef KA
 #undef LAR
+#undef FCA
 #undef O
   }
   return imms;

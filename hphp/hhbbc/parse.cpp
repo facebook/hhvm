@@ -799,8 +799,7 @@ void populate_block(ParseUnitState& puState,
     auto pc = ue.bc() + fpi->m_fpiEndOff;
     auto const op = decode_op(pc);
     if (op != OpFCall) return false;
-    decode_iva(pc);
-    return decode_iva(pc) != 0;
+    return decodeFCallArgs(pc).hasUnpack;
   };
 
 #define IMM_BLA(n)     auto targets = decode_switch(opPC);
@@ -847,6 +846,7 @@ void populate_block(ParseUnitState& puState,
                                        <= func.locals.size());           \
                          return LocalRange { range.first, range.count }; \
                        }();
+#define IMM_FCA(n)     auto fca = decodeFCallArgs(pc);
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x(1)
@@ -992,6 +992,7 @@ void populate_block(ParseUnitState& puState,
 #undef IMM_OA
 #undef IMM_VSA
 #undef IMM_LAR
+#undef IMM_FCA
 
 #undef IMM_NA
 #undef IMM_ONE

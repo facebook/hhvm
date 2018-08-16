@@ -2266,26 +2266,35 @@ FHandleRefMismatch <param id> <reffiness hint> <func name>   []  ->  []
   named %3 and the reffiness hint %2, which may be 'Cell', or 'Ref'. Depending
   on the runtime configuration, may raise a warning or throw an exception.
 
-FCall <num params> <unpack> <num returns> <class name> <func name>
-      [C|V..C|V]  ->  [R | C..C]
+FCall* opcodes
+--------------
 
-  FPI call. This instruction gets the bytecode address of the function
-  associated with the current FPI (the callee), transfers the top %1 values
-  from the stack to the callee as parameters, if %2 is 1, transfers the elements
-  of the last value on the stack (which must be an array) to the callee
-  as parameters, pops the current FPI off of the FPI stack, and then invokes
-  the dispatcher to call the callee. When the callee returns, it will transfer
-  %3 return values onto the caller's evaluation stack using the R flavor if %3
-  was one (callee must use RetC/RetV opcodes) or C flavor otherwise (callee must
-  return the matching number of values using the RetM opcode). The strings in %4
-  and %5 provide hints from static analysis to assist the region selector in
-  determining the callee:
+  FCall* opcodes are responsible for invoking the callee determined by the
+  specific opcode and performing operations related to the function call as
+  specified by the FCA (FCall arguments) immediate consisting of the following
+  data:
 
-    %4          %5          callee
+  <num args> <unpack> <num returns>  [C|V..C|V]  ->  [R | C..C]
+
+  FCall* transfers the top %1 values from the stack to the callee as parameters,
+  if %2 is 1, transfers the elements of the last value on the stack (which must
+  be an array) to the callee as parameters and invokes the function according to
+  the specific opcode. When the callee returns, it will transfer %3 return
+  values onto the caller's evaluation stack using the R flavor if %3 was one
+  (callee must use one of the RetC/RetV opcodes) or C flavor otherwise (callee
+  must return the matching number of values using the RetM opcode).
+
+FCall <fca> <class name> <func name>  [C|V..C|V]  ->  [R | C..C]
+
+  FPI call. This instruction pops the current FPI off the FPI stack and calls
+  the function associated with it. The strings in %2 and %3 provide hints from
+  static analysis to assist the region selector in determining the callee:
+
+    %2          %3          callee
     ----------+-----------+--------------
     empty     | empty     | unknown
-    empty     | non-empty | function %5
-    non-empty | non-empty | method %4::%5
+    empty     | non-empty | function %3
+    non-empty | non-empty | method %2::%3
 
 FCallAwait <num params> <class name> <func name> [C|V..C|V] -> [R]
 

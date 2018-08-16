@@ -90,6 +90,7 @@ const StaticString
  */
 bool isCalleeInlinable(SrcKey callSK, const Func* callee,
                       Annotations& annotations) {
+  assertx(callSK.op() == Op::FCall);
   auto refuse = [&] (const char* why) {
     return traceRefusal(callSK.func(), callee, why, annotations);
   };
@@ -106,7 +107,7 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
     }
     // Refuse if the variadic parameter actually captures something.
     auto pc = callSK.pc();
-    auto const numArgs = getImm(pc, 0).u_IVA;
+    auto const numArgs = getImm(pc, 0).u_FCA.numArgs;
     auto const numParams = callee->numParams();
     if (numArgs >= numParams) {
       return refuse("callee has variadic capture with non-empty value");
@@ -136,6 +137,7 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
  * Check that we don't have any missing or extra arguments.
  */
 bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations& annotations) {
+  assertx(callSK.op() == Op::FCall);
   assertx(callee);
 
   auto refuse = [&] (const char* why) {
@@ -143,26 +145,24 @@ bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations& annotations) {
   };
 
   auto pc = callSK.pc();
-  auto const numArgs = getImm(pc, 0).u_IVA;
+  auto const fca = getImm(pc, 0).u_FCA;
   auto const numParams = callee->numParams();
 
-  if (numArgs > numParams) {
+  if (fca.numArgs > numParams) {
     return refuse("callee called with too many arguments");
   }
 
-  auto const unpack = getImm(pc, 1).u_IVA;
-  if (unpack) {
+  if (fca.hasUnpack) {
     return refuse("callee called with variadic arguments");
   }
 
-  auto const numRets = getImm(pc, 2).u_IVA;
-  if (numRets != 1) {
+  if (fca.numRets != 1) {
     return refuse("callee with multiple returns");
   }
 
   // It's okay if we passed fewer arguments than there are parameters as long
   // as the gap can be filled in by DV funclets.
-  for (auto i = numArgs; i < numParams; ++i) {
+  for (auto i = fca.numArgs; i < numParams; ++i) {
     auto const& param = callee->params()[i];
     if (!param.hasDefaultValue() &&
         (i < numParams - 1 || !callee->hasVariadicCaptureParam())) {
@@ -731,8 +731,8 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
                                  InliningDecider& inl,
                                  int32_t maxBCInstrs,
                                  Annotations& annotations) {
-  auto const op = sk.pc();
-  auto const numArgs = getImm(op, 0).u_IVA;
+  assertx(sk.op() == Op::FCall);
+  auto const numArgs = getImm(sk.pc(), 0).u_FCA.numArgs;
 
   auto const& fpiStack = irgs.irb->fs().fpiStack();
   assertx(!fpiStack.empty());

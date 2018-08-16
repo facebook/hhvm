@@ -5565,24 +5565,24 @@ bool doFCallUnpackTC(PC pc, int32_t numArgsInclUnpack, void* retAddr) {
 }
 
 OPTBLD_FLT_INLINE
-void iopFCall(PC& pc, ActRec* ar,
-              uint32_t numArgs, uint32_t unpack, uint32_t numRets,
+void iopFCall(PC& pc, ActRec* ar, FCallArgs fca,
               const StringData* /*clsName*/, const StringData* funcName) {
+  auto const func = ar->func();
   assertx(
     funcName->empty() ||
     RuntimeOption::EvalJitEnableRenameFunction ||
-    (ar->func()->attrs() & AttrInterceptable) ||
-    ar->func()->name()->isame(funcName) || (
+    (func->attrs() & AttrInterceptable) ||
+    func->name()->isame(funcName) || (
       funcName == s_construct.get() &&
-      ar->func() == ar->func()->cls()->getCtor()
+      func == func->cls()->getCtor()
     )
   );
-  assertx(numArgs + unpack == ar->numArgs());
-  if (ar->isDynamicCall()) callerDynamicCallChecks(ar->func());
-  checkStack(vmStack(), ar->func(), 0);
-  if (numRets != 1) ar->setFCallM();
+  assertx(fca.numArgs + (fca.hasUnpack ? 1 : 0) == ar->numArgs());
+  if (ar->isDynamicCall()) callerDynamicCallChecks(func);
+  checkStack(vmStack(), func, 0);
+  if (fca.numRets != 1) ar->setFCallM();
   ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
-  doFCall(ar, pc, numArgs, unpack != 0);
+  doFCall(ar, pc, fca.numArgs, fca.hasUnpack);
 }
 
 OPTBLD_INLINE
@@ -7090,18 +7090,20 @@ OPTBLD_INLINE TCA iopWrapReturn(void(fn)(PC, Params...), PC origpc,
  * arFromInstr() is always correct for FPI-using instructions, but many opcodes
  * can use the much faster arFromSp().
  */
-ALWAYS_INLINE ActRec* ar_for_inst(Op op, PC origpc,
-                                  int iva_count, uint32_t* ivas) {
-  switch (op) {
-    case Op::FCallAwait:
-      assertx(iva_count >= 1);
-      return arFromSp(ivas[0]);
-    case Op::FCall:
-      assertx(iva_count >= 2);
-      return arFromSp(ivas[0] + ivas[1]);
-    default:
-      return arFromInstr(origpc);
-  }
+template<Op op, class Imm>
+ALWAYS_INLINE ActRec* ar_for_inst(PC origpc, Imm) {
+  return arFromInstr(origpc);
+}
+
+template<>
+ALWAYS_INLINE ActRec* ar_for_inst<Op::FCall, FCallArgs>(PC, FCallArgs fca) {
+  return arFromSp(fca.numArgs + (fca.hasUnpack ? 1 : 0));
+}
+
+template<>
+ALWAYS_INLINE ActRec* ar_for_inst<Op::FCallAwait, uint32_t>(PC,
+                                                            uint32_t numArgs) {
+  return arFromSp(numArgs);
 }
 
 /*
@@ -7129,12 +7131,12 @@ struct litstr_id {
 #define FLAG_NF
 #define FLAG_TF
 #define FLAG_CF , pc
-#define FLAG_FF , ar_for_inst(op, origpc, iva_count, ivas)
+#define FLAG_FF , ar_for_inst<op>(origpc, imm1)
 #define FLAG_PF
 #define FLAG_CF_TF FLAG_CF
 #define FLAG_CF_FF FLAG_CF FLAG_FF
 
-#define DECODE_IVA ivas[iva_count++] = decode_iva(pc)
+#define DECODE_IVA decode_iva(pc)
 #define DECODE_I64A decode<int64_t>(pc)
 #define DECODE_LA decode_local(pc)
 #define DECODE_IA decode_iter(pc)
@@ -7148,6 +7150,7 @@ struct litstr_id {
 #define DECODE_OA(ty) decode<ty>(pc)
 #define DECODE_KA decode_member_key(pc, liveUnit())
 #define DECODE_LAR decodeLocalRange(pc)
+#define DECODE_FCA decodeFCallArgs(pc)
 #define DECODE_BLA decode_imm_array<Offset>(pc)
 #define DECODE_SLA decode_imm_array<StrVecItem>(pc)
 #define DECODE_ILA decode_iter_table(pc)
@@ -7173,8 +7176,6 @@ struct litstr_id {
 
 #define O(name, imm, in, out, flags)                                 \
   OPTBLD_INLINE TCA iopWrap##name(PC& pc) {                          \
-    UNUSED int iva_count = 0;                                        \
-    UNUSED uint32_t ivas[kMaxHhbcImms];                              \
     UNUSED auto const op = Op::name;                                 \
     UNUSED auto const origpc = pc - encoded_op_size(op);             \
     DECODE_##imm                                                     \
@@ -7204,6 +7205,7 @@ OPCODES
 #undef DECODE_OA
 #undef DECODE_KA
 #undef DECODE_LAR
+#undef DECODE_FCA
 #undef DECODE_BLA
 #undef DECODE_SLA
 #undef DECODE_ILA

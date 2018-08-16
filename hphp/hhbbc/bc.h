@@ -109,6 +109,16 @@ inline bool operator!=(const LocalRange& a, const LocalRange& b) {
   return !(a == b);
 }
 
+inline bool operator==(const FCallArgs& a, const FCallArgs& b) {
+  return
+    a.numArgs == b.numArgs && a.hasUnpack == b.hasUnpack &&
+    a.numRets == b.numRets;
+}
+
+inline bool operator!=(const FCallArgs& a, const FCallArgs& b) {
+  return !(a == b);
+}
+
 struct IterTabEnt {
   IterKind kind;
   IterId id;
@@ -178,6 +188,13 @@ struct hasher_impl {
 
   static size_t hash(LocalRange range) {
     return HPHP::hash_int64_pair(range.first, range.count);
+  }
+
+  static size_t hash(FCallArgs fca) {
+    return HPHP::hash_int64_pair(
+      (fca.numArgs << 1) + (fca.hasUnpack ? 1 : 0),
+      fca.numRets
+    );
   }
 
   template<class T>
@@ -315,6 +332,7 @@ namespace imm {
 #define IMM_ID_VSA      VSA
 #define IMM_ID_KA       KA
 #define IMM_ID_LAR      LAR
+#define IMM_ID_FCA      FCA
 
 #define IMM_TY_BLA      SwitchTab
 #define IMM_TY_SLA      SSwitchTab
@@ -336,6 +354,7 @@ namespace imm {
 #define IMM_TY_VSA      CompactVector<LSString>
 #define IMM_TY_KA       MKey
 #define IMM_TY_LAR      LocalRange
+#define IMM_TY_FCA      FCallArgs
 
 #define IMM_NAME_BLA(n)     targets
 #define IMM_NAME_SLA(n)     targets
@@ -358,6 +377,7 @@ namespace imm {
 #define IMM_NAME_VSA(n)     keys
 #define IMM_NAME_KA(n)      mkey
 #define IMM_NAME_LAR(n)     locrange
+#define IMM_NAME_FCA(n)     fca
 
 #define IMM_EXTRA_BLA
 #define IMM_EXTRA_SLA
@@ -379,6 +399,7 @@ namespace imm {
 #define IMM_EXTRA_VSA
 #define IMM_EXTRA_KA
 #define IMM_EXTRA_LAR
+#define IMM_EXTRA_FCA
 
 #define IMM_MEM(which, n)          IMM_TY_##which IMM_NAME_##which(n)
 #define IMM_MEM_NA
@@ -508,11 +529,15 @@ namespace imm {
                       return Flavor::CVU;                     \
                     }
 
-#define POP_FCALL   uint32_t numPop() const { return arg1 + arg2 + arg3 - 1; } \
+#define POP_FCALL   uint32_t numPop() const {                                  \
+                      return fca.numArgs + (fca.hasUnpack ? 1 : 0) +           \
+                             fca.numRets - 1;                                  \
+                    }                                                          \
                     Flavor popFlavor(uint32_t i) const {                       \
                       assert(i < numPop());                                    \
-                      if (i == 0 && arg2) return Flavor::C;                    \
-                      return i < arg1 + arg2 ? Flavor::CV : Flavor::U;         \
+                      if (i == 0 && fca.hasUnpack) return Flavor::C;           \
+                      auto const cv = fca.numArgs + (fca.hasUnpack ? 1 : 0);   \
+                      return i < cv ? Flavor::CV : Flavor::U;                  \
                     }
 
 #define PUSH_NOV          uint32_t numPush() const { return 0; }
@@ -523,7 +548,7 @@ namespace imm {
 
 #define PUSH_INS_1(...)   uint32_t numPush() const { return 1; }
 
-#define PUSH_FCALL        uint32_t numPush() const { return arg3; }
+#define PUSH_FCALL        uint32_t numPush() const { return fca.numRets; }
 
 #define FLAGS_NF
 #define FLAGS_TF
@@ -660,6 +685,7 @@ OPCODES
 #undef IMM_TY_VSA
 #undef IMM_TY_KA
 #undef IMM_TY_LAR
+#undef IMM_TY_FCA
 
 // These are deliberately not undefined, so they can be used in other
 // places.
@@ -682,6 +708,7 @@ OPCODES
 // #undef IMM_NAME_OA
 // #undef IMM_NAME_OA_IMPL
 // #undef IMM_NAME_LAR
+// #undef IMM_NAME_FCA
 
 #undef IMM_EXTRA_BLA
 #undef IMM_EXTRA_SLA
@@ -702,6 +729,7 @@ OPCODES
 #undef IMM_EXTRA_OA
 #undef IMM_EXTRA_KA
 #undef IMM_EXTRA_LAR
+#undef IMM_EXTRA_FCA
 
 #undef IMM_MEM
 #undef IMM_MEM_NA

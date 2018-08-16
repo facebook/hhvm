@@ -132,6 +132,11 @@ int immSize(ArgType type, PC immPC) {
     return pc - immPC;
   }
 
+  if (type == FCA) {
+    decodeFCallArgs(pc);
+    return pc - immPC;
+  }
+
   if (argTypeIsVector(type)) {
     auto size = decode_iva(pc);
     int vecElemSz;
@@ -203,6 +208,8 @@ ArgUnion getImm(const PC origPC, int idx, const Unit* unit) {
     retval.u_KA = decode_member_key(pc, unit);
   } else if (type == LAR) {
     retval.u_LAR = decodeLocalRange(pc);
+  } else if (type == FCA) {
+    retval.u_FCA = decodeFCallArgs(pc);
   } else if (type == RATA) {
     assertx(unit != nullptr);
     retval.u_RATA = decodeRAT(unit, pc);
@@ -268,6 +275,7 @@ Offset* instrJumpOffset(const PC origPC) {
 #define IMM_VSA 0
 #define IMM_KA 0
 #define IMM_LAR 0
+#define IMM_FCA 0
 #define ONE(a) IMM_##a
 #define TWO(a, b) (IMM_##a + 2 * IMM_##b)
 #define THREE(a, b, c) (IMM_##a + 2 * IMM_##b + 4 * IMM_##c)
@@ -296,6 +304,7 @@ Offset* instrJumpOffset(const PC origPC) {
 #undef IMM_VSA
 #undef IMM_KA
 #undef IMM_LAR
+#undef IMM_FCA
 #undef ONE
 #undef TWO
 #undef THREE
@@ -435,9 +444,10 @@ int instrNumPops(PC pc) {
   // FCallAwait, NewPackedArray, and some final member operations specify how
   // many values are popped in their first immediate
   if (n == -3) return getImm(pc, 0).u_IVA;
-  // FCall pops numArgs (imm0), unpack (imm1) and uninit values (imm2 - 1)
+  // FCall pops numArgs, unpack and (numRets - 1) uninit values
   if (n == -4) {
-    return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA + getImm(pc, 2).u_IVA - 1;
+    auto const fca = getImm(pc, 0).u_FCA;
+    return fca.numArgs + (fca.hasUnpack ? 1 : 0) + fca.numRets - 1;
   }
   // Other final member operations pop their first immediate + 1
   if (n == -5) return getImm(pc, 0).u_IVA + 1;
@@ -481,7 +491,7 @@ int instrNumPushes(PC pc) {
   int n = numberOfPushes[size_t(op)];
 
   // The FCall call flavors push a tuple of arguments onto the stack
-  if (n == -1) return getImm(pc, 2).u_IVA;
+  if (n == -1) return getImm(pc, 0).u_FCA.numRets;
 
   return n;
 }
@@ -502,10 +512,9 @@ FlavorDesc manyFlavor(PC op, uint32_t i, FlavorDesc flavor) {
 
 FlavorDesc fcallFlavor(PC op, uint32_t i) {
   always_assert(i < uint32_t(instrNumPops(op)));
-  auto const numArgs = getImm(op, 0).u_IVA;
-  auto const unpack = getImm(op, 1).u_IVA;
-  if (i == 0 && unpack) return CV;
-  return i < numArgs + unpack ? CVV : UV;
+  auto const fca = getImm(op, 0).u_FCA;
+  if (i == 0 && fca.hasUnpack) return CV;
+  return i < fca.numArgs + fca.hasUnpack ? CVV : UV;
 }
 
 }
@@ -886,6 +895,7 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 } while (false)
 #define H_KA (out += ' ', out += show(decode_member_key(it, u)))
 #define H_LAR (out += ' ', out += show(decodeLocalRange(it)))
+#define H_FCA (out += ' ', out += show(decodeFCallArgs(it)))
 
 #define O(name, imm, push, pop, flags)    \
   case Op##name: {                        \
@@ -923,6 +933,8 @@ OPCODES
 #undef H_AA
 #undef H_VSA
 #undef H_KA
+#undef H_LAR
+#undef H_FCA
     default: assertx(false);
   };
   return out;
@@ -1208,6 +1220,12 @@ int instrFpToArDelta(const Func* func, PC opcode) {
 std::string show(const LocalRange& range) {
   return folly::sformat(
     "L:{}+{}", range.first, range.count
+  );
+}
+
+std::string show(const FCallArgs& fca) {
+  return folly::sformat(
+    "{} {} {}", fca.numArgs, (int)fca.hasUnpack, fca.numRets
   );
 }
 

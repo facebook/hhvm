@@ -49,7 +49,23 @@ struct LocalRange {
   uint32_t count;
 };
 
+// Arguments to FCall opcodes.
+// hhas format: <numArgs> <hasUnpack> <numRets>
+// hhbc format: <uint8:flags> ?<iva:numArgs> ?<iva:numRets>
+//   numArgs   = flags >> 2 ? flags >> 2 - 1 : decode_iva()
+//   hasUnpack = flags & 1
+//   numRets   = flags & 2 ? decode_iva() : 1
+struct FCallArgs {
+  explicit FCallArgs(uint32_t numArgs, bool hasUnpack = false,
+                     uint32_t numRets = 1)
+    : numArgs(numArgs), numRets(numRets), hasUnpack(hasUnpack) {}
+  uint32_t numArgs;
+  uint32_t numRets;
+  bool hasUnpack;
+};
+
 std::string show(const LocalRange&);
+std::string show(const FCallArgs&);
 
 /*
  * Variable-size immediates are implemented as follows: To determine which size
@@ -85,6 +101,7 @@ std::string show(const LocalRange&);
   ARGTYPE(OA,     unsigned char) /* Sub-opcode, untyped */                     \
   ARGTYPE(KA,     MemberKey)     /* Member key: local, stack, int, str */      \
   ARGTYPE(LAR,    LocalRange)    /* Contiguous range of locals */              \
+  ARGTYPE(FCA,    FCallArgs)     /* FCall arguments */                         \
   ARGTYPEVEC(VSA, Id)            /* Vector of static string IDs */
 
 enum ArgType {
@@ -590,8 +607,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FThrowOnRefMismatch, ONE(BLLA),    NOV,             NOV,        FF) \
   O(FHandleRefMismatch, THREE(IVA,OA(FPassHint),SA),                    \
                                        NOV,             NOV,        NF) \
-  O(FCall,           FIVE(IVA,IVA,IVA,SA,SA),                           \
-                                       FCALL,           FCALL,      CF_FF) \
+  O(FCall,           THREE(FCA,SA,SA), FCALL,           FCALL,      CF_FF) \
   O(FCallAwait,      THREE(IVA,SA,SA), CVMANY,          ONE(CV),    CF_FF) \
   O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(RV),    NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \

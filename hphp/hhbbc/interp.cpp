@@ -2070,7 +2070,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
             ObjMethodOp::NullThrows,
             false
           },
-          bc::FCall { 0, 0, 1, staticEmptyString(), staticEmptyString() },
+          bc::FCall { FCallArgs(0), staticEmptyString(), staticEmptyString() },
           bc::UnboxR {},
           bc::CastString {}
         );
@@ -2093,7 +2093,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
             ObjMethodOp::NullSafe,
             false
           },
-          bc::FCall { 0, 0, 1, staticEmptyString(), staticEmptyString() },
+          bc::FCall { FCallArgs(0), staticEmptyString(), staticEmptyString() },
           bc::UnboxR {},
           bc::CastString {},
           bc::Int { 0 },
@@ -3312,7 +3312,7 @@ void in(ISS& env, const bc::FThrowOnRefMismatch& op) {
         env,
         bc::FPushCtorD { 1, exCls, false },
         bc::String { err },
-        bc::FCall { 1, 0, 1, staticEmptyString(), staticEmptyString() },
+        bc::FCall { FCallArgs(1), staticEmptyString(), staticEmptyString() },
         bc::UnboxRNop {},
         bc::PopC {},
         bc::Throw {}
@@ -3432,6 +3432,7 @@ void fcallKnownImpl(ISS& env, uint32_t numArgs, bool unpack, uint32_t numRets) {
 }
 
 void in(ISS& env, const bc::FCall& op) {
+  auto const fca = op.fca;
   auto const ar = fpiTop(env);
   if (ar.func && !ar.fallbackFunc) {
     switch (ar.kind) {
@@ -3440,18 +3441,19 @@ void in(ISS& env, const bc::FCall& op) {
     case FPIKind::ObjInvoke:
       not_reached();
     case FPIKind::Func:
-      assertx(op.str4->empty());
-      if (ar.func->name() != op.str5) {
+      assertx(op.str2->empty());
+      if (ar.func->name() != op.str3) {
         // We've found a more precise type for the call, so update it
         return reduce(env, bc::FCall {
-          op.arg1, op.arg2, op.arg3, staticEmptyString(), ar.func->name() });
+          fca, staticEmptyString(), ar.func->name() });
       }
-      return fcallKnownImpl(env, op.arg1, op.arg2 != 0, op.arg3);
+      return fcallKnownImpl(env, fca.numArgs, fca.hasUnpack, fca.numRets);
     case FPIKind::Builtin:
-      assertx(op.arg3 == 1);
-      return finish_builtin(env, ar.func->exactFunc(), op.arg1, op.arg2 != 0);
+      assertx(fca.numRets == 1);
+      return finish_builtin(
+        env, ar.func->exactFunc(), fca.numArgs, fca.hasUnpack);
     case FPIKind::Ctor:
-      assertx(op.arg3 == 1);
+      assertx(fca.numRets == 1);
       /*
        * Need to be wary of old-style ctors. We could get into the situation
        * where we're constructing class D extends B, and B has an old-style
@@ -3464,28 +3466,28 @@ void in(ISS& env, const bc::FCall& op) {
       // fallthrough
     case FPIKind::ObjMeth:
     case FPIKind::ClsMeth:
-      assertx(op.str4->empty() == op.str5->empty());
+      assertx(op.str2->empty() == op.str3->empty());
       if (ar.cls.hasValue() && ar.func->cantBeMagicCall() &&
-          (ar.cls->name() != op.str4 || ar.func->name() != op.str5)) {
+          (ar.cls->name() != op.str2 || ar.func->name() != op.str3)) {
         // We've found a more precise type for the call, so update it
         return reduce(env, bc::FCall {
-          op.arg1, op.arg2, op.arg3, ar.cls->name(), ar.func->name() });
+          fca, ar.cls->name(), ar.func->name() });
       }
       // fallthrough
     case FPIKind::ObjMethNS:
       // If we didn't return a reduce above, we still can compute a
       // partially-known FCall effect with our res::Func.
-      return fcallKnownImpl(env, op.arg1, op.arg2 != 0, op.arg3);
+      return fcallKnownImpl(env, fca.numArgs, fca.hasUnpack, fca.numRets);
     }
   }
 
-  if (op.arg2) popC(env);
-  for (auto i = uint32_t{0}; i < op.arg1; ++i) popF(env);
+  if (fca.hasUnpack) popC(env);
+  for (auto i = uint32_t{0}; i < fca.numArgs; ++i) popF(env);
   fpiPop(env);
   specialFunctionEffects(env, ar);
-  for (auto i = uint32_t{0}; i < op.arg3 - 1; ++i) popU(env);
-  for (auto i = uint32_t{0}; i < op.arg3; ++i) {
-    push(env, op.arg3 == 1 ? TInitGen : TInitCell);
+  for (auto i = uint32_t{0}; i < fca.numRets - 1; ++i) popU(env);
+  for (auto i = uint32_t{0}; i < fca.numRets; ++i) {
+    push(env, fca.numRets == 1 ? TInitGen : TInitCell);
   }
 }
 
@@ -3508,7 +3510,7 @@ void in(ISS& env, const bc::FCallAwait& op) {
     );
   }
   impl(env,
-       bc::FCall { op.arg1, 0, 1, op.str2, op.str3 },
+       bc::FCall { FCallArgs(op.arg1), op.str2, op.str3 },
        bc::UnboxRNop {},
        bc::Await {});
 }

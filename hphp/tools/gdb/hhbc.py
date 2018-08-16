@@ -275,6 +275,29 @@ class HHBC(object):
             info['size'] = first_type.sizeof + count_type.sizeof
             info['value'] = 'L:' + str(first >> 1) + '+' + str(count >> 1)
 
+        elif immtype == V('HPHP::FCA'):
+            flags = ptr.cast(T('uint8_t').pointer()).dereference()
+            size = 1
+
+            if flags >> 2:
+                num_args = str((flags >> 2) - 1)
+            else:
+                iva = HHBC.decode_iva(ptr + size)
+                num_args = str(iva['value'])
+                size += iva['size']
+
+            has_unpack = '1' if (flags & 0x1) else '0'
+
+            if flags & 0x2:
+                iva = HHBC.decode_iva(ptr + size)
+                num_rets = str(iva['value'])
+                size += iva['size']
+            else:
+                num_rets = '1'
+
+            info['size'] = size
+            info['value'] = num_args + ' ' + has_unpack + ' ' + num_rets
+
         else:
             table_name = 'HPHP::immSize(unsigned char const*, int)::argTypeToSizes'
             if immtype >= 0:

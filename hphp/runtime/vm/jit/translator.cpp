@@ -541,9 +541,11 @@ int64_t getStackPopped(PC pc) {
   switch (op) {
     case Op::FCallAwait:
       return getImm(pc, 0).u_IVA + kNumActRecCells;
-    case Op::FCall:
-      return getImm(pc, 0).u_IVA + getImm(pc, 1).u_IVA + getImm(pc, 2).u_IVA +
+    case Op::FCall: {
+      auto const fca = getImm(pc, 0).u_FCA;
+      return fca.numArgs + (fca.hasUnpack ? 1 : 0) + fca.numRets +
         kNumActRecCells - 1;
+    }
 
     case Op::QueryM:
     case Op::VGetM:
@@ -583,7 +585,7 @@ int64_t getStackPopped(PC pc) {
 int64_t getStackPushed(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
-    case Op::FCall:        return getImm(pc, 2).u_IVA;
+    case Op::FCall:        return getImm(pc, 0).u_FCA.numRets;
     default:               break;
   }
 
@@ -642,6 +644,7 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
 #define VSA(n)
 #define KA(n)
 #define LAR(n)
+#define FCA(n)
 #define O(name, imm, ...) case Op::name: imm break;
 
 size_t localImmIdx(Op op) {
@@ -703,6 +706,7 @@ size_t memberKeyImmIdx(Op op) {
 #undef VSA
 #undef KA
 #undef LAR
+#undef FCA
 #undef O
 
 /*
@@ -724,7 +728,11 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   auto stackOff = bcSPOff;
 
   if (flags & FStack) {
-    stackOff -= ni.imm[0].u_IVA; // arguments consumed
+    assertx(isFCallStar(ni.op()));
+    // arguments consumed
+    stackOff -= ni.op() == Op::FCallAwait
+      ? ni.imm[0].u_IVA
+      : ni.imm[0].u_FCA.numArgs + (ni.imm[0].u_FCA.hasUnpack ? 1 : 0);
     stackOff -= kNumActRecCells; // ActRec is torn down as well
   }
   if (flags & IgnoreInnerType) ni.ignoreInnerType = true;
@@ -1192,6 +1200,7 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
 #define IMM_OA(subop)  (subop)IMM_OA_IMPL
 #define IMM_KA(n)      ni.imm[n].u_KA
 #define IMM_LAR(n)     ni.imm[n].u_LAR
+#define IMM_FCA(n)     ni.imm[n].u_FCA
 
 #define ONE(x0)           , IMM_##x0(0)
 #define TWO(x0,x1)        , IMM_##x0(0), IMM_##x1(1)
@@ -1235,6 +1244,7 @@ static void translateDispatch(irgen::IRGS& irgs,
 #undef IMM_VSA
 #undef IMM_KA
 #undef IMM_LAR
+#undef IMM_FCA
 
 //////////////////////////////////////////////////////////////////////
 

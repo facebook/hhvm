@@ -375,6 +375,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #define IMM_VSA    print_stringvec();
 #define IMM_KA     out.fmt(" {}", print_mk(decode_member_key(pc, finfo.unit)));
 #define IMM_LAR    out.fmt(" {}", show(decodeLocalRange(pc)));
+#define IMM_FCA    out.fmt(" {}", show(decodeFCallArgs(pc)));
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x
@@ -422,6 +423,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #undef IMM_VSA
 #undef IMM_KA
 #undef IMM_LAR
+#undef IMM_FCA
 
   out.nl();
 }

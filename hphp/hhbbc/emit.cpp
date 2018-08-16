@@ -630,7 +630,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     auto fcall = [&] (Op op) {
       // FCalls with unpack do their own stack overflow checking
-      if (!(op == Op::FCall && inst.FCall.arg2 != 0)) {
+      if (!(op == Op::FCall && inst.FCall.fca.hasUnpack)) {
         ret.containsCalls = true;
       }
       end_fpi(startOffset);
@@ -693,6 +693,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_VSA(n)     emit_vsa(data.keys);
 #define IMM_KA(n)      encode_member_key(make_member_key(data.mkey), ue);
 #define IMM_LAR(n)     emit_lar(data.locrange);
+#define IMM_FCA(n)     encodeFCallArgs(ue, data.fca);
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x(1)
@@ -713,14 +714,15 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_SMANY      pop(data.keys.size());
 #define POP_CVMANY     pop(data.arg##1);
 #define POP_CVUMANY    pop(data.arg##1);
-#define POP_FCALL      pop(data.arg##1 + data.arg##2 + data.arg##3 - 1);
+#define POP_FCALL      pop(data.fca.numArgs + (data.fca.hasUnpack ? 1 : 0) + \
+                           data.fca.numRets - 1);
 
 #define PUSH_NOV
 #define PUSH_ONE(x)            push(1);
 #define PUSH_TWO(x, y)         push(2);
 #define PUSH_THREE(x, y, z)    push(3);
 #define PUSH_INS_1(x)          push(1);
-#define PUSH_FCALL             push(data.arg3);
+#define PUSH_FCALL             push(data.fca.numRets);
 
 #define O(opcode, imms, inputs, outputs, flags)         \
     auto emit_##opcode = [&] (const bc::opcode& data) { \
@@ -772,6 +774,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef IMM_VSA
 #undef IMM_KA
 #undef IMM_LAR
+#undef IMM_FCA
 
 #undef IMM_NA
 #undef IMM_ONE

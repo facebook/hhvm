@@ -1312,6 +1312,13 @@ LocalRange read_local_range(AsmState& as) {
   return LocalRange{uint32_t(firstLoc), count};
 }
 
+FCallArgs read_fcall_args(AsmState& as) {
+  auto const numArgs = read_opcode_arg<uint32_t>(as);
+  auto const hasUnpack = read_opcode_arg<uint32_t>(as);
+  auto const numRets = read_opcode_arg<uint32_t>(as);
+  return FCallArgs(numArgs, hasUnpack != 0, numRets);
+}
+
 Id create_litstr_id(AsmState& as) {
   auto const sd = read_litstr(as);
   auto const id = as.ue->mergeLitstr(sd);
@@ -1359,6 +1366,10 @@ std::map<std::string,ParserFunc> opcode_parsers;
                      read_opcode_arg<int32_t>(as)))
 #define IMM_OA(ty) as.ue->emitByte(read_subop<ty>(as));
 #define IMM_LAR    encodeLocalRange(*as.ue, read_local_range(as))
+#define IMM_FCA do {                                      \
+    immFCA = read_fcall_args(as);                         \
+    encodeFCallArgs(*as.ue, immFCA);                      \
+  } while (0)
 
 // Record the offset of the immediate so that we can correlate it with its
 // associated adata later.
@@ -1444,7 +1455,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_PUSH_TWO(a,b) 2
 #define NUM_PUSH_THREE(a,b,c) 3
 #define NUM_PUSH_INS_1(a) 1
-#define NUM_PUSH_FCALL immIVA[2] /* number of outputs */
+#define NUM_PUSH_FCALL immFCA.numRets
 #define NUM_POP_NOV 0
 #define NUM_POP_ONE(a) 1
 #define NUM_POP_TWO(a,b) 2
@@ -1454,12 +1465,14 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_POP_V_MFINAL NUM_POP_C_MFINAL
 #define NUM_POP_CVMANY immIVA[0] /* number of arguments */
 #define NUM_POP_CVUMANY immIVA[0] /* number of arguments */
-#define NUM_POP_FCALL (immIVA[0] + immIVA[1] + immIVA[2] - 1)
+#define NUM_POP_FCALL (immFCA.numArgs + (immFCA.hasUnpack ? 1 : 0) +   \
+                       immFCA.numRets - 1)
 #define NUM_POP_CMANY immIVA[0] /* number of arguments */
 #define NUM_POP_SMANY vecImmStackValues
 
 #define O(name, imm, pop, push, flags)                                 \
   void parse_opcode_##name(AsmState& as) {                             \
+    UNUSED auto immFCA = FCallArgs(-1);                                \
     UNUSED uint32_t immIVA[kMaxHhbcImms];                              \
     UNUSED auto const thisOpcode = Op::name;                           \
     UNUSED const Offset curOpcodeOff = as.ue->bcPos();                 \
@@ -1506,7 +1519,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
     }                                                                  \
                                                                        \
     /* FCalls with unpack perform their own bounds checking. */        \
-    if ((Op##name == OpFCall && !immIVA[1]) ||                         \
+    if ((Op##name == OpFCall && !immFCA.hasUnpack) ||                  \
         Op##name == OpFCallAwait) {                                    \
       as.fe->containsCalls = true;                                     \
     }                                                                  \
@@ -1562,6 +1575,7 @@ OPCODES
 #undef IMM_VSA
 #undef IMM_KA
 #undef IMM_LAR
+#undef IMM_FCA
 
 #undef NUM_PUSH_NOV
 #undef NUM_PUSH_ONE

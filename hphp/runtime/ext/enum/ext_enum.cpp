@@ -44,7 +44,7 @@ static Array HHVM_STATIC_METHOD(BuiltinEnum, getNames) {
 }
 
 static bool HHVM_STATIC_METHOD(BuiltinEnum, isValid, const Variant &value) {
-  return enumHasValue(self_, value.asCell());
+  return enumHasValue(self_, value.toCell());
 }
 
 static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {

@@ -386,16 +386,16 @@ bool UnaryOpExpression::preCompute(const Variant& value, Variant &result) {
       case '!':
         result = !value.toBoolean(); break;
       case '+':
-        cellSet(add(make_tv<KindOfInt64>(0), *value.asCell()),
-                *result.asCell());
+        cellSet(add(make_tv<KindOfInt64>(0), *value.toCell()),
+                *result.toCell());
         break;
       case '-':
-        cellSet(sub(make_tv<KindOfInt64>(0), *value.asCell()),
-                *result.asCell());
+        cellSet(sub(make_tv<KindOfInt64>(0), *value.toCell()),
+                *result.toCell());
         break;
       case '~':
-        tvSet(*value.asCell(), *result.asTypedValue());
-        cellBitNot(*result.asCell());
+        tvSet(*value.toCell(), *result.asTypedValue());
+        cellBitNot(*result.toCell());
         break;
       case '@':
         result = value;

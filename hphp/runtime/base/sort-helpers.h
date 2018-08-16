@@ -329,8 +329,8 @@ struct ElmUCompare {
 
   bool operator()(ElmT left, ElmT right) const {
     TypedValue args[2] = {
-      *acc.getValue(left).asCell(),
-      *acc.getValue(right).asCell()
+      *acc.getValue(left).toCell(),
+      *acc.getValue(right).toCell()
     };
     auto ret = Variant::attach(
       g_context->invokeFuncFew(*ctx, 2, args)

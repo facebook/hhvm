@@ -83,7 +83,7 @@ Object createAndConstructThrowable(Class* cls, const Variant& message) {
   auto const message_prop = inst->propLvalAtOffset(s_messageIdx);
   assertx(isStringType(message_prop.type()));
   assertx(message_prop.val().pstr == staticEmptyString());
-  cellDup(*message.asCell(), message_prop);
+  cellDup(*message.toCell(), message_prop);
   return inst;
 }
 

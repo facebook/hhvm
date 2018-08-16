@@ -375,7 +375,7 @@ bool SystemlibSessionModule::open(const char *save_path,
 
   Variant savePath = String(save_path, CopyString);
   Variant sessionName = String(session_name, CopyString);
-  TypedValue args[2] = { *savePath.asCell(), *sessionName.asCell() };
+  TypedValue args[2] = { *savePath.toCell(), *sessionName.toCell() };
   auto ret = Variant::attach(
       g_context->invokeFuncFew(m_open, obj.get(), nullptr, 2, args)
   );
@@ -416,7 +416,7 @@ bool SystemlibSessionModule::read(const char *key, String &value) {
   Variant sessionKey = String(key, CopyString);
   auto ret = Variant::attach(
     g_context->invokeFuncFew(m_read, obj.get(),
-                             nullptr, 1, sessionKey.asCell())
+                             nullptr, 1, sessionKey.toCell())
   );
 
   if (ret.isString()) {
@@ -433,7 +433,7 @@ bool SystemlibSessionModule::write(const char *key, const String& value) {
 
   Variant sessionKey = String(key, CopyString);
   Variant sessionVal = value;
-  TypedValue args[2] = { *sessionKey.asCell(), *sessionVal.asCell() };
+  TypedValue args[2] = { *sessionKey.toCell(), *sessionVal.toCell() };
   auto ret = Variant::attach(
     g_context->invokeFuncFew(m_write, obj.get(), nullptr, 2, args)
   );
@@ -452,7 +452,7 @@ bool SystemlibSessionModule::destroy(const char *key) {
   Variant sessionKey = String(key, CopyString);
   auto ret = Variant::attach(
     g_context->invokeFuncFew(m_destroy, obj.get(),
-                             nullptr, 1, sessionKey.asCell())
+                             nullptr, 1, sessionKey.toCell())
   );
 
   if (ret.isBoolean() && ret.toBoolean()) {
@@ -469,7 +469,7 @@ bool SystemlibSessionModule::gc(int maxlifetime, int *nrdels) {
   Variant maxLifeTime = maxlifetime;
   auto ret = Variant::attach(
     g_context->invokeFuncFew(m_gc, obj.get(),
-                             nullptr, 1, maxLifeTime.asCell())
+                             nullptr, 1, maxLifeTime.toCell())
   );
 
   if (ret.isInteger()) {

@@ -31,7 +31,7 @@ inline bool isContainer(const Cell c) {
 }
 
 inline bool isContainer(const Variant& v) {
-  return isContainer(*v.asCell());
+  return isContainer(*v.toCell());
 }
 
 inline bool isContainerOrNull(const Cell c) {
@@ -41,7 +41,7 @@ inline bool isContainerOrNull(const Cell c) {
 }
 
 inline bool isContainerOrNull(const Variant& v) {
-  return isContainerOrNull(*v.asCell());
+  return isContainerOrNull(*v.toCell());
 }
 
 inline bool isMutableContainer(const Cell c) {
@@ -51,7 +51,7 @@ inline bool isMutableContainer(const Cell c) {
 }
 
 inline bool isMutableContainer(const Variant& v) {
-  return isMutableContainer(*v.asCell());
+  return isMutableContainer(*v.toCell());
 }
 
 inline size_t getContainerSize(const Cell c) {
@@ -64,7 +64,7 @@ inline size_t getContainerSize(const Cell c) {
 }
 
 inline size_t getContainerSize(const Variant& v) {
-  return getContainerSize(*v.asCell());
+  return getContainerSize(*v.toCell());
 }
 
 inline bool isPackedContainer(const Cell c) {
@@ -78,7 +78,7 @@ inline bool isPackedContainer(const Cell c) {
 
 ALWAYS_INLINE
 const Cell container_as_cell(const Variant& container) {
-  const auto& cellContainer = *container.asCell();
+  const auto& cellContainer = *container.toCell();
   if (UNLIKELY(!isContainer(cellContainer))) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a container (array or collection)");

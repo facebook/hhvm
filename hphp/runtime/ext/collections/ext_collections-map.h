@@ -58,15 +58,15 @@ public:
    * Append `v' to the Map and incref it if it's refcounted.
    */
   void add(TypedValue v);
-  void add(const Variant& v) { add(*v.asCell()); }
+  void add(const Variant& v) { add(*v.toCell()); }
 
   /*
    * Add `k' => `v' to the Map, increffing each if it's refcounted.
    */
   void set(int64_t k, TypedValue v);
   void set(StringData* k, TypedValue v);
-  void set(int64_t k, const Variant& v) { set(k, *v.asCell()); }
-  void set(StringData* k, const Variant& v) { set(k, *v.asCell()); }
+  void set(int64_t k, const Variant& v) { set(k, *v.toCell()); }
+  void set(StringData* k, const Variant& v) { set(k, *v.toCell()); }
   void set(TypedValue k, TypedValue v) {
     assertx(!isRefType(k.m_type));
     if (k.m_type == KindOfInt64) {
@@ -78,7 +78,7 @@ public:
     }
   }
   void set(const Variant& k, const Variant& v) {
-    set(*k.asCell(), *v.asCell());
+    set(*k.toCell(), *v.toCell());
   }
 
   Variant pop();
@@ -187,8 +187,8 @@ protected:
   // If you're not sure, use set() instead.
   void setRaw(int64_t k, TypedValue v);
   void setRaw(StringData* key, TypedValue v);
-  void setRaw(int64_t k, const Variant& v)     { setRaw(k, *v.asCell()); }
-  void setRaw(StringData* k, const Variant& v) { setRaw(k, *v.asCell()); }
+  void setRaw(int64_t k, const Variant& v)     { setRaw(k, *v.toCell()); }
+  void setRaw(StringData* k, const Variant& v) { setRaw(k, *v.toCell()); }
 
   void setRaw(TypedValue k, TypedValue v) {
     assertx(!isRefType(k.m_type));
@@ -201,7 +201,7 @@ protected:
     }
   }
   void setRaw(const Variant& k, const Variant& v) {
-    setRaw(*k.asCell(), *v.asCell());
+    setRaw(*k.toCell(), *v.toCell());
   }
 
   template<class TMap>

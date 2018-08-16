@@ -48,7 +48,7 @@ Variant HHVM_FUNCTION(min,
                       const Variant& value,
                       const Array& args /* = null_array */) {
   if (args.empty()) {
-    const auto& cell_value = *value.asCell();
+    const auto& cell_value = *value.toCell();
     if (UNLIKELY(!isContainer(cell_value))) {
       if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::WARN) {
         raise_warning("min(): This will return the value instead of null, "
@@ -97,7 +97,7 @@ Variant HHVM_FUNCTION(max,
                       const Variant& value,
                       const Array& args /* = null_array */) {
   if (args.empty()) {
-    const auto& cell_value = *value.asCell();
+    const auto& cell_value = *value.toCell();
     if (UNLIKELY(!isContainer(cell_value))) {
       if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::WARN) {
         raise_warning("max(): This will return the value instead of null, "

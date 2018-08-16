@@ -73,7 +73,7 @@ ArrayIter::ArrayIter(const Cell c) {
 }
 
 ArrayIter::ArrayIter(const Variant& v) {
-  cellInit(*v.asCell());
+  cellInit(*v.toCell());
 }
 
 ArrayIter::ArrayIter(const ArrayIter& iter) {

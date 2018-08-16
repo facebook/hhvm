@@ -804,7 +804,7 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
 template<typename Fn, typename... Args> ALWAYS_INLINE
 decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
                     const Variant& key, Args&&... args) {
-  return elem(arr, fn, is_key, *key.asCell(), std::forward<Args>(args)...);
+  return elem(arr, fn, is_key, *key.toCell(), std::forward<Args>(args)...);
 }
 
 }

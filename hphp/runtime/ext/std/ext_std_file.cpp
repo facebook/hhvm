@@ -2018,8 +2018,8 @@ Variant HHVM_FUNCTION(dir,
     return false;
   }
   auto d = SystemLib::AllocDirectoryObject();
-  d->setProp(nullptr, s_path.get(), directory.asCell());
-  d->setProp(nullptr, s_handle.get(), *dir.asCell());
+  d->setProp(nullptr, s_path.get(), directory.toCell());
+  d->setProp(nullptr, s_handle.get(), *dir.toCell());
   return d;
 }
 

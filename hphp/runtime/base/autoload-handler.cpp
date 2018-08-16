@@ -323,7 +323,7 @@ AutoloadHandler::invokeFailureCallback(
   //  - anything else means keep going
   Variant action = vm_call_user_func(func,
                                      make_packed_array(kind, name, err));
-  auto const actionCell = action.asCell();
+  auto const actionCell = action.toCell();
   if (actionCell->m_type == KindOfBoolean) {
     return actionCell->m_data.num ? RetryAutoloading : StopAutoloading;
   }

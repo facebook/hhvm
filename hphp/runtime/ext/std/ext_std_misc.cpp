@@ -424,7 +424,7 @@ bool HHVM_FUNCTION(define, const String& name, const Variant& value,
   if (case_insensitive) {
     raise_warning(Strings::CONSTANTS_CASE_SENSITIVE);
   }
-  return Unit::defCns(name.get(), value.asCell());
+  return Unit::defCns(name.get(), value.toCell());
 }
 
 bool HHVM_FUNCTION(defined, const String& name, bool autoload /* = true */) {

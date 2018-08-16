@@ -71,7 +71,7 @@ TypedValue HHVM_FUNCTION(array_chunk,
                          const Variant& input,
                          int chunkSize,
                          bool preserve_keys /* = false */) {
-  const auto& cellInput = *input.asCell();
+  const auto& cellInput = *input.toCell();
   if (UNLIKELY(!isContainer(cellInput))) {
     raise_warning("Invalid operand type was used: %s expects "
                   "an array or collection as argument 1", __FUNCTION__+2);
@@ -174,8 +174,8 @@ TypedValue HHVM_FUNCTION(array_combine,
                          const Variant& values) {
   SuppressHackArrCompatNotices suppress;
 
-  const auto& cell_keys = *keys.asCell();
-  const auto& cell_values = *values.asCell();
+  const auto& cell_keys = *keys.toCell();
+  const auto& cell_values = *values.toCell();
   if (UNLIKELY(!isContainer(cell_keys) || !isContainer(cell_values))) {
     raise_warning("Invalid operand type was used: array_combine expects "
                   "arrays or collections");
@@ -213,7 +213,7 @@ TypedValue HHVM_FUNCTION(array_fill_keys,
 
   folly::Optional<ArrayInit> ai;
   auto ok = IterateV(
-    *keys.asCell(),
+    *keys.toCell(),
     [&](ArrayData* adata) {
       ai.emplace(adata->size(), ArrayInit::Mixed{});
     },
@@ -275,7 +275,7 @@ TypedValue HHVM_FUNCTION(array_flip,
                          const Variant& trans) {
   SuppressHackArrCompatNotices suppress;
 
-  auto const& transCell = *trans.asCell();
+  auto const& transCell = *trans.toCell();
   if (UNLIKELY(!isContainer(transCell))) {
     raise_warning("Invalid operand type was used: %s expects "
                   "an array or collection", __FUNCTION__+2);
@@ -299,7 +299,7 @@ bool HHVM_FUNCTION(array_key_exists,
                    const Variant& search) {
   const ArrayData *ad;
 
-  auto const searchCell = search.asCell();
+  auto const searchCell = search.toCell();
   if (LIKELY(isArrayLikeType(searchCell->m_type))) {
     ad = searchCell->m_data.parr;
   } else if (searchCell->m_type == KindOfObject) {
@@ -314,7 +314,7 @@ bool HHVM_FUNCTION(array_key_exists,
     return false;
   }
 
-  auto const cell = key.asCell();
+  auto const cell = key.toCell();
 
   switch (cell->m_type) {
     case KindOfUninit:
@@ -370,7 +370,7 @@ bool HHVM_FUNCTION(key_exists,
 Variant array_keys_helper(const Variant& input,
                           const Variant& search_value /* = uninit_null */,
                           bool strict /* = false */) {
-  const auto& cell_input = *input.asCell();
+  const auto& cell_input = *input.toCell();
   if (UNLIKELY(!isContainer(cell_input))) {
     raise_warning("array_keys() expects parameter 1 to be an array "
                   "or collection");
@@ -466,7 +466,7 @@ TypedValue HHVM_FUNCTION(array_map,
     CallerFrame cf;
     vm_decode_function(callback, cf(), false, ctx);
   }
-  const auto& cell_arr1 = *arr1.asCell();
+  const auto& cell_arr1 = *arr1.toCell();
   if (UNLIKELY(!isContainer(cell_arr1))) {
     raise_warning("array_map(): Argument #2 should be an array or collection");
     return make_tv<KindOfNull>();
@@ -713,7 +713,7 @@ TypedValue HHVM_FUNCTION(array_pad,
 
 TypedValue HHVM_FUNCTION(array_pop,
                          VRefParam containerRef) {
-  const auto* container = containerRef->asCell();
+  const auto* container = containerRef->toCell();
   if (UNLIKELY(!isMutableContainer(*container))) {
     raise_warning("array_pop() expects parameter 1 to be an "
                   "array or mutable collection");
@@ -896,7 +896,7 @@ TypedValue HHVM_FUNCTION(array_reverse,
 
 TypedValue HHVM_FUNCTION(array_shift,
                          VRefParam array) {
-  const auto* cell_array = array->asCell();
+  const auto* cell_array = array->toCell();
   if (UNLIKELY(!isMutableContainer(*cell_array))) {
     raise_warning("array_shift() expects parameter 1 to be an "
                   "array or mutable collection");
@@ -1093,7 +1093,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
                          VRefParam array,
                          const Variant& var,
                          const Array& args /* = null array */) {
-  const auto* cell_array = array->asCell();
+  const auto* cell_array = array->toCell();
   if (UNLIKELY(!isContainer(*cell_array))) {
     raise_warning("%s() expects parameter 1 to be an array, Vector, or Set",
                   __FUNCTION__+2 /* remove the "f_" prefix */);
@@ -1163,7 +1163,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
           vec->addFront(tvToCell(args->atPos(pos)));
         }
       }
-      vec->addFront(*var.asCell());
+      vec->addFront(*var.toCell());
       return make_tv<KindOfInt64>(vec->size());
     }
     case CollectionType::Set: {
@@ -1175,7 +1175,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
           st->addFront(tvToCell(args->atPos(pos)));
         }
       }
-      st->addFront(*var.asCell());
+      st->addFront(*var.toCell());
       return make_tv<KindOfInt64>(st->size());
     }
     case CollectionType::Map:
@@ -1191,7 +1191,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
 }
 
 Variant array_values(const Variant& input) {
-  auto const cell = *input.asCell();
+  auto const cell = *input.toCell();
   if (isArrayType(cell.m_type)) {
     if (cell.m_data.parr->isPacked()) {
       return input;
@@ -1241,7 +1241,7 @@ static void walk_func(Variant& value,
                       const void *data) {
   CallCtx* ctx = (CallCtx*)data;
   int nargs = userdata.isInitialized() ? 3 : 2;
-  TypedValue args[3] = { *value.asRef(), *key.asCell(), *userdata.asCell() };
+  TypedValue args[3] = { *value.asRef(), *key.toCell(), *userdata.toCell() };
   tvDecRefGen(
     g_context->invokeFuncFew(*ctx, nargs, args)
   );
@@ -1415,7 +1415,7 @@ static Variant iter_op_impl(VRefParam refParam, OpPtr op, const String& objOp,
                             NonArrayRet nonArray,
                             bool(ArrayData::*pred)() const =
                               &ArrayData::isInvalid) {
-  auto& cell = *refParam.wrapped().asCell();
+  auto& cell = *refParam.wrapped().toCell();
   if (!isArrayLikeType(cell.m_type)) {
     if (cell.m_type == KindOfObject) {
       auto obj = refParam.wrapped().toObject();
@@ -1537,7 +1537,7 @@ bool HHVM_FUNCTION(in_array,
                    bool strict /* = false */) {
   bool ret = false;
   auto ok = strict ?
-    IterateV(*haystack.asCell(),
+    IterateV(*haystack.toCell(),
              [](ArrayData*) { return false; },
              [&](TypedValue v) -> bool {
                if (tvSame(v, *needle.asTypedValue())) {
@@ -1547,7 +1547,7 @@ bool HHVM_FUNCTION(in_array,
                return false;
              },
              [](ObjectData*) { return false; }) :
-    IterateV(*haystack.asCell(),
+    IterateV(*haystack.toCell(),
              [](ArrayData*) { return false; },
              [&](TypedValue v) -> bool {
                if (tvEqual(v, *needle.asTypedValue())) {
@@ -1570,7 +1570,7 @@ Variant array_search(const Variant& needle,
                      bool strict /* = false */) {
   Variant ret = false;
   auto ok = strict ?
-    IterateKV(*haystack.asCell(),
+    IterateKV(*haystack.toCell(),
               [](ArrayData*) { return false; },
               [&](Cell k, TypedValue v) -> bool {
                 if (tvSame(v, *needle.asTypedValue())) {
@@ -1580,7 +1580,7 @@ Variant array_search(const Variant& needle,
                 return false;
               },
               [](ObjectData*) { return false; }) :
-    IterateKV(*haystack.asCell(),
+    IterateKV(*haystack.toCell(),
               [](ArrayData*) { return false; },
               [&](Cell k, TypedValue v) -> bool {
                 if (tvEqual(v, *needle.asTypedValue())) {
@@ -1765,16 +1765,16 @@ static void containerKeysToSetHelper(const req::ptr<c_Set>& st,
                                      const Variant& container) {
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
-  bool isKey = isArrayLikeType(container.asCell()->m_type);
+  bool isKey = isArrayLikeType(container.toCell()->m_type);
   for (ArrayIter iter(container); iter; ++iter) {
-    addToSetHelper(st, *iter.first().asCell(), strTv, !isKey);
+    addToSetHelper(st, *iter.first().toCell(), strTv, !isKey);
   }
 }
 
 #define ARRAY_DIFF_PRELUDE() \
   /* Check to make sure all inputs are containers */ \
-  const auto& c1 = *container1.asCell(); \
-  const auto& c2 = *container2.asCell(); \
+  const auto& c1 = *container1.toCell(); \
+  const auto& c2 = *container2.toCell(); \
   if (UNLIKELY(!isContainer(c1) || !isContainer(c2))) { \
     raise_warning("%s() expects parameter %d to be an array or collection", \
                   __FUNCTION__+2, /* remove the "f_" prefix */ \
@@ -1861,7 +1861,7 @@ TypedValue HHVM_FUNCTION(array_diff_key,
     auto ad2 = c2.m_data.parr;
     for (ArrayIter iter(container1); iter; ++iter) {
       auto key = iter.first();
-      const auto& c = *key.asCell();
+      const auto& c = *key.toCell();
       if (c.m_type == KindOfInt64) {
         if (ad2->exists(c.m_data.num)) continue;
       } else {
@@ -1892,7 +1892,7 @@ TypedValue HHVM_FUNCTION(array_diff_key,
   bool isKey = isArrayLikeType(c1.m_type);
   for (ArrayIter iter(container1); iter; ++iter) {
     auto key = iter.first();
-    const auto& c = *key.asCell();
+    const auto& c = *key.toCell();
     if (checkSetHelper(st, c, strTv, !isKey)) continue;
     ret.setWithRef(key, iter.secondValPlus(), isKey);
   }
@@ -1998,7 +1998,7 @@ static inline TypedValue* makeContainerListHelper(const Variant& a,
   assertx(smallestPos < count);
   // Allocate a TypedValue array and copy 'a' and the contents of 'argv'
   TypedValue* containers = req::make_raw_array<TypedValue>(count);
-  tvCopy(*a.asCell(), containers[0]);
+  tvCopy(*a.toCell(), containers[0]);
   int pos = 1;
   for (ArrayIter argvIter(argv); argvIter; ++argvIter, ++pos) {
     cellCopy(tvToCell(argvIter.secondVal()), containers[pos]);
@@ -2113,7 +2113,7 @@ static void containerValuesIntersectHelper(const req::ptr<c_Set>& st,
     auto const rval = iter.secondRvalPlus().unboxed();
     assertx(rval.type() == KindOfInt64);
     if (rval.val().num == count) {
-      st->add(*iter.first().asCell());
+      st->add(*iter.first().toCell());
     }
   }
 }
@@ -2129,7 +2129,7 @@ static void containerKeysIntersectHelper(const req::ptr<c_Set>& st,
   bool isKey = isArrayLikeType(containers[0].m_type);
   for (ArrayIter iter(tvAsCVarRef(&containers[0])); iter; ++iter) {
     auto key = iter.first();
-    const auto& c = *key.asCell();
+    const auto& c = *key.toCell();
     // For each key k in containers[0], we add the key/value pair (k, 1)
     // to the map. If a key (after various conversions) occurs more than
     // once in the container, we'll simply overwrite the old entry and
@@ -2140,7 +2140,7 @@ static void containerKeysIntersectHelper(const req::ptr<c_Set>& st,
     isKey = isArrayLikeType(containers[pos].m_type);
     for (ArrayIter iter(tvAsCVarRef(&containers[pos])); iter; ++iter) {
       auto key = iter.first();
-      const auto& c = *key.asCell();
+      const auto& c = *key.toCell();
       updateIntersectMapHelper(mp, c, pos, strTv, !isKey);
     }
   }
@@ -2151,15 +2151,15 @@ static void containerKeysIntersectHelper(const req::ptr<c_Set>& st,
     auto const rval = iter.secondRvalPlus().unboxed();
     assertx(rval.type() == KindOfInt64);
     if (rval.val().num == count) {
-      st->add(*iter.first().asCell());
+      st->add(*iter.first().toCell());
     }
   }
 }
 
 #define ARRAY_INTERSECT_PRELUDE() \
   /* Check to make sure all inputs are containers */ \
-  const auto& c1 = *container1.asCell(); \
-  const auto& c2 = *container2.asCell(); \
+  const auto& c1 = *container1.toCell(); \
+  const auto& c2 = *container2.toCell(); \
   if (!isContainer(c1) || !isContainer(c2)) { \
     raise_warning("%s() expects parameter %d to be an array or collection", \
                   __FUNCTION__+2, /* remove the "f_" prefix */ \
@@ -2247,7 +2247,7 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
     auto ad2 = c2.m_data.parr;
     for (ArrayIter iter(container1); iter; ++iter) {
       auto key = iter.first();
-      const auto& c = *key.asCell();
+      const auto& c = *key.toCell();
       if (c.m_type == KindOfInt64) {
         if (!ad2->exists(c.m_data.num)) continue;
       } else {
@@ -2284,7 +2284,7 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
   bool isKey = isArrayLikeType(c1.m_type);
   for (ArrayIter iter(container1); iter; ++iter) {
     auto key = iter.first();
-    const auto& c = *key.asCell();
+    const auto& c = *key.toCell();
     if (!checkSetHelper(st, c, strTv, !isKey)) continue;
     ret.setWithRef(key, iter.secondValPlus(), isKey);
   }

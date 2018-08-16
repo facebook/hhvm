@@ -548,7 +548,7 @@ void ObjectData::o_set(const String& propName, const Variant& v,
   }
 
   if (useSet) {
-    invokeSet(propName.get(), *v.asCell());
+    invokeSet(propName.get(), *v.toCell());
   } else if (!prop) {
     setDynProp(propName.get(), tvToInitCell(*v.asTypedValue()));
   }
@@ -1127,7 +1127,7 @@ Variant ObjectData::offsetGet(Variant key) {
   assertx(method);
 
   return
-    g_context->invokeMethodV(this, method, InvokeArgs(key.asCell(), 1), false);
+    g_context->invokeMethodV(this, method, InvokeArgs(key.toCell(), 1), false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

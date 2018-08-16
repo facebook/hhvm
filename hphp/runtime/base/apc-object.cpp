@@ -318,7 +318,7 @@ Object APCObject::createObjectSlow() const {
     }
 
     auto val = prop->val ? prop->val->toLocal() : init_null();
-    obj->setProp(const_cast<Class*>(ctx), key, *val.asCell());
+    obj->setProp(const_cast<Class*>(ctx), key, *val.toCell());
   }
 
   obj->invokeWakeup();

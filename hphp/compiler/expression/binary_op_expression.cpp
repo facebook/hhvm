@@ -309,13 +309,13 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstRawPtr ar) {
           result = static_cast<bool>(v1.toBoolean() ^ v2.toBoolean());
           break;
         case '|':
-          *result.asCell() = cellBitOr(*v1.asCell(), *v2.asCell());
+          *result.toCell() = cellBitOr(*v1.toCell(), *v2.toCell());
           break;
         case '&':
-          *result.asCell() = cellBitAnd(*v1.asCell(), *v2.asCell());
+          *result.toCell() = cellBitAnd(*v1.toCell(), *v2.toCell());
           break;
         case '^':
-          *result.asCell() = cellBitXor(*v1.asCell(), *v2.asCell());
+          *result.toCell() = cellBitXor(*v1.toCell(), *v2.toCell());
           break;
         case '.':
           if (v1.isArray() || v2.isArray()) {
@@ -339,37 +339,37 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstRawPtr ar) {
           result = less(v1, v2);
           break;
         case T_IS_SMALLER_OR_EQUAL:
-          result = cellLessOrEqual(*v1.asCell(), *v2.asCell());
+          result = cellLessOrEqual(*v1.toCell(), *v2.toCell());
           break;
         case '>':
           result = more(v1, v2);
           break;
         case T_IS_GREATER_OR_EQUAL:
-          result = cellGreaterOrEqual(*v1.asCell(), *v2.asCell());
+          result = cellGreaterOrEqual(*v1.toCell(), *v2.toCell());
           break;
         case T_SPACESHIP:
-          result = cellCompare(*v1.asCell(), *v2.asCell());
+          result = cellCompare(*v1.toCell(), *v2.toCell());
           break;
         case '+':
-          *result.asCell() = add(*v1.asCell(), *v2.asCell());
+          *result.toCell() = add(*v1.toCell(), *v2.toCell());
           break;
         case '-':
-          *result.asCell() = sub(*v1.asCell(), *v2.asCell());
+          *result.toCell() = sub(*v1.toCell(), *v2.toCell());
           break;
         case '*':
-          *result.asCell() = mul(*v1.asCell(), *v2.asCell());
+          *result.toCell() = mul(*v1.toCell(), *v2.toCell());
           break;
         case '/':
           if ((v2.isIntVal() && v2.toInt64() == 0) || v2.toDouble() == 0.0) {
             return ExpressionPtr();
           }
-          *result.asCell() = cellDiv(*v1.asCell(), *v2.asCell());
+          *result.toCell() = cellDiv(*v1.toCell(), *v2.toCell());
           break;
         case '%':
           if ((v2.isIntVal() && v2.toInt64() == 0) || v2.toDouble() == 0.0) {
             return ExpressionPtr();
           }
-          *result.asCell() = cellMod(*v1.asCell(), *v2.asCell());
+          *result.toCell() = cellMod(*v1.toCell(), *v2.toCell());
           break;
         case T_SL: {
           int64_t shift = v2.toInt64();

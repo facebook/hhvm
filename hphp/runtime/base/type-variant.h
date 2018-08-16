@@ -1178,8 +1178,8 @@ struct Variant : private TypedValue {
    * Access this Variant as a Cell.  I.e. unboxes it if it was a
    * KindOfRef.
    */
-  const Cell* asCell() const { return tvToCell(asTypedValue()); }
-        Cell* asCell()       { return tvToCell(asTypedValue()); }
+  const Cell* toCell() const { return tvToCell(asTypedValue()); }
+        Cell* toCell()       { return tvToCell(asTypedValue()); }
 
   /*
    * Read this Variant as an InitCell, without incrementing the
@@ -1752,7 +1752,7 @@ ALWAYS_INLINE Cell Array::convertKey(Cell k) const {
   return cellToKey(k, m_arr ? m_arr.get() : staticEmptyArray());
 }
 ALWAYS_INLINE Cell Array::convertKey(const Variant& k) const {
-  return convertKey(*k.asCell());
+  return convertKey(*k.toCell());
 }
 
 inline VarNR Variant::toKey(const ArrayData* ad) const {

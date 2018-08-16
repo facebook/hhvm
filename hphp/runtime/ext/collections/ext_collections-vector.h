@@ -236,7 +236,7 @@ public:
    * Append `v' to the Vector and incref it if it's refcounted.
    */
   void add(TypedValue v) { addImpl<false>(v); }
-  void add(const Variant& v) { add(*v.asCell()); }
+  void add(const Variant& v) { add(*v.toCell()); }
 
   /*
    * Add `k' => `v' to the Vector, increffing `v' if it's refcounted.
@@ -246,7 +246,7 @@ public:
     setRaw(key, val);
   }
   void set(int64_t key, const Variant& val) {
-    set(key, val.asCell());
+    set(key, val.toCell());
   }
   void set(const TypedValue* key, const TypedValue* val) {
     assertx(!isRefType(key->m_type));
@@ -256,7 +256,7 @@ public:
     set(key->m_data.num, val);
   }
   void set(const Variant& key, const Variant& val) {
-    set(key.asCell(), val.asCell());
+    set(key.toCell(), val.toCell());
   }
 
   template<class TVector>
@@ -341,7 +341,7 @@ protected:
   // immutable buffer, so it's only safe to use in some cases. If you're not
   // sure, use add() instead.
   void addRaw(TypedValue v) { addImpl<true>(v); }
-  void addRaw(const Variant& v) { addRaw(*v.asCell()); }
+  void addRaw(const Variant& v) { addRaw(*v.toCell()); }
 
   // setRaw() assigns a value to the specified key in this Vector but doesn't
   // check for an immutable buffer, so it's only safe to use in some cases.
@@ -359,7 +359,7 @@ protected:
     tvDecRefGen(oldTV);
   }
   void setRaw(int64_t key, const Variant& val) {
-    setRaw(key, val.asCell());
+    setRaw(key, val.toCell());
   }
   void setRaw(const TypedValue* key, const TypedValue* val) {
     assertx(!isRefType(key->m_type));
@@ -369,7 +369,7 @@ protected:
     setRaw(key->m_data.num, val);
   }
   void setRaw(const Variant& key, const Variant& val) {
-    setRaw(key.asCell(), val.asCell());
+    setRaw(key.toCell(), val.toCell());
   }
 
   /**
@@ -379,10 +379,10 @@ protected:
 
   Object getIterator();
   Variant php_at(const Variant& key) {
-    return tvAsCVarRef(at(key.asCell()));
+    return tvAsCVarRef(at(key.toCell()));
   }
   Variant php_get(const Variant& key) {
-    if (auto tv = get(key.asCell())) {
+    if (auto tv = get(key.toCell())) {
       return tvAsCVarRef(tv);
     }
     return init_null_variant;
@@ -527,7 +527,7 @@ struct c_Vector : BaseVector {
     return reserve(checkRequestedSize(sz));
   }
   void php_resize(const Variant& sz, const Variant& value) {
-    return resize(checkRequestedSize(sz), value.asCell());
+    return resize(checkRequestedSize(sz), value.toCell());
   }
   Object php_set(const Variant& key, const Variant& value) {
     set(key, value);

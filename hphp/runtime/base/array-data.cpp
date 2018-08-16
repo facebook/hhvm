@@ -830,7 +830,7 @@ bool ArrayData::IsValidKey(Cell k) {
 }
 
 bool ArrayData::IsValidKey(const Variant& k) {
-  return IsValidKey(*k.asCell());
+  return IsValidKey(*k.toCell());
 }
 
 bool ArrayData::IsValidKey(const String& k) {

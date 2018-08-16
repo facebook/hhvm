@@ -345,7 +345,7 @@ public:
   int64_t toInt64 () const { return m_str ? m_str->toInt64  () : 0;}
   double toDouble () const { return m_str ? m_str->toDouble () : 0;}
   std::string toCppString() const { return std::string(c_str(), size()); }
-  Cell asCell() const {
+  Cell toCell() const {
     assertx(m_str);
     return make_tv<KindOfString>(m_str.get());
   }

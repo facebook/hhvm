@@ -43,7 +43,7 @@ void throw_invalid_object_type(const Object& p) {
 }
 
 void throw_invalid_object_type(const Variant& p) {
-  auto tv = p.asCell();
+  auto tv = p.toCell();
   switch (tv->m_type) {
     case KindOfNull:
     case KindOfUninit:

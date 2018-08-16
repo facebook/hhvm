@@ -415,7 +415,7 @@ struct CompactWriter {
 
       if (isContainer(map)) {
         writeMapBegin(keyType, valueType, getContainerSize(map));
-        IterateKV(*map.asCell(), [](const ArrayData* /*ad*/) { return false; },
+        IterateKV(*map.toCell(), [](const ArrayData* /*ad*/) { return false; },
                   elemWriter, [](const ObjectData* /*o*/) { return false; });
       } else {
         auto const arr = map.toArray();
@@ -447,11 +447,11 @@ struct CompactWriter {
       if (isContainer(list)) {
         writeListBegin(valueType, getContainerSize(list));
         if (listType == C_LIST_LIST) {
-          IterateV(*list.asCell(),
+          IterateV(*list.toCell(),
                    [](const ArrayData* /*ad*/) { return false; }, listWriter,
                    [](const ObjectData* /*o*/) { return false; });
         } else {
-          IterateKV(*list.asCell(),
+          IterateKV(*list.toCell(),
                     [](const ArrayData* /*ad*/) { return false; }, setWriter,
                     [](const ObjectData* /*o*/) { return false; });
         }
@@ -947,7 +947,7 @@ struct CompactReader {
         for (uint32_t i = 0; i < size; i++) {
           Variant key = readField(keySpec, keyType);
           Variant value = readField(valueSpec, valueType);
-          BaseMap::OffsetSet(ret.get(), key.asCell(), value.asCell());
+          BaseMap::OffsetSet(ret.get(), key.toCell(), value.toCell());
         }
         readCollectionEnd();
         return Variant(std::move(ret));
@@ -990,7 +990,7 @@ struct CompactReader {
         int64_t i = 0;
         do {
           auto val = readField(valueSpec, valueType);
-          cellDup(*val.asCell(), *vec->appendForUnserialize(i));
+          cellDup(*val.toCell(), *vec->appendForUnserialize(i));
         } while (++i < size);
         readCollectionEnd();
         return Variant(std::move(vec));

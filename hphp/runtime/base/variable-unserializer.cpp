@@ -1002,7 +1002,7 @@ void VariableUnserializer::unserializeVariant(
       } else {
         obj = Object{SystemLib::s___PHP_Incomplete_ClassClass};
         obj->setProp(nullptr, s_PHP_Incomplete_Class_Name.get(),
-                     clsName.asCell());
+                     clsName.toCell());
       }
       assertx(!obj.isNull());
       tvSet(make_tv<KindOfObject>(obj.get()), self);
@@ -1173,8 +1173,8 @@ void VariableUnserializer::unserializeVariant(
         }
         Object ret = create_object_only(s_PHP_Incomplete_Class);
         ret->setProp(nullptr, s_PHP_Incomplete_Class_Name.get(),
-                     clsName.asCell());
-        ret->setProp(nullptr, s_serialized.get(), serialized.asCell());
+                     clsName.toCell());
+        ret->setProp(nullptr, s_serialized.get(), serialized.toCell());
         return ret;
       }();
 

@@ -405,7 +405,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
       while (start < end) push(make_tv<KindOfNull>());
     }
 
-    cellDup(*ret.asCell(), *stack.allocTV());
+    cellDup(*ret.toCell(), *stack.allocTV());
 
     vmfp() = outer;
     vmpc() = outer ? outer->func()->unit()->at(pcOff) : nullptr;

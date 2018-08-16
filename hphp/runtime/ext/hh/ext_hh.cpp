@@ -467,7 +467,7 @@ void HHVM_FUNCTION(set_frame_metadata, const Variant& metadata) {
       LIKELY(!fp->hasVarEnv())) {
     auto const local = fp->func()->lookupVarId(s_86metadata.get());
     if (LIKELY(local != kInvalidId)) {
-      cellSet(*metadata.asCell(), *tvAssertCell(frame_local(fp, local)));
+      cellSet(*metadata.toCell(), *tvAssertCell(frame_local(fp, local)));
     } else {
       SystemLib::throwInvalidArgumentExceptionObject(
         "Unsupported dynamic call of set_frame_metadata()");

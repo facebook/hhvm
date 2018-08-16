@@ -397,7 +397,7 @@ TypedValue* atRw(ObjectData* obj, const TypedValue* key) {
 }
 
 bool contains(ObjectData* obj, const Variant& offset) {
-  auto* key = offset.asCell();
+  auto* key = offset.toCell();
   switch (obj->collectionType()) {
     case CollectionType::Vector:
     case CollectionType::ImmVector:

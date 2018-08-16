@@ -293,12 +293,12 @@ Array HHVM_METHOD(DateTime, __sleep) {
   DateTimeData* data = Native::data<DateTimeData>(this_);
 
   auto const formatted = data->format(s_ISOformat);
-  this_->setProp(nullptr, s_date.get(), formatted.asCell());
+  this_->setProp(nullptr, s_date.get(), formatted.toCell());
   int zoneType = data->m_dt->zoneType();
   this_->setProp(nullptr, s_timezone_type.get(),
                  make_tv<KindOfInt64>(zoneType));
   auto const timezone = zone_type_to_string(zoneType, data->m_dt);
-  this_->setProp(nullptr, s_timezone.get(), timezone.asCell());
+  this_->setProp(nullptr, s_timezone.get(), timezone.toCell());
   return make_packed_array(s_date, s_timezone_type, s_timezone);
 }
 

@@ -312,7 +312,7 @@ BaseVector::php_zip(const Variant& iterable) {
   auto end = elm + m_size;
   do {
     Variant v = iter.second();
-    auto pair = req::make<c_Pair>(*elm, *v.asCell());
+    auto pair = req::make<c_Pair>(*elm, *v.toCell());
     vec->addRaw(make_tv<KindOfObject>(pair.get()));
     ++iter;
   } while (++elm < end && iter);
@@ -527,7 +527,7 @@ BaseVector::fromKeysOf(const TypedValue& container) {
   assertx(iter);
   auto elm = vec->data();
   do {
-    cellDup(*iter.first().asCell(), *elm++);
+    cellDup(*iter.first().toCell(), *elm++);
     ++iter;
   } while (iter);
   return Object{std::move(vec)};
@@ -885,7 +885,7 @@ ALWAYS_INLINE typename std::enable_if<
 HHVM_STATIC_METHOD(BaseVector, fromKeysOf, const Variant& container) {
   if (container.isNull()) { return Object{req::make<TVector>()}; }
 
-  const auto& cellContainer = *container.asCell();
+  const auto& cellContainer = *container.toCell();
   if (UNLIKELY(!isContainer(cellContainer))) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a container (array or collection)");

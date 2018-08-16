@@ -1280,14 +1280,14 @@ static xmlDocPtr serialize_response_call(
           }
         }
         hdr_ret = ht->m_data;
-        obj->setProp(nullptr, s_headerfault.get(), *hdr_ret.asCell());
+        obj->setProp(nullptr, s_headerfault.get(), *hdr_ret.toCell());
       }
 
       if (h->function) {
         if (serialize_response_call2(head, h->function,
                                      h->function_name.data(), uri,
                                      hdr_ret, version, 0) == SOAP_ENCODED) {
-          obj->setProp(nullptr, s_headerfault.get(), *hdr_ret.asCell());
+          obj->setProp(nullptr, s_headerfault.get(), *hdr_ret.toCell());
           use = SOAP_ENCODED;
         }
       } else {
@@ -3002,18 +3002,18 @@ void HHVM_METHOD(SoapVar, __construct,
     }
   }
   this_->setProp(nullptr, s_enc_type.get(), make_tv<KindOfInt64>(ntype));
-  if (data.toBoolean()) this_->setProp(nullptr, s_enc_value.get(), *data.asCell());
+  if (data.toBoolean()) this_->setProp(nullptr, s_enc_value.get(), *data.toCell());
   if (!type_name.empty()) {
-    this_->setProp(nullptr, s_enc_stype.get(), type_name.asCell());
+    this_->setProp(nullptr, s_enc_stype.get(), type_name.toCell());
   }
   if (!type_namespace.empty()) {
-    this_->setProp(nullptr, s_enc_ns.get(), type_namespace.asCell());
+    this_->setProp(nullptr, s_enc_ns.get(), type_namespace.toCell());
   }
   if (!node_name.empty()) {
-    this_->setProp(nullptr, s_enc_name.get(), node_name.asCell());
+    this_->setProp(nullptr, s_enc_name.get(), node_name.toCell());
   }
   if (!node_namespace.empty()) {
-    this_->setProp(nullptr, s_enc_namens.get(), node_namespace.asCell());
+    this_->setProp(nullptr, s_enc_namens.get(), node_namespace.toCell());
   }
 }
 
@@ -3072,8 +3072,8 @@ void HHVM_METHOD(SoapHeader, __construct,
   nativeData->m_data = data;
   nativeData->m_mustUnderstand = mustunderstand;
 
-  this_->setProp(nullptr, s_namespace.get(), ns.asCell());
-  this_->setProp(nullptr, s_name.get(), name.asCell());
+  this_->setProp(nullptr, s_namespace.get(), ns.toCell());
+  this_->setProp(nullptr, s_name.get(), name.toCell());
   this_->setProp(nullptr, s_data.get(), data.asInitCellTmp());
   this_->setProp(nullptr, s_mustUnderstand.get(),
                  make_tv<KindOfBoolean>(mustunderstand));

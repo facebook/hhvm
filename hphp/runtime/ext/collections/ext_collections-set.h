@@ -47,7 +47,7 @@ protected:
       throwBadValueType();
     }
   }
-  void addRaw(const Variant& v) { addRaw(*v.asCell()); }
+  void addRaw(const Variant& v) { addRaw(*v.toCell()); }
 
 public:
   /*
@@ -65,7 +65,7 @@ public:
       throwBadValueType();
     }
   }
-  void add(const Variant& v) { add(*v.asCell()); }
+  void add(const Variant& v) { add(*v.toCell()); }
 
   /*
    * Prepend an element to the Set, increffing it if it's refcounted.

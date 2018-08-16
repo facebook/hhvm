@@ -173,11 +173,11 @@ inline ArrayData* ArrayData::set(StringData* k, Cell v, bool copy) {
 }
 
 inline ArrayData* ArrayData::set(int64_t k, const Variant& v, bool copy) {
-  return g_array_funcs.setInt[kind()](this, k, *v.asCell(), copy);
+  return g_array_funcs.setInt[kind()](this, k, *v.toCell(), copy);
 }
 
 inline ArrayData* ArrayData::set(StringData* k, const Variant& v, bool copy) {
-  return g_array_funcs.setStr[kind()](this, k, *v.asCell(), copy);
+  return g_array_funcs.setStr[kind()](this, k, *v.toCell(), copy);
 }
 
 inline ArrayData* ArrayData::setWithRef(int64_t k, TypedValue v, bool copy) {
@@ -210,11 +210,11 @@ inline ArrayData* ArrayData::add(StringData* k, Cell v, bool copy) {
 }
 
 inline ArrayData* ArrayData::add(int64_t k, const Variant& v, bool copy) {
-  return g_array_funcs.addInt[kind()](this, k, *v.asCell(), copy);
+  return g_array_funcs.addInt[kind()](this, k, *v.toCell(), copy);
 }
 
 inline ArrayData* ArrayData::add(StringData* k, const Variant& v, bool copy) {
-  return g_array_funcs.addStr[kind()](this, k, *v.asCell(), copy);
+  return g_array_funcs.addStr[kind()](this, k, *v.toCell(), copy);
 }
 
 inline ArrayData* ArrayData::remove(int64_t k, bool copy) {
@@ -465,7 +465,7 @@ inline bool ArrayData::exists(const String& k) const {
 }
 
 inline bool ArrayData::exists(const Variant& k) const {
-  return exists(*k.asCell());
+  return exists(*k.toCell());
 }
 
 inline arr_lval ArrayData::lval(const String& k, bool copy) {
@@ -474,7 +474,7 @@ inline arr_lval ArrayData::lval(const String& k, bool copy) {
 }
 
 inline arr_lval ArrayData::lval(const Variant& k, bool copy) {
-  return lval(*k.asCell(), copy);
+  return lval(*k.toCell(), copy);
 }
 
 inline arr_lval ArrayData::lvalRef(const String& k, bool copy) {
@@ -483,7 +483,7 @@ inline arr_lval ArrayData::lvalRef(const String& k, bool copy) {
 }
 
 inline arr_lval ArrayData::lvalRef(const Variant& k, bool copy) {
-  return lvalRef(*k.asCell(), copy);
+  return lvalRef(*k.toCell(), copy);
 }
 
 inline tv_rval ArrayData::get(const String& k, bool error) const {
@@ -492,7 +492,7 @@ inline tv_rval ArrayData::get(const String& k, bool error) const {
 }
 
 inline tv_rval ArrayData::get(const Variant& k, bool error) const {
-  return get(*k.asCell(), error);
+  return get(*k.toCell(), error);
 }
 
 inline ArrayData* ArrayData::set(const String& k, Cell v, bool copy) {
@@ -503,12 +503,12 @@ inline ArrayData* ArrayData::set(const String& k, Cell v, bool copy) {
 
 inline ArrayData* ArrayData::set(const String& k, const Variant& v,
                                  bool copy) {
-  return set(k, *v.asCell(), copy);
+  return set(k, *v.toCell(), copy);
 }
 
 inline ArrayData* ArrayData::set(const Variant& k, const Variant& v,
                                  bool copy) {
-  return set(*k.asCell(), *v.asCell(), copy);
+  return set(*k.toCell(), *v.toCell(), copy);
 }
 
 inline ArrayData* ArrayData::setWithRef(const String& k,
@@ -526,7 +526,7 @@ ArrayData::setRef(const String& k, tv_lval v, bool copy) {
 
 inline ArrayData*
 ArrayData::setRef(const Variant& k, tv_lval v, bool copy) {
-  return setRef(*k.asCell(), v, copy);
+  return setRef(*k.toCell(), v, copy);
 }
 
 inline ArrayData* ArrayData::setRef(const String& k, Variant& v, bool copy) {
@@ -545,12 +545,12 @@ inline ArrayData* ArrayData::add(const String& k, Cell v, bool copy) {
 
 inline ArrayData* ArrayData::add(const String& k, const Variant& v,
                                  bool copy) {
-  return add(k, *v.asCell(), copy);
+  return add(k, *v.toCell(), copy);
 }
 
 inline ArrayData* ArrayData::add(const Variant& k, const Variant& v,
                                  bool copy) {
-  return add(*k.asCell(), *v.asCell(), copy);
+  return add(*k.toCell(), *v.toCell(), copy);
 }
 
 inline ArrayData* ArrayData::remove(const String& k, bool copy) {
@@ -559,7 +559,7 @@ inline ArrayData* ArrayData::remove(const String& k, bool copy) {
 }
 
 inline ArrayData* ArrayData::remove(const Variant& k, bool copy) {
-  return remove(*k.asCell(), copy);
+  return remove(*k.toCell(), copy);
 }
 
 inline ArrayData* ArrayData::appendRef(Variant& v, bool copy) {

@@ -117,7 +117,7 @@ Variant json_type_array_to_variant(json_object *new_obj, const bool assoc,
     tmpvar = json_object_to_variant(json_object_array_get_idx(new_obj, i),
                                     assoc, container_type);
     if (container_type == JSONContainerType::COLLECTIONS) {
-      collections::append(var.getObjectData(), tmpvar.asCell());
+      collections::append(var.getObjectData(), tmpvar.toCell());
     } else {
       var.asArrRef().append(tmpvar);
     }
@@ -157,7 +157,7 @@ Variant json_type_object_to_variant(json_object *new_obj, const bool assoc,
 
     if (!assoc) {
       if (key.empty()) {
-        var.getObjectData()->setProp(nullptr, s_empty.get(), *tmpvar.asCell());
+        var.getObjectData()->setProp(nullptr, s_empty.get(), *tmpvar.toCell());
       } else {
         var.getObjectData()->o_set(key, tmpvar);
       }
@@ -165,7 +165,7 @@ Variant json_type_object_to_variant(json_object *new_obj, const bool assoc,
       switch (container_type) {
         case JSONContainerType::COLLECTIONS: {
           auto keyTV = make_tv<KindOfString>(key.get());
-          collections::set(var.getObjectData(), &keyTV, tmpvar.asCell());
+          collections::set(var.getObjectData(), &keyTV, tmpvar.toCell());
           break;
         }
         case JSONContainerType::HACK_ARRAYS:

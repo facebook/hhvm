@@ -1806,7 +1806,7 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
                                         InvokeFlags flags /* = InvokeNormal */,
                                         bool dynamic /* = true */,
                                         bool checkRefAnnot /* = false */) {
-  const auto& args = *args_.asCell();
+  const auto& args = *args_.toCell();
   assertx(isContainerOrNull(args));
 
   auto const argc = cellIsNull(&args) ? 0 : getContainerSize(args);

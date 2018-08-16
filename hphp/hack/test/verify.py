@@ -9,6 +9,7 @@ import difflib
 import shlex
 from collections import namedtuple
 from concurrent.futures import ThreadPoolExecutor
+from typing import Callable, Dict, List
 
 max_workers = 48
 verbose = False
@@ -27,17 +28,19 @@ same name as test, but with .flags extension.
 """
 
 
-def get_test_flags(f):
-    prefix, _ext = os.path.splitext(f)
+def get_test_flags(path: str) -> List[str]:
+    prefix, _ext = os.path.splitext(path)
     path = prefix + '.flags'
 
     if not os.path.isfile(path):
         return []
-    with open(path) as f:
-        return shlex.split(f.read().strip())
+    with open(path) as file:
+        return shlex.split(file.read().strip())
 
 
-def run_test_program(test_cases, program, get_flags):
+def run_test_program(test_cases: List[TestCase],
+                     program: str,
+                     get_flags: Callable[[str], List[str]]) -> List[Result]:
     """
     Run the program and return a list of results.
     """
@@ -67,7 +70,7 @@ def run_test_program(test_cases, program, get_flags):
     return [future.result() for future in futures]
 
 
-def filter_ocaml_stacktrace(text):
+def filter_ocaml_stacktrace(text: str) -> str:
     """take a string and remove all the lines that look like
     they're part of an OCaml stacktrace"""
     assert isinstance(text, str)
@@ -86,7 +89,7 @@ def filter_ocaml_stacktrace(text):
     return "\n".join(out) + "\n"
 
 
-def check_result(test_case, out):
+def check_result(test_case: TestCase, out: str) -> Result:
     is_failure = (
         test_case.expected != out and
         test_case.expected != filter_ocaml_stacktrace(out))
@@ -94,18 +97,18 @@ def check_result(test_case, out):
     return Result(test_case=test_case, output=out, is_failure=is_failure)
 
 
-def record_results(results, out_ext):
+def record_results(results: List[Result], out_ext: str) -> None:
     for result in results:
         outfile = result.test_case.file_path + out_ext
         with open(outfile, 'wb') as f:
             f.write(bytes(result.output, 'UTF-8'))
 
 
-def report_failures(total,
-                    failures,
-                    out_extension,
-                    expect_extension,
-                    no_copy=False):
+def report_failures(total: int,
+                    failures: List[Result],
+                    out_extension: str,
+                    expect_extension: str,
+                    no_copy: bool=False) -> None:
     record_results(failures, out_extension)
     fnames = [failure.test_case.file_path for failure in failures]
     print("To review the failures, use the following command: ")
@@ -118,7 +121,7 @@ def report_failures(total,
         dump_failures(failures)
 
 
-def dump_failures(failures):
+def dump_failures(failures: List[Result]) -> None:
     for f in failures:
         expected = f.test_case.expected
         actual = f.output
@@ -136,7 +139,7 @@ def dump_failures(failures):
         print("\n<<<<<     End Diff      <<<<<<<\n")
 
 
-def get_hh_flags(test_dir):
+def get_hh_flags(test_dir: str) -> List[str]:
     path = os.path.join(test_dir, 'HH_FLAGS')
     if not os.path.isfile(path):
         if verbose:
@@ -146,26 +149,26 @@ def get_hh_flags(test_dir):
         return shlex.split(f.read().strip())
 
 
-def files_with_ext(files, ext):
+def files_with_ext(files: List[str], ext: str) -> List[str]:
     """
     Returns the set of filenames in :files that end in :ext
     """
-    result = set()
-    for f in files:
-        prefix, suffix = os.path.splitext(f)
+    filtered_files: List[str] = []
+    for file in files:
+        prefix, suffix = os.path.splitext(file)
         if suffix == ext:
-            result.add(prefix)
-    return result
+            filtered_files.append(prefix)
+    return filtered_files
 
 
-def list_test_files(root, disabled_ext, test_ext):
+def list_test_files(root: str, disabled_ext: str, test_ext: str) -> List[str]:
     if os.path.isfile(root):
         if root.endswith(test_ext):
             return [root]
         else:
             return []
     elif os.path.isdir(root):
-        result = []
+        result: List[str] = []
         children = os.listdir(root)
         disabled = files_with_ext(children, disabled_ext)
         for child in children:
@@ -185,7 +188,7 @@ def list_test_files(root, disabled_ext, test_ext):
             args.test_path)
 
 
-def get_content(file_path, ext=''):
+def get_content(file_path: str, ext: str='') -> str:
     try:
         with open(file_path + ext, 'r') as fexp:
             return fexp.read()
@@ -193,12 +196,12 @@ def get_content(file_path, ext=''):
         return ''
 
 
-def run_tests(files,
-              expected_extension,
-              out_extension,
-              use_stdin,
-              program,
-              get_flags):
+def run_tests(files: List[str],
+              expected_extension: str,
+              out_extension: str,
+              use_stdin: str,
+              program: str,
+              get_flags: Callable[[str], List[str]]) -> List[Result]:
     # for each file, create a test case
     test_cases = [
         TestCase(
@@ -228,11 +231,11 @@ def run_tests(files,
     return results
 
 
-def run_idempotence_tests(results,
-                          expected_extension,
-                          out_extension,
-                          program,
-                          get_flags):
+def run_idempotence_tests(results: List[Result],
+                          expected_extension: str,
+                          out_extension: str,
+                          program: str,
+                          get_flags: Callable[[str], List[str]]) -> None:
     idempotence_test_cases = [
         TestCase(
             file_path=result.test_case.file_path,
@@ -259,14 +262,35 @@ def run_idempotence_tests(results,
             idempotence_failures,
             out_extension + out_extension,  # e.g., *.out.out
             expected_extension,
-            True)
+            no_copy=True)
         sys.exit(1)  # this exit code fails the suite and lets Buck know
 
 
+def get_flags_cache(args_flags: List[str]) -> Callable[[str], List[str]]:
+    flags_cache: Dict[str, List[str]] = {}
+
+    def get_flags(test_dir: str) -> List[str]:
+        if args_flags is not None:
+            flags = args_flags
+        else:
+            if test_dir not in flags_cache:
+                flags_cache[test_dir] = get_hh_flags(test_dir)
+            flags = flags_cache[test_dir]
+        return flags
+
+    return get_flags
+
+
 if __name__ == '__main__':
+    # Defining this function to make the Flake8 linter happy (error T484)
+    # instead of passing os.path.abspath directly to add_argument. A different
+    # linter/type checker may not have this issue.
+    def abspath(path: str) -> str:
+        return os.path.abspath(path)
+
     parser = argparse.ArgumentParser()
     parser.add_argument('test_path', help='A file or a directory. ')
-    parser.add_argument('--program', type=os.path.abspath)
+    parser.add_argument('--program', type=abspath)
     parser.add_argument('--out-extension', type=str, default='.out')
     parser.add_argument('--expect-extension', type=str, default='.exp')
     parser.add_argument('--in-extension', type=str, default='.php')
@@ -309,16 +333,7 @@ if __name__ == '__main__':
         raise Exception(
             'Could not find any files to test in ' + args.test_path)
 
-    flags_cache = {}
-
-    def get_flags(test_dir):
-        if args.flags is not None:
-            flags = args.flags
-        else:
-            if test_dir not in flags_cache:
-                flags_cache[test_dir] = get_hh_flags(test_dir)
-            flags = flags_cache[test_dir]
-        return flags
+    get_flags = get_flags_cache(args.flags)
 
     results = run_tests(
         files,
@@ -329,7 +344,7 @@ if __name__ == '__main__':
         get_flags)
 
     # Doesn't make sense to check failures for idempotence
-    successes = [r for r in results if not r.is_failure]
+    successes = [result for result in results if not result.is_failure]
 
     if args.idempotence and successes:
         run_idempotence_tests(

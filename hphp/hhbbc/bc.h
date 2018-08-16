@@ -221,8 +221,7 @@ hash(const hash_operand<T,S>& t, Unused...) {
 }
 
 /*
- * Clone of folly::hash::hash_combine_generic(), but with a hasher argument
- * instead of a hasher template parameter.
+ * Clone of folly::hash::hash_combine_generic.
  */
 template <class H>
 size_t hash_combine(H /*h*/) {

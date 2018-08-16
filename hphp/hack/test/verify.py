@@ -39,7 +39,7 @@ def get_test_flags(f):
 
 def run_test_program(test_cases, program, get_flags):
     """
-    Run the program and return a list of Failures.
+    Run the program and return a list of results.
     """
     def run(test_case):
         test_dir, test_name = os.path.split(test_case.file_path)
@@ -99,6 +99,23 @@ def record_results(results, out_ext):
         outfile = result.test_case.file_path + out_ext
         with open(outfile, 'wb') as f:
             f.write(bytes(result.output, 'UTF-8'))
+
+
+def report_failures(total,
+                    failures,
+                    out_extension,
+                    expect_extension,
+                    no_copy=False):
+    record_results(failures, out_extension)
+    fnames = [failure.test_case.file_path for failure in failures]
+    print("To review the failures, use the following command: ")
+    print("OUT_EXT=%s EXP_EXT=%s NO_COPY=%s ./hphp/hack/test/review.sh %s" %
+            (out_extension,
+            expect_extension,
+            "true" if no_copy else "false",
+            " ".join(fnames)))
+    if dump_on_failure:
+        dump_failures(failures)
 
 
 def dump_failures(failures):
@@ -176,6 +193,76 @@ def get_content(file_path, ext=''):
         return ''
 
 
+def run_tests(files,
+              expected_extension,
+              out_extension,
+              use_stdin,
+              program,
+              get_flags):
+    # for each file, create a test case
+    test_cases = [
+        TestCase(
+            file_path=file,
+            expected=get_content(file, expected_extension),
+            input=get_content(file) if use_stdin else None)
+        for file in files]
+
+    results = run_test_program(test_cases, program, get_flags)
+
+    failures = [result for result in results if result.is_failure]
+
+    num_results = len(results)
+    if failures == []:
+        print("All tests in the suite passed! "
+              "The number of tests that ran: %d\n" % num_results)
+    else:
+        print("The number of tests that failed: %d/%d\n"
+            % (len(failures), num_results))
+        report_failures(
+            num_results,
+            failures,
+            args.out_extension,
+            args.expect_extension)
+        sys.exit(1)  # this exit code fails the suite and lets Buck know
+
+    return results
+
+
+def run_idempotence_tests(results,
+                          expected_extension,
+                          out_extension,
+                          program,
+                          get_flags):
+    idempotence_test_cases = [
+        TestCase(
+            file_path=result.test_case.file_path,
+            expected=result.test_case.expected,
+            input=result.output)
+        for result in results]
+
+    idempotence_results = run_test_program(
+        idempotence_test_cases, program, get_flags)
+
+    num_idempotence_results = len(idempotence_results)
+
+    idempotence_failures = [
+        result for result in idempotence_results if result.is_failure]
+
+    if idempotence_failures == []:
+        print("All idempotence tests in the suite passed! The number of "
+              "idempotence tests that ran: %d\n" % num_idempotence_results)
+    else:
+        print("The number of idempotence tests that failed: %d/%d\n"
+            % (len(idempotence_failures), num_idempotence_results))
+        report_failures(
+            num_idempotence_results,
+            idempotence_failures,
+            out_extension + out_extension,  # e.g., *.out.out
+            expected_extension,
+            True)
+        sys.exit(1)  # this exit code fails the suite and lets Buck know
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('test_path', help='A file or a directory. ')
@@ -186,6 +273,9 @@ if __name__ == '__main__':
     parser.add_argument('--disabled-extension', type=str,
                         default='.no_typecheck')
     parser.add_argument('--verbose', action='store_true')
+    parser.add_argument('--idempotence', action='store_true',
+                        help="Verify that the output passed to the program "
+                        "as input results in the same output.")
     parser.add_argument('--max-workers', type=int, default='48')
     parser.add_argument('--diff', action='store_true',
                         help="On test failure, show the content of "
@@ -230,28 +320,21 @@ if __name__ == '__main__':
             flags = flags_cache[test_dir]
         return flags
 
-    # for each file, create a test case
+    results = run_tests(
+        files,
+        args.expect_extension,
+        args.out_extension,
+        args.stdin,
+        args.program,
+        get_flags)
 
-    test_cases = []
-    for f in files:
-        exp = get_content(f, args.expect_extension)
-        input = get_content(f) if args.stdin else None
-        test_cases.append(TestCase(file_path=f, expected=exp, input=input))
+    # Doesn't make sense to check failures for idempotence
+    successes = [r for r in results if not r.is_failure]
 
-    results = run_test_program(test_cases, args.program, get_flags)
-
-    failures = [r for r in results if r.is_failure]
-
-    total = len(files)
-    if failures == []:
-        print("All %d tests passed!\n" % total)
-    else:
-        record_results(failures, args.out_extension)
-        fnames = [failure.test_case.file_path for failure in failures]
-        print("To review the failures, use the following command: ")
-        print("OUT_EXT=%s EXP_EXT=%s ./hphp/hack/test/review.sh %s" %
-                (args.out_extension, args.expect_extension, " ".join(fnames)))
-        if dump_on_failure:
-            dump_failures(failures)
-        print("Failed %d out of %d tests." % (len(failures), total))
-        sys.exit(1)
+    if args.idempotence and successes:
+        run_idempotence_tests(
+            successes,
+            args.expect_extension,
+            args.out_extension,
+            args.program,
+            get_flags)

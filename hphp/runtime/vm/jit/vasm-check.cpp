@@ -150,6 +150,56 @@ checkCalls(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
   return true;
 }
 
+/* Check for any Vtuples are used by more than one Vinstr */
+
+struct VtupleVisitor {
+  explicit VtupleVisitor(const Vunit& unit)
+    : unit{unit} { uses.resize(unit.tuples.size()); }
+
+  const Vunit& unit;
+
+  struct Pos { Vlabel block; size_t instr; };
+  Pos pos;
+  jit::vector<Pos> uses;
+
+  template <typename T> void imm(const T&) const {}
+  template <typename T> void use(const T&) const {}
+  template <typename T> void def(const T&) const {}
+  template <typename T> void across(const T& t) { use(t); }
+  template <typename T, typename U>
+  void useHint(const T& t, const U&) { use(t); }
+  template <typename T, typename U>
+  void defHint(const T& t, const U&) { def(t); }
+  void use(Vtuple t) { check(t); }
+  void def(Vtuple t) { check(t); }
+  void check(Vtuple t) {
+    auto const usePos = uses[t];
+    always_assert_flog(
+      !usePos.block.isValid(),
+      "Instruction '{}' in {} uses a Vtuple already used by '{}' in {}\n{}\n",
+      show(unit, unit.blocks[pos.block].code[pos.instr]),
+      pos.block,
+      show(unit, unit.blocks[usePos.block].code[usePos.instr]),
+      usePos.block,
+      show(unit)
+    );
+    uses[t] = pos;
+  }
+};
+
+DEBUG_ONLY bool
+checkVtuples(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
+  VtupleVisitor visitor{unit};
+  for (auto const b : blocks) {
+    auto const& code = unit.blocks[b].code;
+    for (size_t i = 0; i < code.size(); ++i) {
+      visitor.pos = VtupleVisitor::Pos{b, i};
+      visitOperands(code[i], visitor);
+    }
+  }
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct FlagUseChecker {
@@ -418,6 +468,7 @@ bool check(Vunit& unit) {
   assertx(checkSSA(unit, blocks));
   assertx(checkCalls(unit, blocks));
   assertx(checkSF(unit, blocks));
+  assertx(checkVtuples(unit, blocks));
   return true;
 }
 

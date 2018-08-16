@@ -78,9 +78,8 @@ void forwardJmp(Vunit& unit, jit::flat_set<size_t>& catch_blocks,
     for (unsigned i = 0; i < forwardedRegs.size(); ++i) {
       regs[i] = unit.makeReg();
     }
-    auto newTuple = unit.makeTuple(regs);
-    middle.code.emplace_back(phidef{newTuple}, irctx);
-    middle.code.emplace_back(phijmp{destLabel, newTuple}, irctx);
+    middle.code.emplace_back(phidef{unit.makeTuple(regs)}, irctx);
+    middle.code.emplace_back(phijmp{destLabel, unit.makeTuple(regs)}, irctx);
     return;
   } else if (headInst.op == Vinstr::landingpad) {
     // If the dest started with a landingpad, copy it to middle. The dest's

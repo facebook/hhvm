@@ -24,7 +24,6 @@ namespace HPHP { namespace jit { namespace ppc64 {
 void adjustForRelocation(RelocationInfo&);
 void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd);
 void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& meta);
-void adjustMetaDataForRelocation(RelocationInfo&, AsmInfo*, CGMeta&);
 void findFixups(TCA start, TCA end, CGMeta& meta);
 size_t relocate(RelocationInfo&, CodeBlock&, TCA, TCA, CodeBlock&, CGMeta&,
                 TCA*, AreaIndex);

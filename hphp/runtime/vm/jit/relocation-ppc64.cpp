@@ -354,25 +354,6 @@ void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
   }
 }
 
-void adjustMetaDataForRelocation(RelocationInfo& rel, AsmInfo* /*asmInfo*/,
-                                 CGMeta& meta) {
-  for (auto& li : meta.literalAddrs) {
-    if (auto adjusted = rel.adjustedAddressAfter((TCA)li.second)) {
-      li.second = (uint64_t*)adjusted;
-    }
-  }
-
-  decltype(meta.codePointers) updatedCP;
-  for (auto cp : meta.codePointers) {
-    if (auto adjusted = (TCA*)rel.adjustedAddressAfter((TCA)cp)) {
-      updatedCP.emplace(adjusted);
-    } else {
-      updatedCP.emplace(cp);
-    }
-  }
-  updatedCP.swap(meta.codePointers);
-}
-
 /*
  * Adjust potentially live references that point into the relocated
  * area.

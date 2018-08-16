@@ -279,9 +279,31 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
   }
   updatedJD.swap(meta.smashableJumpData);
 
+  for (auto& li : meta.literalAddrs) {
+    if (auto adjusted = rel.adjustedAddressAfter((TCA)li.second)) {
+      li.second = (uint64_t*)adjusted;
+    }
+  }
 
-  // Perform platform-specific metadata adjustments.
-  ARCH_SWITCH_CALL(adjustMetaDataForRelocation, rel, asmInfo, meta);
+  decltype(meta.smashableLocations) updatedSL;
+  for (auto sl : meta.smashableLocations) {
+    if (auto adjusted = rel.adjustedAddressAfter(sl)) {
+      updatedSL.insert(adjusted);
+    } else {
+      updatedSL.insert(sl);
+    }
+  }
+  updatedSL.swap(meta.smashableLocations);
+
+  decltype(meta.codePointers) updatedCP;
+  for (auto cp : meta.codePointers) {
+    if (auto adjusted = (TCA*)rel.adjustedAddressAfter((TCA)cp)) {
+      updatedCP.emplace(adjusted);
+    } else {
+      updatedCP.emplace(cp);
+    }
+  }
+  updatedCP.swap(meta.codePointers);
 
   if (asmInfo) {
     assertx(asmInfo->validate());

@@ -157,6 +157,12 @@ let format_intervals ?config intervals tree =
   let ranges =
     intervals
     |> List.map ~f:(line_interval_to_offset_range line_boundaries)
+    (* If we get a range which starts or ends exactly at an atom boundary,
+       expand it to the NEXT atom boundary so that we get the whitespace
+       surrounding the formatted range. We want the whitespace surrounding the
+       tokens in the range, but we want to leave alone all other whitespace
+       outside of the range. *)
+    |> List.map ~f:(fun (st, ed) -> st - 1, ed + 1)
     |> List.map ~f:(expand_to_atom_boundaries atom_boundaries)
     |> Interval.union_list
     |> List.sort ~cmp:Interval.comparator

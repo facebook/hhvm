@@ -2436,7 +2436,7 @@ and handle_list env
     | hd :: tl ->
       Concat [
         before_each ();
-        t env hd;
+        handle_element hd;
         after_each false;
         aux tl
       ]
@@ -2765,6 +2765,11 @@ and transform_braced_item env left_p item right_p =
 
 and transform_argish_item env x =
   match Syntax.syntax x with
+  | Syntax.ListItem { list_item; list_separator } ->
+    Concat [
+      transform_argish_item env list_item;
+      t env list_separator;
+    ]
   | Syntax.BinaryExpression {
       binary_left_operand  = left;
       binary_operator      = op;

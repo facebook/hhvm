@@ -412,7 +412,7 @@ Variant HHVM_FUNCTION(constant, const String& name) {
     }
   } else {
     auto const cns = Unit::loadCns(name.get());
-    if (cns) return const_variant_ref{cns};
+    if (cns) return Variant::wrap(*cns);
   }
 
   raise_warning("constant(): Couldn't find constant %s", data);

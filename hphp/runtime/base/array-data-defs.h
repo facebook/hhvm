@@ -567,7 +567,7 @@ inline ArrayData* ArrayData::appendRef(Variant& v, bool copy) {
 }
 
 inline Variant ArrayData::getValue(ssize_t pos) const {
-  return const_variant_ref{rvalPos(pos)};
+  return Variant{const_variant_ref{rvalPos(pos)}};
 }
 
 inline Variant ArrayData::getKey(ssize_t pos) const {

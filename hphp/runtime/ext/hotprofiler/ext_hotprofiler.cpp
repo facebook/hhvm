@@ -1117,7 +1117,7 @@ struct MemoProfiler final : Profiler {
         VariableSerializer vs(VariableSerializer::Type::DebuggerSerialize);
         String sdata;
         try {
-          sdata = vs.serialize(args, true);
+          sdata = vs.serialize(VarNR{args}, true);
           f.m_args = sdata;
         } catch (...) {
           fprintf(stderr, "Args Serialization failure: %s\n", symbol);

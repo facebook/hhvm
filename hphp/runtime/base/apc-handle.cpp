@@ -29,37 +29,36 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-APCHandle::Pair APCHandle::Create(const Variant& source,
+APCHandle::Pair APCHandle::Create(const_variant_ref source,
                                   bool serialized,
                                   APCHandleLevel level,
                                   bool unserializeObj) {
-
-  auto type = source.getType(); // this gets rid of the ref, if it was one
-  switch (type) {
+  auto const cell = source.toCell();
+  switch (cell.type()) {
     case KindOfUninit: {
-      auto value = APCTypedValue::tvUninit();
+      auto const value = APCTypedValue::tvUninit();
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
     case KindOfNull: {
-      auto value = APCTypedValue::tvNull();
+      auto const value = APCTypedValue::tvNull();
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
     case KindOfBoolean: {
-      auto value = source.getBoolean() ? APCTypedValue::tvTrue()
+      auto const value = val(cell).num ? APCTypedValue::tvTrue()
                                        : APCTypedValue::tvFalse();
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
     case KindOfInt64: {
-      auto value = new APCTypedValue(source.getInt64());
+      auto const value = new APCTypedValue(val(cell).num);
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
     case KindOfDouble: {
-      auto value = new APCTypedValue(source.getDouble());
+      auto const value = new APCTypedValue(val(cell).dbl);
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
     case KindOfPersistentString:
     case KindOfString: {
-      auto const s = source.getStringData();
+      auto const s = val(cell).pstr;
       if (serialized) {
         // It is priming, and there might not be the right class definitions
         // for unserialization.
@@ -84,39 +83,39 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
 
     case KindOfPersistentVec:
     case KindOfVec: {
-      auto ad = source.getArrayData();
+      auto const ad = val(cell).parr;
       assertx(ad->isVecArray());
       return APCArray::MakeSharedVec(ad, level, unserializeObj);
     }
 
     case KindOfPersistentDict:
     case KindOfDict: {
-      auto ad = source.getArrayData();
+      auto const ad = val(cell).parr;
       assertx(ad->isDict());
       return APCArray::MakeSharedDict(ad, level, unserializeObj);
     }
 
     case KindOfPersistentKeyset:
     case KindOfKeyset: {
-      auto ad = source.getArrayData();
+      auto const ad = val(cell).parr;
       assertx(ad->isKeyset());
       return APCArray::MakeSharedKeyset(ad, level, unserializeObj);
     }
 
     case KindOfPersistentArray:
     case KindOfArray: {
-      auto ad = source.getArrayData();
+      auto const ad = val(cell).parr;
       assertx(ad->isPHPArray());
       return APCArray::MakeSharedArray(ad, level, unserializeObj);
     }
 
     case KindOfObject:
-      if (source.getObjectData()->isCollection()) {
-        return APCCollection::Make(source.getObjectData(),
+      if (val(cell).pobj->isCollection()) {
+        return APCCollection::Make(val(cell).pobj,
                                    level,
                                    unserializeObj);
       }
-      return unserializeObj ? APCObject::Construct(source.getObjectData()) :
+      return unserializeObj ? APCObject::Construct(val(cell).pobj) :
              APCString::MakeSerializedObject(apc_serialize(source));
 
     case KindOfResource:

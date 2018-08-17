@@ -83,11 +83,16 @@ public:
   bool isFunc()      const { return isFuncType(getType()); }
   bool isClass()     const { return isClassType(getType()); }
 
+  bool isReferenced() const {
+    return isRefType(type(m_val)) && val(m_val).pref->isReferenced();
+  }
+
   auto toBoolean() const { return tvCastToBoolean(*m_val); }
   auto toInt64()   const { return tvCastToInt64(*m_val); }
   auto toDouble()  const { return tvCastToDouble(*m_val); }
   auto toString()  const { return HPHP::toString(m_val); }
   auto toArray()   const { return HPHP::toArray(m_val); }
+  auto toObject()  const { return HPHP::toObject(m_val); }
 
   auto& asCStrRef() const { return HPHP::asCStrRef(m_val); }
   auto& asCArrRef() const { return HPHP::asCArrRef(m_val); }
@@ -96,6 +101,8 @@ public:
   auto& toCStrRef() const { return HPHP::toCStrRef(m_val); }
   auto& toCArrRef() const { return HPHP::toCArrRef(m_val); }
   auto& toCObjRef() const { return HPHP::toCObjRef(m_val); }
+
+  tv_rval toCell() const { return tvToCell(m_val); }
 
   auto getArrayData() const {
     assertx(isArray());
@@ -113,6 +120,10 @@ public:
     assertx(isClass());
     return isRefType(type(m_val)) ? val(m_val).pref->tv()->m_data.pclass
       : val(m_val).pclass;
+  }
+
+  int getRefCount() const noexcept {
+    return isRefcountedType(type(m_val)) ? tvGetCount(*m_val) : 1;
   }
 
 protected:
@@ -355,7 +366,7 @@ struct Variant : private TypedValue {
    */
 
   Variant(const Variant& v) noexcept;
- /* implicit */  Variant(const_variant_ref v) noexcept;
+  explicit Variant(const_variant_ref v) noexcept;
 
   Variant(const Variant& v, CellCopy) noexcept {
     m_type = v.m_type;
@@ -826,7 +837,9 @@ struct Variant : private TypedValue {
   /**
    * Get reference count of weak or strong binding. For debugging purpose.
    */
-  int getRefCount() const noexcept;
+  int getRefCount() const noexcept {
+    return const_variant_ref{*this}.getRefCount();
+  }
 
   bool getBoolean() const {
     assertx(getType() == KindOfBoolean);
@@ -924,25 +937,6 @@ struct Variant : private TypedValue {
   Variant &operator -- () = delete;
   Variant  operator -- (int) = delete;
 
-  /*
-   * Variant used to implicitly convert to all these types.  (It still
-   * implicitly converts *from* most of them.)
-   *
-   * We're leaving these functions deleted for now because we fear the
-   * possibility of changes to overload resolution by not declaring
-   * them.  Eventually when fewer of these types have implicit
-   * conversions we'll remove them.
-   */
-  /* implicit */ operator bool   () const = delete;
-  /* implicit */ operator char   () const = delete;
-  /* implicit */ operator short  () const = delete;
-  /* implicit */ operator int    () const = delete;
-  /* implicit */ operator int64_t() const = delete;
-  /* implicit */ operator double () const = delete;
-  /* implicit */ operator String () const = delete;
-  /* implicit */ operator Array  () const = delete;
-  /* implicit */ operator Object () const = delete;
-
   /**
    * Explicit type conversions
    */
@@ -992,8 +986,7 @@ struct Variant : private TypedValue {
     return toPHPArrayHelper();
   }
   Object toObject() const {
-    if (m_type == KindOfObject) return Object{m_data.pobj};
-    return toObjectHelper();
+    return HPHP::toObject(asTypedValue());
   }
   Resource toResource() const {
     if (m_type == KindOfResource) return Resource{m_data.pres};
@@ -1405,7 +1398,6 @@ private:
   int64_t  toInt64Helper(int base = 10) const;
   double toDoubleHelper() const;
   Array  toPHPArrayHelper() const;
-  Object toObjectHelper() const;
   Resource toResourceHelper() const;
 
   DataType convertToNumeric(int64_t *lval, double *dval) const;
@@ -1418,6 +1410,7 @@ Variant operator+(const Variant & lhs, const Variant & rhs) = delete;
 /*
  * Definitions for some members of variant_ref et al. that use Variant.
  */
+
 inline variant_ref::variant_ref(Variant& v)
   : variant_ref_detail::base<false>{v.asTypedValue()}
 {}
@@ -1545,6 +1538,7 @@ struct VarNR : private TypedValueAux {
   explicit VarNR(const ObjectData*) = delete;
 
   explicit VarNR(TypedValue tv) { init(tv.m_type); m_data = tv.m_data; }
+  explicit VarNR(const Variant& v) : VarNR{*v.asTypedValue()} {}
 
   VarNR(const VarNR &v) : TypedValueAux(v) {}
 

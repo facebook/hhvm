@@ -684,7 +684,9 @@ ALWAYS_INLINE const Array& toCArrRef(tv_rval tv) {
 }
 
 ALWAYS_INLINE Array toArray(tv_rval rval) {
-  if (isArrayLikeType(type(rval))) return Array{val(rval).parr};
+  if (isArrayLikeType(type(rval))) {
+    return Array{assert_not_null(val(rval).parr)};
+  }
   return Array::attach(tvCastToArrayLikeData(*rval));
 }
 

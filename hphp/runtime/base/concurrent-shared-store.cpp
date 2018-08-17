@@ -582,7 +582,7 @@ APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
     if (sval->readOnly) vu.setReadOnly();
     Variant v = vu.unserialize();
     auto const pair = APCHandle::Create(v, sval->isSerializedObj(),
-      APCHandleLevel::Outer, false);
+                                        APCHandleLevel::Outer, false);
     sval->dataSize = pair.size;
     sval->setHandle(pair.handle);  // Publish unserialized value (see 'get').
     APCStats::getAPCStats().addAPCValue(pair.handle, pair.size, true);
@@ -702,8 +702,8 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
   s_hotCache.clearValue(sval);
 
   auto const ret = oldHandle->toLocal().toInt64() + step;
-  auto const pair = APCHandle::Create(Variant(ret), false,
-    APCHandleLevel::Outer, false);
+  auto const pair = APCHandle::Create(VarNR{ret}, false,
+                                      APCHandleLevel::Outer, false);
   APCStats::getAPCStats().updateAPCValue(pair.handle, pair.size,
                                          oldHandle, sval.dataSize,
                                          sval.expire == 0, false);
@@ -733,8 +733,8 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
     return false;
   }
 
-  auto const pair = APCHandle::Create(Variant(val), false,
-    APCHandleLevel::Outer, false);
+  auto const pair = APCHandle::Create(VarNR{val}, false,
+                                      APCHandleLevel::Outer, false);
   APCStats::getAPCStats().updateAPCValue(pair.handle, pair.size,
                                          oldHandle, sval.dataSize,
                                          sval.expire == 0, false);
@@ -938,7 +938,7 @@ bool ConcurrentTableSharedStore::constructPrime(const String& v,
     // TODO: currently we double serialize string for uniform handling later,
     // hopefully the unserialize won't be called often. We could further
     // optimize by storing more type info.
-    String s = apc_serialize(v);
+    String s = apc_serialize(VarNR{v});
     char *sAddr = s_apc_file_storage.put(s.data(), s.size());
     if (sAddr) {
       item.sAddr = sAddr;
@@ -946,7 +946,8 @@ bool ConcurrentTableSharedStore::constructPrime(const String& v,
       return false;
     }
   }
-  auto pair = APCHandle::Create(v, serialized, APCHandleLevel::Outer, false);
+  auto pair = APCHandle::Create(VarNR{v}, serialized,
+                                APCHandleLevel::Outer, false);
   item.value = pair.handle;
   item.sSize = pair.size;
   return true;

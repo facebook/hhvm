@@ -1064,7 +1064,7 @@ int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
 ///////////////////////////////////////////////////////////////////////////////
 // apc serialization
 
-String apc_serialize(const Variant& value) {
+String apc_serialize(const_variant_ref value) {
   VariableSerializer::Type sType =
     apcExtension::EnableApcSerialize ?
       VariableSerializer::Type::APCSerialize :

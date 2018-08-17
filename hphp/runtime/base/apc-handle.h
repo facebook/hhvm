@@ -152,10 +152,16 @@ struct APCHandle {
    * Create an instance of an APC object according to the type of source and
    * the various flags. This is the only entry point to create APC entities.
    */
-  static Pair Create(const Variant& source,
+  static Pair Create(const_variant_ref source,
                      bool serialized,
                      APCHandleLevel level,
                      bool unserializeObj);
+  static Pair Create(const Variant& var,
+                     bool serialized,
+                     APCHandleLevel level,
+                     bool unserializeObj) {
+    return Create(const_variant_ref{var}, serialized, level, unserializeObj);
+  }
 
   /*
    * Memory management API.

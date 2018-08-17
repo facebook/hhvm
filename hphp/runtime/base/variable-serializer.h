@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
@@ -65,7 +66,10 @@ struct VariableSerializer {
   /**
    * Top level entry function called by f_ functions.
    */
-  String serialize(const Variant& v, bool ret, bool keepCount = false);
+  String serialize(const_variant_ref v, bool ret, bool keepCount = false);
+  String serialize(const Variant& var, bool ret, bool keepCount = false) {
+    return serialize(const_variant_ref{var}, ret, keepCount);
+  }
   String serializeValue(const Variant& v, bool limit);
 
   // Serialize with limit size of output, always return the serialized string.
@@ -121,7 +125,7 @@ private:
 
   void write(const String& v);
   void write(const Object& v);
-  void write(const Variant& v, bool isArrayKey = false);
+  void write(const_variant_ref v, bool isArrayKey = false);
 
   void writeNull();
   // what to write if recursive level is over limit?

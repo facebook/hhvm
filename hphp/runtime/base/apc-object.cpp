@@ -93,7 +93,7 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
     auto const attrs = propInfo[i].attrs;
     assertx((attrs & AttrStatic) == 0);
 
-    const TypedValue* objProp;
+    tv_rval objProp;
     if (attrs & AttrBuiltin) {
       // Special properties like the Memoize cache should be set to their
       // default value, not the current value.
@@ -107,7 +107,7 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
       objProp = objPropVec + i;
     }
 
-    if (UNLIKELY(objProp->m_type == KindOfUninit) && (attrs & AttrLateInit)) {
+    if (UNLIKELY(type(objProp) == KindOfUninit) && (attrs & AttrLateInit)) {
       auto const origI = i;
       while (i > 0) {
         --i;
@@ -117,14 +117,14 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
       throw_late_init_prop(propInfo[origI].cls, propInfo[origI].name, false);
     }
 
-    auto val = APCHandle::Create(tvAsCVarRef(objProp), false,
+    auto val = APCHandle::Create(const_variant_ref{objProp}, false,
                                  APCHandleLevel::Inner, true);
     size += val.size;
     apcPropVec[i] = val.handle;
   }
 
   if (UNLIKELY(hasDynProps)) {
-    auto val = APCHandle::Create(objectData->dynPropArray(), false,
+    auto val = APCHandle::Create(VarNR{objectData->dynPropArray()}, false,
                                  APCHandleLevel::Inner, true);
     size += val.size;
     apcPropVec[numRealProps] = val.handle;
@@ -150,7 +150,7 @@ APCHandle::Pair APCObject::ConstructSlow(ObjectData* objectData,
     assertx(key.isString());
     auto const rval = it.secondRval();
     if (!isNullType(rval.unboxed().type())) {
-      auto val = APCHandle::Create(VarNR(rval.tv()), false,
+      auto val = APCHandle::Create(const_variant_ref{rval}, false,
                                    APCHandleLevel::Inner, true);
       prop->val = val.handle;
       size += val.size;

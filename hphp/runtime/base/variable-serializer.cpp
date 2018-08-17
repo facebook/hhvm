@@ -167,7 +167,7 @@ void VariableSerializer::popResourceInfo() {
   popObjectInfo();
 }
 
-String VariableSerializer::serialize(const Variant& v, bool ret,
+String VariableSerializer::serialize(const_variant_ref v, bool ret,
                                      bool keepCount /* = false */) {
   StringBuffer buf;
   m_buf = &buf;
@@ -687,7 +687,7 @@ void VariableSerializer::preventOverflow(const Object& v,
   decNestedLevel(&tv);
 }
 
-void VariableSerializer::write(const Variant& v, bool isArrayKey /*= false */) {
+void VariableSerializer::write(const_variant_ref v, bool isArrayKey) {
   setReferenced(v.isReferenced());
   if (m_type == Type::DebugDump) {
     setRefCount(v.getRefCount());
@@ -696,7 +696,7 @@ void VariableSerializer::write(const Variant& v, bool isArrayKey /*= false */) {
     write(v.toObject());
     return;
   }
-  serializeVariant(v.asTypedValue(), isArrayKey);
+  serializeVariant(v.rval(), isArrayKey);
 }
 
 void VariableSerializer::writeNull() {

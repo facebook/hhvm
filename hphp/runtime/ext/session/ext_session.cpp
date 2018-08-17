@@ -1091,12 +1091,12 @@ static PhpSessionSerializer s_php_session_serializer;
 struct PhpSerializeSessionSerializer : SessionSerializer {
   PhpSerializeSessionSerializer() : SessionSerializer("php_serialize") {}
 
-  virtual String encode() {
+  String encode() override {
     VariableSerializer vs(VariableSerializer::Type::Serialize);
-    return vs.serialize(php_global(s__SESSION).toArray(), true, true);
+    return vs.serialize(VarNR{php_global(s__SESSION).toArray()}, true, true);
   }
 
-  virtual bool decode(const String& value) {
+  bool decode(const String& value) override {
     VariableUnserializer vu(value.data(), value.size(),
                             VariableUnserializer::Type::Serialize);
 

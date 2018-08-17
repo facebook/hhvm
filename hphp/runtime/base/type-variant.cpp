@@ -85,14 +85,22 @@ Variant::Variant(StringData *v) noexcept {
   }
 }
 
+namespace {
+ALWAYS_INLINE
+void implCopyConstruct(TypedValue tv, Variant& v) {
+  cellDup(tvToInitCell(tv), v.asTypedValue());
+}
+}
+
 // the version of the high frequency function that is not inlined
 NEVER_INLINE
 Variant::Variant(const Variant& v) noexcept {
-  cellDup(tvToInitCell(*v.asTypedValue()), *asTypedValue());
+  implCopyConstruct(*v.asTypedValue(), *this);
 }
+
 NEVER_INLINE
 Variant::Variant(const_variant_ref v) noexcept {
-  cellDup(tvToInitCell(*v.rval()), *asTypedValue());
+  implCopyConstruct(*v.rval(), *this);
 }
 
 /*
@@ -206,10 +214,6 @@ IMPLEMENT_STEAL(ObjectData, pobj, KindOfObject)
 IMPLEMENT_STEAL(ResourceHdr, pres, KindOfResource)
 
 #undef IMPLEMENT_STEAL
-
-int Variant::getRefCount() const noexcept {
-  return isRefcountedType(m_type) ? tvGetCount(*asTypedValue()) : 1;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // informational
@@ -464,47 +468,6 @@ Array Variant::toPHPArrayHelper() const {
     case KindOfRef:           return m_data.pref->var()->toArray();
       always_assert(false);
 
-  }
-  not_reached();
-}
-
-Object Variant::toObjectHelper() const {
-  switch (m_type) {
-    case KindOfUninit:
-    case KindOfNull:
-      return SystemLib::AllocStdClassObject();
-
-    case KindOfBoolean:
-    case KindOfInt64:
-    case KindOfDouble:
-    case KindOfPersistentString:
-    case KindOfString:
-    case KindOfFunc:
-    case KindOfClass:
-    case KindOfResource: {
-      ArrayInit props(1, ArrayInit::Map{});
-      props.set(s_scalar, *this);
-      return ObjectData::FromArray(props.create());
-    }
-
-
-    case KindOfPersistentVec:
-    case KindOfVec:
-    case KindOfPersistentDict:
-    case KindOfDict:
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:
-      return ObjectData::FromArray(toPHPArray().get());
-
-    case KindOfPersistentArray:
-    case KindOfArray:
-      return ObjectData::FromArray(m_data.parr);
-
-    case KindOfObject:
-      return Object{m_data.pobj};
-
-    case KindOfRef:
-      return m_data.pref->var()->toObject();
   }
   not_reached();
 }

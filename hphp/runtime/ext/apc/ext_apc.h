@@ -178,7 +178,10 @@ static_assert(sizeof(int64_t) == sizeof(long long),
 ///////////////////////////////////////////////////////////////////////////////
 // apc serialization
 
-String apc_serialize(const Variant& value);
+String apc_serialize(const_variant_ref value);
+inline String apc_serialize(const Variant& var) {
+  return apc_serialize(const_variant_ref{var});
+}
 Variant apc_unserialize(const char* data, int len);
 String apc_reserialize(const String& str);
 

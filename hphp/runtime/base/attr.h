@@ -131,9 +131,9 @@ enum Attr {
   // must be treated as having this flag.
   AttrMayUseVV             = (1u << 16), //       |          |    X    //
                                          //       |          |         //
-  // Indicates that the function or class can be loaded once and then persisted
-  // across all requests.                //       |          |         //
-  AttrPersistent           = (1u << 17), //    X  |          |    X    //
+  // Indicates that the function, class or static property can be loaded
+  // once and then persisted across all requests. |          |         //
+  AttrPersistent           = (1u << 17), //    X  |    X     |    X    //
                                          //       |          |         //
   // Indicates that this property cannot be initialized on an ObjectData by
   // simply memcpy-ing from the initializer vector.          |         //

@@ -2354,7 +2354,6 @@ void Class::setProperties() {
   PropMap::Builder curPropMap;
   SPropMap::Builder curSPropMap;
   m_hasDeepInitProps = false;
-  Slot traitOffset = 0;
 
   if (m_parent.get() != nullptr) {
     // m_hasDeepInitProps indicates if there are properties that require
@@ -2382,9 +2381,6 @@ void Class::setProperties() {
       // will use these negative indexes to assign new indexes to parent
       // properties that haven't been overlayed.
       prop.idx = -parentProp.idx - 1;
-      if (traitOffset < -prop.idx) {
-        traitOffset = -prop.idx;
-      }
       if (!(parentProp.attrs & AttrPrivate)) {
         curPropMap.add(prop.name, prop);
       } else {
@@ -2408,9 +2404,6 @@ void Class::setProperties() {
       sProp.cls            = parentProp.cls;
       sProp.repoAuthType   = parentProp.repoAuthType;
       sProp.idx            = -parentProp.idx - 1;
-      if (traitOffset < -sProp.idx) {
-        traitOffset = -sProp.idx;
-      }
       tvWriteUninit(sProp.val);
       curSPropMap.add(sProp.name, sProp);
     }
@@ -2425,7 +2418,7 @@ void Class::setProperties() {
   }
 
   static_assert(AttrPublic < AttrProtected && AttrProtected < AttrPrivate, "");
-  for (Slot slot = 0; slot < m_preClass->numProperties(); ++slot) {
+  for (Slot slot = 0; slot < traitIdx; ++slot) {
     const PreClass::Prop* preProp = &m_preClass->properties()[slot];
 
     if (!(preProp->attrs() & AttrStatic)) {
@@ -2463,39 +2456,11 @@ void Class::setProperties() {
       }
       auto addNewProp = [&] {
         Prop prop;
-        prop.name                = preProp->name();
-        prop.mangledName         = preProp->mangledName();
-        prop.attrs               = Attr(preProp->attrs() & ~AttrTrait)
-                                   | AttrNoBadRedeclare;
-        // This is the first class to declare this property
-        prop.cls                 = this;
-        prop.userType            = preProp->userType();
-        prop.typeConstraint      = preProp->typeConstraint();
-        prop.docComment          = preProp->docComment();
-        prop.repoAuthType        = preProp->repoAuthType();
-        if (slot < traitIdx) {
-          prop.idx = slot;
-        } else {
-          prop.idx = slot + m_preClass->numProperties() + traitOffset;
-        }
-
-        // Check if this property's initial value needs to be type checked at
-        // runtime.
-        auto const& tv = preProp->val();
-        auto const& tc = prop.typeConstraint;
-        if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
-            !(prop.attrs & AttrInitialSatisfiesTC) &&
-            tv.m_type != KindOfUninit) {
-          // System provided initial values should always be correct
-          if ((prop.attrs & AttrSystemInitialValue) || tc.alwaysPasses(&tv)) {
-            prop.attrs |= AttrInitialSatisfiesTC;
-          } else {
-            m_needsPropInitialCheck = true;
-          }
-        }
+        initProp(prop, preProp);
+        prop.idx = slot;
 
         curPropMap.add(preProp->name(), prop);
-        m_declPropInit.push_back(tv);
+        m_declPropInit.push_back(preProp->val());
       };
 
       auto const lateInitCheck = [&] (const Class::Prop& prop) {
@@ -2527,143 +2492,107 @@ void Class::setProperties() {
         // Check whether a superclass has already declared this protected
         // property.
         PropMap::Builder::iterator it2 = curPropMap.find(preProp->name());
-        if (it2 != curPropMap.end()) {
-          auto& prop = curPropMap[it2->second];
-          assertx((prop.attrs & (AttrPublic|AttrProtected|AttrPrivate)) ==
-                 AttrProtected);
-          assertx(!(prop.attrs & AttrNoImplicitNullable) ||
-                  (preProp->attrs() & AttrNoImplicitNullable));
-          assertx(prop.attrs & AttrNoBadRedeclare);
-
-          lateInitCheck(prop);
-
-          if (!(preProp->attrs() & AttrTrait)) {
-            prop.cls = this;
-          }
-          prop.docComment = preProp->docComment();
-
-          auto const& tc = preProp->typeConstraint();
-          if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
-              !(preProp->attrs() & AttrNoBadRedeclare) &&
-              tc.maybeInequivalentForProp(prop.typeConstraint)) {
-            // If this property isn't obviously not redeclaring a property in
-            // the parent, we need to check that when we initialize the class.
-            prop.attrs = Attr(prop.attrs & ~AttrNoBadRedeclare);
-            m_selfMaybeRedefsPropTy = true;
-            m_maybeRedefsPropTy = true;
-          }
-          prop.typeConstraint = tc;
-
-          if (preProp->attrs() & AttrNoImplicitNullable) {
-            prop.attrs |= AttrNoImplicitNullable;
-          }
-          if (preProp->attrs() & AttrSystemInitialValue) {
-            prop.attrs |= AttrSystemInitialValue;
-          }
-          if (preProp->attrs() & AttrInitialSatisfiesTC) {
-            prop.attrs |= AttrInitialSatisfiesTC;
-          }
-
-          // Check if this property's initial value needs to be type checked at
-          // runtime.
-          auto const& tv = preProp->val();
-          if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
-              !(prop.attrs & AttrInitialSatisfiesTC) &&
-              tv.m_type != KindOfUninit) {
-            // System provided initial values should always be correct
-            if ((prop.attrs & AttrSystemInitialValue) || tc.alwaysPasses(&tv)) {
-              prop.attrs |= AttrInitialSatisfiesTC;
-            } else {
-              m_needsPropInitialCheck = true;
-            }
-          }
-
-          if (slot < traitIdx) {
-            prop.idx = slot;
-          } else {
-            prop.idx = slot + m_preClass->numProperties() + traitOffset;
-          }
-          TypedValueAux& tvaux = m_declPropInit[it2->second];
-          tvaux.m_data = tv.m_data;
-          tvaux.m_type = tv.m_type;
-          copyDeepInitAttr(preProp, &prop);
+        if (it2 == curPropMap.end()) {
+          addNewProp();
           break;
         }
-        addNewProp();
+        auto& prop = curPropMap[it2->second];
+        assertx((prop.attrs & (AttrPublic|AttrProtected|AttrPrivate)) ==
+                AttrProtected);
+        assertx(!(prop.attrs & AttrNoImplicitNullable) ||
+                (preProp->attrs() & AttrNoImplicitNullable));
+        assertx(prop.attrs & AttrNoBadRedeclare);
+
+        lateInitCheck(prop);
+
+        prop.cls = this;
+        prop.docComment = preProp->docComment();
+
+        auto const& tc = preProp->typeConstraint();
+        if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
+            !(preProp->attrs() & AttrNoBadRedeclare) &&
+            tc.maybeInequivalentForProp(prop.typeConstraint)) {
+          // If this property isn't obviously not redeclaring a property in
+          // the parent, we need to check that when we initialize the class.
+          prop.attrs = Attr(prop.attrs & ~AttrNoBadRedeclare);
+          m_selfMaybeRedefsPropTy = true;
+          m_maybeRedefsPropTy = true;
+        }
+        prop.typeConstraint = tc;
+
+        if (preProp->attrs() & AttrNoImplicitNullable) {
+          prop.attrs |= AttrNoImplicitNullable;
+        }
+        if (preProp->attrs() & AttrSystemInitialValue) {
+          prop.attrs |= AttrSystemInitialValue;
+        }
+        if (preProp->attrs() & AttrInitialSatisfiesTC) {
+          prop.attrs |= AttrInitialSatisfiesTC;
+        }
+
+        checkPrePropVal(prop, preProp);
+        prop.idx = slot;
+        TypedValueAux& tvaux = m_declPropInit[it2->second];
+        auto const& tv = preProp->val();
+        tvaux.m_data = tv.m_data;
+        tvaux.m_type = tv.m_type;
+        copyDeepInitAttr(preProp, &prop);
         break;
       }
       case AttrPublic: {
         // Check whether a superclass has already declared this as a
         // protected/public property.
         auto it2 = curPropMap.find(preProp->name());
-        if (it2 != curPropMap.end()) {
-          auto& prop = curPropMap[it2->second];
-          assertx(!(prop.attrs & AttrNoImplicitNullable) ||
-                  (preProp->attrs() & AttrNoImplicitNullable));
-          assertx(prop.attrs & AttrNoBadRedeclare);
-
-          lateInitCheck(prop);
-
-          if (!(preProp->attrs() & AttrTrait)) {
-            prop.cls = this;
-          }
-          prop.docComment = preProp->docComment();
-          if ((prop.attrs & (AttrPublic|AttrProtected|AttrPrivate))
-              == AttrProtected) {
-            // Weaken protected property to public.
-            prop.mangledName = preProp->mangledName();
-            prop.attrs = Attr(prop.attrs ^ (AttrProtected|AttrPublic));
-            prop.userType = preProp->userType();
-          }
-          if (slot < traitIdx) {
-            prop.idx = slot;
-          } else {
-            prop.idx = slot + m_preClass->numProperties() + traitOffset;
-          }
-
-          auto const& tc = preProp->typeConstraint();
-          if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
-              !(preProp->attrs() & AttrNoBadRedeclare) &&
-              tc.maybeInequivalentForProp(prop.typeConstraint)) {
-            // If this property isn't obviously not redeclaring a property in
-            // the parent, we need to check that when we initialize the class.
-            prop.attrs = Attr(prop.attrs & ~AttrNoBadRedeclare);
-            m_selfMaybeRedefsPropTy = true;
-            m_maybeRedefsPropTy = true;
-          }
-          prop.typeConstraint = tc;
-
-          if (preProp->attrs() & AttrNoImplicitNullable) {
-            prop.attrs |= AttrNoImplicitNullable;
-          }
-          if (preProp->attrs() & AttrSystemInitialValue) {
-            prop.attrs |= AttrSystemInitialValue;
-          }
-          if (preProp->attrs() & AttrInitialSatisfiesTC) {
-            prop.attrs |= AttrInitialSatisfiesTC;
-          }
-
-          // Check if this property's initial value needs to be type checked at
-          // runtime.
-          auto const& tv = preProp->val();
-          if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
-              !(prop.attrs & AttrInitialSatisfiesTC) &&
-              tv.m_type != KindOfUninit) {
-            // System provided initial values should always be correct
-            if ((prop.attrs & AttrSystemInitialValue) || tc.alwaysPasses(&tv)) {
-              prop.attrs |= AttrInitialSatisfiesTC;
-            } else {
-              m_needsPropInitialCheck = true;
-            }
-          }
-
-          TypedValueAux& tvaux = m_declPropInit[it2->second];
-          tvaux.m_data = tv.m_data;
-          tvaux.m_type = tv.m_type;
-          copyDeepInitAttr(preProp, &prop);
+        if (it2 == curPropMap.end()) {
+          addNewProp();
           break;
         }
-        addNewProp();
+        auto& prop = curPropMap[it2->second];
+        assertx(!(prop.attrs & AttrNoImplicitNullable) ||
+                (preProp->attrs() & AttrNoImplicitNullable));
+        assertx(prop.attrs & AttrNoBadRedeclare);
+
+        lateInitCheck(prop);
+
+        prop.cls = this;
+        prop.docComment = preProp->docComment();
+        if ((prop.attrs & (AttrPublic|AttrProtected|AttrPrivate))
+            == AttrProtected) {
+          // Weaken protected property to public.
+          prop.mangledName = preProp->mangledName();
+          prop.attrs = Attr(prop.attrs ^ (AttrProtected|AttrPublic));
+          prop.userType = preProp->userType();
+        }
+        prop.idx = slot;
+
+        auto const& tc = preProp->typeConstraint();
+        if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
+            !(preProp->attrs() & AttrNoBadRedeclare) &&
+            tc.maybeInequivalentForProp(prop.typeConstraint)) {
+          // If this property isn't obviously not redeclaring a property in
+          // the parent, we need to check that when we initialize the class.
+          prop.attrs = Attr(prop.attrs & ~AttrNoBadRedeclare);
+          m_selfMaybeRedefsPropTy = true;
+          m_maybeRedefsPropTy = true;
+        }
+        prop.typeConstraint = tc;
+
+        if (preProp->attrs() & AttrNoImplicitNullable) {
+          prop.attrs |= AttrNoImplicitNullable;
+        }
+        if (preProp->attrs() & AttrSystemInitialValue) {
+          prop.attrs |= AttrSystemInitialValue;
+        }
+        if (preProp->attrs() & AttrInitialSatisfiesTC) {
+          prop.attrs |= AttrInitialSatisfiesTC;
+        }
+
+        checkPrePropVal(prop, preProp);
+        TypedValueAux& tvaux = m_declPropInit[it2->second];
+        auto const& tv = preProp->val();
+        tvaux.m_data = tv.m_data;
+        tvaux.m_type = tv.m_type;
+        copyDeepInitAttr(preProp, &prop);
         break;
       }
       default: assertx(false);
@@ -2704,51 +2633,24 @@ void Class::setProperties() {
         }
         sPropInd = it3->second;
       }
-      // Create a new property, or overlay ancestor's property if one exists.
       if (sPropInd == kInvalidSlot) {
         SProp sProp;
-        sProp.name = preProp->name();
-        sPropInd = curSPropMap.size();
-        curSPropMap.add(sProp.name, sProp);
-      }
-      // Finish initializing.
-      auto& sProp = curSPropMap[sPropInd];
-      sProp.attrs          = preProp->attrs() | AttrNoBadRedeclare;
-      sProp.userType       = preProp->userType();
-      sProp.typeConstraint = preProp->typeConstraint();
-      sProp.docComment     = preProp->docComment();
-      sProp.cls            = this;
-      sProp.val            = preProp->val();
-      sProp.repoAuthType   = preProp->repoAuthType();
-      if (slot < traitIdx) {
+        initProp(sProp, preProp);
         sProp.idx = slot;
-      } else {
-        sProp.idx = slot + m_preClass->numProperties() + traitOffset;
+        curSPropMap.add(sProp.name, sProp);
+        continue;
       }
-
-      // Check if this property's initial value needs to be type checked at
-      // runtime.
-      auto const& tv = preProp->val();
-      auto const& tc = sProp.typeConstraint;
-      if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
-          !(sProp.attrs & AttrInitialSatisfiesTC) &&
-          tv.m_type != KindOfUninit) {
-        // System provided initial values should always be correct
-        if ((sProp.attrs & AttrSystemInitialValue) || tc.alwaysPasses(&tv)) {
-          sProp.attrs |= AttrInitialSatisfiesTC;
-        } else {
-          // If the sprop needs an initial value check, force it to be
-          // non-persistent so we check it on every request.
-          sProp.attrs = Attr(sProp.attrs & ~AttrPersistent);
-        }
-      }
+      // Overlay ancestor's property.
+      auto& sProp = curSPropMap[sPropInd];
+      initProp(sProp, preProp);
+      sProp.idx = slot;
     }
   }
 
   // After assigning indexes for current properties, we reassign indexes to
   // parent properties that haven't been overlayed to make sure that they
   // are greater than those of current properties.
-  int idxOffset = m_preClass->numProperties() - 1;
+  int idxOffset = traitIdx - 1;
   int curIdx = idxOffset;
   for (Slot slot = 0; slot < curPropMap.size(); ++slot) {
     auto& prop = curPropMap[slot];
@@ -2769,7 +2671,7 @@ void Class::setProperties() {
     }
   }
 
-  importTraitProps(curIdx + 1, curPropMap, curSPropMap);
+  importTraitProps(traitIdx, curIdx + 1, curPropMap, curSPropMap);
 
   // LSB static properties that were inherited must be initialized separately.
   for (Slot slot = 0; slot < curSPropMap.size(); ++slot) {
@@ -2837,21 +2739,21 @@ const constexpr Attr kRedeclarePropAttrMask =
     ~(AttrNoBadRedeclare |
       AttrSystemInitialValue |
       AttrNoImplicitNullable |
-      AttrInitialSatisfiesTC)
+      AttrInitialSatisfiesTC |
+      AttrPersistent)
   );
 
 }
 
-void Class::importTraitInstanceProp(Class* trait, Prop& traitProp,
-                                    TypedValue& traitPropVal,
+void Class::importTraitInstanceProp(Prop& traitProp,
+                                    const TypedValue& traitPropVal,
                                     const int idxOffset,
                                     PropMap::Builder& curPropMap) {
   auto prevIt = curPropMap.find(traitProp.name);
 
   if (prevIt == curPropMap.end()) {
     // New prop, go ahead and add it
-    Prop prop = traitProp;
-    prop.cls = this; // set current class as the first declaring prop
+    auto prop = traitProp;
     // private props' mangled names contain the class name, so regenerate them
     if (prop.attrs & AttrPrivate) {
       prop.mangledName = PreClass::manglePropName(m_preClass->name(),
@@ -2861,11 +2763,17 @@ void Class::importTraitInstanceProp(Class* trait, Prop& traitProp,
     if (prop.attrs & AttrDeepInit) {
       m_hasDeepInitProps = true;
     }
-    // Clear NoImplicitNullable on the property. HHBBC analyzed the property in
-    // the context of the trait, not this class, so we cannot predict what
-    // derived class' will do with it. Be conservative.
-    prop.attrs = Attr(prop.attrs & ~AttrNoImplicitNullable)
-                 | AttrNoBadRedeclare;
+    if (traitProp.cls != this) {
+      // this was a non-flattened trait property.
+      prop.cls = this;
+
+      // Clear NoImplicitNullable on the property. HHBBC analyzed the property in
+      // the context of the trait, not this class, so we cannot predict what
+      // derived class' will do with it. Be conservative.
+      prop.attrs = Attr(prop.attrs & ~AttrNoImplicitNullable) | AttrNoBadRedeclare;
+    } else {
+      assertx(prop.attrs & AttrNoBadRedeclare);
+    }
     prop.idx += idxOffset;
     curPropMap.add(prop.name, prop);
     m_declPropInit.push_back(traitPropVal);
@@ -2883,7 +2791,7 @@ void Class::importTraitInstanceProp(Class* trait, Prop& traitProp,
   }
 }
 
-void Class::importTraitStaticProp(Class* /*trait*/, SProp& traitProp,
+void Class::importTraitStaticProp(SProp& traitProp,
                                   const int idxOffset,
                                   PropMap::Builder& curPropMap,
                                   SPropMap::Builder& curSPropMap) {
@@ -2896,7 +2804,7 @@ void Class::importTraitStaticProp(Class* /*trait*/, SProp& traitProp,
   auto prevIt = curSPropMap.find(traitProp.name);
   if (prevIt == curSPropMap.end()) {
     // New prop, go ahead and add it
-    SProp prop = traitProp;
+    auto prop = traitProp;
     prop.cls = this; // set current class as the first declaring prop
     prop.idx += idxOffset;
     prop.attrs |= AttrNoBadRedeclare;
@@ -2936,10 +2844,75 @@ void Class::importTraitStaticProp(Class* /*trait*/, SProp& traitProp,
   }
 }
 
-void Class::importTraitProps(int idxOffset,
+template<typename XProp>
+void Class::checkPrePropVal(XProp& prop, const PreClass::Prop* preProp) {
+  auto const& tv = preProp->val();
+  auto const& tc = preProp->typeConstraint();
+  if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
+      !(preProp->attrs() & AttrInitialSatisfiesTC) &&
+      tv.m_type != KindOfUninit) {
+    // System provided initial values should always be correct
+    if ((preProp->attrs() & AttrSystemInitialValue) || tc.alwaysPasses(&tv)) {
+      prop.attrs |= AttrInitialSatisfiesTC;
+    } else if (preProp->attrs() & AttrStatic) {
+      prop.attrs = Attr(prop.attrs & ~AttrPersistent);
+    } else {
+      m_needsPropInitialCheck = true;
+    }
+  }
+}
+
+template<typename XProp>
+void Class::initProp(XProp& prop, const PreClass::Prop* preProp) {
+  prop.name                = preProp->name();
+  prop.attrs               = Attr(preProp->attrs() & ~AttrTrait) |
+                             AttrNoBadRedeclare;
+  // This is the first class to declare this property
+  prop.cls                 = this;
+  prop.userType            = preProp->userType();
+  prop.typeConstraint      = preProp->typeConstraint();
+  prop.docComment          = preProp->docComment();
+  prop.repoAuthType        = preProp->repoAuthType();
+
+  // Check if this property's initial value needs to be type checked at
+  // runtime.
+  checkPrePropVal(prop, preProp);
+}
+
+void Class::initProp(Prop& prop, const PreClass::Prop* preProp) {
+  initProp<Prop>(prop, preProp);
+  prop.mangledName = preProp->mangledName();
+}
+
+void Class::initProp(SProp& prop, const PreClass::Prop* preProp) {
+  initProp<SProp>(prop, preProp);
+  prop.val = preProp->val();
+}
+
+void Class::importTraitProps(int traitIdx,
+                             int idxOffset,
                              PropMap::Builder& curPropMap,
                              SPropMap::Builder& curSPropMap) {
-  if (attrs() & AttrNoExpandTrait) return;
+  if (attrs() & AttrNoExpandTrait) {
+    for (Slot p = traitIdx; p < m_preClass->numProperties(); p++) {
+      auto const* preProp = &m_preClass->properties()[p];
+      assertx(preProp->attrs() & AttrTrait);
+      if (!(preProp->attrs() & AttrStatic)) {
+        Prop prop;
+        initProp(prop, preProp);
+        prop.idx = 0;
+        importTraitInstanceProp(prop, preProp->val(), idxOffset, curPropMap);
+      } else {
+        SProp prop;
+        initProp(prop, preProp);
+        prop.idx = 0;
+        importTraitStaticProp(prop, idxOffset, curPropMap, curSPropMap);
+      }
+      ++idxOffset;
+    }
+    return;
+  }
+
   for (auto const& t : m_extra->m_usedTraits) {
     auto trait = t.get();
 
@@ -2949,15 +2922,13 @@ void Class::importTraitProps(int idxOffset,
     for (Slot p = 0; p < trait->m_declProperties.size(); p++) {
       auto& traitProp    = trait->m_declProperties[p];
       auto& traitPropVal = trait->m_declPropInit[p];
-      importTraitInstanceProp(trait, traitProp, traitPropVal, idxOffset,
-                              curPropMap);
+      importTraitInstanceProp(traitProp, traitPropVal, idxOffset, curPropMap);
     }
 
     // static properties
     for (Slot p = 0; p < trait->m_staticProperties.size(); ++p) {
       auto& traitProp = trait->m_staticProperties[p];
-      importTraitStaticProp(trait, traitProp, idxOffset, curPropMap,
-                            curSPropMap);
+      importTraitStaticProp(traitProp, idxOffset, curPropMap, curSPropMap);
     }
 
     idxOffset += trait->m_declProperties.size() +

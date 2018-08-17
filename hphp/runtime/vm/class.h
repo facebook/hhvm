@@ -143,7 +143,7 @@ struct Class : AtomicCountable {
     LowStringPtr name;
     LowStringPtr mangledName;
 
-    /* First parent class that declares this property. */
+    /* Most derived class that declares this property. */
     LowPtr<Class> cls;
 
     Attr attrs;
@@ -1431,16 +1431,21 @@ private:
   void importTraitMethods(MethodMapBuilder& curMethodMap);
   void applyTraitRules(TMIData& tmid);
 
-  void importTraitProps(int idxOffset,
+  template<typename XProp>
+  void initProp(XProp& prop, const PreClass::Prop* preProp);
+  void initProp(Prop& prop, const PreClass::Prop* preProp);
+  void initProp(SProp& prop, const PreClass::Prop* preProp);
+  template<typename XProp>
+  void checkPrePropVal(XProp& prop, const PreClass::Prop* preProp);
+  void importTraitProps(int traitIdx,
+                        int idxOffset,
                         PropMap::Builder& curPropMap,
                         SPropMap::Builder& curSPropMap);
-  void importTraitInstanceProp(Class*      trait,
-                               Prop&       traitProp,
-                               TypedValue& traitPropVal,
+  void importTraitInstanceProp(Prop&       traitProp,
+                               const TypedValue& traitPropVal,
                                const int idxOffset,
                                PropMap::Builder& curPropMap);
-  void importTraitStaticProp(Class*   trait,
-                             SProp&   traitProp,
+  void importTraitStaticProp(SProp&   traitProp,
                              const int idxOffset,
                              PropMap::Builder& curPropMap,
                              SPropMap::Builder& curSPropMap);

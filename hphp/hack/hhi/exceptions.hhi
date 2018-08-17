@@ -69,7 +69,7 @@ class Exception implements Throwable {
   protected string $file;
   protected int $line;
   /* HH_FIXME[2082] T30662901 */
-  protected array $trace;
+  private array $trace;
   protected mixed $userMetadata;
 
   <<__Rx>>

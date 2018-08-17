@@ -18,10 +18,10 @@ if [ -z "${NO_COPY+x}" ]; then
   NO_COPY=false
 fi
 
-DIFF=`command -v colordiff || echo diff`
+DIFF=$(command -v colordiff || echo "command diff")
 
 for f in "$@"; do
-  nl --body-numbering=a $f
+  nl --body-numbering=a "$f"
   if [ -e "$f$EXP_EXT" ]; then
     EXP="$f$EXP_EXT"
   else

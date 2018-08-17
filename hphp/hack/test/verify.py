@@ -85,8 +85,7 @@ def filter_ocaml_stacktrace(text: str) -> str:
             pass
         else:
             out.append(x)
-    # force trailing newline
-    return "\n".join(out) + "\n"
+    return "\n".join(out)
 
 
 def check_result(test_case: TestCase, out: str) -> Result:

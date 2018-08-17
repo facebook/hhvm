@@ -13,4 +13,3 @@
 function bar<T>(T $x) : T {
   return $x ? $x : $x ? $x : $x;
 }
-

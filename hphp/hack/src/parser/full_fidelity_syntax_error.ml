@@ -516,6 +516,9 @@ let invalid_class_in_collection_initializer =
 let invalid_brace_kind_in_collection_initializer =
   "Initializers of 'vec', 'dict' and 'keyset' should use '[...]' instead of '{...}'."
 
+let nested_ternary =
+  "Nested ternary expressions inside ternary expressions are ambiguous. Please add parentheses"
+
 let alternate_control_flow =
   "Alternate control flow syntax is not allowed in Hack files"
 let execution_operator =

@@ -1960,11 +1960,23 @@ let expression_errors env namespace_name node parents errors =
       | _ -> errors
     end
   | ConditionalExpression
-    { conditional_consequence = cons
-    ; _ }
-    when is_missing cons
-      && is_typechecker env ->
-    make_error_from_node node SyntaxError.elvis_operator_space :: errors
+    { conditional_test
+    ; conditional_consequence = cons
+    ; conditional_alternative
+    ; _ } ->
+    let errors =
+      if is_missing cons && is_typechecker env
+      then make_error_from_node node SyntaxError.elvis_operator_space :: errors
+      else errors in
+    let errors =
+      if is_conditional_expression conditional_test && is_typechecker env
+      then make_error_from_node node SyntaxError.nested_ternary :: errors
+      else errors in
+    begin match conditional_alternative with
+    | { syntax = LambdaExpression { lambda_body; _ }; _ }
+      when is_conditional_expression lambda_body && is_typechecker env ->
+      make_error_from_node node SyntaxError.nested_ternary :: errors
+    | _ -> errors end
   | LambdaExpression
     { lambda_attribute_spec = s
     ; lambda_body = body

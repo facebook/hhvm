@@ -280,6 +280,7 @@ val invalid_yield : string
 val invalid_yield_from : string
 val invalid_class_in_collection_initializer: string
 val invalid_brace_kind_in_collection_initializer: string
+val nested_ternary: string
 val alternate_control_flow : string
 val execution_operator : string
 val invalid_octal_integer : string

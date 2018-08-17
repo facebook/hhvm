@@ -588,4 +588,5 @@ module type S = sig
   val misplaced_rx_of_scope: Pos.t -> unit
   val rx_of_scope_and_explicit_rx: Pos.t -> unit
   val lateinit_with_default: Pos.t -> unit
+  val interface_use_trait: Pos.t -> unit
 end

@@ -841,6 +841,9 @@ and interface c =
   (* make sure constructor has no body *)
   Option.iter c.c_constructor enforce_no_body;
   Option.iter c.c_constructor enforce_not_async;
+  List.iter (c.c_uses) (fun (p, _) ->
+    Errors.interface_use_trait p
+  );
   (* make sure that interfaces don't have any member variables *)
   match c.c_vars with
   | hd::_ ->

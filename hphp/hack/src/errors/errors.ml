@@ -1286,6 +1286,10 @@ let await_in_sync_function p =
   add (NastCheck.err_code NastCheck.AwaitInSyncFunction) p
     "await can only be used inside async functions"
 
+let interface_use_trait p =
+  add (NastCheck.err_code NastCheck.InterfaceUsesTrait) p
+    "Interfaces cannot use traits"
+
 let await_not_allowed p =
   add (NastCheck.err_code NastCheck.AwaitNotAllowed) p
     "await is only permitted as a statement, expression in a return statement \

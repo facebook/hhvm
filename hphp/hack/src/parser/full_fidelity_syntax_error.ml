@@ -369,6 +369,9 @@ let fn_with_inout_and_ref_params =
   "Functions may not use both reference and inout parameters"
 let method_calls_on_xhp_attributes =
   "Method calls are not allowed on XHP attributes"
+
+let method_calls_on_xhp_expression =
+  "Please add parentheses around the XHP component"
 let invalid_constant_initializer =
   "Invalid expression in constant initializer"
 let no_args_in_halt_compiler =
@@ -555,3 +558,6 @@ let experimental_in_codegen_without_hacksperimental =
 
 let type_alias_to_type_constant =
   "Type aliases to type constants are not supported"
+
+let interface_with_memoize =
+  "Memoize is not allowed on interface methods"

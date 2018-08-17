@@ -1026,29 +1026,33 @@ let attribute_specification_contains node name =
     end
   | _ -> false
 
-let methodish_contains_memoize_lsb node =
-  match syntax node with
+let methodish_contains_attribute node attribute =
+  match node with
   | MethodishDeclaration { methodish_attribute = attr_spec; _ } ->
-    attribute_specification_contains attr_spec SN.UserAttributes.uaMemoizeLSB
+    attribute_specification_contains attr_spec attribute
   | _ -> false
 
 let methodish_memoize_lsb_on_non_static node errors =
-  if methodish_contains_memoize_lsb node &&
+  if methodish_contains_attribute (syntax node) SN.UserAttributes.uaMemoizeLSB  &&
      not (methodish_contains_static node)
   then
     let e = make_error_from_node node SyntaxError.memoize_lsb_on_non_static
     in e :: errors
   else errors
 
-let function_declaration_contains_memoize_lsb node =
-  match syntax node with
+let function_declaration_contains_attribute node attribute =
+  match node with
   | FunctionDeclaration { function_attribute_spec = attr_spec; _ } ->
-    attribute_specification_contains attr_spec SN.UserAttributes.uaMemoizeLSB
+    attribute_specification_contains attr_spec attribute
   | _ -> false
+
+let methodish_contains_memoize env node parents =
+  (is_typechecker env) && is_inside_interface parents
+    && (methodish_contains_attribute node SN.UserAttributes.uaMemoize)
 
 let function_declaration_header_memoize_lsb parents errors =
   let node = List.hd_exn parents in
-  if function_declaration_contains_memoize_lsb node
+  if function_declaration_contains_attribute (syntax node) SN.UserAttributes.uaMemoizeLSB
   then
     let e = make_error_from_node node SyntaxError.memoize_lsb_on_non_method
     in e :: errors
@@ -1118,6 +1122,10 @@ let methodish_errors env node parents errors =
       ~default:"" in
     let method_name = Option.value (extract_function_name
       md.methodish_function_decl_header) ~default:"" in
+    let errors =
+      produce_error_for_header errors
+      (methodish_contains_memoize env)
+      node parents SyntaxError.interface_with_memoize header_node in
     let errors =
       produce_error_for_header errors
       (class_constructor_has_static) header_node
@@ -1556,10 +1564,20 @@ let function_call_argument_errors node errors =
       end
   | _ -> errors
 
-let function_call_on_xhp_name_errors node errors =
+let function_call_on_xhp_name_errors env node errors =
   match syntax node with
-  | MemberSelectionExpression { member_name = name; _ }
-  | SafeMemberSelectionExpression { safe_member_name = name; _ } ->
+  | MemberSelectionExpression { member_object; member_name = name; _ }
+  | SafeMemberSelectionExpression {
+      safe_member_object=member_object;
+      safe_member_name = name; _ } ->
+    let errors =
+    begin match syntax member_object with
+    | XHPExpression _ when is_typechecker env ->
+      let e =
+        make_error_from_node node SyntaxError.method_calls_on_xhp_expression in
+      e::errors
+    | _ -> errors
+    end in
     begin match syntax name with
     | Token token when Token.kind token = TokenKind.XHPClassName ->
       let e =
@@ -1758,7 +1776,7 @@ let expression_errors env namespace_name node parents errors =
       ~f:(fun p acc -> function_call_argument_errors p acc)
     in
     let errors =
-      function_call_on_xhp_name_errors function_call_receiver errors in
+      function_call_on_xhp_name_errors env function_call_receiver errors in
     errors
   | ListExpression { list_members; _ }
     when is_hhvm_compat env ->

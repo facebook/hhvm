@@ -1968,9 +1968,12 @@ function run_config_cli($options, $test, $cmd, $cmd_env) {
   return array($output, $stderr);
 }
 
-function replace_object_ids($str, $replacement) {
+function replace_object_resource_ids($str, $replacement) {
+  $str = preg_replace(
+    '/(object\([^)]+\)#)\d+/', '\1'.$replacement, $str
+  );
   return preg_replace(
-    '/(object\([a-zA-Z_\\\\]+\)#)\d+/', '\1'.$replacement, $str
+    '/resource\(\d+\)/', "resource($replacement)", $str
   );
 }
 
@@ -2029,8 +2032,8 @@ function run_config_post($outputs, $test, $options) {
       ($is_tc && $type === 'typechecker.expect')) {
     $wanted = trim(file_get_contents($file));
     if (isset($options['ignore-oids'])) {
-      $output = replace_object_ids($output, 'n');
-      $wanted = replace_object_ids($wanted, 'n');
+      $output = replace_object_resource_ids($output, 'n');
+      $wanted = replace_object_resource_ids($wanted, 'n');
     }
 
     if (!$repeats) {
@@ -2045,7 +2048,7 @@ function run_config_post($outputs, $test, $options) {
              ($is_tc && $type === 'typechecker.expectf')) {
     $wanted = trim(file_get_contents($file));
     if (isset($options['ignore-oids'])) {
-      $wanted = replace_object_ids($wanted, '%d');
+      $wanted = replace_object_resource_ids($wanted, '%d');
     }
     $wanted_re = $wanted;
 

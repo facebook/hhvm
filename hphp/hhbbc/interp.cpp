@@ -721,22 +721,12 @@ std::pair<Type,bool> resolveSame(ISS& env) {
   auto const l2 = topStkEquiv(env, 1);
   auto const t2 = topC(env, 1);
 
-  auto const mightWarn = [&] {
-    // EvalHackArrCompatNotices will notice on === and !== between PHP arrays
-    // and Hack arrays.
-    if (RuntimeOption::EvalHackArrCompatNotices) {
-      if (t1.couldBe(BArr) && couldBeHackArr(t2)) return true;
-      if (couldBeHackArr(t1) && t2.couldBe(BArr)) return true;
-    }
-    if (RuntimeOption::EvalHackArrCompatDVCmpNotices) {
-      if (!t1.couldBe(BArr) || !t2.couldBe(BArr)) return false;
-      if (t1.subtypeOf(BPArr) && t2.subtypeOf(BPArr)) return false;
-      if (t1.subtypeOf(BVArr) && t2.subtypeOf(BVArr)) return false;
-      if (t1.subtypeOf(BDArr) && t2.subtypeOf(BDArr)) return false;
-      return true;
-    }
-    return false;
-  };
+  // EvalHackArrCompatNotices will notice on === and !== between PHP arrays and
+  // Hack arrays. We can't really do better than this in general because of
+  // arrays inside these arrays.
+  auto const mightWarn =
+    RuntimeOption::EvalHackArrCompatNotices ||
+    RuntimeOption::EvalHackArrCompatDVCmpNotices;
 
   auto const result = [&] {
     auto const v1 = tv(t1);
@@ -761,7 +751,7 @@ std::pair<Type,bool> resolveSame(ISS& env) {
     return NSame ? typeNSame(t1, t2) : typeSame(t1, t2);
   };
 
-  return { result(), mightWarn() };
+  return { result(), mightWarn };
 }
 
 template<bool Negate>

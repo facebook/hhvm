@@ -1773,6 +1773,7 @@ module Make (GetLocals : GetLocals) = struct
       N.m_variadic        = variadicity ;
       N.m_user_attributes = attrs;
       N.m_ret_by_ref      = m.m_ret_by_ref;
+      N.m_external        = m.m_external;
     }
 
   and kind (final, abs, vis) = function
@@ -1874,6 +1875,7 @@ module Make (GetLocals : GetLocals) = struct
       f_variadic = variadicity;
       f_user_attributes = user_attributes env f.f_user_attributes;
       f_ret_by_ref = f.f_ret_by_ref;
+      f_external = f.f_external;
     } in
     named_fun
 
@@ -2676,6 +2678,7 @@ module Make (GetLocals : GetLocals) = struct
       f_variadic = variadicity;
       f_user_attributes = user_attributes env f.f_user_attributes;
       f_ret_by_ref = f.f_ret_by_ref;
+      f_external = f.f_external;
     }
 
   and make_class_id env (p, x as cid) hl =

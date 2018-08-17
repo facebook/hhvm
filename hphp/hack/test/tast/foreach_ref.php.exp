@@ -49,5 +49,6 @@ Errors:
                 (Some (([9:10-12], int), (Lvar ([9:10-12], $y))))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
+      f_external = false })
   ]

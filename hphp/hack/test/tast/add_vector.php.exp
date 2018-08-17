@@ -68,7 +68,8 @@
                     []))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
+      f_external = false });
   (Class
      { Aast.AnnotatedAST.c_annotation = (); c_mode = <opaque>;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;
@@ -112,7 +113,7 @@
                m_fun_kind = FSync; m_user_attributes = [];
                m_ret =
                (Some ([15:19-30], (Happly (([15:19-30], "void"), []))));
-               m_ret_by_ref = false });
+               m_ret_by_ref = false; m_external = false });
        c_static_methods = [];
        c_methods =
        [{ Aast.AnnotatedAST.m_annotation = (); m_final = false;
@@ -144,7 +145,8 @@
                  ];
                fnb_unsafe = false });
           m_fun_kind = FSync; m_user_attributes = [];
-          m_ret = (Some ([19:30-34], (Hprim Tvoid))); m_ret_by_ref = false };
+          m_ret = (Some ([19:30-34], (Hprim Tvoid))); m_ret_by_ref = false;
+          m_external = false };
          { Aast.AnnotatedAST.m_annotation = (); m_final = false;
            m_abstract = false; m_visibility = Public;
            m_name = ([23:19-22], "get"); m_tparams = [];
@@ -172,7 +174,8 @@
                   ];
                 fnb_unsafe = false });
            m_fun_kind = FSync; m_user_attributes = [];
-           m_ret = (Some ([23:32-33], (Habstr "T"))); m_ret_by_ref = false }
+           m_ret = (Some ([23:32-33], (Habstr "T"))); m_ret_by_ref = false;
+           m_external = false }
          ];
        c_user_attributes = []; c_enum = None });
   (Class

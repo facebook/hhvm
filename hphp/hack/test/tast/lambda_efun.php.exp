@@ -45,7 +45,7 @@
                                  ];
                                fnb_unsafe = false });
                           f_fun_kind = FSync; f_user_attributes = [];
-                          f_ret_by_ref = false },
+                          f_ret_by_ref = false; f_external = false },
                         [([15:15-17], $y)])))
                     ))));
              (Expr
@@ -91,7 +91,7 @@
                                  ];
                                fnb_unsafe = false });
                           f_fun_kind = FSync; f_user_attributes = [];
-                          f_ret_by_ref = false },
+                          f_ret_by_ref = false; f_external = false },
                         [([18:26-28], $y)])))
                     ))));
              (Expr
@@ -136,7 +136,7 @@
                                  ];
                                fnb_unsafe = false });
                           f_fun_kind = FSync; f_user_attributes = [];
-                          f_ret_by_ref = false },
+                          f_ret_by_ref = false; f_external = false },
                         [])))
                     ))));
              (Expr
@@ -152,5 +152,6 @@
                     ))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
+      f_external = false })
   ]

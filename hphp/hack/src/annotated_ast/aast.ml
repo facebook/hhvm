@@ -229,6 +229,8 @@ and fun_ = {
   f_fun_kind : Ast.fun_kind;
   f_user_attributes : user_attribute list;
   f_ret_by_ref : bool;
+  f_external : bool;  (* true if this declaration has no body because it is an
+                         external function declaration (e.g. from an HHI file)*)
 }
 
 and func_body =
@@ -336,6 +338,7 @@ and method_ = {
   m_user_attributes : user_attribute list ;
   m_ret             : hint option         ;
   m_ret_by_ref      : bool                ;
+  m_external        : bool                ;  (* see f_external above for context *)
 }
 
 and typedef = {

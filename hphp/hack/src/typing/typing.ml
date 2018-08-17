@@ -534,6 +534,7 @@ and fun_def tcopt f =
           T.fnb_unsafe = nb.fnb_unsafe;
         };
         T.f_ret_by_ref = f.f_ret_by_ref;
+        T.f_external = f.f_external;
       } in
       Typing_lambda_ambiguous.suggest_fun_def env fundef
   ) in
@@ -2958,6 +2959,7 @@ and anon_make tenv p f ft idl =
           T.f_params = t_params;
           T.f_variadic = t_variadic; (* TODO TAST: Variadic efuns *)
           T.f_ret_by_ref = f.f_ret_by_ref;
+          T.f_external = f.f_external;
         } in
         let ty = (Reason.Rwitness p, Tfun ft) in
         let te = T.make_typed_expr p ty (T.Efun (tfun_, idl)) in
@@ -6978,6 +6980,7 @@ and method_def env m =
       T.fnb_unsafe = nb.fnb_unsafe;
     };
     T.m_ret_by_ref = m.m_ret_by_ref;
+    T.m_external = m.m_external;
   } in
   Typing_lambda_ambiguous.suggest_method_def env method_def
 

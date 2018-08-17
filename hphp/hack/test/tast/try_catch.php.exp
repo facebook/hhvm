@@ -5,7 +5,8 @@
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
       (NamedBody { Aast.AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
+      f_external = false });
   (Fun
      { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([13:44-47], (Hprim Tint)));
@@ -61,5 +62,6 @@
                  (Some (([30:10-12], int), (Lvar ([30:10-12], $a))))))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
+       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
+       f_external = false })
   ]

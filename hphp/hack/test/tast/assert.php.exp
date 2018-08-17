@@ -25,7 +25,8 @@
                           (([15:24-25], A), (CI (([15:24-25], "\\A"), []))))))))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
+      f_external = false });
   (Class
      { Aast.AnnotatedAST.c_annotation = (); c_mode = <opaque>;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;

@@ -81,7 +81,8 @@
                     []))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
+      f_external = false });
   (Typedef
      { Aast.AnnotatedAST.t_annotation = (); t_name = ([3:6-11], "\\Point");
        t_tparams = []; t_constraint = None;

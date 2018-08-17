@@ -37,6 +37,7 @@ let xhp_attribute_declaration_method ?p name kind body =
     A.m_fun_kind = A.FSync;
     A.m_span = p;
     A.m_doc_comment = None;
+    A.m_external = false;
   }
 
 let emit_xhp_attribute_array ~ns xal =

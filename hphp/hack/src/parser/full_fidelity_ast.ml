@@ -618,6 +618,9 @@ let fun_template yielding node suspension_kind env =
   ; f_span            = p
   ; f_doc_comment     = None
   ; f_static          = false
+  ; f_external        = false  (* true if this declaration has no body
+                                  because it is anexternal function declaration
+                                  (e.g. from an HHI file)*)
   }
 
 let param_template node env =
@@ -1042,12 +1045,14 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         mpYielding pFunctionBody lambda_body
           (if not (is_compound_statement lambda_body) then env else non_tls env)
       in
+      let f_external = is_semicolon lambda_body in
       Lfun
       { (fun_template yield node suspension_kind env) with
         f_ret
       ; f_params
       ; f_body
       ; f_user_attributes = pUserAttributes env lambda_attribute_spec
+      ; f_external
       }
 
     | BracedExpression        { braced_expression_expression        = expr; _ }
@@ -1631,6 +1636,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           | None -> top_docblock() in
         let f_ret_by_ref = is_ret_by_ref anonymous_ampersand in
         let user_attributes = pUserAttributes env attribute_spec in
+        let f_external = is_semicolon anonymous_body in
         Efun
         ( { (fun_template yield node suspension_kind env) with
             f_ret         = mpOptional pHint anonymous_type env
@@ -1640,6 +1646,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           ; f_ret_by_ref
           ; f_doc_comment = doc_comment
           ; f_user_attributes = user_attributes
+          ; f_external
           }
         , try pUse anonymous_use env with _ -> []
         )
@@ -1663,10 +1670,12 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
            List.exists attrs ~f:(fun { ua_name = (_, n); _ } -> check n)
         then attrs
         else { ua_name = (Pos.none, UA.uaRxOfScope); ua_params = [] } :: attrs in
+      let f_external = is_semicolon awaitable_compound_statement in
       let body =
         { (fun_template yld node suspension_kind env) with
            f_body = mk_noop (pPos awaitable_compound_statement env) blk;
-           f_user_attributes = user_attributes }
+           f_user_attributes = user_attributes;
+           f_external }
       in
       Call ((pPos node env, Lfun body), [], [], [])
     | XHPExpression
@@ -2477,6 +2486,7 @@ and pClassElt : class_elt list parser = fun node env ->
       in
       let body, body_has_yield = mpYielding pBody methodish_function_body env in
       let kind = pKinds (fun _ -> ()) h.function_modifiers env in
+      let is_external = is_semicolon methodish_function_body in
       member_def @ [Method
       { m_kind            = kind
       ; m_tparams         = hdr.fh_type_parameters
@@ -2490,6 +2500,7 @@ and pClassElt : class_elt list parser = fun node env ->
       ; m_span            = pFunction node env
       ; m_fun_kind        = mk_fun_kind hdr.fh_suspension_kind body_has_yield
       ; m_doc_comment     = doc_comment_opt
+      ; m_external        = is_external  (* see f_external above for context *)
       }]
   | TraitUseConflictResolution
     { trait_use_conflict_resolution_names
@@ -2685,8 +2696,9 @@ and pDef : def list parser = fun node env ->
       let check_modifier node =
         raise_parsing_error env (`Node node) (SyntaxError.function_modifier (text node)) in
       let hdr = pFunHdr check_modifier function_declaration_header env in
+      let is_external = is_semicolon function_body in
       let block, yield =
-        if is_semicolon function_body then [], false else
+        if is_external then [], false else
           mpYielding pFunctionBody function_body env
       in
       [ Fun
@@ -2710,6 +2722,7 @@ and pDef : def list parser = fun node env ->
         end
       ; f_user_attributes = pUserAttributes env function_attribute_spec
       ; f_doc_comment = doc_comment_opt
+      ; f_external = is_external
       }]
   | ClassishDeclaration
     { classish_attribute       = attr

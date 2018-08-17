@@ -10,7 +10,8 @@
                ))
              ];
            fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
+      f_external = false });
   (Fun
      { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([9:22-26], (Hprim Tvoid)));
@@ -55,7 +56,8 @@
                      ))))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
+       f_external = false });
   (Class
      { Aast.AnnotatedAST.c_annotation = (); c_mode = <opaque>;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;

@@ -430,6 +430,7 @@ let make_closure ~class_num
     m_fun_kind = fd.f_fun_kind;
     m_span = fd.f_span;
     m_doc_comment = fd.f_doc_comment;
+    m_external = false;
   } in
   let cvl =
     List.map lambda_vars

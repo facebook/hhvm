@@ -244,6 +244,7 @@ and method_ = {
   m_fun_kind: fun_kind;
   m_span: pos;
   m_doc_comment: string option;
+  m_external: bool;
 }
 
 and typeconst = {
@@ -288,6 +289,7 @@ and fun_ = {
   f_span            : pos;
   f_doc_comment     : string option;
   f_static          : bool;
+  f_external        : bool;
 }
 
 and is_coroutine = bool

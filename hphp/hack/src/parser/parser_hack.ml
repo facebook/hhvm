@@ -805,7 +805,7 @@ and fun_ fun_start ~attr ~(sync:fun_decl_kind) env =
   let params = parameter_list env in
   let ret = hint_return_opt env in
   let constrs = where_clause env in
-  let is_generator, body_stmts = function_body env in
+  let is_generator, is_external, body_stmts = function_body env in
   let fun_end = Pos.make env.file env.lb in
   { f_name = name;
     f_tparams = tparams;
@@ -821,6 +821,7 @@ and fun_ fun_start ~attr ~(sync:fun_decl_kind) env =
     f_span = Pos.btw fun_start fun_end;
     f_doc_comment = None;
     f_static = false;
+    f_external = is_external;
   }
 
 (*****************************************************************************)
@@ -1910,7 +1911,7 @@ and method_ env method_start ~modifiers ~attrs ~(sync:fun_decl_kind)
   let params = parameter_list env in
   let ret = hint_return_opt env in
   let constrs = where_clause env in
-  let is_generator, body_stmts = function_body env in
+  let is_generator, is_external, body_stmts = function_body env in
   let method_end = Pos.make env.file env.lb in
   let ret = method_implicit_return env pname ret in
   if name = "__destruct" && params <> []
@@ -1927,6 +1928,7 @@ and method_ env method_start ~modifiers ~attrs ~(sync:fun_decl_kind)
     m_fun_kind = fun_kind sync is_generator;
     m_span = Pos.btw method_start method_end;
     m_doc_comment = None;
+    m_external = is_external;
   }
 
 (*****************************************************************************)
@@ -2005,7 +2007,7 @@ and param_implicit_field vis p =
 and function_body env =
   match L.token env.file env.lb with
   | Tsc ->
-    false, []
+    false, true, []
   | Tlcb ->
     let previous_in_generator = !(env.in_generator) in
     env.in_generator := false;
@@ -2024,10 +2026,10 @@ and function_body env =
     ) in
     let in_generator = !(env.in_generator) in
     env.in_generator := previous_in_generator ;
-    in_generator, statements
+    in_generator, false, statements
   | _ ->
     error_expect env "{";
-    false, []
+    false, false, []
 
 and fun_kind sync (has_yield:bool) =
   match sync, has_yield with
@@ -3107,7 +3109,8 @@ and lambda_body ~sync env ~attrs params ret =
       *
       * See test ternary_within_lambda_block_within_ternary.php
       *)
-     then with_base_priority env function_body
+     then let is_generator, _, body_statements = with_base_priority env function_body
+     in is_generator, body_statements
      (** e.g.
       *   ==> x + 5
       *   We keep the current priority so that possible priority ambiguities
@@ -3135,6 +3138,7 @@ and lambda_body ~sync env ~attrs params ret =
     f_span = Pos.none; (* We only care about span of "real" functions *)
     f_doc_comment = None;
     f_static = false;
+    f_external = false;
   }
   in Lfun f
 
@@ -3710,7 +3714,7 @@ and expr_anon_fun env pos ~attrs  ~(sync:fun_decl_kind) =
   let params = parameter_list env in
   let ret = hint_return_opt env in
   let use = function_use env in
-  let is_generator, body_stmts = function_body env in
+  let is_generator, is_external, body_stmts = function_body env in
   let f = {
     f_name = (Pos.none, ";anonymous");
     f_tparams = [];
@@ -3726,6 +3730,7 @@ and expr_anon_fun env pos ~attrs  ~(sync:fun_decl_kind) =
     f_span = Pos.none; (* We only care about span of "real" functions *)
     f_doc_comment = None;
     f_static = false;
+    f_external = is_external;
   }
   in
   pos, Efun (f, use)

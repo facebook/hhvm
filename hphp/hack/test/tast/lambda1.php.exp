@@ -49,7 +49,7 @@
                                  ];
                                fnb_unsafe = false });
                           f_fun_kind = FSync; f_user_attributes = [];
-                          f_ret_by_ref = false },
+                          f_ret_by_ref = false; f_external = false },
                         [([4:29-31], $s)])))
                     ))));
              (Expr
@@ -72,5 +72,6 @@
                     ))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
+      f_external = false })
   ]

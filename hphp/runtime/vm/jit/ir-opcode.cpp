@@ -279,7 +279,8 @@ bool opcodeMayRaise(Opcode opc) {
   // Same thing for SameArr and NSameArr, but for EvalHackArrCompatDVCmpNotices.
   case NSameArr:
   case SameArr:
-    return RuntimeOption::EvalHackArrCompatDVCmpNotices;
+    return RuntimeOption::EvalHackArrCompatDVCmpNotices ||
+      RuntimeOption::EvalHackArrCompatCheckCompare;
 
   // Same thing for IsTypeStruct, but for EvalHackArrCompatIsArrayNotices
   // and EvalIsExprEnableUnresolvedWarning.

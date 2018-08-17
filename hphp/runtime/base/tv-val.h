@@ -47,17 +47,19 @@ struct with_dummy {
    * static tv_val dummy();
    * bool is_dummy() const;
    */
-  static T dummy() { return T { &immutable_uninit_base }; }
-  bool is_dummy() const { return static_cast<const T&>(*this) == dummy(); }
+  INLINE_FLATTEN static T dummy() { return T { &immutable_uninit_base }; }
+  INLINE_FLATTEN bool is_dummy() const {
+    return static_cast<const T&>(*this) == dummy();
+  }
 };
 
 template<typename T>
-T* get_ptr(T* ptr) {
+INLINE_FLATTEN T* get_ptr(T* ptr) {
   return ptr;
 }
 
 template<typename T, typename Tag>
-T* get_ptr(CompactTaggedPtr<T, Tag> ptr) {
+INLINE_FLATTEN T* get_ptr(CompactTaggedPtr<T, Tag> ptr) {
   return ptr.ptr();
 }
 }
@@ -106,30 +108,30 @@ public:
   static constexpr int type_idx = wide_tv_val ? 0 : -1;
   static constexpr int val_idx = wide_tv_val ? 1 : 0;
 
-  tv_val();
-  /* implicit */ tv_val(tv_t* lval);
-  tv_val(type_t* type, value_t* val);
+  INLINE_FLATTEN tv_val();
+  /* implicit */ INLINE_FLATTEN tv_val(tv_t* lval);
+  INLINE_FLATTEN tv_val(type_t* type, value_t* val);
 
   /*
    * Construct from a tv_val without a tag and a tag.
    */
   template<typename Tag = tag_t>
-  tv_val(tv_val<is_const> lval, with_tag_t<Tag> t);
+  INLINE_FLATTEN tv_val(tv_val<is_const> lval, with_tag_t<Tag> t);
 
-  bool operator==(tv_val other) const;
+  INLINE_FLATTEN bool operator==(tv_val other) const;
 
   /*
    * Whether this tv_val is set.
    */
-  bool is_set() const;
-  explicit operator bool() const;
-  bool operator==(std::nullptr_t) const;
-  bool operator!=(std::nullptr_t) const;
+  INLINE_FLATTEN bool is_set() const;
+  INLINE_FLATTEN explicit operator bool() const;
+  INLINE_FLATTEN bool operator==(std::nullptr_t) const;
+  INLINE_FLATTEN bool operator!=(std::nullptr_t) const;
 
   /*
    * Implicit cast to tv_rval.
    */
-  /* implicit */ operator tv_val<true>() const;
+  /* implicit */ INLINE_FLATTEN operator tv_val<true>() const;
 
   /*
    * Explicit cast to tv_lval.
@@ -137,36 +139,36 @@ public:
    * This is the moral equivalent of:
    *   const_cast<TypedValue*>(const TypedValue*)
    */
-  tv_val<false> as_lval() const;
+  INLINE_FLATTEN tv_val<false> as_lval() const;
 
   /*
    * References to the value and type.
    *
    * @requires: is_set()
    */
-  value_t& val() const;
-  type_t& type() const;
+  INLINE_FLATTEN value_t& val() const;
+  INLINE_FLATTEN type_t& type() const;
 
   /*
    * Get a copy of the referenced value and type as a TypedValue.
    *
    * @requires: is_set()
    */
-  TypedValue tv() const;
-  TypedValue operator*() const;
+  INLINE_FLATTEN TypedValue tv() const;
+  INLINE_FLATTEN TypedValue operator*() const;
 
 
   /*
    * Return `this' if the referenced value is already unboxed, else a tv_val to
    * the inner value.
    */
-  tv_val unboxed() const;
+  INLINE_FLATTEN tv_val unboxed() const;
 
   template<typename Tag = tag_t>
-  with_tag_t<Tag> tag() const;
+  INLINE_FLATTEN with_tag_t<Tag> tag() const;
 
   template<typename Tag = tag_t>
-  with_tag_t<Tag, tv_val<is_const>> drop_tag() const;
+  INLINE_FLATTEN with_tag_t<Tag, tv_val<is_const>> drop_tag() const;
 
   TYPE_SCAN_CUSTOM() {
     if (isRefcountedType(type())) scanner.scan(val().pcnt);
@@ -184,28 +186,28 @@ private:
    * Default storage type: a single TypedValue*.
    */
   struct storage {
-    storage(type_t* type, value_t* val)
+    INLINE_FLATTEN storage(type_t* type, value_t* val)
       : m_tv{reinterpret_cast<tv_t*>(val)}
     {
       assertx(val == nullptr || &m_tv->m_type == type);
     }
 
     template<typename Tag = tag_t>
-    storage(type_t* type, value_t* val, with_tag_t<Tag> tag)
+    INLINE_FLATTEN storage(type_t* type, value_t* val, with_tag_t<Tag> tag)
       : m_tv{tag, reinterpret_cast<tv_t*>(val)}
     {
       assertx(val == nullptr || &m_tv->m_type == type);
     }
 
-    bool operator==(const storage& o) const {
+    INLINE_FLATTEN bool operator==(const storage& o) const {
       return m_tv == o.m_tv;
     }
 
-    type_t* type() const { return &m_tv->m_type; }
-    value_t* val() const { return &m_tv->m_data; }
+    INLINE_FLATTEN type_t* type() const { return &m_tv->m_type; }
+    INLINE_FLATTEN value_t* val() const { return &m_tv->m_data; }
 
     template<typename Tag = tag_t>
-    with_tag_t<Tag> tag() const { return m_tv.tag(); }
+    INLINE_FLATTEN with_tag_t<Tag> tag() const { return m_tv.tag(); }
 
    private:
     maybe_tagged_t<tv_t> m_tv;
@@ -216,7 +218,7 @@ private:
    * only meangingful is m_val != nullptr.
    */
   struct wide_storage {
-    wide_storage(type_t* type, value_t* val)
+    INLINE_FLATTEN wide_storage(type_t* type, value_t* val)
       : m_type{type}
       , m_val{val}
     {
@@ -224,22 +226,24 @@ private:
     }
 
     template<typename Tag = tag_t>
-    wide_storage(type_t* type, value_t* val, with_tag_t<Tag> tag)
+    INLINE_FLATTEN wide_storage(type_t* type, value_t* val, with_tag_t<Tag> tag)
       : m_type{tag, type}
       , m_val{val}
     {
       assertx((type && val) || val == nullptr);
     }
 
-    bool operator==(const wide_storage& o) const {
+    INLINE_FLATTEN bool operator==(const wide_storage& o) const {
       return m_val == o.m_val && (m_type == o.m_type || m_val == nullptr);
     }
 
-    type_t* type() const { return tv_val_detail::get_ptr(m_type); }
-    value_t* val() const { return m_val; }
+    INLINE_FLATTEN type_t* type() const {
+      return tv_val_detail::get_ptr(m_type);
+    }
+    INLINE_FLATTEN value_t* val() const { return m_val; }
 
     template<typename Tag = tag_t>
-    with_tag_t<Tag> tag() const { return m_type.tag(); }
+    INLINE_FLATTEN with_tag_t<Tag> tag() const { return m_type.tag(); }
 
    private:
     maybe_tagged_t<type_t> m_type;
@@ -254,11 +258,13 @@ private:
  * TV-lval API for tv_val.
  */
 template<bool is_const>
-auto& type(const tv_val<is_const>& val) { return val.type(); }
+INLINE_FLATTEN auto& type(const tv_val<is_const>& val) { return val.type(); }
 template<bool is_const>
-auto& val(const tv_val<is_const>& val) { return val.val(); }
+INLINE_FLATTEN auto& val(const tv_val<is_const>& val) { return val.val(); }
 template<bool is_const>
-TypedValue as_tv(const tv_val<is_const>& val) { return val.tv(); }
+INLINE_FLATTEN TypedValue as_tv(const tv_val<is_const>& val) {
+  return val.tv();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

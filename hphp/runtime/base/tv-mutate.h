@@ -96,11 +96,12 @@ ALWAYS_INLINE const Cell* tvToCell(const TypedValue* tv) {
   return LIKELY(!isRefType(tv->m_type)) ? tv : tv->m_data.pref->tv();
 }
 template<bool is_const, typename tag_t>
-ALWAYS_INLINE tv_val<is_const, tag_t> tvToCell(tv_val<is_const, tag_t> tv) {
+INLINE_FLATTEN tv_val<is_const, tag_t> tvToCell(tv_val<is_const, tag_t> tv) {
   return tv.unboxed();
 }
 template<bool is_const, typename tag_t>
-inline tv_val<is_const, tag_t> tv_val<is_const, tag_t>::unboxed() const {
+INLINE_FLATTEN
+tv_val<is_const, tag_t> tv_val<is_const, tag_t>::unboxed() const {
   return LIKELY(!isRefType(type())) ? *this : tv_val { val().pref->tv() };
 }
 

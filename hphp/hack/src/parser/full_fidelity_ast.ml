@@ -151,7 +151,7 @@ let underscore = Str.regexp "_"
 let quoted = Str.regexp "[ \t\n\r\012]*\"\\(\\(.\\|\n\\)*\\)\""
 let whitespace = Str.regexp "[ \t\n\r\012]+"
 let hashbang = Str.regexp "^#!.*\n"
-let ignore_error = Str.regexp "HH_\\(FIXME\\|IGNORE_ERROR\\)[ \\t\\n]*\\[?\\([0-9]+\\)\\]?"
+let ignore_error = Str.regexp "HH_\\(FIXME\\|IGNORE_ERROR\\)[ \\t\\n]*\\[\\([0-9]+\\)\\]"
 let namespace_use = Str.regexp "[^\\\\]*$"
 
 let mode_annotation = function

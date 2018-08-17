@@ -191,6 +191,11 @@ let format_intervals ?config intervals tree =
   for i = !bytes_seen to length - 1 do
     Buffer.add_char buf text.[i];
   done;
+  (* Dirty hack: Since we don't print the whitespace surrounding formatted
+     ranges, we don't print the trailing newline at the end of the file if the
+     last line in the file was modified. Add it here manually. *)
+  if Buffer.length buf > 0 && Buffer.nth buf (Buffer.length buf - 1) <> '\n'
+  then Buffer.add_char buf '\n';
   Buffer.contents buf
 
 (** Format a node at the given offset.

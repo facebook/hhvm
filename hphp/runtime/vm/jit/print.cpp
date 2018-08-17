@@ -263,6 +263,7 @@ void disasmRange(std::ostream& os, TCA begin, TCA end) {
       vixl::Decoder dec;
       vixl::PrintDisassembler disasm(os, kIndent + 4, dumpIR,
                                      color(ANSI_COLOR_BROWN));
+      disasm.setShouldDereferencePCRelativeLiterals(true);
       dec.AppendVisitor(&disasm);
       for (; begin < end; begin += vixl::kInstructionSize) {
         dec.Decode(vixl::Instruction::Cast(begin));

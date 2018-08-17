@@ -1420,7 +1420,7 @@ let is_foreach_in_for for_initializer =
     is_as_expression item
   | _ -> false
 
-let statement_errors _env node parents errors =
+let statement_errors env node parents errors =
   let result = match syntax node with
   | TryStatement { try_catch_clauses; try_finally_clause; _ }
     when (is_missing try_catch_clauses) && (is_missing try_finally_clause) ->
@@ -1431,6 +1431,21 @@ let statement_errors _env node parents errors =
   | ForStatement { for_initializer ; _ }
     when is_foreach_in_for for_initializer ->
     Some (node, SyntaxError.for_with_as_expression)
+  | CaseLabel {
+    case_colon = {
+      syntax = Token m;
+      _;
+    } as colon;
+    _
+  }
+  | DefaultLabel {
+    default_colon = {
+      syntax = Token m;
+      _;
+    } as colon;
+    _
+  } when is_typechecker env &&  Token.kind m <> TokenKind.Colon ->
+    Some (colon, SyntaxError.error1020)
   | _ -> None in
   match result with
   | None -> errors
@@ -3076,7 +3091,9 @@ let find_syntax_errors env =
       match syntax node with
       | TryStatement _
       | UsingStatementFunctionScoped _
-      | ForStatement _ ->
+      | ForStatement _
+      | CaseLabel _
+      | DefaultLabel _ ->
         let errors = statement_errors env node parents errors in
         trait_require_clauses, names, errors
       | MethodishDeclaration _

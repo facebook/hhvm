@@ -52,17 +52,22 @@ TRACE_SET_MOD(inlining);
 namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string nameAndReason(std::string caller, std::string callee,
+std::string nameAndReason(int bcOff, std::string caller, std::string callee,
     std::string why) {
-  return caller + " -> " + callee + " " + why;
+  std::ostringstream bcStmStr;
+  bcStmStr << bcOff;
+  std::string bcStr = bcStmStr.str();
+  return "BC: " + bcStr + " " + caller + " -> " + callee + " " + why;
 }
 
-bool traceRefusal(const Func* caller, const Func* callee, const char* why,
+bool traceRefusal(SrcKey callerSk, const Func* callee, const char* why,
     Annotations& annotations) {
   // This is not under Trace::enabled so that we can collect the data in prod.
+  const Func* caller = callerSk.func();
+  int bcOff = callerSk.offset();
   if (RuntimeOption::EvalDumpInlRefuse) {
     annotations.emplace_back("NoInline ",
-      nameAndReason(caller->fullName()->data(),
+      nameAndReason(bcOff, caller->fullName()->data(),
                     callee->fullName()->data(), why));
   }
   if (Trace::enabled) {
@@ -92,7 +97,7 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
                       Annotations& annotations) {
   assertx(callSK.op() == Op::FCall);
   auto refuse = [&] (const char* why) {
-    return traceRefusal(callSK.func(), callee, why, annotations);
+    return traceRefusal(callSK, callee, why, annotations);
   };
 
   if (!callee) {
@@ -141,7 +146,7 @@ bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations& annotations) {
   assertx(callee);
 
   auto refuse = [&] (const char* why) {
-    return traceRefusal(callSK.func(), callee, why, annotations);
+    return traceRefusal(callSK, callee, why, annotations);
   };
 
   auto pc = callSK.pc();
@@ -183,12 +188,12 @@ bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee,
       !RuntimeOption::EvalHHIREnableGenTimeInlining ||
       RuntimeOption::EvalJitEnableRenameFunction ||
       callee->attrs() & AttrInterceptable) {
-    return traceRefusal(callSK.func(), callee, "trivial", annotations);
+    return traceRefusal(callSK, callee, "trivial", annotations);
   }
 
   // We can only inline at normal FCalls.
   if (callSK.op() != Op::FCall) {
-    return traceRefusal(callSK.func(), callee, "Not FCall", annotations);
+    return traceRefusal(callSK, callee, "Not FCall", annotations);
   }
 
   // Don't inline from resumed functions.  The inlining mechanism doesn't have
@@ -196,12 +201,12 @@ bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee,
   // the frame pointer, because in a resumed function the frame pointer points
   // into the heap instead of into the eval stack.
   if (callSK.resumeMode() != ResumeMode::None) {
-    return traceRefusal(callSK.func(), callee, "Resumed", annotations);
+    return traceRefusal(callSK, callee, "Resumed", annotations);
   }
 
   // TODO(#4238160): Inlining into pseudomain callsites is still buggy.
   if (callSK.func()->isPseudoMain()) {
-    return traceRefusal(callSK.func(), callee, "PseudoMain", annotations);
+    return traceRefusal(callSK, callee, "PseudoMain", annotations);
   }
 
   if (!isCalleeInlinable(callSK, callee, annotations) ||
@@ -504,7 +509,7 @@ bool InliningDecider::shouldInline(SrcKey callerSk,
   // Tracing return lambdas.
   auto refuse = [&] (const char* why) {
     FTRACE(2, "shouldInline: rejecting callee region: {}", show(region));
-    return traceRefusal(m_topFunc, callee, why, annotations);
+    return traceRefusal(callerSk, callee, why, annotations);
   };
 
   auto accept = [&, this] (const char* kind) {

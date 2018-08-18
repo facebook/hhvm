@@ -91,11 +91,7 @@ let range_test_suite =
     assert_formatting
       ~src:"$x = f($a,'foo\nbar');"
       ~indent:1
-      ~exp:("  $x = f(\n"
-          ^ "    $a,\n"
-          ^ "    'foo\n"
-          ^ "bar',\n"
-          ^ "  );\n")
+      ~exp:("  $x = f($a, 'foo\nbar');\n")
   ]
 
 let _ =

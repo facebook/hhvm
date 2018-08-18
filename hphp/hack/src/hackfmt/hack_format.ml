@@ -2702,42 +2702,81 @@ and transform_argish env
       end
     | _ -> allow_trailing
   in
-  (* When there is only one argument, with no surrounding whitespace in the
-   * original source, allow that style to be preserved even when there are
-   * line breaks within the argument (normally these would force the splits
-   * around the argument to break). *)
+  (* When the last argument breaks across multiple lines, we want to allow the
+     arg list rule to stay unbroken even though the last argument contains
+     splits that may be broken on.
+
+     For example:
+
+     // We do not want to break f's rule even though its child splits:
+     f(vec[
+       $foo, // single-line comment forces the vec's rule to split
+       $bar,
+     ]);
+
+     // We do not want to break map's rule even though the lambda has splits:
+     map($vec, $element ==> {
+       // ...
+     });
+   *)
+  let looks_bad_in_non_parental_braces item =
+    let item =
+      match Syntax.syntax item with
+      | Syntax.ListItem { list_item; _ } -> list_item
+      | _ -> failwith "Expected ListItem"
+    in
+    match Syntax.syntax item with
+    | Syntax.(LambdaExpression
+        { lambda_body = { syntax = CompoundStatement _; _ }; _ }) ->
+      false
+    | Syntax.FunctionCallExpression { function_call_receiver; _ } ->
+      Syntax.is_member_selection_expression function_call_receiver
+    | Syntax.ConditionalExpression _
+    | Syntax.BinaryExpression _
+    | Syntax.MemberSelectionExpression _
+    | Syntax.FieldSpecifier _
+    | Syntax.FieldInitializer _
+    | Syntax.ElementInitializer _
+    | Syntax.LambdaExpression _
+      -> true
+    | _ -> false
+  in
   let split_when_children_split =
-    match spaces, Syntax.syntax arg_list with
-    | false, Syntax.SyntaxList [x] ->
+    if spaces then true else
+    match Syntax.syntax arg_list with
+    | Syntax.SyntaxList [] -> true
+    | Syntax.SyntaxList [x] ->
       let has_surrounding_whitespace =
         not (
           List.is_empty (Syntax.trailing_trivia left_p) &&
-          List.is_empty (Syntax.trailing_trivia x)
+          List.is_empty (Syntax.trailing_trivia arg_list)
         )
       in
-      let item =
-        match Syntax.syntax x with
-        | Syntax.ListItem { list_item; _ } -> list_item
-        | _ -> failwith "Expected ListItem"
+      if has_surrounding_whitespace
+      then true
+      else looks_bad_in_non_parental_braces x
+    | Syntax.SyntaxList items ->
+      let last = List.last_exn items in
+      let has_surrounding_whitespace =
+        not (
+          List.is_empty (Syntax.leading_trivia last) &&
+          List.is_empty (Syntax.trailing_trivia last)
+        )
       in
-      (* Blacklist constructs which look ugly when we try to preserve the
-       * lack-of-whitespace style. *)
-      (match Syntax.syntax item with
-      | Syntax.(LambdaExpression
-          { lambda_body = { syntax = CompoundStatement _; _ }; _ }) ->
-        has_surrounding_whitespace
-      | Syntax.FunctionCallExpression { function_call_receiver; _ } ->
-        Syntax.is_member_selection_expression function_call_receiver ||
-          has_surrounding_whitespace
-      | Syntax.ConditionalExpression _
-      | Syntax.BinaryExpression _
-      | Syntax.MemberSelectionExpression _
-      | Syntax.FieldSpecifier _
-      | Syntax.FieldInitializer _
-      | Syntax.ElementInitializer _
-      | Syntax.LambdaExpression _
-        -> true
-      | _ -> has_surrounding_whitespace
+      if has_surrounding_whitespace then true else
+      (* When there are multiple arguments, opt into this behavior only when we
+         have no splits in any of the arguments except the last. *)
+      (match List.rev items with
+      | [] -> assert false
+      | last :: rest ->
+        let prev_args_may_split =
+          rest
+          |> List.map ~f:(t env)
+          |> List.exists ~f:has_split
+        in
+        if prev_args_may_split
+        then true
+        else looks_bad_in_non_parental_braces last
       )
     | _ -> true
   in

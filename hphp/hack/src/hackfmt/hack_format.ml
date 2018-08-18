@@ -1901,7 +1901,9 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
                 let v =
                   match Syntax.syntax node with
                   | Syntax.Token _ ->
-                    if has_invisibles leading then Split else Nothing
+                    if has_newline leading then Newline
+                    else if has_whitespace leading then Space
+                    else Nothing
                   | _ -> Split in
                 Concat [v; transform_xhp_leading_trivia leading]
               end;

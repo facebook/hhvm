@@ -2586,35 +2586,55 @@ and handle_possible_chaining env (obj, arrow1, member1) argish =
         ~f:(fun (lp, args, rp) -> transform_argish env lp args rp);
     ]
   in
+  let obj_has_trailing_newline = node_has_trailing_newline obj in
   match chain_list with
   | hd :: [] ->
     Concat [
       Span [t env obj];
-      if node_has_trailing_newline obj
+      if obj_has_trailing_newline
       then Newline
       else SplitWith Cost.High;
       Nest [transform_chain hd];
     ]
   | hd :: tl ->
+    let transformed_hd = transform_chain hd in
+    let tl = List.map tl transform_chain in
     let rule_type = match hd with
       | (_, trailing, None)
       | (_, _, Some (_, _, trailing)) ->
         if node_has_trailing_newline trailing
         then Rule.Always
-        else Rule.Parental
+        else if obj_has_trailing_newline
+        then Rule.Parental
+        else
+          (* If we have a chain where only the final item contains internal
+             splits, use a Simple rule instead of a Parental one.
+             This allows us to preserve this style:
+
+             return $this->fooGenerator->generateFoo(
+               $argument_one,
+               $argument_two,
+               $argument_three,
+             );
+          *)
+          let rev_tl_except_last = List.rev tl |> List.tl_exn in
+          let items_except_last = transformed_hd :: rev_tl_except_last in
+          if List.exists items_except_last has_split
+          then Rule.Parental
+          else Rule.Simple Cost.NoCost
     in
     Span [
       WithLazyRule (rule_type,
         Concat [
           t env obj;
-          if node_has_trailing_newline obj
+          if obj_has_trailing_newline
           then Newline
           else SplitWith Cost.Base;
         ],
         Concat [
           (* This needs to be nested separately due to the above SplitWith *)
-          Nest [transform_chain hd];
-          Nest (List.map tl ~f:(fun x -> Concat [Split; transform_chain x]))
+          Nest [transformed_hd];
+          Nest (List.map tl ~f:(fun x -> Concat [Split; x]))
         ])
     ]
   | _ -> failwith "Expected a chain of at least length 1"

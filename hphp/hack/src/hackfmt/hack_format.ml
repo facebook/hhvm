@@ -2739,28 +2739,6 @@ and transform_argish env
        // ...
      });
    *)
-  let looks_bad_in_non_parental_braces item =
-    let item =
-      match Syntax.syntax item with
-      | Syntax.ListItem { list_item; _ } -> list_item
-      | _ -> failwith "Expected ListItem"
-    in
-    match Syntax.syntax item with
-    | Syntax.(LambdaExpression
-        { lambda_body = { syntax = CompoundStatement _; _ }; _ }) ->
-      false
-    | Syntax.FunctionCallExpression { function_call_receiver; _ } ->
-      Syntax.is_member_selection_expression function_call_receiver
-    | Syntax.ConditionalExpression _
-    | Syntax.BinaryExpression _
-    | Syntax.MemberSelectionExpression _
-    | Syntax.FieldSpecifier _
-    | Syntax.FieldInitializer _
-    | Syntax.ElementInitializer _
-    | Syntax.LambdaExpression _
-      -> true
-    | _ -> false
-  in
   let split_when_children_split =
     if spaces then true else
     match Syntax.syntax arg_list with
@@ -2808,6 +2786,46 @@ and transform_argish env
     right_p
     [transform_arg_list env ~allow_trailing arg_list]
 
+(** Sometimes, we want to use a non-Parental rule for function call argument
+    lists and other similar constructs when not breaking around the argument
+    list looks reasonable. For example:
+
+      f($x ==> {
+        return do_something_with($x);
+      });
+
+    Some constructs don't look so great when we do this:
+
+      f($x ==>
+        do_something_with($x));
+
+      f($x
+        ? $y
+        : $z);
+
+    This function blacklists those constructs. *)
+and looks_bad_in_non_parental_braces item =
+  let item =
+    match Syntax.syntax item with
+    | Syntax.ListItem { list_item; _ } -> list_item
+    | _ -> item
+  in
+  match Syntax.syntax item with
+  | Syntax.(LambdaExpression
+      { lambda_body = { syntax = CompoundStatement _; _ }; _ }) ->
+    false
+  | Syntax.FunctionCallExpression { function_call_receiver; _ } ->
+    Syntax.is_member_selection_expression function_call_receiver
+  | Syntax.ConditionalExpression _
+  | Syntax.BinaryExpression _
+  | Syntax.MemberSelectionExpression _
+  | Syntax.FieldSpecifier _
+  | Syntax.FieldInitializer _
+  | Syntax.ElementInitializer _
+  | Syntax.LambdaExpression _
+    -> true
+  | _ -> false
+
 and transform_braced_item env left_p item right_p =
   let has_no_surrounding_trivia =
     List.is_empty (Syntax.trailing_trivia left_p) &&
@@ -2815,12 +2833,9 @@ and transform_braced_item env left_p item right_p =
     List.is_empty (Syntax.trailing_trivia item) &&
     List.is_empty (Syntax.leading_trivia right_p)
   in
-  match Syntax.syntax item with
-  | Syntax.LiteralExpression _
-  | Syntax.VariableExpression _ when has_no_surrounding_trivia ->
-    Concat (List.map [left_p; item; right_p] (t env))
-  | _ ->
-    delimited_nest env left_p right_p [t env item]
+  if has_no_surrounding_trivia && not (looks_bad_in_non_parental_braces item)
+  then Concat (List.map [left_p; item; right_p] (t env))
+  else delimited_nest env left_p right_p [t env item]
 
 and transform_argish_item env x =
   match Syntax.syntax x with
@@ -2861,10 +2876,22 @@ and transform_trailing_comma env ~allow_trailing item comma =
   | _ -> failwith "Expected Token"
 
 and transform_braced_item_with_trailer env left_p item comma right_p =
-  delimited_nest env left_p right_p
-    (* TODO: turn allow_trailing:true when HHVM versions that don't support
-       trailing commas in all these places reach end-of-life. *)
-    [transform_trailing_comma env ~allow_trailing:false item comma]
+  let has_no_surrounding_trivia =
+    List.is_empty (Syntax.trailing_trivia left_p) &&
+    List.is_empty (Syntax.leading_trivia item) &&
+    List.is_empty (Syntax.trailing_trivia item) &&
+    List.is_empty (Syntax.leading_trivia comma) &&
+    List.is_empty (Syntax.trailing_trivia comma) &&
+    List.is_empty (Syntax.leading_trivia right_p)
+  in
+  (* TODO: turn allow_trailing:true when HHVM versions that don't support
+     trailing commas in all these places reach end-of-life. *)
+  let item_and_comma =
+    transform_trailing_comma env ~allow_trailing:false item comma
+  in
+  if has_no_surrounding_trivia && not (looks_bad_in_non_parental_braces item)
+  then Concat [t env left_p; item_and_comma; t env right_p]
+  else delimited_nest env left_p right_p [item_and_comma]
 
 and transform_arg_list env ?(allow_trailing=true) items =
   handle_possible_list env items

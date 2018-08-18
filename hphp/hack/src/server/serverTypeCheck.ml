@@ -834,7 +834,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     begin if
       SharedMem.hh_log_level() > 0 ||
       GlobalOptions.tco_language_feature_logging env.tcopt
-    then Measure.print_stats () end;
+    then Measure.print_stats (); Measure.print_distributions () end;
     ServerDebug.info genv "incremental_done";
 
     let new_env = CheckKind.get_env_after_typing

@@ -27,6 +27,7 @@ namespace HPHP {
 struct HeapObject;
 struct ArrayData;
 struct ObjectData;
+struct TypedValue;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -107,6 +108,10 @@ private:
                     DataFeature& features,
                     PointerSet& visited) const;
 
+  bool visitTypedValue(TypedValue rval,
+                       DataFeature& features,
+                       PointerSet& visited,
+                       PointerMap* seenArrs = nullptr) const;
   bool markVisited(HeapObject* ptr,
                    DataFeature& features,
                    PointerSet& visited) const;

@@ -16,10 +16,11 @@
 #include "hphp/runtime/base/data-walker.h"
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/object-iterator.h"
+#include "hphp/runtime/ext/collections/ext_collections-pair.h"
 
 namespace HPHP {
 
@@ -46,33 +47,9 @@ void DataWalker::traverseData(ArrayData* data,
     return;
   }
 
-  auto const fn = [&] (TypedValue rval) {
-    if (isRefType(rval.m_type)) {
-      if (rval.m_data.pref->isReferenced()) {
-        if (markVisited(rval.m_data.pref, features, visited)) {
-          // Don't recurse forever; we already went down this path, and
-          // stop the walk if we've already got everything we need.
-          return canStopWalk(features);
-        }
-        // Right now consider it circular even if the referenced variant
-        // only showed up in one spot.  This could be revisted later.
-        features.isCircular = true;
-        if (canStopWalk(features)) return true;
-      }
-      rval = *rval.m_data.pref->tv();
-    }
-
-    if (rval.m_type == KindOfObject) {
-      features.hasObjectOrResource = true;
-      traverseData(rval.m_data.pobj, features, visited);
-    } else if (isArrayLikeType(rval.m_type)) {
-      traverseData(rval.m_data.parr, features, visited, seenArrs);
-    } else if (rval.m_type == KindOfResource) {
-      features.hasObjectOrResource = true;
-    }
-    return canStopWalk(features);
-  };
-  IterateV<decltype(fn), false>(data, fn);
+  IterateVNoInc(data, [&](TypedValue rval) {
+    visitTypedValue(rval, features, visited, seenArrs);
+  });
 }
 
 void DataWalker::traverseData(
@@ -83,14 +60,61 @@ void DataWalker::traverseData(
   if (markVisited(data, features, visited)) {
     return; // avoid infinite recursion
   }
-  if (!canStopWalk(features)) {
-    // Use asArray to avoid int-like string key coercion (which can hide
-    // values).
-    auto const arr = data->isCollection()
-      ? collections::asArray(data)
-      : nullptr;
-    traverseData(arr ? arr : data->toArray().get(), features, visited);
+  if (canStopWalk(features)) return;
+
+  if (data->isCollection()) {
+    auto const arr = collections::asArray(data);
+    if (arr) {
+      traverseData(arr, features, visited);
+      return;
+    }
+    assertx(data->collectionType() == CollectionType::Pair);
+    auto const pair = static_cast<c_Pair*>(data);
+    visitTypedValue(*pair->get(0), features, visited);
+    visitTypedValue(*pair->get(1), features, visited);
+    return;
   }
+
+  IteratePropMemOrderNoInc(
+    data,
+    [&](Slot slot, const Class::Prop& prop, tv_rval val) {
+      visitTypedValue(val.tv(), features, visited);
+    },
+    [&](Cell key_tv, TypedValue val) {
+      visitTypedValue(val, features, visited);
+    }
+  );
+}
+
+ALWAYS_INLINE
+bool DataWalker::visitTypedValue(TypedValue rval,
+                                 DataFeature& features,
+                                 PointerSet& visited,
+                                 PointerMap* seenArrs) const {
+  if (isRefType(rval.m_type)) {
+    if (rval.m_data.pref->isReferenced()) {
+      if (markVisited(rval.m_data.pref, features, visited)) {
+        // Don't recurse forever; we already went down this path, and
+        // stop the walk if we've already got everything we need.
+        return canStopWalk(features);
+      }
+      // Right now consider it circular even if the referenced variant
+      // only showed up in one spot.  This could be revisted later.
+      features.isCircular = true;
+      if (canStopWalk(features)) return true;
+    }
+    rval = *rval.m_data.pref->tv();
+  }
+
+  if (rval.m_type == KindOfObject) {
+    features.hasObjectOrResource = true;
+    traverseData(rval.m_data.pobj, features, visited);
+  } else if (isArrayLikeType(rval.m_type)) {
+    traverseData(rval.m_data.parr, features, visited, seenArrs);
+  } else if (rval.m_type == KindOfResource) {
+    features.hasObjectOrResource = true;
+  }
+  return canStopWalk(features);
 }
 
 inline bool DataWalker::markVisited(

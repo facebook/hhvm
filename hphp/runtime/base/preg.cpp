@@ -1085,6 +1085,7 @@ static Variant preg_match_impl(const StringData* pattern,
   const pcre_cache_entry* pce = accessor.get();
 
   const bool hackArrOutput = flags & PREG_FB_HACK_ARRAYS;
+  const bool includeNonMatchingCaptures = flags & PREG_FB__PRIVATE__HSL_IMPL;
 
   pcre_extra extra;
   init_local_extra(&extra, pce->extra);
@@ -1251,6 +1252,20 @@ static Variant preg_match_impl(const StringData* pattern,
                 result_set.append(value);
               }
             }
+            if (includeNonMatchingCaptures && count < num_subpats) {
+              for (; i < num_subpats; i++) {
+                auto const lval = match_sets.lvalAt(i);
+                // We don't want to set the numeric key if there is a string
+                // key, but we have do it usually to make migration from
+                // preg_match() practical; given that existing code gets
+                // nothing for unmatched captures, we don't need to set both
+                // here.
+                if (subpat_names[i]) {
+                  result_set.set(String(subpat_names[i]), empty_string());
+                }
+                result_set.append(empty_string());
+              }
+            }
             /* And add it to the output array */
             forceToOutput(*subpats, hackArrOutput).append(
               std::move(result_set)
@@ -1276,6 +1291,16 @@ static Variant preg_match_impl(const StringData* pattern,
                 );
               }
               forceToOutput(*subpats, hackArrOutput).append(value);
+            }
+          }
+          if (includeNonMatchingCaptures && count < num_subpats) {
+            for (; i < num_subpats; i++) {
+              if (subpat_names[i]) {
+                forceToOutput(*subpats, hackArrOutput).set(
+                  String(subpat_names[i]), empty_string()
+                );
+              }
+              forceToOutput(*subpats, hackArrOutput).append(empty_string());
             }
           }
         }

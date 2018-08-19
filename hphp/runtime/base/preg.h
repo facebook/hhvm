@@ -30,6 +30,7 @@
 #define PREG_SET_ORDER              2
 #define PREG_OFFSET_CAPTURE         (1<<8)
 #define PREG_FB_HACK_ARRAYS         (1<<30)
+#define PREG_FB__PRIVATE__HSL_IMPL  (1<<29)
 
 #define PREG_SPLIT_NO_EMPTY         (1<<0)
 #define PREG_SPLIT_DELIM_CAPTURE    (1<<1)

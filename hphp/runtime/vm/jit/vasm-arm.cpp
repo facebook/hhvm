@@ -485,6 +485,8 @@ void Vgen::handleLiterals(Venv& env) {
     patchAddressActual->SetImmPCOffsetTarget(
       Instruction::Cast(literalAddress),
       Instruction::Cast(pl.patchAddress));
+    auto const pAA = reinterpret_cast<TCA>(patchAddressActual);
+    cb->syncDirect(pAA, pAA + kInstructionSize);
   }
 
   for (auto const& h : headers) {
@@ -495,7 +497,9 @@ void Vgen::handleLiterals(Venv& env) {
     assertx(env.fallThrus.count(h.second));
     // Write the jmp.
     Assembler a { cb };
+    auto const begin = cb.frontier();
     a.b(poolSize >> kInstructionSizeLog2);
+    cb.sync(begin);
   }
   env.meta.literalsToPool.swap(notEmitted);
 }

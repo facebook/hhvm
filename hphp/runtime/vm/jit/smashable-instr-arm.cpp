@@ -334,8 +334,10 @@ bool optimizeSmashedCall(TCA inst) {
     CodeBlock callBlock;
     callBlock.init(inst, 8 /* bytes */, "optimizeSmashedCall");
     MacroAssembler a{callBlock};
+    auto const the_start = callBlock.frontier();
     a.nop();
     a.bl(offset >> kInstructionSizeLog2);
+    callBlock.sync(the_start);
     return true;
   }
 
@@ -356,8 +358,10 @@ bool optimizeSmashedJmp(TCA inst) {
     CodeBlock callBlock;
     callBlock.init(inst, 8 /* bytes */, "optimizeSmashedJmp");
     MacroAssembler a{callBlock};
+    auto const the_start = callBlock.frontier();
     a.nop();
     a.b(offset >> kInstructionSizeLog2);
+    callBlock.sync(the_start);
     return true;
   }
 
@@ -377,11 +381,13 @@ bool optimizeSmashedJcc(TCA inst) {
     CodeBlock callBlock;
     callBlock.init(inst, 12 /* bytes */, "optimizeSmashedJcc");
     MacroAssembler a{callBlock};
+    auto const the_start = callBlock.frontier();
     auto const cond = static_cast<Condition>(b->ConditionBranch());
     auto const invCond = InvertCondition(cond);
     a.b(offset >> kInstructionSizeLog2, invCond);
     a.nop();
     a.nop();
+    callBlock.sync(the_start);
     return true;
   }
 

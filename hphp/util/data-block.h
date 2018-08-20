@@ -284,7 +284,7 @@ struct DataBlock {
   }
 
   static void syncDirect(Address begin,  Address end) {
-    if (arch() == Arch::ARM) {
+    if (arch() == Arch::ARM && begin < end) {
       __builtin___clear_cache(reinterpret_cast<char*>(begin),
                               reinterpret_cast<char*>(end));
 

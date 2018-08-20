@@ -1609,14 +1609,34 @@ and emit_inline_hhas s =
   | None ->
     failwith @@ "impossible: cannot find parsed inline hhas for '" ^ s ^ "'"
 
+and get_reified_var env is_fun name =
+  if is_fun then
+    instr_cgetl @@ Local.Named (SU.Reified.mangle_reified_param name)
+  else
+    let p = Pos.none in
+    let expr = p, A.Lvar (p, "$this") in
+    let prop = p, A.Id (p, SU.Reified.mangle_reified_param ~nodollar:true name) in
+    fst (emit_obj_get ~need_ref:false env p QueryOp.CGet expr prop A.OG_nullthrows)
+
 and emit_reified_type env name =
   let scope = Emit_env.get_scope env in
-  let current_targs = List.filter_map (Ast_scope.Scope.get_fun_tparams scope)
-    ~f:(function (_, (_, id), _, true) -> Some id | _ -> None) in
-  if List.exists ~f:(fun id -> id = name) current_targs then
-      instr_cgetl @@ Local.Named (SU.Reified.mangle_reified_param name)
+  let f tparam acc =
+    match tparam with
+    | _, (_, id), _, true -> SSet.add id acc
+    | _ -> acc
+  in
+  let current_fun_targs =
+    List.fold_right (Ast_scope.Scope.get_fun_tparams scope) ~init:SSet.empty ~f
+  in
+  let current_class_targs =
+    List.fold_right (Ast_scope.Scope.get_class_tparams scope) ~init:SSet.empty ~f
+  in
+  if SSet.mem name current_fun_targs then
+    get_reified_var env true name
+  else if SSet.mem name current_class_targs then
+    get_reified_var env false name
   else
-    failwith "invalid reified type"
+    Emit_fatal.raise_fatal_runtime Pos.none "Invalid reified param"
 
 and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
   match expr_ with
@@ -2911,23 +2931,39 @@ and emit_reified_arg env hint =
   then Emit_fatal.raise_fatal_parse Pos.none "Reified generics are not allowed"
   else
   let scope = Emit_env.get_scope env in
-  let current_targs = List.filter_map (Ast_scope.Scope.get_fun_tparams scope)
-    ~f:(function (_, (_, id), _, true) -> Some id | _ -> None) in
+  let f is_fun tparam acc =
+    match tparam with
+    | _, (_, id), _, true -> SMap.add id is_fun acc
+    | _ -> acc
+  in
+  let current_targs =
+    List.fold_right (Ast_scope.Scope.get_fun_tparams scope)
+      ~init:SMap.empty ~f:(f true)
+  in
+  let current_targs =
+    List.fold_right (Ast_scope.Scope.get_class_tparams scope)
+      ~init:current_targs ~f:(f false)
+  in
+  let get_reified_var_helper name =
+    match SMap.get name current_targs with
+    | Some is_fun ->
+      (* This is already resolved by the previous caller *)
+      get_reified_var env is_fun name
+    | _ -> failwith "impossible, already checked for membership"
+  in
   let acc = (0, SMap.empty) in
   let visitor = object(_)
     inherit [int * int SMap.t] Ast_visitor.ast_visitor
     method! on_id (i, map as acc) id =
       let name = snd id in
-      if not (SMap.mem name map) &&
-        List.exists ~f:(fun id -> id = name) current_targs then
-        (i + 1, SMap.add name i map) else acc
+      match SMap.get name current_targs with
+      | Some _ when not (SMap.mem name map) -> (i + 1, SMap.add name i map)
+      | _ -> acc
     end in
   let count, targ_map = visitor#on_hint acc hint in
   match snd hint with
-  | A.Happly ((_, name), [])
-      when List.exists ~f:(fun id -> id = name) current_targs ->
-        (* This is already resolved by the previous caller *)
-        instr_cgetl @@ Local.Named (SU.Reified.mangle_reified_param name)
+  | A.Happly ((_, name), []) when SMap.mem name current_targs ->
+    get_reified_var_helper name
   | _ ->
     let namespace = Emit_env.get_namespace env in
     let ts = Emit_type_constant.hint_to_type_constant
@@ -2940,8 +2976,7 @@ and emit_reified_arg env hint =
       let values =
         SMap.bindings targ_map
         |> List.sort ~compare:(fun (_, x) (_, y) -> Pervasives.compare x y)
-        |> List.map ~f:(fun (v, _) ->
-            instr_cgetl @@ Local.Named (SU.Reified.mangle_reified_param v))
+        |> List.map ~f:(fun (v, _) -> get_reified_var_helper v)
       in
       gather [
         gather values;

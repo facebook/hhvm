@@ -242,5 +242,6 @@ end
 
 (* Reified param mangling *)
 module Reified = struct
-  let mangle_reified_param s = "$__reified$" ^ s
+  let mangle_reified_param ?(nodollar = false) s =
+    (if nodollar then "" else "$") ^ "__reified$" ^ s
 end

@@ -1135,10 +1135,80 @@ and convert_fun env st fd =
     convert_user_attributes env st fd.f_user_attributes in
   st, { fd with f_body; f_params; f_user_attributes }
 
+and add_reified_class_params cd body =
+  let reified_params = List.filter_map cd.c_tparams
+      ~f:(function (_, (_, name), _, true) -> Some name | _ -> None) in
+  if List.length reified_params = 0 then body else begin
+  let p = Pos.none in
+  let hint = Some (p, Happly ((p, "darray"), [])) in
+  let body = body @ List.map reified_params ~f:(fun name -> ClassVars
+    { cv_kinds = [Private]
+    ; cv_hint = hint
+    ; cv_is_promoted_variadic = false
+    ; cv_names =
+      [p, (p, SU.Reified.mangle_reified_param ~nodollar:true name), None]
+    ; cv_doc_comment = None
+    ; cv_user_attributes = []
+    }) in
+  let new_params, new_body =
+    List.unzip @@ List.map reified_params ~f:(fun name ->
+      let mangled_name = SU.Reified.mangle_reified_param name in
+      { param_hint = hint
+      ; param_is_reference = false
+      ; param_is_variadic = false
+      ; param_id = (p, mangled_name)
+      ; param_expr = None
+      ; param_modifier = None
+      ; param_callconv = None
+      ; param_user_attributes = []
+      },
+      (* $this->__reifiedParam = $__reifiedParam *)
+      (p, Expr
+        (p, Binop
+          ( Eq None,
+            (p, Obj_get (
+              (p, Lvar (p, "$this")),
+              (p, (Id (p, SU.Reified.mangle_reified_param ~nodollar:true name))),
+              OG_nullthrows)),
+            (p, Lvar (p, mangled_name))
+          )
+        )
+      )
+      ) in
+  let has_construct = ref false in
+  let body = List.map body ~f:begin fun e ->
+    match e with
+    | Method md when
+      String.lowercase @@ snd md.m_name = SN.Members.__construct ->
+      has_construct := true;
+      Method { md with m_params = new_params @ md.m_params;
+                       m_body = new_body @ md.m_body }
+    | _ -> e
+  end in
+  let body = if !has_construct then body else begin
+    Method
+    { m_kind = [Public]
+    ; m_tparams = []
+    ; m_constrs = []
+    ; m_name = (p, SN.Members.__construct)
+    ; m_params = new_params
+    ; m_body = new_body
+    ; m_user_attributes = []
+    ; m_ret = None
+    ; m_ret_by_ref = false
+    ; m_fun_kind = FSync
+    ; m_span = p
+    ; m_doc_comment = None
+    ; m_external = false
+    } :: body
+  end in
+  body end
+
 and convert_class env st cd =
   let env = env_with_class env cd in
   let st = reset_function_counts st in
   let st, c_body = List.map_env st cd.c_body (convert_class_elt env) in
+  let c_body = add_reified_class_params cd c_body in
   let st, c_user_attributes =
     convert_user_attributes env st cd.c_user_attributes in
   st, { cd with c_body = c_body; c_user_attributes }

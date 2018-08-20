@@ -47,6 +47,8 @@ struct TSEnv {
   bool partial{};
   // Initial value false since unless proven there are no invalid types
   bool invalidType{};
+  // Vector of typestructures that need to be put in for reified generics
+  const req::vector<Array>* tsList;
 };
 
 /*
@@ -77,7 +79,8 @@ const StaticString
   s_callable("callable"),
   s_alias("alias"),
   s_typevars("typevars"),
-  s_typevar_types("typevar_types")
+  s_typevar_types("typevar_types"),
+  s_id("id")
 ;
 
 const std::string
@@ -348,6 +351,11 @@ std::string fullName(const Array& arr, bool forDisplay) {
       break;
     case TypeStructure::Kind::T_xhp:
       xhpTypeName(arr, name);
+      break;
+    case TypeStructure::Kind::T_reifiedtype:
+      assertx(arr.exists(s_id));
+      name += "reified ";
+      name += arr[s_id].toCStrRef().data();
       break;
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
@@ -774,6 +782,13 @@ Array resolveTS(TSEnv& env,
       auto const name = arr[s_name].toCStrRef();
       return generics.exists(name) ? generics[name].toDArray() : arr.toDArray();
     }
+    case TypeStructure::Kind::T_reifiedtype: {
+      assertx(env.tsList != nullptr);
+      assertx(arr.exists(s_id));
+      auto id = arr[s_id].toInt64Val();
+      assertx(id < env.tsList->size());
+      return env.tsList->at(id);
+    }
     case TypeStructure::Kind::T_xhp:
     default:
       return arr.toDArray();
@@ -840,12 +855,14 @@ Array TypeStructure::resolve(const String& aliasName,
 Array TypeStructure::resolve(const Array& ts,
                              const Class* typeCnsCls,
                              const Class* declCls,
+                             const req::vector<Array>& tsList,
                              bool& persistent) {
   // Use a bogus constant, because the type structure is anonymous.
   Class::Const typeCns;
   typeCns.name = nullptr;
   typeCns.cls = declCls;
   TSEnv env;
+  env.tsList = &tsList;
   auto resolved = resolveTS(env, ts, typeCns, typeCnsCls, Array());
   persistent = env.persistent;
   return resolved;

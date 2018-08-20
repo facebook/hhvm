@@ -26,7 +26,7 @@ let emit_main is_evaled defs =
       ~return_value:(if is_evaled then instr_null else instr_int 1)
       ~default_dropthrough:None
       ~doc_comment:None
-      [] None defs
+      [] [] None defs
   in
     body
 

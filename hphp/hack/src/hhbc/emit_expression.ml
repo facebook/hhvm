@@ -261,6 +261,9 @@ let is_incdec op =
 let is_global_namespace env =
   Namespace_env.is_global_namespace (Emit_env.get_namespace env)
 
+let enable_intrinsics_extension () =
+  Hhbc_options.enable_intrinsics_extension !Hhbc_options.compiler_options
+
 let is_special_function env e args =
   match snd e with
   | A.Id (_, s) ->
@@ -270,6 +273,8 @@ let is_special_function env e args =
     | "isset" -> n > 0
     | "__hhas_adata"
     | "empty" -> n = 1
+    | "__hhvm_intrinsics\\get_reified_type"
+      when enable_intrinsics_extension () -> n = 1
     | "define" when is_global_namespace env ->
       begin match args with
       | [_, A.String _; _] -> true
@@ -299,6 +304,9 @@ let hack_arr_dv_arrs () =
 
 let php7_ltr_assign () =
   Hhbc_options.php7_ltr_assign !Hhbc_options.compiler_options
+
+let reified_generics () =
+  Hhbc_options.enable_reified_generics !Hhbc_options.compiler_options
 
 (* Strict binary operations; assumes that operands are already on stack *)
 let from_binop op =
@@ -686,7 +694,7 @@ and emit_as env pos e h is_nullable =
   end else begin
     let namespace = Emit_env.get_namespace env in
     let tv = Emit_type_constant.hint_to_type_constant
-      ~tparams:[] ~namespace h in
+      ~tparams:[] ~namespace ~targ_map:SMap.empty h in
     gather [
       emit_expr ~need_ref:false env e;
       instr_astypestruct @@ Emit_adata.get_array_identifier tv
@@ -695,7 +703,7 @@ and emit_as env pos e h is_nullable =
 and emit_is env _pos h =
   let namespace = Emit_env.get_namespace env in
   let ts = Emit_type_constant.hint_to_type_constant
-    ~tparams:[] ~namespace h in
+    ~tparams:[] ~namespace ~targ_map:SMap.empty h in
   instr_istypestruct @@ Emit_adata.get_array_identifier ts
 
 and emit_cast env pos hint expr =
@@ -770,8 +778,11 @@ and emit_conditional_expression env pos etest etrue efalse =
       instr_label end_label;
     ]
 
-and emit_new env pos expr args uargs =
-  let nargs = List.length args + List.length uargs in
+and emit_new env pos expr targs args uargs =
+  let reified_targs = List.filter_map targs
+    ~f:(function (_, false) -> None | (h, true) -> Some h) in
+  let nargs =
+    List.length reified_targs + List.length args + List.length uargs in
   let cexpr = expr_to_class_expr ~resolve_self:true
     (Emit_env.get_scope env) expr in
   match cexpr with
@@ -783,35 +794,35 @@ and emit_new env pos expr args uargs =
     gather [
       emit_pos pos;
       instr_fpushctord nargs fq_id;
-      emit_args_and_call env pos args uargs;
+      emit_args_and_call env pos reified_targs args uargs;
       instr_popr
       ]
   | Class_static ->
     gather [
       emit_pos pos;
       instr_fpushctors nargs SpecialClsRef.Static;
-      emit_args_and_call env pos args uargs;
+      emit_args_and_call env pos reified_targs args uargs;
       instr_popr
       ]
   | Class_self ->
     gather [
       emit_pos pos;
       instr_fpushctors nargs SpecialClsRef.Self;
-      emit_args_and_call env pos args uargs;
+      emit_args_and_call env pos reified_targs args uargs;
       instr_popr
       ]
   | Class_parent ->
     gather [
       emit_pos pos;
       instr_fpushctors nargs SpecialClsRef.Parent;
-      emit_args_and_call env pos args uargs;
+      emit_args_and_call env pos reified_targs args uargs;
       instr_popr
       ]
   | _ ->
     gather [
       emit_load_class_ref env pos cexpr;
       instr_fpushctor nargs 0;
-      emit_args_and_call env pos args uargs;
+      emit_args_and_call env pos reified_targs args uargs;
       instr_popr
     ]
 
@@ -820,7 +831,7 @@ and emit_new_anon env pos cls_idx args uargs =
   gather [
     instr_defcls cls_idx;
     instr_fpushctori nargs cls_idx;
-    emit_args_and_call env pos args uargs;
+    emit_args_and_call env pos [] args uargs;
     instr_popr
     ]
 
@@ -1306,7 +1317,7 @@ and emit_eval env pos e =
 and emit_xhp_obj_get_raw env pos e s nullflavor =
   let fn_name = pos, A.Obj_get (e, (pos, A.Id (pos, "getAttribute")), nullflavor) in
   let args = [pos, A.String (SU.Xhp.clean s)] in
-  fst (emit_call env pos fn_name args [])
+  fst (emit_call env pos fn_name [] args [])
 
 and emit_xhp_obj_get ~need_ref env pos e s nullflavor =
   gather [
@@ -1598,6 +1609,15 @@ and emit_inline_hhas s =
   | None ->
     failwith @@ "impossible: cannot find parsed inline hhas for '" ^ s ^ "'"
 
+and emit_reified_type env name =
+  let scope = Emit_env.get_scope env in
+  let current_targs = List.filter_map (Ast_scope.Scope.get_fun_tparams scope)
+    ~f:(function (_, (_, id), _, true) -> Some id | _ -> None) in
+  if List.exists ~f:(fun id -> id = name) current_targs then
+      instr_cgetl @@ Local.Named (SU.Reified.mangle_reified_param name)
+  else
+    failwith "invalid reified type"
+
 and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
   match expr_ with
   | A.Call ((_, A.Id (_, "__hhas_adata")), _, [ (_, A.String _) ], [])
@@ -1674,13 +1694,17 @@ and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
     when (String.lowercase s = "exit" || String.lowercase s = "die") ->
     emit_pos_then pos @@
     emit_exit env (List.hd es)
+  | A.Call ((_, A.Id (_, "__hhvm_intrinsics\\get_reified_type")), _, [ (_, A.Id (_, s)) ], [])
+    when enable_intrinsics_extension () ->
+    emit_pos_then pos @@ emit_reified_type env s
   | A.Call _
   (* execution operator is compiled as call to `shell_exec` and should
      be handled in the same way *)
   | A.Execution_operator _ ->
     emit_call_expr ?last_pos ~need_ref env expr
-  | A.New (typeexpr, _, args, uargs) ->
-    emit_box_if_necessary pos need_ref @@ emit_new env pos typeexpr args uargs
+  | A.New (typeexpr, targs, args, uargs) ->
+    emit_box_if_necessary pos need_ref @@
+      emit_new env pos typeexpr targs args uargs
   | A.NewAnonClass (args, uargs, { A.c_name = (_, cls_name); _ }) ->
     let cls_idx = int_of_string cls_name in
     emit_box_if_necessary pos need_ref @@ emit_new_anon env pos cls_idx args uargs
@@ -2882,8 +2906,55 @@ and emit_ignored_expr env ?(pop_pos = Pos.none) e =
       emit_pos_then pop_pos @@ instr_pop flavor;
     ]
 
+and emit_reified_arg env hint =
+  if not @@ reified_generics ()
+  then Emit_fatal.raise_fatal_parse Pos.none "Reified generics are not allowed"
+  else
+  let scope = Emit_env.get_scope env in
+  let current_targs = List.filter_map (Ast_scope.Scope.get_fun_tparams scope)
+    ~f:(function (_, (_, id), _, true) -> Some id | _ -> None) in
+  let acc = (0, SMap.empty) in
+  let visitor = object(_)
+    inherit [int * int SMap.t] Ast_visitor.ast_visitor
+    method! on_id (i, map as acc) id =
+      let name = snd id in
+      if not (SMap.mem name map) &&
+        List.exists ~f:(fun id -> id = name) current_targs then
+        (i + 1, SMap.add name i map) else acc
+    end in
+  let count, targ_map = visitor#on_hint acc hint in
+  match snd hint with
+  | A.Happly ((_, name), [])
+      when List.exists ~f:(fun id -> id = name) current_targs ->
+        (* This is already resolved by the previous caller *)
+        instr_cgetl @@ Local.Named (SU.Reified.mangle_reified_param name)
+  | _ ->
+    let namespace = Emit_env.get_namespace env in
+    let ts = Emit_type_constant.hint_to_type_constant
+      ~tparams:[] ~namespace ~targ_map hint in
+    let i = Emit_adata.get_array_identifier ts in
+    let ts_instr = if hack_arr_dv_arrs () then
+      instr (ILitConst (Dict i)) else instr (ILitConst (Array i)) in
+    let ts_list = if count = 0 then ts_instr else
+      (* Sort map from key 0 to count and convert each identified into cgetl *)
+      let values =
+        SMap.bindings targ_map
+        |> List.sort ~compare:(fun (_, x) (_, y) -> Pervasives.compare x y)
+        |> List.map ~f:(fun (v, _) ->
+            instr_cgetl @@ Local.Named (SU.Reified.mangle_reified_param v))
+      in
+      gather [
+        gather values;
+        ts_instr;
+      ]
+    in
+    gather [
+      ts_list;
+      instr_combine_and_resolve_type_struct (count + 1);
+    ]
+
 (* Emit code to construct the argument frame and then make the call *)
-and emit_args_and_call env call_pos args uargs =
+and emit_args_and_call env call_pos reified_targs args uargs =
   let args_count = List.length args in
   let all_args = args @ uargs in
   let aliases =
@@ -2900,7 +2971,7 @@ and emit_args_and_call env call_pos args uargs =
     | [] ->
       let use_unpack = uargs <> [] in
       let num_inout = List.length inout_setters in
-      let nargs = List.length args in
+      let nargs = List.length reified_targs + List.length args in
       let instr_enforce_hint =
         if throw_on_mismatch && args <> []
         then instr_fthrow_on_ref_mismatch (List.map args expr_starts_with_ref)
@@ -3060,7 +3131,11 @@ and emit_args_and_call env call_pos args uargs =
             instr_popc;
           ]
   in
-  Local.scope @@ fun () -> aux 0 all_args []
+  Local.scope @@ fun () ->
+    gather [
+      gather @@ List.map reified_targs (emit_reified_arg env);
+      aux 0 all_args []
+    ]
 
 (* Expression that appears in an object context, such as expr->meth(...) *)
 and emit_object_expr env ?last_pos (_, expr_ as expr) =
@@ -3257,7 +3332,7 @@ and emit_special_function env pos id args uargs default =
            && String.lowercase @@ SU.strip_ns s = "func_get_args"->
     let p = Pos.none in
     Some (emit_call env pos (p,
-        A.Id (p, "\\__SystemLib\\func_slice_args")) [count] [])
+        A.Id (p, "\\__SystemLib\\func_slice_args")) [] [count] [])
 
   | "hh\\asm", [_, A.String s] ->
     Some (emit_inline_hhas s, Flavor.Cell)
@@ -3359,11 +3434,14 @@ and get_inout_arg_positions args =
           | _, A.Callconv (A.Pinout, _) -> Some i
           | _ -> None)
 
-and emit_call env pos (_, expr_ as expr) args uargs =
+and emit_call env pos (_, expr_ as expr) targs args uargs =
   (match expr_ with
     | A.Id (_, s) -> Emit_symbol_refs.add_function s
     | _ -> ());
-  let nargs = List.length args + List.length uargs in
+  let reified_targs = List.filter_map targs
+    ~f:(function (_, false) -> None | (h, true) -> Some h) in
+  let nargs =
+    List.length reified_targs + List.length args + List.length uargs in
   let inout_arg_positions = get_inout_arg_positions args in
   let num_uninit = List.length inout_arg_positions in
   let default () =
@@ -3373,7 +3451,7 @@ and emit_call env pos (_, expr_ as expr) args uargs =
       gather @@ List.init num_uninit ~f:(fun _ -> instr_nulluninit);
       emit_call_lhs
         env pos expr nargs (not (List.is_empty uargs)) inout_arg_positions;
-      emit_args_and_call env pos args uargs;
+      emit_args_and_call env pos reified_targs args uargs;
     ], flavor in
 
   match expr_, args with
@@ -3391,9 +3469,9 @@ and emit_call env pos (_, expr_ as expr) args uargs =
  *)
 and emit_flavored_expr env ?last_pos (pos, expr_ as expr) =
   match expr_ with
-  | A.Call (e, _, args, uargs)
+  | A.Call (e, tal, args, uargs)
     when not (is_special_function env e args) ->
-    let instrs, flavor = emit_call env pos e args uargs in
+    let instrs, flavor = emit_call env pos e tal args uargs in
     emit_pos_then pos instrs, flavor
   | A.Execution_operator es ->
     emit_execution_operator env pos es, Flavor.ReturnVal

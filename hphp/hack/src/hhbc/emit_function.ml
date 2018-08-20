@@ -24,6 +24,8 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
     || ast_fun.Ast.f_fun_kind = Ast_defs.FAsyncGenerator in
   let function_attributes =
     Emit_attribute.from_asts namespace ast_fun.Ast.f_user_attributes in
+  let function_attributes = Emit_attribute.add_reified_attribute
+    function_attributes ast_fun.Ast.f_tparams in
   let is_memoize = Hhas_attribute.has_memoized function_attributes in
   let is_native = Hhas_attribute.has_native function_attributes in
   let deprecation_info = Hhas_attribute.deprecation_info function_attributes in
@@ -56,6 +58,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       ~return_value:instr_null
       ~namespace
       ~doc_comment:ast_fun.Ast.f_doc_comment
+      ast_fun.Ast.f_tparams
       ast_fun.Ast.f_params
       ast_fun.Ast.f_ret
       [Ast.Stmt (Pos.none, Ast.Block ast_fun.Ast.f_body)] in

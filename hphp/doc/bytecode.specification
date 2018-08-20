@@ -1511,6 +1511,18 @@ AsTypeStruct <scalar array id>    [C]  ->  [C]
   If %1 matches the type structure of a defined type and $1 is a subtype of %1,
   this instruction pushes $1 onto the stack, otherwise it throws an exception.
 
+CombineAndResolveTypeStruct <num type structures> [C..C] -> [C]
+
+  Consumes a type structure from the stack that potentially has holes in it,
+  and (%1 - 1) amount of type structures from the stack and merges these type
+  structures into the first type structure. Merging means that the hole on the
+  first type structure denoted by the reified type kind will be replaced by the
+  type structure whose id matches the id provided at this field. If the id at
+  this field does not match that of any given type structures or the provided
+  inputs are not valid type structures, this instruction throws a fatal error.
+  After merging, this instruction resolves the final type structure and pushes
+  it onto the stack.
+
 Print    [C]  ->  [C:Int]
 
   Print (print). Outputs (string)$1 to STDOUT and pushes the integer value 1

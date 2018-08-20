@@ -944,9 +944,10 @@ ArrayData* resolveTypeStructHelper(
   const Class* calledCls,
   bool suppress
 ) {
+  req::vector<Array> tsList;
   auto const ts = ArrNR(a);
-  auto resolved =
-    resolveAndVerifyTypeStructure(ts, declaringCls, calledCls, suppress);
+  auto resolved = resolveAndVerifyTypeStructure<true>(
+                    ts, declaringCls, calledCls, tsList, suppress);
   return resolved.detach();
 }
 

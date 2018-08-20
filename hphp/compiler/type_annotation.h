@@ -248,6 +248,7 @@ private:
   unsigned m_allowsUnknownFields : 1;
   unsigned m_clsCnsShapeField : 1;
   unsigned m_optionalShapeField : 1;
+  unsigned m_reifiedtype : 1;
 };
 
 }

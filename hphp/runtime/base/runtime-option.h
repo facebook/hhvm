@@ -447,6 +447,7 @@ struct RuntimeOption {
   static bool AutoTypecheck;
   static bool AutoprimeGenerators;
   static bool EnableIsExprPrimitiveMigration;
+  static bool EnableReifiedGenerics;
   static bool EnableCoroutines;
   static bool Hacksperimental;
   static uint32_t EvalInitialStaticStringTableSize;

@@ -201,6 +201,8 @@ static const struct {
   { OpInstanceOfD, {Stack1,           Stack1,       OutPredBool     }},
   { OpIsTypeStruct,{Stack1,           Stack1,       OutBoolean      }},
   { OpAsTypeStruct,{Stack1,           Stack1,       OutSameAsInput1 }},
+  { OpCombineAndResolveTypeStruct,
+                   {StackN,           Stack1,       OutDArray       }},
   { OpSelect,      {StackTop3,        Stack1,       OutUnknown      }},
   { OpPrint,       {Stack1,           Stack1,       OutInt64        }},
   { OpClone,       {Stack1,           Stack1,       OutObject       }},
@@ -556,6 +558,7 @@ int64_t getStackPopped(PC pc) {
     case Op::NewKeysetArray:
     case Op::NewVArray:
     case Op::ConcatN:
+    case Op::CombineAndResolveTypeStruct:
     case Op::FCallBuiltin:
     case Op::CreateCl:
       return getImm(pc, 0).u_IVA;
@@ -764,6 +767,7 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
                    ni.op() == Op::NewVecArray ||
                    ni.op() == Op::NewKeysetArray ||
                    ni.op() == Op::NewVArray ||
+                   ni.op() == Op::CombineAndResolveTypeStruct ||
                    ni.op() == Op::ConcatN)
       ? ni.imm[0].u_IVA
       : ni.immVec.numStackValues();
@@ -965,6 +969,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::CnsE:
   case Op::CnsU:
   case Op::ColFromArray:
+  case Op::CombineAndResolveTypeStruct:
   case Op::ConcatN:
   case Op::Concat:
   case Op::ContCheck:

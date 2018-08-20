@@ -2488,6 +2488,7 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
+    case TypeStructure::Kind::T_reifiedtype:
       return result(TBool);
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_typevar:
@@ -2509,6 +2510,18 @@ void in(ISS& env, const bc::IsTypeStruct& op) {
 void in(ISS& env, const bc::AsTypeStruct& op) {
   assertx(op.arr1->isDictOrDArray());
   isAsTypeStructImpl<true>(env, op.arr1);
+}
+
+void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
+  // TODO(T31677864): implement real optimizations
+  assertx(op.arg1 > 0);
+  auto valid = true;
+  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr;
+  for (int i = 0; i < op.arg1; ++i) {
+    auto const t = popC(env);
+    valid &= t.subtypeOf(requiredTSType);
+  }
+  push(env, valid ? requiredTSType : TBottom);
 }
 
 namespace {

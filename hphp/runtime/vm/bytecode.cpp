@@ -2672,7 +2672,9 @@ OPTBLD_INLINE void iopInstanceOfD(Id id) {
 
 namespace {
 
-Array resolveAndVerifyTypeStructureHelper(const Array& ts, bool suppress) {
+template <bool isAsOp>
+Array resolveAndVerifyTypeStructureHelper(
+  const Array& ts, const req::vector<Array>& tsList, bool suppress) {
   Class* declaringCls = nullptr;
   Class* calledCls = nullptr;
   if (typeStructureCouldBeNonStatic(ts)) {
@@ -2684,7 +2686,8 @@ Array resolveAndVerifyTypeStructureHelper(const Array& ts, bool suppress) {
         : frame->getThis()->getVMClass();
     }
   }
-  return resolveAndVerifyTypeStructure(ts, declaringCls, calledCls, suppress);
+  return resolveAndVerifyTypeStructure<isAsOp>(
+           ts, declaringCls, calledCls, tsList, suppress);
 }
 
 } // namespace
@@ -2692,7 +2695,9 @@ Array resolveAndVerifyTypeStructureHelper(const Array& ts, bool suppress) {
 OPTBLD_INLINE void iopIsTypeStruct(const ArrayData* a) {
   auto c1 = vmStack().topC();
   assertx(c1 != nullptr);
-  auto resolved = resolveAndVerifyTypeStructureHelper(ArrNR(a), true);
+  req::vector<Array> tsList;
+  auto resolved = resolveAndVerifyTypeStructureHelper<true>(
+                    ArrNR(a), tsList, true);
   auto b = checkTypeStructureMatchesCell(resolved, *c1);
   vmStack().replaceC<KindOfBoolean>(b);
 }
@@ -2701,11 +2706,51 @@ OPTBLD_INLINE void iopAsTypeStruct(const ArrayData* a) {
   auto c1 = vmStack().topC();
   assertx(c1 != nullptr);
   std::string givenType, expectedType, errorKey;
-  auto resolved = resolveAndVerifyTypeStructureHelper(ArrNR(a), false);
+  req::vector<Array> tsList;
+  auto resolved = resolveAndVerifyTypeStructureHelper<true>(
+                    ArrNR(a), tsList, false);
   if (!checkTypeStructureMatchesCell(
         resolved, *c1, givenType, expectedType, errorKey)) {
     throwTypeStructureDoesNotMatchCellException(
       givenType, expectedType, errorKey);
+  }
+}
+
+namespace {
+
+ALWAYS_INLINE void verifyTSType(const Cell* c) {
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    if (!tvIsDict(c)) {
+      raise_error("Type structure must be a dict");
+    }
+  } else {
+    if (!tvIsArray(c)) {
+      raise_error("Type structure must be an array");
+    }
+  }
+}
+
+} // namespace
+
+OPTBLD_INLINE void iopCombineAndResolveTypeStruct(uint32_t n) {
+  assertx(n != 0);
+  auto const a = vmStack().topC();
+  verifyTSType(a);
+  req::vector<Array> tsList;
+
+  for (int i = n - 1; i > 0; --i) {
+    auto const a2 = vmStack().indC(i);
+    verifyTSType(a2);
+    tsList.emplace_back(Array::attach(a2->m_data.parr));
+  }
+  auto resolved = resolveAndVerifyTypeStructureHelper<false>(
+                    Array::attach(a->m_data.parr), tsList, false);
+  vmStack().popC(); // pop the first TS
+  vmStack().ndiscard(n-1);
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    vmStack().pushDict(resolved.detach());
+  } else {
+    vmStack().pushArray(resolved.detach());
   }
 }
 

@@ -444,6 +444,7 @@ bool write_type_alias(ProfDataSerializer& ser, const TypeAliasReq* td) {
         case TypeStructure::Kind::T_typeaccess:
         case TypeStructure::Kind::T_xhp:
         case TypeStructure::Kind::T_mixed:
+        case TypeStructure::Kind::T_reifiedtype:
           return false;
 
         case TypeStructure::Kind::T_class:

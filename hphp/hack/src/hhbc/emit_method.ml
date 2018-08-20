@@ -65,6 +65,8 @@ let from_ast_wrapper : bool -> _ ->
   let namespace = ast_class.Ast.c_namespace in
   let method_attributes =
     Emit_attribute.from_asts namespace ast_method.Ast.m_user_attributes in
+  let method_attributes = Emit_attribute.add_reified_attribute
+    method_attributes ast_method.Ast.m_tparams in
   let is_native = Hhas_attribute.has_native method_attributes in
   let is_native_opcode_impl =
     Hhas_attribute.is_native_opcode_impl method_attributes in
@@ -217,6 +219,7 @@ let from_ast_wrapper : bool -> _ ->
         ~return_value:instr_null
         ~namespace
         ~doc_comment:ast_method.Ast.m_doc_comment
+        ast_method.Ast.m_tparams
         ast_method.Ast.m_params
         ret
         [Ast.Stmt (Pos.none, Ast.Block ast_method.Ast.m_body)]

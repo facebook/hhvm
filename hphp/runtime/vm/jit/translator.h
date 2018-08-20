@@ -249,6 +249,7 @@ enum OutTypeConstraints {
   OutArray,
   OutArrayImm,
   OutVArray,
+  OutDArray,
   OutVec,
   OutVecImm,
   OutDict,

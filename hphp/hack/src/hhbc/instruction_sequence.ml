@@ -102,6 +102,8 @@ let instr_instanceofd s = instr (IOp (InstanceOfD s))
 let instr_instanceof = instr (IOp InstanceOf)
 let instr_istypestruct s = instr (IOp (IsTypeStruct s))
 let instr_astypestruct s = instr (IOp (AsTypeStruct s))
+let instr_combine_and_resolve_type_struct i =
+  instr (IOp (CombineAndResolveTypeStruct i))
 let instr_int i = instr (ILitConst (Int (Int64.of_int i)))
 let instr_int64 i = instr (ILitConst (Int i))
 let instr_int_of_string litstr =
@@ -766,7 +768,7 @@ let get_input_output_count i =
     | CastVArray | CastDArray | InstanceOfD _ | IsTypeStruct _ | AsTypeStruct _
     | Print | Clone | Hhbc_ast.Exit | Abs -> (1, 1)
     | Fatal _ -> (1, 0)
-    | ConcatN n -> (n, 1)
+    | CombineAndResolveTypeStruct n | ConcatN n -> (n, 1)
     | ResolveFunc _ -> (0, 1)
     end
   | ICall i ->

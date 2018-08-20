@@ -44,6 +44,8 @@ type t = {
   option_include_roots                    : string SMap.t;
   option_enable_perf_logging              : bool;
   option_disable_return_by_reference      : bool;
+  option_enable_reified_generics          : bool;
+  option_enable_intrinsics_extension      : bool;
 }
 
 let default = {
@@ -81,7 +83,8 @@ let default = {
   option_include_roots = SMap.empty;
   option_enable_perf_logging = false;
   option_disable_return_by_reference = false;
-
+  option_enable_reified_generics = false;
+  option_enable_intrinsics_extension = false;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -116,6 +119,8 @@ let include_search_paths o = o.option_include_search_paths
 let include_roots o = o.option_include_roots
 let enable_perf_logging o = o.option_enable_perf_logging
 let disable_return_by_reference o = o.option_disable_return_by_reference
+let enable_reified_generics o = o.option_enable_reified_generics
+let enable_intrinsics_extension o = o.option_enable_intrinsics_extension
 let to_string o =
   let dynamic_invokes =
     String.concat ~sep:", " (SSet.elements (dynamic_invoke_functions o)) in
@@ -159,6 +164,7 @@ let to_string o =
     ; Printf.sprintf "include_roots: {%s}" inc_roots
     ; Printf.sprintf "enable_perf_logging: %B" @@ enable_perf_logging o
     ; Printf.sprintf "disable_return_by_reference: %B" @@ disable_return_by_reference o
+    ; Printf.sprintf "enable_intrinsics_extension: %B" @@ enable_intrinsics_extension o
     ]
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
@@ -223,10 +229,14 @@ let set_option options name value =
     { options with option_enable_is_expr_primitive_migration = as_bool value }
   | "hack.lang.enablecoroutines" ->
     { options with option_enable_coroutines = as_bool value }
+  | "hack.lang.enablereifiedgenerics" ->
+    { options with option_enable_reified_generics = as_bool value }
   | "hack.lang.hacksperimental" ->
     { options with option_hacksperimental = as_bool value }
   | "eval.logexterncompilerperf" ->
     { options with option_enable_perf_logging = as_bool value }
+  | "eval.enableintrinsicsextension" ->
+    { options with option_enable_intrinsics_extension = as_bool value }
   | "hhvm.disable_return_by_reference" ->
     { options with option_disable_return_by_reference = as_bool value}
   | _ -> options
@@ -337,6 +347,8 @@ let value_setters = [
     fun opts v -> { opts with option_enable_coroutines = (v = 1) });
   (set_value "hhvm.hack.lang.hacksperimental" get_value_from_config_int @@
     fun opts v -> { opts with option_hacksperimental = (v = 1) });
+  (set_value "hhvm.hack.lang.enable_reified_generics" get_value_from_config_int @@
+    fun opts v -> { opts with option_enable_reified_generics = (v = 1) });
   (set_value "doc_root" get_value_from_config_string @@
     fun opts v -> { opts with option_doc_root = v });
   (set_value "hhvm.server.include_search_paths" get_value_from_config_string_array @@
@@ -345,6 +357,8 @@ let value_setters = [
      fun opts v -> { opts with option_include_roots = v });
   (set_value "hhvm.log_extern_compiler_perf" get_value_from_config_int @@
      fun opts v -> { opts with option_enable_perf_logging = (v = 1) });
+  (set_value "hhvm.enable_intrinsics_extension" get_value_from_config_int @@
+     fun opts v -> { opts with option_enable_intrinsics_extension = (v = 1) });
   (set_value "hhvm.disable_return_by_reference" get_value_from_config_int @@
      fun opts v -> { opts with option_disable_return_by_reference = (v = 1)});
 ]

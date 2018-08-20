@@ -20,7 +20,7 @@ let kind_to_type_structure ~tparams ~namespace k =
   match k with
   | Ast.Alias h | Ast.NewType h ->
     Emit_type_constant.hint_to_type_constant ~is_typedef:true ~tparams
-      ~namespace h
+      ~namespace ~targ_map:SMap.empty h
 
 let emit_typedef : Ast.typedef -> Hhas_typedef.t =
   fun ast_typedef ->

@@ -262,6 +262,7 @@ type instruct_operator =
   | InstanceOfD of class_id
   | IsTypeStruct of adata_id
   | AsTypeStruct of adata_id
+  | CombineAndResolveTypeStruct of int
   | Print
   | Clone
   | Exit

@@ -258,6 +258,7 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::InstanceOfD:
   case Op::IsTypeStruct:
   case Op::AsTypeStruct:
+  case Op::CombineAndResolveTypeStruct:
   case Op::InstanceOf:
   case Op::Print:
   case Op::Exit:

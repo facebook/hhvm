@@ -515,11 +515,14 @@ bool FuncChecker::checkImmILA(PC& pc, PC const /*instr*/) {
 
 bool FuncChecker::checkImmIVA(PC& pc, PC const instr) {
   auto const k = decode_iva(pc);
-  if (peek_op(instr) == Op::ConcatN) {
-    return k >= 2 && k <= kMaxConcatN;
+  switch (peek_op(instr)) {
+    case Op::ConcatN:
+      return k >= 2 && k <= kMaxConcatN;
+    case Op::CombineAndResolveTypeStruct:
+      return k >= 1;
+    default:
+      return true;
   }
-
-  return true;
 }
 
 bool FuncChecker::checkImmI64A(PC& pc, PC const /*instr*/) {
@@ -871,6 +874,8 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::NewKeysetArray:  // ONE(IVA),     CMANY,   ONE(CV)
   case Op::NewVArray:       // ONE(IVA),     CMANY,   ONE(CV)
   case Op::ConcatN:         // ONE(IVA),     CMANY,   ONE(CV)
+  case Op::CombineAndResolveTypeStruct:
+                            // ONE(IVA),     CMANY,   ONE(CV)
   case Op::RetM:            // ONE(IVA),     CMANY,   NA
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CV;

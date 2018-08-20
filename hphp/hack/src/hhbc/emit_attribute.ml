@@ -10,6 +10,8 @@
 open Core_kernel
 open Emit_expression
 
+module TV = Typed_value
+
 let from_attribute_base namespace attribute_id arguments =
   try
     let attribute_arguments =
@@ -51,3 +53,12 @@ let ast_any_is_memoize_lsb : A.user_attribute list -> bool =
 let ast_any_is_deprecated : A.user_attribute list -> bool =
   fun ast_attrs ->
   List.exists ast_attrs ast_is_deprecated
+
+let add_reified_attribute attrs params =
+  let reified_tparams =
+    List.filter_map params
+      ~f:(function (_, _, _, false) -> None | (_, (_, s), _, true) -> Some s) in
+  if List.length reified_tparams = 0 then attrs else
+  (Hhas_attribute.make "__Reified" @@
+    List.concat_mapi reified_tparams
+      (fun index p -> [TV.Int (Int64.of_int index); TV.String p])) :: attrs

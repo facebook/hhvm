@@ -378,6 +378,7 @@ bool checkTypeStructureMatchesCellImpl(
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_typevar:
     case TypeStructure::Kind::T_trait:
+    case TypeStructure::Kind::T_reifiedtype:
       // Not supported, should have already thrown an error
       // on these during resolution
       always_assert(false);
@@ -460,6 +461,9 @@ void errorOnIsAsExpressionInvalidTypes(const Array& ts) {
         "\"is\" and \"as\" operators cannot be used with a generic type");
     case TypeStructure::Kind::T_trait:
       raise_error("\"is\" and \"as\" operators cannot be used with a trait");
+    case TypeStructure::Kind::T_reifiedtype:
+      raise_error("\"is\" and \"as\" operators cannot be used with "
+                  "incomplete type structures");
     case TypeStructure::Kind::T_tuple: {
       assertx(ts.exists(s_elem_types));
       auto const elemsArr = ts[s_elem_types].getArrayData();
@@ -500,6 +504,7 @@ bool typeStructureCouldBeNonStatic(const Array& ts) {
     case TypeStructure::Kind::T_arraylike:
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:
+    case TypeStructure::Kind::T_reifiedtype:
       return true;
     case TypeStructure::Kind::T_void:
     case TypeStructure::Kind::T_int:
@@ -520,10 +525,12 @@ bool typeStructureCouldBeNonStatic(const Array& ts) {
   not_reached();
 }
 
+template <bool IsOrAsOp>
 Array resolveAndVerifyTypeStructure(
   const Array& ts,
   const Class* declaringCls,
   const Class* calledCls,
+  const req::vector<Array>& tsList,
   bool suppress
 ) {
   assertx(!ts.empty());
@@ -531,11 +538,12 @@ Array resolveAndVerifyTypeStructure(
   Array resolved;
   try {
     bool persistent = true;
-    resolved = TypeStructure::resolve(ts, calledCls, declaringCls, persistent);
+    resolved =
+      TypeStructure::resolve(ts, calledCls, declaringCls, tsList, persistent);
   } catch (Exception& e) {
     // Catch and throw again so we get a line number
     auto const errMsg = e.getMessage();
-    if (!suppress) raise_error(errMsg);
+    if (!suppress || !IsOrAsOp) raise_error(errMsg);
     if (RuntimeOption::EvalIsExprEnableUnresolvedWarning) raise_warning(errMsg);
     // Lets just return an unresolved array instead
     resolved = Array::CreateDArray();
@@ -546,9 +554,15 @@ Array resolveAndVerifyTypeStructure(
   }
   assertx(!resolved.empty());
   assertx(resolved.isDictOrDArray());
-  errorOnIsAsExpressionInvalidTypes(resolved);
+  if (IsOrAsOp) errorOnIsAsExpressionInvalidTypes(resolved);
   return resolved;
 }
+
+template Array resolveAndVerifyTypeStructure<true>(
+  const Array&, const Class*, const Class*, const req::vector<Array>&, bool);
+
+template Array resolveAndVerifyTypeStructure<false>(
+  const Array&, const Class*, const Class*, const req::vector<Array>&, bool);
 
 void throwTypeStructureDoesNotMatchCellException(
   std::string& givenType,

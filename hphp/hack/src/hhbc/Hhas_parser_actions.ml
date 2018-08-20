@@ -880,6 +880,8 @@ let makeunaryinst s arg = match s with
    | "AsTypeStruct" -> (match arg with
        | IAArrayno n -> IOp (AsTypeStruct n)
        | _ -> report_error "bad array lit cst")
+   | "CombineAndResolveTypeStruct" ->
+      IOp (CombineAndResolveTypeStruct (intofiarg arg))
    | "ConcatN" -> IOp (ConcatN (intofiarg arg))
 
 (* instruct_control_flow *)

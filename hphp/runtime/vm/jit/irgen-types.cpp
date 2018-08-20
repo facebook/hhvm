@@ -851,6 +851,7 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_resource:
+    case TypeStructure::Kind::T_reifiedtype:
       // TODO(T28423611): Implement these
       return false;
   }

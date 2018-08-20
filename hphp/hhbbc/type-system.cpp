@@ -2951,6 +2951,7 @@ folly::Optional<Type> type_of_type_structure(SArray ts) {
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_typevar:
     case TypeStructure::Kind::T_trait:
+    case TypeStructure::Kind::T_reifiedtype:
       return folly::none;
   }
 

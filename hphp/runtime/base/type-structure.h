@@ -18,6 +18,7 @@
 #define incl_HPHP_TYPE_STRUCTURE_H
 
 #include <cstdint>
+#include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
@@ -71,6 +72,7 @@ enum class Kind : uint8_t {
   T_unresolved = 101,
   T_typeaccess = 102,
   T_xhp = 103,
+  T_reifiedtype = 104,
 };
 
 String toString(const Array& arr);
@@ -93,6 +95,7 @@ Array resolve(const String& aliasName,
 Array resolve(const Array& ts,
               const Class* typeCnsCls,
               const Class* declCls,
+              const req::vector<Array>& tsList,
               bool& persistent);
 
 /*

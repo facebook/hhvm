@@ -124,7 +124,8 @@ let from_type_constant ~namespace ast_type_constant =
     (* TODO: Deal with the constraint *)
     let type_constant_initializer =
       (* Type constants do not take type vars hence tparams:[] *)
-      Some (Emit_type_constant.hint_to_type_constant ~tparams:[] ~namespace init)
+      Some (Emit_type_constant.hint_to_type_constant
+        ~tparams:[] ~namespace ~targ_map:SMap.empty init)
     in
     Hhas_type_constant.make type_constant_name type_constant_initializer
 

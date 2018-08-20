@@ -43,7 +43,8 @@ TypeAnnotation::TypeAnnotation(const std::string &name,
                                 m_shape(false),
                                 m_allowsUnknownFields(false),
                                 m_clsCnsShapeField(false),
-                                m_optionalShapeField(false) {
+                                m_optionalShapeField(false),
+                                m_reifiedtype(false) {
 }
 
 std::string TypeAnnotation::vanillaName() const {
@@ -312,6 +313,9 @@ TypeStructure::Kind TypeAnnotation::getKind() const {
     // TODO(7657500): in the runtime, resolve this type to a class.
     return TypeStructure::Kind::T_xhp;
   }
+  if (m_reifiedtype) {
+    return TypeStructure::Kind::T_reifiedtype;
+  }
 
   return TypeStructure::Kind::T_unresolved;
 }
@@ -332,7 +336,8 @@ const StaticString
   s_is_cls_cns("is_cls_cns"),
   s_optional_shape_field("optional_shape_field"),
   s_value("value"),
-  s_typevars("typevars")
+  s_typevars("typevars"),
+  s_id("id")
 ;
 
 /* Turns the argsList linked list of TypeAnnotation into a positioned
@@ -436,6 +441,9 @@ Array TypeAnnotation::getScalarArrayRep() const {
     if (m_typeArgs) {
       rep.add(s_generic_types, Variant(argsListToScalarArray(m_typeArgs)));
     }
+    break;
+  case TypeStructure::Kind::T_reifiedtype:
+    rep.add(s_id, Variant(m_name));
     break;
   default:
     break;

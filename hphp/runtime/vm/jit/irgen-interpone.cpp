@@ -121,6 +121,7 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutArray:       return TArr;
     case OutArrayImm:    return TArr; // Should be StaticArr/Vec/Dict: t2124292
     case OutVArray:      return RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
+    case OutDArray:      return RuntimeOption::EvalHackArrDVArrs ? TDict : TArr;
     case OutVec:         return TVec;
     case OutVecImm:      return TVec;
     case OutDict:        return TDict;
@@ -487,6 +488,8 @@ void emitContEnterDelegate(IRGS& env)         { INTERP }
 void emitYieldFromDelegate(IRGS& env, int32_t, int32_t)
                                               { INTERP }
 void emitContUnsetDelegate(IRGS& env, CudOp, int32_t)
+                                              { INTERP }
+void emitCombineAndResolveTypeStruct(IRGS& env, uint32_t)
                                               { INTERP }
 
 //////////////////////////////////////////////////////////////////////

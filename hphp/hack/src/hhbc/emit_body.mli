@@ -36,6 +36,7 @@ val emit_body:
   return_value: Instruction_sequence.t ->
   namespace: Namespace_env.env ->
   doc_comment: string option ->
+  Ast.tparam list ->
   Ast.fun_param list ->
   Ast.hint option ->
   Ast.program ->

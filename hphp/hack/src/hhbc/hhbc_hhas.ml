@@ -190,6 +190,8 @@ let string_of_operator instruction =
     | InstanceOfD id -> sep ["InstanceOfD"; string_of_class_id id]
     | IsTypeStruct id -> sep ["IsTypeStruct"; string_of_adata_id id]
     | AsTypeStruct id -> sep ["AsTypeStruct"; string_of_adata_id id]
+    | CombineAndResolveTypeStruct n ->
+      sep ["CombineAndResolveTypeStruct"; string_of_int n]
     | Print -> "Print"
     | Clone -> "Clone"
     | H.Exit -> "Exit"

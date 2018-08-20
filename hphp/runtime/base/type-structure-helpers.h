@@ -20,6 +20,7 @@
 #include <string>
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/typed-value.h"
 
 #include "hphp/runtime/vm/bytecode.h"
@@ -48,10 +49,12 @@ bool cellInstanceOf(const Cell* tv, const NamedEntity* ne);
  *`self`, and `parent` references are resolved correctly and error messages
  * are displayed correctly.
  */
+template <bool IsOrAsOp>
 Array resolveAndVerifyTypeStructure(
   const Array& ts,
   const Class* declaringCls,
   const Class* calledCls,
+  const req::vector<Array>& tsList,
   bool suppress
 );
 

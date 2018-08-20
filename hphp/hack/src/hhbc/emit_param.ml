@@ -11,6 +11,7 @@ open Core_kernel
 open Instruction_sequence
 open Ast_class_expr
 module A = Ast
+module SU = Hhbc_string_utils
 
 let hack_arr_dv_arrs () =
   Hhbc_options.hack_arr_dv_arrs !Hhbc_options.compiler_options
@@ -226,3 +227,15 @@ let emit_param_default_value_setter ?(is_native = false) env pos params =
   else
     let l = Label.next_regular () in
     instr_label l, gather [gather setters; instr_jmpns l]
+
+let emit_reified_params tparams =
+  let convert_reified_params = function
+    | (_, _, _, false) -> None
+    | (_, (_, s), _, true) ->
+      let param_name = SU.Reified.mangle_reified_param s in
+      let type_name = Some "HH\\darray" in
+      let tc =
+        Hhas_type_constraint.make type_name [Hhas_type_constraint.HHType] in
+      let ti = Some (Hhas_type_info.make type_name tc) in
+      Some (Hhas_param.make param_name false false false [] ti None) in
+  List.filter_map tparams ~f:convert_reified_params

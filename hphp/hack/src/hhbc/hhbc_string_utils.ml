@@ -239,3 +239,8 @@ module Xhp = struct
         String.concat ~sep:"\\" (List.rev (unmangle_id_worker id :: rest))
 
 end
+
+(* Reified param mangling *)
+module Reified = struct
+  let mangle_reified_param s = "$__reified$" ^ s
+end

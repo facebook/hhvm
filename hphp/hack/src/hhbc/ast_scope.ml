@@ -50,6 +50,13 @@ struct
     | ScopeItem.Method md :: scope -> md.Ast.m_tparams @ get_tparams scope
     | _ :: scope -> get_tparams scope
 
+  let rec get_fun_tparams scope =
+    match scope with
+    | [] | ScopeItem.Class _ :: _ -> []
+    | ScopeItem.Function fd :: _ -> fd.Ast.f_tparams
+    | ScopeItem.Method md :: _ -> md.Ast.m_tparams
+    | _ :: scope -> get_fun_tparams scope
+
   let rec has_this scope =
     match scope with
     | [] -> true (* Assume top level has this *)

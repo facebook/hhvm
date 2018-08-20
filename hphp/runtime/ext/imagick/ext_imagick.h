@@ -311,7 +311,7 @@ String convertMagickData(size_t size, unsigned char* &data);
 template<typename T>
 ALWAYS_INLINE
 Array convertArray(size_t num, const T* arr) {
-  PackedArrayInit ret(num);
+  VArrayInit ret(num);
   for (size_t i = 0; i < num; ++i) {
     ret.appendWithRef(arr[i]);
   }

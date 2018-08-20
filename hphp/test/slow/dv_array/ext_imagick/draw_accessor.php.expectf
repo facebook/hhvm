@@ -1,0 +1,54 @@
+bool(true)
+int(10)
+array(4) {
+  ["r"]=>
+  int(255)
+  ["g"]=>
+  int(255)
+  ["b"]=>
+  int(0)
+  ["a"]=>
+  float(1)
+}
+0.50
+bool(true)
+bool(true)
+bool(false)
+array(4) {
+  ["r"]=>
+  int(240)
+  ["g"]=>
+  int(43)
+  ["b"]=>
+  int(136)
+  ["a"]=>
+  float(1)
+}
+array(3) {
+  [0]=>
+  float(1)
+  [1]=>
+  float(2)
+  [2]=>
+  float(3)
+}
+float(-1)
+bool(true)
+bool(true)
+int(3)
+0.90
+1.20
+bool(true)
+bool(false)
+bool(true)
+string(5) "UTF-8"
+array(4) {
+  ["r"]=>
+  int(0)
+  ["g"]=>
+  int(255)
+  ["b"]=>
+  int(255)
+  ["a"]=>
+  float(1)
+}

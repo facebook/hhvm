@@ -1,0 +1,12 @@
+object(Imagick)#1 (3) {
+  ["wand":"Imagick":private]=>
+  resource(4) of type (WandResource)
+  ["nextOutOfBound":"Imagick":private]=>
+  bool(false)
+  ["imagePending":"Imagick":private]=>
+  bool(false)
+}
+object(ImagickPixel)#2 (1) {
+  ["wand":"ImagickPixel":private]=>
+  resource(5) of type (WandResource)
+}

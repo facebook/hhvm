@@ -10,7 +10,7 @@ error_reporting(-1);
 
 ///*
 // Boolean operand with all kinds of operands, swapping them over to make
-// LHS/RHS order is irrelevent.
+// LHS/RHS order is irrelevant.
 
 $oper1 = array(TRUE, FALSE);
 $oper2 = array(0, 100, -3.4, TRUE, FALSE, NULL, "", "123", "abc", [], [10,2.3]);

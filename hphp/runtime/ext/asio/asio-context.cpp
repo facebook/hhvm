@@ -129,7 +129,7 @@ c_AsyncFunctionWaitHandle* AsioContext::maybePopFast() {
       // We only call maybePopFast() on the current context.  Since `wh' was
       // scheduled in this context at some point, it must still be scheduled
       // here now, since the only way it could leave the context is if the
-      // context was destroyed.  (Being scheduled here supercedes it having
+      // context was destroyed.  (Being scheduled here supersedes it having
       // been scheduled in earlier contexts.)
       assertx(wh->getContextIdx() ==
               AsioSession::Get()->getCurrentContextIdx());

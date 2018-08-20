@@ -117,7 +117,7 @@ class Framework {
       // This will disable tests too upon install.
       $this->install();
     } else {
-      // Even if we are found out to alreay be installed, still ensure that
+      // Even if we are found out to already be installed, still ensure that
       // appropriate tests are disabled.
       $this->disableTestFiles();
     }

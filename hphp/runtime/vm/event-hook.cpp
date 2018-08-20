@@ -132,7 +132,7 @@ bool shouldRunUserProfiler(const Func* func) {
     return false;
   }
   // Don't profile 86ctor, since its an implementation detail,
-  // and we dont guarantee to call it
+  // and we don't guarantee to call it
   if ((g_context->m_setprofileFlags & EventHook::ProfileConstructors) == 0 &&
       func->cls() && func == func->cls()->getCtor() &&
       Func::isSpecial(func->name())) {

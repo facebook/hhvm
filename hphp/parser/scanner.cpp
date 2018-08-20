@@ -184,7 +184,7 @@ int Scanner::scanToken(ScannerToken &t, Location &l) {
       case T_OPEN_TAG:
       case T_WHITESPACE:
         if (m_type & ReturnAllTokens) {
-          // m_lastToken holds the last "signficant" token, so
+          // m_lastToken holds the last "significant" token, so
           // don't update it for comments or whitespace
           return tokid;
         }

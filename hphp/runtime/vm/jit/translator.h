@@ -307,9 +307,9 @@ enum Operands {
   Local           = 1 << 6,  // Writes to a local
   Iter            = 1 << 7,  // Iterator in imm[0]
   AllLocals       = 1 << 8, // All locals (used by RetC)
-  DontGuardStack1 = 1 << 9, // Dont force a guard on behalf of stack1 input
-  IgnoreInnerType = 1 << 10, // Instruction doesnt care about the inner types
-  DontGuardAny    = 1 << 11, // Dont force a guard for any input
+  DontGuardStack1 = 1 << 9, // Don't force a guard on behalf of stack1 input
+  IgnoreInnerType = 1 << 10, // Instruction doesn't care about the inner types
+  DontGuardAny    = 1 << 11, // Don't force a guard for any input
   This            = 1 << 12, // Input to CheckThis
   StackN          = 1 << 13, // pop N cells from stack; n = imm[0].u_IVA
   BStackN         = 1 << 14, // consume N cells from stack for builtin call;
@@ -318,7 +318,7 @@ enum Operands {
   MBase           = 1 << 16, // member operation base
   MKey            = 1 << 17, // member lookup key
   LocalRange      = 1 << 18, // read range of locals given in imm[1].u_LAR
-  DontGuardBase   = 1 << 19, // Dont force a guard for the base
+  DontGuardBase   = 1 << 19, // Don't force a guard for the base
   StackTop2 = Stack1 | Stack2,
   StackTop3 = Stack1 | Stack2 | Stack3,
 };
@@ -346,7 +346,7 @@ struct InstrInfo {
 const InstrInfo& getInstrInfo(Op op);
 
 /*
- * If this returns true, we dont generate guards for any of the inputs to this
+ * If this returns true, we don't generate guards for any of the inputs to this
  * instruction.
  *
  * This is used to avoid generating guards for interpreted instructions.

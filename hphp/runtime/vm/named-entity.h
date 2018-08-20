@@ -72,7 +72,7 @@ struct NamedEntity {
    * Global NamedEntity map type.
    *
    * We hold onto references to elements of this map.  If we use a different
-   * map, we must use one that doesnt invalidate references to its elements
+   * map, we must use one that doesn't invalidate references to its elements
    * (unless they are deleted, which never happens here).  Any standard
    * associative container will meet this requirement.
    */

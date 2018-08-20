@@ -23,7 +23,7 @@ foreach ($v as $k => $e)
     echo "key: ".$k.", value: ".$e."\n";
 }
 
-// try to access non-existant elements
+// try to access non-existent elements
 
 echo "[7] contains >".($v[7] == NULL ? "NULL" : "??")
     ."<, [12] contains >".($v[12] == NULL ? "NULL" : "??")."<\n";
@@ -73,7 +73,7 @@ var_dump($z);
 $z = [array(2,4,6,8), array(5,10), array(100,200,300)][0][2];
 var_dump($z);
 
-$z = [[2,4,6,8], [5,10], [100,200,300]][0][2];  // acceses element with value 6
+$z = [[2,4,6,8], [5,10], [100,200,300]][0][2];  // accesses element with value 6
 var_dump($z);
 
 var_dump(["black", "white", "yellow"][1]);      // white
@@ -86,7 +86,7 @@ function f()
 }
 //*/
 ///*
-var_dump(f()[2]);   // acceses element with value 3000
+var_dump(f()[2]);   // accesses element with value 3000
 //*/
 
 ///*

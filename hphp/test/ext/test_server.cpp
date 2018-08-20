@@ -219,7 +219,7 @@ void TestServer::StopServer() {
 
 void TestServer::KillServer() {
   fprintf(stderr, "Have to kill HHVM\n");
-  // Getting more aggresive
+  // Getting more aggressive
   char buf[1024];
   int fd = open(s_pidfile, O_RDONLY);
   int ret = read(fd, buf, sizeof(buf) - 1);

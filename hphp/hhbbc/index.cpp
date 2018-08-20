@@ -1800,7 +1800,7 @@ bool find_constructor(ClassInfo* cinfo) {
     return true;
   }
 
-  // We'll use SystemLib::s_nullfunc, but thats equivalent to no constructor
+  // We'll use SystemLib::s_nullfunc, but that's equivalent to no constructor
   return true;
 }
 
@@ -5568,7 +5568,7 @@ void PublicSPropIndexer::merge(Context ctx, ClassInfo* cinfo,
         "NOTE: had to mark everything unknown for public static "
         "property types due to dynamic code.  -fanalyze-public-statics "
         "will not help for this program.\n"
-        "NOTE: The offending code occured in this context: %s\n",
+        "NOTE: The offending code occurred in this context: %s\n",
         show(ctx).c_str()
       );
       m_everything_bad = true;

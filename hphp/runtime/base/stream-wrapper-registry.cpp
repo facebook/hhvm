@@ -123,7 +123,7 @@ bool registerRequestWrapper(const String& scheme,
     return false;
   }
 
-  // Try to insert, return true if it happend, or false if a wrapper has
+  // Try to insert, return true if it happened, or false if a wrapper has
   // already been registered for that scheme
   return s_request_wrappers->wrappers().insert(
       std::make_pair(std::move(lscheme), std::move(wrapper))

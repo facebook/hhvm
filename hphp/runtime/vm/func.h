@@ -581,7 +581,7 @@ struct Func final {
    * which takes parameters by reference
    *
    * If !takesInOutParams() this function has reference parameters and wraps a
-   * function with inout paramaters.
+   * function with inout parameters.
    */
   bool isInOutWrapper() const;
 

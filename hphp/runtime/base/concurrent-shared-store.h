@@ -433,7 +433,7 @@ private:
    *
    * Note that its possible that the apc key was freed and
    * reallocated, and the entry in m_expQueue doesn't correspond to
-   * the new key; but thats fine - if the key really has expired, it
+   * the new key; but that's fine - if the key really has expired, it
    * will be purged, and if not, nothing will happen.
    */
   tbb::concurrent_priority_queue<ExpirationPair,

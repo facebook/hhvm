@@ -15,7 +15,7 @@ function foo($ret = FALSE) {
     } catch (Exception $e) {
         goto local;
 local: 
-        var_dump("catched");
+        var_dump("caught");
         if ($ret) return "return";
     } finally {
        var_dump("finally2");

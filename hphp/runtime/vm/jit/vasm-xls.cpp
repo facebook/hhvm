@@ -531,7 +531,7 @@ Interval* Variable::ivlAtUse(unsigned pos) {
  * another one to spill, trying to free up the longest-available register.
  *
  * Split positions must be after an interval's start position, and on or before
- * the chosen split point. We're free try to choose a good position inbetween,
+ * the chosen split point. We're free try to choose a good position between,
  * for example block boundaries and cold blocks.
  *
  * 5. Once intervals have been walked and split, every interval has an assigned

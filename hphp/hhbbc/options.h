@@ -40,7 +40,7 @@ using OpcodeSet = hphp_fast_set<Op,OpHash>;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Publically-settable options that control compilation.
+ * Publicly-settable options that control compilation.
  */
 struct Options {
   /*

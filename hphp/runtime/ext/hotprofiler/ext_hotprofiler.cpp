@@ -118,7 +118,7 @@ static int64_t get_cpu_frequency() {
   uint64_t tsc_start = cpuCycles();
   uint64_t tsc_end;
   volatile int i;
-  // Busy loop for 5 miliseconds. Don't use usleep() here since it causes the
+  // Busy loop for 5 milliseconds. Don't use usleep() here since it causes the
   // CPU to halt which will generate meaningless results.
   do {
     for (i = 0; i < 1000000; i++);
@@ -281,7 +281,7 @@ size_t Frame::getName(char *result_buf, size_t result_len) {
   }
 
   // Add '@recurse_level' if required
-  // NOTE: Dont use snprintf's return val as it is compiler dependent
+  // NOTE: Don't use snprintf's return val as it is compiler dependent
   if (m_recursion) {
     snprintf(result_buf, result_len, "%s@%d", m_name, m_recursion);
   } else {
@@ -294,8 +294,8 @@ size_t Frame::getName(char *result_buf, size_t result_len) {
 }
 
 size_t Frame::getStack(int level, char *result_buf, size_t result_len) {
-  // End recursion if we dont need deeper levels or
-  // we dont have any deeper levels
+  // End recursion if we don't need deeper levels or
+  // we don't have any deeper levels
   if (!m_parent || level <= 1) {
     return getName(result_buf, result_len);
   }

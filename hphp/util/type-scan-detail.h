@@ -281,7 +281,7 @@ bool isIgnoredType(const std::string& name);
 // Check if a type with the given name is on the list of template types which
 // cannot contain request heap allocated types. This is mainly for templates
 // (like the standard containers) where we have request heap aware versions and
-// is to prevent people accidently using the standard kind.
+// is to prevent people accidentally using the standard kind.
 bool isForbiddenTemplate(const std::string& name);
 
 // Check if a type with the given name is on the list of template types which

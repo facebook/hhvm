@@ -578,7 +578,7 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
              gen(env, ConvIntToBool, left),
              gen(env, ConvCellToBool, right)));
   } else if (rightTy <= TArr) {
-    // All ints are implicity less than arrays.
+    // All ints are implicitly less than arrays.
     push(env, emitConstCmp(env, op, false, true));
   } else if (rightTy <= TVec) {
     push(env, emitMixedVecCmp(env, op));

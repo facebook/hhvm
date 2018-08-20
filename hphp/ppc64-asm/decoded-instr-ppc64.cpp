@@ -288,7 +288,7 @@ static_cast<int64_t>(indexBigTOC << 16));
 }
 
 /*
- * Reads back the immediate when emmited with (without nops) and return the
+ * Reads back the immediate when emitted with (without nops) and return the
  * number of bytes read for this immediate decoding.
  */
 uint8_t DecodedInstruction::decodeImm() {

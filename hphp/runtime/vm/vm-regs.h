@@ -239,7 +239,7 @@ struct VMRegGuard {
    * If we know the frame pointer returned by DECLARE_FRAME_POINTER is accurate,
    * we can use ALWAYS_INLINE, and grab the frame pointer.
    * If not, we have to use NEVER_INLINE to ensure we're one level in from the
-   * guard... but thats not quite enough because VMRegGuard::VMRegGuard is a
+   * guard... but that's not quite enough because VMRegGuard::VMRegGuard is a
    * leaf function, and so might not have a frame
    */
 #ifdef FRAME_POINTER_IS_ACCURATE

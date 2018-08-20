@@ -1637,7 +1637,7 @@ SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
 
   // Specially handle checking if an uninit var's type is null. The Type class
   // doesn't fully correctly handle the fact that the earlier stages of the
-  // compiler consider null to be either initalized or uninitalized, so we need
+  // compiler consider null to be either initialized or uninitialized, so we need
   // to do this check first. Right here is really the only place in the backend
   // it seems to matter, especially since manipulating an uninit is kind of
   // weird; as of this writing, "$uninitalized_variable ?? 42" is the only
@@ -2219,7 +2219,7 @@ SSATmp* simplifyConvCellToBool(State& env, const IRInstruction* inst) {
       // skip anything that's an interface.
       if (!(cls->attrs() & AttrInterface)) {
         // t3429711 we should test cls->m_ODAttr
-        // here, but currently it doesnt have all
+        // here, but currently it doesn't have all
         // the flags set.
         if (!cls->instanceCtor()) {
           return cns(env, true);

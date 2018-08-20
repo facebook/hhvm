@@ -96,7 +96,7 @@ bool ExpressionList::isRefable(bool checkError /* = false */) const {
       m_kind == ListKindLeft) {
     // Its legal to ref a list...
     if (checkError) return true;
-    // ...but we shouldnt apply ref() to it unless the corresponding
+    // ...but we shouldn't apply ref() to it unless the corresponding
     // arg is refable
     int ix = m_kind == ListKindLeft ? 0 : m_exps.size() - 1;
     return m_exps[ix]->isRefable(false);

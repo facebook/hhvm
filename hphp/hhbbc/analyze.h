@@ -85,7 +85,7 @@ struct FuncAnalysisResult {
   LocalId retParam{MaxLocalId};
 
   /*
-   * Reads a constant thats not in the index (yet - this can only
+   * Reads a constant that's not in the index (yet - this can only
    * happen on the first iteration). We'll need to revisit it.
    */
   bool readsUntrackedConstants{false};

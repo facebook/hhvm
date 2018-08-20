@@ -2286,7 +2286,7 @@ Token Parser::onClosure(ClosureType type,
   // "second" slot.) Then, we can fix it up here -- pick the one that is
   // nonempty, or generate a special parse error if they are both nonempty.
   //
-  // This is slighly more annoying by the fact that many callsites to this
+  // This is slightly more annoying by the fact that many callsites to this
   // function are *not* long-form closures, and so all of the above doesn't
   // apply to them, hence ret2 being a pointer with a nullptr default, so they
   // don't all have to explicitly opt out of this mess.

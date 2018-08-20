@@ -760,11 +760,11 @@ struct FrameRestore {
       m_pc = vmpc();
 
       /*
-        we can be called from Unit::merge, which hasnt yet setup
-        the frame (because often it doesnt need to).
+        we can be called from Unit::merge, which hasn't yet setup
+        the frame (because often it doesn't need to).
         Set up a fake frame here, in case of errors.
         But note that mergeUnit is called for systemlib etc before the
-        stack has been setup. So dont do anything if m_stack.top()
+        stack has been setup. So don't do anything if m_stack.top()
         is NULL
       */
       ActRec &tmp = *vmStack().allocA();
@@ -1758,7 +1758,7 @@ void Unit::mergeImpl(MergeInfo* mi) {
     } while (++ix < end);
 
     if (UNLIKELY(redoHoistable)) {
-      // if this unit isnt mergeOnly, we're done
+      // if this unit isn't mergeOnly, we're done
       if (!isMergeOnly()) return;
 
       // As a special case, if all the classes are potentially hoistable, we
@@ -1973,7 +1973,7 @@ void Unit::mergeImpl(MergeInfo* mi) {
              * In the case where mi == newMi, there's an apparent
              * race here. Although we have a lock, so we're the only
              * ones modifying this, there could be any number of
-             * readers. But thats ok, because it doesnt matter
+             * readers. But that's ok, because it doesn't matter
              * whether they see the old contents or the new.
              */
             compactMergeInfo(mi, newMi, m_typeAliases);

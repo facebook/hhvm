@@ -273,7 +273,7 @@ XenonRequestLocalData::~XenonRequestLocalData() {
 
 
 // Creates an array to respond to the Xenon PHP extension;
-// builds the data into the format neeeded.
+// builds the data into the format needed.
 Array XenonRequestLocalData::createResponse() {
   assertx(m_inRequest);
   VArrayInit stacks(m_stackSnapshots.size());

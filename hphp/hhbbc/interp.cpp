@@ -2096,7 +2096,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       break;
   }
 
-  // No type constraint, or one that isn't usuable. Use the generic memoization
+  // No type constraint, or one that isn't usable. Use the generic memoization
   // scheme which can handle any type:
 
   if (auto const val = tv(inTy)) {
@@ -2420,7 +2420,7 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
   auto const ts_type = type_of_type_structure(ts);
 
   if (is_nullable_ts && !is_definitely_not_null && ts_type == folly::none) {
-    // Ts is nullable and we know that t could be null but we dont know for sure
+    // Ts is nullable and we know that t could be null but we don't know for sure
     // Also we didn't get a type out of the type structure
     return result(TBool);
   }
@@ -3507,7 +3507,7 @@ void in(ISS& env, const bc::FCallAwait& op) {
 
 void in(ISS& env, const bc::DecodeCufIter& op) {
   popC(env); // func
-  env.propagate(op.target, &env.state); // before iter is modifed
+  env.propagate(op.target, &env.state); // before iter is modified
 }
 
 namespace {

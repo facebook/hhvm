@@ -17,7 +17,7 @@ class M
     const MYPI = 3.14;
     const CON1 = -222;
 
-// method b1 demostrates self vs. static
+// method b1 demonstrates self vs. static
 
     public function b1()
     {
@@ -90,7 +90,7 @@ class P extends N
         echo "Inside static " . __METHOD__ . "\n";
     }
 
-// method f1 demostrates self and parent
+// method f1 demonstrates self and parent
 
     public static function f1()
     {

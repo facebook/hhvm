@@ -38,7 +38,7 @@ struct HostHealthMonitorExtension final : public Extension {
     Config::Bind(Enabled, ini, globalConfig,
                  "HealthMonitor.EnableHealthMonitor", true);
     Config::Bind(UpdateFreq, ini, globalConfig,
-                 "HealthMonitor.UpdateFreq", 1000 /* miliseconds */);
+                 "HealthMonitor.UpdateFreq", 1000 /* milliseconds */);
   }
 } s_host_health_monitor_extension;
 

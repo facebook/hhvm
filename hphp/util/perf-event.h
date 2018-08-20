@@ -103,7 +103,7 @@ bool perf_event_enable(uint64_t sample_freq, perf_event_signal_fn_t signal_fn);
 /*
  * Disable perf memory event sampling on this thread.
  *
- * All unconsumed samples will be lost, even if sampling is later reenabled.
+ * All unconsumed samples will be lost, even if sampling is later re-enabled.
  */
 void perf_event_disable();
 

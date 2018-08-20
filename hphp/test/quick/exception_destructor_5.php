@@ -37,7 +37,7 @@ class Exiter {
   }
 
   public function doExit() {
-    // This exit() should prevent the destructor for this clas from running,
+    // This exit() should prevent the destructor for this class from running,
     // as well as any up-stack destructors.
     exit();
   }

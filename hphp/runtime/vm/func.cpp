@@ -250,7 +250,7 @@ void Func::init(int numParams) {
   }
   if (isSpecial(m_name)) {
     /*
-     * We dont want these compiler generated functions to
+     * We don't want these compiler generated functions to
      * appear in backtraces.
      */
     m_attrs = m_attrs | AttrNoInjection;

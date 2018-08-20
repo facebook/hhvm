@@ -204,7 +204,7 @@ bool UserFile::close() {
   bool ret = true;
   if (!isClosed()) {
     // PHP's streams layer explicitly flushes on close
-    // Mimick that for user-wrappers by pushing the flush here
+    // Mimic that for user-wrappers by pushing the flush here
     // without impacting other HPHP stream types.
     ret = flushImpl(false) || !RuntimeOption::CheckFlushOnUserClose;
 

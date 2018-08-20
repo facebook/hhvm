@@ -469,7 +469,7 @@ bool optimizeSmashableLookingJmp(Env& env, TCA srcAddr, TCA destAddr,
  * Returns true if the source is a PC relative instruction. Relocates the
  * that instruction, adjusting the offsets in the instruction. If the new
  * offset cannot be encoded, then the instruction is changed into a multi-
- * instruction sequence, overwritting the original PC relative instruction
+ * instruction sequence, overwriting the original PC relative instruction
  * that was initially copied. The following are the PC relative instructions:
  *   ADR/ADRP
  *   LDR (literal)
@@ -849,7 +849,7 @@ size_t relocateImpl(Env& env) {
       alignCount = 0;
       auto destAddr = env.destBlock.frontier();
 
-      // Align the frontier to follow any potential aligment constraints.
+      // Align the frontier to follow any potential alignment constraints.
       auto af = env.meta.alignments.equal_range(srcAddr);
       while (af.first != af.second) {
         auto const alignPair = af.first->second;
@@ -887,7 +887,7 @@ size_t relocateImpl(Env& env) {
       env.destBlock.bytes(kInstructionSize,
                           env.srcBlock.toDestAddress(srcAddr));
 
-      // If it's not a literal, and we don't need to satisfy an aligment
+      // If it's not a literal, and we don't need to satisfy an alignment
       // constraint, then attempt any special relocations.
       if (!literals.count(src) && !preserveAlignment) {
         // Remove nops that are not necessary for alignment constraints.

@@ -978,7 +978,7 @@ void cgReservePackedArrayDataNewElem(IRLS& env, const IRInstruction* i) {
   auto const sizePtr = arrayData[ArrayData::offsetofSize()];
 
   // If the check below succeeds, we'll end up returning the original size
-  // so just use the destination register to hold the orignal size
+  // so just use the destination register to hold the original size
   auto const size = dstLoc(env, i, 0).reg();
   v << loadzlq{sizePtr, size};
 

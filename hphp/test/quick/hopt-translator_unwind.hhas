@@ -9,7 +9,7 @@
 
   # If get_undefined_var is inlined then the context passed to handler will
   # contain the locals from test_unwind_dirty_stack_regs in an array which will
-  # be stored along wtih other arguments inside the exception unless we pass
+  # be stored along with other arguments inside the exception unless we pass
   # ignore args. If this happens the exception will keep the DtorPrinter objects
   # alive past the end of test_unwind_dirty_stack_regs.
   FPushClsMethodD 1 "setTraceOptions" "Exception"

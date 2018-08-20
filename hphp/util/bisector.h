@@ -45,7 +45,7 @@ namespace HPHP {
    name : 1
    name : 2
 
-  Now you can bisect down to the optimization thats causing issues by setting
+  Now you can bisect down to the optimization that's causing issues by setting
   name1 and name2 (name1 will default to 0 if not set). If name1 < name2 it
   will run the optimizations in the interval [name1, name2). If name1 > name2
   it will skip the optimizations in the interval [name2, name1).

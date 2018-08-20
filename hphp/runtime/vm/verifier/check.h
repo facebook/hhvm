@@ -93,12 +93,12 @@ bool checkUnit(const UnitEmitter*, ErrorMode mode = kStderr);
  *    2+ names.
  * -- FuncStaticVar not checked
  * -- FuncUserAttribute table not checked
- * -- control-flow from DV entry points isn't checked -- we dont require
+ * -- control-flow from DV entry points isn't checked -- we don't require
  *    that entry K fall through to K+1, or whatever.  We either should
  *    check or make the spec say what uninitialized optional params
  *    are set to (Uninit null like uninitialized locals?).
  * -- Function attributes (static, abstract, etc) must all make sense,
- *    certian attributes are mutually exclusive, others aren't, some
+ *    certain attributes are mutually exclusive, others aren't, some
  *    imply bytecode restrictions.  (access This from static? etc).
  */
 bool checkFunc(const FuncEmitter*, ErrorMode mode = kStderr);

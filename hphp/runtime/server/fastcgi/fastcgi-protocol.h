@@ -39,7 +39,7 @@ FOLLY_PACK_POP
 }
 
 /* FastCGI sends all data over the wire in big-endian format. These helper types
- * marshal data within records for transmition.
+ * marshal data within records for transmission.
  */
 using wshort = detail::wire<uint16_t>;
 using wlong  = detail::wire<uint32_t>;
@@ -60,7 +60,7 @@ enum class Version : uint8_t {
  * Structured streams contain name-value pairs encoded as a length followed
  * by an ascii string. Numeric values are encoded as strings.
  *
- * Streams of the same type are to be concatentated together.
+ * Streams of the same type are to be concatenated together.
  */
 enum Type : uint8_t {
   /* FastCGI BEGIN_REQUEST intiates a new http request. The contentData for

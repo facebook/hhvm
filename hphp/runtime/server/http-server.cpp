@@ -412,7 +412,7 @@ void HttpServer::runOrExitProcess() {
     createPid();
     Lock lock(this);
     BootStats::done();
-    // continously running until /stop is received on admin server, or
+    // continuously running until /stop is received on admin server, or
     // takeover is requested.
     while (!m_stopped) {
       wait();

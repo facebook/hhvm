@@ -598,7 +598,7 @@ static Variant HHVM_FUNCTION(mysql_async_fetch_array, const Resource& result,
 // This function takes an array of arrays, each of which is of the
 // form array($dbh, ...).  The only thing that matters in the inner
 // arrays is the first element being a MySQL instance.  It then
-// procedes to block for up to 'timeout' seconds, waiting for the
+// proceeds to block for up to 'timeout' seconds, waiting for the
 // first actionable descriptor(s), which it then returns in the form
 // of the original arrays passed in.  The intention is the caller
 // would include other information they care about in the tail of the

@@ -75,7 +75,7 @@ struct VMRegs {
 namespace rds {
 
 /*
- * Statically layed-out header that goes at the front of RDS.
+ * Statically laid-out header that goes at the front of RDS.
  */
 struct Header {
   /*
@@ -121,7 +121,7 @@ struct Header {
 };
 
 /*
- * Access to the statically layed out header.
+ * Access to the statically laid out header.
  */
 inline Header* header() {
   return static_cast<Header*>(tl_base);

@@ -900,7 +900,7 @@ void RuntimeOption::Load(
   std::vector<std::string>* messages /* = nullptr */,
   std::string cmd /* = "" */) {
 
-  // Intialize the memory manager here because various settings and
+  // Initialize the memory manager here because various settings and
   // initializations that we do here need it
   tl_heap.getCheck();
 
@@ -1336,7 +1336,7 @@ void RuntimeOption::Load(
       if (EvalJitSerdesMode != JitSerdesMode::Off) {
         if (ServerMode) {
           Logger::Warning("Eval.JitSerdesMode reset from " + jitSerdesMode +
-                          " to off, becasue JitRetranslateAll isn't enabled.");
+                          " to off, because JitRetranslateAll isn't enabled.");
         }
         EvalJitSerdesMode = JitSerdesMode::Off;
       }
@@ -2095,7 +2095,7 @@ void RuntimeOption::Load(
 
   Config::Bind(CustomSettings, ini, config, "CustomSettings");
 
-  // Run initializers depedent on options, e.g., resizing atomic maps/vectors.
+  // Run initializers dependent on options, e.g., resizing atomic maps/vectors.
   refineStaticStringTableSize();
   InitFiniNode::ProcessPostRuntimeOptions();
   always_assert(Func::getFuncVec().size() == RuntimeOption::EvalFuncCountHint);

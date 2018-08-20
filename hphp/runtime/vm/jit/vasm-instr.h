@@ -499,7 +499,7 @@ struct debugtrap {};
 struct fallthru { RegSet args; };
 
 /*
- * Load an immedate value without mutating status flags.
+ * Load an immediate value without mutating status flags.
  */
 struct ldimmb { Immed s; Vreg d; };
 struct ldimmw { Immed s; Vreg16 d; };

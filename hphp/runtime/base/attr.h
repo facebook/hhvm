@@ -157,7 +157,7 @@ enum Attr {
   AttrHasImmutable         = (1u << 22), //    X  |          |         //
                                          //       |          |         //
   // Indicates that the frame should be ignored when searching for context
-  // (e.g., array_map evalutates its callback in the context of the caller).
+  // (e.g., array_map evaluates its callback in the context of the caller).
   AttrSkipFrame            = (1u << 22), //       |          |    X    //
                                          //       |          |         //
   // Indicates that the function might read from the caller's frame. Only

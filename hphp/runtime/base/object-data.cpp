@@ -1872,7 +1872,7 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
     prop = tvToCell(prop);
     if (typeHintChecked(lookup.prop)) {
       /*
-       * If this property has a type-hint, we can't do the setop truely in
+       * If this property has a type-hint, we can't do the setop truly in
        * place. We need to verify that the new value satisfies the type-hint
        * before assigning back to the property (if we raise a warning and throw,
        * we don't want to have already put the value into the prop).
@@ -1985,7 +1985,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
     }
 
     /*
-     * If this property has a type-hint, we can't do the inc-dec truely in
+     * If this property has a type-hint, we can't do the inc-dec truly in
      * place. We need to verify that the new value satisfies the type-hint
      * before assigning back to the property (if we raise a warning and throw,
      * we don't want to have already put the value into the prop).

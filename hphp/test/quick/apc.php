@@ -26,7 +26,7 @@ function testApc($before) {
       exit(3);
     }
     if (!isset($after[$k])) {
-      echo "expected key not set. devestating.\n";
+      echo "expected key not set. devastating.\n";
       var_dump($after[$k]);
       exit(4);
     }

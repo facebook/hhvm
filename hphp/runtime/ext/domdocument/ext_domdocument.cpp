@@ -2186,7 +2186,7 @@ Variant HHVM_METHOD(DOMNode, cloneNode,
     return false;
   }
   // When deep is false Element nodes still require the attributes
-  // Following taken from libxml as xmlDocCopyNode doesnt do this
+  // Following taken from libxml as xmlDocCopyNode doesn't do this
   if (n->type == XML_ELEMENT_NODE && !deep) {
     if (n->nsDef != nullptr) {
       node->nsDef = xmlCopyNamespaceList(n->nsDef);

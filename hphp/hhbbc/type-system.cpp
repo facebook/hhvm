@@ -2900,7 +2900,7 @@ folly::Optional<Type> type_of_type_structure(SArray ts) {
       return is_nullable ? union_of(std::move(arrT), TNull) : arrT;
     }
     case TypeStructure::Kind::T_shape: {
-      // Taking a very conservative approach to shapes where we dont do any
+      // Taking a very conservative approach to shapes where we don't do any
       // conversions if the shape contains unknown or optional fields
       if (does_ts_shape_allow_unknown_fields(ts)) return folly::none;
       auto map = MapElems{};
@@ -2920,7 +2920,7 @@ folly::Optional<Type> type_of_type_structure(SArray ts) {
       return is_nullable ? union_of(std::move(arrT), TNull) : arrT;
     }
     case TypeStructure::Kind::T_vec_or_dict:
-      // Ideally, we would return this union; but thats not an allowed type, so
+      // Ideally, we would return this union; but that's not an allowed type, so
       // we end up with TInitCell as the result, which makes hhbbc think that
       // the condition is always true.
       //

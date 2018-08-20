@@ -521,7 +521,7 @@ struct SimpleParser {
    * re-parse and push as an int64_t if possible, otherwise as a double.
    */
   void parseBigInt(int len) {
-    assertx(*p > '9' || *p < '0');  // Aleady read maximal digit sequence.
+    assertx(*p > '9' || *p < '0');  // Already read maximal digit sequence.
     errno = 0;
     const int64_t sx = strtoll(p - len, nullptr, 10);
     if (errno == ERANGE) {

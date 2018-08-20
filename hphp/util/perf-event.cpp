@@ -74,9 +74,9 @@ size_t s_pagesz = 0;
  *
  * These may be altered when the module is initialized.
  */
-// On Haswell and later, this is called "LOAD_LATENCY".
+// On Has well and later, this is called "LOAD_LATENCY".
 const char* s_mem_loads = "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD";
-// On Haswell and later, "MEM_UOPS_RETIRED:ALL_STORES" is used instead.
+// On Has well and later, "MEM_UOPS_RETIRED:ALL_STORES" is used instead.
 const char* s_mem_stores = "MEM_TRANS_RETIRED:PRECISE_STORE";
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -128,7 +128,7 @@ bool perf_event_init() {
   std::string event_str;
   if (folly::readFile("/sys/devices/cpu/events/mem-stores", event_str)) {
     // If the read fails, we'll stick with the {Sandy,Ivy}Bridge event name.
-    // Otherwise, check for the Haswell encoding string.
+    // Otherwise, check for the Has well encoding string.
     //
     // @see: linux/arch/x86/events/intel/core.c.
     if (event_str == "event=0xd0,umask=0x82") {
@@ -350,7 +350,7 @@ folly::Optional<perf_event_handle> enable_event(const char* event_name,
   auto const pe = perf_event_handle { fd, meta };
 
   // Reset the event.  This seems to be present in most examples, but it's
-  // unclear if it's necessary or just good hygeine.  (It's possible that it's
+  // unclear if it's necessary or just good hygiene.  (It's possible that it's
   // necessary on successive opens.)
   if (ioctl(fd, PERF_EVENT_IOC_RESET, 0) < 0) {
     Logger::Warning("perf_event: failed to reset perf_event: %s",

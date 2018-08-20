@@ -8,7 +8,7 @@
 
 error_reporting(-1);
 
-// Try to require a non-existant file
+// Try to require a non-existent file
 
 //$inc = require_once('XXPositions.inc');
 //var_dump($inc);

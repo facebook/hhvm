@@ -218,7 +218,7 @@ enum sdlTransport {
 ///////////////////////////////////////////////////////////////////////////////
 // SOAP types
 
-/* Soap Binding Specfic stuff */
+/* Soap Binding Specific stuff */
 
 struct sdl;
 struct sdlSoapBinding;

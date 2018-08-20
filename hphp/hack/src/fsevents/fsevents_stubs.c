@@ -170,7 +170,7 @@ static void clear_pipe(int fd) {
 
 
 /**
- * This callback is called whenver an FSEvents watch is triggered
+ * This callback is called whenever an FSEvents watch is triggered
  */
 static void watch_callback(
     ConstFSEventStreamRef streamRef,

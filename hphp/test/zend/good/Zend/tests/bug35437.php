@@ -17,6 +17,6 @@ class TestClass
 try {
 	TestClass::testMethod();
 } catch (Exception $e) {
-	echo "Catched: ".$e->getMessage()."\n";
+	echo "Caught: ".$e->getMessage()."\n";
 }
 ?>

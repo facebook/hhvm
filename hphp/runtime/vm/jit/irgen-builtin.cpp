@@ -879,7 +879,7 @@ prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* thiz,
     cur.value = loadParam(offset, ty);
     cur.isOutputArg = pi.nativeArg && ty == TBoxedCell;
     // If ty > TBottom, it had some kind of type hint.
-    // A by-reference parameter thats defaulted will get a plain
+    // A by-reference parameter that's defaulted will get a plain
     // value (typically null), rather than a BoxedCell; so we still
     // need to apply a conversion there.
     cur.needsConversion = cur.isOutputArg ||

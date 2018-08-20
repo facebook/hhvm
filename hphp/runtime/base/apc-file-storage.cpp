@@ -60,7 +60,7 @@ char* APCFileStorage::put(const char* data, uint32_t len) {
 
   auto maxOffset = m_chunkSize - totalLen;
   auto current = m_current.load(std::memory_order_relaxed);
-  // m_current is intialized to -1 to postpone allocation to first 'put'.
+  // m_current is initialized to -1 to postpone allocation to first 'put'.
   assertx(!m_chunks.empty() || current == ~0ull);
   do {
     if (UNLIKELY(static_cast<uint32_t>(current) > maxOffset)) {

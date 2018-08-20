@@ -7,7 +7,7 @@ class T {
     public function __toString() {
 		global $handler;
 	    $handler = $this;
-        $this->_this = $this; // <-- uncoment this
+        $this->_this = $this; // <-- uncomment this
         return 'A';
     }
 }

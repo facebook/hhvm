@@ -81,7 +81,7 @@ class PrecomputedResults {
   std::unordered_set<Cluster*> invalidKeys;
 };
 
-// A wrapper for algorthm-wide variables
+// A wrapper for algorithm-wide variables
 struct AlgoState {
   // the call graph
   const TargetGraph* cg;
@@ -232,7 +232,7 @@ std::unordered_set<Cluster*> adjacentClusters(const AlgoState& state,
 }
 
 /*
- * The expected number of calls for an edge withing the same TLB page
+ * The expected number of calls for an edge within the same TLB page
  */
 double expectedCalls(int src_addr, int dst_addr, double edgeWeight) {
   int dist = std::abs(src_addr - dst_addr);

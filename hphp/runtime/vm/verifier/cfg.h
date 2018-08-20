@@ -99,7 +99,7 @@ inline bool isRet(PC pc) {
   return op == Op::RetC || op == Op::RetV || op == Op::RetM;
 }
 
-// Return true if pc points to an Iter instruction whose first immedate
+// Return true if pc points to an Iter instruction whose first immediate
 // argument is an iterator id.
 inline bool isIter(PC pc) {
   // IterBreak is not included, because it has a variable-length list of

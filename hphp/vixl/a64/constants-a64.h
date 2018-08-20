@@ -75,7 +75,7 @@ V_(ImmDPShift, 15, 10, Bits)                                                   \
 V_(ImmAddSub, 21, 10, Bits)                                                    \
 V_(ShiftAddSub, 23, 22, Bits)                                                  \
                                                                                \
-/* Add/substract extend */                                                     \
+/* Add/subtract extend */                                                     \
 V_(ImmExtendShift, 12, 10, Bits)                                               \
 V_(ExtendMode, 15, 13, Bits)                                                   \
                                                                                \

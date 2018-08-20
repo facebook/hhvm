@@ -594,7 +594,7 @@ struct Assembler {
   void xxpermdi(const RegXMM& tx, const RegXMM& xa, const RegXMM& xb) {
    EmitXX3Form(60, rn(tx), rn(xa), rn(xb),  10, 0, 0, 0);
    // Note that I decided to hardcode DM bit as 0
-   // (xo field = 10), because it's sufficent for now.
+   // (xo field = 10), because it's sufficient for now.
    // However, I might not be the case in the future
   }
 

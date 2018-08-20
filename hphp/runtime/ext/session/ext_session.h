@@ -29,7 +29,7 @@ namespace HPHP {
 // SessionModule
 
 /**
- * Session modules are implemeted by extending this class and
+ * Session modules are implemented by extending this class and
  * implementing its virtual methods, usually registering by
  * name as a by-product of the constructor.
  *

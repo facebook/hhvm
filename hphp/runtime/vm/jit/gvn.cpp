@@ -744,7 +744,7 @@ void replaceRedundantComputations(
   for (auto& elm : actionMap) {
     if (env.insertMap.size() == kMaxTrackedPrcs) {
       // This pretty much doesn't happen; when it does, we might be
-      // over-increffing here - but thats not a big deal.
+      // over-increffing here - but that's not a big deal.
       auto const newTmp = elm.second[0];
       auto const block = newTmp->inst()->block();
       auto const iter = std::next(block->iteratorTo(newTmp->inst()));

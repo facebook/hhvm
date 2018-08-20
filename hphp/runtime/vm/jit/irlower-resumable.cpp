@@ -139,7 +139,7 @@ void cgContPreNext(IRLS& env, const IRInstruction* inst) {
 
   // Transition the generator into either the Priming state (if we were just
   // created) or the Running state (if we were started).  Due to the way the
-  // enum is layed out, we can model this by just adding 2.
+  // enum is laid out, we can model this by just adding 2.
   v << addlim{int8_t(2), cont[stateOff], v.makeReg()};
 }
 

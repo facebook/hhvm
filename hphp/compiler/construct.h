@@ -56,7 +56,7 @@ struct IParseHandler {
    * onParseRecur is called by a parent construct (ultimately a class or
    * interface).
    * This is done because at the time that onParse would be called for
-   * (eg) a method, the ClassScope doesnt exist. So we wait until onParse
+   * (eg) a method, the ClassScope doesn't exist. So we wait until onParse
    * is called for the class, and it calls onParseRecur for its children.
    */
   virtual void onParseRecur(AnalysisResultConstRawPtr /*ar*/,

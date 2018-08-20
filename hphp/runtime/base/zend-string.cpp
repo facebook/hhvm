@@ -1993,7 +1993,7 @@ char _codes[26] = { 1,16,4,16,9,2,4,16,9,2,0,2,2,2,1,4,0,2,4,4,1,0,0,0,8,0};
 /* These letters are passed through unchanged */
 #define NOCHANGE(c) (ENCODE(c) & 2)    /* FJMNR */
 
-/* These form dipthongs when preceding H */
+/* These form diphthongs when preceding H */
 #define AFFECTH(c)  (ENCODE(c) & 4)    /* CGPST */
 
 /* These make C and G soft */

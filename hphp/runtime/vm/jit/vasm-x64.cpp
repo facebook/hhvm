@@ -777,7 +777,7 @@ void Vgen::emit(const cloadq& i) {
 template<class cmov>
 void Vgen::emit_cmov(const cmov& i) {
   if (i.f != i.d && i.t == i.d) {
-    // negate the condition and swap t/f operands so we dont clobber i.t
+    // negate the condition and swap t/f operands so we don't clobber i.t
     return emit(cmov{ccNegate(i.cc), i.sf, i.t, i.f, i.d});
   } else {
     prep(i.f, i.d);

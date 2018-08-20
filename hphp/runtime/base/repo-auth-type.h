@@ -178,7 +178,7 @@ struct RepoAuthType {
 
   // Turn an array RAT represented by ID into equivalent array RAT represented
   // by its actual Array*. Should only be called when it is indeed not resolved
-  // yet, which should be the place where an RAT is initally loaded from Repo.
+  // yet, which should be the place where an RAT is initially loaded from Repo.
   void resolveArray(const UnitEmitter& ue);
 
   bool mayHaveArrData() const {

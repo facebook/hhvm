@@ -2140,7 +2140,7 @@ void ExecutionContext::enqueueAPCHandle(APCHandle* handle, size_t size) {
   assertx(handle->isUncounted());
   if (RuntimeOption::EvalGCForAPC) {
     // Register handle with APCGCManager
-    // And resursively find all allocations belong to handle, register them too
+    // And recursively find all allocations belong to handle, register them too
     APCGCManager::getInstance().registerPendingDeletion(handle, size);
   }
   m_apcHandles.push_back(handle);

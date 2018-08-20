@@ -6466,7 +6466,7 @@ OPTBLD_INLINE void iopContAssignDelegate(Iter* iter) {
   }
 
   // We don't use the iterator if we have a delegate generator (as iterators
-  // mess with the internal state of the generator), so short circuit and dont
+  // mess with the internal state of the generator), so short circuit and don't
   // init our iterator in that case. Otherwise, if we init our iterator and it
   // returns false then we know that we have an empty iterator (like `[]`) in
   // which case just set our delegate to Null so that ContEnterDelegate and

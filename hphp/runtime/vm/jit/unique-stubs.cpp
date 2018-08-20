@@ -212,7 +212,7 @@ FCallHelperRet fcallHelper(ActRec* ar) {
 
   // If doFCall indicates that the function was intercepted and should be
   // skipped, it will have already torn down the callee's frame. So, we need to
-  // save the return value thats in it.
+  // save the return value that's in it.
   auto const retAddr = (TCA)ar->m_savedRip;
 
   try {

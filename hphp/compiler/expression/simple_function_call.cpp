@@ -186,7 +186,7 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstRawPtr ar,
     case FunType::VariableArgument:
       /*
         Note:
-        At this point, we dont have a function scope, so we set
+        At this point, we don't have a function scope, so we set
         the flags on the FileScope.
         The FileScope maintains a stack of attributes, so that
         it correctly handles each function.

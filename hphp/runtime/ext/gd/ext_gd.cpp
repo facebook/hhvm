@@ -861,7 +861,7 @@ struct gfxinfo *php_handle_jpeg(const req::ptr<File>& file, Array& info) {
     case M_APP15:
       if (!info.isNull()) {
         if (!php_read_APP(file, marker, info)) {
-          /* read all the app markes... */
+          /* read all the app marks... */
           return result;
         }
       } else {
@@ -6643,7 +6643,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
             if (ImageInfo->Copyright) IM_FREE(ImageInfo->Copyright);
             php_vspprintf(&ImageInfo->Copyright, 0, "%s, %s",
                           value_ptr, ImageInfo->CopyrightEditor);
-            /* format = TAG_FMT_UNDEFINED; this musn't be ASCII         */
+            /* format = TAG_FMT_UNDEFINED; this mustn't be ASCII         */
             /* but we are not supposed to change this                   */
             /* keep in mind that image_info does not store editor value */
           } else {

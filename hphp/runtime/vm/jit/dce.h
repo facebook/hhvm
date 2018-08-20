@@ -66,7 +66,7 @@ void rewriteToParentFrame(IRUnit& unit, IRInstruction& inst);
  * Converts an InlineReturn instruction to a noop instruction that still models
  * the memory effects of InlineReturn to ensure that stores from the callee are
  * not pushed into the caller, and to hopefully prevent some stores from
- * occuring at all.
+ * occurring at all.
  *
  * Precondition: inst is InlineReturn
  * Postcondition: inst is InlineReturnNoFrame

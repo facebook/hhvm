@@ -404,7 +404,7 @@ TCA handleBindCall(TCA toSmash, ActRec* calleeFrame, bool isImmutable) {
   TCA start = mcgen::getFuncPrologue(func, nArgs);
   TRACE(2, "bindCall -> %p\n", start);
   if (start && !isImmutable) {
-    // We dont know we're calling the right function, so adjust start to point
+    // We don't know we're calling the right function, so adjust start to point
     // to the dynamic check of ar->m_func.
     start = funcGuardFromPrologue(start, func);
   } else {

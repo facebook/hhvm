@@ -75,7 +75,7 @@ namespace HPHP { namespace rds {
  * dynamic link table to give the segment the same layout for each thread as
  * new data is allocated.
  *
- * The RDS starts with a small header that is statically layed out, followed by
+ * The RDS starts with a small header that is statically laid out, followed by
  * the main "normal" segment, which is (logically) reset at the beginning of
  * every request. The next section, called "local", contains unshared but still
  * persistent data---this is data that is local to a thread but retains its

@@ -146,7 +146,7 @@ void VirtualHost::SortAllowedDirectories(std::vector<std::string>& dirs) {
   std::sort(dirs.begin(), dirs.end());
   /*
      AllowedDirectories is a list of prefixes, so if x is a substring
-     of y, we dont need y (also remove any duplicates).
+     of y, we don't need y (also remove any duplicates).
   */
   dirs.erase(std::unique(dirs.begin(), dirs.end(),
                          [](const std::string &a, const std::string &b) {

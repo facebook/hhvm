@@ -50,7 +50,7 @@ echo "===========================\n";
 //*/
 
 ///*
-// define a generator that returns sucessive lines from a file of text
+// define a generator that returns successive lines from a file of text
 
 function getTextFileLines($filename)
 {

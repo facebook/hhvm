@@ -1,17 +1,17 @@
 <?php
 class Node {
 	public $parent = NULL;
-	public $childs = array();
+	public $children = array();
 	
 	function __construct(Node $parent=NULL) {
 		if ($parent) {
-			$parent->childs[] = $this;
+			$parent->children[] = $this;
 		}
-		$this->childs[] = $this;
+		$this->children[] = $this;
 	}
 	
 	function __destruct() {
-		$this->childs = NULL;
+		$this->children = NULL;
 	}	
 }
 

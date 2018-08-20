@@ -774,7 +774,7 @@ void merge_loaded_units(int numWorkers) {
   std::vector<std::thread> workers;
   // Compute a batch size that causes each thread to process approximately 16
   // batches.  Even if the batches are somewhat imbalanced in what they contain,
-  // the straggler workers are very unlikey to take more than 10% longer than
+  // the straggler workers are very unlikely to take more than 10% longer than
   // the first worker to finish.
   auto const batchSize{std::max(units.size() / numWorkers / 16, size_t(1))};
   std::atomic<size_t> index{0};

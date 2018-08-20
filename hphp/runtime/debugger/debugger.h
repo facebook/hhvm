@@ -41,7 +41,7 @@ struct DebuggerClientOptions;
 #define DEBUGGER_LOG_TAG "[DBGINFO] "
 
 /*
- * The Debugger generally manages proxies, sandboxes, and is the inital handler
+ * The Debugger generally manages proxies, sandboxes, and is the initial handler
  * of interrupts from the VM. It associates VM threads with sandboxes, and
  * sandboxes with proxies. Interrupts get minimal handling before being handed
  * off to the proper proxy.
@@ -145,7 +145,7 @@ private:
 
   // Map of "sandbox id"->"sandbox info" for any sandbox the process has seen.
   // Entries are made when a request is received for a sandbox, or when a switch
-  // to a new sandbox id is made via CmdMachine. The latter alows a debugger to
+  // to a new sandbox id is made via CmdMachine. The latter allows a debugger to
   // "pre-attach" to a sandbox before the first request is every received.
   // Entries are never removed.
   using SandboxMap = tbb::concurrent_hash_map<

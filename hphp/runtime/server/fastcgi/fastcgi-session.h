@@ -143,7 +143,7 @@ private:
  * ===== Socket ownership and life cycle =====
  *
  * Ownership of the TCP/UNIX socket is defined by the FastCGI protocol. Upon
- * reciept of a new request via a BEGIN_REQUEST record the session will read
+ * receipt of a new request via a BEGIN_REQUEST record the session will read
  * the flags field to determine whether or not it should remain open to process
  * subsequent requests following request completion.
  *
@@ -255,7 +255,7 @@ private:
   // Methods for reading records
   //
   // Convenience methods for parsing FastCGI records received from the
-  // webserver. All methods are called from readDataAvailable, and guarenteed
+  // webserver. All methods are called from readDataAvailable, and guaranteed
   // to have DestructorGuard on the stack.
   //
   // onRecordImpl methods process discrete records which have already been
@@ -384,7 +384,7 @@ private:
   // run until onComplete() is called. the eventCount must be incremented once
   // headers are complete to reflect this.
   //
-  // If thie socket shuts down before the entirety of the POST data arrives the
+  // If the socket shuts down before the entirety of the POST data arrives the
   // onBodyComplete callback on the transport must be invoked to notify it that
   // no further data will arrive; otherwise it will deadlock.
 

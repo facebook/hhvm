@@ -52,7 +52,7 @@ struct NormalizedInstruction {
   bool ignoreInnerType:1;
 
   /*
-   * Used with HHIR. Instruction shoud be interpreted, because previous attempt
+   * Used with HHIR. Instruction should be interpreted, because previous attempt
    * to translate it has failed.
    */
   bool interp:1;

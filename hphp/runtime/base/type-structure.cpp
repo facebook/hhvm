@@ -124,7 +124,7 @@ void functionTypeName(const Array& arr, std::string& name, bool forDisplay) {
     sep = ", ";
   }
 
-  // add funciton return type
+  // add function return type
   folly::toAppend("): ", fullName(retType, forDisplay), ")", &name);
 }
 

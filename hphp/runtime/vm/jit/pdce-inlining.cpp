@@ -123,7 +123,7 @@ start of every exit-head.
 
 After determining the callee main blocks the optimize pass will process every
 use of the callee frame pointer to determine if the use is compatible with
-sinking the DefInlineFP into exit-heads. Any use occuring within an exit-block
+sinking the DefInlineFP into exit-heads. Any use occurring within an exit-block
 is accepted as these uses will have access to the sunk frame pointer. Uses on
 the main block that can either be transformed to stack relative uses or adjusted
 to use the parent frame pointer (generally with some additional fixup in any
@@ -768,7 +768,7 @@ void adjustBCMarkers(OptimizeContext& ctx) {
   auto parent   = parentFp->inst();
 
   /*
-   * We're going to pretend this instruction occured in the caller, so
+   * We're going to pretend this instruction occurred in the caller, so
    * update its marker to use the same SrcKey as the call.
    *
    * This is particularly important for syncing vm regs where we read the

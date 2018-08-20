@@ -46,7 +46,7 @@
 // archs. The correct way of doing that is do not compile arch specific
 // files of a different one, but currently it is not possible, since
 // some common files use arch specific methods without eclusion.
-// The macro bellow returns the dummy field for x86 as it will not be used
+// The macro below returns the dummy field for x86 as it will not be used
 // in x64 arch.
 #ifdef __powerpc64__
 #define SAVED_TOC() m_savedToc
@@ -1165,7 +1165,7 @@ X(andqi, andq, TWO(s1, d))
 
 #undef X
 
-// Can be replaced by andqi that can be replaced by a andq if immediate wont
+// Can be replaced by andqi that can be replaced by a andq if immediate won't
 // fit.
 #define X(vasm_src, vasm_dst, operands)                                 \
 void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
@@ -1442,7 +1442,7 @@ void lowerForPPC64(Vunit& unit) {
 
 /*
  * Vptr struct supports fancy x64 addressing modes.
- * So we need to patch it to avoid ppc64el unsuported address modes.
+ * So we need to patch it to avoid ppc64el unsupported address modes.
  *
  * After patching, the Vptr @p will only have either base and index or base and
  * displacement.

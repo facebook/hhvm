@@ -564,7 +564,7 @@ void cgCheckRefs(IRLS& env, const IRInstruction* inst)  {
 
     if (vals64 != 0 && vals64 != mask64) {
       // If we're beyond nparams, then either all params are refs, or all
-      // params are non-refs, so if vals64 isn't 0 and isnt mask64, there's no
+      // params are non-refs, so if vals64 isn't 0 and isn't mask64, there's no
       // possibility of a match.
       fwdJcc(v, env, CC_LE, sf, inst->taken());
       thenBody(v);

@@ -145,7 +145,7 @@ struct DecodedInstruction {
   // Check if is loading data from TOC
   bool isLoadingTOC() const;
 
-  // Return the TOC addres of the immediate
+  // Return the TOC address of the immediate
   uint64_t* decodeTOCAddress() const;
 
   // Return the TOC offset of the immediate

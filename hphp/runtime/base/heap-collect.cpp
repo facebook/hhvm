@@ -243,7 +243,7 @@ void Collector::checkedEnqueue(const void* p) {
 // pointer into it. p shouldn't keep the buffer alive, since whoever
 // owns it, will scan it using the container's iterator api; OR
 // * p could be a stale pointer of any interesting type, that randomly
-// is pointing to recycled memory. ignoring it is actually desireable.
+// is pointing to recycled memory. ignoring it is actually desirable.
 template <bool apcgc>
 void Collector::exactEnqueue(const void* p) {
   if (auto h = find(p)) {
@@ -261,7 +261,7 @@ void Collector::exactEnqueue(const void* p) {
   }
 }
 
-// mark ambigous pointers in the range [start,start+len). If the start or
+// mark ambiguous pointers in the range [start,start+len). If the start or
 // end is a partial word, don't scan that word.
 template <bool apcgc>
 void FOLLY_DISABLE_ADDRESS_SANITIZER

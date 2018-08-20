@@ -364,7 +364,7 @@ void SocketTransport::waitForConnection(
   };
 
   // fds[0] will contain the read end of our "abort" pipe. Another thread will
-  // write data to tihs pipe to signal it's time for this worker to stop
+  // write data to this pipe to signal it's time for this worker to stop
   // blocking in poll() and terminate.
   int eventMask = POLLIN | POLLERR | POLLHUP;
   fds[0].fd = abortFd;

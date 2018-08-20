@@ -120,7 +120,7 @@ bool EvaluateCommand::executeImpl(
       // The dummy request only appears in the client UX while it is
       // stopped at a breakpoint during an evaluation (because the user
       // needs to see a call stack and scopes at that point). Otherwise,
-      // existance of the dummy is hiden from the user. If the dummy is
+      // existence of the dummy is hiden from the user. If the dummy is
       // no longer executing any evaluation, send a thread exited event
       // to remove it from the front-end UX.
       m_debugger->sendThreadEventMessage(

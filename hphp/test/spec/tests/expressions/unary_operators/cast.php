@@ -87,9 +87,9 @@ echo "---------------\n";
 
 class E
 {
-    const CON1 = 123;               // constants irrelevent for conversion purposes
-    public function f() {}          // methods irrelevent for conversion purposes
-    private static $fsprop = 0;     // static properties irrelevent for conversion purposes
+    const CON1 = 123;               // constants irrelevant for conversion purposes
+    public function f() {}          // methods irrelevant for conversion purposes
+    private static $fsprop = 0;     // static properties irrelevant for conversion purposes
 
     private $priv_prop;
     protected $prot_prop = 12.345;

@@ -276,7 +276,7 @@ void conjureEndInlining(IRGS& env, bool builtin);
  * accessor functions (functions that just return a static local or static
  * property if it's not null).
  *
- * This is exposed publically because the region translator drives inlining
+ * This is exposed publicly because the region translator drives inlining
  * decisions.
  */
 void inlSingletonSProp(IRGS&, const Func*, PC clsOp, PC propOp);

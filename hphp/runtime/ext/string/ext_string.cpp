@@ -984,7 +984,7 @@ TypedValue* HHVM_FN(sscanf)(ActRec* ar) {
 }
 
 String HHVM_FUNCTION(chr, const Variant& ascii) {
-  // This is the only known occurance of ParamCoerceModeNullByte,
+  // This is the only known occurrence of ParamCoerceModeNullByte,
   // so we treat it specially using an explicit tvCoerce call
   Variant v(ascii);
   auto tv = v.asTypedValue();

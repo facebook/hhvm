@@ -31,7 +31,7 @@ class collection implements Iterator {
   }
 
   public function valid() {
-    throw new Exception('shit happend');
+    throw new Exception('shit happened');
 
     return ($this->current() !== false);
   }

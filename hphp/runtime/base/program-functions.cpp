@@ -824,7 +824,7 @@ hugifyText(char* from, char* to) {
   // in the linker script
   madvise(from, sz, MADV_HUGEPAGE);
   // Don't use memcpy because its probably one of the
-  // functions thats been mapped out.
+  // functions that's been mapped out.
   // Needs the attribute((optimize("2")) to prevent
   // g++ from turning this back into memcpy(!)
   wordcpy((uint64_t*)from, (uint64_t*)mem, sz / sizeof(uint64_t));
@@ -1759,7 +1759,7 @@ static int execute_program_impl(int argc, char** argv) {
   RuntimeOption::BuildId = po.buildId;
   RuntimeOption::InstanceId = po.instanceId;
 
-  // Do this as early as possible to avoid creating temp files and spawing
+  // Do this as early as possible to avoid creating temp files and spawning
   // light processes. Correct compilation still requires loading all of the
   // ini/hdf/cli options.
   if (po.mode == "dumphhas" || po.mode == "verify") {
@@ -2330,7 +2330,7 @@ void hphp_process_init() {
   pcre_reinit();
   BootStats::mark("pcre_reinit");
 
-  // the liboniguruma docs say this isnt needed,
+  // the liboniguruma docs say this isn't needed,
   // but the implementation of init is not
   // thread safe due to bugs
   onig_init();

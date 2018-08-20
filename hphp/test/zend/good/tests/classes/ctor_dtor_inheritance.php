@@ -3,7 +3,7 @@
 // This test checks for:
 // - inherited constructors/destructors are not called automatically
 // - base classes know about derived properties in constructor/destructor
-// - base class constructors/destructors know the instanciated class name
+// - base class constructors/destructors know the instantiated class name
 
 class base {
 	public $name;

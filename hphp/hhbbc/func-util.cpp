@@ -106,7 +106,7 @@ void fixupSwitch(SSwitchTab& s, BlockId delta) {
   for (auto& ent : s) ent.second += delta;
 }
 
-// generic do-nothing function, thats an inexact match
+// generic do-nothing function, that's an inexact match
 template <typename Opcode>
 void fixupBlockIds(const Opcode& /*op*/, bool) {}
 

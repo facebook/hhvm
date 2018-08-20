@@ -14,7 +14,7 @@ echo "Inside file >" . __FILE__ . "< at line >" . __LINE__ .
 //var_dump(MY_MIN);
 //var_dump(MY_MAX);
 
-// Try to include a non-existant file
+// Try to include a non-existent file
 
 $fileName = 'unknown.php';
 $inc = include $fileName;

@@ -758,7 +758,7 @@ NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
   auto slab_start = slab->init();
   m_front = slab_start + nbytes; // allocate requested object
   // we can't use any space after slab->end() even if the allocator allows
-  // (indiciated by mem.size), because of the fixed-sized crossing map.
+  // (indicated by mem.size), because of the fixed-sized crossing map.
   m_limit = slab->end();
   FTRACE(3, "newSlab: adding slab at {} to limit {}\n", slab_start, m_limit);
   slab->setStart(slab_start);

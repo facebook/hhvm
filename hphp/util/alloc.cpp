@@ -195,7 +195,7 @@ __thread int high_arena_flags = 0;
 
 #if USE_JEMALLOC_EXTENT_HOOKS
 // Keep track of the size of recently freed memory that might be in the high1g
-// arena when it is disabled, so that we know when to reenable it.
+// arena when it is disabled, so that we know when to re-enable it.
 std::atomic_uint g_highArenaRecentlyFreed;
 
 alloc::Bump2MMapper* low_2m_mapper = nullptr;

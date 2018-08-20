@@ -2,7 +2,7 @@
 
 // The important thing here is that we call Variant::toObject on a hack array.
 // Extensions use Variant to accept arguments from user code, so all the repro
-// recipies below are using that. The extensions themselves are not to blame.
+// recipes below are using that. The extensions themselves are not to blame.
 
 $hackArrays = vec[
   vec[],

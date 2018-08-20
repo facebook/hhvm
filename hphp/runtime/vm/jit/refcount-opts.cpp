@@ -79,7 +79,7 @@ DecRefNZ.
 One rule this pass relies on is that it is illegal to DecRef an object in a way
 that takes its refcount to zero, and then IncRef it again after that.  This is
 not illegal for trivial reasons, because object __destruct methods can
-ressurect an object in PHP.  But within one JIT region, right now we declare it
+resurrect an object in PHP.  But within one JIT region, right now we declare it
 illegal to generate IR that uses an object after a DecRef that might take it to
 zero.
 
@@ -211,7 +211,7 @@ However, if we see an instruction that could DecRef one of these objects
 through a pointer in memory and its lower_bound is currently above its
 unsupported component, we can be sure we've accounted for that may-DecRef
 by balancing it with a IncRef of some sort that we've already observed.
-In this situation, we can remove the memory support bit to avoid futher
+In this situation, we can remove the memory support bit to avoid further
 reductions in the lower bound of that set via that memory location.
 
 Since this is may-information that makes analysis more conservative, the memory
@@ -234,7 +234,7 @@ IncRef instructions that raise the lower bound for that new pointer.
 
 Most of the complexity in this analysis is related to instructions that load or
 store from memory, and therefore interacts with memory support.  There are
-enough details to discuss it futher in next several sections of this doc.
+enough details to discuss it further in next several sections of this doc.
 
 
 -- About Loads --
@@ -1585,7 +1585,7 @@ bool merge_into(Env& /*env*/, RCState& dst, const RCState& src) {
     if (dst.unbalanced_decrefs.size()) {
       // Need to merge the unbalanced_decrefs. For each aset in
       // either, we want the destination to end up with max(aset in
-      // dst, aset in src) occurrances of aset (a kind of "union with
+      // dst, aset in src) occurrences of aset (a kind of "union with
       // counts").
       std::sort(tmp.begin(), tmp.end());
       std::sort(dst.unbalanced_decrefs.begin(), dst.unbalanced_decrefs.end());

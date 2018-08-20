@@ -20,7 +20,7 @@ var_dump($hello);
 ob_end_flush();
 
 
-echo "\ncheck that we dont have a reference\n";
+echo "\ncheck that we don't have a reference\n";
 ob_start();
 echo "Hello World\n";
 $hello2 = ob_get_contents();

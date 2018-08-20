@@ -2,9 +2,9 @@ array(4) {
   ["country_code"]=>
   string(2) "US"
   ["latitude"]=>
-  float(40.71416)
+  float(%f)
   ["longitude"]=>
-  float(-74.00639)
+  float(%f)
   ["comments"]=>
   string(20) "Eastern (most areas)"
 }

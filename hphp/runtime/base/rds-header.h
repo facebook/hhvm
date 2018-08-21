@@ -137,8 +137,6 @@ constexpr ptrdiff_t kVmpcOff           = kVmRegsOff + offsetof(VMRegs, pc);
 constexpr ptrdiff_t kVmFirstAROff      = kVmRegsOff + offsetof(VMRegs, firstAR);
 constexpr ptrdiff_t kVmMInstrStateOff  = kVmRegsOff +
                                            offsetof(VMRegs, mInstrState);
-constexpr ptrdiff_t kVmJitReturnAddrOff = kVmRegsOff +
-                                           offsetof(VMRegs, jitReturnAddr);
 
 static_assert((kVmMInstrStateOff % 16) == 0,
               "MInstrState should be 16-byte aligned in rds::Header");

@@ -1480,7 +1480,6 @@ void ExecutionContext::pushVMState(Cell* savedSP) {
   savedVM.sp = savedSP;
   savedVM.mInstrState = vmMInstrState();
   savedVM.jitCalledFrame = vmJitCalledFrame();
-  savedVM.jitReturnAddr = vmJitReturnAddr();
   m_nesting++;
 
   if (debug && savedVM.fp &&
@@ -1516,7 +1515,6 @@ void ExecutionContext::popVMState() {
   vmStack().top() = savedVM.sp;
   vmMInstrState() = savedVM.mInstrState;
   vmJitCalledFrame() = savedVM.jitCalledFrame;
-  vmJitReturnAddr() = savedVM.jitReturnAddr;
 
   if (debug) {
     if (savedVM.fp &&
@@ -1783,7 +1781,6 @@ static inline void enterVMCustomHandler(ActRec* ar, Action action) {
 
   vmFirstAR() = ar;
   vmJitCalledFrame() = nullptr;
-  vmJitReturnAddr() = 0;
 
   action();
 
@@ -1990,8 +1987,7 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
 ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
                                          Offset* prevPc /* = NULL */,
                                          TypedValue** prevSp /* = NULL */,
-                                         bool* fromVMEntry /* = NULL */,
-                                         uint64_t* jitReturnAddr /* = NULL */) {
+                                         bool* fromVMEntry /* = NULL */) {
   if (fp == nullptr) {
     return nullptr;
   }
@@ -2026,7 +2022,6 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
     *prevPc = prevFp->func()->unit()->offsetOf(vmstate.pc);
   }
   if (fromVMEntry) *fromVMEntry = true;
-  if (jitReturnAddr) *jitReturnAddr = (uint64_t)vmstate.jitReturnAddr;
   return prevFp;
 }
 

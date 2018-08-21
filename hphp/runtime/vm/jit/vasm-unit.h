@@ -48,7 +48,6 @@ struct Vblock {
 
   AreaIndex area_idx;
   int frame{-1};
-  int pending_frames{-1};
   uint64_t weight;
   jit::vector<Vinstr> code;
 };
@@ -132,14 +131,8 @@ struct Vconst {
 };
 
 struct Vframe {
-  Vframe(
-    const Func* func,
-    int32_t soff,
-    int parent,
-    int cost,
-    uint64_t entry_weight
-  ) : func(func)
-    , soff(soff)
+  Vframe(const Func* func, int parent, int cost, uint64_t entry_weight)
+    : func(func)
     , parent(parent)
     , entry_weight(entry_weight)
     , inclusive_cost(cost)
@@ -154,7 +147,6 @@ struct Vframe {
   static constexpr int Top = -1;
 
   LowPtr<const Func> func;
-  int32_t soff{-1};
   int parent;
 
   uint64_t entry_weight;

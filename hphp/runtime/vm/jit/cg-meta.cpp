@@ -23,16 +23,11 @@
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/tread-hash-map.h"
 
-#include "hphp/util/atomic-vector.h"
-
 namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(mcg);
 
 namespace {
-
-std::atomic<IFrameID> s_nextFrameKey;
-
 // Map from integral literals to their location in the TC data section.
 using LiteralMap = TreadHashMap<uint64_t,const uint64_t*,std::hash<uint64_t>>;
 LiteralMap s_literals{128};
@@ -44,60 +39,7 @@ CatchTraceMap s_catchTraceMap{128};
 using AbortReasonMap = TreadHashMap<uint32_t, Reason, std::hash<uint32_t>>;
 AbortReasonMap s_trapReasonMap{128};
 
-using InlineStackMap = TreadHashMap<uint32_t, IStack, std::hash<uint32_t>>;
-InlineStackMap s_inlineStacks{1024};
-
-using InlineFrameVec = AtomicVector<IFrame>;
-InlineFrameVec s_inlineFrames{4096,IFrame{}};
-
 constexpr uint32_t kInvalidCatchTrace = 0x0;
-
-IFrameID insertFrames(const std::vector<IFrame>& frames) {
-  auto const start = s_nextFrameKey.fetch_add(frames.size());
-  s_inlineFrames.ensureSize(start + frames.size());
-
-  for (IFrameID i = 0; i < frames.size(); ++i) {
-    auto& f = frames[i];
-    auto newFrame = IFrame{f.func, f.soff, f.parent + start};
-    s_inlineFrames.exchange(start + i, newFrame);
-  }
-
-  return start;
-}
-
-void insertStacks(
-  IFrameID start, const std::vector<std::pair<TCA,IStack>>& stacks
-) {
-  for (auto& stk : stacks) {
-    if (!stk.second.nframes) continue;
-    auto off = tc::addrToOffset(stk.first);
-    auto val = stk.second;
-    val.frame += start;
-    if (auto pos = s_inlineStacks.find(off)) {
-      *pos = val;
-    } else {
-      s_inlineStacks.insert(off, val);
-    }
-  }
-}
-
-void processInlineFrames(const CGMeta& cm) {
-  auto const start = insertFrames(cm.inlineFrames);
-  insertStacks(start, cm.inlineStacks);
-}
-
-}
-
-folly::Optional<IStack> inlineStackAt(CTCA addr) {
-  auto off = tc::addrToOffset(addr);
-  if (auto pos = s_inlineStacks.find(off)) {
-    return *pos;
-  }
-  return folly::none;
-}
-
-IFrame getInlineFrame(IFrameID id) {
-  return s_inlineFrames[id];
 }
 
 const uint64_t* addrForLiteral(uint64_t val) {
@@ -179,13 +121,9 @@ void CGMeta::process_only(
   }
   fixups.clear();
 
-  processInlineFrames(*this);
-  inlineFrames.clear();
-  inlineStacks.clear();
-
-  for (auto const& ct : catches) {
-    auto const key = tc::addrToOffset(ct.first);
-    auto const val = tc::addrToOffset(ct.second);
+  for (auto const& pair : catches) {
+    auto const key = tc::addrToOffset(pair.first);
+    auto const val = tc::addrToOffset(pair.second);
     if (auto pos = s_catchTraceMap.find(key)) {
       *pos = val;
     } else {
@@ -228,8 +166,6 @@ void CGMeta::clear() {
   watchpoints.clear();
   fixups.clear();
   catches.clear();
-  inlineFrames.clear();
-  inlineStacks.clear();
   jmpTransIDs.clear();
   literalsToPool.clear();
   literalAddrs.clear();
@@ -248,8 +184,6 @@ bool CGMeta::empty() const {
     watchpoints.empty() &&
     fixups.empty() &&
     catches.empty() &&
-    inlineFrames.empty() &&
-    inlineStacks.empty() &&
     jmpTransIDs.empty() &&
     literalsToPool.empty() &&
     literalAddrs.empty() &&

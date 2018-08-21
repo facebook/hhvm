@@ -43,17 +43,9 @@
                      (([12:7-11], _), (Lvar ([12:7-11], $foo))),
                      OG_nullthrows))));
               (Expr
-                 (([13:3-29], _),
-                  (Array_get (
-                     (([13:3-8], _),
-                      (Obj_get ((([13:3-5], C), (Lvar ([13:3-5], $c))),
-                         (([13:7-8], _), Null), OG_nullthrows))),
-                     (Some (([13:8-29], string),
-                            (Call (Cnormal,
-                               (([13:8-27], (function(): string)),
-                                (Id ([13:8-27], "\\returnsTheStringFoo"))),
-                               [], [], []))))
-                     ))))
+                 (([13:3-30], _),
+                  (Obj_get ((([13:3-5], C), (Lvar ([13:3-5], $c))),
+                     (([13:8-29], _), Any), OG_nullthrows))))
               ];
             fnb_unsafe = false });
        f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;

@@ -1,6 +1,6 @@
 File "disallows_a_variable_that_may_be_an_array_of_string_when_array_of_int_to_string_is_required.php", line 16, characters 29-34:
 Invalid argument (Typing[4110])
-File "disallows_a_variable_that_may_be_an_array_of_string_when_array_of_int_to_string_is_required.php", line 3, characters 36-40:
+File "disallows_a_variable_that_may_be_an_array_of_string_when_array_of_int_to_string_is_required.php", line 3, characters 36-53:
 This is an array (used like a hashtable)
 File "disallows_a_variable_that_may_be_an_array_of_string_when_array_of_int_to_string_is_required.php", line 12, characters 5-12:
 It is incompatible with an array (used like a vector) because a value is appended to it

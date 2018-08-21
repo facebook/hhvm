@@ -1,6 +1,6 @@
 File "varray_with_array_map_does_not_return_dict_like_array.php", line 4, characters 10-52:
 Invalid return type (Typing[4110])
-File "varray_with_array_map_does_not_return_dict_like_array.php", line 3, characters 35-39:
+File "varray_with_array_map_does_not_return_dict_like_array.php", line 3, characters 35-49:
 This is an array (used like a hashtable)
-File "varray_with_array_map_does_not_return_dict_like_array.php", line 4, characters 31-36:
+File "varray_with_array_map_does_not_return_dict_like_array.php", line 4, characters 31-51:
 It is incompatible with an array (used like a vector)

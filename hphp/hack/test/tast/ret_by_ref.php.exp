@@ -10,7 +10,7 @@ Errors:
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
            [(Static_var
-               [(([4:10-17], int),
+               [(([4:13-17], int),
                  (Binop ((Eq None),
                     (([4:10-12], int), (Lvar ([4:10-12], $x))),
                     (([4:15-17], int), (Int "42")))))

@@ -31,7 +31,7 @@
                     [([6:13-16], (Hprim Tint)); ([6:18-24], (Hprim Tstring));
                       ([6:26-29], (Hprim Tnum))],
                     [None; None; None], Hnon_variadic,
-                    ([6:32-41],
+                    ([6:32-46],
                      (Happly (([6:32-41], "\\Container"),
                         [([6:42-45], (Hprim Tint))])))
                     ))));
@@ -49,7 +49,7 @@
           param_callconv = None; param_user_attributes = [] };
         { Aast.AnnotatedAST.param_annotation = ([8:18-21], Container<int>);
           param_hint =
-          (Some ([8:3-12],
+          (Some ([8:3-17],
                  (Happly (([8:3-12], "\\Container"),
                     [([8:13-16], (Hprim Tint))]))));
           param_is_reference = false; param_is_variadic = false;
@@ -57,7 +57,7 @@
           param_callconv = None; param_user_attributes = [] };
         { Aast.AnnotatedAST.param_annotation = ([9:21-24], Container<string>);
           param_hint =
-          (Some ([9:3-12],
+          (Some ([9:3-20],
                  (Happly (([9:3-12], "\\Container"),
                     [([9:13-19], (Hprim Tstring))]))));
           param_is_reference = false; param_is_variadic = false;
@@ -66,7 +66,7 @@
         { Aast.AnnotatedAST.param_annotation =
           ([10:28-31], KeyedContainer<int, num>);
           param_hint =
-          (Some ([10:3-17],
+          (Some ([10:3-27],
                  (Happly (([10:3-17], "\\KeyedContainer"),
                     [([10:18-21], (Hprim Tint)); ([10:23-26], (Hprim Tnum))]
                     ))));

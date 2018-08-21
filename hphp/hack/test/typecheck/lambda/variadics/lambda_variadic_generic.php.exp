@@ -1,4 +1,4 @@
-File "lambda_variadic_generic.php", line 38, characters 18-18:
+File "lambda_variadic_generic.php", line 38, characters 18-46:
 Invalid argument (Typing[4101])
   File "lambda_variadic_generic.php", line 38, characters 19-19:
   This type has 0 arguments

@@ -7,7 +7,7 @@
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
-               (([9:4-21], :foo),
+               (([9:3-21], :foo),
                 (Xml (([9:4-7], "\\:foo"),
                    [(Xhp_simple (([9:8-11], "bar"),
                        (([9:12-18], string), (String "herp"))))
@@ -19,24 +19,24 @@
                     (([10:3-8], string), (Lvar ([10:3-8], $derp))),
                     (([10:11-17], string), (String "derp"))))));
              (Expr
-                (([11:4-22], :foo),
+                (([11:3-22], :foo),
                  (Xml (([11:4-7], "\\:foo"),
                     [(Xhp_simple (([11:8-11], "bar"),
                         (([11:13-18], string), (Lvar ([11:13-18], $derp)))))
                       ],
                     []))));
              (Expr
-                (([14:4-18:9], :foo),
+                (([14:3-18:9], :foo),
                  (Xml (([14:4-7], "\\:foo"),
                     [(Xhp_simple (([14:8-11], "bar"),
                         (([14:12-18], string), (String "herp"))))
                       ],
-                    [(([15:6-17:11], :foo),
+                    [(([15:5-17:11], :foo),
                       (Xml (([15:6-9], "\\:foo"),
                          [(Xhp_simple (([15:10-13], "bar"),
                              (([15:14-20], string), (String "derp"))))
                            ],
-                         [(([16:8-25], :foo),
+                         [(([16:7-25], :foo),
                            (Xml (([16:8-11], "\\:foo"),
                               [(Xhp_simple (([16:12-15], "bar"),
                                   (([16:16-22], string), (String "herp"))))
@@ -62,7 +62,7 @@
        [{ Aast.AnnotatedAST.cv_final = false; cv_is_xhp = true;
           cv_visibility = Public;
           cv_type =
-          (Some ([4:13-17], (Hoption ([4:13-17], (Hprim Tstring)))));
+          (Some ([4:13-34], (Hoption ([4:13-34], (Hprim Tstring)))));
           cv_id = ([4:35-38], ":bar"); cv_expr = None;
           cv_user_attributes = [] }
          ];

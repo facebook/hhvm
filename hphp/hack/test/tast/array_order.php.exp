@@ -7,10 +7,10 @@
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
-               (([13:3-13], array<string, _>),
+               (([13:3-50], array<string, _>),
                 (Binop ((Eq None),
                    (([13:3-5], array<string, _>), (Lvar ([13:3-5], $x))),
-                   (([13:8-13], array<string, _>),
+                   (([13:8-50], array<string, _>),
                     (Array
                        [(AFkvalue ((([13:14-17], string), (String "k")),
                            (([13:21-22], int), (Int "0"))));
@@ -24,10 +24,10 @@
                          ]))
                    ))));
              (Expr
-                (([14:3-13], array<_>),
+                (([14:3-35], array<_>),
                  (Binop ((Eq None),
                     (([14:3-5], array<_>), (Lvar ([14:3-5], $y))),
-                    (([14:8-13], array<_>),
+                    (([14:8-35], array<_>),
                      (Array
                         [(AFvalue (([14:14-15], int), (Int "0")));
                           (AFvalue

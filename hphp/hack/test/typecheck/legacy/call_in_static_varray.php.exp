@@ -1,2 +1,0 @@
-File "call_in_static_varray.php", line 7, characters 22-27:
-Initialization of class property must be a static literal expression. (Typing[4152])

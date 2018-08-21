@@ -28,10 +28,10 @@
                     (([6:3-5], int), (Lvar ([6:3-5], $x))),
                     (([6:9-10], int), (Int "4"))))));
              (Expr
-                (([8:3-11], array<int>),
+                (([8:3-22], array<int>),
                  (Binop ((Eq None),
                     (([8:3-7], array<int>), (Lvar ([8:3-7], $arr))),
-                    (([8:10-11], array<int>),
+                    (([8:10-22], array<int>),
                      (Array
                         [(AFvalue (([8:11-12], int), (Int "1")));
                           (AFvalue (([8:14-15], int), (Int "2")));

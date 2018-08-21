@@ -1,6 +1,6 @@
 File "darray_with_array_map_does_not_return_vect_like_array.php", line 4, characters 10-68:
 Invalid return type (Typing[4110])
-File "darray_with_array_map_does_not_return_vect_like_array.php", line 3, characters 35-39:
+File "darray_with_array_map_does_not_return_vect_like_array.php", line 3, characters 35-45:
 This is an array (used like a vector)
-File "darray_with_array_map_does_not_return_vect_like_array.php", line 4, characters 31-36:
+File "darray_with_array_map_does_not_return_vect_like_array.php", line 4, characters 31-67:
 It is incompatible with an array (used like a hashtable)

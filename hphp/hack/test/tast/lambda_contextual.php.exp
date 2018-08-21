@@ -32,11 +32,11 @@
                     (([6:3-12], (function((function(int): num) $f): void)),
                      (Id ([6:3-12], "\\takes_fun"))),
                     [],
-                    [(([6:13-15], (function(int $x): num)),
+                    [(([6:13-22], (function(int $x): num)),
                       (Efun (
                          { Aast.AnnotatedAST.f_annotation = ();
                            f_mode = <opaque>; f_ret = None;
-                           f_name = ([Pos.none], ";anonymous");
+                           f_name = ([6:13-22], ";anonymous");
                            f_tparams = []; f_where_constraints = [];
                            f_variadic = FVnonVariadic;
                            f_params =

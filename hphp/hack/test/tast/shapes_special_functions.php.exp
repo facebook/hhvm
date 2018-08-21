@@ -87,7 +87,7 @@
      { Aast.AnnotatedAST.t_annotation = (); t_name = ([3:6-11], "\\Point");
        t_tparams = []; t_constraint = None;
        t_kind =
-       ([3:14-19],
+       ([3:14-44],
         (Hshape
            { Aast_defs.nsi_allows_unknown_fields = false;
              nsi_field_map = [ShapeMap] }));

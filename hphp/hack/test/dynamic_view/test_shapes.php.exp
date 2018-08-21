@@ -8,5 +8,5 @@ File "test_shapes.php", line 7, characters 10-11:
 Invalid return type (Typing[4110])
   File "test_shapes.php", line 2, characters 19-21:
   This is an int
-  File "test_shapes.php", line 3, characters 8-12:
+  File "test_shapes.php", line 3, characters 8-38:
   It is incompatible with a shape

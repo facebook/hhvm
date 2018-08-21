@@ -2,4 +2,5 @@
 \D::getX : int try int
 \F::getX : ?_, int try ?int
 \G::getX : ?_, int try ?int
-No errors
+File "fake_members.php", line 35, characters 3-17:
+Cannot declare abstract method D::getX private (Parsing[1002])

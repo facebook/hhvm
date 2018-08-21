@@ -1,0 +1,2 @@
+File "heredoc_missing_identifier.php", line 12, characters 6-8:
+A name is expected here. (Parsing[1002])

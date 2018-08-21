@@ -1,0 +1,2 @@
+File "keyset_literal_wrong_bracket.php", line 4, characters 10-23:
+Initializers of 'vec', 'dict' and 'keyset' should use '[...]' instead of '{...}'. (Parsing[1002])

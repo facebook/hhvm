@@ -1,6 +1,6 @@
 File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 6, characters 24-34:
 Invalid argument (Typing[4110])
-File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 39-43:
+File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 39-51:
 This is an array (used like a hashtable)
-File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 5, characters 15-19:
+File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 5, characters 15-24:
 It is incompatible with an array (used like a vector)

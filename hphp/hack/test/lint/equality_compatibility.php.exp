@@ -3,6 +3,3 @@ equality_compatibility.php only declares `foo`, it should be named foo.php inste
 File "equality_compatibility.php", line 14, characters 3-16:
 Invalid comparison: This expression will always return false.
 A value of type int can never be equal to a value of type string (Lint[5607])
-File "equality_compatibility.php", line 15, characters 3-17:
-Invalid comparison: This expression will always return true.
-A value of type string can never be equal to a value of type int (Lint[5607])

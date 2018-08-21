@@ -28,15 +28,15 @@
                        [(([4:21-23], int), (Lvar ([4:21-23], $i)))])))
                    ))));
              (Expr
-                (([5:3-9], (function(): int)),
+                (([5:3-12:4], (function(): int)),
                  (Binop ((Eq None),
                     (([5:3-5], (function(): int)), (Lvar ([5:3-5], $f))),
-                    (([5:8-9], (function(): int)),
+                    (([5:8-12:4], (function(): int)),
                      (Efun (
                         { Aast.AnnotatedAST.f_annotation = ();
                           f_mode = <opaque>;
                           f_ret = (Some ([5:12-15], (Hprim Tint)));
-                          f_name = ([Pos.none], ";anonymous");
+                          f_name = ([5:8-12:4], ";anonymous");
                           f_tparams = []; f_where_constraints = [];
                           f_variadic = FVnonVariadic; f_params = [];
                           f_body =

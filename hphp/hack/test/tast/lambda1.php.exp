@@ -11,14 +11,14 @@
                 (Binop ((Eq None), (([3:3-5], string), (Lvar ([3:3-5], $s))),
                    (([3:8-13], string), (String "foo"))))));
              (Expr
-                (([4:3-10], [fun]),
+                (([4:3-41], [fun]),
                  (Binop ((Eq None), (([4:3-5], [fun]), (Lvar ([4:3-5], $f))),
-                    (([4:8-10], HackSuggest<(function(int): string), (function(string): string)>),
+                    (([4:8-41], HackSuggest<(function(int): string), (function(string): string)>),
                      (Efun (
                         { Aast.AnnotatedAST.f_annotation = ();
                           f_mode = <opaque>; f_ret = None;
-                          f_name = ([Pos.none], ";anonymous");
-                          f_tparams = []; f_where_constraints = [];
+                          f_name = ([4:8-41], ";anonymous"); f_tparams = [];
+                          f_where_constraints = [];
                           f_variadic = FVnonVariadic;
                           f_params =
                           [{ Aast.AnnotatedAST.param_annotation =

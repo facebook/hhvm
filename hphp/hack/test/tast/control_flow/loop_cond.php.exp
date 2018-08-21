@@ -58,7 +58,7 @@
        (NamedBody
           { Aast.AnnotatedAST.fnb_nast =
             [(For (
-                (([17:7-21], (A)),
+                (([17:8-20], (A)),
                  (Expr_list
                     [(([17:8-20], A),
                       (Binop ((Eq None),
@@ -69,10 +69,10 @@
                              [], [])))
                          )))
                       ])),
-                (([17:20-25], ((A | ?A))),
+                (([17:22-24], ((A | ?A))),
                  (Expr_list
                     [(([17:22-24], (A | ?A)), (Lvar ([17:22-24], $x)))])),
-                (([17:24-43], (?A)),
+                (([17:26-42], (?A)),
                  (Expr_list
                     [(([17:26-42], ?A),
                       (Binop ((Eq None),
@@ -84,7 +84,7 @@
                              [], [], [])))
                          )))
                       ])),
-                [Noop]))
+                []))
               ];
             fnb_unsafe = false });
        f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;

@@ -9,10 +9,10 @@ Errors:
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
-               (([3:3-15], array<int>),
+               (([3:3-24], array<int>),
                 (Binop ((Eq None),
                    (([3:3-7], array<int>), (Lvar ([3:3-7], $arr))),
-                   (([3:10-15], array<int>),
+                   (([3:10-24], array<int>),
                     (Array
                        [(AFvalue (([3:16-17], int), (Int "1")));
                          (AFvalue (([3:19-20], int), (Int "2")));

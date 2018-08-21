@@ -35,5 +35,5 @@ function has_unsafe(int $a) {
 }
 
 function has_unsafeexpr(string $a) {
-  <unchecked>echo</unchecked> <unchecked>/* UNSAFE_EXPR */ $a + 1</unchecked>;
+  <unchecked>echo</unchecked> /* UNSAFE_EXPR */ <unchecked>$a + 1</unchecked>;
 }

@@ -1624,6 +1624,7 @@ static void prepareFuncEntry(ActRec *ar, PC& pc, StackArgsState stk) {
   pushFrameSlots(func, nlocals);
 
   vmfp() = ar;
+  vmJitReturnAddr() = nullptr;
   if (firstDVInitializer != InvalidAbsoluteOffset) {
     pc = func->unit()->entry() + firstDVInitializer;
   } else {

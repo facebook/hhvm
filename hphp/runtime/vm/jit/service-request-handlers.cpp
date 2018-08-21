@@ -221,6 +221,7 @@ void syncFuncBodyVMRegs(ActRec* fp, void* sp) {
   auto& regs = vmRegsUnsafe();
   regs.fp = fp;
   regs.stack.top() = (Cell*)sp;
+  regs.jitReturnAddr = nullptr;
 
   auto const nargs = fp->numArgs();
   auto const nparams = fp->func()->numNonVariadicParams();
@@ -456,6 +457,7 @@ TCA handleResume(bool interpFirst) {
     start = getTranslation(TransArgs(sk));
   }
 
+  vmJitReturnAddr() = nullptr;
   vmJitCalledFrame() = vmfp();
   SCOPE_EXIT { vmJitCalledFrame() = nullptr; };
 

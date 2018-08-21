@@ -785,6 +785,10 @@ and emit_new env pos expr targs args uargs =
     List.length reified_targs + List.length args + List.length uargs in
   let cexpr = expr_to_class_expr ~resolve_self:true
     (Emit_env.get_scope env) expr in
+  let cexpr = match cexpr with
+    | Class_id (_, name) ->
+      Option.value ~default:cexpr (get_reified_var_cexpr env name)
+    | _ -> cexpr in
   match cexpr with
     (* Special case for statically-known class *)
   | Class_id id ->
@@ -993,6 +997,10 @@ and emit_class_get env qop need_ref cid prop =
 and emit_class_const env pos cid (_, id) =
   let cexpr = expr_to_class_expr ~resolve_self:true
     (Emit_env.get_scope env) cid in
+  let cexpr = match cexpr with
+    | Class_id (_, name) ->
+      Option.value ~default:cexpr (get_reified_var_cexpr env name)
+    | _ -> cexpr in
   match cexpr with
   | Class_id cid ->
     emit_class_const_impl env cid id
@@ -1011,6 +1019,7 @@ and emit_class_const_impl env cid id =
     Emit_symbol_refs.add_class fq_id_str;
     instr (ILitConst (ClsCnsD (Hhbc_id.Const.from_ast_name id, fq_id)))
     end
+
 and emit_yield env pos = function
   | A.AFvalue e ->
     gather [
@@ -1609,32 +1618,45 @@ and emit_inline_hhas s =
   | None ->
     failwith @@ "impossible: cannot find parsed inline hhas for '" ^ s ^ "'"
 
-and get_reified_var env is_fun name =
+and get_reified_var ~is_fun name =
+  let p = Pos.none in
   if is_fun then
-    instr_cgetl @@ Local.Named (SU.Reified.mangle_reified_param name)
+    p, A.Lvar (p, SU.Reified.mangle_reified_param name)
   else
-    let p = Pos.none in
+    (* $this->reified_var *)
     let expr = p, A.Lvar (p, "$this") in
     let prop = p, A.Id (p, SU.Reified.mangle_reified_param ~nodollar:true name) in
-    fst (emit_obj_get ~need_ref:false env p QueryOp.CGet expr prop A.OG_nullthrows)
+    p, A.Obj_get (expr, prop, A.OG_nullthrows)
 
-and emit_reified_type env name =
+and is_reified_tparam ~is_fun env name =
   let scope = Emit_env.get_scope env in
   let f tparam acc =
     match tparam with
     | _, (_, id), _, true -> SSet.add id acc
     | _ -> acc
   in
-  let current_fun_targs =
-    List.fold_right (Ast_scope.Scope.get_fun_tparams scope) ~init:SSet.empty ~f
-  in
-  let current_class_targs =
-    List.fold_right (Ast_scope.Scope.get_class_tparams scope) ~init:SSet.empty ~f
-  in
-  if SSet.mem name current_fun_targs then
-    get_reified_var env true name
-  else if SSet.mem name current_class_targs then
-    get_reified_var env false name
+  let tparams =
+    if is_fun then Ast_scope.Scope.get_fun_tparams scope
+    else Ast_scope.Scope.get_class_tparams scope in
+  let current_targs = List.fold_right tparams ~init:SSet.empty ~f in
+  SSet.mem name current_targs
+
+and get_reified_var_cexpr env name =
+  let p = Pos.none in
+  let aux base = (* $base['classname'] *)
+    Class_expr (p, A.Array_get (base, Some (p, A.String ("classname")))) in
+  if is_reified_tparam ~is_fun:true env name then
+    Some (aux @@ get_reified_var ~is_fun:true name)
+  else if is_reified_tparam ~is_fun:false env name then
+    Some (aux @@ get_reified_var ~is_fun:false name)
+  else
+    None
+
+and emit_reified_type env name =
+  if is_reified_tparam ~is_fun:true env name then
+    emit_expr ~need_ref:false env @@ get_reified_var ~is_fun:true name
+  else if is_reified_tparam ~is_fun:false env name then
+    emit_expr ~need_ref:false env @@ get_reified_var ~is_fun:false name
   else
     Emit_fatal.raise_fatal_runtime Pos.none "Invalid reified param"
 
@@ -2948,7 +2970,7 @@ and emit_reified_arg env hint =
     match SMap.get name current_targs with
     | Some is_fun ->
       (* This is already resolved by the previous caller *)
-      get_reified_var env is_fun name
+      emit_expr ~need_ref:false env @@ get_reified_var ~is_fun name
     | _ -> failwith "impossible, already checked for membership"
   in
   let acc = (0, SMap.empty) in
@@ -3238,6 +3260,10 @@ and emit_call_lhs env outer_pos (pos, expr_ as expr) nargs has_splat inout_arg_p
       then Hhbc_id.Method.add_suffix method_id
         (Emit_inout_helpers.inout_suffix inout_arg_positions)
       else method_id in
+    let cexpr = match cexpr with
+      | Class_id (_, name) ->
+        Option.value ~default:cexpr (get_reified_var_cexpr env name)
+      | _ -> cexpr in
     begin match cexpr with
     (* Statically known *)
     | Class_id cid ->
@@ -3257,17 +3283,21 @@ and emit_call_lhs env outer_pos (pos, expr_ as expr) nargs has_splat inout_arg_p
          instr_fpushclsmethod nargs []
        ]
     | _ ->
-       let method_name = Hhbc_id.Method.to_raw_string method_id in
-       gather [
-         of_pair @@ emit_class_expr env cexpr (Pos.none, A.Id (Pos.none, method_name));
-         instr_fpushclsmethod nargs []
-       ]
+      let method_name = Hhbc_id.Method.to_raw_string method_id in
+      gather [
+        of_pair @@ emit_class_expr env cexpr (Pos.none, A.Id (Pos.none, method_name));
+        instr_fpushclsmethod nargs []
+      ]
     end
 
   | A.Class_get (cid, e) ->
     let cexpr = expr_to_class_expr ~resolve_self:false
       (Emit_env.get_scope env) cid in
     let expr_instrs = emit_expr ~need_ref:false env e in
+    let cexpr = match cexpr with
+      | Class_id (_, name) ->
+        Option.value ~default:cexpr (get_reified_var_cexpr env name)
+      | _ -> cexpr in
     begin match cexpr with
     | Class_static ->
        gather [expr_instrs;
@@ -3285,12 +3315,12 @@ and emit_call_lhs env outer_pos (pos, expr_ as expr) nargs has_splat inout_arg_p
         instr_fpushclsmethod nargs inout_arg_positions
        ]
     | _ ->
-       gather [
+      gather [
         expr_instrs;
         emit_load_class_ref env pos cexpr;
         emit_pos outer_pos;
         instr_fpushclsmethod nargs inout_arg_positions
-       ]
+      ]
     end
 
   | A.Id (_, s as id)->

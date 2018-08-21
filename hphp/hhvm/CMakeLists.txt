@@ -68,7 +68,8 @@ int main() {
 
 if(NOT "${NOT_REQUIRE_ATOMIC_LINKER_FLAG}")
     message(STATUS "-latomic is required to link hhvm")
-    target_link_libraries(hhvm atomic)
+    find_library(ATOMIC_LIBRARY NAMES atomic libatomic.so.1)
+    target_link_libraries(hhvm ${ATOMIC_LIBRARY})
 endif()
 set(CMAKE_REQUIRED_FLAGS ${OLD_CMAKE_REQUIRED_FLAGS})
 

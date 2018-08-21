@@ -53,6 +53,7 @@ CASE(Keyset)
 CASE(Object)
 CASE(Resource)
 CASE(Ref)
+CASE(Func)
 
 #undef CASE
 

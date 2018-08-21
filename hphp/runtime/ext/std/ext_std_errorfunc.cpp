@@ -211,7 +211,7 @@ bool HHVM_FUNCTION(restore_exception_handler) {
 
 Variant HHVM_FUNCTION(set_error_handler, const Variant& error_handler,
                       int error_types /* = ErrorMode::PHP_ALL | STRICT */) {
-  if (!is_null(error_handler)) {
+  if (!is_null(error_handler.asTypedValue())) {
     return g_context->pushUserErrorHandler(error_handler, error_types);
   } else {
     g_context->clearUserErrorHandlers();

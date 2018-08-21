@@ -251,7 +251,7 @@ static Variant php_hash_do_hash(const String& algo, const String& data,
 
   if (isfilename) {
     for (Variant chunk = HHVM_FN(fread)(f.toResource(), 1024);
-         !is_empty_string(chunk);
+         !is_empty_string(chunk.asTypedValue());
          chunk = HHVM_FN(fread)(f.toResource(), 1024)) {
       String schunk = chunk.toString();
       ops->hash_update(context, (unsigned char *)schunk.data(), schunk.size());

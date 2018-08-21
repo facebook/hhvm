@@ -4302,7 +4302,7 @@ OPTBLD_INLINE void iopIssetS(clsref_slot slot) {
 }
 
 OPTBLD_FLT_INLINE void iopIssetL(local_var tv) {
-  bool ret = is_not_null(tvAsCVarRef(tv.ptr));
+  bool ret = !is_null(tvToCell(tv.ptr));
   TypedValue* topTv = vmStack().allocTV();
   topTv->m_data.num = ret;
   topTv->m_type = KindOfBoolean;
@@ -4312,10 +4312,10 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
   assertx(cellIsPlausible(*val));
 
   switch (op) {
-  case IsTypeOp::Null:   return is_null(tvAsCVarRef(val));
-  case IsTypeOp::Bool:   return is_bool(tvAsCVarRef(val));
-  case IsTypeOp::Int:    return is_int(tvAsCVarRef(val));
-  case IsTypeOp::Dbl:    return is_double(tvAsCVarRef(val));
+  case IsTypeOp::Null:   return is_null(val);
+  case IsTypeOp::Bool:   return is_bool(val);
+  case IsTypeOp::Int:    return is_int(val);
+  case IsTypeOp::Dbl:    return is_double(val);
   case IsTypeOp::Arr:
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices &&
         !vmfp()->m_func->isBuiltin())) {
@@ -4330,7 +4330,7 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
       }
       return false;
     }
-    return is_array(tvAsCVarRef(val));
+    return is_array(val);
   case IsTypeOp::Vec:
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
       if (isArrayType(val->m_type)) {
@@ -4340,7 +4340,7 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
         return false;
       }
     }
-    return is_vec(tvAsCVarRef(val));
+    return is_vec(val);
   case IsTypeOp::Dict:
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
       if (isArrayType(val->m_type)) {
@@ -4350,10 +4350,10 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
         return false;
       }
     }
-    return is_dict(tvAsCVarRef(val));
-  case IsTypeOp::Keyset: return is_keyset(tvAsCVarRef(val));
-  case IsTypeOp::Obj:    return is_object(tvAsCVarRef(val));
-  case IsTypeOp::Str:    return is_string(tvAsCVarRef(val));
+    return is_dict(val);
+  case IsTypeOp::Keyset: return is_keyset(val);
+  case IsTypeOp::Obj:    return is_object(val);
+  case IsTypeOp::Str:    return is_string(val);
   case IsTypeOp::Res:    return val->m_type == KindOfResource;
   case IsTypeOp::Scalar: return HHVM_FN(is_scalar)(tvAsCVarRef(val));
   case IsTypeOp::ArrLike: return isArrayLikeType(val->m_type);
@@ -4365,7 +4365,7 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
         return false;
       }
     }
-    return is_varray(tvAsCVarRef(val));
+    return is_varray(val);
   case IsTypeOp::DArray:
     assertx(!RuntimeOption::EvalHackArrDVArrs);
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
@@ -4374,7 +4374,7 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
         return false;
       }
     }
-    return is_darray(tvAsCVarRef(val));
+    return is_darray(val);
   }
   not_reached();
 }

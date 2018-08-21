@@ -416,7 +416,7 @@ bool UnaryOpExpression::preCompute(const Variant& value, Variant &result) {
         result = !value.toBoolean();
         break;
       case T_ISSET:
-        result = is_not_null(value);
+        result = !is_null(value.toCell());
         break;
       case T_INC:
       case T_DEC:

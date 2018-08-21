@@ -95,19 +95,19 @@ bool HHVM_FUNCTION(settype, VRefParam var, const String& type) {
 }
 
 bool HHVM_FUNCTION(is_null, const Variant& v) {
-  return is_null(v);
+  return is_null(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(is_bool, const Variant& v) {
-  return is_bool(v);
+  return is_bool(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(is_int, const Variant& v) {
-  return is_int(v);
+  return is_int(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(is_float, const Variant& v) {
-  return is_double(v);
+  return is_double(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(is_numeric, const Variant& v) {
@@ -115,7 +115,7 @@ bool HHVM_FUNCTION(is_numeric, const Variant& v) {
 }
 
 bool HHVM_FUNCTION(is_string, const Variant& v) {
-  return is_string(v);
+  return is_string(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(is_scalar, const Variant& v) {
@@ -135,7 +135,7 @@ bool HHVM_FUNCTION(is_array, const Variant& v) {
     }
     return false;
   }
-  return is_array(v);
+  return is_array(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(HH_is_vec, const Variant& v) {
@@ -148,7 +148,7 @@ bool HHVM_FUNCTION(HH_is_vec, const Variant& v) {
       return false;
     }
   }
-  return is_vec(v);
+  return is_vec(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(HH_is_dict, const Variant& v) {
@@ -161,41 +161,43 @@ bool HHVM_FUNCTION(HH_is_dict, const Variant& v) {
       return false;
     }
   }
-  return is_dict(v);
+  return is_dict(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(HH_is_keyset, const Variant& v) {
-  return is_keyset(v);
+  return is_keyset(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(HH_is_varray, const Variant& val) {
-  if (RuntimeOption::EvalHackArrDVArrs) return is_vec(val);
+  auto const cell = val.asTypedValue();
+  if (RuntimeOption::EvalHackArrDVArrs) return is_vec(cell);
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
     if (val.isVecArray()) {
       raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_VARR);
       return false;
     }
   }
-  return val.isPHPArray() && val.toCArrRef().isVArray();
+  return tvIsArray(cell) && cell->m_data.parr->isVArray();
 }
 
 bool HHVM_FUNCTION(HH_is_darray, const Variant& val) {
-  if (RuntimeOption::EvalHackArrDVArrs) return is_dict(val);
+  auto const cell = val.asTypedValue();
+  if (RuntimeOption::EvalHackArrDVArrs) return is_dict(cell);
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
     if (val.isDict()) {
       raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_DARR);
       return false;
     }
   }
-  return val.isPHPArray() && val.toCArrRef().isDArray();
+  return tvIsArray(cell) && cell->m_data.parr->isDArray();
 }
 
 bool HHVM_FUNCTION(HH_is_any_array, const Variant& val) {
-  return val.isArray();
+  return tvIsArrayLike(val.asTypedValue());
 }
 
 bool HHVM_FUNCTION(is_object, const Variant& v) {
-  return is_object(v);
+  return is_object(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(is_resource, const Variant& v) {

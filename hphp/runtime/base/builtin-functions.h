@@ -60,14 +60,29 @@ void throw_exception(const Object& e);
 ///////////////////////////////////////////////////////////////////////////////
 // type testing
 
-inline bool is_null(const Variant& v)   { return v.isNull();}
-inline bool is_not_null(const Variant& v) { return !v.isNull();}
-inline bool is_bool(const Variant& v)   { return v.is(KindOfBoolean);}
-inline bool is_int(const Variant& v)    { return v.isInteger();}
-inline bool is_double(const Variant& v) { return v.is(KindOfDouble);}
-inline bool is_string(const Variant& v) {
-  if (v.isString()) return true;
-  if (v.isFunc()) {
+inline bool is_null(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsNull(c);
+}
+
+inline bool is_bool(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsBool(c);
+}
+
+inline bool is_int(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsInt(c);
+}
+
+inline bool is_double(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsDouble(c);
+}
+
+inline bool is_string(const Cell* c) {
+  if (tvIsString(c)) return true;
+  if (tvIsFunc(c)) {
     if (RuntimeOption::EvalRaiseFuncConversionWarning) {
       raise_warning("Func to string conversion");
     }
@@ -75,32 +90,47 @@ inline bool is_string(const Variant& v) {
   }
   return false;
 }
-inline bool is_array(const Variant& v)  { return v.isPHPArray();}
-inline bool is_vec(const Variant& v)    { return v.isVecArray();}
-inline bool is_dict(const Variant& v)   { return v.isDict();}
-inline bool is_keyset(const Variant& v) { return v.isKeyset();}
-inline bool is_varray(const Variant& v) {
-  return RuntimeOption::EvalHackArrDVArrs
-    ? v.isVecArray()
-    : (v.isArray() && v.asCArrRef().isVArray());
-}
-inline bool is_darray(const Variant& v) {
-  return RuntimeOption::EvalHackArrDVArrs
-    ? v.isDict()
-    : (v.isArray() && v.asCArrRef().isDArray());
+
+inline bool is_array(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsArray(c);
 }
 
-inline bool is_object(const Variant& var) {
-  if (!var.is(KindOfObject)) {
-    return false;
-  }
-  auto cls = var.toObject().get()->getVMClass();
-  auto incompleteClass = SystemLib::s___PHP_Incomplete_ClassClass;
-  return cls != incompleteClass;
+inline bool is_vec(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsVec(c);
 }
 
-inline bool is_empty_string(const Variant& v) {
-  return v.isString() && v.getStringData()->empty();
+inline bool is_dict(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsDict(c);
+}
+
+inline bool is_keyset(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsKeyset(c);
+}
+
+inline bool is_varray(const Cell* c) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? tvIsVec(c)
+    : (tvIsArray(c) && c->m_data.parr->isVArray());
+}
+
+inline bool is_darray(const Cell* c) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? tvIsDict(c)
+    : (tvIsArray(c) && c->m_data.parr->isDArray());
+}
+
+inline bool is_object(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsObject(c) &&
+    c->m_data.pobj->getVMClass() != SystemLib::s___PHP_Incomplete_ClassClass;
+}
+
+inline bool is_empty_string(const Cell* c) {
+  return tvIsString(c) && c->m_data.pstr->empty();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

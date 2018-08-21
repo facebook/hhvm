@@ -1,0 +1,225 @@
+array(1) {
+  ["foo"]=>
+  NULL
+}
+array(2) {
+  ["A"]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+  ["B"]=>
+  array(0) {
+  }
+}
+array(2) {
+  ["A"]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+  ["B"]=>
+  array(0) {
+  }
+}
+array(3) {
+  [0]=>
+  object(ReflectionParameter)#2 (3) {
+    ["info"]=>
+    array(10) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(1) "a"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
+      ["function"]=>
+      string(3) "foo"
+      ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
+      bool(true)
+      ["attributes"]=>
+      array(0) {
+      }
+      ["is_optional"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(1) "a"
+    ["paramTypeInfo"]=>
+    array(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
+  }
+  [1]=>
+  object(ReflectionParameter)#3 (3) {
+    ["info"]=>
+    array(12) {
+      ["index"]=>
+      int(1)
+      ["name"]=>
+      string(1) "b"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
+      ["function"]=>
+      string(3) "foo"
+      ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
+      bool(true)
+      ["default"]=>
+      NULL
+      ["defaultText"]=>
+      string(4) "NULL"
+      ["attributes"]=>
+      array(0) {
+      }
+      ["is_optional"]=>
+      bool(true)
+    }
+    ["name"]=>
+    string(1) "b"
+    ["paramTypeInfo"]=>
+    array(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
+  }
+  [2]=>
+  object(ReflectionParameter)#4 (3) {
+    ["info"]=>
+    array(12) {
+      ["index"]=>
+      int(2)
+      ["name"]=>
+      string(1) "c"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
+      ["function"]=>
+      string(3) "foo"
+      ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
+      bool(true)
+      ["default"]=>
+      NULL
+      ["defaultText"]=>
+      string(4) "NULL"
+      ["attributes"]=>
+      array(0) {
+      }
+      ["is_optional"]=>
+      bool(true)
+    }
+    ["name"]=>
+    string(1) "c"
+    ["paramTypeInfo"]=>
+    array(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
+  }
+}
+object(ReflectionType)#5 (1) {
+  ["type_hint_info":"ReflectionType":private]=>
+  array(3) {
+    ["name"]=>
+    string(7) "HH\void"
+    ["nullable"]=>
+    bool(false)
+    ["builtin"]=>
+    bool(false)
+  }
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(0) {
+}
+array(1) {
+  ["Bing"]=>
+  array(0) {
+  }
+}
+array(2) {
+  ["Bing"]=>
+  array(0) {
+  }
+  ["Bar"]=>
+  array(0) {
+  }
+}
+array(1) {
+  [0]=>
+  object(ReflectionParameter)#6 (3) {
+    ["info"]=>
+    array(11) {
+      ["index"]=>
+      int(0)
+      ["name"]=>
+      string(1) "a"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(0) ""
+      ["type_hint_builtin"]=>
+      bool(false)
+      ["function"]=>
+      string(1) "a"
+      ["class"]=>
+      string(3) "Baz"
+      ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
+      bool(true)
+      ["attributes"]=>
+      array(0) {
+      }
+      ["is_optional"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(1) "a"
+    ["paramTypeInfo"]=>
+    array(3) {
+      ["name"]=>
+      string(0) ""
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
+  }
+}
+int(2)

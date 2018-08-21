@@ -574,11 +574,11 @@ class ReflectionParameter implements Reflector {
     if ($this->hasType()) {
       return new ReflectionType(
         $this,
-        array(
+        darray[
           'name' => $this->info['type_hint'],
           'nullable' => $this->info['type_hint_nullable'],
           'builtin' => $this->info['type_hint_builtin'],
-        )
+        ]
       );
     }
     return null;
@@ -1174,7 +1174,7 @@ class ReflectionExtension implements Reflector {
 class ReflectionType {
   private $type_hint_info;
   public function __construct(?Reflector $param_or_ret = null,
-                              array $type_hint_info = array()) {
+                              darray $type_hint_info = darray[]) {
     // PHP7 actually allows you to call this constructor from user code
     // successfully, even though it is really meant to only be called from
     // ReflectionParameter::getType() and

@@ -656,7 +656,7 @@ static Array get_function_static_variables(const Func* func) {
   auto const& staticVars = func->staticVars();
 
   auto size = staticVars.size();
-  ArrayInit ai(size, ArrayInit::Mixed{});
+  DArrayInit ai(size);
 
   for (size_t i = 0; i < staticVars.size(); ++i) {
     const Func::SVInfo &sv = staticVars[i];
@@ -731,10 +731,10 @@ ALWAYS_INLINE static bool isPhpTypeHintEnabled(const Func* func) {
 ALWAYS_INLINE
 static Array get_function_param_info(const Func* func) {
   const Func::ParamInfoVec& params = func->params();
-  PackedArrayInit ai(func->numParams());
+  VArrayInit ai(func->numParams());
 
   for (int i = 0; i < func->numParams(); ++i) {
-    Array param = Array::Create();
+    Array param = Array::CreateDArray();
     const Func::ParamInfo& fpi = params[i];
 
     param.set(s_index, make_tv<KindOfInt64>(i));
@@ -897,7 +897,7 @@ ALWAYS_INLINE
 static Array get_function_user_attributes(const Func* func) {
   auto userAttrs = func->userAttributes();
 
-  ArrayInit ai(userAttrs.size(), ArrayInit::Mixed{});
+  DArrayInit ai(userAttrs.size());
   for (auto it = userAttrs.begin(); it != userAttrs.end(); ++it) {
     ai.set(VarNR::MakeKey(StrNR(it->first).asString()).tv(), it->second);
   }
@@ -1193,16 +1193,16 @@ static Array HHVM_METHOD(ReflectionClass, getRequirementNames) {
   if (!(cls->attrs() & (AttrTrait | AttrInterface))) {
     // requirements are applied to abstract/concrete classes when they use
     // a trait / implement an interface
-    return empty_array();
+    return Array::attach(staticEmptyVArray());
   }
 
   auto const& requirements = cls->allRequirements();
   auto numReqs = requirements.size();
   if (numReqs == 0) {
-    return empty_array();
+    return Array::attach(staticEmptyVArray());
   }
 
-  PackedArrayInit pai(numReqs);
+  VArrayInit pai(numReqs);
   for (int i = 0; i < numReqs; ++i) {
     auto const& req = requirements[i];
     pai.append(Variant{const_cast<StringData*>(req->name())});
@@ -1226,18 +1226,13 @@ static Array HHVM_METHOD(ReflectionClass, getInterfaceNames) {
       st->add(const_cast<StringData*>(interface->name()));
     }
   }
-
-  PackedArrayInit ai(st->size());
-  for (ArrayIter iter(st.get()); iter; ++iter) {
-    ai.append(iter.secondValPlus());
-  }
-  return ai.toArray();
+  return st->toVArray();
 }
 
 static Array HHVM_METHOD(ReflectionClass, getTraitNames) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   auto const& traits = cls->preClass()->usedTraits();
-  PackedArrayInit ai(traits.size());
+  VArrayInit ai(traits.size());
   for (const StringData* traitName : traits) {
     ai.append(Variant{const_cast<StringData*>(traitName)});
   }
@@ -1248,7 +1243,7 @@ static Array get_trait_alias_info(const Class* cls) {
   auto const& aliases = cls->traitAliases();
 
   if (aliases.size()) {
-    ArrayInit ai(aliases.size(), ArrayInit::Map{});
+    DArrayInit ai(aliases.size());
 
     for (auto const& namePair : aliases) {
       ai.set(StrNR(namePair.first), VarNR(namePair.second).tv());
@@ -1260,7 +1255,7 @@ static Array get_trait_alias_info(const Class* cls) {
     // on the Class.
     auto const& rules = cls->preClass()->traitAliasRules();
 
-    ArrayInit ai(rules.size(), ArrayInit::Map{});
+    DArrayInit ai(rules.size());
 
     for (auto const& rule : rules) {
       auto namePair = rule.asNamePair();
@@ -1410,7 +1405,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedConstants) {
 
   size_t numConsts = cls->numConstants();
   if (!numConsts) {
-    return Array::Create();
+    return Array::CreateDArray();
   }
 
   auto st = req::make<c_Set>();
@@ -1419,7 +1414,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedConstants) {
   addClassConstantNames(cls, st, numConsts);
   assertx(st->size() <= numConsts);
 
-  ArrayInit ai(numConsts, ArrayInit::Mixed{});
+  DArrayInit ai(numConsts);
   for (ArrayIter iter(st.get()); iter; ++iter) {
     auto constName = iter.first().getStringData();
     Cell value = cls->clsCnsGet(constName);
@@ -1435,7 +1430,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedAbstractConstants) {
 
   size_t numConsts = cls->numConstants();
   if (!numConsts) {
-    return Array::Create();
+    return Array::CreateDArray();
   }
 
   auto st = req::make<c_Set>();
@@ -1449,7 +1444,14 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedAbstractConstants) {
   }
 
   assertx(st->size() <= numConsts);
-  return st->toArray();
+
+  DArrayInit ai(numConsts);
+  IterateV(collections::asArray(st.get()),
+           [&ai] (const TypedValue& value) {
+              auto constName = value.m_data.pstr;
+              ai.add(constName, Variant(constName));
+           });
+  return ai.toArray();
 }
 
 
@@ -1483,7 +1485,7 @@ static Array HHVM_METHOD(ReflectionClass, getAttributes) {
   auto const pcls = cls->preClass();
 
   auto userAttrs = pcls->userAttributes();
-  ArrayInit ai(userAttrs.size(), ArrayInit::Mixed{});
+  DArrayInit ai(userAttrs.size());
 
   for (auto it = userAttrs.begin(); it != userAttrs.end(); ++it) {
     ai.set(StrNR(it->first), tvAsCVarRef(&it->second));
@@ -1494,7 +1496,7 @@ static Array HHVM_METHOD(ReflectionClass, getAttributes) {
 static Array HHVM_METHOD(ReflectionClass, getAttributesRecursive) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
 
-  Array ret = Array::Create(); // no reasonable idea about sizing
+  Array ret = Array::CreateDArray(); // no reasonable idea about sizing
 
   // UserAttributes are stored in the PreClass, so we must walk the parent
   // chain to get all of them; attribute specifications from child classes
@@ -2061,7 +2063,7 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getAttributes) {
   assertx(req);
   auto const userAttrs = req->userAttrs;
 
-  ArrayInit ai(userAttrs.size(), ArrayInit::Mixed{});
+  DArrayInit ai(userAttrs.size());
   for (auto& attr : userAttrs) {
     ai.set(StrNR(attr.first), tvAsCVarRef(&attr.second));
   }

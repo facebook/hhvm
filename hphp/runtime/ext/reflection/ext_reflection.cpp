@@ -1445,13 +1445,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedAbstractConstants) {
 
   assertx(st->size() <= numConsts);
 
-  DArrayInit ai(numConsts);
-  IterateV(collections::asArray(st.get()),
-           [&ai] (const TypedValue& value) {
-              auto constName = value.m_data.pstr;
-              ai.add(constName, Variant(constName));
-           });
-  return ai.toArray();
+  return st->toDArray();
 }
 
 

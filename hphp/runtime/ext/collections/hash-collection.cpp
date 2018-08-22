@@ -108,17 +108,17 @@ Array HashCollection::toArray() {
 
 Array HashCollection::toVArray() {
   if (!m_size) return Array::attach(staticEmptyVArray());
-  auto ad = arrayData()->toVArray(true);
-  assertx(ad->m_pos == 0);
-  return Array::attach(ad);
+  auto arr = Array{arrayData()}.toVArray();
+  assertx(arr->m_pos == 0);
+  return arr;
 }
 
 Array HashCollection::toDArray() {
   if (!m_size) return Array::attach(staticEmptyDArray());
-  auto ad = arrayData()->toDArray(true);
-  if (UNLIKELY(ad->size() < m_size)) warnOnStrIntDup();
-  assertx(ad->m_pos == 0);
-  return Array::attach(ad);
+  auto arr = Array{arrayData()}.toDArray();
+  if (UNLIKELY(arr->size() < m_size)) warnOnStrIntDup();
+  assertx(arr->m_pos == 0);
+  return arr;
 }
 
 Array HashCollection::toKeysArray() {

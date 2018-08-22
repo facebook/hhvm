@@ -976,7 +976,7 @@ private:
  */
 jit::vector<Variable*> buildIntervals(const Vunit& unit,
                                       const VxlsContext& ctx) {
-  ONTRACE(kRegAllocLevel, printCfg(unit, ctx.blocks));
+  ONTRACE(kVasmRegAllocDetailLevel, printCfg(unit, ctx.blocks));
 
   auto variables = jit::vector<Variable*>{unit.next_vr};
 
@@ -1036,7 +1036,7 @@ jit::vector<Variable*> buildIntervals(const Vunit& unit,
     std::reverse(ivl->uses.begin(), ivl->uses.end());
     std::reverse(ivl->ranges.begin(), ivl->ranges.end());
   }
-  ONTRACE(kRegAllocLevel,
+  ONTRACE(kVasmRegAllocDetailLevel,
     printVariables("after building intervals", unit, ctx, variables);
   );
 
@@ -1611,7 +1611,8 @@ void Vxls::assignSpill(Interval* ivl) {
   }
 
   // Ran out of spill slots.
-  ONTRACE(kRegAllocLevel, dumpVariables(variables, spill_info.num_spills));
+  ONTRACE(kVasmRegAllocDetailLevel,
+          dumpVariables(variables, spill_info.num_spills));
   TRACE(1, "vxls-punt TooManySpills\n");
   TRACE_PUNT("LinearScan_TooManySpills");
 }
@@ -2387,7 +2388,7 @@ void renameOperands(Vunit& unit, const VxlsContext& ctx,
     }
   }
   ONTRACE(
-    kRegAllocLevel,
+    kVasmRegAllocDetailLevel,
     printVariables("after renaming operands", unit, ctx, variables);
   );
 }
@@ -3259,7 +3260,8 @@ void allocateRegisters(Vunit& unit, const Abi& abi) {
   // Perform register allocation.
   auto spill_info = assignRegisters(ctx, variables, hint_info);
 
-  ONTRACE(kRegAllocLevel, dumpVariables(variables, spill_info.num_spills));
+  ONTRACE(kVasmRegAllocDetailLevel,
+          dumpVariables(variables, spill_info.num_spills));
 
   // Insert lifetime-resolving copies, spills, and rematerializations, and
   // replace the Vreg operands in the Vinstr stream with the assigned PhysRegs.
@@ -3267,7 +3269,7 @@ void allocateRegisters(Vunit& unit, const Abi& abi) {
   renameOperands(unit, ctx, variables);
   insertCopies(unit, ctx, variables, resolution);
 
-  ONTRACE(kRegAllocLevel,
+  ONTRACE(kVasmRegAllocDetailLevel,
     dumpVariables(variables, spill_info.num_spills);
     printVariables("after inserting copies", unit, ctx, variables);
   );

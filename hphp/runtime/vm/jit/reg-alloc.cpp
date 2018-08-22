@@ -21,8 +21,8 @@
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
-#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
 
@@ -186,31 +186,35 @@ void assignRegs(const IRUnit& unit, Vunit& vunit, irlower::IRLS& state,
     if (forced != InvalidReg) {
       state.locs[tmp] = Vloc{forced};
       UNUSED Reg64 r = forced;
-      FTRACE(kRegAllocLevel, "force t{} in {}\n", tmp->id(), reg::regname(r));
+      FTRACE(kVasmRegAllocDetailLevel,
+             "force t{} in {}\n", tmp->id(), reg::regname(r));
       continue;
     }
     if (tmp->inst()->is(DefConst)) {
       auto const loc = make_const(vunit, tmp->type());
       state.locs[tmp] = loc;
-      FTRACE(kRegAllocLevel, "const t{} in %{}\n", tmp->id(),
+      FTRACE(kVasmRegAllocDetailLevel, "const t{} in %{}\n", tmp->id(),
              size_t(loc.reg(0)), size_t(loc.reg(1)));
     } else {
       if (tmp->numWords() == 2) {
         if (!not_wide.test(tmp->id())) {
           auto r = vunit.makeReg();
           state.locs[tmp] = Vloc{Vloc::kWide, r};
-          FTRACE(kRegAllocLevel, "def t{} in wide %{}\n", tmp->id(), size_t(r));
+          FTRACE(kVasmRegAllocDetailLevel,
+                 "def t{} in wide %{}\n", tmp->id(), size_t(r));
         } else {
           auto data = vunit.makeReg();
           auto type = vunit.makeReg();
           state.locs[tmp] = Vloc{data, type};
-          FTRACE(kRegAllocLevel, "def t{} in %{},%{}\n", tmp->id(),
+          FTRACE(kVasmRegAllocDetailLevel,
+                 "def t{} in %{},%{}\n", tmp->id(),
                  size_t(data), size_t(type));
         }
       } else {
         auto data = vunit.makeReg();
         state.locs[tmp] = Vloc{data};
-        FTRACE(kRegAllocLevel, "def t{} in %{}\n", tmp->id(), size_t(data));
+        FTRACE(kVasmRegAllocDetailLevel,
+               "def t{} in %{}\n", tmp->id(), size_t(data));
       }
     }
   }

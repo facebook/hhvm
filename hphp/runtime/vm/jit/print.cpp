@@ -248,12 +248,12 @@ static constexpr auto kIndent = 4;
 
 void disasmRange(std::ostream& os, TCA begin, TCA end) {
   assertx(begin <= end);
-  bool const dumpIR = dumpIREnabled(kExtraLevel);
+  bool const printEncoding = dumpIREnabled(kAsmEncodingLevel);
 
   switch (arch()) {
     case Arch::X64: {
       Disasm disasm(Disasm::Options().indent(kIndent + 4)
-                    .printEncoding(dumpIR)
+                    .printEncoding(printEncoding)
                     .color(color(ANSI_COLOR_BROWN)));
       disasm.disasm(os, begin, end);
       return;
@@ -261,7 +261,7 @@ void disasmRange(std::ostream& os, TCA begin, TCA end) {
 
     case Arch::ARM: {
       vixl::Decoder dec;
-      vixl::PrintDisassembler disasm(os, kIndent + 4, dumpIR,
+      vixl::PrintDisassembler disasm(os, kIndent + 4, printEncoding,
                                      color(ANSI_COLOR_BROWN));
       disasm.setShouldDereferencePCRelativeLiterals(true);
       dec.AppendVisitor(&disasm);
@@ -272,8 +272,8 @@ void disasmRange(std::ostream& os, TCA begin, TCA end) {
     }
 
     case Arch::PPC64: {
-      ppc64_asm::Disassembler disasm(dumpIR, true, kIndent + 4,
-                                      color(ANSI_COLOR_BROWN));
+      ppc64_asm::Disassembler disasm(printEncoding, true, kIndent + 4,
+                                     color(ANSI_COLOR_BROWN));
       for (; begin < end; begin += ppc64_asm::instr_size_in_bytes) {
         disasm.disassembly(os, begin);
       }

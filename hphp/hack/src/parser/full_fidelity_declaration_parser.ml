@@ -117,6 +117,25 @@ module WithExpressionAndStatementAndTypeParser
   let parse_compound_statement parser =
     with_statement_parser parser StatementParser.parse_compound_statement
 
+  let with_expression_parser
+  : 'a . t -> (ExpressionParser.t -> ExpressionParser.t * 'a) -> t * 'a
+  = fun parser f ->
+    let expr_parser =
+      ExpressionParser.make
+        parser.env
+        parser.lexer
+        parser.errors
+        parser.context
+        parser.sc_state in
+    let (expr_parser, expr) = f expr_parser in
+    let env = ExpressionParser.env expr_parser in
+    let lexer = ExpressionParser.lexer expr_parser in
+    let errors = ExpressionParser.errors expr_parser in
+    let context = ExpressionParser.context expr_parser in
+    let sc_state = ExpressionParser.sc_state expr_parser in
+    let parser = { env; lexer; errors; context; sc_state } in
+    (parser, expr)
+
   let parse_expression parser =
     let expr_parser =
       ExpressionParser.make
@@ -1329,18 +1348,7 @@ module WithExpressionAndStatementAndTypeParser
       Make.missing parser (pos parser)
 
   and parse_attribute parser =
-    let (parser, name) = require_name parser in
-    let (parser, left, items, right) =
-      if peek_token_kind parser = LeftParen then
-        parse_parenthesized_comma_list_opt_allow_trailing
-          parser parse_expression
-      else
-        let (parser, missing1) = Make.missing parser (pos parser) in
-        let (parser, missing2) = Make.missing parser (pos parser) in
-        let (parser, missing3) = Make.missing parser (pos parser) in
-        (parser, missing1, missing2, missing3)
-    in
-    Make.attribute parser name left items right
+    with_expression_parser parser ExpressionParser.parse_constructor_call
 
   and parse_generic_type_parameter_list_opt parser =
     let (_parser1, open_angle) = next_token parser in

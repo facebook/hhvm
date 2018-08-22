@@ -9,7 +9,7 @@
         ((() << 2 ())
          (list 3
           ((list_item 3
-            ((attribute 3
+            ((constructor_call 3
               ((() name 3 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())))
              (missing 0 ())))))
          (() >> 2 ((whitespace 1)))))

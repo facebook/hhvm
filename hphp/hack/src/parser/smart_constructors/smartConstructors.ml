@@ -69,7 +69,6 @@ module type SmartConstructors_S = sig
   val make_parameter_declaration : r -> r -> r -> r -> r -> r -> t -> t * r
   val make_variadic_parameter : r -> r -> r -> t -> t * r
   val make_attribute_specification : r -> r -> r -> t -> t * r
-  val make_attribute : r -> r -> r -> r -> t -> t * r
   val make_inclusion_expression : r -> r -> t -> t * r
   val make_inclusion_directive : r -> r -> t -> t * r
   val make_compound_statement : r -> r -> r -> t -> t * r
@@ -253,7 +252,6 @@ end) = struct
     let parameter_declaration parser arg0 arg1 arg2 arg3 arg4 arg5 = call parser (SCI.make_parameter_declaration arg0 arg1 arg2 arg3 arg4 arg5)
     let variadic_parameter parser arg0 arg1 arg2 = call parser (SCI.make_variadic_parameter arg0 arg1 arg2)
     let attribute_specification parser arg0 arg1 arg2 = call parser (SCI.make_attribute_specification arg0 arg1 arg2)
-    let attribute parser arg0 arg1 arg2 arg3 = call parser (SCI.make_attribute arg0 arg1 arg2 arg3)
     let inclusion_expression parser arg0 arg1 = call parser (SCI.make_inclusion_expression arg0 arg1)
     let inclusion_directive parser arg0 arg1 = call parser (SCI.make_inclusion_directive arg0 arg1)
     let compound_statement parser arg0 arg1 arg2 = call parser (SCI.make_compound_statement arg0 arg1 arg2)

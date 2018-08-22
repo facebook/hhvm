@@ -28,6 +28,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       val sc_state : t -> SC.t
       val parse_expression : t -> t * SC.r
       val parse_simple_variable: t -> t * SC.r
+      val parse_constructor_call: t -> t * SC.r
       val parse_cast_or_parenthesized_or_lambda_expression: t -> t * SC.r
       val with_as_expresssions: t
         -> enabled: bool

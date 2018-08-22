@@ -59,7 +59,6 @@ type t =
   | ParameterDeclaration
   | VariadicParameter
   | AttributeSpecification
-  | Attribute
   | InclusionExpression
   | InclusionDirective
   | CompoundStatement
@@ -236,7 +235,6 @@ let to_string kind =
   | ParameterDeclaration                    -> "parameter_declaration"
   | VariadicParameter                       -> "variadic_parameter"
   | AttributeSpecification                  -> "attribute_specification"
-  | Attribute                               -> "attribute"
   | InclusionExpression                     -> "inclusion_expression"
   | InclusionDirective                      -> "inclusion_directive"
   | CompoundStatement                       -> "compound_statement"

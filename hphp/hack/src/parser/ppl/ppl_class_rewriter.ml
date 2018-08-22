@@ -197,8 +197,8 @@ let is_ppl_attribute attribute =
   match syntax attribute with
   | ListItem {
       list_item = {
-        syntax = Attribute {
-          attribute_name = {
+        syntax = ConstructorCall {
+          constructor_call_type = {
             syntax = Token token;
             _;
           };

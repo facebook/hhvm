@@ -678,15 +678,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       attribute_specification_attributes = attrs;
       attribute_specification_right_double_angle = right_da; } ->
     transform_argish env ~allow_trailing:false left_da attrs right_da
-  | Syntax.Attribute {
-      attribute_name = name;
-      attribute_left_paren = left_p;
-      attribute_values = values;
-      attribute_right_paren = right_p; } ->
-    Concat [
-      t env name;
-      transform_argish env left_p values right_p;
-    ]
   | Syntax.InclusionExpression {
       inclusion_require = kw;
       inclusion_filename = expr; } ->

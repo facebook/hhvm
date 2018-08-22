@@ -375,14 +375,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     
-  let make_attribute p0 p1 p2 p3 stack =
-    match stack with
-    | a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3] [a0; a1; a2; a3] "attribute" in
-      let node = Syntax.make_attribute p0 p1 p2 p3 in
-      node :: rem, node
-    | _ -> failwith "Unexpected stack state"
-    
   let make_inclusion_expression p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->

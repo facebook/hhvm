@@ -565,8 +565,8 @@ let methodish_is_native node =
         attribute_specification_attributes = attrs; _}; _}; _} ->
     let attrs = syntax_to_list_no_separators attrs in
     List.exists attrs
-      ~f:(function { syntax = Attribute {attribute_name; _}; _} ->
-            String.lowercase @@ text attribute_name = "__native"
+      ~f:(function { syntax = ConstructorCall {constructor_call_type; _}; _} ->
+            String.lowercase @@ text constructor_call_type = "__native"
           | _ -> false)
   | _ -> false
 
@@ -871,8 +871,8 @@ let first_parent_function_attributes_contains parents name =
       let attrs =
         syntax_to_list_no_separators attribute_specification_attributes in
       List.exists attrs
-        ~f:(function { syntax = Attribute { attribute_name; _}; _} ->
-          text attribute_name = name | _ -> false)
+        ~f:(function { syntax = ConstructorCall { constructor_call_type; _}; _} ->
+          text constructor_call_type = name | _ -> false)
     | _ -> false
     end
 
@@ -1016,9 +1016,9 @@ let attribute_specification_contains node name =
     List.exists (syntax_node_to_list attrs) ~f:begin fun n ->
       match syntax n with
       | ListItem {
-          list_item = { syntax = Attribute { attribute_name; _ }; _ }; _
+          list_item = { syntax = ConstructorCall { constructor_call_type; _ }; _ }; _
         } ->
-        begin match Syntax.extract_text attribute_name with
+        begin match Syntax.extract_text constructor_call_type with
         | Some n when n = name -> true
         | _ -> false
         end
@@ -1615,9 +1615,9 @@ let no_memoize_attribute_on_lambda node errors =
     List.fold (syntax_node_to_list attrs) ~init:errors ~f:begin fun errors n ->
       match syntax n with
       | ListItem {
-          list_item = ({ syntax = Attribute { attribute_name; _ }; _ } as attr);_
+          list_item = ({ syntax = ConstructorCall { constructor_call_type; _ }; _ } as attr);_
         } ->
-        begin match Syntax.extract_text attribute_name with
+        begin match Syntax.extract_text constructor_call_type with
         | Some n when n = SN.UserAttributes.uaMemoize ->
           let e =
             make_error_from_node attr SyntaxError.memoize_on_lambda in
@@ -1736,13 +1736,18 @@ let expression_errors env namespace_name node parents errors =
   | ConstructorCall ctr_call ->
     let typechecker_errors =
       if is_typechecker env then
-        if is_missing ctr_call.constructor_call_left_paren ||
-            is_missing ctr_call.constructor_call_right_paren
-        then
-          let node = ctr_call.constructor_call_type in
-          let constructor_name = text ctr_call.constructor_call_type in
-          [make_error_from_node node (SyntaxError.error2038 constructor_name)]
-        else []
+        match parents with
+        (* list item -> syntax list -> attribute *)
+        | _ :: _ :: a :: _ when is_attribute_specification a ->
+          []
+        | _ ->
+          if (is_missing ctr_call.constructor_call_left_paren ||
+              is_missing ctr_call.constructor_call_right_paren)
+          then
+            let node = ctr_call.constructor_call_type in
+            let constructor_name = text ctr_call.constructor_call_type in
+            [make_error_from_node node (SyntaxError.error2038 constructor_name)]
+          else []
       else []
     in
     let designator_errors = class_type_designator_errors ctr_call.constructor_call_type in
@@ -2244,9 +2249,9 @@ let classish_errors env node parents namespace_name names errors =
         let attrs = syntax_to_list_no_separators attrs in
         List.exists attrs (fun e ->
           match syntax e with
-          | Attribute {attribute_values; attribute_name; _ } ->
-            text attribute_name = SN.UserAttributes.uaSealed &&
-            List.exists (syntax_to_list_no_separators attribute_values) (fun e ->
+          | ConstructorCall {constructor_call_argument_list; constructor_call_type; _ } ->
+            text constructor_call_type = SN.UserAttributes.uaSealed &&
+            List.exists (syntax_to_list_no_separators constructor_call_argument_list) (fun e ->
               match syntax e with
               | ScopeResolutionExpression {scope_resolution_name; _ } ->
                 text scope_resolution_name <> "class"
@@ -2260,8 +2265,8 @@ let classish_errors env node parents namespace_name names errors =
         let attrs = syntax_to_list_no_separators attrs in
         List.exists attrs (fun e ->
           match syntax e with
-          | Attribute {attribute_name; _ } ->
-            text attribute_name = SN.UserAttributes.uaSealed
+          | ConstructorCall {constructor_call_type; _ } ->
+            text constructor_call_type = SN.UserAttributes.uaSealed
           | _ -> false)
       | _ -> false in
 

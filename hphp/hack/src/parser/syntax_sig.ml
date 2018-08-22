@@ -252,12 +252,6 @@ module type Syntax_S = sig
     ; attribute_specification_attributes                 : t
     ; attribute_specification_right_double_angle         : t
     }
-  | Attribute                               of
-    { attribute_name                                     : t
-    ; attribute_left_paren                               : t
-    ; attribute_values                                   : t
-    ; attribute_right_paren                              : t
-    }
   | InclusionExpression                     of
     { inclusion_require                                  : t
     ; inclusion_filename                                 : t
@@ -1099,7 +1093,6 @@ module type Syntax_S = sig
   val make_parameter_declaration : t -> t -> t -> t -> t -> t -> t
   val make_variadic_parameter : t -> t -> t -> t
   val make_attribute_specification : t -> t -> t -> t
-  val make_attribute : t -> t -> t -> t -> t
   val make_inclusion_expression : t -> t -> t
   val make_inclusion_directive : t -> t -> t
   val make_compound_statement : t -> t -> t -> t
@@ -1274,7 +1267,6 @@ module type Syntax_S = sig
   val is_parameter_declaration : t -> bool
   val is_variadic_parameter : t -> bool
   val is_attribute_specification : t -> bool
-  val is_attribute : t -> bool
   val is_inclusion_expression : t -> bool
   val is_inclusion_directive : t -> bool
   val is_compound_statement : t -> bool

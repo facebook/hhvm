@@ -9,13 +9,13 @@
         ((() << 2 ())
          (list 6
           ((list_item 2
-            ((attribute 1
+            ((constructor_call 1
               ((() name 1 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())))
              (() , 1 ((whitespace 1)))))
            (list_item 3
-            ((attribute 3
-              ((() name 1 ()) (() "(" 1 ()) (missing 0 ())
-               (() ")" 1 ((whitespace 1)))))
+            ((constructor_call 3
+              ((simple_type_specifier 1 ((() name 1 ()))) (() "(" 1 ())
+               (missing 0 ()) (() ")" 1 ((whitespace 1)))))
              (missing 0 ())))))
          (() >> 2 ((whitespace 1)))))
        (missing 0 ()) (() class 5 ((whitespace 1)))

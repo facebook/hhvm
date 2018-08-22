@@ -42,7 +42,7 @@
               ((((whitespace 2)) << 2 ())
                (list 4
                 ((list_item 4
-                  ((attribute 4
+                  ((constructor_call 4
                     ((() name 4 ()) (missing 0 ()) (missing 0 ())
                      (missing 0 ())))
                    (missing 0 ())))))
@@ -61,7 +61,7 @@
               ((((whitespace 2)) << 2 ())
                (list 4
                 ((list_item 4
-                  ((attribute 4
+                  ((constructor_call 4
                     ((() name 4 ()) (missing 0 ()) (missing 0 ())
                      (missing 0 ())))
                    (missing 0 ())))))

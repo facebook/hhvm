@@ -941,10 +941,10 @@ and pUserAttribute : user_attribute list parser = fun node env ->
   match syntax node with
   | AttributeSpecification { attribute_specification_attributes; _ } ->
     couldMap attribute_specification_attributes env ~f:begin function
-      | { syntax = Attribute { attribute_name; attribute_values; _}; _ } ->
+      | { syntax = ConstructorCall { constructor_call_argument_list; constructor_call_type; _ }; _ } ->
         fun env ->
-          { ua_name   = pos_name attribute_name env
-          ; ua_params = couldMap ~f:pExpr attribute_values env
+          { ua_name   = pos_name constructor_call_type env
+          ; ua_params = couldMap ~f:pExpr constructor_call_argument_list env
           }
       | node -> missing_syntax "attribute" node
     end

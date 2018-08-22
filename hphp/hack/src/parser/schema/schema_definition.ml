@@ -509,21 +509,8 @@ let schema : schema_node list =
     ; aggregates  = []
     ; fields =
       [ "left_double_angle", Token
-      ; "attributes", ZeroOrMore (Just "Attribute")
+      ; "attributes", ZeroOrMore (Just "ConstructorCall")
       ; "right_double_angle", Token
-      ]
-    }
-  ; { kind_name   = "Attribute"
-    ; type_name   = "attribute"
-    ; func_name   = "attribute"
-    ; description = "attribute"
-    ; prefix      = "attribute"
-    ; aggregates  = []
-    ; fields =
-      [ "name", Token
-      ; "left_paren", ZeroOrOne Token
-      ; "values", ZeroOrMore (Aggregate Expression)
-      ; "right_paren", ZeroOrOne Token
       ]
     }
   ; { kind_name   = "InclusionExpression"

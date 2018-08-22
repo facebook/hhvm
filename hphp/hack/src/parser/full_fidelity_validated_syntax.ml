@@ -1366,7 +1366,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_attribute_specification : attribute_specification validator = function
   | { Syntax.syntax = Syntax.AttributeSpecification x; value = v } -> v,
     { attribute_specification_right_double_angle = validate_token x.attribute_specification_right_double_angle
-    ; attribute_specification_attributes = validate_list_with (validate_attribute) x.attribute_specification_attributes
+    ; attribute_specification_attributes = validate_list_with (validate_constructor_call) x.attribute_specification_attributes
     ; attribute_specification_left_double_angle = validate_token x.attribute_specification_left_double_angle
     }
   | s -> validation_fail (Some SyntaxKind.AttributeSpecification) s
@@ -1374,26 +1374,8 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.AttributeSpecification
       { attribute_specification_left_double_angle = invalidate_token x.attribute_specification_left_double_angle
-      ; attribute_specification_attributes = invalidate_list_with (invalidate_attribute) x.attribute_specification_attributes
+      ; attribute_specification_attributes = invalidate_list_with (invalidate_constructor_call) x.attribute_specification_attributes
       ; attribute_specification_right_double_angle = invalidate_token x.attribute_specification_right_double_angle
-      }
-    ; Syntax.value = v
-    }
-  and validate_attribute : attribute validator = function
-  | { Syntax.syntax = Syntax.Attribute x; value = v } -> v,
-    { attribute_right_paren = validate_option_with (validate_token) x.attribute_right_paren
-    ; attribute_values = validate_list_with (validate_expression) x.attribute_values
-    ; attribute_left_paren = validate_option_with (validate_token) x.attribute_left_paren
-    ; attribute_name = validate_token x.attribute_name
-    }
-  | s -> validation_fail (Some SyntaxKind.Attribute) s
-  and invalidate_attribute : attribute invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.Attribute
-      { attribute_name = invalidate_token x.attribute_name
-      ; attribute_left_paren = invalidate_option_with (invalidate_token) x.attribute_left_paren
-      ; attribute_values = invalidate_list_with (invalidate_expression) x.attribute_values
-      ; attribute_right_paren = invalidate_option_with (invalidate_token) x.attribute_right_paren
       }
     ; Syntax.value = v
     }

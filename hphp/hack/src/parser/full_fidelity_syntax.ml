@@ -98,7 +98,6 @@ module WithToken(Token: TokenType) = struct
       | ParameterDeclaration                    _ -> SyntaxKind.ParameterDeclaration
       | VariadicParameter                       _ -> SyntaxKind.VariadicParameter
       | AttributeSpecification                  _ -> SyntaxKind.AttributeSpecification
-      | Attribute                               _ -> SyntaxKind.Attribute
       | InclusionExpression                     _ -> SyntaxKind.InclusionExpression
       | InclusionDirective                      _ -> SyntaxKind.InclusionDirective
       | CompoundStatement                       _ -> SyntaxKind.CompoundStatement
@@ -281,7 +280,6 @@ module WithToken(Token: TokenType) = struct
     let is_parameter_declaration                        = has_kind SyntaxKind.ParameterDeclaration
     let is_variadic_parameter                           = has_kind SyntaxKind.VariadicParameter
     let is_attribute_specification                      = has_kind SyntaxKind.AttributeSpecification
-    let is_attribute                                    = has_kind SyntaxKind.Attribute
     let is_inclusion_expression                         = has_kind SyntaxKind.InclusionExpression
     let is_inclusion_directive                          = has_kind SyntaxKind.InclusionDirective
     let is_compound_statement                           = has_kind SyntaxKind.CompoundStatement
@@ -880,17 +878,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc attribute_specification_left_double_angle in
          let acc = f acc attribute_specification_attributes in
          let acc = f acc attribute_specification_right_double_angle in
-         acc
-      | Attribute {
-        attribute_name;
-        attribute_left_paren;
-        attribute_values;
-        attribute_right_paren;
-      } ->
-         let acc = f acc attribute_name in
-         let acc = f acc attribute_left_paren in
-         let acc = f acc attribute_values in
-         let acc = f acc attribute_right_paren in
          acc
       | InclusionExpression {
         inclusion_require;
@@ -2737,17 +2724,6 @@ module WithToken(Token: TokenType) = struct
         attribute_specification_attributes;
         attribute_specification_right_double_angle;
       ]
-      | Attribute {
-        attribute_name;
-        attribute_left_paren;
-        attribute_values;
-        attribute_right_paren;
-      } -> [
-        attribute_name;
-        attribute_left_paren;
-        attribute_values;
-        attribute_right_paren;
-      ]
       | InclusionExpression {
         inclusion_require;
         inclusion_filename;
@@ -4593,17 +4569,6 @@ module WithToken(Token: TokenType) = struct
         "attribute_specification_left_double_angle";
         "attribute_specification_attributes";
         "attribute_specification_right_double_angle";
-      ]
-      | Attribute {
-        attribute_name;
-        attribute_left_paren;
-        attribute_values;
-        attribute_right_paren;
-      } -> [
-        "attribute_name";
-        "attribute_left_paren";
-        "attribute_values";
-        "attribute_right_paren";
       ]
       | InclusionExpression {
         inclusion_require;
@@ -6543,18 +6508,6 @@ module WithToken(Token: TokenType) = struct
           attribute_specification_left_double_angle;
           attribute_specification_attributes;
           attribute_specification_right_double_angle;
-        }
-      | (SyntaxKind.Attribute, [
-          attribute_name;
-          attribute_left_paren;
-          attribute_values;
-          attribute_right_paren;
-        ]) ->
-        Attribute {
-          attribute_name;
-          attribute_left_paren;
-          attribute_values;
-          attribute_right_paren;
         }
       | (SyntaxKind.InclusionExpression, [
           inclusion_require;
@@ -8719,21 +8672,6 @@ module WithToken(Token: TokenType) = struct
           attribute_specification_left_double_angle;
           attribute_specification_attributes;
           attribute_specification_right_double_angle;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_attribute
-        attribute_name
-        attribute_left_paren
-        attribute_values
-        attribute_right_paren
-      =
-        let syntax = Attribute {
-          attribute_name;
-          attribute_left_paren;
-          attribute_values;
-          attribute_right_paren;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

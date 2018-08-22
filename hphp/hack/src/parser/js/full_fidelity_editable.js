@@ -160,8 +160,6 @@ class EditableSyntax
       return VariadicParameter.from_json(json, position, source);
     case 'attribute_specification':
       return AttributeSpecification.from_json(json, position, source);
-    case 'attribute':
-      return Attribute.from_json(json, position, source);
     case 'inclusion_expression':
       return InclusionExpression.from_json(json, position, source);
     case 'inclusion_directive':
@@ -7081,110 +7079,6 @@ class AttributeSpecification extends EditableSyntax
         'attributes',
         'right_double_angle'];
     return AttributeSpecification._children_keys;
-  }
-}
-class Attribute extends EditableSyntax
-{
-  constructor(
-    name,
-    left_paren,
-    values,
-    right_paren)
-  {
-    super('attribute', {
-      name: name,
-      left_paren: left_paren,
-      values: values,
-      right_paren: right_paren });
-  }
-  get name() { return this.children.name; }
-  get left_paren() { return this.children.left_paren; }
-  get values() { return this.children.values; }
-  get right_paren() { return this.children.right_paren; }
-  with_name(name){
-    return new Attribute(
-      name,
-      this.left_paren,
-      this.values,
-      this.right_paren);
-  }
-  with_left_paren(left_paren){
-    return new Attribute(
-      this.name,
-      left_paren,
-      this.values,
-      this.right_paren);
-  }
-  with_values(values){
-    return new Attribute(
-      this.name,
-      this.left_paren,
-      values,
-      this.right_paren);
-  }
-  with_right_paren(right_paren){
-    return new Attribute(
-      this.name,
-      this.left_paren,
-      this.values,
-      right_paren);
-  }
-  rewrite(rewriter, parents)
-  {
-    if (parents == undefined)
-      parents = [];
-    let new_parents = parents.slice();
-    new_parents.push(this);
-    var name = this.name.rewrite(rewriter, new_parents);
-    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
-    var values = this.values.rewrite(rewriter, new_parents);
-    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
-    if (
-      name === this.name &&
-      left_paren === this.left_paren &&
-      values === this.values &&
-      right_paren === this.right_paren)
-    {
-      return rewriter(this, parents);
-    }
-    else
-    {
-      return rewriter(new Attribute(
-        name,
-        left_paren,
-        values,
-        right_paren), parents);
-    }
-  }
-  static from_json(json, position, source)
-  {
-    let name = EditableSyntax.from_json(
-      json.attribute_name, position, source);
-    position += name.width;
-    let left_paren = EditableSyntax.from_json(
-      json.attribute_left_paren, position, source);
-    position += left_paren.width;
-    let values = EditableSyntax.from_json(
-      json.attribute_values, position, source);
-    position += values.width;
-    let right_paren = EditableSyntax.from_json(
-      json.attribute_right_paren, position, source);
-    position += right_paren.width;
-    return new Attribute(
-        name,
-        left_paren,
-        values,
-        right_paren);
-  }
-  get children_keys()
-  {
-    if (Attribute._children_keys == null)
-      Attribute._children_keys = [
-        'name',
-        'left_paren',
-        'values',
-        'right_paren'];
-    return Attribute._children_keys;
   }
 }
 class InclusionExpression extends EditableSyntax
@@ -21561,7 +21455,6 @@ exports.DecoratedExpression = DecoratedExpression;
 exports.ParameterDeclaration = ParameterDeclaration;
 exports.VariadicParameter = VariadicParameter;
 exports.AttributeSpecification = AttributeSpecification;
-exports.Attribute = Attribute;
 exports.InclusionExpression = InclusionExpression;
 exports.InclusionDirective = InclusionDirective;
 exports.CompoundStatement = CompoundStatement;

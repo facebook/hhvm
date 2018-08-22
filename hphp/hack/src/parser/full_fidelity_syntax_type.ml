@@ -367,12 +367,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; attribute_specification_attributes                 : t
     ; attribute_specification_right_double_angle         : t
     }
-  | Attribute                               of
-    { attribute_name                                     : t
-    ; attribute_left_paren                               : t
-    ; attribute_values                                   : t
-    ; attribute_right_paren                              : t
-    }
   | InclusionExpression                     of
     { inclusion_require                                  : t
     ; inclusion_filename                                 : t
@@ -1664,14 +1658,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and attribute_specification =
     { attribute_specification_left_double_angle: Token.t value
-    ; attribute_specification_attributes: attribute listesque value
+    ; attribute_specification_attributes: constructor_call listesque value
     ; attribute_specification_right_double_angle: Token.t value
-    }
-  and attribute =
-    { attribute_name: Token.t value
-    ; attribute_left_paren: Token.t option value
-    ; attribute_values: expression listesque value
-    ; attribute_right_paren: Token.t option value
     }
   and inclusion_expression =
     { inclusion_require: Token.t value

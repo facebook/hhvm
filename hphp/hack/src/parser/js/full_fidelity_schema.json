@@ -829,16 +829,6 @@
         { "field_name" : "attributes" },
         { "field_name" : "right_double_angle" }
       ] },
-    { "kind_name" : "Attribute",
-      "type_name" : "attribute",
-      "description" : "attribute",
-      "prefix" : "attribute",
-      "fields" : [
-        { "field_name" : "name" },
-        { "field_name" : "left_paren" },
-        { "field_name" : "values" },
-        { "field_name" : "right_paren" }
-      ] },
     { "kind_name" : "InclusionExpression",
       "type_name" : "inclusion_expression",
       "description" : "inclusion_expression",

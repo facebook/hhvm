@@ -214,7 +214,7 @@ bool prepareInstruction(Env& env) {
   }
   auto const breaksBB =
     (env.profiling && instrBreaksProfileBB(&env.inst)) ||
-    opcodeBreaksBB(env.inst.op());
+    opcodeBreaksBB(env.inst.op(), env.inlining);
   env.inst.endsRegion = breaksBB ||
     (dontGuardAnyInputs(env.inst) && opcodeChangesPC(env.inst.op()));
   env.inst.funcd = env.arState.knownFunc();

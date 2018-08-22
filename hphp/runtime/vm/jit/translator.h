@@ -61,6 +61,8 @@ struct NormalizedInstruction;
 struct ProfData;
 namespace irgen { struct IRGS; }
 
+enum class InlineType { Normal, Async, AwaitedAsync };
+
 constexpr uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
 
@@ -161,7 +163,7 @@ enum class ControlFlowInfo {
 /*
  * Return the ControlFlowInfo for `instr'.
  */
-ControlFlowInfo opcodeControlFlowInfo(const Op op);
+ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining);
 
 /*
  * Return true if the instruction can potentially set PC to point to something
@@ -175,7 +177,7 @@ bool opcodeChangesPC(const Op op);
  * Most instructions that change PC will break the tracelet, though some do not
  * (e.g., FCall).
  */
-bool opcodeBreaksBB(const Op op);
+bool opcodeBreaksBB(const Op op, bool inlining);
 
 /*
  * Similar to opcodeBreaksBB but more strict.  We break profiling blocks after

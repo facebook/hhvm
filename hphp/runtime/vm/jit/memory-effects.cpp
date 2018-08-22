@@ -759,6 +759,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     );
   }
 
+  case InlineSuspend:
   case InlineReturn: {
     auto const callee = stack_below(inst.src(0), FPRelOffset{2}) |
                         AMIStateAny | AFrameAny | AClsRefSlotAny |

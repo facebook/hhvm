@@ -50,7 +50,7 @@ inline SrcKey TransContext::srcKey() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Control flow information.
 
-inline ControlFlowInfo opcodeControlFlowInfo(const Op op) {
+inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {
   switch (op) {
     case Op::Jmp:
     case Op::JmpNS:
@@ -62,9 +62,6 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op) {
     case Op::Yield:
     case Op::YieldK:
     case Op::YieldFromDelegate:
-    case Op::Await:
-    case Op::AwaitAll:
-    case Op::FCallAwait:
     case Op::RetC:
     case Op::RetV:
     case Op::RetM:
@@ -95,6 +92,10 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op) {
     case Op::BreakTraceHint:
     case Op::MemoGet:
       return ControlFlowInfo::BreaksBB;
+    case Op::Await:
+    case Op::AwaitAll:
+    case Op::FCallAwait:
+      return inlining ? ControlFlowInfo::ChangesPC : ControlFlowInfo::BreaksBB;
     case Op::FCall:
     case Op::ContEnter:
     case Op::ContRaise:
@@ -111,11 +112,11 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op) {
 }
 
 inline bool opcodeChangesPC(const Op op) {
-  return opcodeControlFlowInfo(op) >= ControlFlowInfo::ChangesPC;
+  return opcodeControlFlowInfo(op, false) >= ControlFlowInfo::ChangesPC;
 }
 
-inline bool opcodeBreaksBB(const Op op) {
-  return opcodeControlFlowInfo(op) == ControlFlowInfo::BreaksBB;
+inline bool opcodeBreaksBB(const Op op, bool inlining) {
+  return opcodeControlFlowInfo(op, inlining) == ControlFlowInfo::BreaksBB;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

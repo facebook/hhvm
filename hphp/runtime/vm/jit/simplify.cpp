@@ -39,6 +39,7 @@
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/ext/hh/ext_hh.h"
+#include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 
 #include "hphp/util/overflow.h"
 #include "hphp/util/trace.h"
@@ -3513,6 +3514,31 @@ SSATmp* simplifyIsWaitHandle(State& env, const IRInstruction* inst) {
     });
 }
 
+SSATmp* simplifyLdWHState(State& env, const IRInstruction* inst) {
+  auto const wh = canonical(inst->src(0));
+  if (wh->inst()->is(CreateSSWH)) {
+    return cns(env, int64_t{c_Awaitable::STATE_SUCCEEDED});
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyLdWHResult(State& env, const IRInstruction* inst) {
+  auto const wh = canonical(inst->src(0));
+  if (wh->inst()->is(CreateSSWH)) {
+    return wh->inst()->src(0);
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyLdWHNotDone(State& env, const IRInstruction* inst) {
+  return simplifyByClass(
+    env, inst->src(0),
+    [&](const Class* cls, bool) -> SSATmp* {
+      if (cls->classof(c_StaticWaitHandle::classof())) return cns(env, 0);
+      return nullptr;
+    });
+}
+
 SSATmp* simplifyIsCol(State& env, const IRInstruction* inst) {
   return simplifyByClass(
     env, inst->src(0),
@@ -3777,6 +3803,9 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LdClsCtx)
   X(LdClsCctx)
   X(LdClsName)
+  X(LdWHResult)
+  X(LdWHState)
+  X(LdWHNotDone)
   X(LookupClsRDS)
   X(LookupSPropSlot)
   X(LdClsMethod)

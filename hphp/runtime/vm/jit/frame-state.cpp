@@ -415,6 +415,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   switch (inst->op()) {
   case DefInlineFP:    trackDefInlineFP(inst);  break;
+  case InlineSuspend:
   case InlineReturn:   trackInlineReturn(); break;
   case InitCtx: {
     always_assert(!cur().ctx);

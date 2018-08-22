@@ -458,6 +458,7 @@ bool canDCE(IRInstruction* inst) {
   case NewStructDict:
   case Clone:
   case InlineReturn:
+  case InlineSuspend:
   case CallUnpack:
   case Call:
   case NativeImpl:
@@ -799,7 +800,7 @@ static_assert(sizeof(DceFlags) == 1, "sizeof(DceFlags) should be 1 byte");
 // DCE state indexed by instr->id().
 typedef StateVector<IRInstruction, DceFlags> DceState;
 typedef StateVector<SSATmp, uint32_t> UseCounts;
-typedef jit::vector<const IRInstruction*> WorkList;
+typedef jit::vector<IRInstruction*> WorkList;
 
 void removeDeadInstructions(IRUnit& unit, const DceState& state) {
   postorderWalk(unit, [&](Block* block) {
@@ -1345,6 +1346,7 @@ void fullDCE(IRUnit& unit) {
   // other instructions marked dead.
   DceState state(unit, DceFlags());
   UseCounts uses(unit, 0);
+  jit::fast_map<IRInstruction*, jit::vector<IRInstruction*>> decs;
   WorkList wl = initInstructions(unit, blocks, state);
 
   // process the worklist
@@ -1362,10 +1364,29 @@ void fullDCE(IRUnit& unit) {
         }
       }
 
+      if (srcInst->is(CreateSSWH)) {
+        ++uses[src];
+        if (inst->is(DecRef)) decs[srcInst].emplace_back(inst);
+      }
+
       if (state[srcInst].isDead()) {
         state[srcInst].setLive();
         wl.push_back(srcInst);
       }
+    }
+  }
+
+  // If evert use of CreateSSWH is a DecRef, then it must be DecRef'd exactly
+  // once on every path to an exit from the region (otherwise we would have a
+  // leak or double-free of the StaticWaitHandle). Since each of these DecRefs
+  // destroy the SSWH they must also DecRef its src.
+  for (auto& pair : decs) {
+    if (uses[pair.first->dst()] != pair.second.size()) continue;
+    state[pair.first].setDead();
+    auto const need_dec = pair.first->src(0)->type().maybe(TCounted);
+    for (auto dec : pair.second) {
+      if (need_dec) dec->setSrc(0, pair.first->src(0));
+      else state[dec].setDead();
     }
   }
 

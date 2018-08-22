@@ -1693,7 +1693,19 @@ To string conversions:
 | InlineReturn<callerFPOff>, ND, S(FramePtr), NF
 
   Unlinks a frame constructed by DefInlineFP.  `callerFPOff' is the offset of
-  the caller's frame pointer relative to S0.
+  the caller's frame pointer relative to S0. Every inline region must contain
+  exactly one InlineReturn or InlineReturnNoFrame. Optimization passes which
+  attempt to elide DefInlineFP detect "main" blocks within an inlined region as
+  those which are dominated by BeginInlining and post-dominated by InlineReturn.
+
+| InlineSuspend<callerFPOff>, ND, S(FramePtr), NF
+
+  Identical to an InlineReturn, but for use when the frame is being suspended in
+  a side exit and will be torn down via an InlineReturn in the main trace. The
+  behavior of InlineSuspend is identical to inline return, but it allows us to
+  preserve the invariant that an inline region has a single InlineReturn for
+  every DefInlineFP (while still allowing InlineSuspend in the case of a side
+  exit).
 
 | InlineReturnNoFrame<InlineFrameStart>, ND, NA, NF
 

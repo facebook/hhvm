@@ -599,6 +599,7 @@ struct DefInlineFPData : IRExtraData {
   FPInvOffset retSPOff;
   IRSPRelOffset spOffset; // offset from caller SP to bottom of callee's ActRec
   uint32_t numNonDefault;
+  bool isFCallAwait;
 };
 
 struct SyncReturnBCData : IRExtraData {
@@ -1577,6 +1578,7 @@ X(DefInlineFP,                  DefInlineFPData);
 X(BeginInlining,                BeginInliningData);
 X(SyncReturnBC,                 SyncReturnBCData);
 X(InlineReturn,                 FPRelOffsetData);
+X(InlineSuspend,                FPRelOffsetData);
 X(InlineReturnNoFrame,          FPRelOffsetData);
 X(ReqRetranslate,               ReqRetranslateData);
 X(ReqBindJmp,                   ReqBindJmpData);

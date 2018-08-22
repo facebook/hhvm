@@ -717,6 +717,7 @@ bool opcodeMayRaise(Opcode opc) {
   case InitThrowableFileAndLine:
   case InlineReturn:
   case InlineReturnNoFrame:
+  case InlineSuspend:
   case InstanceOf:
   case InstanceOfBitmask:
   case InstanceOfIface:

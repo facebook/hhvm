@@ -245,7 +245,7 @@ bool beginInlining(IRGS& env,
  * eval stack, in addition to the actual control transfer and bookkeeping done
  * by implInlineReturn().
  */
-void endInlining(IRGS& env);
+bool endInlining(IRGS& env);
 
 /*
  * Begin inlining func into a dummy region used to measure the cost of

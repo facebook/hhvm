@@ -17,6 +17,7 @@
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
+#include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 
@@ -25,6 +26,7 @@
 
 #include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-ret.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
@@ -58,6 +60,8 @@ void suspendHook(IRGS& env, bool useNextBcOff, Hook hook) {
       hook();
     }
   );
+}
+
 }
 
 void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset,
@@ -96,11 +100,18 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset,
       gen(env, DbgTrashRetVal, fp(env));
     }
 
+    if (isInlining(env)) {
+      suspendFromInlined(env, waitHandle);
+      return;
+    }
+
     // Return control to the caller.
     auto const spAdjust = offsetToReturnSlot(env);
     auto const retData = RetCtrlData { spAdjust, false, AuxUnion{1} };
     gen(env, RetCtrl, retData, sp(env), fp(env), waitHandle);
   } else {
+    assertx(!isInlining(env));
+
     // Create the AsyncGeneratorWaitHandle object.
     auto const waitHandle =
       gen(env, CreateAGWH, fp(env), resumeAddr, cns(env, resumeOffset), child);
@@ -117,11 +128,14 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset,
   }
 }
 
+namespace {
+
 void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset,
                 bool useNextBcOff) {
   assertx(curFunc(env)->isAsync());
   assertx(resumeMode(env) == ResumeMode::Async);
   assertx(child->isA(TObj));
+  assertx(!isInlining(env));
 
   // We must do this before we do anything, because it can throw, and we can't
   // start tearing down the AFWH before that or the unwinder won't be able to
@@ -315,6 +329,10 @@ void emitAwait(IRGS& env) {
       gen(env, JmpNZero, taken, succeeded);
     },
     [&] { // Next: the wait handle is not finished, we need to suspend
+      if (child->type() <= Type::SubObj(c_StaticWaitHandle::classof())) {
+        gen(env, Jmp, exitSlow);
+        return;
+      }
       auto const failed = gen(env, EqInt, state, cns(env, kFailed));
       gen(env, JmpNZero, exitSlow, failed);
       if (resumeMode(env) == ResumeMode::Async) {

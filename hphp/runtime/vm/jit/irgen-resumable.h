@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_IRGEN_INLINING_H_
-#define incl_HPHP_JIT_IRGEN_INLINING_H_
+#ifndef incl_HPHP_JIT_IRGEN_RESUMABLE_H_
+#define incl_HPHP_JIT_IRGEN_RESUMABLE_H_
+
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP { namespace jit {
 
@@ -27,22 +29,10 @@ struct IRGS;
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Return control from an inlined callee to the caller.
- *
- * This also does bookkeeping for `env' to pop the current inlined frame.
+ * Suspend from an eager executing (possibly inlined) async context.
  */
-void implInlineReturn(IRGS& env);
-
-/*
- * Emit a return from an inlined function.
- */
-void retFromInlined(IRGS&);
-
-/*
- * Exit the (now suspended) inline frame. The frame must no longer be live, and
- * its contents must now reside in waithandle.
- */
-void suspendFromInlined(IRGS&, SSATmp* waithandle);
+void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset,
+                bool useNextBcOff);
 
 ///////////////////////////////////////////////////////////////////////////////
 

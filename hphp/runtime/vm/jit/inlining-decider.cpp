@@ -95,7 +95,7 @@ const StaticString
  */
 bool isCalleeInlinable(SrcKey callSK, const Func* callee,
                       Annotations& annotations) {
-  assertx(callSK.op() == Op::FCall);
+  assertx(callSK.op() == Op::FCall || callSK.op() == Op::FCallAwait);
   auto refuse = [&] (const char* why) {
     return traceRefusal(callSK, callee, why, annotations);
   };
@@ -121,8 +121,8 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
   if (callee->isMagic()) {
     return refuse("magic callee");
   }
-  if (callee->isResumable()) {
-    return refuse("callee is resumable");
+  if (callee->isGenerator()) {
+    return refuse("callee is generator");
   }
   if (callee->maxStackCells() >= kStackCheckLeafPadding) {
     return refuse("function stack depth too deep");
@@ -142,7 +142,7 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
  * Check that we don't have any missing or extra arguments.
  */
 bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations& annotations) {
-  assertx(callSK.op() == Op::FCall);
+  assertx(callSK.op() == Op::FCall || callSK.op() == Op::FCallAwait);
   assertx(callee);
 
   auto refuse = [&] (const char* why) {
@@ -191,9 +191,9 @@ bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee,
     return traceRefusal(callSK, callee, "trivial", annotations);
   }
 
-  // We can only inline at normal FCalls.
-  if (callSK.op() != Op::FCall) {
-    return traceRefusal(callSK, callee, "Not FCall", annotations);
+  // We can only inline at normal FCall and FCallAwait.
+  if (callSK.op() != Op::FCall && callSK.op() != Op::FCallAwait) {
+    return traceRefusal(callSK, callee, "Not FCall/FCallAwait", annotations);
   }
 
   // Don't inline from resumed functions.  The inlining mechanism doesn't have

@@ -488,7 +488,7 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
                                        int32_t maxBCInstrs,
                                        int& calleeCost,
                                        Annotations& annotations) {
-  if (psk.srcKey.op() != Op::FCall) {
+  if (psk.srcKey.op() != Op::FCall && psk.srcKey.op() != Op::FCallAwait) {
     return nullptr;
   }
 
@@ -717,7 +717,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       }
 
       if (calleeRegion) {
-        always_assert(inst.op() == Op::FCall);
+        always_assert(inst.op() == Op::FCall || inst.op() == Op::FCallAwait);
         auto const* callee = inst.funcd;
 
         // We shouldn't be inlining profiling translations.
@@ -734,12 +734,20 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
 
         auto returnSk = inst.nextSk();
         auto returnBlock = irb.unit().defBlock(irgen::curProfCount(irgs));
+        auto suspendRetBlock = irb.unit().defBlock(irgen::curProfCount(irgs));
+        auto retType =
+          !callee->isAsync() ? InlineType::Normal :
+          inst.op() == Op::FCallAwait ? InlineType::AwaitedAsync :
+          InlineType::Async;
+        auto returnTarget = irgen::ReturnTarget {
+          returnBlock, suspendRetBlock, retType
+        };
         auto returnFuncOff = returnSk.offset() - block.func()->base();
 
         if (irgen::beginInlining(irgs, inst.imm[0].u_FCA.numArgs, callee,
                                  calleeRegion->start(),
                                  returnFuncOff,
-                                 irgen::ReturnTarget { returnBlock },
+                                 returnTarget,
                                  calleeCost,
                                  false)) {
           SCOPE_ASSERT_DETAIL("Inlined-RegionDesc")
@@ -783,20 +791,14 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
 
           // Native calls end inlining before CallBuiltin
           if (!callee->isCPPBuiltin()) {
-            // Start a new IR block to hold the remainder of this block.
-            auto const did_start =
-              irb.startBlock(returnBlock, false /* hasUnprocPred */);
-
             // If the inlined region failed to contain any returns then the
             // rest of this block is dead- we could continue but there's no
             // benefit to inlining this call if it ends in a ReqRetranslate or
             // ReqBind* so instead we mark it as uninlinable and retry.
-            if (!did_start) {
+            if (!irgen::endInlining(irgs)) {
               retry.inlineBlacklist.insert(psk);
               return TranslateResult::Retry;
             }
-
-            irgen::endInlining(irgs);
           } else {
             // For native calls we don't use a return block
             assertx(returnBlock->empty());
@@ -988,6 +990,11 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
 
     auto const entry = irb.unit().entry();
     auto returnBlock = irb.unit().defBlock();
+    auto suspendRetBlock = irb.unit().defBlock();
+    auto retType = func->isAsync() ? InlineType::Async : InlineType::Normal;
+    auto returnTarget = irgen::ReturnTarget {
+      returnBlock, suspendRetBlock, retType
+    };
 
     // Set the profCount of the entry and return blocks we just created.
     entry->setProfCount(curProfCount(irgs));
@@ -996,8 +1003,7 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
     SCOPE_ASSERT_DETAIL("Inline-IRUnit") { return show(*unit); };
     irb.startBlock(entry, false /* hasUnprocPred */);
     if (!irgen::conjureBeginInlining(irgs, func, region.start(),
-                                     ctxType, argTypes,
-                                     irgen::ReturnTarget{returnBlock})) {
+                                     ctxType, argTypes, returnTarget)) {
       return nullptr;
     }
 
@@ -1018,15 +1024,6 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
     }
 
     if (result == TranslateResult::Success) {
-      /*
-       * Builtin functions will implicitly start the return block during the
-       * inlined call. For everything else if we fail to start the return block
-       * it means the return was unreachable, and we cannot inline such regions.
-       */
-      if (!func->isCPPBuiltin() && !irb.startBlock(returnBlock, false)) {
-        return nullptr;
-      }
-
       irgen::conjureEndInlining(irgs, func->isCPPBuiltin());
       irgen::sealUnit(irgs);
       optimize(*unit, TransKind::Optimize);

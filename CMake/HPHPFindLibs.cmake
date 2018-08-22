@@ -561,10 +561,31 @@ macro(hphp_link target)
 
   if (LINUX)
     target_link_libraries(${target} -Wl,--wrap=pthread_create -Wl,--wrap=pthread_exit -Wl,--wrap=pthread_join)
-    target_link_libraries(${target} atomic)
   endif()
 
   if (MSVC)
     target_link_libraries(${target} dbghelp.lib dnsapi.lib)
   endif()
+
+# Check whether atomic operations require -latomic or not
+# See https://github.com/facebook/hhvm/issues/5217
+  include(CheckCXXSourceCompiles)
+  set(OLD_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
+  set(CMAKE_REQUIRED_FLAGS "-std=c++1y")
+  CHECK_CXX_SOURCE_COMPILES("
+#include <atomic>
+#include <stdint.h>
+int main() {
+    struct Test { int64_t val1; int64_t val2; };
+    std::atomic<Test> s;
+    s.is_lock_free();
+}
+  " NOT_REQUIRE_ATOMIC_LINKER_FLAG)
+
+  if(NOT "${NOT_REQUIRE_ATOMIC_LINKER_FLAG}")
+      message(STATUS "-latomic is required to link hhvm")
+      find_library(ATOMIC_LIBRARY NAMES atomic libatomic.so.1)
+      target_link_libraries(${target} ${ATOMIC_LIBRARY})
+  endif()
+  set(CMAKE_REQUIRED_FLAGS ${OLD_CMAKE_REQUIRED_FLAGS})
 endmacro()

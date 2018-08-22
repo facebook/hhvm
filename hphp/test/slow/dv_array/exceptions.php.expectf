@@ -1,0 +1,46 @@
+array(2) {
+  [0]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/exceptions.php"
+    ["line"]=>
+    int(21)
+    ["function"]=>
+    string(10) "throws_exn"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [1]=>
+  array(2) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+array(3) {
+  [0]=>
+  string(8) "garbage!"
+  [1]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/exceptions.php"
+    ["line"]=>
+    int(26)
+    ["function"]=>
+    string(13) "throws_my_exn"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [2]=>
+  array(2) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    array(0) {
+    }
+  }
+}

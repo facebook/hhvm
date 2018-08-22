@@ -1,0 +1,41 @@
+vec(2) {
+  dict(4) {
+    ["file"]=>
+    string(%d) "%s/exceptions.php"
+    ["line"]=>
+    int(21)
+    ["function"]=>
+    string(10) "throws_exn"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(2) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+}
+vec(3) {
+  string(8) "garbage!"
+  dict(4) {
+    ["file"]=>
+    string(%d) "%s/exceptions.php"
+    ["line"]=>
+    int(26)
+    ["function"]=>
+    string(13) "throws_my_exn"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+  dict(2) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    vec(0) {
+    }
+  }
+}

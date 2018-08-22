@@ -712,7 +712,7 @@ Array CompactTrace::Key::extract() const {
 }
 
 Array CompactTrace::extract() const {
-  if (m_key.m_frames.size() == 1) return empty_array();
+  if (m_key.m_frames.size() == 1) return Array::CreateVArray();
 
   Cache::ConstAccessor acc;
   if (s_cache.find(acc, m_key)) {
@@ -722,7 +722,7 @@ Array CompactTrace::extract() const {
   auto arr = m_key.extract();
   auto ins = CachedArray(
     arr.get()->empty()
-      ? staticEmptyArray()
+      ? staticEmptyVArray()
       : PackedArray::MakeUncounted(arr.get()),
     CacheDeleter()
   );

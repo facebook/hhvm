@@ -293,5 +293,5 @@ namespace __SystemLib {
    * @return array - the backtrace extracted from $trace
    */
   <<__Native>>
-  function extract_trace(resource $trace): array;
+  function extract_trace(resource $trace): \HH\varray;
 }

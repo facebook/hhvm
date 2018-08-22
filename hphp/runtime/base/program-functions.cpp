@@ -926,6 +926,10 @@ static void pagein_self(void) {
       auto endPtr = (char*)end;
       auto hotStart = (char*)__hot_start;
       auto hotEnd = (char*)__hot_end;
+      // Upper limit for the size of the hugifyText() function in the binary, in
+      // bytes.
+      const uint32_t kMaxHugifyTextFuncSize = 1024;
+      auto const hugifyTextEnd = (char*)hugifyText + kMaxHugifyTextFuncSize;
       const size_t hugePageBytes = 2L * 1024 * 1024;
 
       if (mlock(beginPtr, end - begin) == 0) {
@@ -938,7 +942,7 @@ static void pagein_self(void) {
           if (to - from >  maxHugeHotTextBytes) {
             to = from + maxHugeHotTextBytes;
           }
-          if (to <= (void*)hugifyText) {
+          if (to <= (void*)hugifyText || hugifyTextEnd < from) {
             mapped_huge = true;
             hugifyText(from, to);
           }

@@ -1797,6 +1797,11 @@ let expression_errors env namespace_name node parents errors =
     in
     let errors =
       function_call_on_xhp_name_errors env function_call_receiver errors in
+    let errors =
+      if text function_call_receiver = Naming_special_names.PseudoFunctions.unset_no_ns
+      then make_error_from_node function_call_receiver SyntaxError.unset_as_expression :: errors
+      else errors
+    in
     errors
   | ListExpression { list_members; _ }
     when is_hhvm_compat env ->

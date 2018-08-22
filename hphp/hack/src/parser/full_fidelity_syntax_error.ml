@@ -571,3 +571,6 @@ let type_alias_to_type_constant =
 
 let interface_with_memoize =
   "Memoize is not allowed on interface methods"
+
+let unset_as_expression =
+  "unset() cannot be used as an expression"

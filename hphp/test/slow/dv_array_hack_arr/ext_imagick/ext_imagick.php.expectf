@@ -227,7 +227,7 @@ dict(2) {
   ["versionNumber"]=>
   int(1689)
   ["versionString"]=>
-  string(70) "ImageMagick 6.9.9-42 Q16 x86_64 2018-07-12 https://www.imagemagick.org"
+  string(%d) "ImageMagick 6.9.9-42 Q16 %s 2018-07-12 https://www.imagemagick.org"
 }
 dict(5) {
   ["imageName"]=>

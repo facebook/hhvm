@@ -203,7 +203,7 @@ public:
                                                          src, dest); }
 
   void loadsbq(MemoryRef m, Reg64 r)        { xedInstrMR(XED_ICLASS_MOVSX,
-                                                         m, r); }
+                                                         m, r, sz::byte); }
   void movsbq(Reg8 src, Reg64 dest)         { xedInstrRR(XED_ICLASS_MOVSX,
                                                          src, dest); }
 
@@ -859,18 +859,21 @@ private:
   }
 
   ALWAYS_INLINE
-  void xedInstrRR(xed_iclass_enum_t instr, const Reg8& r1, const Reg32& r2) {
-    xedEmit(instr, toXedOperand(r2), toXedOperand(r1), bytesToBits(sz::byte));
+  void xedInstrRR(xed_iclass_enum_t instr, const Reg8& r1, const Reg32& r2,
+                  int size = sz::dword) {
+    xedEmit(instr, toXedOperand(r2), toXedOperand(r1), bytesToBits(size));
   }
 
   ALWAYS_INLINE
-  void xedInstrRR(xed_iclass_enum_t instr, const Reg16& r1, const Reg32& r2) {
-    xedEmit(instr, toXedOperand(r2), toXedOperand(r1), bytesToBits(sz::word));
+  void xedInstrRR(xed_iclass_enum_t instr, const Reg16& r1, const Reg32& r2,
+                  int size = sz::dword) {
+    xedEmit(instr, toXedOperand(r2), toXedOperand(r1), bytesToBits(size));
   }
 
   ALWAYS_INLINE
-  void xedInstrRR(xed_iclass_enum_t instr, const Reg8& r1, const Reg64& r2) {
-    xedEmit(instr, toXedOperand(r2), toXedOperand(r1), bytesToBits(sz::byte));
+  void xedInstrRR(xed_iclass_enum_t instr, const Reg8& r1, const Reg64& r2,
+                  int size = sz::qword) {
+    xedEmit(instr, toXedOperand(r2), toXedOperand(r1), bytesToBits(size));
   }
 
   ALWAYS_INLINE

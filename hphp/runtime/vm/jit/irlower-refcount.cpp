@@ -307,6 +307,8 @@ CallSpec getDtorCallSpec(DataType type) {
   switch (type) {
     case KindOfString:
       return CallSpec::method(&StringData::release);
+    case KindOfShape:
+      return CallSpec::direct(MixedArray::Release);
     case KindOfArray:
       return CallSpec::method(&ArrayData::release);
     case KindOfVec:

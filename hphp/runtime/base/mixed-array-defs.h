@@ -388,6 +388,11 @@ void ConvertTvToUncounted(
       break;
     }
 
+    case KindOfShape:
+    case KindOfPersistentShape: {
+      not_implemented();
+    }
+
     case KindOfArray:
       source->m_type = KindOfPersistentArray;
       // Fall-through.

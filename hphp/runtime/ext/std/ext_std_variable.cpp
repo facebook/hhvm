@@ -364,6 +364,11 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
       break;
     }
 
+    case KindOfPersistentShape:
+    case KindOfShape: { // TODO(T31134050)
+      not_implemented();
+    }
+
     case KindOfPersistentArray:
     case KindOfArray: {
       ArrayData *arr = value.getArrayData();

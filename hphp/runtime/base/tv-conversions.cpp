@@ -85,6 +85,7 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
       case KindOfPersistentVec:
       case KindOfPersistentDict:
       case KindOfPersistentKeyset:
+      case KindOfPersistentShape:
       case KindOfPersistentArray:
         b = !tv->m_data.parr->empty();
         continue;
@@ -92,6 +93,7 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
+      case KindOfShape:
       case KindOfArray:
         b = !tv->m_data.parr->empty();
         tvDecRefArr(tv);
@@ -167,6 +169,7 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
       case KindOfPersistentVec:
       case KindOfPersistentDict:
       case KindOfPersistentKeyset:
+      case KindOfPersistentShape:
       case KindOfPersistentArray:
         d = tv->m_data.parr->empty() ? 0 : 1;
         continue;
@@ -174,6 +177,7 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
+      case KindOfShape:
       case KindOfArray:
         d = tv->m_data.parr->empty() ? 0 : 1;
         tvDecRefArr(tv);
@@ -243,6 +247,7 @@ void tvCastToInt64InPlace(TypedValue* tv) {
       case KindOfPersistentVec:
       case KindOfPersistentDict:
       case KindOfPersistentKeyset:
+      case KindOfPersistentShape:
       case KindOfPersistentArray:
         i = tv->m_data.parr->empty() ? 0 : 1;
         continue;
@@ -250,6 +255,7 @@ void tvCastToInt64InPlace(TypedValue* tv) {
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
+      case KindOfShape:
       case KindOfArray:
         i = tv->m_data.parr->empty() ? 0 : 1;
         tvDecRefArr(tv);
@@ -321,6 +327,8 @@ double tvCastToDouble(TypedValue tv) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
       return tv.m_data.parr->empty() ? 0.0 : 1.0;
@@ -399,6 +407,15 @@ void cellCastToStringInPlace(tv_lval tv) {
       raise_notice("Keyset to string conversion");
       if (type(tv) == KindOfKeyset) tvDecRefArr(*tv);
       return persistentString(keyset_string.get());
+
+    case KindOfPersistentShape:
+    case KindOfShape:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        raise_notice("Dict to string conversion");
+        if (type(tv) == KindOfShape) tvDecRefArr(*tv);
+        return persistentString(dict_string.get());
+      }
+      // Fallthrough
 
     case KindOfArray:
     case KindOfPersistentArray:
@@ -485,6 +502,14 @@ StringData* cellCastToStringData(Cell tv) {
       raise_notice("Keyset to string conversion");
       return keyset_string.get();
 
+    case KindOfPersistentShape:
+    case KindOfShape:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        raise_notice("Dict to string conversion");
+        return dict_string.get();
+      }
+      // Fallthrough
+
     case KindOfPersistentArray:
     case KindOfArray:
       raise_notice("Array to string conversion");
@@ -543,6 +568,8 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray: {
       auto const ad = tv.m_data.parr;
@@ -564,6 +591,10 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
 
 Array tvCastToArrayLike(TypedValue tv) {
   return Array::attach(tvCastToArrayLikeData(tv));
+}
+
+void tvCastToShapeInPlace(TypedValue* tv) {
+  not_implemented();
 }
 
 void tvCastToArrayInPlace(TypedValue* tv) {
@@ -636,6 +667,14 @@ void tvCastToArrayInPlace(TypedValue* tv) {
         a = SetArray::ToPHPArray(adIn, adIn->cowCheck());
         if (a != adIn) tvDecRefArr(tv);
         continue;
+      }
+
+      case KindOfPersistentShape: {
+        not_implemented();
+      }
+
+      case KindOfShape: {
+        not_implemented();
       }
 
       case KindOfPersistentArray: {
@@ -744,6 +783,11 @@ void tvCastToVecInPlace(TypedValue* tv) {
         continue;
       }
 
+      case KindOfPersistentShape:
+      case KindOfShape: {
+        not_implemented();
+      }
+
       case KindOfPersistentArray:
       case KindOfArray: {
         auto* adIn = tv->m_data.parr;
@@ -843,6 +887,11 @@ void tvCastToDictInPlace(TypedValue* tv) {
         continue;
       }
 
+      case KindOfPersistentShape:
+      case KindOfShape: {
+        not_implemented();
+      }
+
       case KindOfPersistentArray:
       case KindOfArray: {
         auto* adIn = tv->m_data.parr;
@@ -940,6 +989,11 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
         a = MixedArray::ToKeysetDict(adIn, adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
         continue;
+      }
+
+      case KindOfPersistentShape:
+      case KindOfShape: {
+        not_implemented();
       }
 
       case KindOfPersistentArray:
@@ -1050,6 +1104,11 @@ void tvCastToVArrayInPlace(TypedValue* tv) {
         assertx(a != adIn);
         decRefArr(adIn);
         continue;
+      }
+
+      case KindOfPersistentShape:
+      case KindOfShape: {
+        not_implemented();
       }
 
       case KindOfPersistentArray:
@@ -1164,6 +1223,11 @@ void tvCastToDArrayInPlace(TypedValue* tv) {
         continue;
       }
 
+      case KindOfPersistentShape:
+      case KindOfShape: {
+        not_implemented();
+      }
+
       case KindOfPersistentArray:
       case KindOfArray: {
         auto* adIn = tv->m_data.parr;
@@ -1235,6 +1299,8 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
     case KindOfVec:
     case KindOfPersistentDict:
     case KindOfDict:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentKeyset:
     case KindOfKeyset: {
       auto const arr = Array::attach(tv.m_data.parr->toPHPArray(true));
@@ -1292,6 +1358,14 @@ void tvCastToObjectInPlace(TypedValue* tv) {
         continue;
       }
 
+      case KindOfPersistentShape:
+      case KindOfShape:
+        if (RuntimeOption::EvalHackArrDVArrs) {
+          tvCastToArrayInPlace(tv);
+        }
+        tvAsVariant(tv) = ObjectData::FromArray(tv->m_data.parr);
+        return;
+
       case KindOfPersistentVec:
       case KindOfVec:
       case KindOfPersistentDict:
@@ -1346,6 +1420,7 @@ void tvCastToResourceInPlace(TypedValue* tv) {
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
+      case KindOfShape:
       case KindOfArray:
       case KindOfObject:
         tvDecRefCountable(tv);
@@ -1392,6 +1467,8 @@ bool tvCoerceParamToBooleanInPlace(TypedValue* tv,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
@@ -1427,6 +1504,8 @@ static bool tvCanBeCoercedToNumber(const TypedValue* tv,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
@@ -1500,6 +1579,8 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
       return false;
@@ -1518,6 +1599,10 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv,
       break;
   }
   not_reached();
+}
+
+bool tvCoerceParamToShapeInPlace(TypedValue* tv, bool /*builtin*/) {
+  not_implemented();
 }
 
 bool tvCoerceParamToArrayInPlace(TypedValue* tv, bool /*builtin*/) {
@@ -1540,6 +1625,19 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv, bool /*builtin*/) {
     case KindOfKeyset:
     case KindOfFunc:
     case KindOfClass:
+      return false;
+
+    case KindOfPersistentShape:
+      if (!RuntimeOption::EvalHackArrDVArrs) {
+        tvAsVariant(tv) = tv->m_data.parr->toDArray(true);
+        return true;
+      }
+      return false;
+    case KindOfShape:
+      if (!RuntimeOption::EvalHackArrDVArrs) {
+        tvAsVariant(tv) = tv->m_data.parr->toDArray(true);
+        return true;
+      }
       return false;
 
     case KindOfPersistentArray:
@@ -1579,6 +1677,8 @@ bool tvCoerceParamToVecInPlace(TypedValue* tv, bool /*builtin*/) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfFunc:
@@ -1619,6 +1719,19 @@ bool tvCoerceParamToDictInPlace(TypedValue* tv, bool /*builtin*/) {
     case KindOfClass:
       return false;
 
+    case KindOfPersistentShape:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        tvAsVariant(tv) = tv->m_data.parr->toDict(true);
+        return true;
+      }
+      return false;
+    case KindOfShape:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        tvAsVariant(tv) = tv->m_data.parr->toDict(true);
+        return true;
+      }
+      return false;
+
     case KindOfPersistentDict:
     case KindOfDict:
       return true;
@@ -1647,6 +1760,8 @@ bool tvCoerceParamToKeysetInPlace(TypedValue* tv, bool /*builtin*/) {
     case KindOfVec:
     case KindOfPersistentDict:
     case KindOfDict:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfFunc:

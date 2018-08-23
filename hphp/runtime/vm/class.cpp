@@ -2720,6 +2720,8 @@ bool Class::compatibleTraitPropInit(const TypedValue& tv1,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:

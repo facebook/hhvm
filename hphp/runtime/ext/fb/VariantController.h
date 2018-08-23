@@ -51,6 +51,14 @@ struct VariantControllerImpl {
       case KindOfPersistentString:
       case KindOfString:     return HPHP::serialize::Type::STRING;
       case KindOfObject:     return HPHP::serialize::Type::OBJECT;
+      case KindOfPersistentShape:
+      case KindOfShape: { // TODO(T31134050)
+        if (RuntimeOption::EvalHackArrDVArrs &&
+            HackArraysMode != VariantControllerHackArraysMode::ON) {
+          throw HPHP::serialize::HackArraySerializeError{};
+        }
+        return HPHP::serialize::Type::MAP;
+      }
       case KindOfPersistentArray:
       case KindOfArray:      return HPHP::serialize::Type::MAP;
       case KindOfPersistentDict:

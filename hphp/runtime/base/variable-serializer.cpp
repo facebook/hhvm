@@ -1508,6 +1508,10 @@ void VariableSerializer::serializeVariant(tv_rval tv,
       serializeArray(val(tv).parr, skipNestCheck);
       return;
 
+    case KindOfPersistentShape:
+    case KindOfShape:
+      not_implemented();
+
     case KindOfPersistentArray:
     case KindOfArray:
       assertx(!isArrayKey);

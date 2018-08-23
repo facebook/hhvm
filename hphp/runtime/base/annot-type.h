@@ -112,6 +112,7 @@ bool interface_supports_int(const StringData* s);
 bool interface_supports_double(const StringData* s);
 bool interface_supports_string(const StringData* s);
 bool interface_supports_array(const StringData* s);
+bool interface_supports_shape(const StringData* s);
 bool interface_supports_vec(const StringData* s);
 bool interface_supports_dict(const StringData* s);
 bool interface_supports_keyset(const StringData* s);
@@ -120,6 +121,7 @@ bool interface_supports_int(std::string const&);
 bool interface_supports_double(std::string const&);
 bool interface_supports_string(std::string const&);
 bool interface_supports_array(std::string const&);
+bool interface_supports_shape(std::string const&);
 bool interface_supports_vec(std::string const&);
 bool interface_supports_dict(std::string const&);
 bool interface_supports_keyset(std::string const&);
@@ -271,6 +273,11 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfPersistentString:
       case KindOfString:
         return interface_supports_string(annotClsName)
+          ? AnnotAction::Pass : AnnotAction::Fail;
+      case KindOfPersistentShape:
+      case KindOfShape:
+        // TODO(T31025155): Emit a warning.
+        return interface_supports_shape(annotClsName)
           ? AnnotAction::Pass : AnnotAction::Fail;
       case KindOfPersistentArray:
       case KindOfArray:

@@ -311,6 +311,10 @@ inline Type Type::cns(const TypedValue& tv) {
         assertx(tv.m_data.parr->isKeyset());
         return type_detail::for_const(tv.m_data.parr);
 
+      case KindOfPersistentShape:
+      case KindOfShape:
+        not_implemented();
+
       case KindOfPersistentArray:
       case KindOfArray:
         assertx(tv.m_data.parr->isPHPArray());

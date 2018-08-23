@@ -737,6 +737,12 @@ SSATmp* opt_foldable(IRGS& env,
           env,
           make_tv<KindOfPersistentKeyset>(scalar_array())
         );
+      case KindOfPersistentShape:
+      case KindOfShape:
+        return cns(
+          env,
+          make_tv<KindOfPersistentShape>(scalar_array())
+        );
       case KindOfPersistentArray:
       case KindOfArray:
         return cns(

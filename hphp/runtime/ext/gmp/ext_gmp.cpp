@@ -157,6 +157,8 @@ static bool variantToGMPData(const char* const fnCaller,
   case KindOfDict:
   case KindOfPersistentKeyset:
   case KindOfKeyset:
+  case KindOfPersistentShape:
+  case KindOfShape:
   case KindOfPersistentArray:
   case KindOfArray:
   case KindOfRef:

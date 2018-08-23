@@ -810,6 +810,8 @@ static std::string toStringElm(const TypedValue* tv) {
   case KindOfDict:
   case KindOfPersistentKeyset:
   case KindOfKeyset:
+  case KindOfPersistentShape:
+  case KindOfShape:
   case KindOfPersistentArray:
   case KindOfArray:
   case KindOfObject:
@@ -877,6 +879,9 @@ static std::string toStringElm(const TypedValue* tv) {
       print_count();
       os << ":Keyset";
       continue;
+    case KindOfPersistentShape:
+    case KindOfShape:
+      not_implemented();
     case KindOfPersistentArray:
     case KindOfArray:
       assertx(tv->m_data.parr->isPHPArray());
@@ -2978,6 +2983,8 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
             case KindOfDict:
             case KindOfPersistentKeyset:
             case KindOfKeyset:
+            case KindOfPersistentShape:
+            case KindOfShape:
             case KindOfPersistentArray:
             case KindOfArray:
             case KindOfObject:
@@ -3006,6 +3013,12 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
         case KindOfKeyset:
           tvDecRefArr(val);
         case KindOfPersistentKeyset:
+          match = SwitchMatch::DEFAULT;
+          return;
+
+        case KindOfShape:
+          tvDecRefArr(val);
+        case KindOfPersistentShape:
           match = SwitchMatch::DEFAULT;
           return;
 

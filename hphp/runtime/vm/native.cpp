@@ -236,6 +236,8 @@ void callFunc(const Func* func, void *ctx,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
@@ -332,7 +334,7 @@ bool coerceFCallArgs(TypedValue* args,
           return false;
         }
         if (!tc.isArray()) return false;
-        if (!isArrayType(c->m_type)) return false;
+        if (!isArrayOrShapeType(c->m_type)) return false;
         if (tc.isVArray()) {
           return !c->m_data.parr->isVArray();
         } else if (tc.isDArray()) {
@@ -367,6 +369,7 @@ bool coerceFCallArgs(TypedValue* args,
       CASE(Vec)
       CASE(Dict)
       CASE(Keyset)
+      CASE(Shape)
       CASE(Array)
       CASE(Resource)
 
@@ -385,6 +388,7 @@ bool coerceFCallArgs(TypedValue* args,
       case KindOfPersistentVec:
       case KindOfPersistentDict:
       case KindOfPersistentKeyset:
+      case KindOfPersistentShape:
       case KindOfPersistentArray:
       case KindOfRef:
       case KindOfFunc:
@@ -603,6 +607,8 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfDict:         return ty == T::Array    || ty == T::ArrayArg;
     case KindOfPersistentKeyset:
     case KindOfKeyset:       return ty == T::Array    || ty == T::ArrayArg;
+    case KindOfPersistentShape:
+    case KindOfShape:        return ty == T::Array    || ty == T::ArrayArg;
     case KindOfPersistentArray:
     case KindOfArray:        return ty == T::Array    || ty == T::ArrayArg;
     case KindOfResource:     return ty == T::Resource || ty == T::ResourceArg;

@@ -332,6 +332,8 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
@@ -781,6 +783,8 @@ TypedValue HHVM_FUNCTION(array_product,
       case KindOfDict:
       case KindOfPersistentKeyset:
       case KindOfKeyset:
+      case KindOfPersistentShape:
+      case KindOfShape:
       case KindOfPersistentArray:
       case KindOfArray:
       case KindOfObject:
@@ -806,6 +810,7 @@ DOUBLE:
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
+      case KindOfShape:
       case KindOfArray:
       case KindOfObject:
       case KindOfResource:
@@ -1054,6 +1059,8 @@ TypedValue HHVM_FUNCTION(array_sum,
       case KindOfDict:
       case KindOfPersistentKeyset:
       case KindOfKeyset:
+      case KindOfPersistentShape:
+      case KindOfShape:
       case KindOfPersistentArray:
       case KindOfArray:
       case KindOfObject:
@@ -1079,6 +1086,7 @@ DOUBLE:
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
+      case KindOfShape:
       case KindOfArray:
       case KindOfObject:
       case KindOfResource:
@@ -1375,6 +1383,8 @@ int64_t HHVM_FUNCTION(count,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
       if ((CountMode)mode == CountMode::RECURSIVE) {
@@ -2950,6 +2960,17 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
       SystemLib::throwInvalidArgumentExceptionObject(
         "Keysets cannot be cast to an array-key"
       );
+    case KindOfPersistentShape:
+    case KindOfShape:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        SystemLib::throwInvalidArgumentExceptionObject(
+          "Dicts cannot be cast to an array-key"
+        );
+      } else {
+        SystemLib::throwInvalidArgumentExceptionObject(
+          "Arrays cannot be cast to an array-key"
+        );
+      }
     case KindOfPersistentArray:
     case KindOfArray:
       SystemLib::throwInvalidArgumentExceptionObject(

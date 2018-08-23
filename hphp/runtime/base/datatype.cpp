@@ -276,6 +276,22 @@ MaybeDataType get_datatype(
   return KindOfObject;
 }
 
+bool isArrayOrShapeType(DataType t) {
+  return isArrayType(t) ||
+    (!RuntimeOption::EvalHackArrDVArrs && isShapeType(t));
+}
+bool isArrayOrShapeType(MaybeDataType t) {
+  return t && isArrayOrShapeType(*t);
+}
+
+bool isDictOrShapeType(DataType t) {
+  return isDictType(t) ||
+    (RuntimeOption::EvalHackArrDVArrs && isShapeType(t));
+}
+bool isDictOrShapeType(MaybeDataType t) {
+  return t && isDictOrShapeType(*t);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

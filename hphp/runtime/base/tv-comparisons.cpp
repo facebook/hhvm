@@ -106,6 +106,13 @@ typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
 
+    case KindOfPersistentShape:
+    case KindOfShape:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        return op.dictVsNonDict();
+      }
+      // fallthrough
+
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
@@ -166,6 +173,13 @@ typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
+
+    case KindOfPersistentShape:
+    case KindOfShape:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        return op.dictVsNonDict();
+      }
+      // Fallthrough
 
     case KindOfPersistentArray:
     case KindOfArray:
@@ -235,6 +249,13 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
+
+    case KindOfPersistentShape:
+    case KindOfShape:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        return op.dictVsNonDict();
+      }
+      // Fallthrough
 
     case KindOfPersistentArray:
     case KindOfArray:
@@ -325,6 +346,14 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
       hackArr();
       return op.keysetVsNonKeyset();
 
+    case KindOfPersistentShape:
+    case KindOfShape:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        hackArr();
+        return op.dictVsNonDict();
+      }
+      // Fallthrough
+
     case KindOfPersistentArray:
     case KindOfArray:
       return op(cell.m_data.parr, ad);
@@ -395,6 +424,13 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
 
+    case KindOfPersistentShape:
+    case KindOfShape:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        return op.dictVsNonDict();
+      }
+      // Fallthrough
+
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
@@ -456,6 +492,13 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceData* rd) {
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
 
+    case KindOfPersistentShape:
+    case KindOfShape:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        return op.dictVsNonDict();
+      }
+      // Fallthrough
+
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
@@ -503,6 +546,12 @@ typename Op::RetType cellRelOpVec(Op op, Cell cell, const ArrayData* a) {
     return op.vecVsNonVec();
   }
   return op.vec(cell.m_data.parr, a);
+}
+
+template<class Op>
+typename Op::RetType cellRelOpShape(Op op, Cell cell, const ArrayData* a) {
+  return RuntimeOption::EvalHackArrDVArrs ?
+    cellRelOpDict(op, cell, a) : cellRelOp(op, cell, a);
 }
 
 template<class Op>
@@ -562,6 +611,8 @@ typename Op::RetType cellRelOp(Op op, Cell c1, Cell c2) {
   case KindOfDict:         return cellRelOpDict(op, c1, c2.m_data.parr);
   case KindOfPersistentKeyset:
   case KindOfKeyset:       return cellRelOpKeyset(op, c1, c2.m_data.parr);
+  case KindOfPersistentShape:
+  case KindOfShape:        return cellRelOpShape(op, c1, c2.m_data.parr);
   case KindOfPersistentArray:
   case KindOfArray:        return cellRelOp(op, c1, c2.m_data.parr);
   case KindOfObject:       return cellRelOp(op, c1, c2.m_data.pobj);
@@ -913,7 +964,7 @@ bool cellSame(Cell c1, Cell c2) {
 
     case KindOfPersistentDict:
     case KindOfDict:
-      if (!isDictType(c2.m_type)) {
+      if (!isDictOrShapeType(c2.m_type)) {
         phpArrayCheck();
         return false;
       }
@@ -927,9 +978,13 @@ bool cellSame(Cell c1, Cell c2) {
       }
       return SetArray::Same(c1.m_data.parr, c2.m_data.parr);
 
+    case KindOfPersistentShape:
+    case KindOfShape: // TODO(T31025155): Add warning.
+      not_implemented();
+
     case KindOfPersistentArray:
     case KindOfArray:
-      if (!isArrayType(c2.m_type)) {
+      if (!isArrayOrShapeType(c2.m_type)) {
         if (UNLIKELY(checkHACCompare() && isHackArrayType(c2.m_type))) {
           raiseHackArrCompatArrMixedCmp();
         }

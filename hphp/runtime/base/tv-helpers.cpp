@@ -93,6 +93,9 @@ bool cellIsPlausible(const Cell cell) {
         assertx(cell.m_data.parr->isKeyset());
         assertx(cell.m_data.parr->isNotDVArray());
         return;
+      case KindOfPersistentShape:
+      case KindOfShape:
+        not_implemented();
       case KindOfPersistentArray:
         assertPtr(cell.m_data.parr);
         assertx(cell.m_data.parr->kindIsValid());

@@ -102,6 +102,11 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       return APCArray::MakeSharedKeyset(ad, level, unserializeObj);
     }
 
+    case KindOfPersistentShape:
+    case KindOfShape: {
+      not_implemented();
+    }
+
     case KindOfPersistentArray:
     case KindOfArray: {
       auto const ad = val(cell).parr;

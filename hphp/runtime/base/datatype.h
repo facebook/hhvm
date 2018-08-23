@@ -55,8 +55,10 @@ namespace HPHP {
  * - Audit jit::emitTypeTest().
  */
 #define DATATYPES \
-  DT(PersistentArray,  -10) \
-  DT(Array,             -9) \
+  DT(PersistentArray,  -12) \
+  DT(Array,            -11) \
+  DT(PersistentShape,  -10) \
+  DT(Shape,             -9) \
   DT(PersistentKeyset,  -8) \
   DT(Keyset,            -7) \
   DT(PersistentDict,    -6) \
@@ -304,6 +306,31 @@ inline bool isDictType(MaybeDataType t) {
   return t && isDictType(*t);
 }
 
+constexpr bool isShapeType(DataType t) {
+  return
+    static_cast<DataType>(dt_t(t) & ~kRefCountedBit) == KindOfPersistentShape;
+}
+inline bool isShapeType(MaybeDataType t) {
+  return t && isShapeType(*t);
+}
+
+/*
+ * isArrayOrShapeType checks whether DataType is an Array or a Shape that
+ * behaves like an Array. This is important because this check is often used
+ * to check that a piece of code is only operating on array-like objects and
+ * not dict-like objects.
+ */
+bool isArrayOrShapeType(DataType);
+bool isArrayOrShapeType(MaybeDataType);
+/*
+ * isDictOrShapeType checks whether DataType is a Dict or a Shape that
+ * behaves like a Dict. This is important because this check is often used
+ * to check that a piece of code is only operating on dict-like objects and
+ * not array-like objects.
+ */
+bool isDictOrShapeType(DataType);
+bool isDictOrShapeType(MaybeDataType);
+
 constexpr bool isKeysetType(DataType t) {
   return
     static_cast<DataType>(dt_t(t) & ~kRefCountedBit) == KindOfPersistentKeyset;
@@ -363,6 +390,7 @@ bool operator>=(DataType, DataType) = delete;
   case KindOfInt64:         \
   case KindOfDouble:        \
   case KindOfPersistentString:  \
+  case KindOfPersistentShape:   \
   case KindOfPersistentArray:   \
   case KindOfPersistentVec: \
   case KindOfPersistentDict: \

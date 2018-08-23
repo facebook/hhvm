@@ -113,19 +113,21 @@ Variant::Variant(const_variant_ref v) noexcept {
  */
 
 static_assert(typeToDestrIdx(KindOfArray)    == 0, "Array destruct index");
-static_assert(typeToDestrIdx(KindOfKeyset)   == 1, "Keyset destruct index");
-static_assert(typeToDestrIdx(KindOfDict)     == 2, "Dict destruct index");
-static_assert(typeToDestrIdx(KindOfVec)      == 3, "Vec destruct index");
-static_assert(typeToDestrIdx(KindOfString)   == 4, "String destruct index");
-static_assert(typeToDestrIdx(KindOfObject)   == 6, "Object destruct index");
-static_assert(typeToDestrIdx(KindOfResource) == 7, "Resource destruct index");
-static_assert(typeToDestrIdx(KindOfRef)      == 8, "Ref destruct index");
+static_assert(typeToDestrIdx(KindOfShape)    == 1, "Shape destruct index");
+static_assert(typeToDestrIdx(KindOfKeyset)   == 2, "Keyset destruct index");
+static_assert(typeToDestrIdx(KindOfDict)     == 3, "Dict destruct index");
+static_assert(typeToDestrIdx(KindOfVec)      == 4, "Vec destruct index");
+static_assert(typeToDestrIdx(KindOfString)   == 5, "String destruct index");
+static_assert(typeToDestrIdx(KindOfObject)   == 7, "Object destruct index");
+static_assert(typeToDestrIdx(KindOfResource) == 8, "Resource destruct index");
+static_assert(typeToDestrIdx(KindOfRef)      == 9, "Ref destruct index");
 
-static_assert(kDestrTableSize == 9,
+static_assert(kDestrTableSize == 10,
               "size of g_destructors[] must be kDestrTableSize");
 
 RawDestructor g_destructors[] = {
   (RawDestructor)getMethodPtr(&ArrayData::release),   // KindOfArray
+  (RawDestructor)&MixedArray::Release,                // KindOfShape
   (RawDestructor)&SetArray::Release,                  // KindOfKeyset
   (RawDestructor)&MixedArray::Release,                // KindOfDict
   (RawDestructor)&PackedArray::Release,               // KindOfVec
@@ -237,6 +239,8 @@ DataType Variant::toNumeric(int64_t &ival, double &dval,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
@@ -273,6 +277,8 @@ bool Variant::isScalar() const noexcept {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
@@ -306,12 +312,14 @@ static bool isAllowedAsConstantValueImpl(TypedValue tv) {
     case KindOfPersistentDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
     case KindOfPersistentArray:
     case KindOfResource:
       return true;
 
     case KindOfVec:
     case KindOfDict:
+    case KindOfShape:
     case KindOfArray: {
       if (tv.m_data.parr->isGlobalsArray()) return false;
 
@@ -366,6 +374,8 @@ bool Variant::toBooleanHelper() const {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:         return !m_data.parr->empty();
     case KindOfObject:        return m_data.pobj->toBoolean();
@@ -395,6 +405,8 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:         return m_data.parr->empty() ? 0 : 1;
     case KindOfObject:        return m_data.pobj->toInt64();
@@ -424,6 +436,8 @@ double Variant::toDoubleHelper() const {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:         return (double)toInt64();
     case KindOfObject:        return m_data.pobj->toDouble();
@@ -453,6 +467,8 @@ Array Variant::toPHPArrayHelper() const {
     case KindOfVec:
     case KindOfPersistentDict:
     case KindOfDict:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentKeyset:
     case KindOfKeyset:        return ArrNR{m_data.parr}.asArray().toPHPArray();
     case KindOfPersistentArray:
@@ -487,6 +503,8 @@ Resource Variant::toResourceHelper() const {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
@@ -570,6 +588,12 @@ void Variant::setEvalScalar() {
     case KindOfKeyset:
       m_type = KindOfPersistentKeyset;
     case KindOfPersistentKeyset:
+      do_array();
+      return;
+
+    case KindOfShape:
+      m_type = KindOfPersistentShape;
+    case KindOfPersistentShape:
       do_array();
       return;
 

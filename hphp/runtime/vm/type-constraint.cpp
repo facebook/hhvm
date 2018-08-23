@@ -491,16 +491,16 @@ bool TypeConstraint::checkTypeAliasNonObj(tv_rval val) const {
         return !ForProp && (Assert || is_callable(cellAsCVarRef(*val)));
       case AnnotAction::ObjectCheck: break;
       case AnnotAction::VArrayCheck:
-        assertx(tvIsArray(val));
+        assertx(tvIsArrayOrShape(val));
         return Assert || val.val().parr->isVArray();
       case AnnotAction::DArrayCheck:
-        assertx(tvIsArray(val));
+        assertx(tvIsArrayOrShape(val));
         return Assert || val.val().parr->isDArray();
       case AnnotAction::VArrayOrDArrayCheck:
-        assertx(tvIsArray(val));
+        assertx(tvIsArrayOrShape(val));
         return Assert || !val.val().parr->isNotDVArray();
       case AnnotAction::NonVArrayOrDArrayCheck:
-        assertx(tvIsArray(val));
+        assertx(tvIsArrayOrShape(val));
         return Assert || val.val().parr->isNotDVArray();
     }
     assertx(result == AnnotAction::ObjectCheck);
@@ -684,16 +684,16 @@ bool TypeConstraint::checkImpl(tv_rval val,
     case AnnotAction::VArrayCheck:
       // Since d/varray type-hints are always soft, we can never assert on their
       // correctness.
-      assertx(tvIsArray(val));
+      assertx(tvIsArrayOrShape(val));
       return isAssert || val.val().parr->isVArray();
     case AnnotAction::DArrayCheck:
-      assertx(tvIsArray(val));
+      assertx(tvIsArrayOrShape(val));
       return isAssert || val.val().parr->isDArray();
     case AnnotAction::VArrayOrDArrayCheck:
-      assertx(tvIsArray(val));
+      assertx(tvIsArrayOrShape(val));
       return isAssert || !val.val().parr->isNotDVArray();
     case AnnotAction::NonVArrayOrDArrayCheck:
-      assertx(tvIsArray(val));
+      assertx(tvIsArrayOrShape(val));
       return isAssert || val.val().parr->isNotDVArray();
   }
   not_reached();
@@ -793,6 +793,9 @@ const char* describe_actual_type(tv_rval val, bool isHHType) {
     case KindOfDict:          return "HH\\dict";
     case KindOfPersistentKeyset:
     case KindOfKeyset:        return "HH\\keyset";
+    case KindOfPersistentShape:
+    case KindOfShape:
+      return RuntimeOption::EvalHackArrDVArrs ? "HH\\dict" : "array";
     case KindOfPersistentArray:
     case KindOfArray:         return "array";
     case KindOfObject:        return val.val().pobj->getClassName().c_str();
@@ -1145,6 +1148,8 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
         case KindOfDict:
         case KindOfPersistentKeyset:
         case KindOfKeyset:
+        case KindOfPersistentShape:
+        case KindOfShape:
         case KindOfPersistentArray:
         case KindOfArray:
         case KindOfResource:

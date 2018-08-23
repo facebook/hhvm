@@ -211,6 +211,14 @@ void deepCopy(TypedValue* tv) {
       return;
     }
 
+    case KindOfShape: {
+      auto arr = RuntimeOption::EvalHackArrDVArrs ?
+        deepCopyDict(tv->m_data.parr) : deepCopyArray(tv->m_data.parr);
+      decRefArr(tv->m_data.parr);
+      tv->m_data.parr = arr;
+      return;
+    }
+
     case KindOfDict: {
       auto arr = deepCopyDict(tv->m_data.parr);
       decRefArr(tv->m_data.parr);

@@ -164,6 +164,7 @@ ALWAYS_INLINE void tvDecRefArr(const TypedValue* tv) {
   assertx(tv->m_type == KindOfArray ||
          tv->m_type == KindOfVec ||
          tv->m_type == KindOfDict ||
+         tv->m_type == KindOfShape ||
          tv->m_type == KindOfKeyset);
   decRefArr(tv->m_data.parr);
 }

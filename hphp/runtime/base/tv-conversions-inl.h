@@ -53,6 +53,8 @@ inline bool cellToBool(Cell cell) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:         return !cell.m_data.parr->empty();
     case KindOfObject:        return cell.m_data.pobj->toBoolean();
@@ -83,6 +85,8 @@ inline int64_t cellToInt(Cell cell) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:         return cell.m_data.parr->empty() ? 0 : 1;
     case KindOfObject:        return cell.m_data.pobj->toInt64();
@@ -147,6 +151,8 @@ inline Cell cellToKey(Cell cell, const ArrayData* ad) {
     case KindOfResource:
       return make_tv<KindOfInt64>(cell.m_data.pres->data()->o_toInt64());
 
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfPersistentVec:

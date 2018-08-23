@@ -272,6 +272,8 @@ inline int dataTypeToSoap(DataType dt) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:   return SOAP_ENC_ARRAY_DT;
     case KindOfObject:  return SOAP_ENC_OBJECT;

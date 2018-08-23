@@ -281,6 +281,10 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
                   !strcasecmp(hint, "HH\\arraylike"));
         return;
 
+      case KindOfPersistentShape:
+      case KindOfShape:
+        always_assert(false);
+
       case KindOfPersistentArray:
       case KindOfArray:
         compat = (acceptAny ||

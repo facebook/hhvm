@@ -467,10 +467,12 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
     case KindOfPersistentVec    : return kPersistentVec;
     case KindOfPersistentDict   : return kPersistentDict;
     case KindOfPersistentKeyset : return kPersistentKeyset;
+    case KindOfPersistentShape  : not_implemented();
     case KindOfPersistentArray  : return kPersistentArr;
     case KindOfVec              : return kVec;
     case KindOfDict             : return kDict;
     case KindOfKeyset           : return kKeyset;
+    case KindOfShape            : not_implemented();
     case KindOfArray            : return kArr;
     case KindOfResource         : return kRes;
     case KindOfObject           : return kObj;

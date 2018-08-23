@@ -204,6 +204,29 @@ bool interface_supports_dict(const std::string& n) {
           (n.size() == 8 && !strcasecmp(s, "XHPChild")));
 }
 
+bool interface_supports_shape(const StringData* s) {
+  return (s->isame(s_HH_Traversable.get()) ||
+          s->isame(s_HH_KeyedTraversable.get()) ||
+          s->isame(s_HH_RX_Traversable.get()) ||
+          s->isame(s_HH_RX_KeyedTraversable.get()) ||
+          s->isame(s_HH_Container.get()) ||
+          s->isame(s_HH_KeyedContainer.get()) ||
+          s->isame(s_Indexish.get()) ||
+          s->isame(s_XHPChild.get()));
+}
+
+bool interface_supports_shape(const std::string& n) {
+  const char* s = n.c_str();
+  return ((n.size() == 14 && !strcasecmp(s, "HH\\Traversable")) ||
+          (n.size() == 19 && !strcasecmp(s, "HH\\KeyedTraversable")) ||
+          (n.size() == 17 && !strcasecmp(s, "HH\\Rx\\Traversable")) ||
+          (n.size() == 22 && !strcasecmp(s, "HH\\Rx\\KeyedTraversable")) ||
+          (n.size() == 12 && !strcasecmp(s, "HH\\Container")) ||
+          (n.size() == 17 && !strcasecmp(s, "HH\\KeyedContainer")) ||
+          (n.size() == 8 && !strcasecmp(s, "Indexish")) ||
+          (n.size() == 8 && !strcasecmp(s, "XHPChild")));
+}
+
 bool interface_supports_keyset(const StringData* s) {
   return (s->isame(s_HH_Traversable.get()) ||
           s->isame(s_HH_KeyedTraversable.get()) ||

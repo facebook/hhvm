@@ -21,8 +21,14 @@ let check_implements check_new_object attr_interface
     if not (SSet.mem attr_name SN.UserAttributes.as_set)
     then Errors.unbound_attribute_name attr_pos attr_name; env end
   else
-    let attr_class_name = "\\__Attribute__" ^ attr_name in
-    match Typing_env.get_class env attr_class_name, Typing_env.get_class env attr_interface with
+    let attr_class_opt =
+      let attr_class_name = "\\" ^ attr_name in
+      let ac = Typing_env.get_class env attr_class_name in
+      match ac with
+      | Some _ -> ac
+      | None -> let attr_class_prefix_name = "\\__Attribute__" ^ attr_name in
+        Typing_env.get_class env attr_class_prefix_name in
+    match attr_class_opt, Typing_env.get_class env attr_interface with
     | Some attr_class, Some intf_class ->
       (* Found matching class *)
       let attr_cid = (attr_class.tc_pos, attr_class.tc_name) in

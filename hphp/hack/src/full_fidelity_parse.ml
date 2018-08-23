@@ -16,8 +16,6 @@
   * --full-fidelity-errors-all
   * --full-fidelity-s-expression
   * --full-fidelity-ast-s-expression
-  * --original-parser-errors
-  * --original-parser-s-expression
   * --program-text
   * --pretty-print
   * --show-file-name
@@ -48,8 +46,6 @@ module FullFidelityParseArgs = struct
     full_fidelity_errors_all : bool;
     full_fidelity_s_expr : bool;
     full_fidelity_ast_s_expr : bool;
-    original_parser_errors : bool;
-    original_parser_s_expr : bool;
     program_text : bool;
     pretty_print : bool;
     schema: bool;
@@ -79,8 +75,6 @@ module FullFidelityParseArgs = struct
     full_fidelity_errors_all
     full_fidelity_s_expr
     full_fidelity_ast_s_expr
-    original_parser_errors
-    original_parser_s_expr
     program_text
     pretty_print
     schema
@@ -105,8 +99,6 @@ module FullFidelityParseArgs = struct
     full_fidelity_errors_all;
     full_fidelity_s_expr;
     full_fidelity_ast_s_expr;
-    original_parser_errors;
-    original_parser_s_expr;
     program_text;
     pretty_print;
     schema;
@@ -143,10 +135,6 @@ module FullFidelityParseArgs = struct
     let full_fidelity_ast_s_expr = ref false in
     let set_full_fidelity_s_expr () = full_fidelity_s_expr := true in
     let set_full_fidelity_ast_s_expr () = full_fidelity_ast_s_expr := true in
-    let original_parser_errors = ref false in
-    let set_original_parser_errors () = original_parser_errors := true in
-    let original_parser_s_expr = ref false in
-    let set_original_parser_s_expr () = original_parser_s_expr := true in
     let program_text = ref false in
     let set_program_text () = program_text := true in
     let pretty_print = ref false in
@@ -196,12 +184,6 @@ No errors are filtered out.";
       "--full-fidelity-ast-s-expression",
         Arg.Unit set_full_fidelity_ast_s_expr,
         "Displays the AST produced by the FFP in S-expression format.";
-      "--original-parser-errors",
-        Arg.Unit set_original_parser_errors,
-        "Displays the original parse tree errors, if any.";
-      "--original-parser-s-expression",
-        Arg.Unit set_original_parser_s_expr,
-        "Displays the original parse tree in S-expression format.";
       "--program-text",
         Arg.Unit set_program_text,
         "Displays the text of the given file.";
@@ -282,8 +264,6 @@ No errors are filtered out.";
       !full_fidelity_errors_all
       !full_fidelity_s_expr
       !full_fidelity_ast_s_expr
-      !original_parser_errors
-      !original_parser_s_expr
       !program_text
       !pretty_print
       !schema
@@ -337,12 +317,6 @@ let handle_existing_file args filename =
   let env = Full_fidelity_parser_env.make ?mode () in
   let syntax_tree = SyntaxTree.make ~env source_text in
   let editable = SyntaxTransforms.editable_from_positioned syntax_tree in
-
-  (* Parse with the original parser *)
-  let (original_errors, original_parse) = Errors.do_
-    begin
-      fun () -> Parser_hack.from_file popt file
-    end in
 
   if args.show_file_name then begin
     Printf.printf "%s\n" filename
@@ -401,14 +375,6 @@ let handle_existing_file args filename =
     let res = Lowerer.from_file env in
     let str = Debug.dump_ast @@ Ast.AProgram res.Lowerer.ast in
     Printf.printf "%s" str
-  end;
-  if args.original_parser_errors then begin
-    Errors.iter_error_list print_error original_errors
-  end;
-  if args.original_parser_s_expr then begin
-    let ast = Ast.AProgram original_parse.Parser_return.ast in
-    let str = Debug.dump_ast ast in
-    Printf.printf "%s\n" str
   end;
   if args.full_fidelity_json then begin
     let json = SyntaxTree.to_json syntax_tree in

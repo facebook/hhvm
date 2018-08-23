@@ -72,16 +72,11 @@ type mode =
   | Infer_return_types
   | Least_upper_bound
 
-type parser =
-  | Legacy
-  | FFP
-
 type options = {
   filename : string;
   mode : mode;
   no_builtins : bool;
   tcopt : GlobalOptions.t;
-  parser : parser;
 }
 
 (* Canonical builtins from our hhi library *)
@@ -156,7 +151,6 @@ let parse_options () =
   let allow_return_by_ref = ref false in
   let allow_array_cell_pass_by_ref = ref false in
   let void_is_type_of_null = ref false in
-  let parser = ref FFP in
   let auto_namespace_map = ref [] in
   let dont_assume_php = ref false in
   let unsafe_rx = ref false in
@@ -183,12 +177,6 @@ let parse_options () =
     "--ffp-auto-complete",
       Arg.Unit (set_mode Ffp_autocomplete),
       " Produce autocomplete suggestions using the full-fidelity parse tree";
-    "--parser",
-      Arg.String
-        (function "ffp" -> parser := FFP
-          | "legacy" -> parser := Legacy
-          | p -> failwith @@ p ^ " is an invalid parser"),
-      " Parser: ffp or legacy [def: legacy]";
     "--colour",
       Arg.Unit (set_mode Color),
       " Produce colour output";
@@ -367,7 +355,6 @@ let parse_options () =
     mode = !mode;
     no_builtins = !no_builtins;
     tcopt;
-    parser = !parser;
   }
 
 let compute_least_type tcopt popt fn =
@@ -557,14 +544,12 @@ let n_class_fold _tcopt _fn acc _class_name = acc
 let n_type_fold _tcopt _fn acc _type_name = acc
 let n_const_fold _tcopt _fn acc _const_name = acc
 
-let parse_name_and_decl popt files_contents tcopt parser =
+let parse_name_and_decl popt files_contents tcopt =
   Errors.do_ begin fun () ->
     let parsed_files =
       Relative_path.Map.mapi files_contents ~f:begin fun fn contents ->
         Errors.run_in_context fn Errors.Parsing begin fun () ->
-          match parser with
-          | Legacy -> Parser_hack.program popt fn contents
-          | FFP -> Full_fidelity_ast.defensive_program popt fn contents
+          Full_fidelity_ast.defensive_program popt fn contents
         end
       end
     in
@@ -644,7 +629,7 @@ let compare_classes c1 c2 =
   let _, is_unchanged = Decl_compare.ClassEltDiff.compare c1 c2 in
   if is_unchanged = `Changed then fail_comparison "ClassEltDiff"
 
-let test_decl_compare filename popt files_contents tcopt files_info parser =
+let test_decl_compare filename popt files_contents tcopt files_info =
   (* skip some edge cases that we don't handle now... ugly! *)
   if (Relative_path.suffix filename) = "capitalization3.php" then () else
   if (Relative_path.suffix filename) = "capitalization4.php" then () else
@@ -674,7 +659,7 @@ let test_decl_compare filename popt files_contents tcopt files_info parser =
       ~collect_garbage:false;
 
   let files_contents = Relative_path.Map.map files_contents ~f:add_newline in
-  let _, _= parse_name_and_decl popt files_contents tcopt parser in
+  let _, _= parse_name_and_decl popt files_contents tcopt in
 
   let typedefs2, funs2, classes2 = get_decls defs in
 
@@ -692,7 +677,7 @@ let get_tast opts filename files_info =
   end
 
 let handle_mode
-  mode filename tcopt popt parser files_contents files_info errors =
+  mode filename tcopt popt files_contents files_info errors =
   match mode with
   | Ai _ -> ()
   | Autocomplete
@@ -963,14 +948,14 @@ let handle_mode
       then (List.iter ~f:(error ~indent:true) errors; exit 2)
       else Printf.printf "No errors\n"
   | Decl_compare ->
-    test_decl_compare filename popt files_contents tcopt files_info parser
+    test_decl_compare filename popt files_contents tcopt files_info
   | Least_upper_bound-> compute_least_type tcopt popt filename
 
 (*****************************************************************************)
 (* Main entry point *)
 (*****************************************************************************)
 
-let decl_and_run_mode {filename; mode; no_builtins; tcopt; parser} popt =
+let decl_and_run_mode {filename; mode; no_builtins; tcopt } popt =
   if mode = Dump_deps then Typing_deps.debug_trace := Typing_deps.Full
   else if mode = Dump_bazooka_deps
     then Typing_deps.debug_trace := Typing_deps.Bazooka;
@@ -985,9 +970,9 @@ let decl_and_run_mode {filename; mode; no_builtins; tcopt; parser} popt =
   in
 
   let errors, files_info =
-    parse_name_and_decl popt files_contents_with_builtins tcopt parser in
+    parse_name_and_decl popt files_contents_with_builtins tcopt in
 
-  handle_mode mode filename tcopt popt parser files_contents files_info
+  handle_mode mode filename tcopt popt files_contents files_info
     (Errors.get_error_list errors)
 
 let main_hack ({filename; mode; tcopt; _} as opts) =

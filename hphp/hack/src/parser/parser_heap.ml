@@ -43,24 +43,6 @@ let get_from_local_cache ~full popt file_name =
   let fn = Relative_path.to_absolute file_name in
   match LocalParserCache.get file_name with
   | Some ast -> ast
-  | None when not (ParserOptions.use_full_fidelity popt) ->
-    (* Legacy branch during cutover phase; remove entire branch after *)
-        let contents =
-        match File_heap.get_contents file_name with
-        | Some contents -> contents
-        | None -> "" in
-        let contents = let fn = (Relative_path.to_absolute file_name) in
-          if (FindUtils.is_php fn
-          && not (FilesToIgnore.should_ignore fn))
-          && Parser_hack.get_file_mode popt file_name contents <> None then
-          contents else "" in
-        let { Parser_return.ast;
-          _ } = Parser_hack.program ~quick:(not full) popt file_name contents in
-        let ast = if (Relative_path.prefix file_name = Relative_path.Hhi)
-        && ParserOptions.deregister_php_stdlib popt
-        then Ast_utils.deregister_ignored_attributes ast else ast in
-        if full then LocalParserCache.add file_name ast;
-        ast
   | None ->
     let f contents =
       let contents =

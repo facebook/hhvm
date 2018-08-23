@@ -19,10 +19,6 @@ module Logger = HackcEventLogger
 (*****************************************************************************)
 (* Types, constants *)
 (*****************************************************************************)
-type parser =
-  | Legacy
-  | FFP
-
 type mode =
   | CLI
   | DAEMON
@@ -32,7 +28,6 @@ type options = {
   fallback         : bool;
   config_list      : string list;
   debug_time       : bool;
-  parser           : parser;
   output_file      : string option;
   config_file      : string option;
   quiet_mode       : bool;
@@ -101,7 +96,6 @@ let parse_options () =
   let want_version = ref false in
   let fallback = ref false in
   let debug_time = ref false in
-  let parser = ref FFP in
   let config_list = ref [] in
   let mode = ref CLI in
   let output_file = ref None in
@@ -153,13 +147,6 @@ let parse_options () =
           , Arg.String (fun str -> output_file := Some str)
             , " Output file. Creates it if necessary"
       );
-      ("--parser"
-          , Arg.String
-            (function "ffp" -> parser := FFP
-              | "legacy" -> parser := Legacy
-              | p -> failwith @@ p ^ " is an invalid parser")
-            , " Parser: ffp or legacy [def: ffp]"
-      );
       ("--daemon"
           , Arg.Unit (fun () -> mode := DAEMON)
             , " Run a daemon which processes Hack source from standard input"
@@ -206,7 +193,6 @@ let parse_options () =
   ; fallback           = !fallback
   ; config_list        = !config_list
   ; debug_time         = !debug_time
-  ; parser             = !parser
   ; output_file        = !output_file
   ; config_file        = !config_file
   ; quiet_mode         = !quiet_mode
@@ -272,44 +258,38 @@ let write_stats_if_enabled ~compiler_options =
 
 let parse_text compiler_options popt fn text =
   let () = set_stats_if_enabled ~compiler_options in
-  match compiler_options.parser with
-  | FFP ->
-    let ignore_pos =
-      not (Hhbc_options.source_mapping !Hhbc_options.compiler_options) in
-    let enable_hh_syntax =
-      Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
-    let enable_xhp =
-      Hhbc_options.enable_xhp !Hhbc_options.compiler_options in
-    let php5_compat_mode =
-      not (Hhbc_options.enable_uniform_variable_syntax !Hhbc_options.compiler_options) in
-    let hacksperimental =
-      Hhbc_options.hacksperimental !Hhbc_options.compiler_options in
-    let lower_coroutines =
-      Hhbc_options.enable_coroutines !Hhbc_options.compiler_options in
-    let systemlib_compat_mode = Emit_env.is_systemlib () in
-    Lex.Env.set ~force_hh:enable_hh_syntax ~enable_xhp;
-    let env = Full_fidelity_ast.make_env
-      ~parser_options:popt
-      ~ignore_pos
-      ~codegen:true
-      ~fail_open:false
-      ~systemlib_compat_mode
-      ~php5_compat_mode
-      ~enable_hh_syntax
-      ~hacksperimental
-      ~keep_errors:false
-      ~lower_coroutines
-      fn
-    in
-    let source_text = SourceText.make fn text in
-    let { Full_fidelity_ast.ast; Full_fidelity_ast.is_hh_file; _ } =
-      Full_fidelity_ast.from_text env source_text in
-    let () = write_stats_if_enabled ~compiler_options in
-    (ast, is_hh_file)
-  | Legacy ->
-    let {Parser_return.ast; Parser_return.is_hh_file; _} =
-      Parser_hack.program popt fn text in
-    (ast, is_hh_file)
+  let ignore_pos =
+    not (Hhbc_options.source_mapping !Hhbc_options.compiler_options) in
+  let enable_hh_syntax =
+    Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
+  let enable_xhp =
+    Hhbc_options.enable_xhp !Hhbc_options.compiler_options in
+  let php5_compat_mode =
+    not (Hhbc_options.enable_uniform_variable_syntax !Hhbc_options.compiler_options) in
+  let hacksperimental =
+    Hhbc_options.hacksperimental !Hhbc_options.compiler_options in
+  let lower_coroutines =
+    Hhbc_options.enable_coroutines !Hhbc_options.compiler_options in
+  let systemlib_compat_mode = Emit_env.is_systemlib () in
+  Lex.Env.set ~force_hh:enable_hh_syntax ~enable_xhp;
+  let env = Full_fidelity_ast.make_env
+    ~parser_options:popt
+    ~ignore_pos
+    ~codegen:true
+    ~fail_open:false
+    ~systemlib_compat_mode
+    ~php5_compat_mode
+    ~enable_hh_syntax
+    ~hacksperimental
+    ~keep_errors:false
+    ~lower_coroutines
+    fn
+  in
+  let source_text = SourceText.make fn text in
+  let { Full_fidelity_ast.ast; Full_fidelity_ast.is_hh_file; _ } =
+    Full_fidelity_ast.from_text env source_text in
+  let () = write_stats_if_enabled ~compiler_options in
+  (ast, is_hh_file)
 
 let parse_file compiler_options popt filename text =
   try

@@ -25,17 +25,16 @@ def get_expected(file):
     return count
 
 
-def run_hh_single_parse(hh_single_parse, file, ffp=False):
-    if ffp:
-        cmd = [hh_single_parse, "--parser", "ffp", file]
-    else:
-        cmd = [hh_single_parse, file]
+def run_hh_single_parse(hh_single_parse, file):
+
+    cmd = [hh_single_parse, file]
+
     try:
         out = subprocess.check_output(cmd)
         return str(out).count("Block")
     except subprocess.CalledProcessError as e:
         print("Error when running hh_single_parse on %s%s"
-            % (file, " with FFP" if ffp else ""))
+            % (file, " with FFP"))
         raise e
 
 
@@ -46,20 +45,12 @@ def run_test(hh_single_parse, file):
     failed = False
     expected = get_expected(file)
     try:
-        ffp_result = run_hh_single_parse(hh_single_parse, file, ffp=True)
+        ffp_result = run_hh_single_parse(hh_single_parse, file)
     except subprocess.CalledProcessError as e:
         return True
     if ffp_result != expected:
         print("%s expected %d blocks, FFP gives %d blocks"
             % (file, expected, ffp_result))
-        failed = True
-    try:
-        legacy_result = run_hh_single_parse(hh_single_parse, file, ffp=False)
-    except subprocess.CalledProcessError as e:
-        return True
-    if legacy_result != expected:
-        print("%s expected %d blocks, Legacy gives %d blocks"
-            % (file, expected, legacy_result))
         failed = True
     return failed
 

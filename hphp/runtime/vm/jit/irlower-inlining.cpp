@@ -101,7 +101,7 @@ void cgInlineReturnNoFrame(IRLS& env, const IRInstruction* inst) {
     auto const extra = inst->extra<InlineReturnNoFrame>();
     auto const offset = cellsToBytes(extra->offset.offset);
     for (auto i = 0; i < kNumActRecCells; ++i) {
-      trashTV(v, rvmfp(), offset - cellsToBytes(i), kTVTrashJITFrame);
+      trashFullTV(v, rvmfp()[offset - cellsToBytes(i)], kTVTrashJITFrame);
     }
   }
 

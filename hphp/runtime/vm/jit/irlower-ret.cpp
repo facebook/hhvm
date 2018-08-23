@@ -182,7 +182,7 @@ void cgLdRetVal(IRLS& env, const IRInstruction* inst) {
 
 void cgDbgTrashRetVal(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
-  trashTV(v, srcLoc(env, inst, 0).reg(), kArRetOff, kTVTrashJITRetVal);
+  trashFullTV(v, srcLoc(env, inst, 0).reg()[kArRetOff], kTVTrashJITRetVal);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -246,14 +246,26 @@ void copyTV(Vout& v, Vloc src, Vloc dst, Type destType) {
   }
 }
 
-void trashTV(Vout& v, Vreg ptr, int32_t offset, char byte) {
+void trashFullTV(Vout& v, Vptr ptr, char byte) {
   int32_t trash32;
   memset(&trash32, byte, sizeof(trash32));
-  static_assert(sizeof(TypedValue) == 16, "");
-  v << storeli{trash32, ptr[offset + 0x0]};
-  v << storeli{trash32, ptr[offset + 0x4]};
-  v << storeli{trash32, ptr[offset + 0x8]};
-  v << storeli{trash32, ptr[offset + 0xc]};
+  static_assert(sizeof(TypedValue) % sizeof(trash32) == 0, "");
+
+  for (int offset = 0; offset < sizeof(TypedValue);
+       offset += sizeof(trash32)) {
+    v << storeli{trash32, ptr + offset};
+  }
+}
+
+void trashTV(Vout& v, Vptr typePtr, Vptr valPtr, char byte) {
+  int32_t trash32;
+  memset(&trash32, byte, sizeof(trash32));
+  static_assert(sizeof(Value) == 8, "");
+  v << storeli{trash32, valPtr};
+  v << storeli{trash32, valPtr + 4};
+
+  static_assert(sizeof(DataType) == 1, "");
+  v << storebi{byte, typePtr};
 }
 
 void emitAssertRefCount(Vout& v, Vreg data, Reason reason) {

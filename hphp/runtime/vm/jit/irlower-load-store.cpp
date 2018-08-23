@@ -100,7 +100,7 @@ void cgDbgTrashFrame(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const off = cellsToBytes(inst->extra<DbgTrashFrame>()->offset.offset);
   for (auto i = 0; i < kNumActRecCells; ++i) {
-    trashTV(vmain(env), fp, off + cellsToBytes(i), kTVTrashJITFrame);
+    trashFullTV(vmain(env), fp[off + cellsToBytes(i)], kTVTrashJITFrame);
   }
 }
 
@@ -153,7 +153,7 @@ void cgStOutValue(IRLS& env, const IRInstruction* inst) {
 void cgDbgTrashStk(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const off = cellsToBytes(inst->extra<DbgTrashStk>()->offset.offset);
-  trashTV(vmain(env), sp, off, kTVTrashJITStk);
+  trashFullTV(vmain(env), sp[off],  kTVTrashJITStk);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -244,8 +244,10 @@ void cgStMem(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgDbgTrashMem(IRLS& env, const IRInstruction* inst) {
-  auto const ptr = srcLoc(env, inst, 0).reg();
-  trashTV(vmain(env), ptr, 0, kTVTrashJITHeap);
+  auto const ptr    = inst->src(0);
+  auto const ptrLoc = tmpLoc(env, ptr);
+  trashTV(vmain(env), memTVTypePtr(ptr, ptrLoc), memTVValPtr(ptr, ptrLoc),
+          kTVTrashJITHeap);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -118,7 +118,12 @@ void copyTV(Vout& v, Vloc src, Vloc dst, Type dstType);
  *
  * Note that this will also clobber the Aux area of a TypedValueAux.
  */
-void trashTV(Vout& v, Vreg ptr, int32_t offset, char byte);
+void trashFullTV(Vout& v, Vptr ptr, char byte);
+
+/*
+ * Fill the type and value of a TypedValue with trash.
+ */
+void trashTV(Vout& v, Vptr typePtr, Vptr valPtr, char byte);
 
 /*
  * Compare an object's reference count with an immediate value, return the

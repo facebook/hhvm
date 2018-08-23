@@ -1888,7 +1888,7 @@ To string conversions:
   slots starting at the offset (in cells), and going toward higher memory
   addresses.
 
-| DbgTrashMem, ND, S(PtrToGen), NF
+| DbgTrashMem, ND, S(MemToGen), NF
 
   For debugging purposes.  Store kTVTrashJITHeap to a heap slot pointed to by
   S0.

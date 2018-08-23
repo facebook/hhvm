@@ -31,6 +31,7 @@ type const_id = Hhbc_id.Const.t
 type prop_id = Hhbc_id.Prop.t
 type num_params = int
 type has_unpack = bool
+type fcall_args = num_params * has_unpack * num_params
 type classref_id = int
 (* Conventionally this is "A_" followed by an integer *)
 type adata_id = string
@@ -418,7 +419,7 @@ type instruct_call =
   | FIsParamByRefCufIter of param_num * fpass_hint * Iterator.t
   | FThrowOnRefMismatch of bool list
   | FHandleRefMismatch of param_num * fpass_hint * string
-  | FCall of num_params * has_unpack * num_params * class_id * function_id
+  | FCall of fcall_args * class_id * function_id
   | FCallAwait of num_params * class_id * function_id
   | FCallBuiltin of num_params * num_params * string
 

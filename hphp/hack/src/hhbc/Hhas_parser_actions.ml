@@ -800,6 +800,9 @@ let doubleofiarg arg =
   | IAInt64 n -> (Int64.to_string n) ^ "." (* ugh *)
   | _ -> report_error "bad double lit cst"
 
+let fcallargsofiargs num_args has_unpack num_rets =
+  intofiarg num_args, has_unpack_of_iarg has_unpack, intofiarg num_rets
+
 let makeunaryinst s arg = match s with
   (* instruct_lit_const *)
    | "Int" -> (match arg with | IAInt64 n -> ILitConst (Int n)
@@ -1166,6 +1169,6 @@ match s with
                                           labelofiarg arg3, localidofiarg arg4,
                                           localidofiarg arg5))
   | "FCall" ->
-    ICall(FCall (intofiarg arg1, has_unpack_of_iarg arg2, intofiarg arg3,
+    ICall(FCall (fcallargsofiargs arg1 arg2 arg3,
       class_id_of_iarg arg4, function_id_of_iarg arg5))
   | _ -> failwith ("NYI quinary: " ^ s)

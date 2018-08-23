@@ -36,11 +36,13 @@ let emit_body_instrs_inout params call_instrs =
   let has_variadic = is_last_param_variadic param_count params in
   let param_count = if has_variadic then param_count - 1 else param_count in
   let num_inout = List.length inout_params in
+  let fcall_args = make_fcall_args
+    ~has_unpack:has_variadic ~num_rets:(num_inout + 1) param_count in
   gather [
     gather @@ List.init num_inout ~f:(fun _ -> instr_nulluninit);
     call_instrs;
     param_instrs;
-    instr_fcall param_count has_variadic (num_inout + 1);
+    instr_fcall fcall_args;
     Emit_inout_helpers.emit_list_set_for_inout_call local inout_params;
     instr_retc
   ]
@@ -61,10 +63,11 @@ let emit_body_instrs_ref params call_instrs =
         then Some (instr_cgetl (Local.Named (Hhas_param.name p))) else None) in
   let has_variadic = is_last_param_variadic param_count params in
   let param_count = if has_variadic then param_count - 1 else param_count in
+  let fcall_args = make_fcall_args ~has_unpack:has_variadic param_count in
   gather [
     call_instrs;
     param_instrs;
-    instr_fcall param_count has_variadic 1;
+    instr_fcall fcall_args;
     instr_unboxr_nop;
     gather param_get_instrs;
     instr_retm (List.length param_get_instrs + 1)

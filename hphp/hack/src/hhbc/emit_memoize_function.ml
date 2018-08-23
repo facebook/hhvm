@@ -23,7 +23,7 @@ let make_memoize_function_no_params_code
     instr_retc;
     instr_label label;
     instr_fpushfuncd 0 renamed_function_id;
-    instr_fcall 0 false 1;
+    instr_fcall (make_fcall_args 0);
     instr_unboxr;
     instr_memoset None;
     instr_retc
@@ -51,7 +51,7 @@ let make_memoize_function_with_params_code
     instr_label label;
     instr_fpushfuncd param_count renamed_method_id;
     param_code_gets params;
-    instr_fcall param_count false 1;
+    instr_fcall (make_fcall_args param_count);
     instr_unboxr;
     instr_memoset (Some (first_local, param_count));
     instr_retc;

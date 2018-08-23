@@ -85,7 +85,13 @@ let string_of_param_id x =
 
 let string_of_param_num i = string_of_int i
 
-let string_of_has_unpack has_unpack = if has_unpack then "1" else "0"
+let string_of_fcall_args fcall_args =
+  let num_args, has_unpack, num_rets = fcall_args in
+  sep [
+    string_of_int num_args;
+    if has_unpack then "1" else "0";
+    string_of_int num_rets
+  ]
 
 let string_of_local_id x =
   match x with
@@ -506,9 +512,9 @@ let string_of_call instruction =
   | FHandleRefMismatch (i, h, f) ->
     sep ["FHandleRefMismatch"; string_of_param_num i; string_of_fpasshint h;
          "\"" ^ f ^ "\""]
-  | FCall (n1, u, n2, c, f) ->
+  | FCall (fcall_args, c, f) ->
     sep ["FCall";
-      string_of_int n1; string_of_has_unpack u; string_of_int n2;
+      string_of_fcall_args fcall_args;
       string_of_class_id c; string_of_function_id f]
   | FCallAwait (n, c, f) ->
     sep ["FCallAwait";

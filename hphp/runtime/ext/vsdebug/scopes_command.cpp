@@ -63,13 +63,18 @@ bool ScopesCommand::executeImpl(
   folly::dynamic scopes = folly::dynamic::array;
 
   if (getFrameObject(session) != nullptr) {
-    scopes.push_back(getScopeDescription(session, "Locals", ScopeType::Locals));
+    scopes.push_back(getScopeDescription(session,
+                                         "Locals",
+                                         ScopeType::Locals,
+                                         false));
     scopes.push_back(getScopeDescription(session,
                                          "Superglobals",
-                                         ScopeType::Superglobals));
+                                         ScopeType::Superglobals,
+                                         false));
     scopes.push_back(getScopeDescription(session,
                                          "Constants",
-                                         ScopeType::ServerConstants));
+                                         ScopeType::ServerConstants,
+                                         true));
   }
 
   body["scopes"] = scopes;
@@ -82,7 +87,8 @@ bool ScopesCommand::executeImpl(
 folly::dynamic ScopesCommand::getScopeDescription(
   DebuggerSession* session,
   const char* displayName,
-  ScopeType type
+  ScopeType type,
+  bool expensive
 ) {
   FrameObject* frame = getFrameObject(session);
   assert (frame != nullptr);
@@ -95,7 +101,7 @@ folly::dynamic ScopesCommand::getScopeDescription(
 
   scope["name"] = displayName;
   scope["variablesReference"] = scopeId;
-  scope["expensive"] = true;
+  scope["expensive"] = expensive;
 
   const ScopeObject* scopeObj = session->getScopeObject(scopeId);
   scope["namedVariables"] =

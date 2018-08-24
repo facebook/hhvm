@@ -250,7 +250,8 @@ private:
   folly::dynamic getScopeDescription(
     DebuggerSession* session,
     const char* displayName,
-    ScopeType type
+    ScopeType type,
+    bool expensive
   );
 };
 

@@ -90,6 +90,9 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
   , m_hackWarn{false}
   , m_dictWarn{false}
   , m_phpWarn{false}
+  , m_edWarn{false}
+  , m_vdWarn{false}
+  , m_ddWarn{false}
   , m_hasHackWarned{false}
   , m_hasDictWarned{false}
   , m_hasPHPWarned{false}
@@ -1006,8 +1009,20 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     }
 
     if (info.is_vector || kind == ArrayKind::Keyset) {
+      if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices) &&
+          kind == ArrayKind::DArray) {
+        if (size == 0 && m_edWarn) {
+          raise_hackarr_compat_notice("JSON encoding empty darray");
+        } else if (size != 0 && m_vdWarn) {
+          raise_hackarr_compat_notice("JSON encoding vec-like darray");
+        }
+      }
       m_buf->append('[');
     } else {
+      if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices) &&
+          kind == ArrayKind::DArray && m_ddWarn) {
+        raise_hackarr_compat_notice("JSON encoding dict-like darray");
+      }
       m_buf->append('{');
     }
 

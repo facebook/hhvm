@@ -96,6 +96,14 @@ test("normal", 0);
 test("force PHP", JSON_FB_FORCE_PHP_ARRAYS);
 test("dict warn", JSON_FB_WARN_DICTS);
 test("PHP warn", JSON_FB_WARN_PHP_ARRAYS);
+test("empty darrays", JSON_FB_WARN_EMPTY_DARRAYS);
+test("vec-like darrays", JSON_FB_WARN_VEC_LIKE_DARRAYS);
+test("dict-like darrays", JSON_FB_WARN_DICT_LIKE_DARRAYS);
+test("all darrays",
+  JSON_FB_WARN_EMPTY_DARRAYS |
+  JSON_FB_WARN_VEC_LIKE_DARRAYS |
+  JSON_FB_WARN_DICT_LIKE_DARRAYS
+);
 test("warn both", JSON_FB_WARN_DICTS | JSON_FB_WARN_PHP_ARRAYS);
 test("force + dict warn", JSON_FB_WARN_DICTS | JSON_FB_FORCE_PHP_ARRAYS);
 test("force + PHP warn", JSON_FB_WARN_PHP_ARRAYS | JSON_FB_FORCE_PHP_ARRAYS);

@@ -87,17 +87,16 @@ struct VariableSerializer {
   // arrays. This flag can override that behavior.
   void keepDVArrays() { m_keepDVArrays = true; }
 
-  // Force Hack arrays to serialize as PHP arrays
+  // Force Hack arrays to serialize as PHP arrays.
   void setForcePHPArrays() { m_forcePHPArrays = true; }
 
-  // Emit a Hack array compat notice on Hack array serialization
+  // Emit a HAC notice on serialization of the specified kind of array.
   void setHackWarn()  { m_hackWarn = true; }
-
-  // Emit a Hack array compat notice on Dict serialization
   void setDictWarn()  { m_dictWarn = true; }
-
-  // Emit a Hack array compat notice on PHP array serialization
   void setPHPWarn()   { m_phpWarn = true; }
+  void setEmptyDArrayWarn()    { m_edWarn = true; }
+  void setVecLikeDArrayWarn()  { m_vdWarn = true; }
+  void setDictLikeDArrayWarn() { m_ddWarn = true; }
 
   enum class ArrayKind { PHP, Dict, Vec, Keyset, VArray, DArray };
 
@@ -210,6 +209,9 @@ private:
   bool m_hackWarn;               // warn when attempting on Hack arrays
   bool m_dictWarn;               // warn when attempting on dicts
   bool m_phpWarn;                // warn when attempting on PHP arrays
+  bool m_edWarn;                 // warn when attempting on empty darrays
+  bool m_vdWarn;                 // warn when attempting on vec-like darrays
+  bool m_ddWarn;                 // warn when attempting on non-vec-like darrays
   bool m_hasHackWarned;          // have we already warned on Hack arrays?
   bool m_hasDictWarned;          // have we already warned on dicts?
   bool m_hasPHPWarned;           // have we already warned on PHP arrays?

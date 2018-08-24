@@ -115,6 +115,90 @@ string(44) "[1,[2,3,4],[5,6,7],[8,9,10],{"a":11,"b":12}]"
 
 Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 90
 string(61) "{"a":[1,2,3],"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
+==================== empty darrays =========================
+string(2) "[]"
+string(9) "[1,2,3,4]"
+string(2) "[]"
+string(9) "[1,2,3,4]"
+string(2) "{}"
+string(19) "{"a":1,"b":2,"c":3}"
+string(25) "{"0":"a","1":"b","2":"c"}"
+
+Notice: Hack Array Compat: JSON encoding empty darray in %s/test/slow/hack_arr_compat/json-encode.php on line 67
+string(2) "[]"
+string(19) "{"a":1,"b":2,"c":3}"
+string(13) "["a","b","c"]"
+string(2) "[]"
+string(13) "["a","b","c"]"
+string(13) "[[1,2],[3,4]]"
+string(13) "[[1,2],[3,4]]"
+string(37) "{"a":{"c":1,"d":2},"b":{"e":3,"f":4}}"
+string(44) "[1,[2,3,4],[5,6,7],[8,9,10],{"a":11,"b":12}]"
+string(61) "{"a":[1,2,3],"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
+==================== vec-like darrays =========================
+string(2) "[]"
+string(9) "[1,2,3,4]"
+string(2) "[]"
+string(9) "[1,2,3,4]"
+string(2) "{}"
+string(19) "{"a":1,"b":2,"c":3}"
+string(25) "{"0":"a","1":"b","2":"c"}"
+string(2) "[]"
+string(19) "{"a":1,"b":2,"c":3}"
+
+Notice: Hack Array Compat: JSON encoding vec-like darray in %s/test/slow/hack_arr_compat/json-encode.php on line 69
+string(13) "["a","b","c"]"
+string(2) "[]"
+string(13) "["a","b","c"]"
+string(13) "[[1,2],[3,4]]"
+string(13) "[[1,2],[3,4]]"
+string(37) "{"a":{"c":1,"d":2},"b":{"e":3,"f":4}}"
+string(44) "[1,[2,3,4],[5,6,7],[8,9,10],{"a":11,"b":12}]"
+string(61) "{"a":[1,2,3],"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
+==================== dict-like darrays =========================
+string(2) "[]"
+string(9) "[1,2,3,4]"
+string(2) "[]"
+string(9) "[1,2,3,4]"
+string(2) "{}"
+string(19) "{"a":1,"b":2,"c":3}"
+string(25) "{"0":"a","1":"b","2":"c"}"
+string(2) "[]"
+
+Notice: Hack Array Compat: JSON encoding dict-like darray in %s/test/slow/hack_arr_compat/json-encode.php on line 68
+string(19) "{"a":1,"b":2,"c":3}"
+string(13) "["a","b","c"]"
+string(2) "[]"
+string(13) "["a","b","c"]"
+string(13) "[[1,2],[3,4]]"
+string(13) "[[1,2],[3,4]]"
+string(37) "{"a":{"c":1,"d":2},"b":{"e":3,"f":4}}"
+string(44) "[1,[2,3,4],[5,6,7],[8,9,10],{"a":11,"b":12}]"
+string(61) "{"a":[1,2,3],"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
+==================== all darrays =========================
+string(2) "[]"
+string(9) "[1,2,3,4]"
+string(2) "[]"
+string(9) "[1,2,3,4]"
+string(2) "{}"
+string(19) "{"a":1,"b":2,"c":3}"
+string(25) "{"0":"a","1":"b","2":"c"}"
+
+Notice: Hack Array Compat: JSON encoding empty darray in %s/test/slow/hack_arr_compat/json-encode.php on line 67
+string(2) "[]"
+
+Notice: Hack Array Compat: JSON encoding dict-like darray in %s/test/slow/hack_arr_compat/json-encode.php on line 68
+string(19) "{"a":1,"b":2,"c":3}"
+
+Notice: Hack Array Compat: JSON encoding vec-like darray in %s/test/slow/hack_arr_compat/json-encode.php on line 69
+string(13) "["a","b","c"]"
+string(2) "[]"
+string(13) "["a","b","c"]"
+string(13) "[[1,2],[3,4]]"
+string(13) "[[1,2],[3,4]]"
+string(37) "{"a":{"c":1,"d":2},"b":{"e":3,"f":4}}"
+string(44) "[1,[2,3,4],[5,6,7],[8,9,10],{"a":11,"b":12}]"
+string(61) "{"a":[1,2,3],"b":[1,2,3],"c":{"a":1,"b":2},"d":["a","b","c"]}"
 ==================== warn both =========================
 
 Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 60

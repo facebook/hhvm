@@ -43,7 +43,10 @@ const int JSON_FB_COLLECTIONS = 0;
 const int JSON_FB_HACK_ARRAYS = 0;
 const int JSON_FB_FORCE_PHP_ARRAYS = 0;
 const int JSON_FB_WARN_DICTS = 0;
-const int JSON_FB_WARN_PHP_ARRAYS  = 0;
+const int JSON_FB_WARN_PHP_ARRAYS = 0;
+const int JSON_FB_WARN_EMPTY_DARRAYS = 0;
+const int JSON_FB_WARN_VEC_LIKE_DARRAYS = 0;
+const int JSON_FB_WARN_DICT_LIKE_DARRAYS = 0;
 
 <<__PHPStdLib>>
 function json_encode($value, $options = 0, $depth = 512);

@@ -25,6 +25,10 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include <folly/Format.h>
+
+using folly::format;
+
 namespace HPHP {
 namespace VSDEBUG {
 
@@ -647,28 +651,20 @@ const std::string VariablesCommand::getVariableValue(const Variant& variable) {
 
     case KindOfPersistentVec:
     case KindOfVec:
+      return format("vec[{}]", variable.toArray().size()).str();
     case KindOfPersistentArray:
     case KindOfArray: {
-      std::string arrayDesc = "array[";
-      arrayDesc += std::to_string(variable.toArray().size());
-      arrayDesc += "]";
-      return arrayDesc;
+      return format("array[{}]", variable.toArray().size()).str();
     }
 
     case KindOfPersistentDict:
     case KindOfDict: {
-      std::string dictDisc = "dict[";
-      dictDisc += std::to_string(variable.toArray().size());
-      dictDisc += "]";
-      return dictDisc;
+      return format("dict[{}]", variable.toArray().size()).str();
     }
 
     case KindOfPersistentKeyset:
     case KindOfKeyset: {
-      std::string keysetDisc = "keyset[";
-      keysetDisc += std::to_string(variable.toArray().size());
-      keysetDisc += "]";
-      return keysetDisc;
+      return format("keyset[{}]", variable.toArray().size()).str();
     }
 
     case KindOfRef:

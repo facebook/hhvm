@@ -55,7 +55,6 @@ module type S = sig
   val typeparam_alok : Pos.t * string -> unit
   val unexpected_eof : Pos.t -> unit
   val missing_field : Pos.t -> Pos.t -> string -> unit
-  val generic_class_var : Pos.t -> unit
   val explain_constraint :
     use_pos:Pos.t -> definition_pos:Pos.t -> param_name:string -> error -> unit
   val explain_where_constraint :
@@ -262,6 +261,8 @@ module type S = sig
   val option_void : Pos.t -> unit
   val declared_covariant : Pos.t -> Pos.t -> (Pos.t * string) list -> unit
   val declared_contravariant : Pos.t -> Pos.t -> (Pos.t * string) list -> unit
+  val static_property_type_generic_param :
+    class_pos:Pos.t -> var_type_pos:Pos.t -> generic_pos:Pos.t -> unit
   val contravariant_this: Pos.t -> string -> string -> unit
   val wrong_extend_kind : Pos.t -> string -> Pos.t -> string -> unit
   val unsatisfied_req : Pos.t -> string -> Pos.t -> unit

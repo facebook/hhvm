@@ -14,6 +14,7 @@ open Utils
 module Env = Typing_env
 module SN = Naming_special_names
 module TLazyHeap = Typing_lazy_heap
+module TGen = Typing_generic
 
 (*****************************************************************************)
 (* Module checking the (co/contra)variance annotations (+/-).
@@ -118,7 +119,7 @@ let reason_stack_to_string variance reason_stack =
 
 let reason_to_string ~sign (_, descr, variance) =
   (if sign
-  then variance_to_sign variance^" "
+  then variance_to_sign variance ^ " "
   else ""
   )^
   match descr with
@@ -127,7 +128,7 @@ let reason_to_string ~sign (_, descr, variance) =
   | Rmember ->
       "A non private class member is always invariant"
   | Rtype_parameter ->
-      "The type parameter was declared as "^variance_to_string variance
+      "The type parameter was declared as " ^ variance_to_string variance
   | Rfun_parameter `Instance ->
       "Function parameters are contravariant"
   | Rfun_parameter `Static ->
@@ -356,7 +357,8 @@ let rec class_ tcopt class_name class_type impl =
   let tparams = class_type.tc_tparams in
   let env = SMap.empty in
   let env = List.fold_left impl ~f:(type_ tcopt root Vboth) ~init:env in
-  let env = SMap.fold (class_member tcopt root) class_type.tc_props env in
+  let env = SMap.fold (class_member class_type tcopt root `Instance) class_type.tc_props env in
+  let env = SMap.fold (class_member class_type tcopt root `Static) class_type.tc_sprops env in
   let env =
     SMap.fold (class_method tcopt root `Instance) class_type.tc_methods env in
   (* We need to apply the same restrictions to non-final static members because
@@ -383,7 +385,28 @@ and typedef tcopt type_name =
       List.iter td_tparams (check_variance env)
   | None -> ()
 
-and class_member tcopt root _member_name member env =
+and class_member class_type tcopt root static _member_name member env =
+  if static = `Static
+  then begin
+    (* Check whether the type of a static property (class variable) contains
+     * any generic type parameters. Outside of traits, this is illegal as static
+     * properties are shared across all generic instantiations.
+     * Although not strictly speaking a variance check, it fits here because
+     * it concerns the presence of generic type parameters in types.
+     *)
+    if class_type.tc_kind = Ast.Ctrait
+    then env
+    else
+    let lazy (reason, _ as ty) = member.ce_type in
+    let var_type_pos = Reason.to_pos reason in
+    let class_pos = class_type.tc_pos in
+    match TGen.IsGeneric.ty ty with
+    | None -> env
+    | Some (generic_pos, _generic_name) ->
+    Errors.static_property_type_generic_param ~class_pos ~var_type_pos ~generic_pos;
+    env
+  end
+  else
   match member.ce_visibility with
   | Vprivate _ -> env
   | _ ->

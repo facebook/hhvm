@@ -735,10 +735,6 @@ let typeparam_alok (pos, x) =
   "> somewhere (after the function name definition, \
     or after the class name)\nExamples: "^"function foo<T> or class A<T>")
 
-let generic_class_var pos =
-  add (Naming.err_code Naming.GenericClassVar) pos
-    "A class variable cannot be generic"
-
 let unexpected_arrow pos cname =
   add (Naming.err_code Naming.UnexpectedArrow) pos (
   "Keys may not be specified for "^cname^" initialization"
@@ -2634,6 +2630,12 @@ let declared_contravariant pos1 pos2 emsg =
    pos1, "This is where the parameter was declared as contravariant (-)"
  ] @ emsg
  )
+
+let static_property_type_generic_param ~class_pos ~var_type_pos ~generic_pos =
+   add_list (Typing.err_code Typing.ClassVarTypeGenericParam)
+     [generic_pos, "A generic parameter cannot be used in the type of a static property";
+      var_type_pos, "This is where the type of the static property was declared";
+      class_pos, "This is the class containing the static property"]
 
 let contravariant_this pos class_name tp =
   add (Typing.err_code Typing.ContravariantThis) pos (

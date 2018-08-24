@@ -20,19 +20,22 @@ module ShapeMap = Nast.ShapeMap
 *)
 module IsGeneric: sig
 
-  (* Give back the name and position of a generic if found *)
-  val ty: locl ty -> string option
+  (* Give back the position and name of a generic type parameter if found *)
+  val ty: 'phase ty -> (Pos.t * string) option
 end = struct
 
-  exception Found of string
+  exception Found of Reason.t * string
 
-  let rec ty (_, x) = ty_ x
-  and ty_ = function
+  let rec ty : type a. a ty -> _ = function (r, t) ->
+    match t with
     | Tabstract ((AKdependent (_, _) | AKenum _), cstr) -> ty_opt cstr
     | Tabstract (AKgeneric x, cstr) when AbstractKind.is_generic_dep_ty x ->
       ty_opt cstr
-    | Tabstract (AKgeneric x, _) -> raise (Found x)
-    | Tdynamic | Tanon _ | Tany | Terr | Tmixed | Tnonnull | Tprim _ -> ()
+    | Tabstract (AKgeneric x, _) -> raise (Found (r, x))
+    | Tgeneric x -> raise (Found (r, x))
+    | Tanon _ -> ()
+    | Tthis -> ()
+    | Tdynamic | Tany | Terr | Tmixed | Tnonnull | Tprim _ -> ()
     | Tarraykind akind ->
       begin match akind with
         | AKany -> ()
@@ -58,15 +61,23 @@ end = struct
     | Tabstract (AKnewtype (_, tyl), x) ->
         List.iter tyl ty; ty_opt x
     | Ttuple tyl -> List.iter tyl ty
-    | Tclass (_, tyl)
+    | Tclass (_, tyl) -> List.iter tyl ty
     | Tunresolved tyl -> List.iter tyl ty
     | Tobject -> ()
+    | Tapply (_, tyl) -> List.iter tyl ty
+    | Taccess (t, _) -> ty t
+    | Tarray (t1, t2) -> ty_opt t1; ty_opt t2
+    | Tdarray (t1, t2) -> ty t1; ty t2
+    | Tvarray t -> ty t
+    | Tvarray_or_darray t -> ty t
     | Tshape (_, fdm) ->
         ShapeFieldMap.iter (fun _ v -> ty v) fdm
 
-  and ty_opt = function None -> () | Some x -> ty x
+  and ty_opt : type a . a ty option -> _
+    = function None -> () | Some x -> ty x
 
-  let ty x = try ty x; None with Found x -> Some x
+  let ty : type a . a ty -> _ =
+    function x -> try ty x; None with Found (r, x) -> Some (Reason.to_pos r, x)
 
 end
 
@@ -78,6 +89,6 @@ let no_generic p local_var_id env =
   let ty = Typing_expand.fully_expand env ty in
   match IsGeneric.ty ty with
   | None -> env, false
-  | Some x ->
+  | Some (_, x) ->
       Errors.generic_static p x;
       env, true

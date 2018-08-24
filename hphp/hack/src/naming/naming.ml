@@ -797,7 +797,6 @@ module Make (GetLocals : GetLocals) = struct
   (* Naming of type hints *)
   (************************************************************************)
   let rec hint
-      ?(is_static_var=false)
       ?(forbid_this=false)
       ?(allow_retonly=false)
       ?(allow_typedef=true)
@@ -812,7 +811,7 @@ module Make (GetLocals : GetLocals) = struct
       ~allow_wildcard
       ~in_where_clause
       ~tp_depth
-      is_static_var env h
+      env h
 
   and shape_field_to_shape_field_info env { sf_optional; sf_name=_; sf_hint } =
     {
@@ -846,9 +845,9 @@ module Make (GetLocals : GetLocals) = struct
 
   and hint_ ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard
             ~in_where_clause ?(tp_depth=0)
-        is_static_var env x =
+        env x =
     let hint =
-      hint ~is_static_var ~forbid_this ~allow_typedef ~allow_wildcard in
+      hint ~forbid_this ~allow_typedef ~allow_wildcard in
     match x with
     | Htuple hl ->
       N.Htuple (List.map hl (hint ~allow_retonly env))
@@ -872,7 +871,7 @@ module Make (GetLocals : GetLocals) = struct
     | Happly ((p, _x) as id, hl) ->
       let hint_id =
         hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth
-          env is_static_var id
+          env id
           hl in
       (match hint_id with
       | N.Hprim _ | N.Hmixed | N.Hnonnull ->
@@ -900,7 +899,7 @@ module Make (GetLocals : GetLocals) = struct
             TypecheckerOptions.experimental_tconst_on_generics in
           let h =
             hint_id ~forbid_this ~allow_retonly
-              ~allow_typedef ~allow_wildcard:false ~tp_depth env is_static_var root [] in
+              ~allow_typedef ~allow_wildcard:false ~tp_depth env root [] in
           (match h with
           | N.Hthis | N.Happly _ as h -> h
           | N.Habstr _ when in_where_clause && tconst_on_generics_enabled ->
@@ -913,12 +912,10 @@ module Make (GetLocals : GetLocals) = struct
       N.Hshape (ast_shape_info_to_nast_shape_info env ast_shape_info)
 
   and hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth
-    env is_static_var (p, x as id) hl =
+    env (p, x as id) hl =
     let params = (fst env).type_params in
     if   is_alok_type_name id && not (SMap.mem x params)
     then Errors.typeparam_alok id;
-    if   is_static_var && SMap.mem x params
-    then Errors.generic_class_var (fst id);
     (* some common Xhp screw ups *)
     if   (x = "Xhp") || (x = ":Xhp") || (x = "XHP")
     then Errors.disallowed_xhp_type p x;
@@ -1077,7 +1074,8 @@ module Make (GetLocals : GetLocals) = struct
 
   and constraint_ ?(forbid_this=false) env (ck, h) = ck, hint ~forbid_this env h
 
-  and hintl ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth env l =
+  and hintl ~forbid_this ~allow_retonly
+            ~allow_typedef ~allow_wildcard ~tp_depth env l =
     List.map l
       (hint ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth env)
   and hintl_funcall env p l =
@@ -1488,7 +1486,7 @@ module Make (GetLocals : GetLocals) = struct
        * static variable. See test/typecheck/this_tparam_static.php as
        * an example of what can occur.
        *)
-      let h = Option.map h (hint ~forbid_this:true ~is_static_var:true env) in
+      let h = Option.map h (hint ~forbid_this:true env) in
       let attrs = user_attributes env ua in
       let cvl = List.map cvl (fun cv ->
         let cv = class_prop_ env cv in

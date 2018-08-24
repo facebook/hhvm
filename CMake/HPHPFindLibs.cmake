@@ -574,11 +574,17 @@ macro(hphp_link target)
   set(CMAKE_REQUIRED_FLAGS "-std=c++1y")
   CHECK_CXX_SOURCE_COMPILES("
 #include <atomic>
+#include <iostream>
 #include <stdint.h>
 int main() {
     struct Test { int64_t val1; int64_t val2; };
     std::atomic<Test> s;
-    s.is_lock_free();
+    // Do this to stop modern compilers from optimizing away the libatomic
+    // calls in release builds, making this test always pass in release builds,
+    // and incorrectly think that HHVM doesn't need linking against libatomic.
+    bool (std::atomic<Test>::* volatile x)(void) const =
+      &std::atomic<Test>::is_lock_free;
+    std::cout << (s.*x)() << std::endl;
 }
   " NOT_REQUIRE_ATOMIC_LINKER_FLAG)
 

@@ -343,6 +343,10 @@ type instruct_isset =
   | IsTypeC of istype_op
   | IsTypeL of local_id * istype_op
 
+type setrange_op =
+  | Forward
+  | Reverse
+
 type eq_op =
   | PlusEqual
   | MinusEqual
@@ -446,6 +450,7 @@ type instruct_final =
   | UnsetM of num_params * MemberKey.t
   | SetWithRefLML of local_id * local_id
   | SetWithRefRML of local_id
+  | SetRangeM of num_params * setrange_op * int
 
 type instruct_iterator =
   | IterInit of Iterator.t * Label.t * local_id

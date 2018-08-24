@@ -800,7 +800,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define FIVE(a,b,c,d,e) { e, d, c, b, a },
   #define MFINAL { },
   #define F_MFINAL { },
-  #define C_MFINAL { },
+  #define C_MFINAL(n) { },
   #define V_MFINAL { },
   #define O(name, imm, pop, push, flags) pop
     OPCODES
@@ -834,6 +834,11 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::SetOpM:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = i == n - 1 ? CV : CRV;
+    }
+    return m_tmp_sig;
+  case Op::SetRangeM:
+    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
+      m_tmp_sig[i] = i >= n - 3 ? CV : CRV;
     }
     return m_tmp_sig;
   case Op::BindM:
@@ -906,6 +911,7 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
       decode_iva(pc);
       key = decode_member_key(pc, unit());
       break;
+    case Op::SetRangeM:
     case Op::SetWithRefLML:
     case Op::SetWithRefRML:
       return true;

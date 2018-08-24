@@ -1638,6 +1638,20 @@ void in(ISS& env, const bc::SetM& op) {
   }
 }
 
+void in(ISS& env, const bc::SetRangeM& op) {
+  auto const count = popC(env);
+  auto const value = popC(env);
+  auto const offset = popC(env);
+
+  auto& base = env.state.mInstrState.base.type;
+  if (base.couldBe(BStr)) {
+    base = loosen_staticness(loosen_values(std::move(base)));
+  }
+
+  endBase(env, true, NoLocalId);
+  discard(env, op.arg1);
+}
+
 void in(ISS& env, const bc::IncDecM& op) {
   auto const key = key_type_or_fixup(env, op);
   if (!key) return;

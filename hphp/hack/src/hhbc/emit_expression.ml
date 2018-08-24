@@ -1267,6 +1267,35 @@ and emit_call_empty_expr env outer_pos (pos, expr_ as expr) =
 and emit_unset_expr env expr =
   emit_lval_op_nonlist env (fst expr) LValOp.Unset expr empty 0
 
+and emit_set_range_expr env pos name kind args =
+  let raise_fatal msg =
+    Emit_fatal.raise_fatal_parse pos (Printf.sprintf "%s %s" name msg)
+  in
+  let range_op, size, allow_count = kind in
+  let base, offset, src, args = match args with
+    | b::o::s::rest -> (b, o, s, rest)
+    | _ -> raise_fatal "expects at least 3 arguments"
+  in
+  let count_instrs = match args, allow_count with
+    | [c], true -> emit_expr ~need_ref:false env c
+    | [], _ -> instr_int (-1)
+    | _, false -> raise_fatal "expects no more than 3 arguments"
+    | _, true -> raise_fatal "expects no more than 4 arguments"
+  in
+  let base_expr_begin, base_expr_end, base_setup, base_stack =
+    emit_base ~notice:Notice ~is_object:false
+      env MemberOpMode.Define 3 base
+  in
+  gather [
+    base_expr_begin;
+    base_expr_end;
+    emit_expr ~need_ref:false env offset;
+    emit_expr ~need_ref:false env src;
+    count_instrs;
+    base_setup;
+    instr (IFinal (SetRangeM (base_stack, range_op, size)))
+  ]
+
 and emit_call_isset_exprs env pos exprs =
   match exprs with
   | [] -> Emit_fatal.raise_fatal_parse

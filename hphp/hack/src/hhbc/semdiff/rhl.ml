@@ -484,12 +484,15 @@ let check_instruct_final asn i i' =
     when n=n' -> reads_member_key asn mk mk'
   | UnsetM (n, mk), UnsetM (n', mk')
     when n=n' -> reads_member_key asn mk mk'
+  | SetRangeM (n, op, s), SetRangeM (n', op', s')
+    when n=n' && op=op' && s=s' -> Some asn
   | SetWithRefRML _, SetWithRefRML _ ->
     (* COMPLETENESS: HackC/HHVM do not generate this instruction, so reject it
       for now. *)
     None
   | SetWithRefLML _, _ | QueryM _, _ | VGetM _, _ | SetM _, _ | IncDecM _, _
-  | SetOpM _, _ | BindM _, _ | UnsetM _, _ | SetWithRefRML _, _ ->
+  | SetOpM _, _ | BindM _, _ | UnsetM _, _ | SetWithRefRML _, _
+  | SetRangeM _, _ ->
     None
 
 (* Iterators. My understanding is that the initializers either jump to the

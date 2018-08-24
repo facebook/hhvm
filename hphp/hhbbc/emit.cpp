@@ -708,8 +708,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_THREE(x, y, z)    pop(3);
 
 #define POP_MFINAL     pop(data.arg1);
-#define POP_C_MFINAL   pop(1); pop(data.arg1);
-#define POP_V_MFINAL   POP_C_MFINAL
+#define POP_C_MFINAL(n) pop(n); pop(data.arg1);
+#define POP_V_MFINAL   POP_C_MFINAL(1)
 #define POP_CMANY      pop(data.arg##1);
 #define POP_SMANY      pop(data.keys.size());
 #define POP_CVMANY     pop(data.arg##1);

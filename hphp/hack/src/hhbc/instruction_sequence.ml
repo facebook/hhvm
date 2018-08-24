@@ -840,6 +840,7 @@ let get_input_output_count i =
     | SetM (n, _) | SetOpM (n, _, _) | BindM (n, _) -> (n + 1, 1)
     | SetWithRefLML _ -> (0, 0)
     | SetWithRefRML _ -> (1, 0)
+    | SetRangeM (n, _, _) -> (n + 3, 0)
     end
   | ISpecialFlow _ ->
     failwith "this pseudo-instruction is internal to HackC"

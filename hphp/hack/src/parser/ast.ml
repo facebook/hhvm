@@ -401,6 +401,9 @@ and expr_ =
   | Array_get of expr * expr option
   | Class_get of expr * expr
   | Class_const of expr * pstring
+  (* Call expression:
+   *   callee * type arguments * normal arguments * unpack arguments
+   *)
   | Call of expr * targ list * expr list * expr list
   | Int of string
   | Float of string

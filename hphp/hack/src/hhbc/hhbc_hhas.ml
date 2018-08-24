@@ -239,6 +239,10 @@ let string_of_member_key mk =
   | QT id -> "QT:" ^ string_of_prop_id id
   | W -> "W"
 
+let string_of_setrange_op = function
+  | Forward -> "Forward"
+  | Reverse -> "Reverse"
+
 let string_of_fpasshint h =
   match h with
   | Any -> "Any"
@@ -444,8 +448,12 @@ let string_of_final instruction =
   | IncDecM (i, op, mk) ->
     sep ["IncDecM";
       string_of_param_num i; string_of_incdec_op op; string_of_member_key mk]
-  | _ ->
-    failwith "unreachable final instruction"
+  | SetRangeM (i, op, s) ->
+    sep ["SetRangeM";
+      string_of_int i; string_of_setrange_op op; string_of_int s]
+  | SetWithRefLML _
+  | SetWithRefRML _ -> failwith "unreachable final instruction"
+
 (*
 | IncDecM of num_params * incdec_op * MemberKey.t
 | SetOpM of num_params  * eq_op * MemberKey.t

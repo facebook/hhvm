@@ -212,6 +212,7 @@ inline const char* prettytype(SilenceOp) { return "SilenceOp"; }
 inline const char* prettytype(SwitchKind) { return "SwitchKind"; }
 inline const char* prettytype(MOpMode) { return "MOpMode"; }
 inline const char* prettytype(QueryMOp) { return "QueryMOp"; }
+inline const char* prettytype(SetRangeOp) { return "SetRangeOp"; }
 inline const char* prettytype(FPassHint) { return "FPassHint"; }
 inline const char* prettytype(CudOp) { return "CudOp"; }
 inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
@@ -3900,6 +3901,23 @@ OPTBLD_FLT_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
   auto const result = *topC;
   vmStack().discard();
   mFinal(mstate, nDiscard, result);
+}
+
+OPTBLD_INLINE void iopSetRangeM(
+  uint32_t nDiscard, SetRangeOp op, uint32_t size
+) {
+  auto& mstate = vmMInstrState();
+  auto const count = tvCastToInt64(*vmStack().indC(0));
+  auto const src = *vmStack().indC(1);
+  auto const offset = tvCastToInt64(*vmStack().indC(2));
+
+  if (op == SetRangeOp::Forward) {
+    SetRange<false>(mstate.base, offset, src, count, size);
+  } else {
+    SetRange<true>(mstate.base, offset, src, count, size);
+  }
+
+  mFinal(mstate, nDiscard + 3, folly::none);
 }
 
 OPTBLD_INLINE void iopIncDecM(uint32_t nDiscard, IncDecOp subop, MemberKey mk) {

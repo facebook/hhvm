@@ -127,6 +127,25 @@ let get_level p op e =
     Emit_fatal.raise_fatal_parse
       p ("'" ^ op ^ "' with non-constant operand is not supported")
 
+let set_bytes_kind name =
+  let re = Str.regexp_case_fold
+    "^hh\\\\set_bytes\\(_rev\\|\\)_\\([a-z0-9]+\\)\\(_vec\\|\\)$"
+  in
+  if Str.string_match re name 0 then
+    let op =
+      if Str.matched_group 1 name = "_rev" then Reverse else Forward
+    in
+    let size = Str.matched_group 2 name in
+    let is_vec = Str.matched_group 3 name = "_vec" in
+    match size, is_vec with
+    | "string", false -> Some (op, 1, true)
+    | "bool", _ | "int8", _ -> Some (op, 1, is_vec)
+    | "int16", _ -> Some (op, 2, is_vec)
+    | "int32", _ | "float32", _ -> Some (op, 4, is_vec)
+    | "int64", _ | "float64", _ -> Some (op, 8, is_vec)
+    | _ -> None
+  else None
+
 let rec emit_stmt env (pos, st_) =
   match st_ with
   | A.Let _ -> assert false (* Let statement is converted to assignment in closure convert *)
@@ -135,9 +154,14 @@ let rec emit_stmt env (pos, st_) =
       instr_null;
       emit_return ~need_ref:false env;
     ]
-  | A.Expr (_, A.Call ((_, A.Id (_, s)), _, exprl, []))
-    when String.lowercase s = "unset" ->
-    gather (List.map exprl (emit_unset_expr env))
+  | A.Expr ((pos, A.Call ((_, A.Id (_, s)), _, exprl, [])) as expr) ->
+    if String.lowercase s = "unset" then
+      gather (List.map exprl (emit_unset_expr env))
+    else
+      begin match set_bytes_kind s with
+      | Some kind -> emit_set_range_expr env pos s kind exprl
+      | None -> emit_ignored_expr ~pop_pos:pos env expr
+      end
   | A.Return (Some (inner_pos, A.Await e)) ->
     gather [
       emit_await env inner_pos e;

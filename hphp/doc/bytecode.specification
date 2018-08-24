@@ -3486,6 +3486,47 @@ SetM <stack count> <member key>    [... C]  ->  [C]
 
   Set{Prop,Elem} or SetNewElem member operation.
 
+SetRangeM <stack count> <op> <elem size> [... C C C]  ->  []
+
+  Store raw data into a string, optionally reversing the order of elements
+  based on op, which may be Forward or Reverse.
+
+  The current member base must be a string (if this or any other required
+  conditions are violated, an exception will be thrown). $3, and $1 are cast to
+  Int before inspecting their values. $3 gives the offset within the base
+  string to begin copying data into. The data comes from a source value in $2;
+  supported types are described below. $1 is the count of items to copy from
+  $2, and it maybe be -1 to request that an appropriate value is inferred from
+  $2. The range [$3, count * size) must fit within [0, length of base).
+
+  The following types are supported as data sources (the value in $2):
+
+  - Bool: op must be Forward, count is ignored, and size must be 1. Stored as a
+    1-byte value, either 0 or 1.
+
+  - Int: op must be Forward, count is ignored, and size must be 1, 2, 4, or
+    8. The value is truncated to the requested size and stored using the
+    current machine's byte ordering.
+
+  - Dbl: op must be Forward, count is ignored, and size must be 4 or 8. The
+    value is converted to the requested size and stored using the current
+    machine's byte ordering.
+
+  - Str: count indicates the number of characters to copy, starting at the
+    beginning of $2, and size must be 1. If op is Reverse, the characters are
+    copied in reverse order. Note that characters are still copied starting at
+    the beginning of $2, so Forward vs. Reverse never affects which characters
+    are copied, just their order as they're written to the base string.
+
+  - Vec: count indicates the number of elements to copy, and size indicates the
+    size of each element. All elements of the vec must have the same type,
+    which must be Bool, Int, or Dbl. The operation may modify the base string
+    before failing if there are elements with mismatched types. Size must be
+    one of the allowed values for the contained type, described above. Count
+    must not be greater than the size of the vec. If op is Reverse, the
+    elements will be copied in reverse order (always starting from offset 0 of
+    the vec, as with string sources).
+
 IncDecM <stack count> <op> <member key>    [...]  ->  [C]
 
   IncDec{Prop,Elem} or IncDecNewElem member operation.

@@ -375,6 +375,21 @@ void cgSetElem(IRLS& env, const IRInstruction* inst) {
                SyncOptions::Sync, elemArgs(env, inst).typedValue(2).ssa(3));
 }
 
+void cgSetRange(IRLS& env, const IRInstruction* inst) {
+  auto const target = inst->is(SetRangeRev) ?
+    CallSpec::direct(HPHP::SetRange<true>) :
+    CallSpec::direct(HPHP::SetRange<false>);
+  cgCallHelper(
+    vmain(env), env, target, callDest(env, inst),
+    SyncOptions::Sync,
+    argGroup(env, inst).ssa(0).ssa(1).typedValue(2).ssa(3).ssa(4)
+  );
+}
+
+void cgSetRangeRev(IRLS& env, const IRInstruction* inst) {
+  cgSetRange(env, inst);
+}
+
 IMPL_OPCODE_CALL(SetNewElem);
 IMPL_OPCODE_CALL(BindNewElem);
 

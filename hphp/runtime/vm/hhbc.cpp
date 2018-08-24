@@ -411,8 +411,8 @@ int instrNumPops(PC pc) {
 #define FOUR(...) 4
 #define FIVE(...) 5
 #define MFINAL -3
-#define C_MFINAL -5
-#define V_MFINAL C_MFINAL
+#define C_MFINAL(n) -10 - n
+#define V_MFINAL C_MFINAL(1)
 #define CVMANY -3
 #define CVUMANY -3
 #define FCALL -4
@@ -449,8 +449,8 @@ int instrNumPops(PC pc) {
     auto const fca = getImm(pc, 0).u_FCA;
     return fca.numArgs + (fca.hasUnpack ? 1 : 0) + fca.numRets - 1;
   }
-  // Other final member operations pop their first immediate + 1
-  if (n == -5) return getImm(pc, 0).u_IVA + 1;
+  // Other final member operations pop their first immediate + n
+  if (n <= -10) return getImm(pc, 0).u_IVA - n - 10;
 
   // For instructions with vector immediates, we have to scan the contents of
   // the vector immediate to determine how many values are popped
@@ -530,7 +530,7 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define FOUR(f1, f2, f3, f4) return doFlavor(idx, f1, f2, f3, f4);
 #define FIVE(f1, f2, f3, f4, f5) return doFlavor(idx, f1, f2, f3, f4, f5);
 #define MFINAL return manyFlavor(op, idx, CRV);
-#define C_MFINAL return idx == 0 ? CV : CRV;
+#define C_MFINAL(n) return idx < n ? CV : CRV;
 #define V_MFINAL return idx == 0 ? VV : CRV;
 #define CVMANY return manyFlavor(op, idx, CVV);
 #define CVUMANY return manyFlavor(op, idx, CVUV);
@@ -1029,6 +1029,12 @@ static const char* QueryMOp_names[] = {
 #undef OP
 };
 
+static const char* SetRangeOp_names[] = {
+#define OP(x) #x,
+  SET_RANGE_OPS
+#undef OP
+};
+
 static const char* MOpMode_names[] = {
 #define MODE(x) #x,
   M_OP_MODES
@@ -1123,6 +1129,7 @@ X(OODeclExistsOp, static_cast<int>(OODeclExistsOp::Class))
 X(ObjMethodOp,    static_cast<int>(ObjMethodOp::NullThrows))
 X(SwitchKind,     static_cast<int>(SwitchKind::Unbounded))
 X(QueryMOp,       static_cast<int>(QueryMOp::CGet))
+X(SetRangeOp,     static_cast<int>(SetRangeOp::Forward))
 X(MOpMode,        static_cast<int>(MOpMode::None))
 X(ContCheckOp,    static_cast<int>(ContCheckOp::IgnoreStarted))
 X(CudOp,          static_cast<int>(CudOp::IgnoreIter))

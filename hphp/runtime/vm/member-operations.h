@@ -1863,6 +1863,11 @@ inline StringData* SetElem(tv_lval base, key_type<keyType> key,
   return SetElemSlow<setResult, keyType, intishWarn>(base, key, value, pState);
 }
 
+template<bool reverse>
+void SetRange(
+  tv_lval base, int64_t offset, TypedValue src, int64_t count, int64_t size
+);
+
 /**
  * SetNewElem when base is Null
  */

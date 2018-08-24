@@ -26,12 +26,10 @@ namespace {
 template<typename T> T bad_value() { not_reached(); }
 
 Opcode canonicalOp(Opcode op) {
-  if (op == ElemUX || op == UnsetElem) {
-    return UnsetElem;
-  }
-  if (op == SetWithRefElem) {
-    return SetWithRefElem;
-  }
+  if (op == ElemUX || op == UnsetElem) return UnsetElem;
+  if (op == SetWithRefElem)            return SetWithRefElem;
+  if (op == SetRangeRev)               return SetRange;
+
   return opcodeHasFlags(op, MInstrProp) ? SetProp
        : opcodeHasFlags(op, MInstrElem) ? SetElem
        : bad_value<Opcode>();
@@ -72,7 +70,8 @@ void getBaseType(Opcode rawOp, bool predict,
     baseValChanged = true;
   }
 
-  if ((op == SetElem || op == UnsetElem || op == SetWithRefElem) &&
+  if ((op == SetElem || op == SetRange ||
+       op == UnsetElem || op == SetWithRefElem) &&
       baseType.maybe(TArrLike | TStr)) {
     /* Modifying an array or string element, even when COW doesn't kick in,
      * produces a new SSATmp for the base. StaticArr/StaticStr may be promoted

@@ -17,6 +17,11 @@
 #include "hphp/runtime/vm/member-operations.h"
 
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/type-string.h"
+
+#include "hphp/system/systemlib.h"
+
+#include <type_traits>
 
 namespace HPHP {
 
@@ -262,6 +267,260 @@ Cell incDecBodySlow(IncDecOp op, tv_lval fr) {
   }
   not_reached();
 }
+
+namespace {
+ALWAYS_INLINE
+void copy_int(void* dest, int64_t src, size_t size) {
+  if (size == 1) {
+    uint8_t i = src;
+    memcpy(dest, &i, 1);
+  } else if (size == 2) {
+    uint16_t i = src;
+    memcpy(dest, &i, 2);
+  } else if (size == 4) {
+    uint32_t i = src;
+    memcpy(dest, &i, 4);
+  } else {
+    assertx(size == 8);
+    uint64_t i = src;
+    memcpy(dest, &i, 8);
+  }
+}
+
+template<typename... Args>
+[[noreturn]] NEVER_INLINE
+void fail_oob(folly::StringPiece fmt, Args&&... args) {
+  SystemLib::throwOutOfBoundsExceptionObject(
+    folly::sformat(fmt, std::forward<Args>(args)...)
+  );
+}
+
+template<typename... Args>
+[[noreturn]] NEVER_INLINE
+void fail_invalid(folly::StringPiece fmt, Args&&... args) {
+  SystemLib::throwInvalidOperationExceptionObject(
+    folly::sformat(fmt, std::forward<Args>(args)...)
+  );
+}
+
+template<bool reverse, typename F>
+void setRangeString(
+  char* dest, TypedValue src, int64_t count, int64_t size, F range_check
+) {
+  auto const src_str = val(src).pstr;
+  if (count == -1) {
+    count = src_str->size();
+  } else if (count < 0 || count > src_str->size()) {
+    fail_oob("Cannot read {}-byte range from {}-byte source string",
+             count, src_str->size());
+  }
+  if (size != 1) {
+    fail_invalid("Invalid size {} for string source", size);
+  }
+
+  range_check(count);
+  auto const data = src_str->data();
+  if (reverse) {
+    auto end = data + count;
+    for (int64_t i = 0; i < count % 8; ++i) {
+      *dest++ = *--end;
+    }
+    for (int64_t i = 0; i < count / 8; ++i) {
+      end -= 8;
+      uint64_t tmp;
+      memcpy(&tmp, end, 8);
+      tmp = __builtin_bswap64(tmp);
+      memcpy(dest, &tmp, 8);
+      dest += 8;
+    }
+  } else  {
+    memcpy(dest, data, count);
+  }
+}
+
+/*
+ * The main vec loop is a template to avoid calling memcpy() with a
+ * non-constant size, and to avoid the check for KindOfDouble in the more
+ * common int case.
+ */
+template<bool reverse, int64_t size, DataType elem_type>
+void setRangeVecLoop(char* dest, const TypedValue* vec_data, int64_t count) {
+  static_assert(
+    (isBoolType(elem_type) && size == 1) ||
+    (isIntType(elem_type) &&
+     (size == 1 || size == 2 || size == 4 || size == 8)) ||
+    (isDoubleType(elem_type) && (size == 4 || size == 8)),
+    "Unsupported elem_type and/or size"
+  );
+
+  if (reverse) dest += (count - 1) * size;
+  for (int64_t i = 0; i < count; ++i) {
+    auto elem = vec_data + i;
+    if (UNLIKELY(type(elem) != elem_type)) {
+      fail_invalid(
+        "Multiple types in vec source: {} at index 0; {} at index {}",
+        getDataTypeString(elem_type).data(),
+        getDataTypeString(type(elem)).data(),
+        i
+      );
+    }
+
+    if (isDoubleType(elem_type)) {
+      std::conditional_t<size == 4, float, double> f = val(elem).dbl;
+      memcpy(dest, &f, size);
+    } else {
+      copy_int(dest, val(elem).num, size);
+    }
+    dest += reverse ? -size : size;
+  }
+}
+
+template<bool reverse, typename F>
+void setRangeVec(
+  char* dest, TypedValue src, int64_t count, int64_t size, F range_check
+) {
+  auto const vec = val(src).parr;
+  auto const vec_size = vec->size();
+  if (count == -1) {
+    count = vec_size;
+  } else if (count < 0 || count > vec_size) {
+    fail_oob("Cannot read {} elements from vec of size {}",
+             count, vec_size);
+  }
+
+  range_check(count * size);
+  auto const vec_data = packedData(vec);
+  auto const elem_type = type(vec_data[0]);
+  auto bad_type = [&]() NEVER_INLINE {
+    fail_invalid(
+      "Bad type ({}) and element size ({}) combination in vec source",
+      getDataTypeString(elem_type).data(), size
+    );
+  };
+
+  switch (size) {
+  case 1:
+    if (isIntType(elem_type)) {
+      setRangeVecLoop<reverse, 1, KindOfInt64>(dest, vec_data, count);
+    } else if (isBoolType(elem_type)) {
+      setRangeVecLoop<reverse, 1, KindOfBoolean>(dest, vec_data, count);
+    } else {
+      bad_type();
+    }
+    break;
+
+  case 2:
+    if (isIntType(elem_type)) {
+      setRangeVecLoop<reverse, 2, KindOfInt64>(dest, vec_data, count);
+    } else {
+      bad_type();
+    }
+    break;
+
+  case 4:
+    if (isIntType(elem_type)) {
+      setRangeVecLoop<reverse, 4, KindOfInt64>(dest, vec_data, count);
+    } else if (isDoubleType(elem_type)) {
+      setRangeVecLoop<reverse, 4, KindOfDouble>(dest, vec_data, count);
+    } else {
+      bad_type();
+    }
+    break;
+
+  case 8:
+    if (isIntType(elem_type)) {
+      setRangeVecLoop<reverse, 8, KindOfInt64>(dest, vec_data, count);
+    } else if (isDoubleType(elem_type)) {
+      setRangeVecLoop<reverse, 8, KindOfDouble>(dest, vec_data, count);
+    } else {
+      bad_type();
+    }
+    break;
+
+  default:
+    not_reached();
+  }
+}
+}
+
+template<bool reverse>
+void SetRange(
+  tv_lval base, int64_t offset, TypedValue src, int64_t count, int64_t size
+) {
+  base = tvToCell(base);
+  if (!tvIsString(base)) {
+    fail_invalid("Invalid base type {} for range set operation",
+                 getDataTypeString(type(base)).data());
+  }
+  if (count == 0) return;
+  type(base) = KindOfString;
+
+  auto& base_str = val(base).pstr;
+  if (base_str->cowCheck()) {
+    auto const old_str = base_str;
+    base_str = StringData::Make(old_str, CopyStringMode{});
+    decRefStr(old_str);
+  }
+
+  auto range_check = [&](size_t data_len) {
+    if (offset < 0 || offset + data_len > base_str->size()) {
+      fail_oob(
+        "Cannot set {}-byte range at offset {} in string of length {}",
+        data_len,
+        offset,
+        base_str->size()
+      );
+    }
+  };
+
+  auto dest = base_str->mutableData() + offset;
+
+  auto fail_if_reverse = [&]() {
+    if (reverse) {
+      fail_invalid("Cannot set reverse range for primitive type {}",
+                   getDataTypeString(type(src)).data());
+    }
+  };
+
+  if (tvIsBool(src)) {
+    fail_if_reverse();
+
+    if (size != 1) {
+      fail_invalid("Invalid size {} for bool source", size);
+    }
+
+    range_check(1);
+    copy_int(dest, val(src).num, 1);
+  } else if (tvIsInt(src)) {
+    fail_if_reverse();
+
+    range_check(size);
+    copy_int(dest, val(src).num, size);
+  } else if (tvIsDouble(src)) {
+    fail_if_reverse();
+
+    if (size == 4) {
+      float f = val(src).dbl;
+      range_check(4);
+      memcpy(dest, &f, 4);
+    } else if (size == 8) {
+      range_check(8);
+      memcpy(dest, &val(src).dbl, 8);
+    } else {
+      fail_invalid("Invalid size {} for double source", size);
+    }
+  } else if (tvIsString(src)) {
+    setRangeString<reverse>(dest, src, count, size, range_check);
+  } else if (tvIsVec(src)) {
+    setRangeVec<reverse>(dest, src, count, size, range_check);
+  } else {
+    fail_invalid("Invalid source type %s for range set operation",
+                 tname(type(src)));
+  }
+}
+
+template void SetRange<true>(tv_lval, int64_t, TypedValue, int64_t, int64_t);
+template void SetRange<false>(tv_lval, int64_t, TypedValue, int64_t, int64_t);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

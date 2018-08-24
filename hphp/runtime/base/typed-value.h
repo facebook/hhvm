@@ -368,8 +368,8 @@ ALWAYS_INLINE Value& val(TypedValue& tv) { return tv.m_data; }
 ALWAYS_INLINE TypedValue as_tv(TypedValue& tv) { return tv; }
 ALWAYS_INLINE DataType& type(TypedValue* tv) { return tv->m_type; }
 ALWAYS_INLINE Value& val(TypedValue* tv) { return tv->m_data; }
-ALWAYS_INLINE DataType type(const TypedValue* tv) { return tv->m_type; }
-ALWAYS_INLINE Value val(const TypedValue* tv) { return tv->m_data; }
+ALWAYS_INLINE const DataType& type(const TypedValue* tv) { return tv->m_type; }
+ALWAYS_INLINE const Value& val(const TypedValue* tv) { return tv->m_data; }
 ALWAYS_INLINE TypedValue as_tv(const TypedValue* tv) { return *tv; }
 
 ///////////////////////////////////////////////////////////////////////////////

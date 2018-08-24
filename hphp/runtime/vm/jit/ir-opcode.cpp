@@ -480,6 +480,8 @@ bool opcodeMayRaise(Opcode opc) {
   case SetOpElem:
   case SetOpProp:
   case SetProp:
+  case SetRange:
+  case SetRangeRev:
   case SetWithRefElem:
   case StringGet:
   case SuspendHookAwaitEF:

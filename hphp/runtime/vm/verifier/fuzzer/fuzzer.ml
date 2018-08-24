@@ -414,7 +414,10 @@ let mut_imms (is : IS.t) : IS.t =
     | UnsetM  (i,     k) -> UnsetM  (mutate_int i  !mag,     mutate_key k !mag)
     | SetWithRefLML (id, id') ->
         SetWithRefLML (mutate_local_id id !mag, mutate_local_id id' !mag)
-    | SetWithRefRML  id  -> SetWithRefRML (mutate_local_id id !mag) in
+    | SetWithRefRML  id  -> SetWithRefRML (mutate_local_id id !mag)
+    | SetRangeM (i, op, s) ->
+        SetRangeM (mutate_int i !mag, op, mutate_int s !mag)
+  in
   let mutate_iterator data s =
     match s with
     | IterInit   (i, l, id)      ->

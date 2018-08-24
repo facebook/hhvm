@@ -1450,6 +1450,17 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VGetProp:
     return minstr_final_with_prop_state(inst);
 
+  /*
+   * SetRange behaves like a simpler version of SetElem.
+   */
+  case SetRange:
+  case SetRangeRev:
+    return may_load_store_kill(
+      AHeapAny | all_pointees(inst),
+      AHeapAny | pointee(inst.src(0)),
+      AMIStatePropS
+    );
+
   case SetNewElemArray:
   case SetNewElemVec:
   case SetNewElemKeyset:

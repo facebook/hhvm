@@ -468,6 +468,7 @@ static const struct {
                                       Stack1,       OutVUnknown     }},
   { OpSetM,        {Stack1|BStackN|MBase|MKey,
                                       Stack1,       OutUnknown      }},
+  { OpSetRangeM,   {BStackN|MBase,    None,         OutNone         }},
   { OpIncDecM,     {BStackN|MBase|MKey,
                                       Stack1,       OutUnknown      }},
   { OpSetOpM,      {Stack1|BStackN|MBase|MKey,
@@ -1095,6 +1096,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::UnsetM:
   case Op::SetWithRefLML:
   case Op::SetWithRefRML:
+  case Op::SetRangeM:
   case Op::MemoGet:
   case Op::MemoSet:
   case Op::RetM:

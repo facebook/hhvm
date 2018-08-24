@@ -355,6 +355,16 @@ enum class QueryMOp : uint8_t {
 #undef OP
 };
 
+#define SET_RANGE_OPS \
+  OP(Forward)         \
+  OP(Reverse)
+
+enum class SetRangeOp : uint8_t {
+#define OP(name) name,
+  SET_RANGE_OPS
+#undef OP
+};
+
 #define CONT_CHECK_OPS                            \
   CONT_CHECK_OP(IgnoreStarted)                    \
   CONT_CHECK_OP(CheckStarted)
@@ -720,11 +730,13 @@ constexpr uint32_t kMaxConcatN = 4;
   O(QueryM,          THREE(IVA, OA(QueryMOp), KA),                      \
                                        MFINAL,          ONE(CV),    NF) \
   O(VGetM,           TWO(IVA, KA),     MFINAL,          ONE(VV),    NF) \
-  O(SetM,            TWO(IVA, KA),     C_MFINAL,        ONE(CV),    NF) \
+  O(SetM,            TWO(IVA, KA),     C_MFINAL(1),     ONE(CV),    NF) \
+  O(SetRangeM,       THREE(IVA, OA(SetRangeOp), IVA),                   \
+                                       C_MFINAL(3),     NOV,        NF) \
   O(IncDecM,         THREE(IVA, OA(IncDecOp), KA),                      \
                                        MFINAL,          ONE(CV),    NF) \
   O(SetOpM,          THREE(IVA, OA(SetOpOp), KA),                       \
-                                       C_MFINAL,        ONE(CV),    NF) \
+                                       C_MFINAL(1),     ONE(CV),    NF) \
   O(BindM,           TWO(IVA, KA),     V_MFINAL,        ONE(VV),    NF) \
   O(UnsetM,          TWO(IVA, KA),     MFINAL,          NOV,        NF) \
   O(SetWithRefLML,   TWO(LA,LA),       NOV,             NOV,        NF) \
@@ -893,6 +905,7 @@ const char* subopToName(ObjMethodOp);
 const char* subopToName(SwitchKind);
 const char* subopToName(MOpMode);
 const char* subopToName(QueryMOp);
+const char* subopToName(SetRangeOp);
 const char* subopToName(ContCheckOp);
 const char* subopToName(CudOp);
 const char* subopToName(FPassHint);
@@ -1080,6 +1093,7 @@ inline bool isMemberFinalOp(Op op) {
     case Op::QueryM:
     case Op::VGetM:
     case Op::SetM:
+    case Op::SetRangeM:
     case Op::IncDecM:
     case Op::SetOpM:
     case Op::BindM:
@@ -1100,6 +1114,7 @@ inline bool isMemberOp(Op op) {
 inline MOpMode finalMemberOpMode(Op op) {
   switch(op){
     case Op::SetM:
+    case Op::SetRangeM:
     case Op::VGetM:
     case Op::IncDecM:
     case Op::SetOpM:
@@ -1109,8 +1124,12 @@ inline MOpMode finalMemberOpMode(Op op) {
       return MOpMode::Define;
     case Op::UnsetM:
       return MOpMode::Unset;
-    default:
+    case Op::QueryM:
       return MOpMode::None;
+    default:
+      always_assert_flog(
+        false, "Unknown final member op {}", opcodeToName(op)
+      );
   }
 }
 

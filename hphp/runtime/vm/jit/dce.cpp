@@ -651,6 +651,8 @@ bool canDCE(IRInstruction* inst) {
   case MapSet:
   case SetElem:
   case SetWithRefElem:
+  case SetRange:
+  case SetRangeRev:
   case UnsetElem:
   case SetOpElem:
   case IncDecElem:

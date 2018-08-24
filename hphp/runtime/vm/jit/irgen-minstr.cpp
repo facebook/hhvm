@@ -2259,6 +2259,19 @@ void emitSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   mFinalImpl(env, nDiscard, result);
 }
 
+void emitSetRangeM(IRGS& env, uint32_t nDiscard, SetRangeOp op, uint32_t size) {
+  auto const count = gen(env, ConvCellToInt, topC(env));
+  auto const src = topC(env, BCSPRelOffset{1});
+  auto const offset = gen(env, ConvCellToInt, topC(env, BCSPRelOffset{2}));
+  auto const reverse = op == SetRangeOp::Reverse;
+
+  gen(
+    env, reverse ? SetRangeRev : SetRange,
+    ldMBase(env), offset, src, count, cns(env, size)
+  );
+  mFinalImpl(env, nDiscard + 3, nullptr);
+}
+
 void emitIncDecM(IRGS& env, uint32_t nDiscard, IncDecOp incDec, MemberKey mk) {
   auto key = memberKey(env, mk);
 

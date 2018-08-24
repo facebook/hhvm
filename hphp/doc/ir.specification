@@ -3177,6 +3177,13 @@ fields of that struct for holding intermediate values.
   Furthermore, in the case of "invalid offsets", SetElem may throw an
   InvalidSetMException (see discussion above).
 
+| SetRange, ND, S(LvalToGen) S(Int) S(Cell) S(Int) S(Int), MElem
+
+| SetRangeRev, ND, S(LvalToGen) S(Int) S(Cell) S(Int) S(Int), MElem
+
+  Perform a range set or reverse range set operation, with the same arguments
+  and semantics as the RangeSet bytecode instruction.
+
 | SetWithRefElem, ND, S(LvalToGen) S(Gen) S(Gen) S(MIPropSPtr,Nullptr), MElem
 
   Set element with key S1 in S0 to S2.

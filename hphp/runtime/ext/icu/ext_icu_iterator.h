@@ -115,7 +115,7 @@ struct BugStringCharEnumeration : icu::StringEnumeration {
     return uenum_count(uenum, &status);
   }
 
-  const UnicodeString* snext(UErrorCode& status) override {
+  const icu::UnicodeString* snext(UErrorCode& status) override {
     int32_t length;
     const UChar* str = uenum_unext(uenum, &length, &status);
     if (str == 0 || U_FAILURE(status)) {

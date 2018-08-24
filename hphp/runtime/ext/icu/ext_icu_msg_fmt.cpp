@@ -35,6 +35,8 @@ public:
 };
 U_NAMESPACE_END
 
+using icu::MessageFormatAdapter;
+
 namespace HPHP { namespace Intl {
 //////////////////////////////////////////////////////////////////////////////
 // Internal resource data

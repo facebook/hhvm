@@ -289,7 +289,7 @@ static int64_t HHVM_METHOD(IntlDateFormatter, getTimeType) {
 
 static String HHVM_METHOD(IntlDateFormatter, getTimeZoneId) {
   DATFMT_GET(data, this_, 0);
-  UnicodeString id;
+  icu::UnicodeString id;
   data->datefmtObject()->getTimeZone().getID(id);
   UErrorCode error = U_ZERO_ERROR;
   String ret(u8(id, error));

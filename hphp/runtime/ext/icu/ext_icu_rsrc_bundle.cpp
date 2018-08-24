@@ -74,7 +74,7 @@ static void HHVM_METHOD(ResourceBundle, __construct, const Variant& localeName,
     raise_warning("Bundle name too long");
     bundle = String{};
   }
-  auto const locale = Locale::createFromName(
+  auto const locale = icu::Locale::createFromName(
     localeOrDefault(localeName.toString()).c_str()
   );
   auto data = Native::data<ResourceBundle>(this_);

@@ -10,3 +10,5 @@
 let handler = object
   inherit Tast_visitor.handler_base
 end
+
+let whitelist_path _path = ()

@@ -32,6 +32,8 @@ type t = {
   ignored_paths    : string list;
   (* A list of extra paths to search for declarations *)
   extra_paths      : Path.t list;
+  (* A list of regexps for paths to ignore for typechecking coroutines *)
+  coroutine_whitelist_paths : string list;
 
   (* what version of the typechecker is targetted *)
   forward_compatibility_level : ForwardCompatibilityLevel.t;
@@ -137,7 +139,7 @@ let config_tc_migration_flags config =
   |> process_migration_flags
 
 
-let convert_ignored_paths str =
+let convert_paths str =
   let json = Hh_json.json_of_string ~strict:true str in
   let l = Hh_json.get_array_exn json in
   List.filter_map ~f:(fun s ->
@@ -146,10 +148,9 @@ let convert_ignored_paths str =
       | _ -> None
     ) l
 
-
 let process_ignored_paths config =
   SMap.get config "ignored_paths"
-  |> Option.value_map ~f:convert_ignored_paths ~default:[]
+  |> Option.value_map ~f:convert_paths ~default:[]
 
 let process_forward_compatibility_level config =
   SMap.get config "forward_compatibility_level"
@@ -168,6 +169,10 @@ let process_extra_paths config =
   match SMap.get config "extra_paths" with
   | Some s -> Str.split config_list_regexp s |> List.map ~f:maybe_relative_path
   | _ -> []
+
+let process_coroutine_whitelist_paths config =
+  SMap.get config "coroutine_whitelist_paths"
+  |> Option.value_map ~f:convert_paths ~default:[]
 
 let process_untrusted_mode config =
   match SMap.get config "untrusted_mode" with
@@ -233,6 +238,7 @@ let load config_filename options =
   let version = SMap.get config "version" in
   let ignored_paths = process_ignored_paths config in
   let extra_paths = process_extra_paths config in
+  let coroutine_whitelist_paths = process_coroutine_whitelist_paths config in
   (* Since we use the unix alarm() for our timeouts, a timeout value of 0 means
    * to wait indefinitely *)
   let load_script_timeout = int_ "load_script_timeout" ~default:0 config in
@@ -279,6 +285,7 @@ let load config_filename options =
     config_hash = config_hash;
     ignored_paths = ignored_paths;
     extra_paths = extra_paths;
+    coroutine_whitelist_paths = coroutine_whitelist_paths;
     forward_compatibility_level = forward_compat_level;
   }, local_config
 
@@ -294,6 +301,7 @@ let default_config = {
   config_hash = None;
   ignored_paths = [];
   extra_paths = [];
+  coroutine_whitelist_paths = [];
   forward_compatibility_level = ForwardCompatibilityLevel.HEAD;
 }
 
@@ -307,5 +315,6 @@ let formatter_override config = config.formatter_override
 let config_hash config = config.config_hash
 let ignored_paths config = config.ignored_paths
 let extra_paths config = config.extra_paths
+let coroutine_whitelist_paths config = config.coroutine_whitelist_paths
 let version config = config.version
 let forward_compatibility_level config = config.forward_compatibility_level

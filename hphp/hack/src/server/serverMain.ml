@@ -819,6 +819,8 @@ let setup_server ~informant_managed ~monitor_pid options handle =
     _
   } as local_config = local_config in
   List.iter (ServerConfig.ignored_paths config) ~f:FilesToIgnore.ignore_path;
+  List.iter (ServerConfig.coroutine_whitelist_paths config)
+    ~f:Coroutine_check.whitelist_path;
   let saved_state_load_type =
     LoadScriptConfig.saved_state_load_type_to_string load_script_config in
   let use_sql =

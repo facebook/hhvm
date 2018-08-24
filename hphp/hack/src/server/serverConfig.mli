@@ -19,6 +19,7 @@ val default_config : t
 
 val ignored_paths       : t -> string list
 val extra_paths         : t -> Path.t list
+val coroutine_whitelist_paths : t -> string list
 val gc_control          : t -> Gc.control
 val sharedmem_config    : t -> SharedMem.config
 val typechecker_options : t -> TypecheckerOptions.t

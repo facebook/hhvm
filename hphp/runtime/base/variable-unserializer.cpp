@@ -226,6 +226,11 @@ VariableUnserializer::RefInfo::makeDictValue(tv_lval v) {
   return RefInfo{v, Type::DictValue};
 }
 
+VariableUnserializer::RefInfo
+VariableUnserializer::RefInfo::makeShapeValue(tv_lval v) {
+  return RefInfo{v, Type::ShapeValue};
+}
+
 tv_lval VariableUnserializer::RefInfo::var() const {
   return m_data.drop_tag();
 }
@@ -310,6 +315,8 @@ void VariableUnserializer::add(tv_lval v, UnserializeMode mode) {
     m_refs.emplace_back(RefInfo::makeDictValue(v));
   } else if (mode == UnserializeMode::ColValue) {
     m_refs.emplace_back(RefInfo::makeColValue(v));
+  } else if (mode == UnserializeMode::ShapeValue) {
+    m_refs.emplace_back(RefInfo::makeShapeValue(v));
   } else {
     assertx(mode == UnserializeMode::ColKey);
     // We don't currently support using the 'R' encoding to refer to collection
@@ -870,6 +877,13 @@ void VariableUnserializer::unserializeVariant(
       throwUnknownType(type);
     }
     break;
+  case 'H': // Shape
+    {
+      check_recursion_throw();
+      auto a = unserializeShape();
+      tvMove(make_array_like_tv(a.detach()), self);
+    }
+    return; // Shape has '}' terminating
   case 'a': // PHP array
   case 'D': // Dict
     {
@@ -1510,6 +1524,14 @@ Array VariableUnserializer::unserializeDArray() {
   return arr;
 }
 
+Array VariableUnserializer::unserializeShape() {
+  // Shapes need to behave like DArrays externally in the serializer. Calling
+  // unserializeDict here produces incompatible behaviour with getDefaultValueText()
+  auto arr = unserializeDArray();
+  arr = arr->toShapeInPlaceIfCompatible();
+  return arr;
+}
+
 Array VariableUnserializer::unserializeKeyset() {
   int64_t size = readInt();
   expectChar(':');
@@ -1814,8 +1836,10 @@ void VariableUnserializer::reserialize(StringBuffer& buf) {
   case 'a':
   case 'D':
   case 'Y':
+  case 'H':
     {
-      buf.append(type == 'a' ? "a:" : (type == 'Y' ? "Y:" : "D:"));
+      buf.append(type == 'a' ? "a:" : (type == 'Y' ? "Y:" :
+            (type == 'D' ? "D:" : "H:")));
       int64_t size = readInt();
       char sep2 = readChar();
       buf.append(size);

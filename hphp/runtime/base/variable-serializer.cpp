@@ -96,7 +96,10 @@ VariableSerializer::getKind(const ArrayData* arr) const {
         (arr->isLegacyArray() && getType() == Type::Serialize))) {
     return VariableSerializer::ArrayKind::PHP;
   }
-  if (arr->isDict())              return VariableSerializer::ArrayKind::Dict;
+  if (arr->isShape() && getType() == Type::Internal) {
+    return VariableSerializer::ArrayKind::Shape;
+  }
+  if (arr->isDictOrShape())       return VariableSerializer::ArrayKind::Dict;
   if (arr->isVecArray())          return VariableSerializer::ArrayKind::Vec;
   if (arr->isKeyset())            return VariableSerializer::ArrayKind::Keyset;
   assertx(arr->isPHPArray());
@@ -807,6 +810,8 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       case ArrayKind::Dict:
         m_buf->append("Dict\n");
         break;
+      case ArrayKind::Shape:
+        always_assert_flog(false, "Shapes should not be serialized externally");
       case ArrayKind::Vec:
         m_buf->append("Vec\n");
         break;
@@ -845,6 +850,8 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       m_buf->append("NULL");
     } else {
       switch (kind) {
+      case ArrayKind::Shape:
+        always_assert_flog(false, "Shapes should not be serialized externally");
       case ArrayKind::Dict:
         if (m_type == Type::PHPOutput && m_dvOverrides) {
           m_buf->append(
@@ -902,6 +909,8 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       case ArrayKind::Dict:
         m_buf->append("dict");
         break;
+      case ArrayKind::Shape:
+        always_assert_flog(false, "Shapes should not be serialized externally");
       case ArrayKind::Vec:
         m_buf->append("vec");
         break;
@@ -954,6 +963,14 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       switch (kind) {
       case ArrayKind::Dict:
         m_buf->append("D:");
+        break;
+      case ArrayKind::Shape:
+        if (m_type == Type::Internal) {
+          m_buf->append("H:");
+        } else {
+          always_assert_flog(false,
+              "Shapes should not be serialized externally");
+        }
         break;
       case ArrayKind::Vec:
         m_buf->append("v:");
@@ -1265,6 +1282,8 @@ void VariableSerializer::writeArrayFooter(
       }
     } else if (m_rsrcName.empty()) { // for rsrc, only write NULL in arrayHeader
       switch (kind) {
+      case ArrayKind::Shape:
+        always_assert_flog(false, "Shapes should not be serialized externally");
       case ArrayKind::Dict:
       case ArrayKind::Vec:
       case ArrayKind::Keyset:
@@ -1503,7 +1522,10 @@ void VariableSerializer::serializeVariant(tv_rval tv,
 
     case KindOfPersistentShape:
     case KindOfShape:
-      not_implemented();
+      assertx(!isArrayKey);
+      assertx(val(tv).parr->isShape());
+      serializeArray(val(tv).parr, skipNestCheck);
+      return;
 
     case KindOfPersistentArray:
     case KindOfArray:
@@ -1592,7 +1614,7 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
       raise_hack_arr_compat_serialize_notice(arr);
       m_hasHackWarned = true;
     }
-    if (UNLIKELY(m_dictWarn && !m_hasDictWarned && arr->isDict())) {
+    if (UNLIKELY(m_dictWarn && !m_hasDictWarned && arr->isDictOrShape())) {
       raise_hack_arr_compat_serialize_notice(arr);
       m_hasDictWarned = true;
     }

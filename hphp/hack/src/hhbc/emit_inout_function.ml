@@ -11,7 +11,6 @@ open Core_kernel
 open Instruction_sequence
 
 module H = Hhbc_ast
-module SU = Hhbc_string_utils
 
 let is_last_param_variadic param_count params =
   let last_p = List.nth_exn params (param_count - 1) in
@@ -198,14 +197,11 @@ let emit_wrapper_method
   let method_is_public =
     List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Public ||
     (not method_is_private && not method_is_protected) in
-  let is_in_trait = ast_class.Ast.c_kind = Ast.Ctrait in
   let return_type_info =
     Emit_body.emit_return_type_info
       ~scope ~skipawaitable:false ~namespace ast_method.Ast.m_ret in
   let method_is_return_by_ref = ast_method.Ast.m_ret_by_ref in
   let param_count = List.length params in
-  let class_name =
-    Hhbc_id.Class.from_ast_name @@ SU.Xhp.mangle @@ snd ast_class.A.c_name in
   let wrapper_type, original_id, renamed_id, params =
     if is_closure || has_ref_params then
       Emit_inout_helpers.RefWrapper, renamed_id, original_id,
@@ -219,16 +215,8 @@ let emit_wrapper_method
         instr_this;
         instr_fpushfunc param_count []
       ]
-    else if method_is_static then
-      if is_in_trait then
-        instr_fpushclsmethodsd param_count H.SpecialClsRef.Self renamed_id
-      else
-        instr_fpushclsmethodd param_count renamed_id class_name
     else
-      gather [
-        instr_this;
-        instr_fpushobjmethodd param_count renamed_id Ast.OG_nullsafe
-      ]
+      instr_fpushclsmethodsd param_count H.SpecialClsRef.Self renamed_id
   in
   Local.reset_local @@ List.length decl_vars + List.length params;
   let body_instrs =

@@ -2520,36 +2520,47 @@ and expr_
             Typing_log.increment_feature_count env "Lambda [non-function typed context]";
             check_body_under_known_params declared_ft
           | _ ->
-            Typing_log.increment_feature_count env "Lambda [unknown params]";
-            Typing_log.log_types 1 p env
-              [Typing_log.Log_sub
-                ("Typing.expr Efun unknown params",
-                  [Typing_log.Log_type ("declared_ft", (Reason.Rwitness p, Tfun declared_ft))])];
-            (* check for recursive function calls *)
-            let reactivity = fun_reactivity env.Env.decl_env f.f_user_attributes f.f_params in
-            let old_reactivity = Env.env_reactivity env in
-            let env = Env.set_env_reactive env reactivity in
-            let is_coroutine, counter, pos, anon = anon_make env p f declared_ft idl in
-            let env, tefun, _, anon_id = Errors.try_with_error
-              (fun () ->
-                let (_, tefun, ty) = anon env declared_ft.ft_params declared_ft.ft_arity in
-                let anon_fun = reactivity, is_coroutine, counter, pos, anon in
-                let env, anon_id = Env.add_anonymous env anon_fun in
-                env, tefun, ty, anon_id)
-              (fun () ->
-                (* If the anonymous function declaration has errors itself, silence
-                   them in any subsequent usages. *)
-                let anon_ign ?el:_ ?ret_ty:_ env fun_params =
-                  Errors.ignore_ (fun () -> (anon env fun_params)) in
-                let (_, tefun, ty) = anon_ign env declared_ft.ft_params declared_ft.ft_arity in
-                let anon_fun = reactivity, is_coroutine, counter, pos, anon in
-                let env, anon_id = Env.add_anonymous env anon_fun in
-                env, tefun, ty, anon_id) in
-            let env = Env.set_env_reactive env old_reactivity in
-            let anon_ty = (Reason.Rwitness p, Tanon (declared_ft.ft_arity, anon_id)) in
-            let ((ep,_efun_ty),efun) = tefun in
-            let tefun = ((ep, anon_ty), efun) in
-            env, tefun, anon_ty
+            (* If we're in partial mode then type-check definition anyway,
+             * so treating parameters without type hints as "untyped"
+            *)
+            if not (Env.is_strict env) && TypecheckerOptions.untyped_nonstrict_lambda_parameters
+              (Env.get_options env)
+            then begin
+              Typing_log.increment_feature_count env "Lambda [non-strict unknown params]";
+              check_body_under_known_params declared_ft
+            end
+            else begin
+              Typing_log.increment_feature_count env "Lambda [unknown params]";
+              Typing_log.log_types 1 p env
+                [Typing_log.Log_sub
+                  ("Typing.expr Efun unknown params",
+                    [Typing_log.Log_type ("declared_ft", (Reason.Rwitness p, Tfun declared_ft))])];
+              (* check for recursive function calls *)
+              let reactivity = fun_reactivity env.Env.decl_env f.f_user_attributes f.f_params in
+              let old_reactivity = Env.env_reactivity env in
+              let env = Env.set_env_reactive env reactivity in
+              let is_coroutine, counter, pos, anon = anon_make env p f declared_ft idl in
+              let env, tefun, _, anon_id = Errors.try_with_error
+                (fun () ->
+                  let (_, tefun, ty) = anon env declared_ft.ft_params declared_ft.ft_arity in
+                  let anon_fun = reactivity, is_coroutine, counter, pos, anon in
+                  let env, anon_id = Env.add_anonymous env anon_fun in
+                  env, tefun, ty, anon_id)
+                (fun () ->
+                  (* If the anonymous function declaration has errors itself, silence
+                     them in any subsequent usages. *)
+                  let anon_ign ?el:_ ?ret_ty:_ env fun_params =
+                    Errors.ignore_ (fun () -> (anon env fun_params)) in
+                  let (_, tefun, ty) = anon_ign env declared_ft.ft_params declared_ft.ft_arity in
+                  let anon_fun = reactivity, is_coroutine, counter, pos, anon in
+                  let env, anon_id = Env.add_anonymous env anon_fun in
+                  env, tefun, ty, anon_id) in
+              let env = Env.set_env_reactive env old_reactivity in
+              let anon_ty = (Reason.Rwitness p, Tanon (declared_ft.ft_arity, anon_id)) in
+              let ((ep,_efun_ty),efun) = tefun in
+              let tefun = ((ep, anon_ty), efun) in
+              env, tefun, anon_ty
+            end
         end
       end
   | Xml (sid, attrl, el) ->

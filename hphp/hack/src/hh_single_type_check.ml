@@ -145,6 +145,7 @@ let parse_options () =
   let disallow_array_typehint = ref false in
   let disallow_array_literal = ref false in
   let disallow_reified_generics = ref false in
+  let untyped_nonstrict_lambda_parameters = ref false in
   let no_fallback_in_namespaces = ref false in
   let dynamic_view = ref false in
   let allow_array_as_tuple = ref false in
@@ -279,6 +280,9 @@ let parse_options () =
     "--disallow-ambiguous-lambda",
       Arg.Set disallow_ambiguous_lambda,
       " Disallow definition of lambdas that require use-site checking.";
+    "--untyped-nonstrict-lambda-parameters",
+      Arg.Set untyped_nonstrict_lambda_parameters,
+      " In non-strict files treat lambda parameters without a type hint as untyped.";
     "--disallow-array-typehint",
       Arg.Set disallow_array_typehint,
       " Disallow usage of array typehints.";
@@ -329,6 +333,8 @@ let parse_options () =
       GlobalOptions.tco_safe_vector_array = !safe_vector_array;
       GlobalOptions.po_deregister_php_stdlib = !deregister_attributes;
       GlobalOptions.tco_disallow_ambiguous_lambda = !disallow_ambiguous_lambda;
+      GlobalOptions.tco_untyped_nonstrict_lambda_parameters =
+        !untyped_nonstrict_lambda_parameters;
       GlobalOptions.tco_disallow_array_typehint = !disallow_array_typehint;
       GlobalOptions.tco_disallow_array_literal = !disallow_array_literal;
       GlobalOptions.tco_dynamic_view = !dynamic_view;

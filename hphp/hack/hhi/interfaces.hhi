@@ -296,7 +296,7 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @return - an array converted from the current `Iterable`.
    */
-   /* HH_IGNORE_ERROR[2082] T30260145 */
+  <<__PHPStdLib>>
   public function toArray(): array;
   /**
    * Returns an `array` with the values from the current `Iterable`.

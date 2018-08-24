@@ -71,8 +71,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * @return - an `array` containing the key and value pairs from the current
    *           `Map`.
    */
-  <<__Rx, __MaybeMutable>>
-  /* HH_IGNORE_ERROR[2082] T30260145 */
+  <<__Rx, __MaybeMutable, __PHPStdLib>>
   public function toArray(): array<Tk, Tv>;
 
   /**

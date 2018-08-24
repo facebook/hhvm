@@ -86,8 +86,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - an `array` containing the values from the current `ImmSet`,
    *           where each key of the `array` are the same as each value.
    */
-  <<__Rx, __MaybeMutable>>
-  /* HH_IGNORE_ERROR[2082] T30260145 */
+  <<__Rx, __MaybeMutable, __PHPStdLib>>
   public function toArray(): array<Tv, Tv>;
 
   /**

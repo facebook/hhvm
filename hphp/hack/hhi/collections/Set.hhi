@@ -65,8 +65,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - an `array` containing the values from the current `Set`, where
    *           each key of the `array` are the same as each value.
    */
-  <<__Rx, __MaybeMutable>>
-  /* HH_IGNORE_ERROR[2082] T30260145 */
+  <<__Rx, __MaybeMutable, __PHPStdLib>>
   public function toArray(): array<Tv, Tv>;
 
   /**

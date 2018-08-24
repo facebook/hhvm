@@ -172,6 +172,8 @@ void raise_intish_index_cast();
 
 void raise_hack_arr_compat_serialize_notice(const ArrayData*);
 
+void raise_hack_arr_compat_array_producing_func_notice(const std::string& name);
+
 void raise_hackarr_compat_type_hint_param_notice(const Func* func,
                                                  const ArrayData* ad,
                                                  AnnotType at,

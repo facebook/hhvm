@@ -87,6 +87,8 @@ public:
   Variant pop();
   Variant popFront();
 
+  Array toPHPArray();
+
   template<class TSet>
   typename std::enable_if<
     std::is_base_of<BaseSet, TSet>::value, TSet*>::type

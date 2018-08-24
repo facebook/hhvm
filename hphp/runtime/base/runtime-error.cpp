@@ -178,6 +178,13 @@ void raise_hack_arr_compat_serialize_notice(const ArrayData* arr) {
   raise_notice("Hack Array Compat: Serializing %s", type);
 }
 
+void
+raise_hack_arr_compat_array_producing_func_notice(const std::string& name) {
+  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
+  raise_notice("Hack Array Compat: Calling array producing function %s",
+               name.c_str());
+}
+
 namespace {
 
 const char* arrayAnnotTypeToName(AnnotType at) {

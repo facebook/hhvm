@@ -84,6 +84,8 @@ public:
   Variant pop();
   Variant popFront();
 
+  Array toPHPArray();
+
 public:
   static Array ToArray(const ObjectData* obj);
   static bool ToBool(const ObjectData* obj);

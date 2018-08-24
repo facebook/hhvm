@@ -95,7 +95,7 @@ void HashCollection::warnOnStrIntDup() const {
   // Do nothing if no 'duplicates' were found.
 }
 
-Array HashCollection::toPHPArray() {
+Array HashCollection::toPHPArrayImpl() {
   if (!m_size) {
     return empty_array();
   }

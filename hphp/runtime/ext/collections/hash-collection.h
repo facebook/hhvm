@@ -47,7 +47,7 @@ struct HashCollection : ObjectData {
   }
 
   Array toArray() = delete;
-  Array toPHPArray();
+  Array toPHPArrayImpl();
   Array toVArray();
   Array toDArray();
 

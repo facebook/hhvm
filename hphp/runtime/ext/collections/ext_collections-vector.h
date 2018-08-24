@@ -134,7 +134,7 @@ public:
     check_collection_cast_to_array();
     return const_cast<BaseVector*>(
       static_cast<const BaseVector*>(obj)
-    )->toPHPArray();
+    )->toPHPArrayImpl();
   }
 
   static bool ToBool(const ObjectData* obj) {
@@ -215,9 +215,14 @@ public:
    */
   void reserve(uint32_t sz);
 
-  Array toArray() = delete;
-
   Array toPHPArray() {
+    if (RuntimeOption::EvalHackArrCompatArrayProducingFuncNotices) {
+      raise_hack_arr_compat_array_producing_func_notice("Vector::toArray");
+    }
+    return toPHPArrayImpl();
+  }
+
+  Array toPHPArrayImpl() {
     if (!m_size) return empty_array();
     return Array::attach(const_cast<ArrayData*>(arrayData()->toPHPArray(true)));
   }

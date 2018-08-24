@@ -1,0 +1,46 @@
+array(1) {
+  [0]=>
+  dict(2) {
+    ["a"]=>
+    int(2)
+    ["b"]=>
+    int(3)
+  }
+}
+dict(2) {
+  ["a"]=>
+  int(2)
+  ["b"]=>
+  int(3)
+}
+vec(2) {
+  int(2)
+  int(3)
+}
+dict(2) {
+  ["a"]=>
+  int(2)
+  ["b"]=>
+  int(3)
+}
+vec(2) {
+  int(2)
+  int(3)
+}
+array(2) {
+  ["a"]=>
+  int(2)
+  ["b"]=>
+  int(3)
+}
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)

@@ -2043,6 +2043,7 @@ X(Arr, arrVal, NonDVArr)
 SSATmp* simplifyConvCellToArr(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->isA(TArr))    return gen(env, ConvArrToNonDVArr, src);
+  if (src->isA(TShape))  return gen(env, ConvShapeToArr, inst->taken(), src);
   if (src->isA(TVec))    return gen(env, ConvVecToArr, src);
   if (src->isA(TDict))   return gen(env, ConvDictToArr, inst->taken(), src);
   if (src->isA(TKeyset)) return gen(env, ConvKeysetToArr, inst->taken(), src);

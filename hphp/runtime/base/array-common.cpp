@@ -158,7 +158,11 @@ ArrayData* ArrayCommon::ToDArray(ArrayData* a, bool) {
 }
 
 ArrayData* ArrayCommon::ToShape(ArrayData* a, bool copy) {
-  not_implemented();
+  auto arr = RuntimeOption::EvalHackArrDVArrs
+    ? ArrayCommon::ToDict(a, copy)
+    : ArrayCommon::ToDArray(a, copy);
+  arr = arr->toShapeInPlaceIfCompatible();
+  return arr;
 }
 
 ArrayCommon::RefCheckResult

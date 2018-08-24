@@ -204,6 +204,7 @@ public:
   Array copy() const { COPY_BODY(copy(), Array{}) }
   Array toVec() const { COPY_BODY(toVec(true), CreateVec()) }
   Array toDict() const { COPY_BODY(toDict(true), CreateDict()) }
+  Array toShape() const { COPY_BODY(toShape(true), CreateShape()) }
   Array toKeyset() const { COPY_BODY(toKeyset(true), CreateKeyset()) }
   Array toPHPArray() const { COPY_BODY(toPHPArray(true), Array{}) }
   Array toVArray() const { COPY_BODY(toVArray(true), CreateVArray()) }

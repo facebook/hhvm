@@ -119,10 +119,10 @@ struct ScalarHash {
     if (ad1 == ad2) return true;
     if (ad1->size() != ad2->size()) return false;
     if (!ArrayData::dvArrayEqual(ad1, ad2)) return false;
-    if (ad1->isHackArray()) {
-      if (!ad2->isHackArray()) return false;
+    if (ad1->isHackArray() || ad1->isShape()) {
+      if (!ad2->isHackArray() && !ad2->isShape()) return false;
       if (ad1->kind() != ad2->kind()) return false;
-    } else if (ad2->isHackArray()) {
+    } else if (ad2->isHackArray() || ad2->isShape()) {
       return false;
     }
 
@@ -239,7 +239,7 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
     EmptyArray::entry,                          \
     APCLocalArray::entry,                       \
     GlobalsArray::entry,                        \
-    MixedArray::entry,         /* Shape */      \
+    MixedArray::entry##Shape,  /* Shape */      \
     MixedArray::entry##Dict,   /* Dict */       \
     PackedArray::entry##Vec,   /* Vec */        \
     SetArray::entry,           /* Keyset */     \

@@ -147,10 +147,9 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* ToPHPArray(ArrayData*, bool);
   static ArrayData* ToVArray(ArrayData*, bool);
   static ArrayData* ToDArray(ArrayData*, bool);
-  static ArrayData* ToShape(ArrayData*, bool);
   static ArrayData* ToDict(ArrayData*, bool);
+  static ArrayData* ToShape(ArrayData*, bool);
   static ArrayData* ToVec(ArrayData*, bool);
-  static ArrayData* ToShapeVec(ArrayData*, bool);
   static void Renumber(ArrayData*) {}
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData* ad) {
@@ -181,6 +180,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* ToPHPArrayVec(ArrayData*, bool);
   static ArrayData* ToVArrayVec(ArrayData*, bool);
   static ArrayData* ToDictVec(ArrayData*, bool);
+  static ArrayData* ToShapeVec(ArrayData*, bool);
   static ArrayData* ToVecVec(ArrayData*, bool);
 
   static constexpr auto MergeVec = &Merge;

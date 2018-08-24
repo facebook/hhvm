@@ -343,6 +343,7 @@ void emitCastVArray(IRGS& env) {
       }
       if (src->isA(TVec))    return gen(env, ConvVecToVArr, src);
       if (src->isA(TDict))   return gen(env, ConvDictToVArr, src);
+      if (src->isA(TShape))  return gen(env, ConvShapeToVArr, src);
       if (src->isA(TKeyset)) return gen(env, ConvKeysetToVArr, src);
       if (src->isA(TObj))    return gen(env, ConvObjToVArr, src);
       if (src->isA(TNull))   return raise("Null");
@@ -388,6 +389,7 @@ void emitCastDArray(IRGS& env) {
       }
       if (src->isA(TVec))    return gen(env, ConvVecToDArr, src);
       if (src->isA(TDict))   return gen(env, ConvDictToDArr, src);
+      if (src->isA(TShape))  return gen(env, ConvShapeToDArr, src);
       if (src->isA(TKeyset)) return gen(env, ConvKeysetToDArr, src);
       if (src->isA(TObj))    return gen(env, ConvObjToDArr, src);
       if (src->isA(TNull))   return raise("Null");
@@ -424,6 +426,7 @@ void emitCastVec(IRGS& env) {
       if (src->isA(TVec))    return src;
       if (src->isA(TArr))    return gen(env, ConvArrToVec, src);
       if (src->isA(TDict))   return gen(env, ConvDictToVec, src);
+      if (src->isA(TShape))  return gen(env, ConvShapeToVec, src);
       if (src->isA(TKeyset)) return gen(env, ConvKeysetToVec, src);
       if (src->isA(TObj))    return gen(env, ConvObjToVec, src);
       if (src->isA(TNull))   return raise("Null");
@@ -458,6 +461,7 @@ void emitCastDict(IRGS& env) {
     env,
     [&] {
       if (src->isA(TDict))    return src;
+      if (src->isA(TShape))   return gen(env, ConvShapeToDict, src);
       if (src->isA(TArr))     return gen(env, ConvArrToDict, src);
       if (src->isA(TVec))     return gen(env, ConvVecToDict, src);
       if (src->isA(TKeyset))  return gen(env, ConvKeysetToDict, src);
@@ -497,6 +501,7 @@ void emitCastKeyset(IRGS& env) {
       if (src->isA(TArr))     return gen(env, ConvArrToKeyset, src);
       if (src->isA(TVec))     return gen(env, ConvVecToKeyset, src);
       if (src->isA(TDict))    return gen(env, ConvDictToKeyset, src);
+      if (src->isA(TShape))   return gen(env, ConvShapeToKeyset, src);
       if (src->isA(TObj))     return gen(env, ConvObjToKeyset, src);
       if (src->isA(TNull))    return raise("Null");
       if (src->isA(TBool))    return raise("Bool");

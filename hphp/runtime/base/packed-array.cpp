@@ -1256,12 +1256,12 @@ ArrayData* PackedArray::ToDArray(ArrayData* adIn, bool /*copy*/) {
   return init.create();
 }
 
-ArrayData* PackedArray::ToShape(ArrayData* adIn, bool copy) {
-  not_implemented();
-}
-
-ArrayData* PackedArray::ToShapeVec(ArrayData* adIn, bool copy) {
-  not_implemented();
+ArrayData* PackedArray::ToShape(ArrayData* ad, bool copy) {
+  auto arr = RuntimeOption::EvalHackArrDVArrs
+    ? PackedArray::ToDict(ad, copy)
+    : PackedArray::ToDArray(ad, copy);
+  arr = arr->toShapeInPlaceIfCompatible();
+  return arr;
 }
 
 ArrayData* PackedArray::ToPHPArrayVec(ArrayData* adIn, bool copy) {
@@ -1317,6 +1317,14 @@ ArrayData* PackedArray::ToDictVec(ArrayData* ad, bool copy) {
   if (ad->empty()) return staticEmptyDictArray();
   auto mixed = copy ? ToMixedCopy(ad) : ToMixed(ad);
   return MixedArray::ToDictInPlace(mixed);
+}
+
+ArrayData* PackedArray::ToShapeVec(ArrayData* ad, bool copy) {
+  auto arr = RuntimeOption::EvalHackArrDVArrs
+    ? PackedArray::ToDictVec(ad, copy)
+    : PackedArray::ToDArrayVec(ad, copy);
+  arr = arr->toShapeInPlaceIfCompatible();
+  return arr;
 }
 
 ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {

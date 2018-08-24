@@ -1611,7 +1611,7 @@ ArrayData* MixedArray::ToPHPArray(ArrayData* in, bool copy) {
 
 ALWAYS_INLINE
 ArrayData* MixedArray::FromDictImpl(ArrayData* adIn, bool copy, bool toDArray) {
-  assertx(adIn->isDict());
+  assertx(adIn->isDictOrShape());
   auto a = asMixed(adIn);
 
   auto const size = a->size();
@@ -1679,6 +1679,17 @@ ArrayData* MixedArray::ToPHPArrayDict(ArrayData* adIn, bool copy) {
   return out;
 }
 
+ArrayData* MixedArray::ToPHPArrayShape(ArrayData* in, bool copy) {
+  assertx(in->isShape());
+  auto arr = RuntimeOption::EvalHackArrDVArrs
+    ? MixedArray::ToPHPArrayDict(in, copy)
+    : MixedArray::ToPHPArray(in, copy);
+  if (arr == staticEmptyArray()) return arr;
+  assertx(!arr->cowCheck());
+  arr->m_kind = HeaderKind::Mixed;
+  return arr;
+}
+
 ArrayData* MixedArray::ToDArray(ArrayData* in, bool copy) {
   auto a = asMixed(in);
   assertx(a->isMixed());
@@ -1692,10 +1703,6 @@ ArrayData* MixedArray::ToDArray(ArrayData* in, bool copy) {
   return out;
 }
 
-ArrayData* MixedArray::ToShape(ArrayData* in, bool copy) {
-  not_implemented();
-}
-
 ArrayData* MixedArray::ToDArrayDict(ArrayData* in, bool copy) {
   if (RuntimeOption::EvalHackArrDVArrs) return in;
   auto out = FromDictImpl(in, copy, true);
@@ -1705,11 +1712,19 @@ ArrayData* MixedArray::ToDArrayDict(ArrayData* in, bool copy) {
 }
 
 ArrayData* MixedArray::ToDArrayShape(ArrayData* in, bool copy) {
-  not_implemented();
-}
-
-ArrayData* MixedArray::ToShapeDict(ArrayData* in, bool copy) {
-  not_implemented();
+  assertx(in->isShape());
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    auto out = FromDictImpl(in, copy, true);
+    assertx(out->isDArray());
+    assertx(!out->isLegacyArray());
+    return out;
+  }
+  assertx(in->isDArray());
+  auto a = asMixed(in);
+  auto out = copy ? a->copyMixed() : a;
+  out->m_kind = HeaderKind::Mixed;
+  assertx(out->checkInvariants());
+  return out;
 }
 
 MixedArray* MixedArray::ToDictInPlace(ArrayData* ad) {
@@ -1723,7 +1738,7 @@ MixedArray* MixedArray::ToDictInPlace(ArrayData* ad) {
 
 ArrayData* MixedArray::ToDict(ArrayData* ad, bool copy) {
   auto a = asMixed(ad);
-  assertx(a->isMixed());
+  assertx(a->isMixedOrShape());
 
   if (a->empty() && a->m_nextKI == 0) return staticEmptyDictArray();
 
@@ -1744,9 +1759,32 @@ ArrayData* MixedArray::ToDict(ArrayData* ad, bool copy) {
   }
 }
 
+ArrayData* MixedArray::ToShape(ArrayData* ad, bool copy) {
+  assertx(ad->isMixed());
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    auto a = ToDict(ad, copy);
+    a = a->toShapeInPlaceIfCompatible();
+    return a;
+  }
+  auto a = asMixed(ad);
+  if (a->getSize() == 0) return staticEmptyShapeArray();
+  assertx(a->isDArray());
+  auto out = copy ? a->copyMixed() : a;
+  out->setDVArray(ArrayData::kDArray);
+  out->setLegacyArray(false);
+  assertx(out->checkInvariants());
+  return out->toShapeInPlaceIfCompatible();
+}
+
 ArrayData* MixedArray::ToDictDict(ArrayData* ad, bool) {
   assertx(asMixed(ad)->checkInvariants());
   assertx(ad->isDict());
+  return ad;
+}
+
+ArrayData* MixedArray::ToShapeShape(ArrayData* ad, bool) {
+  assertx(asMixed(ad)->checkInvariants());
+  assertx(ad->isShape());
   return ad;
 }
 
@@ -1794,7 +1832,7 @@ bool MixedArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
 
 tv_rval MixedArray::NvTryGetIntDict(const ArrayData* ad, int64_t k) {
   assertx(asMixed(ad)->checkInvariants());
-  assertx(ad->isDict());
+  assertx(ad->isDictOrShape());
   auto const ptr = MixedArray::NvGetInt(ad, k);
   if (UNLIKELY(!ptr)) throwOOBArrayKeyException(k, ad);
   return ptr;
@@ -1803,7 +1841,7 @@ tv_rval MixedArray::NvTryGetIntDict(const ArrayData* ad, int64_t k) {
 tv_rval MixedArray::NvTryGetStrDict(const ArrayData* ad,
                                                const StringData* k) {
   assertx(asMixed(ad)->checkInvariants());
-  assertx(ad->isDict());
+  assertx(ad->isDictOrShape());
   auto const ptr = MixedArray::NvGetStr(ad, k);
   if (UNLIKELY(!ptr)) throwOOBArrayKeyException(k, ad);
   return ptr;
@@ -1823,48 +1861,127 @@ ArrayData* MixedArray::SetWithRefStrDict(ArrayData* ad, StringData* k,
 
 arr_lval MixedArray::LvalIntRefDict(ArrayData* adIn, int64_t, bool) {
   assertx(asMixed(adIn)->checkInvariants());
-  assertx(adIn->isDict());
+  assertx(adIn->isDictOrShape());
   throwRefInvalidArrayValueException(adIn);
 }
 
 arr_lval MixedArray::LvalStrRefDict(ArrayData* adIn, StringData*, bool) {
   assertx(asMixed(adIn)->checkInvariants());
-  assertx(adIn->isDict());
+  assertx(adIn->isDictOrShape());
   throwRefInvalidArrayValueException(adIn);
 }
 
 arr_lval MixedArray::LvalNewRefDict(ArrayData* adIn, bool) {
   assertx(asMixed(adIn)->checkInvariants());
-  assertx(adIn->isDict());
+  assertx(adIn->isDictOrShape());
   throwRefInvalidArrayValueException(adIn);
 }
 
 ArrayData*
 MixedArray::SetRefIntDict(ArrayData* adIn, int64_t, tv_lval, bool) {
   assertx(asMixed(adIn)->checkInvariants());
-  assertx(adIn->isDict());
+  assertx(adIn->isDictOrShape());
   throwRefInvalidArrayValueException(adIn);
 }
 
 ArrayData*
 MixedArray::SetRefStrDict(ArrayData* adIn, StringData*, tv_lval, bool) {
   assertx(asMixed(adIn)->checkInvariants());
-  assertx(adIn->isDict());
+  assertx(adIn->isDictOrShape());
   throwRefInvalidArrayValueException(adIn);
 }
 
 ArrayData* MixedArray::AppendRefDict(ArrayData* adIn, tv_lval, bool) {
   assertx(asMixed(adIn)->checkInvariants());
-  assertx(adIn->isDict());
+  assertx(adIn->isDictOrShape());
   throwRefInvalidArrayValueException(adIn);
 }
 
 ArrayData*
 MixedArray::AppendWithRefDict(ArrayData* adIn, TypedValue v, bool copy) {
   assertx(asMixed(adIn)->checkInvariants());
-  assertx(adIn->isDict());
+  assertx(adIn->isDictOrShape());
   if (tvIsReferenced(v)) throwRefInvalidArrayValueException(adIn);
   return Append(adIn, tvToInitCell(v), copy);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+tv_rval MixedArray::NvTryGetIntShape(const ArrayData* ad, int64_t k) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? NvTryGetIntDict(ad, k)
+    : NvGetInt(ad, k);
+}
+
+tv_rval MixedArray::NvTryGetStrShape(const ArrayData* ad,
+                                     const StringData* k) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? NvTryGetStrDict(ad, k)
+    : NvGetStr(ad, k);
+}
+
+ArrayData* MixedArray::SetWithRefIntShape(ArrayData* ad, int64_t k,
+                                         TypedValue v, bool copy) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? SetWithRefIntDict(ad, k, v, copy)
+    : SetWithRefInt(ad, k, v, copy);
+}
+
+ArrayData* MixedArray::SetWithRefStrShape(ArrayData* ad, StringData* k,
+                                         TypedValue v, bool copy) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? SetWithRefStrDict(ad, k, v, copy)
+    : SetWithRefStr(ad, k, v, copy);
+}
+
+arr_lval MixedArray::LvalIntRefShape(ArrayData* adIn, int64_t k, bool copy) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? LvalIntRefDict(adIn, k, copy)
+    : LvalIntRef(adIn, k, copy);
+}
+
+arr_lval MixedArray::LvalStrRefShape(ArrayData* adIn,
+                                     StringData* k,
+                                     bool copy) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? LvalStrRefDict(adIn, k, copy)
+    : LvalStrRef(adIn, k, copy);
+}
+
+arr_lval MixedArray::LvalNewRefShape(ArrayData* adIn, bool copy) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? LvalNewRefDict(adIn, copy)
+    : LvalNewRef(adIn, copy);
+}
+
+ArrayData*
+MixedArray::SetRefIntShape(ArrayData* adIn, int64_t k, tv_lval v, bool copy) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? SetRefIntDict(adIn, k, v, copy)
+    : SetRefInt(adIn, k, v, copy);
+}
+
+ArrayData*
+MixedArray::SetRefStrShape(ArrayData* adIn,
+                           StringData* k,
+                           tv_lval v,
+                           bool copy) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? SetRefStrDict(adIn, k, v, copy)
+    : SetRefStr(adIn, k, v, copy);
+}
+
+ArrayData* MixedArray::AppendRefShape(ArrayData* adIn, tv_lval v, bool copy) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? AppendRefDict(adIn, v, copy)
+    : AppendRef(adIn, v, copy);
+}
+
+ArrayData*
+MixedArray::AppendWithRefShape(ArrayData* adIn, TypedValue v, bool copy) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? AppendWithRefDict(adIn, v, copy)
+    : AppendWithRef(adIn, v, copy);
 }
 
 //////////////////////////////////////////////////////////////////////

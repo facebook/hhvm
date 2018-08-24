@@ -2115,6 +2115,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvCellToDbl:
   case ConvArrToVec:
   case ConvArrToDict:
+  case ConvShapeToDict:
   case ConvObjToVec:
   case ConvObjToDict:
   case ConvObjToKeyset:
@@ -2138,21 +2139,26 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvArrToKeyset: // Decrefs input values
   case ConvVecToKeyset:
   case ConvDictToKeyset:
+  case ConvShapeToKeyset:
   case ConvDictToDArr: // These 4 may raise Hack array compat notices
+  case ConvShapeToDArr:
   case ConvKeysetToDArr:
   case ConvDictToArr:
+  case ConvShapeToArr:
   case ConvKeysetToArr:
     return may_load_store(AElemAny, AEmpty);
 
   case ConvVecToArr:
   case ConvArrToNonDVArr:
   case ConvDictToVec:
+  case ConvShapeToVec:
   case ConvKeysetToVec:
   case ConvVecToDict:
   case ConvKeysetToDict:
   case ConvArrToVArr:
   case ConvVecToVArr:
   case ConvDictToVArr:
+  case ConvShapeToVArr:
   case ConvKeysetToVArr:
   case ConvArrToDArr:
   case ConvVecToDArr:

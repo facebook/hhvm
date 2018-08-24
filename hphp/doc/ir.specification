@@ -438,6 +438,8 @@ To array conversions:
 
 | ConvDictToArr,                D(Arr), S(Dict),                  PRc|CRc
 
+| ConvShapeToArr,               D(Arr), S(Shape),                 PRc|CRc
+
 | ConvKeysetToArr,              D(Arr), S(Keyset),                PRc|CRc
 
 | ConvCellToArr,                D(Arr), S(Cell),                  PRc|CRc
@@ -452,6 +454,8 @@ To vec conversions:
 
 | ConvDictToVec,                D(Vec), S(Dict),                     PRc|CRc
 
+| ConvShapeToVec,               D(Vec), S(Shape),                    PRc|CRc
+
 | ConvKeysetToVec,              D(Vec), S(Keyset),                   PRc|CRc
 
 | ConvObjToVec,                 D(Vec), S(Obj),                   PRc|CRc
@@ -460,6 +464,8 @@ To vec conversions:
 To dict conversions:
 
 | ConvArrToDict,                D(Dict), S(Arr),                  PRc|CRc
+
+| ConvShapeToDict,              D(Dict), S(Shape),                PRc|CRc
 
 | ConvVecToDict,                D(Dict), S(Vec),                     PRc|CRc
 
@@ -476,6 +482,8 @@ To keyset conversions:
 
 | ConvDictToKeyset,             D(Keyset), S(Dict),               PRc|CRc
 
+| ConvShapeToKeyset,            D(Keyset), S(Shape),              PRc|CRc
+
 | ConvObjToKeyset,              D(Keyset), S(Obj),                PRc|CRc
 
 
@@ -486,6 +494,8 @@ To varray conversions:
 | ConvVecToVArr,                DArrPacked, S(Vec),                  PRc|CRc
 
 | ConvDictToVArr,               DArrPacked, S(Dict),                 PRc|CRc
+
+| ConvShapeToVArr,              DArrPacked, S(Shape),                PRc|CRc
 
 | ConvKeysetToVArr,             DArrPacked, S(Keyset),               PRc|CRc
 
@@ -499,6 +509,8 @@ To darray conversion:
 | ConvVecToDArr,                DArrMixed, S(Vec),                   PRc|CRc
 
 | ConvDictToDArr,               DArrMixed, S(Dict),               PRc|CRc
+
+| ConvShapeToDArr,              DArrMixed, S(Shape),              PRc|CRc
 
 | ConvKeysetToDArr,             DArrMixed, S(Keyset),             PRc|CRc
 

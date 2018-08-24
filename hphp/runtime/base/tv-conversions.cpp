@@ -594,7 +594,16 @@ Array tvCastToArrayLike(TypedValue tv) {
 }
 
 void tvCastToShapeInPlace(TypedValue* tv) {
-  not_implemented();
+  if (isShapeType(tv->m_type)) {
+    return;
+  }
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    tvCastToDictInPlace(tv);
+  } else {
+    tvCastToDArrayInPlace(tv);
+  }
+  auto const ad = tv->m_data.parr;
+  tvAsVariant(tv) = ad->toShape(ad->cowCheck());
 }
 
 void tvCastToArrayInPlace(TypedValue* tv) {
@@ -670,11 +679,19 @@ void tvCastToArrayInPlace(TypedValue* tv) {
       }
 
       case KindOfPersistentShape: {
-        not_implemented();
+        auto const adIn = tv->m_data.parr;
+        assertx(adIn->isShape());
+        a = MixedArray::ToPHPArrayShape(adIn, true);
+        assertx(a != adIn);
+        continue;
       }
 
       case KindOfShape: {
-        not_implemented();
+        auto const adIn = tv->m_data.parr;
+        assertx(adIn->isShape());
+        a = MixedArray::ToPHPArrayShape(adIn, adIn->cowCheck());
+        if (a != adIn) tvDecRefArr(tv);
+        continue;
       }
 
       case KindOfPersistentArray: {
@@ -785,7 +802,12 @@ void tvCastToVecInPlace(TypedValue* tv) {
 
       case KindOfPersistentShape:
       case KindOfShape: {
-        not_implemented();
+        auto const adIn = tv->m_data.parr;
+        assertx(adIn->isShape());
+        a = MixedArray::ToVecShape(adIn, adIn->cowCheck());
+        assertx(a != adIn);
+        decRefArr(adIn);
+        continue;
       }
 
       case KindOfPersistentArray:
@@ -889,7 +911,11 @@ void tvCastToDictInPlace(TypedValue* tv) {
 
       case KindOfPersistentShape:
       case KindOfShape: {
-        not_implemented();
+        auto const adIn = tv->m_data.parr;
+        assertx(adIn->isShape());
+        a = MixedArray::ToDictShape(adIn, adIn->cowCheck());
+        if (a != adIn) decRefArr(adIn);
+        continue;
       }
 
       case KindOfPersistentArray:
@@ -993,7 +1019,11 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
 
       case KindOfPersistentShape:
       case KindOfShape: {
-        not_implemented();
+        auto const adIn = tv->m_data.parr;
+        assertx(adIn->isShape());
+        a = MixedArray::ToKeysetShape(adIn, adIn->cowCheck());
+        if (a != adIn) decRefArr(adIn);
+        continue;
       }
 
       case KindOfPersistentArray:
@@ -1108,7 +1138,12 @@ void tvCastToVArrayInPlace(TypedValue* tv) {
 
       case KindOfPersistentShape:
       case KindOfShape: {
-        not_implemented();
+        auto const adIn = tv->m_data.parr;
+        assertx(adIn->isShape());
+        a = MixedArray::ToVArrayShape(adIn, adIn->cowCheck());
+        assertx(a != adIn);
+        decRefArr(adIn);
+        continue;
       }
 
       case KindOfPersistentArray:
@@ -1225,7 +1260,11 @@ void tvCastToDArrayInPlace(TypedValue* tv) {
 
       case KindOfPersistentShape:
       case KindOfShape: {
-        not_implemented();
+        auto const adIn = tv->m_data.parr;
+        assertx(adIn->isShape());
+        a = MixedArray::ToDArrayShape(adIn, adIn->cowCheck());
+        if (a != adIn) decRefArr(adIn);
+        continue;
       }
 
       case KindOfPersistentArray:

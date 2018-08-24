@@ -336,6 +336,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvArrToDict:
   case ConvArrToKeyset:
   case ConvArrToVec:
+  case ConvShapeToDict:
   case ConvCellToArr:
   case ConvCellToDbl:
   case ConvCellToInt:
@@ -344,6 +345,9 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvDictToArr:
   case ConvDictToDArr:
   case ConvDictToKeyset:
+  case ConvShapeToArr:
+  case ConvShapeToDArr:
+  case ConvShapeToKeyset:
   case ConvKeysetToArr:
   case ConvKeysetToDArr:
   case ConvObjToArr:
@@ -606,6 +610,8 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvDblToStr:
   case ConvDictToVArr:
   case ConvDictToVec:
+  case ConvShapeToVArr:
+  case ConvShapeToVec:
   case ConvIntToArr:
   case ConvIntToBool:
   case ConvIntToDbl:

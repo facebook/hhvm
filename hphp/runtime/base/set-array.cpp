@@ -922,7 +922,11 @@ ArrayData* SetArray::ToDArray(ArrayData* ad, bool copy) {
 }
 
 ArrayData* SetArray::ToShape(ArrayData* ad, bool copy) {
-  not_implemented();
+  auto arr = RuntimeOption::EvalHackArrDVArrs
+    ? SetArray::ToDict(ad, copy)
+    : SetArray::ToDArray(ad, copy);
+  arr = arr->toShapeInPlaceIfCompatible();
+  return arr;
 }
 
 ArrayData* SetArray::ToKeyset(ArrayData* ad, bool /*copy*/) {

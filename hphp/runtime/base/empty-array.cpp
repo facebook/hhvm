@@ -353,12 +353,12 @@ ArrayData* EmptyArray::Prepend(ArrayData*, Cell v, bool) {
   return EmptyArray::MakePacked(v).arr;
 }
 
-ArrayData* EmptyArray::ToShape(ArrayData* in, bool copy) {
-  not_implemented();
-}
-
 ArrayData* EmptyArray::ToDict(ArrayData*, bool) {
   return staticEmptyDictArray();
+}
+
+ArrayData* EmptyArray::ToShape(ArrayData*, bool) {
+  return staticEmptyShapeArray();
 }
 
 ArrayData* EmptyArray::ToVec(ArrayData*, bool) {

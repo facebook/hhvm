@@ -189,7 +189,8 @@ bool EvaluateCommand::executeImpl(
       "breakpoint",
       "Evaluation returned",
       threadId,
-      true
+      true,
+      -1
     );
   }
 

@@ -389,7 +389,8 @@ void Debugger::sendStoppedEvent(
   const char* reason,
   const char* displayReason,
   request_id_t threadId,
-  bool focusedThread
+  bool focusedThread,
+  int breakpointId
 ) {
   Lock lock(m_lock);
 
@@ -410,6 +411,10 @@ void Debugger::sendStoppedEvent(
 
   if (reason != nullptr) {
     event["reason"] = reason;
+  }
+
+  if (breakpointId >= 0) {
+    event["breakpointId"] = breakpointId;
   }
 
   if (displayReason == nullptr) {
@@ -538,7 +543,8 @@ void Debugger::requestInit() {
       requestInfo,
       "entry",
       nullptr,
-      false
+      false,
+      -1
     );
   }
 }
@@ -572,7 +578,8 @@ void Debugger::enterDebuggerIfPaused(RequestInfo* requestInfo) {
         requestInfo,
         "step",
         requestInfo->m_stepReason,
-        true
+        true,
+        -1
       );
     } else {
       processCommandQueue(
@@ -580,7 +587,8 @@ void Debugger::enterDebuggerIfPaused(RequestInfo* requestInfo) {
         requestInfo,
         "pause",
         nullptr,
-        false
+        false,
+        -1
       );
     }
   }
@@ -591,7 +599,8 @@ void Debugger::processCommandQueue(
   RequestInfo* requestInfo,
   const char* reason,
   const char* displayReason,
-  bool focusedThread
+  bool focusedThread,
+  int bpId
 ) {
   m_lock.assertOwnedBySelf();
 
@@ -607,7 +616,7 @@ void Debugger::processCommandQueue(
   // should not be visible to the client.
   bool sendEvent = m_state != ProgramState::LoaderBreakpoint;
   if (sendEvent) {
-    sendStoppedEvent(reason, displayReason, threadId, focusedThread);
+    sendStoppedEvent(reason, displayReason, threadId, focusedThread, bpId);
   }
 
   VSDebugLogger::Log(
@@ -1023,7 +1032,8 @@ Debugger::prepareToPauseTarget(RequestInfo* requestInfo) {
           requestInfo,
           "pause",
           nullptr,
-          false
+          false,
+          -1
         );
       } else {
         // This is true only in the case of async-break, which is not
@@ -1773,11 +1783,9 @@ void Debugger::onBreakpointHit(
     if (resolvedLocation.m_path == filePath && lineInRange) {
       if (bpMgr->isBreakConditionSatisified(ri, bp)) {
         stopReason = getStopReasonForBp(
-          bpId,
-          !resolvedLocation.m_path.empty()
-            ? resolvedLocation.m_path
-            : bp->m_path,
-          bp->m_line
+          bp,
+          filePath,
+          line
         );
 
         // Breakpoint hit!
@@ -1789,7 +1797,8 @@ void Debugger::onBreakpointHit(
           ri,
           "breakpoint",
           stopReason.c_str(),
-          true
+          true,
+          bpId
         );
 
         return;
@@ -1835,7 +1844,8 @@ void Debugger::onBreakpointHit(
       ri,
       "step",
       stopReason.c_str(),
-      true
+      true,
+      -1
     );
   }
 }
@@ -1889,7 +1899,8 @@ void Debugger::onExceptionBreakpointHit(
     ri,
     "exception",
     stopReason.c_str(),
-    true
+    true,
+    -1
   );
 }
 
@@ -1924,7 +1935,8 @@ bool Debugger::onHardBreak() {
     ri,
     "breakpoint",
     stopReason,
-    true
+    true,
+    -1
   );
 
   // We actually need to step out here, because as far as the PC filter is
@@ -1957,7 +1969,7 @@ void Debugger::onAsyncBreak() {
 
   if (m_debuggerOptions.showDummyOnAsyncPause) {
     // Show the dummy request as stopped.
-    sendStoppedEvent(reason, reason, 0, false);
+    sendStoppedEvent(reason, reason, 0, false, -1);
   }
 }
 
@@ -2011,11 +2023,11 @@ std::string Debugger::getFilePathForUnit(const HPHP::Unit* compilationUnit) {
 }
 
 std::string Debugger::getStopReasonForBp(
-  const int id,
+  const Breakpoint* bp,
   const std::string& path,
   const int line
 ) {
-  std::string description("Breakpoint " + std::to_string(id));
+  std::string description("Breakpoint " + std::to_string(bp->m_id));
   if (!path.empty()) {
     const char* name = boost::filesystem::path(path.c_str()).filename().c_str();
     description += " (";
@@ -2023,6 +2035,10 @@ std::string Debugger::getStopReasonForBp(
     description += ":";
     description += std::to_string(line);
     description += ")";
+  }
+
+  if (bp->m_type == BreakpointType::Function) {
+    description += " - " + bp->m_functionFullName + "()";
   }
 
   return description;

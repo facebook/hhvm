@@ -240,7 +240,8 @@ struct Debugger final {
     RequestInfo* requestInfo,
     const char* reason,
     const char* displayReason,
-    bool focusedThread
+    bool focusedThread,
+    int bpId
   );
 
   // Called by the debugger transport when a new message is received from
@@ -285,7 +286,8 @@ struct Debugger final {
     const char* reason,
     const char* displayReason,
     request_id_t threadId,
-    bool focusedThread
+    bool focusedThread,
+    int breakpointId
   );
 
   // Sends a thread continued event to the client.
@@ -581,7 +583,7 @@ private:
 
   // Returns a stop reason string for a breakpoint.
   static std::string getStopReasonForBp(
-    const int id,
+    const Breakpoint* bp,
     const std::string& path,
     const int line
   );

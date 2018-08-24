@@ -549,6 +549,7 @@ void BreakpointManager::onBreakpointResolved(
   // If calibration moved the breakpoint, tell the user that this was
   // intentional.
   if (m_debugger->getDebuggerOptions().notifyOnBpCalibration &&
+      bp->m_type == BreakpointType::Source &&
       (startLine != bp->m_line || endLine != bp->m_line)) {
 
     std::string msg = "The breakpoint at line ";

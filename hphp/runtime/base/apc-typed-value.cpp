@@ -64,6 +64,10 @@ bool APCTypedValue::checkInvariants() const {
       assertx(m_data.dict->isDict());
       assertx(m_data.dict->isStatic());
       break;
+    case APCKind::StaticShape:
+      assertx(m_data.shape->isShape());
+      assertx(m_data.shape->isStatic());
+      break;
     case APCKind::StaticKeyset:
       assertx(m_data.keyset->isKeyset());
       assertx(m_data.keyset->isStatic());
@@ -80,6 +84,10 @@ bool APCTypedValue::checkInvariants() const {
       assertx(m_data.dict->isDict());
       assertx(m_data.dict->isUncounted());
       break;
+    case APCKind::UncountedShape:
+      assertx(m_data.shape->isShape());
+      assertx(m_data.shape->isUncounted());
+      break;
     case APCKind::UncountedKeyset:
       assertx(m_data.keyset->isKeyset());
       assertx(m_data.keyset->isUncounted());
@@ -91,6 +99,7 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::SharedCollection:
     case APCKind::SharedVec:
     case APCKind::SharedDict:
+    case APCKind::SharedShape:
     case APCKind::SharedKeyset:
     case APCKind::SharedVArray:
     case APCKind::SharedDArray:
@@ -98,6 +107,7 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::SerializedObject:
     case APCKind::SerializedVec:
     case APCKind::SerializedDict:
+    case APCKind::SerializedShape:
     case APCKind::SerializedKeyset:
       assertx(false);
       break;

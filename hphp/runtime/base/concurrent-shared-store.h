@@ -153,12 +153,15 @@ struct EntryInfo {
     SerializedObject,
     UncountedVec,
     UncountedDict,
+    UncountedShape,
     UncountedKeyset,
     SerializedVec,
     SerializedDict,
+    SerializedShape,
     SerializedKeyset,
     APCVec,
     APCDict,
+    APCShape,
     APCKeyset,
   };
 

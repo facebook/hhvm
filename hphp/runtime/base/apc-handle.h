@@ -42,19 +42,23 @@ enum class APCKind: uint8_t {
   UncountedArray,
   UncountedVec,
   UncountedDict,
+  UncountedShape,
   UncountedKeyset,
   StaticString,
   StaticArray,
   StaticVec,
   StaticDict,
+  StaticShape,
   StaticKeyset,
   SharedString, SharedArray,
   SharedPackedArray, SharedVec,
   SharedDict, SharedKeyset,
+  SharedShape,
   SharedVArray, SharedDArray,
   SharedObject, SharedCollection,
   SerializedArray, SerializedVec,
-  SerializedDict, SerializedKeyset,
+  SerializedDict, SerializedShape,
+  SerializedKeyset,
   SerializedObject
 };
 
@@ -108,6 +112,8 @@ enum class APCKind: uint8_t {
  *  UncountedVec      APCTypedValue   KindOfPersistentVec
  *  StaticDict        APCTypedValue   KindOfPersistentDict
  *  UncountedDict     APCTypedValue   KindOfPersistentDict
+ *  StaticShape       APCTypedValue   KindOfPersistentShape
+ *  UncountedShape    APCTypedValue   KindOfPersistentShape
  *  StaticKeyset      APCTypedValue   KindOfPersistentKeyset
  *  UncountedKeyset   APCTypedValue   KindOfPersistentKeyset
  *  SharedString      APCString       kInvalidDataType
@@ -115,6 +121,7 @@ enum class APCKind: uint8_t {
  *  SharedPackedArray APCArray        kInvalidDataType
  *  SharedVec         APCArray        kInvalidDataType
  *  SharedDict        APCArray        kInvalidDataType
+ *  SharedShape       APCArray        kInvalidDataType
  *  SharedKeyset      APCArray        kInvalidDataType
  *  SharedDArray      APCArray        kInvalidDataType
  *  SharedVArray      APCArray        kInvalidDataType
@@ -245,9 +252,10 @@ struct APCHandle {
     static_assert(APCKind::UncountedString < APCKind::UncountedArray &&
                   APCKind::UncountedArray < APCKind::UncountedVec &&
                   APCKind::UncountedVec < APCKind::UncountedDict &&
-                  APCKind::UncountedDict < APCKind::UncountedKeyset &&
+                  APCKind::UncountedDict < APCKind::UncountedShape &&
+                  APCKind::UncountedShape < APCKind::UncountedKeyset &&
                   static_cast<int>(APCKind::UncountedKeyset) -
-                  static_cast<int>(APCKind::UncountedString) == 4,
+                  static_cast<int>(APCKind::UncountedString) == 5,
                   "The Uncounted APCKinds must be consecutive, and "
                   "in the following order so that gcc can optimize "
                   "this to a range check.");
@@ -255,6 +263,7 @@ struct APCHandle {
            m_kind == APCKind::UncountedArray ||
            m_kind == APCKind::UncountedVec ||
            m_kind == APCKind::UncountedDict ||
+           m_kind == APCKind::UncountedShape ||
            m_kind == APCKind::UncountedKeyset;
   }
 

@@ -273,6 +273,7 @@ struct MixedArray final : ArrayData,
 
   static ArrayData* MakeDictFromAPC(const APCArray* apc);
   static ArrayData* MakeDArrayFromAPC(const APCArray* apc);
+  static ArrayData* MakeShapeFromAPC(const APCArray* apc);
 
   static bool DictEqual(const ArrayData*, const ArrayData*);
   static bool DictNotEqual(const ArrayData*, const ArrayData*);

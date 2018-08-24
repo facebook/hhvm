@@ -112,6 +112,24 @@ struct APCTypedValue {
     assertx(checkInvariants());
   }
 
+  enum class StaticShape {};
+  APCTypedValue(StaticShape, ArrayData* data)
+    : m_handle(APCKind::StaticShape, KindOfPersistentShape) {
+    assertx(data->isShape());
+    assertx(data->isStatic());
+    m_data.shape = data;
+    assertx(checkInvariants());
+  }
+
+  enum class UncountedShape {};
+  APCTypedValue(UncountedShape, ArrayData* data)
+    : m_handle(APCKind::UncountedShape, KindOfPersistentShape) {
+    assertx(data->isShape());
+    assertx(data->isUncounted());
+    m_data.shape = data;
+    assertx(checkInvariants());
+  }
+
   enum class StaticKeyset {};
   APCTypedValue(StaticKeyset, ArrayData* data)
     : m_handle(APCKind::StaticKeyset, KindOfPersistentKeyset) {
@@ -195,6 +213,13 @@ struct APCTypedValue {
     return m_data.dict;
   }
 
+  ArrayData* getShapeData() const {
+    assertx(checkInvariants());
+    assertx(m_handle.kind() == APCKind::StaticShape ||
+            m_handle.kind() == APCKind::UncountedShape);
+    return m_data.shape;
+  }
+
   ArrayData* getKeysetData() const {
     assertx(checkInvariants());
     assertx(m_handle.kind() == APCKind::StaticKeyset ||
@@ -249,6 +274,7 @@ private:
     ArrayData* arr;
     ArrayData* vec;
     ArrayData* dict;
+    ArrayData* shape;
     ArrayData* keyset;
   } m_data;
   APCHandle m_handle;

@@ -531,6 +531,14 @@ ArrayData* MixedArray::MakeDArrayFromAPC(const APCArray* apc) {
   return init.create();
 }
 
+ArrayData* MixedArray::MakeShapeFromAPC(const APCArray* apc) {
+  auto arr = RuntimeOption::EvalHackArrDVArrs
+    ? MixedArray::MakeDictFromAPC(apc)
+    : MixedArray::MakeDArrayFromAPC(apc);
+  arr = arr->toShapeInPlaceIfCompatible();
+  return arr;
+}
+
 //=============================================================================
 // Destruction
 

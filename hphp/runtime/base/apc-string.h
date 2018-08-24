@@ -47,6 +47,10 @@ struct APCString {
     return MakeSharedString(APCKind::SerializedDict, str);
   }
 
+  static APCHandle::Pair MakeSerializedShape(StringData* str) {
+    return MakeSharedString(APCKind::SerializedShape, str);
+  }
+
   static APCHandle::Pair MakeSerializedKeyset(StringData* str) {
     return MakeSharedString(APCKind::SerializedKeyset, str);
   }
@@ -67,6 +71,7 @@ struct APCString {
            handle->kind() == APCKind::SerializedArray ||
            handle->kind() == APCKind::SerializedVec ||
            handle->kind() == APCKind::SerializedDict ||
+           handle->kind() == APCKind::SerializedShape ||
            handle->kind() == APCKind::SerializedKeyset ||
            handle->kind() == APCKind::SerializedObject);
     static_assert(
@@ -82,6 +87,7 @@ struct APCString {
            handle->kind() == APCKind::SerializedArray ||
            handle->kind() == APCKind::SerializedVec ||
            handle->kind() == APCKind::SerializedDict ||
+           handle->kind() == APCKind::SerializedShape ||
            handle->kind() == APCKind::SerializedKeyset ||
            handle->kind() == APCKind::SerializedObject);
     static_assert(

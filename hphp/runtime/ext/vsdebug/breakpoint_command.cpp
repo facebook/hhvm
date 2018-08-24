@@ -112,16 +112,20 @@ bool SetBreakpointsCommand::executeImpl(
     );
   }
 
-  const std::string& path =
+  const auto realPath =
     StatCache::realpath(
       File::TranslatePathKeepRelative(String(filePath)).data());
+
+  const std::string& path = realPath.empty() && !filePath.empty()
+    ? filePath
+    : realPath;
 
   BreakpointManager* bpMgr = session->getBreakpointManager();
 
   // Make a map of line -> breakpoint for all breakpoints in this file before
   // this set breakpoints operation.
   std::unordered_map<int, Breakpoint*> oldBpLines;
-  const auto oldBpIds = bpMgr->getBreakpointIdsByFile(path);
+  const auto oldBpIds = bpMgr->getBreakpointIdsForPath(filePath);
   for (auto it = oldBpIds.begin(); it != oldBpIds.end(); it++) {
     Breakpoint* bp = bpMgr->getBreakpointById(*it);
     std::pair<int, Breakpoint*> pair;
@@ -191,7 +195,7 @@ bool SetBreakpointsCommand::executeImpl(
             bool verified = bpMgr->isBreakpointResolved(bp->m_id);
             int responseLine = line;
             if (verified) {
-              responseLine = bp->m_resolvedLocation.m_startLine;
+              responseLine = bp->m_resolvedLocations[0].m_startLine;
               if (!prefs.linesStartAt1) {
                 responseLine--;
               }

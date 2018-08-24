@@ -30,4 +30,12 @@ for ($i = 0; $i < 10; $i++) {
 }
 
 hphp_debug_break();
+
+$dir = dirname(__FILE__);
+require($dir . '/a/test.php.test');
+require($dir . '/b/test.php.test');
+
+require($dir . '/a/test.php.test');
+require($dir . '/b/test.php.test');
+
 echo "goodbye.\n";

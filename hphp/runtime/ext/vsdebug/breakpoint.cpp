@@ -15,13 +15,10 @@
 */
 
 #include "hphp/runtime/ext/vsdebug/breakpoint.h"
-
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/logging.h"
-
 #include "hphp/runtime/vm/runtime-compiler.h"
-
 #include "hphp/runtime/base/execution-context.h"
 
 namespace HPHP {
@@ -48,8 +45,8 @@ Breakpoint::Breakpoint(
     m_line(line),
     m_column(column),
     m_path(path),
+    m_filePath(boost::filesystem::path(path)),
     m_function(""),
-    m_resolvedLocation({0}),
     m_hitCount(0) {
 
   updateConditions(condition, hitCondition);
@@ -65,8 +62,8 @@ Breakpoint::Breakpoint(
     m_line(-1),
     m_column(-1),
     m_path(""),
+    m_filePath(boost::filesystem::path("")),
     m_function(function),
-    m_resolvedLocation({0}),
     m_hitCount(0) {
 
     updateConditions(condition, hitCondition);
@@ -76,6 +73,10 @@ Breakpoint::~Breakpoint() {
   for (const auto& pair : m_unitCache) {
     clearCachedConditionUnit(pair.first);
   }
+}
+
+bool Breakpoint::isRelativeBp() const {
+  return !m_filePath.is_absolute();
 }
 
 void Breakpoint::clearCachedConditionUnit(request_id_t requestId) {
@@ -106,6 +107,25 @@ BreakpointManager::BreakpointManager(Debugger* debugger) :
 BreakpointManager::~BreakpointManager() {
 }
 
+bool BreakpointManager::bpMatchesPath(
+  const Breakpoint* bp,
+  const boost::filesystem::path& unitPath
+) {
+  if (bp->m_type != BreakpointType::Source) {
+    return false;
+  }
+
+  // A breakpoint matches the specified path if the breakpoint
+  // has an absolute path and the full file path matches exactly OR
+  // the breakpoint has a relative path and the filenames match.
+  const auto bpPath = boost::filesystem::path(bp->m_path);
+  if (bpPath.is_absolute()) {
+    return bp->m_path == unitPath.string();
+  } else {
+    return bpPath.filename() == unitPath.filename();
+  }
+}
+
 void BreakpointManager::setExceptionBreakMode(ExceptionBreakMode mode) {
   VSDebugLogger::Log(
     VSDebugLogger::LogLevelInfo,
@@ -125,6 +145,36 @@ const std::unordered_set<int> BreakpointManager::getAllBreakpointIds() const {
     ids.insert(it->first);
   }
   return ids;
+}
+
+const std::unordered_set<int> BreakpointManager::getBreakpointIdsForPath(
+  const std::string& unitPath
+) const {
+  std::unordered_set<int> ids;
+  const auto path = boost::filesystem::path(unitPath);
+  for (auto it = m_breakpoints.begin(); it != m_breakpoints.end(); it++) {
+    if (bpMatchesPath(&it->second, path)) {
+      ids.insert(it->first);
+    }
+  }
+  return ids;
+}
+
+ResolvedLocation BreakpointManager::bpResolvedInfoForFile(
+  const Breakpoint* bp,
+  const std::string& filePath
+) {
+  for (auto it = bp->m_resolvedLocations.begin();
+       it != bp->m_resolvedLocations.end();
+       it++) {
+
+    if (it->m_path == filePath) {
+      return *it;
+    }
+  }
+
+  ResolvedLocation empty = {0};
+  return empty;
 }
 
 int BreakpointManager::addSourceLineBreakpoint(
@@ -467,6 +517,14 @@ void BreakpointManager::onBreakpointResolved(
     }
   }
 
+  ResolvedLocation loc = {0};
+  loc.m_startLine = startLine;
+  loc.m_endLine = endLine;
+  loc.m_startCol = startColumn;
+  loc.m_endCol = endColumn;
+  loc.m_path = path;
+  bp->m_resolvedLocations.push_back(loc);
+
   if (isBreakpointResolved(id)) {
     // Already resolved by another request.
     return;
@@ -485,13 +543,6 @@ void BreakpointManager::onBreakpointResolved(
     "Breakpoint ID %d resolved!",
     id
   );
-
-  // Update the breakpoint with the calibrated line info.
-  bp->m_resolvedLocation.m_startLine = startLine;
-  bp->m_resolvedLocation.m_endLine = endLine;
-  bp->m_resolvedLocation.m_startCol = startColumn;
-  bp->m_resolvedLocation.m_endCol = endColumn;
-  bp->m_resolvedLocation.m_path = path;
 
   sendBreakpointEvent(id, ReasonChanged);
 
@@ -564,13 +615,13 @@ void BreakpointManager::sendBreakpointEvent(
   if (resolved) {
     bp["line"] = adjustLineNumber(
                    preferences,
-                   breakpoint->m_resolvedLocation.m_startLine,
+                   breakpoint->m_resolvedLocations[0].m_startLine,
                    false
                  );
 
     int endLine = adjustLineNumber(
                       preferences,
-                      breakpoint->m_resolvedLocation.m_endLine,
+                      breakpoint->m_resolvedLocations[0].m_endLine,
                       false
                     );
     if (endLine > 0) {
@@ -579,7 +630,7 @@ void BreakpointManager::sendBreakpointEvent(
 
     int col = adjustLineNumber(
                       preferences,
-                      breakpoint->m_resolvedLocation.m_startCol,
+                      breakpoint->m_resolvedLocations[0].m_startCol,
                       true
                     );
     if (col > 0) {
@@ -588,7 +639,7 @@ void BreakpointManager::sendBreakpointEvent(
 
     int endCol = adjustLineNumber(
                         preferences,
-                        breakpoint->m_resolvedLocation.m_endCol,
+                        breakpoint->m_resolvedLocations[0].m_endCol,
                         true
                       );
 
@@ -620,7 +671,7 @@ void BreakpointManager::sendBreakpointEvent(
 
   folly::dynamic source = folly::dynamic::object;
   source["path"] = resolved
-    ? breakpoint->m_resolvedLocation.m_path
+    ? breakpoint->m_resolvedLocations[0].m_path
     : breakpoint->m_path;
   bp["source"] = source;
 
@@ -641,20 +692,6 @@ Breakpoint* BreakpointManager::getBreakpointById(int id) {
   }
 
   return nullptr;
-}
-
-const std::unordered_set<int> BreakpointManager::getBreakpointIdsByFile(
-  const std::string& sourcePath
-) const {
-  const auto it = m_sourceBreakpoints.find(sourcePath);
-  if (it != m_sourceBreakpoints.end()) {
-    // Return a copy of the vector.
-    // Note: we expect the list of breakpoints for any given debugger
-    // session to be pretty small.
-    return std::unordered_set<int>(it->second);
-  }
-
-  return std::unordered_set<int>();
 }
 
 bool BreakpointManager::isBreakpointResolved(int id) const {

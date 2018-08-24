@@ -1403,7 +1403,7 @@ void Debugger::tryInstallBreakpoints(RequestInfo* ri) {
 
       // This breakpoint could not be resolved yet. As new compilation units
       // are loaded, we'll try again.
-      if (!resolved) {
+      if (!resolved || bp->isRelativeBp()) {
         ri->m_breakpointInfo->m_unresolvedBreakpoints.emplace(breakpointId);
       }
     }
@@ -1459,7 +1459,11 @@ bool Debugger::tryResolveBreakpointInUnit(const RequestInfo* /*ri*/, int bpId,
                                           const std::string& unitFilePath,
                                           const HPHP::Unit* compilationUnit) {
 
-  if (bp->m_type != BreakpointType::Source || bp->m_path != unitFilePath) {
+  if (bp->m_type != BreakpointType::Source ||
+      !BreakpointManager::bpMatchesPath(
+        bp,
+        boost::filesystem::path(unitFilePath))) {
+
     return false;
   }
 
@@ -1651,20 +1655,18 @@ void Debugger::onCompilationUnitLoaded(
   if (ri->m_breakpointInfo->m_loadedUnits[filePath] != nullptr &&
       ri->m_breakpointInfo->m_loadedUnits[filePath] != compilationUnit) {
 
-    const auto& bpsForUnit = bpMgr->getBreakpointIdsByFile(filePath);
+    const auto& bps = bpMgr->getBreakpointIdsForPath(filePath);
 
     VSDebugLogger::Log(
       VSDebugLogger::LogLevelInfo,
-      "Compilation unit for %s changed/reloaded in request %d. "
-        "Re-placing %d breakpoints.",
+      "Compilation unit for %s changed/reloaded in request %d. ",
       filePath.c_str(),
-      getCurrentThreadId(),
-      bpsForUnit.size()
+      getCurrentThreadId()
     );
 
     // The unit has been re-loaded from disk since the last time we saw it.
     // We must re-place any breakpoints in this file into the new unit.
-    for (const auto bpId : bpsForUnit) {
+    for (const auto bpId : bps) {
       auto it = ri->m_breakpointInfo->m_unresolvedBreakpoints.find(bpId);
       if (it == ri->m_breakpointInfo->m_unresolvedBreakpoints.end()) {
         ri->m_breakpointInfo->m_unresolvedBreakpoints.emplace(bpId);
@@ -1677,19 +1679,22 @@ void Debugger::onCompilationUnitLoaded(
   // See if any unresolved breakpoints for this request can be placed in the
   // compilation unit that just loaded.
   auto& unresolvedBps = ri->m_breakpointInfo->m_unresolvedBreakpoints;
+
   for (auto it = unresolvedBps.begin(); it != unresolvedBps.end();) {
     const int bpId = *it;
     const Breakpoint* bp = bpMgr->getBreakpointById(bpId);
     if (bp == nullptr ||
         tryResolveBreakpointInUnit(ri, bpId, bp, filePath, compilationUnit)) {
 
-      // If this breakpoint no longer exists (it was removed by the client),
-      // or it was successfully installed, then it is no longer unresolved.
-      it = unresolvedBps.erase(it);
-    } else {
-      // Otherwise, move on to the next unresolved breakpoint.
-      it++;
+      if (bp == nullptr || !bp->isRelativeBp()) {
+        // If this breakpoint no longer exists (it was removed by the client),
+        // or it was successfully installed, then it is no longer unresolved.
+        it = unresolvedBps.erase(it);
+        continue;
+      }
     }
+
+    it++;
   }
 
   updateUnresolvedBpFlag(ri);
@@ -1744,7 +1749,6 @@ void Debugger::onBreakpointHit(
   }
 
   BreakpointManager* bpMgr = m_session->getBreakpointManager();
-  const auto fileBps = bpMgr->getBreakpointIdsByFile(filePath);
 
   const auto removeBreakpoint =
     [&](BreakpointType type) {
@@ -1757,19 +1761,21 @@ void Debugger::onBreakpointHit(
       }
     };
 
-  for (auto it = fileBps.begin(); it != fileBps.end(); it++) {
+  const auto bps = bpMgr->getAllBreakpointIds();
+  for (auto it = bps.begin(); it != bps.end(); it++) {
     const int bpId = *it;
     Breakpoint* bp = bpMgr->getBreakpointById(bpId);
 
-    bool lineInRange = line >= bp->m_resolvedLocation.m_startLine &&
-        line <= bp->m_resolvedLocation.m_endLine;
+    const auto resolvedLocation = bpMgr->bpResolvedInfoForFile(bp, filePath);
+    bool lineInRange = line >= resolvedLocation.m_startLine &&
+        line <= resolvedLocation.m_endLine;
 
-    if (lineInRange) {
+    if (resolvedLocation.m_path == filePath && lineInRange) {
       if (bpMgr->isBreakConditionSatisified(ri, bp)) {
         stopReason = getStopReasonForBp(
           bpId,
-          !bp->m_resolvedLocation.m_path.empty()
-            ? bp->m_resolvedLocation.m_path
+          !resolvedLocation.m_path.empty()
+            ? resolvedLocation.m_path
             : bp->m_path,
           bp->m_line
         );
@@ -1810,7 +1816,7 @@ void Debugger::onBreakpointHit(
     // safe to remove this if there is no real bp at the line.
     bool realBp = false;
     BreakpointManager* bpMgr = m_session->getBreakpointManager();
-    const auto bpIds = bpMgr->getBreakpointIdsByFile(filePath);
+    const auto bpIds = bpMgr->getBreakpointIdsForPath(filePath);
     for (auto it = bpIds.begin(); it != bpIds.end(); it++) {
       Breakpoint* bp = bpMgr->getBreakpointById(*it);
       if (bp->m_line == line) {

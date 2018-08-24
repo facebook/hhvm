@@ -161,7 +161,66 @@ checkObjEqualRecursively($msg, array(
       "description" => "hphp_debug_break()",
   )));
 
+// Verify relative breakpoints work. Two different files named "test.php"
+// will be required by the test script, the breakpoint should hit on
+// both of them.
+$breakpoints = [
+  array(
+    "path" => "test.php.test",
+    "breakpoints" => [
+      array("line" => 4, "calibratedLine" => 4, "condition" => ""),
+    ])
+  ];
+setBreakpoints($breakpoints, false);
 resumeTarget();
+
+// Breakpoint verifies when the require call executes in the target.
+$msg = json_decode(getNextVsDebugMessage(), true);
+checkObjEqualRecursively($msg, array(
+  "type" => "event",
+  "event" => "breakpoint",
+  "body" => array(
+      "reason" => "changed",
+  )));
+
+checkForOutput($testProcess, "hello\n", "stdout");
+verifyBpHit("test.php", $breakpoints[0]{'breakpoints'}[0], 1, true);
+resumeTarget();
+checkForOutput($testProcess, "world\n", "stdout");
+
+checkForOutput($testProcess, "hello\n", "stdout");
+verifyBpHit("test.php", $breakpoints[0]{'breakpoints'}[0], 2, true);
+
+//Verify removing relative breakpoints works
+$seq = sendVsCommand(array(
+  "command" => "setBreakpoints",
+  "type" => "request",
+  "arguments" => array(
+    "source" =>
+      array(
+        "path" => "test.php.test",
+        "name" => "test"
+      ),
+    "lines" => [],
+    "breakpoints" => [])));
+
+// Response should indicate no breakpoints remaining.
+$msg = json_decode(getNextVsDebugMessage(), true);
+checkObjEqualRecursively($msg, array(
+  "type" => "response",
+  "command" => "setBreakpoints",
+  "request_seq" => $seq,
+  "success" => true,
+  "body" => array(
+      "breakpoints" => []
+  )));
+
+resumeTarget();
+checkForOutput($testProcess, "world\n", "stdout");
+checkForOutput($testProcess, "hello\n", "stdout");
+checkForOutput($testProcess, "world\n", "stdout");
+checkForOutput($testProcess, "hello\n", "stdout");
+checkForOutput($testProcess, "world\n", "stdout");
 
 checkForOutput($testProcess, "goodbye.\n", "stdout");
 vsDebugCleanup($testProcess);

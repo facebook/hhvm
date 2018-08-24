@@ -62,7 +62,7 @@ bool RunToLocationCommand::executeImpl(DebuggerSession* session,
   }
 
   // See if there's already a breakpoint at this file + line.
-  const auto bpIds = bpMgr->getBreakpointIdsByFile(path);
+  const auto bpIds = bpMgr->getBreakpointIdsForPath(path);
   for (auto it = bpIds.begin(); it != bpIds.end(); it++) {
     Breakpoint* bp = bpMgr->getBreakpointById(*it);
     if (bp->m_line == line) {

@@ -115,21 +115,35 @@ function resumeTarget() {
     )));
 }
 
-function verifyBpHit($path, $breakpoint, $hitCount = 1) {
+function verifyBpHit($path, $breakpoint, $hitCount = 1, $relative = false) {
   // Verify breakpoint hit count updated.
   $msg = json_decode(getNextVsDebugMessage(), true);
-  checkObjEqualRecursively($msg, array(
-    "type" => "event",
-    "event" => "breakpoint",
-    "body" => array(
-        "reason" => "changed",
-        "breakpoint" => array(
-          "source" => array("path" => $path),
-          "originalLine" => $breakpoint{'line'},
-          "nuclide_hitCount" => $hitCount,
-          "verified" => true,
-          "endLine" => $breakpoint{'calibratedLine'}
-    ))));
+  if (!$relative) {
+    checkObjEqualRecursively($msg, array(
+      "type" => "event",
+      "event" => "breakpoint",
+      "body" => array(
+          "reason" => "changed",
+          "breakpoint" => array(
+            "source" => array("path" => $path),
+            "originalLine" => $breakpoint{'line'},
+            "nuclide_hitCount" => $hitCount,
+            "verified" => true,
+            "endLine" => $breakpoint{'calibratedLine'}
+      ))));
+  } else {
+    checkObjEqualRecursively($msg, array(
+      "type" => "event",
+      "event" => "breakpoint",
+      "body" => array(
+          "reason" => "changed",
+          "breakpoint" => array(
+            "originalLine" => $breakpoint{'line'},
+            "nuclide_hitCount" => $hitCount,
+            "verified" => true,
+            "endLine" => $breakpoint{'calibratedLine'}
+      ))));
+  }
 
   // Verify request stopped.
   $msg = json_decode(getNextVsDebugMessage(), true);

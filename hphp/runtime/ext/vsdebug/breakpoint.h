@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/vsdebug/break_mode.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 
+#include <boost/filesystem.hpp>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -71,16 +72,19 @@ struct Breakpoint {
     const std::string& hitCondition
   );
 
+  bool isRelativeBp() const;
+
   const int m_id;
   const BreakpointType m_type;
   const int m_line;
   const int m_column;
   const std::string m_path;
+  const boost::filesystem::path m_filePath;
   const std::string m_function;
 
   std::string m_functionFullName;
 
-  ResolvedLocation m_resolvedLocation;
+  std::vector<ResolvedLocation> m_resolvedLocations;
   int m_hitCount;
 
   std::string getCondition() const { return m_condition; }
@@ -168,9 +172,8 @@ struct BreakpointManager {
   Breakpoint* getBreakpointById(int id);
 
   const std::unordered_set<int> getAllBreakpointIds() const;
-
-  const std::unordered_set<int> getBreakpointIdsByFile(
-    const std::string& sourcePath
+  const std::unordered_set<int> getBreakpointIdsForPath(
+    const std::string& unitPath
   ) const;
 
   const std::unordered_set<int> getFunctionBreakpoints() const;
@@ -185,6 +188,16 @@ struct BreakpointManager {
   void onFuncIntercepted(request_id_t requestId, std::string name);
 
   void sendMemoizeWarning(request_id_t requestId, int bpId);
+
+  ResolvedLocation bpResolvedInfoForFile(
+    const Breakpoint* bp,
+    const std::string& filePath
+  );
+
+  static bool bpMatchesPath(
+    const Breakpoint* bp,
+    const boost::filesystem::path& unitPath
+  );
 
 private:
 

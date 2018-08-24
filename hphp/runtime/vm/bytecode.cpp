@@ -4355,11 +4355,11 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
   case IsTypeOp::Arr:
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices &&
         !vmfp()->m_func->isBuiltin())) {
-      if (isArrayType(val->m_type)) {
+      if (isArrayOrShapeType(val->m_type)) {
         return true;
       } else if (isVecType(val->m_type)) {
         raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_ARR);
-      } else if (isDictType(val->m_type)) {
+      } else if (isDictOrShapeType(val->m_type)) {
         raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_ARR);
       } else if (isKeysetType(val->m_type)) {
         raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_KEYSET_IS_ARR);
@@ -4379,7 +4379,7 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
     return is_vec(val);
   case IsTypeOp::Dict:
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
-      if (isArrayType(val->m_type)) {
+      if (isArrayOrShapeType(val->m_type)) {
         if (val->m_data.parr->isDArray()) {
           raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_DICT);
         }

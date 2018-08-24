@@ -312,20 +312,22 @@ constexpr bool operator>(Mem a, Mem b) {
   c(StaticArr,       1ULL << 8)                                         \
   c(UncountedArr,    1ULL << 9)                                         \
   c(CountedArr,      1ULL << 10)                                        \
-  c(StaticVec,       1ULL << 11)                                        \
-  c(UncountedVec,    1ULL << 12)                                        \
-  c(CountedVec,      1ULL << 13)                                        \
-  c(StaticDict,      1ULL << 14)                                        \
-  c(UncountedDict,   1ULL << 15)                                        \
-  c(CountedDict,     1ULL << 16)                                        \
-  c(StaticKeyset,    1ULL << 17)                                        \
-  c(UncountedKeyset, 1ULL << 18)                                        \
-  c(CountedKeyset,   1ULL << 19)                                        \
-  c(Obj,             1ULL << 20)                                        \
-  c(Res,             1ULL << 21)                                        \
-  c(Func,            1ULL << 22)                                        \
-  c(Cls,             1ULL << 23)                                        \
-// Boxed*:           24-48
+  c(PersistentShape, 1ULL << 11)                                        \
+  c(CountedShape,    1ULL << 12)                                        \
+  c(StaticVec,       1ULL << 13)                                        \
+  c(UncountedVec,    1ULL << 14)                                        \
+  c(CountedVec,      1ULL << 15)                                        \
+  c(StaticDict,      1ULL << 16)                                        \
+  c(UncountedDict,   1ULL << 17)                                        \
+  c(CountedDict,     1ULL << 18)                                        \
+  c(StaticKeyset,    1ULL << 19)                                        \
+  c(UncountedKeyset, 1ULL << 20)                                        \
+  c(CountedKeyset,   1ULL << 21)                                        \
+  c(Obj,             1ULL << 22)                                        \
+  c(Res,             1ULL << 23)                                        \
+  c(Func,            1ULL << 24)                                        \
+  c(Cls,             1ULL << 25)                                        \
+// Boxed*:           26-51
 
 /*
  * This list should be in non-decreasing order of specificity.
@@ -336,14 +338,15 @@ constexpr bool operator>(Mem a, Mem b) {
   c(Str,                 kPersistentStr|kCountedStr)                    \
   c(PersistentArr,       kStaticArr|kUncountedArr)                      \
   c(Arr,                 kPersistentArr|kCountedArr)                    \
+  c(Shape,               kPersistentShape|kCountedShape)                \
   c(PersistentVec,       kStaticVec|kUncountedVec)                      \
   c(Vec,                 kPersistentVec|kCountedVec)                    \
   c(PersistentDict,      kStaticDict|kUncountedDict)                    \
   c(Dict,                kPersistentDict|kCountedDict)                  \
   c(PersistentKeyset,    kStaticKeyset|kUncountedKeyset)                \
   c(Keyset,              kPersistentKeyset|kCountedKeyset)              \
-  c(PersistentArrLike,   kPersistentArr|kPersistentVec|kPersistentDict|kPersistentKeyset) \
-  c(ArrLike,             kArr|kVec|kDict|kKeyset)                       \
+  c(PersistentArrLike,   kPersistentArr|kPersistentShape|kPersistentVec|kPersistentDict|kPersistentKeyset) \
+  c(ArrLike,             kArr|kShape|kVec|kDict|kKeyset)                \
   c(NullableObj,         kObj|kInitNull|kUninit)                        \
   c(Persistent,          kPersistentStr|kPersistentArrLike)             \
   c(UncountedInit,       kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls) \
@@ -352,19 +355,19 @@ constexpr bool operator>(Mem a, Mem b) {
   c(Cell,                kUninit|kInitCell)
 
 #define IRT_RUNTIME                                                     \
-  IRT(VarEnv,      1ULL << 49)                                          \
-  IRT(NamedEntity, 1ULL << 50)                                          \
-  IRT(Cctx,        1ULL << 51) /* Class* with the lowest bit set,  */   \
+  IRT(VarEnv,      1ULL << 52)                                          \
+  IRT(NamedEntity, 1ULL << 53)                                          \
+  IRT(Cctx,        1ULL << 54) /* Class* with the lowest bit set,  */   \
                                /* as stored in ActRec.m_cls field  */   \
-  IRT(RetAddr,     1ULL << 52) /* Return address */                     \
-  IRT(StkPtr,      1ULL << 53) /* Stack pointer */                      \
-  IRT(FramePtr,    1ULL << 54) /* Frame pointer */                      \
-  IRT(TCA,         1ULL << 55)                                          \
-  IRT(ABC,         1ULL << 56) /* AsioBlockableChain */                 \
-  IRT(RDSHandle,   1ULL << 57) /* rds::Handle */                        \
-  IRT(Nullptr,     1ULL << 58)                                          \
-  IRT(MIPropSPtr,  1ULL << 59) /* Ptr to MInstrPropState */             \
-  /* bits 60-63 are unused */
+  IRT(RetAddr,     1ULL << 55) /* Return address */                     \
+  IRT(StkPtr,      1ULL << 56) /* Stack pointer */                      \
+  IRT(FramePtr,    1ULL << 57) /* Frame pointer */                      \
+  IRT(TCA,         1ULL << 58)                                          \
+  IRT(ABC,         1ULL << 59) /* AsioBlockableChain */                 \
+  IRT(RDSHandle,   1ULL << 60) /* rds::Handle */                        \
+  IRT(Nullptr,     1ULL << 61)                                          \
+  IRT(MIPropSPtr,  1ULL << 62) /* Ptr to MInstrPropState */             \
+  /* bit 63 is unused */
 
 /*
  * Gen, Counted, Init, PtrToGen, etc... are here instead of IRT_PHP_UNIONS
@@ -375,14 +378,15 @@ constexpr bool operator>(Mem a, Mem b) {
   /* Bottom and Top use IRTX to specify a custom Ptr kind */  \
   IRTX(Bottom,       Bottom, kBottom)                         \
   IRTX(Top,          Top,    kTop)                            \
-  IRT(Ctx,                   kObj|kCctx)                     \
+  IRT(Ctx,                   kObj|kCctx)                      \
   IRTX(AnyObj,       Top,    kAnyObj)                         \
   IRTX(AnyArr,       Top,    kAnyArr)                         \
+  IRTX(AnyShape,     Top,    kAnyShape)                       \
   IRTX(AnyVec,       Top,    kAnyVec)                         \
   IRTX(AnyDict,      Top,    kAnyDict)                        \
   IRTX(AnyKeyset,    Top,    kAnyKeyset)                      \
   IRTX(AnyArrLike,   Top,    kAnyArrLike)                     \
-  IRT(Counted,                kCountedStr|kCountedArr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kBoxedCell) \
+  IRT(Counted,               kCountedStr|kCountedArr|kCountedShape|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kBoxedCell) \
   IRTP(PtrToCounted,  Ptr,    kCounted)                       \
   IRTL(LvalToCounted, Ptr,    kCounted)                       \
   IRTM(MemToCounted,  Ptr,    kCounted)                       \
@@ -450,7 +454,7 @@ struct ConstCctx {
 struct Type {
 private:
   using bits_t = uint64_t;
-  static constexpr size_t kBoxShift = 24;
+  static constexpr size_t kBoxShift = 26;
 
 public:
   enum Bits : bits_t {
@@ -470,6 +474,7 @@ public:
 #undef IRTX
 
     kAnyArr       = kArr | kBoxedArr,
+    kAnyShape     = kShape | kBoxedShape,
     kAnyVec       = kVec | kBoxedVec,
     kAnyDict      = kDict | kBoxedDict,
     kAnyKeyset    = kKeyset | kBoxedKeyset,
@@ -716,6 +721,7 @@ public:
   const ArrayData* arrVal() const;
   const ArrayData* vecVal() const;
   const ArrayData* dictVal() const;
+  const ArrayData* shapeVal() const;
   const ArrayData* keysetVal() const;
   const HPHP::Func* funcVal() const;
   const Class* clsVal() const;
@@ -736,16 +742,20 @@ public:
   static Type Array(ArrayData::ArrayKind, const RepoAuthType::Array*);
   static Type Vec(const RepoAuthType::Array*);
   static Type Dict(const RepoAuthType::Array*);
+  static Type Shape(const RepoAuthType::Array*);
   static Type Keyset(const RepoAuthType::Array*);
 
   /*
-   * Return a specialized TStaticArr/TStaticVec/TStaticDict/TStaticKeyset.
+   * Return a specialized TStaticArr/TStaticVec/
+   * TStaticDict/TPersistentShape/TStaticKeyset.
    */
   static Type StaticArray(ArrayData::ArrayKind kind);
   static Type StaticArray(const RepoAuthType::Array* rat);
   static Type StaticArray(ArrayData::ArrayKind, const RepoAuthType::Array*);
   static Type StaticVec(const RepoAuthType::Array*);
   static Type StaticDict(const RepoAuthType::Array*);
+  static Type StaticShape(ArrayData::ArrayKind kind);
+  static Type StaticShape(const RepoAuthType::Array*);
   static Type StaticKeyset(const RepoAuthType::Array*);
 
   /*
@@ -925,6 +935,7 @@ private:
     const ArrayData* m_arrVal;
     const ArrayData* m_vecVal;
     const ArrayData* m_dictVal;
+    const ArrayData* m_shapeVal;
     const ArrayData* m_keysetVal;
     const HPHP::Func* m_funcVal;
     const Class* m_clsVal;

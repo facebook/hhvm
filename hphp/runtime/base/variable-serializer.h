@@ -159,6 +159,36 @@ private:
 
   ArrayKind getKind(const ArrayData* arr) const;
 
+  // The func parameter will be invoked only if there is no overflow.
+  // Otherwise, writeOverflow will be invoked instead.
+  void preventOverflow(const Object& v, const std::function<void()>& func);
+  void writePropertyKey(const String& prop);
+
+  void serializeRef(tv_rval tv, bool isArrayKey);
+  // Serialize a Variant recursively.
+  // The last param noQuotes indicates to serializer to not put the output in
+  // double quotes (used when printing the output of a __toDebugDisplay() of
+  // an object when it is a string.
+  void serializeVariant(tv_rval value,
+                        bool isArrayKey = false,
+                        bool skipNestCheck = false,
+                        bool noQuotes = false);
+  void serializeObject(const Object&);
+  void serializeObject(const ObjectData*);
+  void serializeObjectImpl(const ObjectData* obj);
+  void serializeCollection(ObjectData* obj);
+  void serializeArray(const Array&, bool isObject = false);
+  void serializeArray(const ArrayData*, bool skipNestCheck = false);
+  void serializeArrayImpl(const ArrayData* arr);
+  void serializeResource(const ResourceData*);
+  void serializeResourceImpl(const ResourceData* res);
+  void serializeString(const String&);
+  void serializeFunc(const Func* func);
+  void serializeClass(const Class* cls);
+
+  Array getSerializeProps(const ObjectData* obj) const;
+
+private:
   // Sentinel used to indicate that a member of SavedRefMap has a count but no
   // ID.
   static constexpr int NO_ID = -1;
@@ -197,36 +227,37 @@ private:
     req::fast_map<TypedValue, MapData, TvHash, TvEq> m_mapping;
   };
 
+private:
   Type m_type;
   int m_option;                  // type specific extra options
-  StringBuffer *m_buf;
-  int m_indent;
+  StringBuffer *m_buf{nullptr};
+  int m_indent{0};
   SavedRefMap m_refs;            // reference ids and counts for objs/arrays
-  int m_valueCount;              // Current ref index
-  bool m_referenced;             // mark current array element as reference
+  int m_valueCount{0};           // current ref index
+  bool m_referenced{false};      // mark current array element as reference
   bool m_keepDVArrays;           // serialize d/varrays as themselves or arrays
-  bool m_forcePHPArrays;         // serialize PHP and Hack arrays as PHP arrays
-  bool m_hackWarn;               // warn when attempting on Hack arrays
-  bool m_dictWarn;               // warn when attempting on dicts
-  bool m_phpWarn;                // warn when attempting on PHP arrays
-  bool m_edWarn;                 // warn when attempting on empty darrays
-  bool m_vdWarn;                 // warn when attempting on vec-like darrays
-  bool m_ddWarn;                 // warn when attempting on non-vec-like darrays
-  bool m_hasHackWarned;          // have we already warned on Hack arrays?
-  bool m_hasDictWarned;          // have we already warned on dicts?
-  bool m_hasPHPWarned;           // have we already warned on PHP arrays?
-  int m_refCount;                // current variable's reference count
+  bool m_forcePHPArrays{false};  // serialize PHP and Hack arrays as PHP arrays
+  bool m_hackWarn{false};        // warn when attempting on Hack arrays
+  bool m_dictWarn{false};        // warn when attempting on dicts
+  bool m_phpWarn{false};         // warn when attempting on PHP arrays
+  bool m_edWarn{false};          // warn when attempting on empty darrays
+  bool m_vdWarn{false};          // warn when attempting on vec-like darrays
+  bool m_ddWarn{false};          // warn when attempting on non-vec-like darrays
+  bool m_hasHackWarned{false};   // have we already warned on Hack arrays?
+  bool m_hasDictWarned{false};   // have we already warned on dicts?
+  bool m_hasPHPWarned{false};    // have we already warned on PHP arrays?
+  int m_refCount{1};             // current variable's reference count
   String m_objClass;             // for object serialization
-  int m_objId;                   // for object serialization
-  char m_objCode;                // for object serialization
+  int m_objId{0};                // for object serialization
+  char m_objCode{0};             // for object serialization
   String m_rsrcName;             // for resource serialization
-  int m_rsrcId;                  // for resource serialization
+  int m_rsrcId{0};               // for resource serialization
   int m_maxCount;                // for max recursive levels
-  int m_levelDebugger;           // keep track of levels for DebuggerSerialize
-  int m_maxLevelDebugger;        // for max level of DebuggerSerialize
-  size_t m_currentDepth;         // current depth (nasted objects/arrays)
-  size_t m_maxDepth;             // max depth limit before an error (0 -> none)
-  bool m_keyPrinted;
+  int m_levelDebugger{0};        // keep track of levels for DebuggerSerialize
+  int m_maxLevelDebugger{0};     // for max level of DebuggerSerialize
+  size_t m_currentDepth{0};      // current depth (nasted objects/arrays)
+  size_t m_maxDepth{0};          // max depth limit before an error (0 -> none)
+  bool m_keyPrinted{false};
 
   struct ArrayInfo {
     bool is_object;     // nested arrays or objects
@@ -246,37 +277,8 @@ private:
   };
   req::vector<ObjectInfo> m_objectInfos;
 
-  const DVOverrides* m_dvOverrides = nullptr;
-  size_t m_dvOverridesIndex = 0;
-
-  // The func parameter will be invoked only if there is no overflow.
-  // Otherwise, writeOverflow will be invoked instead.
-  void preventOverflow(const Object& v, const std::function<void()>& func);
-  void writePropertyKey(const String& prop);
-
-  void serializeRef(tv_rval tv, bool isArrayKey);
-  // Serialize a Variant recursively.
-  // The last param noQuotes indicates to serializer to not put the output in
-  // double quotes (used when printing the output of a __toDebugDisplay() of
-  // an object when it is a string.
-  void serializeVariant(tv_rval value,
-                        bool isArrayKey = false,
-                        bool skipNestCheck = false,
-                        bool noQuotes = false);
-  void serializeObject(const Object&);
-  void serializeObject(const ObjectData*);
-  void serializeObjectImpl(const ObjectData* obj);
-  void serializeCollection(ObjectData* obj);
-  void serializeArray(const Array&, bool isObject = false);
-  void serializeArray(const ArrayData*, bool skipNestCheck = false);
-  void serializeArrayImpl(const ArrayData* arr);
-  void serializeResource(const ResourceData*);
-  void serializeResourceImpl(const ResourceData* res);
-  void serializeString(const String&);
-  void serializeFunc(const Func* func);
-  void serializeClass(const Class* cls);
-
-  Array getSerializeProps(const ObjectData* obj) const;
+  const DVOverrides* m_dvOverrides{nullptr};
+  size_t m_dvOverridesIndex{0};
 };
 
 inline String internal_serialize(const Variant& v) {

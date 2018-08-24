@@ -81,30 +81,8 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
                                        int maxRecur /* = 3 */)
   : m_type(type)
   , m_option(option)
-  , m_buf(nullptr)
-  , m_indent(0)
-  , m_valueCount(0)
-  , m_referenced(false)
   , m_keepDVArrays{type != Type::Serialize}
-  , m_forcePHPArrays{false}
-  , m_hackWarn{false}
-  , m_dictWarn{false}
-  , m_phpWarn{false}
-  , m_edWarn{false}
-  , m_vdWarn{false}
-  , m_ddWarn{false}
-  , m_hasHackWarned{false}
-  , m_hasDictWarned{false}
-  , m_hasPHPWarned{false}
-  , m_refCount(1)
-  , m_objId(0)
-  , m_objCode(0)
-  , m_rsrcId(0)
   , m_maxCount(maxRecur)
-  , m_levelDebugger(0)
-  , m_currentDepth(0)
-  , m_maxDepth(0)
-  , m_keyPrinted{false}
 {
   if (type == Type::DebuggerSerialize) {
     m_maxLevelDebugger = g_context->debuggerSettings.printLevel;

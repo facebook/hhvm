@@ -241,6 +241,11 @@ folly::Optional<Opcode> negateCmpOp(Opcode opc) {
     case SameArr:             return NSameArr;
     case NSameArr:            return SameArr;
 
+    case EqShape:             return NeqShape;
+    case NeqShape:            return EqShape;
+    case SameShape:           return NSameShape;
+    case NSameShape:          return SameShape;
+
     case EqVec:               return NeqVec;
     case NeqVec:              return EqVec;
     case SameVec:             return NSameVec;
@@ -277,6 +282,8 @@ bool opcodeMayRaise(Opcode opc) {
     return RuntimeOption::EvalHackArrCompatNotices;
 
   // Same thing for SameArr and NSameArr, but for EvalHackArrCompatDVCmpNotices.
+  case NSameShape:
+  case SameShape:
   case NSameArr:
   case SameArr:
     return RuntimeOption::EvalHackArrCompatDVCmpNotices ||
@@ -317,6 +324,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckSurpriseFlagsEnter:
   case Clone:
   case CmpArr:
+  case CmpShape:
   case CmpObj:
   case CmpVec:
   case CoerceCellToBool:
@@ -386,6 +394,7 @@ bool opcodeMayRaise(Opcode opc) {
   case EmptyElem:
   case EmptyProp:
   case EqArr:
+  case EqShape:
   case EqDict:
   case EqObj:
   case EqVec:
@@ -393,6 +402,8 @@ bool opcodeMayRaise(Opcode opc) {
   case GetMemoKey:
   case GtArr:
   case GteArr:
+  case GtShape:
+  case GteShape:
   case GteObj:
   case GteVec:
   case GtObj:
@@ -433,6 +444,8 @@ bool opcodeMayRaise(Opcode opc) {
   case LookupFuncCached:
   case LtArr:
   case LteArr:
+  case LtShape:
+  case LteShape:
   case LteObj:
   case LteVec:
   case LtObj:
@@ -443,6 +456,7 @@ bool opcodeMayRaise(Opcode opc) {
   case MIterInitK:
   case NativeImpl:
   case NeqArr:
+  case NeqShape:
   case NeqDict:
   case NeqObj:
   case NeqVec:
@@ -635,6 +649,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CountArrayFast:
   case CountCollection:
   case CountDict:
+  case CountShape:
   case CountKeyset:
   case CountVec:
   case CountWHNotDone:

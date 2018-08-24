@@ -44,7 +44,8 @@ Array HHVM_FUNCTION(dummy_darray_builtin, const Array& arr) {
 TypedValue HHVM_FUNCTION(dummy_varr_or_darr_builtin, const Variant& var) {
   if (var.isArray()) {
     auto const& arr = var.asCArrRef();
-    if (arr.isVecOrVArray() || arr.isDictOrDArray()) return tvReturn(arr);
+    if (arr.isVecOrVArray() ||
+        arr.isDictOrDArray()) return tvReturn(arr);
   }
   return tvReturn(staticEmptyVArray());
 }

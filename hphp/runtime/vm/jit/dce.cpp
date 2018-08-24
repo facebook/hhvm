@@ -216,6 +216,7 @@ bool canDCE(IRInstruction* inst) {
   case CountArrayFast:
   case CountVec:
   case CountDict:
+  case CountShape:
   case CountKeyset:
   case CountCollection:
   case Nop:
@@ -378,6 +379,13 @@ bool canDCE(IRInstruction* inst) {
   case EqArr:
   case NeqArr:
   case CmpArr:
+  case GtShape:
+  case GteShape:
+  case LtShape:
+  case LteShape:
+  case EqShape:
+  case NeqShape:
+  case CmpShape:
   case GtVec:
   case GteVec:
   case LtVec:
@@ -743,6 +751,8 @@ bool canDCE(IRInstruction* inst) {
   case ArrayIdx:
     return !RuntimeOption::EvalHackArrCompatNotices;
 
+  case SameShape:
+  case NSameShape:
   case SameArr:
   case NSameArr:
     return !RuntimeOption::EvalHackArrCompatDVCmpNotices;

@@ -124,11 +124,11 @@ bool HHVM_FUNCTION(is_scalar, const Variant& v) {
 
 bool HHVM_FUNCTION(is_array, const Variant& v) {
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
-    if (v.isPHPArray()) {
+    if (v.isPHPArrayOrShape()) {
       return true;
     } else if (v.isVecArray()) {
       raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_ARR);
-    } else if (v.isDict()) {
+    } else if (v.isDictOrShape()) {
       raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_ARR);
     } else if (v.isKeyset()) {
       raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_KEYSET_IS_ARR);
@@ -153,7 +153,7 @@ bool HHVM_FUNCTION(HH_is_vec, const Variant& v) {
 
 bool HHVM_FUNCTION(HH_is_dict, const Variant& v) {
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
-    if (v.isPHPArray()) {
+    if (v.isPHPArrayOrShape()) {
       auto const& arr = v.toCArrRef();
       if (arr.isDArray()) {
         raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_DICT);
@@ -184,12 +184,12 @@ bool HHVM_FUNCTION(HH_is_darray, const Variant& val) {
   auto const cell = val.asTypedValue();
   if (RuntimeOption::EvalHackArrDVArrs) return is_dict(cell);
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
-    if (val.isDict()) {
+    if (val.isDictOrShape()) {
       raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_DARR);
       return false;
     }
   }
-  return tvIsArray(cell) && cell->m_data.parr->isDArray();
+  return tvIsArrayOrShape(cell) && cell->m_data.parr->isDArray();
 }
 
 bool HHVM_FUNCTION(HH_is_any_array, const Variant& val) {

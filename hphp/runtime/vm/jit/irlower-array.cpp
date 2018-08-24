@@ -150,6 +150,10 @@ void cgCountDict(IRLS& env, const IRInstruction* inst) {
   implCountArrayLike(env, inst);
 }
 
+void cgCountShape(IRLS& env, const IRInstruction* inst) {
+  implCountArrayLike(env, inst);
+}
+
 void cgCountKeyset(IRLS& env, const IRInstruction* inst) {
   implCountArrayLike(env, inst);
 }

@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/apc-stats.h"
+#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-helpers.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -1991,8 +1992,8 @@ bool MixedArray::DictEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
                                  bool strict) {
   assertx(asMixed(ad1)->checkInvariants());
   assertx(asMixed(ad2)->checkInvariants());
-  assertx(ad1->isDict());
-  assertx(ad2->isDict());
+  assertx(ad1->isDictOrShape());
+  assertx(ad2->isDictOrShape());
 
   if (ad1 == ad2) return true;
   if (ad1->size() != ad2->size()) return false;
@@ -2088,6 +2089,71 @@ bool MixedArray::DictSame(const ArrayData* ad1, const ArrayData* ad2) {
 bool MixedArray::DictNotSame(const ArrayData* ad1, const ArrayData* ad2) {
   return !DictEqualHelper(ad1, ad2, true);
 }
+
+bool MixedArray::ShapeEqual(const ArrayData* ad1, const ArrayData* ad2) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? DictEqual(ad1, ad2)
+    : ArrayData::Equal(ad1, ad2);
+}
+
+bool MixedArray::ShapeNotEqual(const ArrayData* ad1, const ArrayData* ad2) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? DictNotEqual(ad1, ad2)
+    : ArrayData::NotEqual(ad1, ad2);
+}
+
+bool MixedArray::ShapeSame(const ArrayData* ad1, const ArrayData* ad2) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? DictSame(ad1, ad2)
+    : ArrayData::Same(ad1, ad2);
+}
+
+bool MixedArray::ShapeNotSame(const ArrayData* ad1, const ArrayData* ad2) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? DictNotSame(ad1, ad2)
+    : ArrayData::NotSame(ad1, ad2);
+}
+
+bool MixedArray::ShapeGt(const ArrayData* ad1, const ArrayData* ad2) {
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    throw_dict_compare_exception();
+  } else {
+    return ArrayData::Gt(ad1, ad2);
+  }
+}
+
+bool MixedArray::ShapeGte(const ArrayData* ad1, const ArrayData* ad2) {
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    throw_dict_compare_exception();
+  } else {
+    return ArrayData::Gte(ad1, ad2);
+  }
+}
+
+bool MixedArray::ShapeLt(const ArrayData* ad1, const ArrayData* ad2) {
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    throw_dict_compare_exception();
+  } else {
+    return ArrayData::Lt(ad1, ad2);
+  }
+}
+
+bool MixedArray::ShapeLte(const ArrayData* ad1, const ArrayData* ad2) {
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    throw_dict_compare_exception();
+  } else {
+    return ArrayData::Lte(ad1, ad2);
+  }
+}
+
+bool MixedArray::ShapeCompare(const ArrayData* ad1, const ArrayData* ad2) {
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    throw_dict_compare_exception();
+  } else {
+    return ArrayData::Compare(ad1, ad2);
+  }
+}
+
 
 //////////////////////////////////////////////////////////////////////
 

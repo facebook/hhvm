@@ -751,6 +751,28 @@ To string conversions:
   SameArr and NSameArr may re-enter the VM and therefore may throw
   exceptions. SameArr and NSameArr never re-enter or throw.
 
+| GtShape,                     D(Bool), S(Shape,Arr,Dict) S(Shape,Arr,Dict), NF
+
+| GteShape,                    D(Bool), S(Shape,Arr,Dict) S(Shape,Arr,Dict), NF
+
+| LtShape,                     D(Bool), S(Shape,Arr,Dict) S(Shape,Arr,Dict), NF
+
+| LteShape,                    D(Bool), S(Shape,Arr,Dict) S(Shape,Arr,Dict), NF
+
+| EqShape,                     D(Bool), S(Shape,Arr,Dict) S(Shape,Arr,Dict), NF
+
+| NeqShape,                    D(Bool), S(Shape,Arr,Dict) S(Shape,Arr,Dict), NF
+
+| SameShape,                   D(Bool), S(Shape,Arr,Dict) S(Shape,Arr,Dict), NF
+
+| NSameShape,                  D(Bool), S(Shape,Arr,Dict) S(Shape,Arr,Dict), NF
+
+| CmpShape,                    D(Int),  S(Shape,Arr,Dict) S(Shape,Arr,Dict), NF
+
+  Perform comparison of Shapes using PHP semantics. All versions except for
+  SameShape and NSameShape may re-enter the VM and therefore may throw
+  exceptions. SameShape and NSameShape never re-enter or throw.
+
 | GtVec,                       D(Bool), S(Vec) S(Vec),                    NF
 
 | GteVec,                      D(Bool), S(Vec) S(Vec),                    NF
@@ -2000,6 +2022,8 @@ To string conversions:
 | CountVec,        D(Int), S(Vec),    NF
 
 | CountDict,       D(Int), S(Dict),   NF
+
+| CountShape,      D(Int), S(Shape),  NF
 
 | CountKeyset,     D(Int), S(Keyset), NF
 

@@ -1073,6 +1073,18 @@ bool ArrayData::equal(const ArrayData* v2, bool strict) const {
     return false;
   };
 
+  if (isShape()) {
+    if (UNLIKELY(!v2->isDictOrDArrayOrShape())) return mixed();
+    return strict
+      ? MixedArray::ShapeSame(this, v2) : MixedArray::ShapeEqual(this, v2);
+  }
+
+  if (v2->isShape()) {
+    if (UNLIKELY(!isDictOrDArrayOrShape())) return mixed();
+    return strict
+      ? MixedArray::ShapeSame(this, v2) : MixedArray::ShapeEqual(this, v2);
+  }
+
   if (isPHPArray()) {
     if (UNLIKELY(!v2->isPHPArray())) return mixed();
     return strict ? Same(this, v2) : Equal(this, v2);

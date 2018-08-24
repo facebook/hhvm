@@ -307,6 +307,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case CountArrayFast:
   case CountVec:
   case CountDict:
+  case CountShape:
   case CountKeyset:
   case Select:
   case StrictlyIntegerConv:

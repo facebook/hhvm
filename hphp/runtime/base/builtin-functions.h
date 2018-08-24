@@ -93,7 +93,7 @@ inline bool is_string(const Cell* c) {
 
 inline bool is_array(const Cell* c) {
   assertx(cellIsPlausible(*c));
-  return tvIsArray(c);
+  return tvIsArrayOrShape(c);
 }
 
 inline bool is_vec(const Cell* c) {
@@ -103,7 +103,7 @@ inline bool is_vec(const Cell* c) {
 
 inline bool is_dict(const Cell* c) {
   assertx(cellIsPlausible(*c));
-  return tvIsDict(c);
+  return tvIsDictOrShape(c);
 }
 
 inline bool is_keyset(const Cell* c) {
@@ -119,7 +119,7 @@ inline bool is_varray(const Cell* c) {
 
 inline bool is_darray(const Cell* c) {
   return RuntimeOption::EvalHackArrDVArrs
-    ? tvIsDict(c)
+    ? tvIsDictOrShape(c)
     : (tvIsArray(c) && c->m_data.parr->isDArray());
 }
 

@@ -510,7 +510,16 @@ SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
 
 SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
   if (!RuntimeOption::EvalHackArrCompatIsVecDictNotices) {
-    return gen(env, IsType, TDict, src);
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      return cond(
+        env,
+        [&](Block* taken) { gen(env, CheckType, TDict, taken, src); },
+        [&]{ return cns(env, true); },
+        [&]{ return gen(env, IsType, TShape, src); }
+      );
+    } else {
+      return gen(env, IsType, TDict, src);
+    }
   }
 
   auto const darrCheck = [&]{
@@ -539,14 +548,34 @@ SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
     env,
     [&](Block* taken) { gen(env, CheckType, TDict, taken, src); },
     [&]{ return cns(env, true); },
-    [&]{ darrCheck(); return cns(env, false); }
+    [&]{
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        return cond(
+          env,
+          [&](Block* taken) { gen(env, CheckType, TShape, taken, src); },
+          [&]{ return cns(env, true); },
+          [&]{ darrCheck(); return cns(env, false); }
+        );
+      } else {
+        darrCheck(); return cns(env, false);
+      }
+     }
   );
 }
 
 SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
   if (!RuntimeOption::EvalHackArrCompatIsArrayNotices ||
       curFunc(env)->isBuiltin()) {
-    return gen(env, IsType, TArr, src);
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      return gen(env, IsType, TArr, src);
+    } else {
+      return cond(
+        env,
+        [&](Block* taken) { gen(env, CheckType, TArr, taken, src); },
+        [&]{ return cns(env, true); },
+        [&]{ return gen(env, IsType, TShape, src); }
+      );
+    }
   }
 
 #define X(name, type, msg, next)                                        \
@@ -575,7 +604,18 @@ SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
     env,
     [&](Block* taken) { gen(env, CheckType, TArr, taken, src); },
     [&]{ return cns(env, true); },
-    [&]{ vecCheck(); return cns(env, false); }
+    [&]{
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        vecCheck(); return cns(env, false);
+      } else {
+        return cond(
+          env,
+          [&](Block* taken) { gen(env, CheckType, TShape, taken, src); },
+          [&]{ return cns(env, true); },
+          [&]{ vecCheck(); return cns(env, false); }
+        );
+      }
+    }
   );
 }
 

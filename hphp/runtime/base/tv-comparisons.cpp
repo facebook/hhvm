@@ -557,9 +557,9 @@ typename Op::RetType cellRelOpShape(Op op, Cell cell, const ArrayData* a) {
 template<class Op>
 typename Op::RetType cellRelOpDict(Op op, Cell cell, const ArrayData* a) {
   assertx(cellIsPlausible(cell));
-  assertx(a->isDict());
+  assertx(a->isDictOrShape());
 
-  if (UNLIKELY(!isDictType(cell.m_type))) {
+  if (UNLIKELY(!isDictOrShapeType(cell.m_type))) {
     if (isVecType(cell.m_type)) return op.vecVsNonVec();
     if (isKeysetType(cell.m_type)) return op.keysetVsNonKeyset();
     if (UNLIKELY(op.noticeOnArrHackArr() && isArrayType(cell.m_type))) {
@@ -980,7 +980,20 @@ bool cellSame(Cell c1, Cell c2) {
 
     case KindOfPersistentShape:
     case KindOfShape: // TODO(T31025155): Add warning.
-      not_implemented();
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        if (!isDictOrShapeType(c2.m_type)) {
+          phpArrayCheck();
+          return false;
+        }
+      } else {
+        if (!isArrayOrShapeType(c2.m_type)) {
+          if (UNLIKELY(checkHACCompare() && isHackArrayType(c2.m_type))) {
+            raiseHackArrCompatArrMixedCmp();
+          }
+          return false;
+        }
+      }
+      return MixedArray::ShapeSame(c1.m_data.parr, c2.m_data.parr);
 
     case KindOfPersistentArray:
     case KindOfArray:

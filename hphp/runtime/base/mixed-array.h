@@ -280,6 +280,16 @@ struct MixedArray final : ArrayData,
   static bool DictSame(const ArrayData*, const ArrayData*);
   static bool DictNotSame(const ArrayData*, const ArrayData*);
 
+  static bool ShapeEqual(const ArrayData*, const ArrayData*);
+  static bool ShapeNotEqual(const ArrayData*, const ArrayData*);
+  static bool ShapeSame(const ArrayData*, const ArrayData*);
+  static bool ShapeNotSame(const ArrayData*, const ArrayData*);
+  static bool ShapeGt(const ArrayData*, const ArrayData*);
+  static bool ShapeGte(const ArrayData*, const ArrayData*);
+  static bool ShapeLt(const ArrayData*, const ArrayData*);
+  static bool ShapeLte(const ArrayData*, const ArrayData*);
+  static bool ShapeCompare(const ArrayData*, const ArrayData*);
+
   using ArrayData::decRefCount;
   using ArrayData::hasMultipleRefs;
   using ArrayData::hasExactlyOneRef;

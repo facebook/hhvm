@@ -2198,6 +2198,10 @@ SSATmp* simplifyConvCellToBool(State& env, const IRInstruction* inst) {
     auto const length = gen(env, CountDict, src);
     return gen(env, NeqInt, length, cns(env, 0));
   }
+  if (srcType <= TShape) {
+    auto const length = gen(env, CountShape, src);
+    return gen(env, NeqInt, length, cns(env, 0));
+  }
   if (srcType <= TKeyset) {
     auto const length = gen(env, CountKeyset, src);
     return gen(env, NeqInt, length, cns(env, 0));
@@ -2245,7 +2249,8 @@ SSATmp* simplifyConvCellToStr(State& env, const IRInstruction* inst) {
     );
   }
   if (srcType <= TNull)   return cns(env, staticEmptyString());
-  if (srcType <= TArr) {
+  if (srcType <= TArr ||
+      (!RuntimeOption::EvalHackArrDVArrs && srcType <= TShape)) {
     gen(env, RaiseNotice, catchTrace, cns(env, s_msgArrToStr.get()));
     return cns(env, s_Array.get());
   }
@@ -2253,7 +2258,8 @@ SSATmp* simplifyConvCellToStr(State& env, const IRInstruction* inst) {
     gen(env, RaiseNotice, catchTrace, cns(env, s_msgVecToStr.get()));
     return cns(env, s_Vec.get());
   }
-  if (srcType <= TDict) {
+  if (srcType <= TDict ||
+      (RuntimeOption::EvalHackArrDVArrs && srcType <= TShape)) {
     gen(env, RaiseNotice, catchTrace, cns(env, s_msgDictToStr.get()));
     return cns(env, s_Dict.get());
   }
@@ -2281,6 +2287,10 @@ SSATmp* simplifyConvCellToInt(State& env, const IRInstruction* inst) {
   if (srcType <= TNull) return cns(env, 0);
   if (srcType <= TArr)  {
     auto const length = gen(env, Count, src);
+    return gen(env, Select, length, cns(env, 1), cns(env, 0));
+  }
+  if (srcType <= TShape) {
+    auto const length = gen(env, CountShape, src);
     return gen(env, Select, length, cns(env, 1), cns(env, 0));
   }
   if (srcType <= TVec) {
@@ -2311,6 +2321,10 @@ SSATmp* simplifyConvCellToDbl(State& env, const IRInstruction* inst) {
   if (srcType <= TDbl)  return src;
   if (srcType <= TNull) return cns(env, 0.0);
   if (srcType <= TArr)  return gen(env, ConvArrToDbl, src);
+  if (srcType <= TShape) {
+    auto const length = gen(env, CountShape, src);
+    return gen(env, ConvBoolToDbl, gen(env, ConvIntToBool, length));
+  }
   if (srcType <= TVec) {
     auto const length = gen(env, CountVec, src);
     return gen(env, ConvBoolToDbl, gen(env, ConvIntToBool, length));
@@ -3282,6 +3296,7 @@ SSATmp* simplifyCount(State& env, const IRInstruction* inst) {
   if (ty <= oneTy) return cns(env, 1);
 
   if (ty <= TArr) return gen(env, CountArray, val);
+  if (ty <= TShape) return gen(env, CountShape, val);
   if (ty <= TVec) return gen(env, CountVec, val);
   if (ty <= TDict) return gen(env, CountDict, val);
   if (ty <= TKeyset) return gen(env, CountKeyset, val);
@@ -3360,6 +3375,24 @@ SSATmp* simplifyCountDict(State& env, const IRInstruction* inst) {
     break;
   case A::Tag::PackedN:
     break;
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyCountShape(State& env, const IRInstruction* inst) {
+  auto const shape = inst->src(0);
+  if (shape->hasConstVal(TShape)) return cns(env, shape->shapeVal()->size());
+
+  auto const arrSpec = shape->type().arrSpec();
+  auto const at = arrSpec.type();
+  if (!at) return nullptr;
+  using A = RepoAuthType::Array;
+  switch (at->tag()) {
+    case A::Tag::Packed:
+      if (at->emptiness() == A::Empty::No) return cns(env, at->size());
+      break;
+    case A::Tag::PackedN:
+      break;
   }
   return nullptr;
 }
@@ -3769,6 +3802,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CountArrayFast)
   X(CountVec)
   X(CountDict)
+  X(CountShape)
   X(CountKeyset)
   X(DecRef)
   X(DecRefNZ)

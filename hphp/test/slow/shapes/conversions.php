@@ -10,6 +10,10 @@ var_dump(dict($s));
 var_dump(vec($s));
 
 var_dump((array)$s);
+var_dump((int)$s);
+var_dump((double)$s);
+var_dump((bool)$s);
+var_dump((string)$s);
 
 var_dump(is_array($s));
 var_dump(is_darray($s));

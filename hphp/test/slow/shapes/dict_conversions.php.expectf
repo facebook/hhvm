@@ -33,6 +33,12 @@ array(2) {
   ["b"]=>
   int(3)
 }
+int(1)
+float(1)
+bool(true)
+
+Notice: Dict to string conversion in %s on line %d
+string(4) "Dict"
 bool(false)
 bool(true)
 bool(false)

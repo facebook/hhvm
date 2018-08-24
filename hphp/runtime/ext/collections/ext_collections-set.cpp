@@ -279,7 +279,7 @@ void BaseSet::throwNoMutableIndexAccess() {
 
 Array BaseSet::ToArray(const ObjectData* obj) {
   check_collection_cast_to_array();
-  return const_cast<BaseSet*>(static_cast<const BaseSet*>(obj))->toArray();
+  return const_cast<BaseSet*>(static_cast<const BaseSet*>(obj))->toPHPArray();
 }
 
 bool BaseSet::ToBool(const ObjectData* obj) {
@@ -797,7 +797,7 @@ void CollectionsExtension::initSet() {
   BASE_ME(__construct,   &BaseSet::init);
   BASE_ME(count,         &BaseSet::size);
   BASE_ME(contains,      &BaseSet::php_contains);
-  BASE_ME(toArray,       &BaseSet::toArray);
+  BASE_ME(toArray,       &BaseSet::toPHPArray);
   BASE_ME(toVArray,      &BaseSet::toVArray);
   BASE_ME(toDArray,      &BaseSet::toDArray);
   BASE_ME(toKeysArray,   &BaseSet::toKeysArray);

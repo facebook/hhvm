@@ -309,7 +309,7 @@ void BaseMap::set(StringData* k, TypedValue val) { setImpl<false>(k, val); }
 
 Array BaseMap::ToArray(const ObjectData* obj) {
   check_collection_cast_to_array();
-  return const_cast<BaseMap*>(static_cast<const BaseMap*>(obj))->toArray();
+  return const_cast<BaseMap*>(static_cast<const BaseMap*>(obj))->toPHPArray();
 }
 
 bool BaseMap::ToBool(const ObjectData* obj) {
@@ -817,7 +817,7 @@ void CollectionsExtension::initMap() {
   HHVM_NAMED_ME(HH\\ImmMap, mn, impl);
   BASE_ME(__construct,   &BaseMap::init);
   BASE_ME(count,         &BaseMap::size);
-  BASE_ME(toArray,       &BaseMap::toArray);
+  BASE_ME(toArray,       &BaseMap::toPHPArray);
   BASE_ME(toVArray,      &BaseMap::toVArray);
   BASE_ME(toDArray,      &BaseMap::toDArray);
   BASE_ME(toKeysArray,   &BaseMap::toKeysArray);

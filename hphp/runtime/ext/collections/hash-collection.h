@@ -46,7 +46,8 @@ struct HashCollection : ObjectData {
     return m_size;
   }
 
-  Array toArray();
+  Array toArray() = delete;
+  Array toPHPArray();
   Array toVArray();
   Array toDArray();
 

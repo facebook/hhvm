@@ -1470,7 +1470,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedTypeConstants) {
   }
 
   assertx(st->size() <= numConsts);
-  return st->toArray();
+  return st->toPHPArray();
 }
 
 static Array HHVM_METHOD(ReflectionClass, getAttributes) {

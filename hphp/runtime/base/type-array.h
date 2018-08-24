@@ -91,6 +91,10 @@ public:
     return Array(ArrayData::CreateDict(), NoIncRef{});
   }
 
+  static Array CreateShape() {
+    return Array(ArrayData::CreateShape(), NoIncRef{});
+  }
+
   static Array CreateKeyset() {
     return Array(ArrayData::CreateKeyset(), NoIncRef{});
   }
@@ -226,6 +230,7 @@ public:
    */
   bool isVecArray() const { return m_arr && m_arr->isVecArray(); }
   bool isDict() const { return m_arr && m_arr->isDict(); }
+  bool isShape() const { return m_arr && m_arr->isShape(); }
   bool isKeyset() const { return m_arr && m_arr->isKeyset(); }
   bool isHackArray() const { return m_arr && m_arr->isHackArray(); }
   bool isPHPArray() const { return !m_arr || m_arr->isPHPArray(); }
@@ -233,6 +238,9 @@ public:
   bool isDArray() const { return m_arr && m_arr->isDArray(); }
   bool isVecOrVArray() const { return m_arr && m_arr->isVecOrVArray(); }
   bool isDictOrDArray() const { return m_arr && m_arr->isDictOrDArray(); }
+  bool isDictOrDArrayOrShape() const {
+    return m_arr && m_arr->isDictOrDArrayOrShape();
+  }
 
   /////////////////////////////////////////////////////////////////////////////
 

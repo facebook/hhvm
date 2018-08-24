@@ -687,8 +687,8 @@ struct Eq {
     return PackedArray::VecEqual(ad1, ad2);
   }
   bool dict(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isDict());
-    assertx(ad2->isDict());
+    assertx(ad1->isDictOrShape());
+    assertx(ad2->isDictOrShape());
     return MixedArray::DictEqual(ad1, ad2);
   }
   bool keyset(const ArrayData* ad1, const ArrayData* ad2) const {
@@ -747,8 +747,8 @@ struct Lt {
     return PackedArray::VecLt(ad1, ad2);
   }
   bool dict(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isDict());
-    assertx(ad2->isDict());
+    assertx(ad1->isDictOrShape());
+    assertx(ad2->isDictOrShape());
     throw_dict_compare_exception();
   }
   bool keyset(const ArrayData* ad1, const ArrayData* ad2) const {
@@ -817,8 +817,8 @@ struct Gt {
     return PackedArray::VecGt(ad1, ad2);
   }
   bool dict(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isDict());
-    assertx(ad2->isDict());
+    assertx(ad1->isDictOrShape());
+    assertx(ad2->isDictOrShape());
     throw_dict_compare_exception();
   }
   bool keyset(const ArrayData* ad1, const ArrayData* ad2) const {
@@ -889,8 +889,8 @@ struct Cmp {
     return PackedArray::VecCmp(ad1, ad2);
   }
   int64_t dict(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isDict());
-    assertx(ad2->isDict());
+    assertx(ad1->isDictOrShape());
+    assertx(ad2->isDictOrShape());
     throw_dict_compare_exception();
   }
   int64_t keyset(const ArrayData* ad1, const ArrayData* ad2) const {
@@ -1044,6 +1044,7 @@ bool cellEqual(Cell cell, const ArrayData* val) {
   if (val->isPHPArray()) return cellRelOp(Eq(), cell, val);
   if (val->isVecArray()) return cellRelOpVec(Eq(), cell, val);
   if (val->isDict()) return cellRelOpDict(Eq(), cell, val);
+  if (val->isShape()) return cellRelOpShape(Eq(), cell, val);
   if (val->isKeyset()) return cellRelOpKeyset(Eq(), cell, val);
   not_reached();
 }
@@ -1087,6 +1088,7 @@ bool cellLess(Cell cell, const ArrayData* val) {
   if (val->isPHPArray()) return cellRelOp(Lt(), cell, val);
   if (val->isVecArray()) return cellRelOpVec(Lt(), cell, val);
   if (val->isDict()) return cellRelOpDict(Lt(), cell, val);
+  if (val->isShape()) return cellRelOpShape(Lt(), cell, val);
   if (val->isKeyset()) return cellRelOpKeyset(Lt(), cell, val);
   not_reached();
 }
@@ -1130,6 +1132,7 @@ bool cellGreater(Cell cell, const ArrayData* val) {
   if (val->isPHPArray()) return cellRelOp(Gt(), cell, val);
   if (val->isVecArray()) return cellRelOpVec(Gt(), cell, val);
   if (val->isDict()) return cellRelOpDict(Gt(), cell, val);
+  if (val->isShape()) return cellRelOpShape(Gt(), cell, val);
   if (val->isKeyset()) return cellRelOpKeyset(Gt(), cell, val);
   not_reached();
 }
@@ -1175,6 +1178,7 @@ int64_t cellCompare(Cell cell, const ArrayData* val) {
   if (val->isPHPArray()) return cellRelOp(Cmp(), cell, val);
   if (val->isVecArray()) return cellRelOpVec(Cmp(), cell, val);
   if (val->isDict()) return cellRelOpDict(Cmp(), cell, val);
+  if (val->isShape()) return cellRelOpShape(Cmp(), cell, val);
   if (val->isKeyset()) return cellRelOpKeyset(Cmp(), cell, val);
   not_reached();
 }

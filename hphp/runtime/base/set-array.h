@@ -453,6 +453,7 @@ public:
   static ArrayData* ToKeyset(ArrayData*, bool);
   static constexpr auto ToVArray = &ArrayCommon::ToVArray;
   static ArrayData* ToDArray(ArrayData*, bool);
+  static ArrayData* ToShape(ArrayData*, bool);
   static bool Equal(const ArrayData*, const ArrayData*);
   static bool NotEqual(const ArrayData*, const ArrayData*);
   static bool Same(const ArrayData*, const ArrayData*);

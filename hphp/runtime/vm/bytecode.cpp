@@ -882,7 +882,12 @@ static std::string toStringElm(const TypedValue* tv) {
       continue;
     case KindOfPersistentShape:
     case KindOfShape:
-      not_implemented();
+      assertx(tv->m_data.parr->isShape());
+      assertx(tv->m_data.parr->checkCount());
+      os << tv->m_data.parr;
+      print_count();
+      os << ":Shape";
+      continue;
     case KindOfPersistentArray:
     case KindOfArray:
       assertx(tv->m_data.parr->isPHPArray());

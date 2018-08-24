@@ -390,7 +390,15 @@ void ConvertTvToUncounted(
 
     case KindOfShape:
     case KindOfPersistentShape: {
-      not_implemented();
+      auto& ad = source->m_data.parr;
+      assertx(ad->isShape());
+      if (handlePersistent(ad)) break;
+      if (ad->empty()) {
+        ad = staticEmptyShapeArray();
+      } else {
+        ad = MixedArray::MakeUncounted(ad, false, seen);
+      }
+      break;
     }
 
     case KindOfArray:

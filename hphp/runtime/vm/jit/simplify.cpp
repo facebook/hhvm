@@ -125,18 +125,7 @@ SSATmp* gen(State& env, Opcode op, Args&&... args) {
 }
 
 bool arrayKindNeedsVsize(const ArrayData::ArrayKind kind) {
-  switch (kind) {
-    case ArrayData::kPackedKind:
-    case ArrayData::kMixedKind:
-    case ArrayData::kEmptyKind:
-    case ArrayData::kVecKind:
-    case ArrayData::kApcKind:
-    case ArrayData::kDictKind:
-    case ArrayData::kKeysetKind:
-      return false;
-    default:
-      return true;
-  }
+  return kind == ArrayData::kGlobalsKind;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -65,6 +65,12 @@ ALWAYS_INLINE ArrayData* staticEmptyDictArray() {
   return static_cast<ArrayData*>(vp);
 }
 
+ALWAYS_INLINE ArrayData* staticEmptyShapeArray() {
+  void* vp = RuntimeOption::EvalHackArrDVArrs
+    ? &s_theEmptyShapeDict : &s_theEmptyShapeDArray;
+  return static_cast<ArrayData*>(vp);
+}
+
 ALWAYS_INLINE ArrayData* staticEmptyKeysetArray() {
   void* vp = &s_theEmptySetArray;
   return static_cast<ArrayData*>(vp);
@@ -91,6 +97,10 @@ ALWAYS_INLINE ArrayData* ArrayData::CreateDArray() {
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateDict() {
   return staticEmptyDictArray();
+}
+
+ALWAYS_INLINE ArrayData* ArrayData::CreateShape() {
+  return staticEmptyShapeArray();
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateKeyset() {
@@ -141,25 +151,53 @@ inline bool ArrayData::noCopyOnWrite() const {
 
 inline bool ArrayData::isPacked() const { return kind() == kPackedKind; }
 inline bool ArrayData::isMixed() const { return kind() == kMixedKind; }
+
+/*
+ * isMixedOrShape checks whether the ArrayData is kMixedKind or a Shape that
+ * behaves like a mixed PHP Array. This is important because this check is
+ * often used to check that a piece of code is only operating on
+ * mixed PHP array-like objects and not dict-like objects.
+ */
+inline bool ArrayData::isMixedOrShape() const {
+  return kind() == kMixedKind ||
+    (!RuntimeOption::EvalHackArrDVArrs && kind() == kShapeKind);
+}
 inline bool ArrayData::isApcArray() const { return kind() == kApcKind; }
 inline bool ArrayData::isGlobalsArray() const { return kind() == kGlobalsKind; }
 inline bool ArrayData::isEmptyArray() const { return kind() == kEmptyKind; }
 inline bool ArrayData::isDict() const { return kind() == kDictKind; }
+
+/*
+ * isDictOrShape checks whether the ArrayData is a dict or a Shape that
+ * behaves like a dict. This is important because this check is often used
+ * to check that a piece of code is only operating on dict-like objects and
+ * not array-like objects.
+ */
+inline bool ArrayData::isDictOrShape() const {
+  return kind() == kDictKind ||
+    (RuntimeOption::EvalHackArrDVArrs && kind() == kShapeKind);
+}
 inline bool ArrayData::isVecArray() const { return kind() == kVecKind; }
 inline bool ArrayData::isKeyset() const { return kind() == kKeysetKind; }
+inline bool ArrayData::isShape() const { return kind() == kShapeKind; }
 
 inline bool ArrayData::hasPackedLayout() const {
   return isPacked() || isVecArray();
 }
 inline bool ArrayData::hasMixedLayout() const {
-  return isMixed() || isDict();
+  return isMixed() || isDict() || isShape();
 }
 
 inline bool ArrayData::isPHPArray() const {
-  return kind() < kDictKind;
+  return RuntimeOption::EvalHackArrDVArrs
+    ? kind() < kShapeKind
+    : kind() <= kShapeKind;
 }
+
 inline bool ArrayData::isHackArray() const {
-  return kind() >= kDictKind;
+  return RuntimeOption::EvalHackArrDVArrs
+    ? kind() >= kShapeKind
+    : kind() >= kDictKind;
 }
 
 inline ArrayData::DVArray ArrayData::dvArray() const {
@@ -176,12 +214,17 @@ inline void ArrayData::setDVArray(DVArray d) {
 
 inline bool ArrayData::isVArray() const { return dvArray() & kVArray; }
 inline bool ArrayData::isDArray() const { return dvArray() & kDArray; }
+
 inline bool ArrayData::isNotDVArray() const { return dvArray() == kNotDVArray; }
 inline bool ArrayData::isVecOrVArray() const {
   return RuntimeOption::EvalHackArrDVArrs ? isVecArray() : isVArray();
 }
 inline bool ArrayData::isDictOrDArray() const {
   return RuntimeOption::EvalHackArrDVArrs ? isDict() : isDArray();
+}
+
+inline bool ArrayData::isDictOrDArrayOrShape() const {
+  return isShape() || isDictOrDArray();
 }
 
 // gcc doesn't optimize (a & 3) == (b & 3) very well; help it a little.
@@ -194,6 +237,7 @@ inline bool ArrayData::dvArraySanityCheck() const {
   if (!RuntimeOption::EvalHackArrDVArrs) {
     if (isPacked()) return !(dv & kDArray);
     if (isMixed())  return !(dv & kVArray);
+    if (isShape())  return dv == kDArray;
   }
   return dv == kNotDVArray;
 }
@@ -215,18 +259,20 @@ inline bool ArrayData::useWeakKeys() const { return isPHPArray(); }
 
 inline DataType ArrayData::toDataType() const {
   auto const k = kind();
-  if (k < kDictKind) return KindOfArray;
+  if (k < kShapeKind) return KindOfArray;
   if (k == kVecKind) return KindOfVec;
   if (k == kDictKind) return KindOfDict;
+  if (k == kShapeKind) return KindOfShape;
   assertx(k == kKeysetKind);
   return KindOfKeyset;
 }
 
 inline DataType ArrayData::toPersistentDataType() const {
   auto const k = kind();
-  if (k < kDictKind) return KindOfPersistentArray;
+  if (k < kShapeKind) return KindOfPersistentArray;
   if (k == kVecKind) return KindOfPersistentVec;
   if (k == kDictKind) return KindOfPersistentDict;
+  if (k == kShapeKind) return KindOfPersistentShape;
   assertx(k == kKeysetKind);
   return KindOfPersistentKeyset;
 }

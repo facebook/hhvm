@@ -175,6 +175,12 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
         PackedArray::IterateV(ad, fn);
       });
 
+    case ArrayData::kShapeKind:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        not_reached();
+      }
+      // Fallthrough
+
     case ArrayData::kMixedKind:
       return c_AwaitAllWaitHandle::Create<true>([=](auto fn) {
         MixedArray::IterateV(MixedArray::asMixed(ad), fn);

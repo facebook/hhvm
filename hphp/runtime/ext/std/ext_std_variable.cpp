@@ -366,7 +366,17 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
 
     case KindOfPersistentShape:
     case KindOfShape: { // TODO(T31134050)
-      not_implemented();
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        ArrayData* arr = value.getArrayData();
+        assertx(arr->isShape());
+        if (arr->empty()) {
+          return UNLIKELY(arr->isLegacyArray())
+            ? s_EmptyArray
+            : empty_hack(arr, s_EmptyDictArray);
+        }
+        break;
+      }
+      // Fallthrough
     }
 
     case KindOfPersistentArray:

@@ -170,7 +170,7 @@ ArrayData* deepCopyVecArray(ArrayData* arr) {
 }
 
 ArrayData* deepCopyDict(ArrayData* arr) {
-  assertx(arr->isDict());
+  assertx(arr->isDictOrShape());
   Array ar(arr);
   MixedArray::IterateKV(
     MixedArray::asMixed(arr),

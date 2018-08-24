@@ -45,6 +45,8 @@ namespace HPHP {
 enum class HeaderKind : uint8_t {
   // ArrayKind aliases
   Packed, Mixed, Empty, Apc, Globals,
+  // Shape
+  Shape,
   // Hack arrays
   Dict, VecArray, Keyset,
   // Other ordinary refcounted heap objects

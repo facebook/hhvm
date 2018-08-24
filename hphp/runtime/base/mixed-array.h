@@ -206,6 +206,7 @@ struct MixedArray final : ArrayData,
   static ArrayData* MakeReserveMixed(uint32_t size);
   static ArrayData* MakeReserveDArray(uint32_t size);
   static ArrayData* MakeReserveDict(uint32_t size);
+  static ArrayData* MakeReserveShape(uint32_t size);
   static constexpr auto MakeReserve = &MakeReserveMixed;
 
   /*
@@ -370,6 +371,7 @@ public:
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
   static constexpr auto ToVArray = &ArrayCommon::ToVArray;
   static ArrayData* ToDArray(ArrayData*, bool);
+  static ArrayData* ToShape(ArrayData*, bool);
 
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
@@ -472,6 +474,8 @@ public:
   static constexpr auto ToKeysetDict = &ArrayCommon::ToKeyset;
   static constexpr auto ToVArrayDict = &ArrayCommon::ToVArray;
   static ArrayData* ToDArrayDict(ArrayData*, bool);
+  static ArrayData* ToDArrayShape(ArrayData*, bool);
+  static ArrayData* ToShapeDict(ArrayData*, bool);
 
   //////////////////////////////////////////////////////////////////////
 
@@ -706,6 +710,9 @@ private:
 
   struct DArrayInitializer;
   static DArrayInitializer s_darr_initializer;
+
+  struct ShapeInitializer;
+  static ShapeInitializer s_shape_initializer;
 
   int64_t  m_nextKI;        // Next integer key to use for append.
 };

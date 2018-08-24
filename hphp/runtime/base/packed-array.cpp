@@ -1256,6 +1256,14 @@ ArrayData* PackedArray::ToDArray(ArrayData* adIn, bool /*copy*/) {
   return init.create();
 }
 
+ArrayData* PackedArray::ToShape(ArrayData* adIn, bool copy) {
+  not_implemented();
+}
+
+ArrayData* PackedArray::ToShapeVec(ArrayData* adIn, bool copy) {
+  not_implemented();
+}
+
 ArrayData* PackedArray::ToPHPArrayVec(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isVecArray());

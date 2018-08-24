@@ -83,10 +83,11 @@ struct ArrayData : MaybeCountable {
     kEmptyKind = 2,   // The singleton static empty array
     kApcKind = 3,     // APCLocalArray
     kGlobalsKind = 4, // GlobalsArray
-    kDictKind = 5,    // Hack dict
-    kVecKind = 6,     // Hack vec
-    kKeysetKind = 7,  // Hack keyset
-    kNumKinds = 8     // insert new values before kNumKinds.
+    kShapeKind = 5,   // Shape
+    kDictKind = 6,    // Hack dict
+    kVecKind = 7,     // Hack vec
+    kKeysetKind = 8,  // Hack keyset
+    kNumKinds = 9     // insert new values before kNumKinds.
   };
 
   /*
@@ -133,6 +134,7 @@ public:
   static ArrayData* Create();
   static ArrayData* CreateVec();
   static ArrayData* CreateDict();
+  static ArrayData* CreateShape();
   static ArrayData* CreateKeyset();
   static ArrayData* CreateVArray();
   static ArrayData* CreateDArray();
@@ -183,11 +185,26 @@ public:
    * Convert between array kinds.
    */
   ArrayData* toPHPArray(bool copy);
+  ArrayData* toShape(bool copy);
   ArrayData* toDict(bool copy);
   ArrayData* toVec(bool copy);
   ArrayData* toKeyset(bool copy);
   ArrayData* toVArray(bool copy);
   ArrayData* toDArray(bool copy);
+
+  /*
+   * Converts this to a Shape in place if this is a compatible type with Shapes.
+   * If this is not refCounted it will instead make a copy before converting
+   * to a Shape.
+   *
+   * Dicts are compatible when RuntimeOption::EvalHackArrDVArrs is set and
+   * DArrays are compatible when it is not set. Empty arrays are always
+   * compatible. No other types are compatible.
+   *
+   * This function will return staticEmptyShapeArray when this is empty and it
+   * will return this otherwise.
+   */
+  ArrayData* toShapeInPlaceIfCompatible();
 
   /*
    * Return an array with identical contents to this array, but of an array
@@ -256,10 +273,13 @@ public:
    */
   bool isPacked() const;
   bool isMixed() const;
+  bool isMixedOrShape() const;
   bool isApcArray() const;
   bool isGlobalsArray() const;
   bool isEmptyArray() const;
   bool isDict() const;
+  bool isDictOrShape() const;
+  bool isShape() const;
   bool isVecArray() const;
   bool isKeyset() const;
 
@@ -307,6 +327,7 @@ public:
   bool isNotDVArray() const;
   bool isVecOrVArray() const;
   bool isDictOrDArray() const;
+  bool isDictOrDArrayOrShape() const;
 
   static bool dvArrayEqual(const ArrayData* a, const ArrayData* b);
 
@@ -852,6 +873,7 @@ static_assert(ArrayData::kMixedKind == uint8_t(HeaderKind::Mixed), "");
 static_assert(ArrayData::kEmptyKind == uint8_t(HeaderKind::Empty), "");
 static_assert(ArrayData::kApcKind == uint8_t(HeaderKind::Apc), "");
 static_assert(ArrayData::kGlobalsKind == uint8_t(HeaderKind::Globals), "");
+static_assert(ArrayData::kShapeKind == uint8_t(HeaderKind::Shape), "");
 static_assert(ArrayData::kDictKind == uint8_t(HeaderKind::Dict), "");
 static_assert(ArrayData::kVecKind == uint8_t(HeaderKind::VecArray), "");
 
@@ -868,6 +890,9 @@ extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVecArray;
 extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVArray;
 extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDictArray;
 extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDArray;
+extern std::aligned_storage<kEmptyMixedArraySize, 16>::type
+  s_theEmptyShapeDArray;
+extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyShapeDict;
 extern std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
 
 /*
@@ -882,6 +907,7 @@ ArrayData* staticEmptyVArray();
 ArrayData* staticEmptyDArray();
 ArrayData* staticEmptyVecArray();
 ArrayData* staticEmptyDictArray();
+ArrayData* staticEmptyShapeArray();
 ArrayData* staticEmptyKeysetArray();
 
 /*
@@ -904,7 +930,7 @@ struct ArrayFunctions {
   /*
    * NK stands for number of array kinds.
    */
-  static auto const NK = size_t{8};
+  static auto const NK = size_t{ArrayData::kNumKinds};
 
   void (*release[NK])(ArrayData*);
   tv_rval (*nvGetInt[NK])(const ArrayData*, int64_t k);
@@ -965,6 +991,7 @@ struct ArrayFunctions {
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*escalate[NK])(const ArrayData*);
   ArrayData* (*toPHPArray[NK])(ArrayData*, bool);
+  ArrayData* (*toShape[NK])(ArrayData*, bool);
   ArrayData* (*toDict[NK])(ArrayData*, bool);
   ArrayData* (*toVec[NK])(ArrayData*, bool);
   ArrayData* (*toKeyset[NK])(ArrayData*, bool);

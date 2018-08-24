@@ -1601,8 +1601,61 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv,
   not_reached();
 }
 
-bool tvCoerceParamToShapeInPlace(TypedValue* tv, bool /*builtin*/) {
-  not_implemented();
+bool tvCoerceParamToShapeInPlace(TypedValue* tv, bool builtin) {
+  assertx(tvIsPlausible(*tv));
+  tvUnboxIfNeeded(*tv);
+
+  switch (tv->m_type) {
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfPersistentString:
+    case KindOfString:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+    case KindOfFunc:
+    case KindOfClass:
+      return false;
+
+    case KindOfPersistentShape:
+    case KindOfShape:
+      return true;
+
+    case KindOfPersistentArray:
+    case KindOfArray:
+      if (!RuntimeOption::EvalHackArrDVArrs) {
+        tvAsVariant(tv) = tv->m_data.parr->toShape(true);
+        return true;
+      }
+      return false;
+
+    case KindOfPersistentDict:
+    case KindOfDict:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        tvAsVariant(tv) = tv->m_data.parr->toShape(true);
+        return true;
+      }
+      return false;
+
+    case KindOfObject:
+      if (RuntimeOption::EvalHackArrDVArrs) return false;
+      if (LIKELY(tv->m_data.pobj->isCollection())) {
+        tvAsVariant(tv) = tv->m_data.pobj->toArray();
+        tvAsVariant(tv) = tv->m_data.parr->toShape(true);
+        return true;
+      }
+      return false;
+    case KindOfResource:
+      return false;
+
+    case KindOfRef:
+      break;
+  }
+  not_reached();
 }
 
 bool tvCoerceParamToArrayInPlace(TypedValue* tv, bool /*builtin*/) {

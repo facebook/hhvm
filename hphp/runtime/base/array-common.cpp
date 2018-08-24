@@ -157,6 +157,10 @@ ArrayData* ArrayCommon::ToDArray(ArrayData* a, bool) {
   return init.create();
 }
 
+ArrayData* ArrayCommon::ToShape(ArrayData* a, bool copy) {
+  not_implemented();
+}
+
 ArrayCommon::RefCheckResult
 ArrayCommon::CheckForRefs(const ArrayData* ad) {
   auto result = RefCheckResult::Pass;

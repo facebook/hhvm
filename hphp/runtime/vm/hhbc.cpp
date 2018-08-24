@@ -645,6 +645,7 @@ bool pushesActRec(Op opcode) {
 void staticArrayStreamer(const ArrayData* ad, std::string& out) {
   if (ad->isVecArray()) out += "vec(";
   else if (ad->isDict()) out += "dict(";
+  else if (ad->isShape()) out += "shape(";
   else if (ad->isKeyset()) out += "keyset(";
   else {
     assertx(ad->isPHPArray());

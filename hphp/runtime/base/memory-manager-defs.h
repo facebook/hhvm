@@ -258,6 +258,7 @@ inline size_t allocSize(const HeapObject* h) {
     sizeClass<ArrayData>(), /* Empty */
     0, /* APCLocalArray */
     sizeClass<GlobalsArray>(),
+    0, /* Shape */
     0, /* Dict */
     0, /* VecArray */
     0, /* KeySet */
@@ -344,6 +345,7 @@ inline size_t allocSize(const HeapObject* h) {
       // size = kSizeIndex2Size[h->aux16]
       size = PackedArray::heapSize(static_cast<const ArrayData*>(h));
       break;
+    case HeaderKind::Shape:
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
       // size = fn of h->m_scale

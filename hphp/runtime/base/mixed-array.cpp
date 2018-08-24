@@ -60,6 +60,8 @@ static_assert(MixedArray::computeAllocBytes(MixedArray::SmallScale) ==
 
 std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDictArray;
 std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDArray;
+std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyShapeDArray;
+std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyShapeDict;
 
 struct MixedArray::Initializer {
   Initializer() {
@@ -87,13 +89,38 @@ struct MixedArray::DArrayInitializer {
 };
 MixedArray::DArrayInitializer MixedArray::s_darr_initializer;
 
+struct MixedArray::ShapeInitializer {
+  ShapeInitializer() {
+    {
+      auto const ad = reinterpret_cast<MixedArray*>(&s_theEmptyShapeDArray);
+      ad->initHash(1);
+      ad->m_sizeAndPos = 0;
+      ad->m_scale_used = 1;
+      ad->m_nextKI = 0;
+      ad->initHeader_16(HeaderKind::Shape, StaticValue, ArrayData::kDArray);
+      assertx(ad->checkInvariants());
+    }
+    {
+      auto const ad = reinterpret_cast<MixedArray*>(&s_theEmptyShapeDict);
+      ad->initHash(1);
+      ad->m_sizeAndPos = 0;
+      ad->m_scale_used = 1;
+      ad->m_nextKI = 0;
+      ad->initHeader(HeaderKind::Shape, StaticValue);
+      assertx(ad->checkInvariants());
+    }
+  }
+};
+MixedArray::ShapeInitializer MixedArray::s_shape_initializer;
+
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE
 ArrayData* MixedArray::MakeReserveImpl(uint32_t size,
                                        HeaderKind hk,
                                        ArrayData::DVArray dvArray) {
-  assertx(hk == HeaderKind::Mixed || hk == HeaderKind::Dict);
+  assertx(hk == HeaderKind::Mixed || hk == HeaderKind::Dict ||
+          hk == HeaderKind::Shape);
   assertx(dvArray == ArrayData::kNotDVArray || dvArray == ArrayData::kDArray);
   assertx(hk != HeaderKind::Dict || dvArray == ArrayData::kNotDVArray);
   assertx(!RuntimeOption::EvalHackArrDVArrs ||
@@ -144,6 +171,14 @@ ArrayData* MixedArray::MakeReserveDict(uint32_t size) {
   return ad;
 }
 
+ArrayData* MixedArray::MakeReserveShape(uint32_t size) {
+  auto const ad = MakeReserveImpl(size, HeaderKind::Shape,
+      RuntimeOption::EvalHackArrDVArrs ?
+      ArrayData::kNotDVArray : ArrayData::kDArray);
+  assertx(ad->isShape());
+  return ad;
+}
+
 ArrayData* MixedArray::MakeReserveSame(const ArrayData* other,
                                        uint32_t capacity) {
   capacity = (capacity ? capacity : other->size());
@@ -158,6 +193,10 @@ ArrayData* MixedArray::MakeReserveSame(const ArrayData* other,
 
   if (other->isDict()) {
     return MixedArray::MakeReserveDict(capacity);
+  }
+
+  if (other->isShape()) {
+    return MixedArray::MakeReserveShape(capacity);
   }
 
   if (other->isKeyset()) {
@@ -323,7 +362,9 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
                                   AllocMode mode,
                                   HeaderKind dest_hk,
                                   ArrayData::DVArray dvArray) {
-  assertx(dest_hk == HeaderKind::Mixed || dest_hk == HeaderKind::Dict);
+  assertx(dest_hk == HeaderKind::Mixed ||
+          dest_hk == HeaderKind::Dict ||
+          dest_hk == HeaderKind::Shape);
   assertx(dvArray == ArrayData::kNotDVArray || dvArray == ArrayData::kDArray);
   assertx(dest_hk != HeaderKind::Dict || dvArray == ArrayData::kNotDVArray);
 
@@ -1643,12 +1684,24 @@ ArrayData* MixedArray::ToDArray(ArrayData* in, bool copy) {
   return out;
 }
 
+ArrayData* MixedArray::ToShape(ArrayData* in, bool copy) {
+  not_implemented();
+}
+
 ArrayData* MixedArray::ToDArrayDict(ArrayData* in, bool copy) {
   if (RuntimeOption::EvalHackArrDVArrs) return in;
   auto out = FromDictImpl(in, copy, true);
   assertx(out->isDArray());
   assertx(!out->isLegacyArray());
   return out;
+}
+
+ArrayData* MixedArray::ToDArrayShape(ArrayData* in, bool copy) {
+  not_implemented();
+}
+
+ArrayData* MixedArray::ToShapeDict(ArrayData* in, bool copy) {
+  not_implemented();
 }
 
 MixedArray* MixedArray::ToDictInPlace(ArrayData* ad) {

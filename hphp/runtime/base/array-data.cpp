@@ -177,6 +177,7 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
   if (arr->empty()) {
     if (arr->isVecArray()) return replace(staticEmptyVecArray());
     if (arr->isDict())     return replace(staticEmptyDictArray());
+    if (arr->isShape())    return replace(staticEmptyShapeArray());
     if (arr->isKeyset())   return replace(staticEmptyKeysetArray());
     if (arr->isVArray())   return replace(staticEmptyVArray());
     if (arr->isDArray())   return replace(staticEmptyDArray());
@@ -200,8 +201,8 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
   if (it != s_arrayDataMap.end()) return replace(*it);
 
   ArrayData* ad;
-  if (arr->isVectorData() && !arr->hasPackedLayout() && !arr->isDict() &&
-      !arr->isKeyset() && !arr->isDArray()) {
+  if (((arr->isMixed() && !arr->isDArray()) || arr->isApcArray() ||
+        arr->isGlobalsArray()) && arr->isVectorData()) {
     ad = PackedArray::ConvertStatic(arr);
   } else {
     ad = arr->copyStatic();
@@ -238,6 +239,7 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
     EmptyArray::entry,                          \
     APCLocalArray::entry,                       \
     GlobalsArray::entry,                        \
+    MixedArray::entry,         /* Shape */      \
     MixedArray::entry##Dict,   /* Dict */       \
     PackedArray::entry##Vec,   /* Vec */        \
     SetArray::entry,           /* Keyset */     \
@@ -753,6 +755,15 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(ToPHPArray)
 
    /*
+   * ArrayData* ToShape(ArrayData*, bool)
+   *
+   *   Convert to a shape. If already a shape, it will be returned unchange
+   *   (without copying). If copy is false, it may be converted in place. If the
+   *   input array contains references, an exception will be thrown.
+   */
+  DISPATCH(ToShape)
+
+   /*
    * ArrayData* ToDict(ArrayData*, bool)
    *
    *   Convert to a dict. If already a dict, it will be returned unchange
@@ -873,6 +884,24 @@ ArrayData* ArrayData::CreateRef(TypedValue name, tv_lval value) {
   ArrayInit init(1, ArrayInit::Map{});
   init.setRef(name, value, true);
   return init.create();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+ArrayData* ArrayData::toShapeInPlaceIfCompatible() {
+  if (size() == 0 && isStatic()) {
+    return staticEmptyShapeArray();
+  }
+  assertx((RuntimeOption::EvalHackArrDVArrs && isDict()) ||
+          (!RuntimeOption::EvalHackArrDVArrs && isMixed() && isDArray()));
+  if (!isRefCounted()) {
+    auto ad = MixedArray::Copy(this);
+    ad->m_kind = HeaderKind::Shape;
+    return ad;
+  }
+  assertx(!cowCheck());
+  m_kind = HeaderKind::Shape;
+  return this;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1007,7 +1036,7 @@ int ArrayData::compare(const ArrayData* v2) const {
         raiseHackArrCompatArrMixedCmp();
       }
       if (v2->isVecArray()) throw_vec_compare_exception();
-      if (v2->isDict()) throw_dict_compare_exception();
+      if (v2->isDictOrShape()) throw_dict_compare_exception();
       if (v2->isKeyset()) throw_keyset_compare_exception();
       not_reached();
     }
@@ -1155,12 +1184,13 @@ tv_rval ArrayData::getNotFound(const StringData* k, bool error) const {
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {
-  std::array<const char*,8> names = {{
+  std::array<const char*,9> names = {{
     "PackedKind",
     "MixedKind",
     "EmptyKind",
     "ApcKind",
     "GlobalsKind",
+    "ShapeKind",
     "DictKind",
     "VecKind",
     "KeysetKind"

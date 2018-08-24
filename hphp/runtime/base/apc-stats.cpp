@@ -174,6 +174,7 @@ size_t getMemSize(const ArrayData* arr, bool recurse) {
     }
     return size;
   }
+  case ArrayData::ArrayKind::kShapeKind:
   case ArrayData::ArrayKind::kDictKind:
   case ArrayData::ArrayKind::kMixedKind: {
     auto const mixed = MixedArray::asMixed(arr);

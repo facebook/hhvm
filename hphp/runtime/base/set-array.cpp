@@ -921,6 +921,10 @@ ArrayData* SetArray::ToDArray(ArrayData* ad, bool copy) {
   return out;
 }
 
+ArrayData* SetArray::ToShape(ArrayData* ad, bool copy) {
+  not_implemented();
+}
+
 ArrayData* SetArray::ToKeyset(ArrayData* ad, bool /*copy*/) {
   assertx(asSet(ad)->checkInvariants());
   return ad;

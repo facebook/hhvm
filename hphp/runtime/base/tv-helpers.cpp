@@ -94,8 +94,33 @@ bool cellIsPlausible(const Cell cell) {
         assertx(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfPersistentShape:
+        if (RuntimeOption::EvalHackArrDVArrs) {
+          assertPtr(cell.m_data.parr);
+          assertx(!cell.m_data.parr->isRefCounted());
+          assertx(cell.m_data.parr->isShape());
+          assertx(cell.m_data.parr->isNotDVArray());
+          return;
+        }
+        assertPtr(cell.m_data.parr);
+        assertx(cell.m_data.parr->kindIsValid());
+        assertx(!cell.m_data.parr->isRefCounted());
+        assertx(cell.m_data.parr->isShape());
+        assertx(cell.m_data.parr->dvArraySanityCheck());
+        return;
       case KindOfShape:
-        not_implemented();
+        if (RuntimeOption::EvalHackArrDVArrs) {
+          assertPtr(cell.m_data.parr);
+          assertx(cell.m_data.parr->checkCount());
+          assertx(cell.m_data.parr->isShape());
+          assertx(cell.m_data.parr->isNotDVArray());
+          return;
+        }
+        assertPtr(cell.m_data.parr);
+        assertx(cell.m_data.parr->kindIsValid());
+        assertx(cell.m_data.parr->checkCount());
+        assertx(cell.m_data.parr->isShape());
+        assertx(cell.m_data.parr->dvArraySanityCheck());
+        return;
       case KindOfPersistentArray:
         assertPtr(cell.m_data.parr);
         assertx(cell.m_data.parr->kindIsValid());

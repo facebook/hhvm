@@ -62,6 +62,8 @@ struct ArrayCommon {
   static ArrayData* ToVArray(ArrayData*, bool);
   static ArrayData* ToDArray(ArrayData*, bool);
 
+  static ArrayData* ToShape(ArrayData*, bool);
+
   enum class RefCheckResult {
     Pass, // No refs
     Fail, // Referenced ref

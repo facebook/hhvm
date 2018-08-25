@@ -230,7 +230,7 @@ public:
   template<typename Callback>
   void format(FormatArg& arg, Callback& cb) const {
     auto str = folly::sformat(
-      "IFrame{func = {}, soff = {}, parent = {}}",
+      "IFrame{{func = {}, soff = {}, parent = {}}}",
       m_ifr.func->fullName()->data(),
       m_ifr.soff,
       m_ifr.parent

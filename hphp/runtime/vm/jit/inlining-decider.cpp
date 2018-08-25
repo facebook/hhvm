@@ -65,17 +65,29 @@ bool traceRefusal(SrcKey callerSk, const Func* callee, const char* why,
   // This is not under Trace::enabled so that we can collect the data in prod.
   const Func* caller = callerSk.func();
   int bcOff = callerSk.offset();
+  auto calleeName = callee ? callee->fullName()->data() : "(unknown)";
   if (RuntimeOption::EvalDumpInlRefuse) {
     annotations.emplace_back("NoInline ",
       nameAndReason(bcOff, caller->fullName()->data(),
-                    callee->fullName()->data(), why));
+                    calleeName, why));
   }
   if (Trace::enabled) {
-    UNUSED auto calleeName = callee ? callee->fullName()->data()
-                                    : "(unknown)";
     assertx(caller);
     FTRACE(2, "InliningDecider: refusing {}() <- {}{}\t<reason: {}>\n",
            caller->fullName()->data(), calleeName, callee ? "()" : "", why);
+  }
+  if (caller->shouldSampleJit() || (callee && callee->shouldSampleJit())) {
+    StructuredLogEntry inlLog;
+    auto bcStr = [&] {
+      std::ostringstream bcStrn;
+      bcStrn << bcOff;
+      return bcStrn.str();
+    } ();
+    inlLog.setStr("BC off", bcStr);
+    inlLog.setStr("caller", caller->fullName()->data());
+    inlLog.setStr("callee", calleeName);
+    inlLog.setStr("reason", why);
+    StructuredLog::log("hhvm_inline_refuse", inlLog);
   }
   return false;
 }

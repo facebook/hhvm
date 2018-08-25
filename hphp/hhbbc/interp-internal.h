@@ -75,6 +75,7 @@ struct ISS {
   State& state;
   StepFlags& flags;
   PropagateFn propagate;
+  bool recordUsedParams{true};
 };
 
 void impl_vec(ISS& env, bool reduce, std::vector<Bytecode>&& bcs);
@@ -175,15 +176,37 @@ void jmp_nevertaken(ISS& env) {
   jmp_setdest(env, env.blk.fallthrough);
 }
 
+struct IgnoreUsedParams {
+  explicit IgnoreUsedParams(ISS& env) :
+      env{env}, record{env.recordUsedParams} {
+    env.recordUsedParams = false;
+  }
+
+  ~IgnoreUsedParams() {
+    env.recordUsedParams = record;
+  }
+
+  ISS& env;
+  const bool record;
+};
+
 void readUnknownParams(ISS& env) {
   for (LocalId p = 0; p < env.ctx.func->params.size(); p++) {
     if (p == env.flags.mayReadLocalSet.size()) break;
     env.flags.mayReadLocalSet.set(p);
   }
+  if (env.recordUsedParams) env.collect.usedParams.set();
 }
 
-void readUnknownLocals(ISS& env) { env.flags.mayReadLocalSet.set(); }
-void readAllLocals(ISS& env)     { env.flags.mayReadLocalSet.set(); }
+void readUnknownLocals(ISS& env) {
+  env.flags.mayReadLocalSet.set();
+  if (env.recordUsedParams) env.collect.usedParams.set();
+}
+
+void readAllLocals(ISS& env) {
+  env.flags.mayReadLocalSet.set();
+  if (env.recordUsedParams) env.collect.usedParams.set();
+}
 
 void modifyLocalStatic(ISS& env, LocalId id, const Type& t) {
   auto modifyOne = [&] (LocalId lid) {
@@ -233,6 +256,8 @@ void bindLocalStatic(ISS& env, LocalId id, const Type& t) {
 }
 
 void doRet(ISS& env, Type t, bool hasEffects) {
+  IgnoreUsedParams _{env};
+
   readAllLocals(env);
   assert(env.state.stack.empty());
   env.flags.retParam = NoLocalId;
@@ -472,6 +497,9 @@ void useLocalStatic(ISS& env, LocalId l) {
 void mayReadLocal(ISS& env, uint32_t id) {
   if (id < env.flags.mayReadLocalSet.size()) {
     env.flags.mayReadLocalSet.set(id);
+  }
+  if (env.recordUsedParams && id < env.collect.usedParams.size()) {
+    env.collect.usedParams.set(id);
   }
 }
 

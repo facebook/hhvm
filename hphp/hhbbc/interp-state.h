@@ -419,6 +419,10 @@ struct CollectedInfo {
   bool (*propagate_constants)(const Bytecode& bc, State& state,
                               std::vector<Bytecode>& out) = nullptr;
   CompactVector<Type> localStaticTypes;
+  /*
+   * See FuncAnalysisResult for details.
+   */
+  std::bitset<64> usedParams;
 };
 
 //////////////////////////////////////////////////////////////////////

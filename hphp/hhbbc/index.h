@@ -639,6 +639,11 @@ struct Index {
   folly::Optional<Cell> lookup_persistent_constant(SString cnsName) const;
 
   /*
+   * Return true if the return value of the function might depend on arg.
+   */
+  bool func_depends_on_arg(const php::Func* func, int arg) const;
+
+  /*
    * If func is effect-free when called with args, and it returns a constant,
    * return that constant; otherwise return TTop.
    */
@@ -853,8 +858,7 @@ struct Index {
    * Merges the set of Contexts that depended on the return type of
    * this php::Func into deps.
    */
-  void refine_return_type(const php::Func*,
-                          Type, LocalId,
+  void refine_return_info(const FuncAnalysisResult& fa,
                           DependencyContextSet& deps);
 
   /*

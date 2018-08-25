@@ -332,6 +332,13 @@ struct res::Func::FuncInfo {
    * Type info for local statics.
    */
   CompactVector<Type> localStaticTypes;
+
+  /*
+   * Bitset representing which parameters definitely don't affect the
+   * result of the function, assuming it produces one. Note that
+   * VerifyParamType does not count as a use in this context.
+   */
+  std::bitset<64> unusedParams;
 };
 
 namespace {
@@ -4599,6 +4606,11 @@ folly::Optional<Cell> Index::lookup_persistent_constant(SString cnsName) const {
   return tv(it->second.type);
 }
 
+bool Index::func_depends_on_arg(const php::Func* func, int arg) const {
+  auto const& finfo = *func_info(*m_data, func);
+  return arg >= finfo.unusedParams.size() || !finfo.unusedParams.test(arg);
+}
+
 Type Index::lookup_foldable_return_type(Context ctx,
                                         const php::Func* func,
                                         std::vector<Type> args) const {
@@ -5199,42 +5211,65 @@ void Index::init_return_type(const php::Func* func) {
   finfo->returnTy = std::move(tcT);
 }
 
-void Index::refine_return_type(const php::Func* func,
-                               Type t, LocalId param,
+void Index::refine_return_info(const FuncAnalysisResult& fa,
                                DependencyContextSet& deps) {
+  auto const& t = fa.inferredReturn;
+  auto const func = fa.ctx.func;
   auto const finfo = create_func_info(*m_data, func);
 
-  always_assert_flog(
-    t.moreRefined(finfo->returnTy),
-    "Index return type invariant violated in {} {}{}.\n"
-    "   {} is not a subtype of {}\n",
-    func->unit->filename->data(),
-    func->cls ? folly::to<std::string>(func->cls->name->data(), "::")
-              : std::string{},
-    func->name->data(),
-    show(t),
-    show(finfo->returnTy)
-  );
+  auto error_loc = [&] {
+    return folly::sformat(
+        "{} {}{}",
+        func->unit->filename,
+        func->cls ?
+        folly::to<std::string>(func->cls->name->data(), "::") : std::string{},
+        func->name
+    );
+  };
 
-  always_assert_flog(
-      param != NoLocalId || finfo->retParam == NoLocalId,
-      "Index retParam went from {} to unset in {} {}{}.\n",
-      func->unit->filename->data(),
-      func->cls ? folly::to<std::string>(func->cls->name->data(), "::")
-                : std::string{},
-      func->name->data()
-  );
-
-  finfo->retParam = param;
-  if (!t.strictlyMoreRefined(finfo->returnTy)) return;
-  if (finfo->returnRefinments + 1 < options.returnTypeRefineLimit) {
-    finfo->returnTy = t;
-    ++finfo->returnRefinments;
-    find_deps(*m_data, func, Dep::ReturnTy, deps);
-    return;
+  auto changes = false;
+  if (t.strictlyMoreRefined(finfo->returnTy)) {
+    if (finfo->returnRefinments + 1 < options.returnTypeRefineLimit) {
+      finfo->returnTy = t;
+      ++finfo->returnRefinments;
+      changes = true;
+    } else {
+      FTRACE(1, "maxed out return type refinements at {}\n", error_loc());
+    }
+  } else {
+    always_assert_flog(
+        t.moreRefined(finfo->returnTy),
+        "Index return type invariant violated in {}.\n"
+        "   {} is not at least as refined as {}\n",
+        error_loc(),
+        show(t),
+        show(finfo->returnTy)
+    );
   }
-  FTRACE(1, "maxed out return type refinements on {}:{}\n",
-         func->unit->filename, func->name);
+
+  if (finfo->retParam != fa.retParam) {
+    changes = true;
+    always_assert_flog(
+        fa.retParam != NoLocalId,
+        "Index retParam went from {} to unset in {}.\n",
+        finfo->retParam,
+        error_loc()
+    );
+    finfo->retParam = fa.retParam;
+  }
+
+  auto unusedParams = ~fa.usedParams;
+  if (finfo->unusedParams != unusedParams) {
+    changes = true;
+    always_assert_flog(
+        (finfo->unusedParams | unusedParams) == unusedParams,
+        "Index unusedParams decreased in {}.\n",
+        error_loc()
+    );
+    finfo->unusedParams = unusedParams;
+  }
+
+  if (changes) find_deps(*m_data, func, Dep::ReturnTy, deps);
 }
 
 bool Index::refine_closure_use_vars(const php::Class* cls,

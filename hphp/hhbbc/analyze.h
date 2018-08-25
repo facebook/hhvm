@@ -123,8 +123,17 @@ struct FuncAnalysisResult {
    */
   CompactVector<Type> localStaticTypes;
 
-  // For an 86cinit, any constants that we resolved.
-  // The size_t is the index into ctx.cls->constants
+  /*
+   * Bitset representing which parameters may affect the result of the
+   * function, assuming it produces one. Note that VerifyParamType
+   * does not count as a use in this context.
+   */
+  std::bitset<64> usedParams;
+
+  /*
+   * For an 86cinit, any constants that we resolved.
+   * The size_t is the index into ctx.cls->constants
+   */
   CompactVector<std::pair<size_t,TypedValue>> resolvedConstants;
 };
 

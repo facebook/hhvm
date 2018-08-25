@@ -3370,9 +3370,15 @@ void fcallKnownImpl(ISS& env, uint32_t numArgs, bool unpack, uint32_t numRets) {
         }
         std::vector<Type> args(numArgs);
         for (auto i = uint32_t{0}; i < numArgs; ++i) {
-          auto const arg = topT(env, i);
-          if (!is_scalar(arg)) return TBottom;
-          args[numArgs - i - 1] = scalarize(arg);
+          auto const& arg = topT(env, i);
+          auto const argNum = numArgs - i - 1;
+          auto const isScalar = is_scalar(arg);
+          if (!isScalar &&
+              (env.index.func_depends_on_arg(func, argNum) ||
+               !arg.subtypeOf(BInitCell))) {
+            return TBottom;
+          }
+          args[argNum] = isScalar ? scalarize(arg) : arg;
         }
 
         return env.index.lookup_foldable_return_type(
@@ -4055,6 +4061,8 @@ bool couldBeMocked(const Type& t) {
 }
 
 void in(ISS& env, const bc::VerifyParamType& op) {
+  IgnoreUsedParams _{env};
+
   if (env.ctx.func->isMemoizeImpl &&
       !locCouldBeRef(env, op.loc1) &&
       RuntimeOption::EvalHardTypeHints) {

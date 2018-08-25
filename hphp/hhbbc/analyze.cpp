@@ -442,6 +442,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
   ai.effectFree = collect.effectFree;
   ai.hasInvariantIterBase = collect.hasInvariantIterBase;
   ai.unfoldableFuncs = collect.unfoldableFuncs;
+  ai.usedParams = collect.usedParams;
 
   index.fixup_return_type(ctx.func, ai.inferredReturn);
 

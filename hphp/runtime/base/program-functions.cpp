@@ -1680,6 +1680,10 @@ static int execute_program_impl(int argc, char** argv) {
   }
 
   if (!po.show.empty()) {
+    hphp_thread_init();
+    g_context.getCheck();
+    SCOPE_EXIT { hphp_thread_exit(); };
+
     auto f = req::make<PlainFile>();
     f->open(po.show, "r");
     if (!f->valid()) {

@@ -280,8 +280,51 @@ InstrSet findLiterals(Instruction* start, Instruction* end) {
 }
 
 /*
- * This function attempts to optimize a pattern that looks like a smashable jcc,
- * i.e.:
+ * A far JCC pattern is:
+ *     B.cc NEXT
+ *     LDR Rx, LITERAL_ADDR
+ *     BR Rx
+ *  NEXT:
+ *
+ * Note that the condition code is the inverse of the condition code that is
+ * emitted if the JCC is not far (i.e., it's a single direct branch
+ * instruction).
+ */
+constexpr auto kFarJccLen = 3 * kInstructionSize;
+
+TCA farJccTarget(TCA inst) {
+  auto const b = Instruction::Cast(inst);
+  auto const ldr = b->NextInstruction();
+  auto const br = ldr->NextInstruction();
+  auto const next = br->NextInstruction();
+
+  if (b->IsCondBranchImm() &&
+      b->ImmPCOffsetTarget() == next &&
+      ldr->IsLoadLiteral() &&
+      ldr->Mask(LoadLiteralMask) == LDR_w_lit &&
+      br->Mask(UnconditionalBranchToRegisterMask) == BR &&
+      br->Rn() == ldr->Rd()) {
+    auto const target32 = *reinterpret_cast<uint32_t*>(ldr->LiteralAddress());
+    assertx((target32 & 3) == 0);
+    return reinterpret_cast<TCA>(target32);
+  }
+
+  return nullptr;
+}
+
+/*
+ * Returns a far JCC's original condition, which is inverted in the emitted
+ * code pattern.
+ */
+ConditionCode farJccCond(TCA inst) {
+  auto const b = Instruction::Cast(inst);
+  assertx(b->IsCondBranchImm());
+  return arm::convertCC(InvertCondition(static_cast<Condition>(b->Bits(3, 0))));
+}
+
+
+/*
+ * This function attempts to optimize a "far jcc" pattern, i.e.:
  *   B.<cc> (after)
  *   LDR Reg (literal A)
  *   BR Reg
@@ -299,16 +342,17 @@ InstrSet findLiterals(Instruction* start, Instruction* end) {
  *
  * This function returns whether or not the code was optimized.
  */
-bool optimizeSmashableLookingJcc(Env& env, TCA srcAddr, TCA destAddr,
-                                 size_t& srcCount, size_t& destCount) {
+bool optimizeFarJcc(Env& env, TCA srcAddr, TCA destAddr,
+                    size_t& srcCount, size_t& destCount) {
   auto const srcFrom = Instruction::Cast(srcAddr);
   auto const srcAddrActual = env.srcBlock.toDestAddress(srcAddr);
   auto const src = Instruction::Cast(srcAddrActual);
 
+  if (env.meta.smashableLocations.count(srcAddr)) return false;
   if (env.far.count(src)) return false;
-  if (env.end < srcAddr + smashableJccLen()) return false;
+  if (env.end < srcAddr + kFarJccLen) return false;
 
-  auto const target = smashableJccTarget(srcAddrActual);
+  auto const target = farJccTarget(srcAddrActual);
   if (!target) return false;
 
   auto adjusted = env.rel.adjustedAddressAfter(target);
@@ -338,7 +382,7 @@ bool optimizeSmashableLookingJcc(Env& env, TCA srcAddr, TCA destAddr,
   env.destBlock.setFrontier(destAddr);
 
   // This inverts the condition code for us.
-  auto const cc = arm::convertCC(smashableJccCond(srcAddrActual));
+  auto const cc = arm::convertCC(farJccCond(srcAddrActual));
 
   if (is_int19(imm)) {
     a.b(imm, cc);
@@ -352,7 +396,7 @@ bool optimizeSmashableLookingJcc(Env& env, TCA srcAddr, TCA destAddr,
     destCount++;
   }
 
-  srcCount = smashableJccLen() >> kInstructionSizeLog2;
+  srcCount = kFarJccLen >> kInstructionSizeLog2;
 
   for (auto i = src;
        i < src + (srcCount << kInstructionSizeLog2);
@@ -361,50 +405,57 @@ bool optimizeSmashableLookingJcc(Env& env, TCA srcAddr, TCA destAddr,
   }
   env.updateInternalRefs = true;
   FTRACE(3,
-         "Relocated and optimized smashable looking jcc at src {} with target "
-         "{} to {}.\n",
+         "Relocated and optimized a far JCC at src {} with target {} to {}.\n",
          srcAddrActual, target, env.destBlock.toDestAddress(destAddr));
 
   return true;
 }
 
 /*
+ * A far JMP pattern is:
+ *    LDR x, LITERAL_ADDR
+ *    BR  x
+ */
+constexpr auto kFarJmpLen = 2 * kInstructionSize;
+
+TCA farJmpTarget(TCA inst) {
+  auto const ldr = Instruction::Cast(inst);
+  auto const br = ldr->NextInstruction();
+
+  if (ldr->IsLoadLiteral() &&
+      ldr->Mask(LoadLiteralMask) == LDR_w_lit &&
+      br->Mask(UnconditionalBranchToRegisterMask) == BR &&
+      br->Rn() == ldr->Rd()) {
+    auto const target32 = *reinterpret_cast<uint32_t*>(ldr->LiteralAddress());
+    assertx((target32 & 3) == 0);
+    return reinterpret_cast<TCA>(target32);
+  }
+
+  return nullptr;
+}
+
+/*
  * This attempts to shrink Ldr, Br sequences to PC relative branches.
- * This pattern is exactly the pattern of a smashable jmp sequence.  This
- * relies on alignment constraints preventing this optimization from happening
- * to smashable locations.
  * This returns true if it was able to shrink the the sequence, otherwise it
  * returns false.
- *
- * NOTE: This helper will optimize sequences that are not smashables but which
- *       are identical to smashables. Namely the sequences emitted for
- *       jmp{} and jcc{} which use LDR literals for ease of patching at the
- *       end of the translation. It's important to note that a smashable-like
- *       sequence can be optimized during static relocation, but that an
- *       actual smashable can't be optimized until live relocation and then
- *       only if it has been smashed. Currently there is no means to know
- *       if a smashable has been smashed, and so this optimization of
- *       smashables during live relocation is not yet performed at all.
  *
  * destCount, srcCount and rewrites are updated to reflect when an
  * instruction(s) is rewritten to a different instruction sequence.
  * env.literalsToRemove is updated to include any literals that are no long
  * used.
  */
-bool optimizeSmashableLookingJmp(Env& env, TCA srcAddr, TCA destAddr,
-                                 size_t& srcCount, size_t& destCount) {
+bool optimizeFarJmp(Env& env, TCA srcAddr, TCA destAddr,
+                    size_t& srcCount, size_t& destCount) {
   auto const srcFrom = Instruction::Cast(srcAddr);
   auto const srcAddrActual = env.srcBlock.toDestAddress(srcAddr);
   auto const src = Instruction::Cast(srcAddrActual);
 
+  if (env.meta.smashableLocations.count(srcAddr)) return false;
+  if (env.meta.veneerAddrs.count(srcAddr)) return false;
   if (env.far.count(src)) return false;
-  if (env.end < srcAddr + smashableJmpLen()) return false;
+  if (env.end < srcAddr + kFarJmpLen) return false;
 
-  /*
-   * We rely on the alignment constraints preventing this optimization from
-   * happening to smashable locations.
-   */
-  auto target = smashableJmpTarget(srcAddrActual);
+  auto target = farJmpTarget(srcAddrActual);
 
   if (!target) return false;
 
@@ -450,7 +501,7 @@ bool optimizeSmashableLookingJmp(Env& env, TCA srcAddr, TCA destAddr,
     destCount += (env.destBlock.frontier() - destAddr) >> kInstructionSizeLog2;
   }
 
-  srcCount = smashableJmpLen() >> kInstructionSizeLog2;
+  srcCount = kFarJmpLen >> kInstructionSizeLog2;
   for (auto i = src;
        i < src + (srcCount << kInstructionSizeLog2);
        i = i->NextInstruction()) {
@@ -458,8 +509,7 @@ bool optimizeSmashableLookingJmp(Env& env, TCA srcAddr, TCA destAddr,
   }
   env.updateInternalRefs = true;
   FTRACE(3,
-         "Relocated and optimized smashable looking jmp at src {} with target "
-         "{} to {}.\n",
+         "Relocated and optimized far JMP at src {} with target {} to {}.\n",
          srcAddrActual, target, env.destBlock.toDestAddress(destAddr));
 
   return true;
@@ -897,10 +947,8 @@ size_t relocateImpl(Env& env) {
         }
         // Relocate functions are needed for correctness, while optimize
         // functions will attempt to improve instruction sequences.
-        optimizeSmashableLookingJcc(env, srcAddr, destAddr, srcCount,
-                                    destCount) ||
-        optimizeSmashableLookingJmp(env, srcAddr, destAddr, srcCount,
-                                    destCount) ||
+        optimizeFarJcc(env, srcAddr, destAddr, srcCount, destCount) ||
+        optimizeFarJmp(env, srcAddr, destAddr, srcCount, destCount) ||
         relocatePCRelative(env, srcAddr, destAddr, srcCount, destCount) ||
         relocateImmediate(env, srcAddr, destAddr, srcCount, destCount);
       }

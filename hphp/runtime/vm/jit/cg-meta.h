@@ -102,6 +102,17 @@ struct CGMeta {
    */
   jit::fast_map<uint64_t, const uint64_t*> literalAddrs;
 
+  struct VeneerData {
+    TCA source; // address of instruction that jumps/calls the veneer
+    TCA target; // address that the veneer jumps to
+  };
+  std::vector<VeneerData> veneers;
+
+  /*
+   * Addresses of veneers.
+   */
+  std::set<TCA> veneerAddrs;
+
   /*
    * All the alignment constraints on each code address.
    */
@@ -142,7 +153,7 @@ struct CGMeta {
 
   /*
    * Smashable locations. Used on relocation to be sure a smashable instruction
-   * is not optimized in size.
+   * is not optimized.
    */
   std::set<TCA> smashableLocations;
 
@@ -202,7 +213,9 @@ Reason* getTrapReason(CTCA addr);
  * Pool up literal to be emitted at patch time.
  */
 void poolLiteral(CodeBlock& cb, CGMeta& meta, uint64_t val, uint8_t width,
-                  bool smashable);
+                 bool smashable);
+
+void addVeneer(CGMeta& meta, TCA source, TCA target);
 
 folly::Optional<IStack> inlineStackAt(CTCA addr);
 IFrame getInlineFrame(IFrameID id);

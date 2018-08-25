@@ -311,6 +311,8 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
     irmu.register_block_end();
   }
 
+  Vemit::emitVeneers(env);
+
   Vemit::handleLiterals(env);
 
   // Emit service request stubs and register patch points.

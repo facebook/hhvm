@@ -76,10 +76,10 @@ TCA bindJmp(TCA toSmash, SrcKey destSk, TransFlags /*trflags*/, bool& smashed) {
 
   if (isJcc) {
     auto const target = smashableJccTarget(toSmash);
-    assertx(target);
-
-    // Return if already smashed.
-    if (target == tDest) return tDest;
+    // Return if already smashed.  Note that smashableJccTarget returns nullptr
+    // when the target was smashed if the JCC was able to be optimized in place
+    // (so that it doesn't look like a smashable JCC anymore).
+    if (target == nullptr || target == tDest) return tDest;
     sr->chainFrom(IncomingBranch::jccFrom(toSmash));
   } else {
     auto const target = smashableJmpTarget(toSmash);

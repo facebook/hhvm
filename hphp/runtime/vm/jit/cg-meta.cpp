@@ -152,6 +152,11 @@ void poolLiteral(CodeBlock& cb, CGMeta& meta, uint64_t val, uint8_t width,
   );
 }
 
+void addVeneer(CGMeta& meta, TCA source, TCA target) {
+  FTRACE(5, "addVeneer: source = {}, target = {}\n", source, target);
+  meta.veneers.emplace_back(CGMeta::VeneerData{source, target});
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 void CGMeta::setJmpTransID(TCA jmp, TransID transID, TransKind kind) {
@@ -245,6 +250,7 @@ void CGMeta::clear() {
   jmpTransIDs.clear();
   literalsToPool.clear();
   literalAddrs.clear();
+  veneers.clear();
   alignments.clear();
   reusedStubs.clear();
   addressImmediates.clear();
@@ -265,6 +271,7 @@ bool CGMeta::empty() const {
     jmpTransIDs.empty() &&
     literalsToPool.empty() &&
     literalAddrs.empty() &&
+    veneers.empty() &&
     alignments.empty() &&
     reusedStubs.empty() &&
     addressImmediates.empty() &&

@@ -218,6 +218,7 @@ struct Vgen {
     env.cb->sync(base);
   }
 
+  static void emitVeneers(Venv& env);
   static void handleLiterals(Venv& env);
   static void patch(Venv& env);
 
@@ -443,6 +444,103 @@ static CodeAddress toReal(Venv& env, CodeAddress a) {
   return (b == nullptr) ? a : b->toDestAddress(a);
 }
 
+void Vgen::emitVeneers(Venv& env) {
+  auto& meta = env.meta;
+  decltype(env.meta.veneers) notEmitted;
+
+  for (auto const& veneer : meta.veneers) {
+    auto cb = getBlock(env, veneer.source);
+    if (!cb) {
+      // If we can't find the code block, it must have been emitted by a Vunit
+      // wrapping this one (retransopt emits a Vunit within a Vunit).
+      notEmitted.push_back(veneer);
+      continue;
+    }
+    auto const vaddr = cb->frontier();
+
+    FTRACE(1, "emitVeneers: source = {}, target = {}, veneer at {}\n",
+           veneer.source, veneer.target, vaddr);
+
+    // Emit the veneer code: LDR + BR.
+    meta.veneerAddrs.insert(vaddr);
+    MacroAssembler av{*cb};
+    vixl::Label target_data;
+    meta.addressImmediates.insert(vaddr);
+    poolLiteral(*cb, meta, (uint64_t)makeTarget32(veneer.target), 32, true);
+    av.bind(&target_data);
+    av.Ldr(rAsm_w, &target_data);
+    av.Br(rAsm);
+
+    // Update the veneer source instruction to jump/call the veneer.
+    auto const realSource = toReal(env, veneer.source);
+    CodeBlock tmpBlock;
+    tmpBlock.init(realSource, kInstructionSize, "emitVeneers");
+    MacroAssembler at{tmpBlock};
+    int64_t offset = vaddr - veneer.source;
+    auto sourceInst = Instruction::Cast(realSource);
+
+    if (sourceInst->Mask(UnconditionalBranchMask) == B) {
+      always_assert(is_int28(offset));
+      at.b(offset >> kInstructionSizeLog2);
+
+    } else if (sourceInst->Mask(UnconditionalBranchMask) == BL) {
+      always_assert(is_int28(offset));
+      at.bl(offset >> kInstructionSizeLog2);
+
+    } else if (sourceInst->IsCondBranchImm()) {
+      auto const cond = static_cast<Condition>(sourceInst->ConditionBranch());
+      if (is_int21(offset)) {
+        at.b(offset >> kInstructionSizeLog2, cond);
+      } else {
+        // The offset doesn't fit in a conditional jump. Hopefully it still fits
+        // in an unconditional jump, in which case we add an appendix to the
+        // veneer.
+        offset += 2 * kInstructionSize;
+        always_assert(is_int28(offset));
+        // Add an appendix to the veneer, and jump to it instead.  The full
+        // veneer in this case looks like:
+        //   VENEER:
+        //      LDR RX, LITERAL_ADDR
+        //      BR  RX
+        //   APPENDIX:
+        //      B.CC VENEER
+        //      B NEXT
+        // And the conditional jump into the veneer is turned into a jump to the
+        // appendix:
+        //      B APPENDIX
+        //   NEXT:
+
+        // Turn the original conditional branch into an unconditional one.
+        at.b(offset >> kInstructionSizeLog2);
+
+        // Emit appendix.
+        auto const appendix = cb->frontier();
+        av.b(-2 /* veneer starts 2 instructions before the appendix */, cond);
+        const int64_t nextOffset = (veneer.source + kInstructionSize) - // NEXT
+          (vaddr + 3 * kInstructionSize); // addr of "B NEXT"
+        always_assert(is_int28(nextOffset));
+        av.b(nextOffset >> kInstructionSizeLog2);
+
+        // Replace veneer.source with appendix in the relevant metadata.
+        meta.smashableLocations.erase(veneer.source);
+        meta.smashableLocations.insert(appendix);
+        for (auto& tj : meta.inProgressTailJumps) {
+          if (tj.toSmash() == veneer.source) tj.adjust(appendix);
+        }
+        for (auto& stub : env.stubs) {
+          if (stub.jcc == veneer.source) stub.jcc = appendix;
+        }
+      }
+    } else {
+      always_assert_flog(0, "emitVeneers: invalid source instruction at source"
+                         " {} (realSource = {})",
+                         veneer.source, realSource);
+    }
+  }
+
+  env.meta.veneers.swap(notEmitted);
+}
+
 void Vgen::handleLiterals(Venv& env) {
   decltype(env.meta.literalsToPool) notEmitted;
   jit::fast_map<CodeBlock*, CodeAddress> headers;
@@ -516,18 +614,32 @@ void Vgen::patch(Venv& env) {
   };
 
   for (auto& p : env.jmps) {
-    auto const addr = toReal(env, p.instr);
+    auto addr = toReal(env, p.instr);
     auto const target = env.addrs[p.target];
     assertx(target);
+    if (env.meta.smashableLocations.count(p.instr)) {
+      assertx(possiblySmashableJmp(addr));
+      // Update `addr' to point to the veneer.
+      addr = TCA(vixl::Instruction::Cast(addr)->ImmPCOffsetTarget());
+    }
     // Patch the address we are jumping to.
     patch(addr, target);
   }
   for (auto& p : env.jccs) {
-    auto const addr = toReal(env, p.instr);
+    auto addr = toReal(env, p.instr);
     auto const target = env.addrs[p.target];
     assertx(target);
-    // Patch the jump sequence following the B.<CC>.
-    patch(addr + 4, target);
+    if (env.meta.smashableLocations.count(p.instr)) {
+      assertx(possiblySmashableJcc(addr));
+      // Update `addr' to point to the veneer.
+      addr = TCA(vixl::Instruction::Cast(addr)->ImmPCOffsetTarget());
+    } else {
+      assertx(Instruction::Cast(addr)->IsCondBranchImm());
+      // If the jcc starts with a conditional jump, patch the next instruction
+      // (which should start with a LDR).
+      addr += kInstructionSize;
+    }
+    patch(addr, target);
   }
 }
 
@@ -849,8 +961,8 @@ void Vgen::emit(const jcc& i) {
     jccs.push_back({a->frontier(), taken});
     vixl::Label skip, data;
 
-    // Emit a sequence similar to a smashable for easy patching later.
-    // Static relocation might be able to simplify the branch.
+    // Emit a "far JCC" sequence for easy patching later.  Static relocation
+    // might be able to simplify this later (see optimizeFarJcc()).
     recordAddressImmediate();
     a->B(&skip, vixl::InvertCondition(C(i.cc)));
     recordAddressImmediate();
@@ -879,8 +991,8 @@ void Vgen::emit(const jmp& i) {
   jmps.push_back({a->frontier(), i.target});
   vixl::Label data;
 
-  // Emit a sequence similar to a smashable for easy patching later.
-  // Static relocation might be able to simplify the branch.
+  // Emit a "far JMP" sequence for easy patching later.  Static relocation
+  // might be able to simplify this (see optimizeFarJmp()).
   recordAddressImmediate();
   poolLiteral(*env.cb, env.meta, (uint64_t)a->frontier(), 32, false);
   a->bind(&data); // This will be remapped during the handleLiterals phase.

@@ -285,6 +285,24 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
     }
   }
 
+  for (auto& v : meta.veneers) {
+    bool updated = false;
+    DEBUG_ONLY auto const before = v;
+    if (auto adjustedSource = rel.adjustedAddressAfter(v.source)) {
+      v.source = adjustedSource;
+      updated = true;
+    }
+    if (auto adjustedTarget = rel.adjustedAddressAfter(v.target)) {
+      v.target = adjustedTarget;
+      updated = true;
+    }
+    if (updated) {
+      FTRACE_MOD(Trace::mcg, 3,
+                 "adjustMetaDataForRelocation(veneers): ({}, {}) => ({}, {})\n",
+                 before.source, before.target, v.source, v.target);
+    }
+  }
+
   decltype(meta.smashableLocations) updatedSL;
   for (auto sl : meta.smashableLocations) {
     if (auto adjusted = rel.adjustedAddressAfter(sl)) {

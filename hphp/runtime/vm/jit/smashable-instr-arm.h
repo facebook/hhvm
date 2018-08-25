@@ -37,14 +37,13 @@ namespace arm {
  */
 
 /*
- * Number of instructions (each of which is four bytes) in the sequence, plus
- * the size of the smashable immediate.
+ * Number of bytes in the instruction sequence.
  */
 constexpr size_t smashableMovqLen() { return 4; }
 constexpr size_t smashableCmpqLen() { return 0; }
-constexpr size_t smashableCallLen() { return 4 + 4; }
-constexpr size_t smashableJmpLen()  { return 4 + 4; }
-constexpr size_t smashableJccLen()  { return 4 + smashableJmpLen(); }
+constexpr size_t smashableCallLen() { return 4; } // not including veneer
+constexpr size_t smashableJmpLen()  { return 4; } // not including veneer
+constexpr size_t smashableJccLen()  { return 4; } // not including veneer
 
 /*
  * Don't align the smashables on arm.  The sensitive part of the instruction is
@@ -67,6 +66,9 @@ void smashJmp(TCA inst, TCA target);
 void smashJcc(TCA inst, TCA target);
 
 bool possiblySmashableMovq(TCA inst);
+bool possiblySmashableJmp(TCA inst);
+bool possiblySmashableJcc(TCA inst);
+
 uint64_t smashableMovqImm(TCA inst);
 uint32_t smashableCmpqImm(TCA inst);
 TCA smashableCallTarget(TCA inst);
@@ -104,6 +106,14 @@ inline void patchTarget64(TCA inst, TCA target) {
   *reinterpret_cast<uint64_t*>(inst) = reinterpret_cast<uint64_t>(target);
   auto const begin = inst;
   auto const end = begin + 8;
+  DataBlock::syncDirect(begin, end);
+}
+
+inline void smashInst(TCA addr, uint32_t newInst) {
+  assertx(((uint64_t)addr & 3) == 0);
+  *reinterpret_cast<uint32_t*>(addr) = newInst;
+  auto const begin = addr;
+  auto const end = begin + 4;
   DataBlock::syncDirect(begin, end);
 }
 

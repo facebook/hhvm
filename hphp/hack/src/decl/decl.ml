@@ -118,11 +118,6 @@ let experimental_no_trait_reuse_enabled env =
   env.Decl_env.decl_tcopt
   TypecheckerOptions.experimental_no_trait_reuse)
 
-let lateinit_enabled env =
-  TypecheckerOptions.experimental_feature_enabled
-    env.Decl_env.decl_tcopt
-    TypecheckerOptions.experimental_lateinit
-
 let report_reused_trait parent_type class_nast =
   Errors.trait_reuse parent_type.dc_pos parent_type.dc_name class_nast.c_name
 
@@ -792,7 +787,6 @@ and class_var_decl env c acc cv =
   let vis = visibility (snd c.c_name) cv.cv_visibility in
   let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
   let lateinit = Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes in
-  let lateinit = lateinit_enabled env && lateinit in
   let elt = {
     elt_final = true;
     elt_is_xhp_attr = cv.cv_is_xhp;
@@ -819,7 +813,6 @@ and static_class_var_decl env c acc cv =
   let id = "$" ^ cv_name in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
   let lateinit = Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes in
-  let lateinit = lateinit_enabled env && lateinit in
   let elt = {
     elt_final = true;
     elt_const = false; (* unsupported for static properties *)

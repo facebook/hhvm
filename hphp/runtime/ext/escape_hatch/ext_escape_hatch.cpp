@@ -36,10 +36,6 @@ namespace HPHP {
  * - Another byte, ignored.
  * - An unsigned 32 bit big endian integer indicating the length of the
  *   payload to come.
- *
- * There are no timeouts, and possibly other gotchas. Careful!
- *
- * Grab some data and let's get the hell outta Dodge.
  */
 
 static const auto optPool = String::FromCStr("pool");

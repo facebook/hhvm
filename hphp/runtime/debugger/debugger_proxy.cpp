@@ -535,12 +535,12 @@ struct DebuggerLoggerHook final : LoggerHook {
 
 std::string DebuggerProxy::MakePHP(const std::string &php) {
   TRACE(2, "DebuggerProxy::MakePHP\n");
-  return "<?php " + php + ";";
+  return "<?hh " + php + ";";
 }
 
 std::string DebuggerProxy::MakePHPReturn(const std::string &php) {
   TRACE(2, "DebuggerProxy::MakePHPReturn\n");
-  return "<?php return " + php + ";";
+  return "<?hh return " + php + ";";
 }
 
 // Record info about the current thread for the debugger client to use

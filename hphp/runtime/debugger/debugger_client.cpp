@@ -1956,7 +1956,7 @@ void DebuggerClient::processTakeCode() {
   char first = m_line[0];
   if (first == '@') {
     usageLogCommand("@", m_line);
-    m_code = std::string("<?php ") + (m_line.c_str() + 1) + ";";
+    m_code = std::string("<?hh ") + (m_line.c_str() + 1) + ";";
     processEval();
     return;
   } else if (first == '=') {
@@ -1965,20 +1965,20 @@ void DebuggerClient::processTakeCode() {
       // strip the trailing ;
       m_line = m_line.substr(0, m_line.size() - 1);
     }
-    m_code = std::string("<?php $_=(") + m_line.substr(1) + "); ";
+    m_code = std::string("<?hh $_=(") + m_line.substr(1) + "); ";
     if (processEval()) CmdVariable::PrintVariable(*this, s_UNDERSCORE);
     return;
   } else if (first != '<') {
     usageLogCommand("eval", m_line);
     // User entered something that did not start with @, =, or <
     // and also was not a debugger command. Interpret it as PHP.
-    m_code = "<?php ";
+    m_code = "<?hh ";
     m_code += m_line + ";";
     processEval();
     return;
   }
   usageLogCommand("<?php", m_line);
-  m_code = "<?php ";
+  m_code = "<?hh ";
   m_code += m_line.substr(m_command.length()) + "\n";
   m_inputState = TakingCode;
 

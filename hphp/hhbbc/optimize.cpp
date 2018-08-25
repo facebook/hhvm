@@ -413,7 +413,7 @@ bool persistence_check(php::Block* const blk) {
 //////////////////////////////////////////////////////////////////////
 
 template<class Gen>
-bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
+bool propagate_constants(const Bytecode& op, State& state, Gen gen) {
   auto const numPop  = op.numPop();
   auto const numPush = op.numPush();
   auto const stkSize = state.stack.size();
@@ -465,6 +465,7 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
     auto const v = i < numCells ?
       constVals[i] : *tv(state.stack[stkSize - i - 1].type);
     gen(gen_constant(v));
+    state.stack[stkSize - i - 1].type = from_cell(v);
 
     // Similar special case for FCallBuiltin.  We need to turn things into R
     // flavors since opcode that followed the call are going to expect that
@@ -478,7 +479,7 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
   return true;
 }
 
-bool propagate_constants(const Bytecode& bc, const State& state,
+bool propagate_constants(const Bytecode& bc, State& state,
                          std::vector<Bytecode>& out) {
   return propagate_constants(bc, state, [&] (const Bytecode& bc) {
       out.push_back(bc);

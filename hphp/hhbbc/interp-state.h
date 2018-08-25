@@ -416,7 +416,7 @@ struct CollectedInfo {
   bool hasInvariantIterBase{false};
   bool readsUntrackedConstants{false};
   const CollectionOpts opts{CollectionOpts::TrackConstantArrays};
-  bool (*propagate_constants)(const Bytecode& bc, const State& state,
+  bool (*propagate_constants)(const Bytecode& bc, State& state,
                               std::vector<Bytecode>& out) = nullptr;
   CompactVector<Type> localStaticTypes;
 };

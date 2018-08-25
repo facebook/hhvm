@@ -239,11 +239,21 @@ void doRet(ISS& env, Type t, bool hasEffects) {
   env.flags.returned = t;
   if (hasEffects) return;
   nothrow(env);
-  for (auto const& l : env.state.locals) {
+
+  // If we're doing EffectFreeOnly analysis, we don't care about
+  // params that might have side effects when they're destroyed,
+  // because those params will just get popped if we drop the call,
+  // with exactly the same results.
+  auto i = any(env.collect.opts & CollectionOpts::EffectFreeOnly) ?
+    env.ctx.func->params.size() : 0;
+
+  while (i < env.state.locals.size()) {
+    auto const& l = env.state.locals[i++];
     if (could_run_destructor(l)) {
       return;
     }
   }
+
   effect_free(env);
 }
 
@@ -350,6 +360,12 @@ void push(ISS& env, Type t, LocalId l) {
  */
 bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
   auto foldable = [&] {
+    if (!options.ConstantFoldBuiltins) return false;
+    if (!env.collect.propagate_constants &&
+        any(env.collect.opts & CollectionOpts::Optimizing)) {
+      // we're in the optimization phase, but we're not folding constants
+      return false;
+    }
     if (nArgs < 0 ||
         ar.kind == FPIKind::Ctor ||
         ar.kind == FPIKind::Builtin ||

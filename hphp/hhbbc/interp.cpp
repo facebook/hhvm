@@ -1098,25 +1098,29 @@ void in(ISS& /*env*/, const bc::Jmp&) {
 
 template<bool Negate, class JmpOp>
 void jmpImpl(ISS& env, const JmpOp& op) {
-  nothrow(env);
   auto const location = topStkEquiv(env);
   auto const e = emptiness(popC(env));
   if (e == (Negate ? Emptiness::NonEmpty : Emptiness::Empty)) {
+    effect_free(env);
     jmp_setdest(env, op.target);
     env.propagate(op.target, &env.state);
     return;
   }
 
   if (e == (Negate ? Emptiness::Empty : Emptiness::NonEmpty)) {
+    effect_free(env);
     jmp_nevertaken(env);
     return;
   }
 
   if (next_real_block(*env.ctx.func, env.blk.fallthrough) ==
       next_real_block(*env.ctx.func, op.target)) {
+    effect_free(env);
     jmp_nevertaken(env);
     return;
   }
+
+  nothrow(env);
 
   if (location == NoLocalId) return env.propagate(op.target, &env.state);
 

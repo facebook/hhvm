@@ -217,6 +217,8 @@ void parse_options(int argc, char** argv) {
     setrlimit(RLIMIT_CORE, &rl);
   }
 
+  if (!options.ConstantProp) options.ConstantFoldBuiltins = false;
+
   options.TraceFunctions = make_method_map(trace_fns);
   options.TraceBytecodes = make_bytecode_map(trace_bcs);
 

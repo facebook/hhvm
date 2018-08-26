@@ -433,7 +433,7 @@ struct ActiveSubscription {
     folly::Promise<bool> promise;
     auto res_future = promise.getFuture();
     if (timeout != std::chrono::milliseconds::zero()) {
-      res_future = res_future.within(timeout)
+      res_future = std::move(res_future).within(timeout)
         .onError([](folly::FutureTimeout) {
           return false;
         });

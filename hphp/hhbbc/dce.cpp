@@ -1132,7 +1132,7 @@ void dce(Env& env, const bc::ClsRefName& op) {
   // If the usage of the name is discardable, then so is this read of the
   // class-ref.
   stack_ops(env, [&] (UseInfo& ui) {
-      if (allUnused(ui)) {
+      if (allUnused(ui) && !isLinked(ui)) {
         readSlotDiscardable(env, op.slot, std::move(ui.actions));
       } else {
         readSlot(env, op.slot);

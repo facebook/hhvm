@@ -1493,6 +1493,30 @@ void dce(Env& env, const bc::AddElemC& /*op*/) {
     });
 }
 
+template<typename Op>
+void dceNewArrayLike(Env& env, const Op& op) {
+  if (op.numPop() == 1 && allUnusedIfNotLastRef(env.dceState.stack.back())) {
+    // Just an optimization for when we have a single element array,
+    // but we care about its lifetime. By killing the array, and
+    // leaving its element on the stack, the lifetime is unaffected.
+    return markDead(env);
+  }
+  stack_ops(
+      env,
+      [&] (const UseInfo& ui) {
+        return allUnused(ui) ? PushFlags::MarkUnused : PushFlags::MarkLive;
+      }
+  );
+}
+
+void dce(Env& env, const bc::NewPackedArray& op)  { dceNewArrayLike(env, op); }
+void dce(Env& env, const bc::NewStructArray& op)  { dceNewArrayLike(env, op); }
+void dce(Env& env, const bc::NewStructDArray& op) { dceNewArrayLike(env, op); }
+void dce(Env& env, const bc::NewStructDict& op)   { dceNewArrayLike(env, op); }
+void dce(Env& env, const bc::NewVecArray& op)     { dceNewArrayLike(env, op); }
+void dce(Env& env, const bc::NewKeysetArray& op)  { dceNewArrayLike(env, op); }
+void dce(Env& env, const bc::NewVArray& op)       { dceNewArrayLike(env, op); }
+
 void dce(Env& env, const bc::PopL& op) {
   auto const effects = setLocCouldHaveSideEffects(env, op.loc1);
   if (!isLocLive(env, op.loc1) && !effects) {

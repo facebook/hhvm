@@ -1342,6 +1342,7 @@ private:
   struct TMIOps {
     // Return the name for the trait class.
     static const StringData* clsName(const Class* traitCls);
+    static const StringData* methName(const Func* method);
 
     // Is-a methods.
     static bool isTrait(const Class* traitCls);

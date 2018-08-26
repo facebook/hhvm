@@ -52,8 +52,9 @@ namespace HPHP {
  * functions:
  *
  * Ops {
- *    // Return the name for a trait class.
+ *    // Return the name for a trait class/method.
  *    String clsName(TraitMethod::class_type traitCls);
+ *    String methName(TraitMethod::method_type meth);
  *
  *    // Is-a methods.
  *    bool isTrait(TraitMethod::class_type traitCls);
@@ -184,6 +185,7 @@ private:
   // Map from trait method name to NameData.
   hphp_fast_map<String, NameData,
                 string_data_hash, string_data_isame> m_dataForName;
+  hphp_fast_map<typename TraitMethod::method_type, TraitMethod> m_inoutMethods;
 
   // Method names in order of first declaration.
   std::vector<String> m_orderedNames;

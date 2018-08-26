@@ -3779,6 +3779,10 @@ inline const StringData* Class::TMIOps::clsName(const Class* traitCls) {
   return traitCls->name();
 }
 
+inline const StringData* Class::TMIOps::methName(const Func* meth) {
+  return meth->name();
+}
+
 inline bool Class::TMIOps::isTrait(const Class* traitCls) {
   return traitCls->attrs() & AttrTrait;
 }
@@ -3937,34 +3941,14 @@ void Class::importTraitMethod(const TMIData::MethodData& mdata,
 void Class::importTraitMethods(MethodMapBuilder& builder) {
   TMIData tmid;
 
-  // For inout functions we cannot apply the trait aliasing rules (as their
-  // names have been mangled). All of these functions must either be wrappers
-  // for unmangled by-ref functions, or having unmangled wrappers, and so we
-  // retain a map of unmangled function -> mangled inout wrapper. After the
-  // trait rules have been applied to all unmangled functions we use the map
-  // to apply the same modifications to both the mangled and unmangled forms
-  // of each inout function.
-
-  // Map of ref wrapper -> inout function
-  std::unordered_map<const Func*, Func*> inoutFunctions;
-
   // Find all methods to be imported.
   for (auto const& t : m_extra->m_usedTraits) {
     Class* trait = t.get();
     for (Slot i = 0; i < trait->m_methods.size(); ++i) {
-      Func* method = trait->getMethod(i);
-      const StringData* methName = method->name();
-
-      if (method->takesInOutParams()) {
-        auto const wrapper = trait->lookupMethod(stripInOutSuffix(methName));
-        assertx(wrapper);
-
-        inoutFunctions.emplace(wrapper, method);
-        continue; // Don't apply any trait rules to the inout function
-      }
+      auto const method = trait->getMethod(i);
 
       TraitMethod traitMethod { trait, method, method->attrs() };
-      tmid.add(traitMethod, methName);
+      tmid.add(traitMethod, method->name());
     }
   }
 
@@ -3972,26 +3956,9 @@ void Class::importTraitMethods(MethodMapBuilder& builder) {
   applyTraitRules(tmid);
   auto traitMethods = tmid.finish(this);
 
-  auto getSuffix = [] (const StringData* name) {
-    auto start = name->data() + name->size() - sizeof(kInOutSuffix);
-    for (; *start != '$'; --start) assertx(start != name->data());
-    return folly::StringPiece(start, name->size() - (start - name->data()));
-  };
-
   // Import the methods.
   for (auto const& mdata : traitMethods) {
     importTraitMethod(mdata, builder);
-
-    if (auto io = folly::get_default(inoutFunctions, mdata.tm.method)) {
-      auto const sfx = getSuffix(io->name());
-      auto tm = mdata.tm;
-      tm.method = io;
-      auto ioData = TMIData::MethodData {
-        makeStaticString(folly::to<std::string>(mdata.name->data(), sfx)),
-        tm
-      };
-      importTraitMethod(ioData, builder);
-    }
   }
 }
 

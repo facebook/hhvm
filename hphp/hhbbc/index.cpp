@@ -1127,8 +1127,8 @@ struct TraitMethod {
       , modifiers(modifiers_)
     {}
 
-  const class_type trait;
-  const method_type method;
+  class_type trait;
+  method_type method;
   Attr modifiers;
 };
 
@@ -1147,6 +1147,11 @@ struct TMIOps {
   // Return the name for the trait class.
   static const string_type clsName(class_type traitCls) {
     return traitCls->cls->name;
+  }
+
+  // Return the name for the trait method.
+  static const string_type methName(method_type meth) {
+    return meth->name;
   }
 
   // Is-a methods.

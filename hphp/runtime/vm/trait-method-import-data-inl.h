@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/unit-util.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -23,7 +25,16 @@ TraitMethodImportData<TraitMethod, Ops>
 ::add(const TraitMethod& tm, const String& name) {
   if (Ops::exclude(name)) return;
 
-  bool found = m_dataForName.count(name);
+  if (tm.modifiers & AttrTakesInOutParams) {
+    assertx(name == Ops::methName(tm.method));
+    auto const wrapper = Ops::findTraitMethod(tm.trait,
+                                              stripInOutSuffix(name));
+    assertx(wrapper);
+    m_inoutMethods.emplace(wrapper, tm);
+    return;
+  }
+
+  auto const found = m_dataForName.count(name);
 
   m_dataForName[name].methods.push_back(tm);
   if (!found) m_orderedNames.push_back(name);
@@ -223,7 +234,24 @@ TraitMethodImportData<TraitMethod, Ops>
     }
 
     seenNames.insert(name);
-    output.push_back(MethodData { name, *methods.begin() });
+    auto const &front = *methods.begin();
+    output.push_back({name, front});
+    auto it = m_inoutMethods.find(front.method);
+    if (it != m_inoutMethods.end()) {
+      auto tm = front;
+      tm.method = it->second.method;
+      auto userName = Ops::methName(front.method);
+      auto internalName = Ops::methName(tm.method);
+      auto sfx = folly::StringPiece(
+          internalName->data() + userName->size(),
+          internalName->data() + internalName->size()
+      );
+      output.push_back(
+          {
+            makeStaticString(folly::to<std::string>(name->slice(), sfx)), tm
+          }
+      );
+    }
   };
 
   for (auto const& name : m_orderedNames) {

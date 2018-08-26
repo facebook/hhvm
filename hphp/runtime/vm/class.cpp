@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/native-prop-handler.h"
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/trait-method-import-data.h"
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
@@ -3760,122 +3761,141 @@ void Class::getMethodNames(const Class* cls,
 ///////////////////////////////////////////////////////////////////////////////
 // Trait method import.
 
-bool Class::TMIOps::exclude(const StringData* methName) {
-  return Func::isSpecial(methName);
-}
+namespace {
 
-void Class::TMIOps::addTraitAlias(const Class* cls,
-                                  const PreClass::TraitAliasRule& rule,
-                                  const Class* traitCls) {
-  PreClass::TraitAliasRule newRule { traitCls->name(),
-                                     rule.origMethodName(),
-                                     rule.newMethodName(),
-                                     rule.modifiers() };
-  cls->allocExtraData();
-  cls->m_extra.raw()->m_traitAliases.push_back(newRule.asNamePair());
-}
+struct TraitMethod {
+  TraitMethod(const Class* trait_, const Func* method_, Attr modifiers_)
+      : trait(trait_)
+      , method(method_)
+      , modifiers(modifiers_)
+    {}
 
-inline const StringData* Class::TMIOps::clsName(const Class* traitCls) {
-  return traitCls->name();
-}
+  using class_type = const Class*;
+  using method_type = const Func*;
 
-inline const StringData* Class::TMIOps::methName(const Func* meth) {
-  return meth->name();
-}
+  const Class* trait;
+  const Func* method;
+  Attr modifiers;
+};
 
-inline bool Class::TMIOps::isTrait(const Class* traitCls) {
-  return traitCls->attrs() & AttrTrait;
-}
+struct TMIOps {
+  // Return the name for the trait class.
+  static const StringData* clsName(const Class* traitCls) {
+    return traitCls->name();
+  }
 
-inline bool Class::TMIOps::isAbstract(Attr modifiers) {
-  return modifiers & AttrAbstract;
-}
+  static const StringData* methName(const Func* method) {
+    return method->name();
+  }
 
-inline Class::TraitMethod
-Class::TMIOps::traitMethod(const Class* traitCls,
-                           const Func* traitMeth,
-                           const PreClass::TraitAliasRule& rule) {
-  return TraitMethod { traitCls, traitMeth, rule.modifiers() };
-}
+  // Is-a methods.
+  static bool isTrait(const Class* traitCls) {
+    return traitCls->attrs() & AttrTrait;
+  }
 
-inline const Func*
-Class::TMIOps::findTraitMethod(const Class* traitCls,
-                               const StringData* origMethName) {
-  return traitCls->lookupMethod(origMethName);
-}
+  static bool isAbstract(Attr modifiers) {
+    return modifiers & AttrAbstract;
+  }
 
-inline void
-Class::TMIOps::errorUnknownMethod(const StringData* methName) {
-  raise_error(Strings::TRAITS_UNKNOWN_TRAIT_METHOD, methName->data());
-}
+  // Whether to exclude methods with name `methName' when adding.
+  static bool exclude(const StringData* methName) {
+    return Func::isSpecial(methName);
+  }
 
-inline void Class::TMIOps::errorUnknownTrait(const StringData* traitName) {
-  raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
-}
+  // TraitMethod constructor.
+  static TraitMethod traitMethod(const Class* traitCls,
+                                 const Func* traitMeth,
+                                 const PreClass::TraitAliasRule& rule) {
+    return TraitMethod { traitCls, traitMeth, rule.modifiers() };
+  }
 
-inline void
-Class::TMIOps::errorDuplicateMethod(const Class* cls,
-                                    const StringData* methName) {
-  // No error if the class will override the method.
-  if (cls->preClass()->hasMethod(methName)) return;
-  raise_error(Strings::METHOD_IN_MULTIPLE_TRAITS, methName->data());
-}
+  // Register a trait alias once the trait class is found.
+  static void addTraitAlias(const Class* cls,
+                            const PreClass::TraitAliasRule& rule,
+                            const Class* traitCls) {
+    PreClass::TraitAliasRule newRule { traitCls->name(),
+        rule.origMethodName(),
+        rule.newMethodName(),
+        rule.modifiers() };
+    cls->addTraitAlias(newRule);
+  }
 
-inline void
-Class::TMIOps::errorInconsistentInsteadOf(const Class* cls,
-                                          const StringData* methName) {
-  raise_error(Strings::INCONSISTENT_INSTEADOF, methName->data(),
-              cls->name()->data(), cls->name()->data());
-}
+  // Trait class/method finders.
+  static const Class* findSingleTraitWithMethod(const Class* cls,
+                                                const StringData* methName)  {
+    Class* traitCls = nullptr;
 
-inline void Class::TMIOps::errorMultiplyExcluded(const StringData* traitName,
-                                                 const StringData* methName) {
-  raise_error(Strings::MULTIPLY_EXCLUDED, traitName->data(), methName->data());
-}
-
-const Class*
-Class::TMIOps::findSingleTraitWithMethod(const Class* cls,
-                                         const StringData* methName) {
-  Class* traitCls = nullptr;
-
-  for (auto const& t : cls->m_extra->m_usedTraits) {
-    // Note: m_methods includes methods from parents/traits recursively.
-    if (t->m_methods.find(methName)) {
-      if (traitCls != nullptr) {
-        raise_error("more than one trait contains method '%s'",
-                    methName->data());
+    for (auto const& t : cls->usedTraitClasses()) {
+      // Note: m_methods includes methods from parents/traits recursively.
+      if (t->lookupMethod(methName)) {
+        if (traitCls != nullptr) {
+          raise_error("more than one trait contains method '%s'",
+                      methName->data());
+        }
+        traitCls = t.get();
       }
-      traitCls = t.get();
     }
+    return traitCls;
   }
-  return traitCls;
+
+  static const Class* findTraitClass(const Class* cls,
+                                     const StringData* traitName) {
+    auto ret = Unit::loadClass(traitName);
+    if (!ret) return nullptr;
+    auto const& usedTraits = cls->preClass()->usedTraits();
+    if (std::find_if(usedTraits.begin(), usedTraits.end(),
+                     [&] (auto const name) {
+                       return traitName->isame(name);
+                     }) == usedTraits.end()) {
+      return nullptr;
+    }
+    return ret;
+  }
+  static const Func* findTraitMethod(const Class* traitCls,
+                                     const StringData* origMethName) {
+    return traitCls->lookupMethod(origMethName);
+  }
+
+  // Errors.
+  static void errorUnknownMethod(const StringData* methName) {
+    raise_error(Strings::TRAITS_UNKNOWN_TRAIT_METHOD, methName->data());
+  }
+
+  static void errorUnknownTrait(const StringData* traitName) {
+    raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
+  }
+  static void errorDuplicateMethod(const Class* cls,
+                                   const StringData* methName) {
+    // No error if the class will override the method.
+    if (cls->preClass()->hasMethod(methName)) return;
+    raise_error(Strings::METHOD_IN_MULTIPLE_TRAITS, methName->data());
+  }
+  static void errorInconsistentInsteadOf(const Class* cls,
+                                         const StringData* methName) {
+    raise_error(Strings::INCONSISTENT_INSTEADOF, methName->data(),
+                cls->name()->data(), cls->name()->data());
+  }
+  static void errorMultiplyExcluded(const StringData* traitName,
+                                    const StringData* methName) {
+    raise_error(Strings::MULTIPLY_EXCLUDED,
+                traitName->data(), methName->data());
+  }
+};
+
+using TMIData = TraitMethodImportData<TraitMethod, TMIOps>;
+
+void applyTraitRules(Class* cls, TMIData& tmid) {
+  for (auto const& precRule : cls->preClass()->traitPrecRules()) {
+    tmid.applyPrecRule(precRule, cls);
+  }
+  for (auto const& aliasRule : cls->preClass()->traitAliasRules()) {
+    tmid.applyAliasRule(aliasRule, cls);
+  }
 }
 
-const Class* Class::TMIOps::findTraitClass(const Class* cls,
-                                           const StringData* traitName) {
-  auto ret = Unit::loadClass(traitName);
-  if (!ret) return nullptr;
-  auto const& usedTraits = cls->preClass()->usedTraits();
-  if (std::find_if(usedTraits.begin(), usedTraits.end(),
-                   [&] (auto const name) {
-                     return traitName->isame(name);
-                   }) == usedTraits.end()) {
-    return nullptr;
-  }
-  return ret;
-}
-
-void Class::applyTraitRules(TMIData& tmid) {
-  for (auto const& precRule : m_preClass->traitPrecRules()) {
-    tmid.applyPrecRule(precRule, this);
-  }
-  for (auto const& aliasRule : m_preClass->traitAliasRules()) {
-    tmid.applyAliasRule(aliasRule, this);
-  }
-}
-
-void Class::importTraitMethod(const TMIData::MethodData& mdata,
-                              MethodMapBuilder& builder) {
+void importTraitMethod(Class* cls,
+                       const TMIData::MethodData& mdata,
+                       Class::MethodMapBuilder& builder) {
   const Func* method = mdata.tm.method;
   Attr modifiers = mdata.tm.modifiers;
 
@@ -3902,31 +3922,31 @@ void Class::importTraitMethod(const TMIData::MethodData& mdata,
   Func* parentMethod = nullptr;
   if (mm_iter != builder.end()) {
     Func* existingMethod = builder[mm_iter->second];
-    if (existingMethod->cls() == this) {
+    if (existingMethod->cls() == cls) {
       // Don't override an existing method if this class provided an
       // implementation
       return;
     }
     parentMethod = existingMethod;
   }
-  Func* f = method->clone(this, mdata.name);
+  Func* f = method->clone(cls, mdata.name);
   f->setNewFuncId();
   f->setAttrs(modifiers | AttrTrait);
   if (!parentMethod) {
     // New method
     builder.add(mdata.name, f);
-    f->setBaseCls(this);
+    f->setBaseCls(cls);
     f->setHasPrivateAncestor(false);
   } else {
     // Override an existing method
     Class* baseClass;
 
-    methodOverrideCheck(parentMethod, f);
+    cls->methodOverrideCheck(parentMethod, f);
 
     assertx(!(f->attrs() & AttrPrivate) ||
            (parentMethod->attrs() & AttrPrivate));
     if ((parentMethod->attrs() & AttrPrivate) || (f->attrs() & AttrPrivate)) {
-      baseClass = this;
+      baseClass = cls;
     } else {
       baseClass = parentMethod->baseCls();
     }
@@ -3936,6 +3956,8 @@ void Class::importTraitMethod(const TMIData::MethodData& mdata,
       (parentMethod->attrs() & AttrPrivate));
     builder[mm_iter->second] = f;
   }
+}
+
 }
 
 void Class::importTraitMethods(MethodMapBuilder& builder) {
@@ -3953,12 +3975,12 @@ void Class::importTraitMethods(MethodMapBuilder& builder) {
   }
 
   // Apply trait rules and import the methods.
-  applyTraitRules(tmid);
+  applyTraitRules(this, tmid);
   auto traitMethods = tmid.finish(this);
 
   // Import the methods.
   for (auto const& mdata : traitMethods) {
-    importTraitMethod(mdata, builder);
+    importTraitMethod(this, mdata, builder);
   }
 }
 

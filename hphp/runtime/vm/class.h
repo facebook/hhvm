@@ -29,7 +29,6 @@
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/preclass.h"
-#include "hphp/runtime/vm/trait-method-import-data.h"
 
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/default-ptr.h"
@@ -623,6 +622,11 @@ public:
   Func* lookupMethod(const StringData* methName) const;
 
   /*
+   * public because its used by importTraitMethod.
+   */
+  void methodOverrideCheck(const Func* parentMethod, const Func* method);
+
+  /*
    * Return an Array (via `out') of all the methods of `cls' visible in the
    * context of `ctx' (which may be nullptr).
    *
@@ -984,6 +988,7 @@ public:
    * This is only used by reflection.
    */
   const TraitAliasVec& traitAliases() const;
+  void addTraitAlias(const PreClass::TraitAliasRule& rule) const;
 
   /*
    * All trait and interface requirements imposed on this class, including
@@ -1324,68 +1329,6 @@ private:
   using PropMap  = IndexedStringMap<Prop,true,Slot>;
   using SPropMap = IndexedStringMap<SProp,true,Slot>;
 
-  struct TraitMethod {
-    TraitMethod(const Class* trait_, const Func* method_, Attr modifiers_)
-      : trait(trait_)
-      , method(method_)
-      , modifiers(modifiers_)
-    {}
-
-    using class_type = const Class*;
-    using method_type = const Func*;
-
-    const Class* trait;
-    const Func* method;
-    Attr modifiers;
-  };
-
-  struct TMIOps {
-    // Return the name for the trait class.
-    static const StringData* clsName(const Class* traitCls);
-    static const StringData* methName(const Func* method);
-
-    // Is-a methods.
-    static bool isTrait(const Class* traitCls);
-    static bool isAbstract(Attr modifiers);
-
-    // Whether to exclude methods with name `methName' when adding.
-    static bool exclude(const StringData* methName);
-
-    // TraitMethod constructor.
-    static TraitMethod traitMethod(const Class* traitCls,
-                                   const Func* traitMeth,
-                                   const PreClass::TraitAliasRule& rule);
-
-    // Register a trait alias once the trait class is found.
-    static void addTraitAlias(const Class* cls,
-                              const PreClass::TraitAliasRule& rule,
-                              const Class* traitCls);
-
-    // Trait class/method finders.
-    static const Class* findSingleTraitWithMethod(const Class* cls,
-                                       const StringData* origMethName);
-    static const Class* findTraitClass(const Class* cls,
-                                       const StringData* traitName);
-    static const Func* findTraitMethod(const Class* traitCls,
-                                       const StringData* origMethName);
-
-    // Errors.
-    static void errorUnknownMethod(const StringData* methName);
-    static void errorUnknownTrait(const StringData* traitName);
-    static void errorDuplicateMethod(const Class* cls,
-                                     const StringData* methName);
-    static void errorInconsistentInsteadOf(const Class* cls,
-                                           const StringData* methName);
-    static void errorMultiplyExcluded(const StringData* traitName,
-                                      const StringData* methName);
-  };
-
-  friend struct TMIOps;
-
-  using TMIData = TraitMethodImportData<TraitMethod,
-                                        TMIOps>;
-
-
   /////////////////////////////////////////////////////////////////////////////
   // Private methods.
 
@@ -1400,10 +1343,7 @@ private:
   /*
    * Trait method import routines.
    */
-  void importTraitMethod(const TMIData::MethodData& mdata,
-                         MethodMapBuilder& curMethodMap);
   void importTraitMethods(MethodMapBuilder& curMethodMap);
-  void applyTraitRules(TMIData& tmid);
 
   template<typename XProp>
   void initProp(XProp& prop, const PreClass::Prop* preProp);
@@ -1427,7 +1367,6 @@ private:
 
   void checkInterfaceMethods();
   void checkInterfaceConstraints();
-  void methodOverrideCheck(const Func* parentMethod, const Func* method);
 
   void setParent();
   void setSpecial();

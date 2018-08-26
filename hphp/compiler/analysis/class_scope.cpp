@@ -41,7 +41,6 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/vm/trait-method-import-data.h"
 
 #include "hphp/util/text-util.h"
 

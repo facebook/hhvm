@@ -1120,9 +1120,8 @@ void find_deps(IndexData& data,
 struct TraitMethod {
   using class_type = const ClassInfo*;
   using method_type = const php::Func*;
-  using modifiers_type = Attr;
 
-  TraitMethod(class_type trait_, method_type method_, modifiers_type modifiers_)
+  TraitMethod(class_type trait_, method_type method_, Attr modifiers_)
       : trait(trait_)
       , method(method_)
       , modifiers(modifiers_)
@@ -1130,16 +1129,13 @@ struct TraitMethod {
 
   const class_type trait;
   const method_type method;
-  modifiers_type modifiers;
+  Attr modifiers;
 };
 
 struct TMIOps {
-  using prec_type  = const PreClass::TraitPrecRule&;
-  using alias_type = const PreClass::TraitAliasRule&;
   using string_type = LSString;
   using class_type = TraitMethod::class_type;
   using method_type = TraitMethod::method_type;
-  using modifiers_type = TraitMethod::modifiers_type;
 
   struct TMIException : std::exception {
     explicit TMIException(std::string msg) : msg(msg) {}
@@ -1147,9 +1143,6 @@ struct TMIOps {
   private:
     std::string msg;
   };
-
-  // Whether `str' is empty.
-  static bool strEmpty(string_type str) { return str->empty(); }
 
   // Return the name for the trait class.
   static const string_type clsName(class_type traitCls) {
@@ -1160,7 +1153,7 @@ struct TMIOps {
   static bool isTrait(class_type traitCls) {
     return traitCls->cls->attrs & AttrTrait;
   }
-  static bool isAbstract(modifiers_type modifiers) {
+  static bool isAbstract(Attr modifiers) {
     return modifiers & AttrAbstract;
   }
 
@@ -1172,38 +1165,13 @@ struct TMIOps {
   // TraitMethod constructor.
   static TraitMethod traitMethod(class_type traitCls,
                                  method_type traitMeth,
-                                 alias_type rule) {
+                                 const PreClass::TraitAliasRule& rule) {
     return TraitMethod { traitCls, traitMeth, rule.modifiers() };
   }
 
-  // Accessors for the precedence rule type.
-  static string_type precMethodName(prec_type rule) {
-    return rule.methodName();
-  }
-  static string_type precSelectedTraitName(prec_type rule) {
-    return rule.selectedTraitName();
-  }
-  static TraitNameSet      precOtherTraitNames(prec_type rule) {
-    return rule.otherTraitNames();
-  }
-
-  // Accessors for the alias rule type.
-  static string_type aliasTraitName(alias_type rule) {
-    return rule.traitName();
-  }
-
-  static string_type aliasOrigMethodName(alias_type rule) {
-    return rule.origMethodName();
-  }
-  static string_type aliasNewMethodName(alias_type rule) {
-    return rule.newMethodName();
-  }
-  static modifiers_type aliasModifiers(alias_type rule) {
-    return rule.modifiers();
-  }
-
   // Register a trait alias once the trait class is found.
-  static void addTraitAlias(const ClassInfo* /*cls*/, alias_type /*rule*/,
+  static void addTraitAlias(const ClassInfo* /*cls*/,
+                            const PreClass::TraitAliasRule& /*rule*/,
                             class_type /*traitCls*/) {
     // purely a runtime thing... nothing to do
   }
@@ -1233,7 +1201,7 @@ struct TMIOps {
     return nullptr;
   }
 
-  static method_type findTraitMethod(class_type /*cls*/, class_type traitCls,
+  static method_type findTraitMethod(class_type traitCls,
                                      string_type origMethName) {
     auto it = traitCls->methods.find(origMethName);
     if (it == traitCls->methods.end()) return nullptr;
@@ -1241,15 +1209,10 @@ struct TMIOps {
   }
 
   // Errors.
-  static void errorUnknownMethod(prec_type rule) {
-    throw TMIException(folly::sformat("Unknown method '{}'",
-                                      rule.methodName()));
-  }
-  static void errorUnknownMethod(alias_type /*rule*/, string_type methName) {
+  static void errorUnknownMethod(string_type methName) {
     throw TMIException(folly::sformat("Unknown method '{}'", methName));
   }
-  template <class Rule>
-  static void errorUnknownTrait(const Rule& /*rule*/, string_type traitName) {
+  static void errorUnknownTrait(string_type traitName) {
     throw TMIException(folly::sformat("Unknown trait '{}'", traitName));
   }
   static void errorDuplicateMethod(class_type cls,
@@ -1269,7 +1232,7 @@ struct TMIOps {
     throw TMIException(folly::sformat("InconsistentInsteadOf: {} {}",
                                       methName, cls->cls->name));
   }
-  static void errorMultiplyExcluded(prec_type /*rule*/, string_type traitName,
+  static void errorMultiplyExcluded(string_type traitName,
                                     string_type methName) {
     throw TMIException(folly::sformat("MultiplyExcluded: {}::{}",
                                       traitName, methName));
@@ -1277,10 +1240,7 @@ struct TMIOps {
 };
 
 using TMIData = TraitMethodImportData<TraitMethod,
-                                      TMIOps,
-                                      SString,
-                                      string_data_hash,
-                                      string_data_isame>;
+                                      TMIOps>;
 
 struct BuildClsInfo {
   IndexData& index;

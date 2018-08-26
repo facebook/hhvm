@@ -1314,7 +1314,7 @@ private:
   /*
    * Allocate the ExtraData; done only when necessary.
    */
-  void allocExtraData();
+  void allocExtraData() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Internal types.
@@ -1333,7 +1333,6 @@ private:
 
     using class_type = const Class*;
     using method_type = const Func*;
-    using modifiers_type = Attr;
 
     const Class* trait;
     const Func* method;
@@ -1341,12 +1340,6 @@ private:
   };
 
   struct TMIOps {
-    using prec_type  = const PreClass::TraitPrecRule&;
-    using alias_type = const PreClass::TraitAliasRule&;
-
-    // Whether `str' is empty.
-    static bool strEmpty(const StringData* str);
-
     // Return the name for the trait class.
     static const StringData* clsName(const Class* traitCls);
 
@@ -1360,21 +1353,11 @@ private:
     // TraitMethod constructor.
     static TraitMethod traitMethod(const Class* traitCls,
                                    const Func* traitMeth,
-                                   alias_type rule);
-
-    // Accessors for the precedence rule type.
-    static const StringData* precMethodName(prec_type rule);
-    static const StringData* precSelectedTraitName(prec_type rule);
-    static TraitNameSet      precOtherTraitNames(prec_type rule);
-
-    // Accessors for the alias rule type.
-    static const StringData* aliasTraitName(alias_type rule);
-    static const StringData* aliasOrigMethodName(alias_type rule);
-    static const StringData* aliasNewMethodName(alias_type rule);
-    static Attr aliasModifiers(alias_type rule);
+                                   const PreClass::TraitAliasRule& rule);
 
     // Register a trait alias once the trait class is found.
-    static void addTraitAlias(Class* cls, alias_type rule,
+    static void addTraitAlias(const Class* cls,
+                              const PreClass::TraitAliasRule& rule,
                               const Class* traitCls);
 
     // Trait class/method finders.
@@ -1382,34 +1365,24 @@ private:
                                        const StringData* origMethName);
     static const Class* findTraitClass(const Class* cls,
                                        const StringData* traitName);
-    static const Func* findTraitMethod(const Class* cls,
-                                       const Class* traitCls,
+    static const Func* findTraitMethod(const Class* traitCls,
                                        const StringData* origMethName);
 
     // Errors.
-    static void errorUnknownMethod(prec_type rule);
-    static void errorUnknownMethod(alias_type rule,
-                                   const StringData* methName);
-    template <class Rule>
-    static void errorUnknownTrait(const Rule& rule,
-                                  const StringData* traitName);
+    static void errorUnknownMethod(const StringData* methName);
+    static void errorUnknownTrait(const StringData* traitName);
     static void errorDuplicateMethod(const Class* cls,
                                      const StringData* methName);
     static void errorInconsistentInsteadOf(const Class* cls,
                                            const StringData* methName);
-    template <class Rule>
-    static void errorMultiplyExcluded(const Rule& rule,
-                                      const StringData* traitName,
+    static void errorMultiplyExcluded(const StringData* traitName,
                                       const StringData* methName);
   };
 
   friend struct TMIOps;
 
   using TMIData = TraitMethodImportData<TraitMethod,
-                                        TMIOps,
-                                        const StringData*,
-                                        string_data_hash,
-                                        string_data_isame>;
+                                        TMIOps>;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1503,7 +1476,7 @@ private:
   uint32_t m_magic;
 #endif
 
-  default_ptr<ExtraData> m_extra;
+  mutable default_ptr<ExtraData> m_extra;
   template<class T> friend typename
     std::enable_if<std::is_base_of<c_Awaitable, T>::value, void>::type
   finish_class();

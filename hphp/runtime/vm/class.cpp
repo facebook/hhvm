@@ -3764,8 +3764,8 @@ bool Class::TMIOps::exclude(const StringData* methName) {
   return Func::isSpecial(methName);
 }
 
-void Class::TMIOps::addTraitAlias(Class* cls,
-                                  Class::TMIOps::alias_type rule,
+void Class::TMIOps::addTraitAlias(const Class* cls,
+                                  const PreClass::TraitAliasRule& rule,
                                   const Class* traitCls) {
   PreClass::TraitAliasRule newRule { traitCls->name(),
                                      rule.origMethodName(),
@@ -3773,6 +3773,60 @@ void Class::TMIOps::addTraitAlias(Class* cls,
                                      rule.modifiers() };
   cls->allocExtraData();
   cls->m_extra.raw()->m_traitAliases.push_back(newRule.asNamePair());
+}
+
+inline const StringData* Class::TMIOps::clsName(const Class* traitCls) {
+  return traitCls->name();
+}
+
+inline bool Class::TMIOps::isTrait(const Class* traitCls) {
+  return traitCls->attrs() & AttrTrait;
+}
+
+inline bool Class::TMIOps::isAbstract(Attr modifiers) {
+  return modifiers & AttrAbstract;
+}
+
+inline Class::TraitMethod
+Class::TMIOps::traitMethod(const Class* traitCls,
+                           const Func* traitMeth,
+                           const PreClass::TraitAliasRule& rule) {
+  return TraitMethod { traitCls, traitMeth, rule.modifiers() };
+}
+
+inline const Func*
+Class::TMIOps::findTraitMethod(const Class* traitCls,
+                               const StringData* origMethName) {
+  return traitCls->lookupMethod(origMethName);
+}
+
+inline void
+Class::TMIOps::errorUnknownMethod(const StringData* methName) {
+  raise_error(Strings::TRAITS_UNKNOWN_TRAIT_METHOD, methName->data());
+}
+
+inline void Class::TMIOps::errorUnknownTrait(const StringData* traitName) {
+  raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
+}
+
+inline void
+Class::TMIOps::errorDuplicateMethod(const Class* cls,
+                                    const StringData* methName) {
+  // No error if the class will override the method.
+  if (cls->preClass()->hasMethod(methName)) return;
+  raise_error(Strings::METHOD_IN_MULTIPLE_TRAITS, methName->data());
+}
+
+inline void
+Class::TMIOps::errorInconsistentInsteadOf(const Class* cls,
+                                          const StringData* methName) {
+  raise_error(Strings::INCONSISTENT_INSTEADOF, methName->data(),
+              cls->name()->data(), cls->name()->data());
+}
+
+inline void Class::TMIOps::errorMultiplyExcluded(const StringData* traitName,
+                                                 const StringData* methName) {
+  raise_error(Strings::MULTIPLY_EXCLUDED, traitName->data(), methName->data());
 }
 
 const Class*

@@ -196,7 +196,19 @@ unsigned loadUsedTraits(PreClass* preClass,
     for (auto const& rule : preClass->traitAliasRules()) {
       auto origName = rule.origMethodName();
       auto newName = rule.newMethodName();
-      if (origName != newName) methodCount++;
+      if (origName != newName) {
+        methodCount++;
+        auto const trait = Unit::lookupClass(rule.traitName());
+        // traitName should be one of the traits loaded above, so it
+        // should already exist; if it doesn't, there's a bug, and
+        // we'll fatal importing the trait anyway.
+        if (trait) {
+          auto const meth = trait->lookupMethod(origName);
+          if (meth && meth->isInOutWrapper()) {
+            methodCount++;
+          }
+        }
+      }
     }
   }
   return methodCount;

@@ -8,7 +8,6 @@ class c {
   use a {
     a::f as g;
   }
-  function f(inout $a) { echo "Failed\n"; }
 }
 
 function test($a) {

@@ -260,7 +260,7 @@ struct ActiveSubscription {
     // we just need to sync to make sure all the outstanding threads complete.
     if (checkConnection()) {
       unsubscribe_future = m_watchmanClient->unsubscribe(m_subscriptionPtr)
-        .then([this] (const folly::dynamic& result) { // (ASYNC)
+        .thenValue([this] (const folly::dynamic& result) { // (ASYNC)
           m_unsubscribeData = toJson(result).data();
           return sync(std::chrono::milliseconds::zero());
         });
@@ -277,7 +277,7 @@ struct ActiveSubscription {
       // only re-acquired after the sync promise is fulfilled in the AsyncFunc()
       // thread.
       .via(WatchmanThreadEventBase::Get())
-      .then([this] () { // (ASYNC)
+      .thenValue([this](auto&&){ // (ASYNC)
         // These should be finished by now due to the syncing above
         if (m_oldCallbackExecThread) {
           m_oldCallbackExecThread->waitForEnd();

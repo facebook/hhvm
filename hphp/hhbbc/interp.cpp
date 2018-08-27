@@ -3923,7 +3923,11 @@ void in(ISS& env, const bc::This&) {
   }
   auto const ty = thisType(env);
   push(env, ty ? *ty : TObj);
-  setThisAvailable(env);
+  if (env.ctx.cls && is_unused_trait(*env.ctx.cls)) {
+    unreachable(env);
+  } else {
+    setThisAvailable(env);
+  }
 }
 
 void in(ISS& env, const bc::LateBoundCls& op) {
@@ -3935,7 +3939,11 @@ void in(ISS& env, const bc::CheckThis&) {
   if (thisAvailable(env)) {
     reduce(env, bc::Nop {});
   }
-  setThisAvailable(env);
+  if (env.ctx.cls && is_unused_trait(*env.ctx.cls)) {
+    unreachable(env);
+  } else {
+    setThisAvailable(env);
+  }
 }
 
 void in(ISS& env, const bc::BareThis& op) {

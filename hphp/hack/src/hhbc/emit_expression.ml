@@ -1045,6 +1045,7 @@ and emit_execution_operator env pos exprs =
     instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "shell_exec");
     instrs;
     instr_fcall (make_fcall_args 1);
+    instr_unboxr_nop
   ]
 
 and emit_string2 env pos exprs =
@@ -1768,11 +1769,11 @@ and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
   | A.Call ((_, A.Id (_, "__hhvm_intrinsics\\get_reified_type")), _, [ (_, A.Id (_, s)) ], [])
     when enable_intrinsics_extension () ->
     emit_pos_then pos @@ emit_reified_type env s
-  | A.Call _
-  (* execution operator is compiled as call to `shell_exec` and should
-     be handled in the same way *)
-  | A.Execution_operator _ ->
+  | A.Call _ ->
     emit_call_expr ?last_pos ~need_ref env expr
+  | A.Execution_operator es ->
+    emit_box_if_necessary pos need_ref @@
+      emit_execution_operator env pos es
   | A.New (typeexpr, targs, args, uargs) ->
     emit_box_if_necessary pos need_ref @@
       emit_new env pos typeexpr targs args uargs
@@ -3569,8 +3570,6 @@ and emit_flavored_expr env ?last_pos (pos, expr_ as expr) =
     when not (is_special_function env e args) ->
     let instrs, flavor = emit_call env pos e tal args uargs in
     emit_pos_then pos instrs, flavor
-  | A.Execution_operator es ->
-    emit_execution_operator env pos es, Flavor.ReturnVal
   | _ ->
     let need_ref = binary_assignment_rhs_starts_with_ref expr in
     let flavor = if need_ref then Flavor.Ref else Flavor.Cell in

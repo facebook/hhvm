@@ -1517,6 +1517,9 @@ void dce(Env& env, const bc::NewVecArray& op)     { dceNewArrayLike(env, op); }
 void dce(Env& env, const bc::NewKeysetArray& op)  { dceNewArrayLike(env, op); }
 void dce(Env& env, const bc::NewVArray& op)       { dceNewArrayLike(env, op); }
 
+void dce(Env& env, const bc::NewPair& op)         { dceNewArrayLike(env, op); }
+void dce(Env& env, const bc::ColFromArray& op)    { dceNewArrayLike(env, op); }
+
 void dce(Env& env, const bc::PopL& op) {
   auto const effects = setLocCouldHaveSideEffects(env, op.loc1);
   if (!isLocLive(env, op.loc1) && !effects) {

@@ -142,6 +142,15 @@ DEBUG_ONLY bool validate(const State& env,
     if (!src->type().maybe(TCounted)) return true;
     for (auto& oldSrc : origInst->srcs()) {
       if (oldSrc == src) return true;
+
+      // Some instructions consume a counted SSATmp and produce a new SSATmp
+      // which supports the consumed location. If the result of one such
+      // instruction is available then the value whose count it supports must
+      // also be available. For now CreateSSWH is the only instruction of this
+      // form that we care about.
+      if (oldSrc->inst()->is(CreateSSWH) && oldSrc->inst()->src(0) == src) {
+        return true;
+      }
     }
     return false;
   };

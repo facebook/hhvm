@@ -1235,7 +1235,7 @@ std::string show(const LocalRange& range) {
 
 std::string show(const FCallArgs& fca) {
   return folly::sformat(
-    "{} {} {}", fca.numArgs, (int)fca.hasUnpack, fca.numRets
+    "{} {} {} -", fca.numArgs, (int)fca.hasUnpack, fca.numRets
   );
 }
 

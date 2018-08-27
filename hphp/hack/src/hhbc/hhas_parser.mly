@@ -566,12 +566,14 @@ instruction:
     | ID iarg iarg PLUS INT {maketernaryinst $1 $2 $3 (IAInt64 $5)}
     | ID iarg iarg iarg iarg {makequaternaryinst $1 $2 $3 $4 $5}
     | ID iarg iarg iarg iarg iarg {makequinaryinst $1 $2 $3 $4 $5 $6}
+    | ID iarg iarg iarg iarg iarg iarg {makesenaryinst $1 $2 $3 $4 $5 $6 $7}
 ;
 sswitchcaselist:
     | MINUS COLON ID {[IASswitchcase ("", $3)]}
     | STRING COLON ID sswitchcaselist {IASswitchcase ($1, $3) :: $4}
 ;
 iarg:
+    | MINUS  {IANone}
     | ID     {IAId $1}
     | ASSERTCONSTRAINT {IAString $1}
     | vname  {IAId $1}

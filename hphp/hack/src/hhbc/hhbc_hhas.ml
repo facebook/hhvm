@@ -85,14 +85,6 @@ let string_of_param_id x =
 
 let string_of_param_num i = string_of_int i
 
-let string_of_fcall_args fcall_args =
-  let num_args, has_unpack, num_rets = fcall_args in
-  sep [
-    string_of_int num_args;
-    if has_unpack then "1" else "0";
-    string_of_int num_rets
-  ]
-
 let string_of_local_id x =
   match x with
   | Local.Unnamed i -> "_" ^ (string_of_int i)
@@ -336,6 +328,20 @@ let string_of_label = function
   | Label.Fault id -> "F" ^ (string_of_int id)
   | Label.DefaultArg id -> "DV" ^ (string_of_int id)
   | Label.Named id -> id
+
+let string_of_optional_label opt_label =
+  match opt_label with
+  | None -> "-"
+  | Some label -> string_of_label label
+
+let string_of_fcall_args fcall_args =
+  let num_args, has_unpack, num_rets, async_eager_label = fcall_args in
+  sep [
+    string_of_int num_args;
+    if has_unpack then "1" else "0";
+    string_of_int num_rets;
+    string_of_optional_label async_eager_label
+  ]
 
 let string_of_switch_kind = function
   | H.Unbounded -> "Unbounded"

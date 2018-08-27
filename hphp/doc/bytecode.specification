@@ -2286,7 +2286,8 @@ FCall* opcodes
   specified by the FCA (FCall arguments) immediate consisting of the following
   data:
 
-  <num args> <unpack> <num returns>  [C|V..C|V]  ->  [R | C..C]
+  <num args> <unpack> <num returns> <async eager offset>
+  [C|V..C|V]  ->  [R | C..C]
 
   FCall* transfers the top %1 values from the stack to the callee as parameters,
   if %2 is 1, transfers the elements of the last value on the stack (which must
@@ -2295,6 +2296,12 @@ FCall* opcodes
   values onto the caller's evaluation stack using the R flavor if %3 was one
   (callee must use one of the RetC/RetV opcodes) or C flavor otherwise (callee
   must return the matching number of values using the RetM opcode).
+
+  If the optional offset %4 was specified and the callee would return a finished
+  Awaitable, it may instead return the unpacked result of the Awaitable and
+  continue execution of the caller at offset %4. This is usually used to avoid
+  the cost of Awaitable construction if the callee is an async function that
+  finished eagerly and the caller awaits the Awaitable immediately upon return.
 
 FCall <fca> <class name> <func name>  [C|V..C|V]  ->  [R | C..C]
 

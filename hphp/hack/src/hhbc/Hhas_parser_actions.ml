@@ -442,6 +442,7 @@ let make_nullary_inst s =
  | _ -> failwith ("NYI nullary: " ^ s)
 
 type iarg =
+  | IANone
   | IAInt64 of int64
   | IAString of string
   | IAId of string
@@ -722,6 +723,12 @@ let labelofiarg arg =
   | IAId l -> makelabel l
   | _ -> report_error "bad label"
 
+let optlabelofiarg arg =
+  match arg with
+  | IANone -> None
+  | IAId l -> Some (makelabel l)
+  | _ -> report_error "bad optional label"
+
 let iterofiarg arg = Iterator.Id (intofiarg arg)
 
 let checkstarted_of_arg arg =
@@ -800,8 +807,9 @@ let doubleofiarg arg =
   | IAInt64 n -> (Int64.to_string n) ^ "." (* ugh *)
   | _ -> report_error "bad double lit cst"
 
-let fcallargsofiargs num_args has_unpack num_rets =
-  intofiarg num_args, has_unpack_of_iarg has_unpack, intofiarg num_rets
+let fcallargsofiargs num_args has_unpack num_rets async_eager_label =
+  intofiarg num_args, has_unpack_of_iarg has_unpack, intofiarg num_rets,
+  optlabelofiarg async_eager_label
 
 let makeunaryinst s arg = match s with
   (* instruct_lit_const *)
@@ -1168,7 +1176,11 @@ match s with
   | "LIterNextK" -> IIterator(LIterNextK (iterofiarg arg1, localidofiarg arg2,
                                           labelofiarg arg3, localidofiarg arg4,
                                           localidofiarg arg5))
-  | "FCall" ->
-    ICall(FCall (fcallargsofiargs arg1 arg2 arg3,
-      class_id_of_iarg arg4, function_id_of_iarg arg5))
   | _ -> failwith ("NYI quinary: " ^ s)
+
+let makesenaryinst s arg1 arg2 arg3 arg4 arg5 arg6 =
+match s with
+  | "FCall" ->
+    ICall(FCall (fcallargsofiargs arg1 arg2 arg3 arg4,
+      class_id_of_iarg arg5, function_id_of_iarg arg6))
+  | _ -> failwith ("NYI senary: " ^ s)

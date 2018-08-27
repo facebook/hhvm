@@ -14,6 +14,7 @@ val go:
   Relative_path.Set.t ->
   get_next: Relative_path.t list Bucket.next ->
   ParserOptions.t ->
+  trace: bool ->
   FileInfo.t Relative_path.Map.t * Errors.t * Relative_path.Set.t
 
 (* used by hack build *)

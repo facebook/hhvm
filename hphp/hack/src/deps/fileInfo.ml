@@ -230,3 +230,15 @@ let print_names name =
   Printf.printf "\n";
   flush stdout;
   ()
+
+let to_string fast =
+  ["funs",  fast.funs;
+  "classes", fast.classes;
+  "typedefs", fast.typedefs;
+  "consts", fast.consts;] |>
+  List.filter ~f:(fun (_, l) -> not @@ List.is_empty l) |>
+  List.map ~f:begin fun (kind, l) ->
+    Printf.sprintf "%s: %s"
+      kind (List.map l ~f:snd |> String.concat ",")
+  end |>
+  String.concat ";"

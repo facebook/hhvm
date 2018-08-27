@@ -96,3 +96,4 @@ val simplify: t -> names
 val merge_names: names -> names -> names
 val simplify_fast: t Relative_path.Map.t -> fast
 val print_names : names -> unit
+val to_string: t -> string

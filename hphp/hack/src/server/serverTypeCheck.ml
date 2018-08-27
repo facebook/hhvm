@@ -261,7 +261,7 @@ let parsing genv env to_check ~stop_at_errors =
   let get_next = MultiWorker.next
     genv.workers (Relative_path.Set.elements disk_files) in
   let (fast, errors, failed_parsing) as res =
-    Parsing_service.go genv.workers ide_files ~get_next env.popt in
+    Parsing_service.go genv.workers ide_files ~get_next env.popt ~trace:true in
 
   SearchServiceRunner.update_fileinfo_map fast;
   (* During integration tests, we want to pretend that search is run

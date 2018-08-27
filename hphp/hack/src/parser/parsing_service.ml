@@ -150,11 +150,16 @@ let parse_sequential ~quick fn content acc popt =
   in
   process_parse_result ~ide:true ~quick acc fn res popt
 
+let log_parsing_results fast =
+  Relative_path.(Map.iter fast ~f:begin fun path info ->
+    Hh_logger.log "%s - %s" (suffix path) (FileInfo.to_string info)
+  end)
+
 (*****************************************************************************)
 (* Main entry points *)
 (*****************************************************************************)
 
-let go ?(quick = false) workers files_set ~get_next popt =
+let go ?(quick = false) workers files_set ~get_next popt ~trace =
   let acc = parse_parallel ~quick workers get_next popt in
   let fast, errorl, failed_parsing =
     Relative_path.Set.fold files_set ~init:acc ~f:(
@@ -169,4 +174,5 @@ let go ?(quick = false) workers files_set ~get_next popt =
           let acc = Relative_path.Map.add acc ~key:fn ~data:info in
           acc, errorl, error_files
       ) in
+  if trace then log_parsing_results fast;
   fast, errorl, failed_parsing

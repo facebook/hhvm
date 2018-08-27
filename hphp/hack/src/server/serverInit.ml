@@ -227,7 +227,7 @@ module ServerInitCommon = struct
     let t = Hh_logger.log_duration logstring t in
     get_next, t
 
-  let parsing ~lazy_parse genv env ~get_next ?count t =
+  let parsing ~lazy_parse genv env ~get_next ?count t ~trace =
     let logstring =
       match count with
       | None -> "Parsing"
@@ -240,6 +240,7 @@ module ServerInitCommon = struct
         genv.workers
         Relative_path.Set.empty
         ~get_next
+        ~trace
         env.popt in
     let files_info = Relative_path.Map.union files_info env.files_info in
     let hs = SharedMem.heap_size () in
@@ -489,7 +490,9 @@ module ServerInitCommon = struct
       (* The full_fidelity_parser currently works better in both memory and time
         with a full parse rather than parsing decl asts and then parsing full ones *)
       let lazy_parse = not genv.local_config.SLC.use_full_fidelity_parser in
-      let env, t = parsing ~lazy_parse genv env ~get_next t in
+      (* full init - too many files to trace all of them *)
+      let trace = false in
+      let env, t = parsing ~lazy_parse genv env ~get_next t ~trace in
       if not (ServerArgs.check_mode genv.options) then
         SearchServiceRunner.update_fileinfo_map env.files_info;
       let t = update_files genv env.files_info t in
@@ -551,7 +554,11 @@ module ServerEagerInit : InitKind = struct
      load_mini_approach >>= invoke_approach genv root ~tiny:false in
     let get_next, t = indexing genv in
     let lazy_parse = lazy_level = Parse in
-    let env, t = parsing ~lazy_parse genv env ~get_next t in
+    (* Parsing entire repo, too many files to trace. TODO: why do we parse
+     * entire repo WHILE loading saved state that is supposed to prevent having
+     * to do that? *)
+    let trace = false in
+    let env, t = parsing ~lazy_parse genv env ~get_next t ~trace in
     if not (ServerArgs.check_mode genv.options) then
       SearchServiceRunner.update_fileinfo_map env.files_info;
     let timeout = genv.local_config.SLC.load_mini_script_timeout in
@@ -623,6 +630,7 @@ module ServerLazyInit : InitKind = struct
     assert(lazy_level = Init);
     Hh_logger.log "Begin loading mini-state";
     let tiny = genv.local_config.SLC.load_tiny_state in
+    let trace = genv.local_config.SLC.trace_parsing in
     let state_future =
       load_mini_approach >>= invoke_approach genv root ~tiny in
     let timeout = genv.local_config.SLC.load_mini_script_timeout in
@@ -671,7 +679,7 @@ module ServerLazyInit : InitKind = struct
       (* Parse dirty files only *)
       let next = MultiWorker.next genv.workers parsing_files_list in
       let env, t = parsing genv env ~lazy_parse:true ~get_next:next
-        ~count:(List.length parsing_files_list) t in
+        ~count:(List.length parsing_files_list) t ~trace in
       SearchServiceRunner.update_fileinfo_map env.files_info;
 
       let t = update_files genv env.files_info t in
@@ -821,7 +829,7 @@ let init_to_save_state genv =
   let env = ServerEnvBuild.make_env genv.config in
   let get_next, t = indexing genv in
   (* We need full asts to generate dependencies *)
-  let env, t = parsing ~lazy_parse:false genv env ~get_next t in
+  let env, t = parsing ~lazy_parse:false genv env ~get_next t ~trace:false in
   let t = update_files genv env.files_info t in
   let env, t = naming env t in
   ignore(gen_deps genv env t);

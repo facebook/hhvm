@@ -395,12 +395,10 @@ module ServerInitCommon = struct
       | None -> acc
     end ~init:Relative_path.Map.empty
 
-  let get_all_deps {FileInfo.n_funs; n_classes; n_types; n_consts} =
+  let names_to_deps {FileInfo.n_funs; n_classes; n_types; n_consts} =
     let add_deps_of_sset dep_ctor sset depset =
       SSet.fold sset ~init:depset ~f:begin fun n acc ->
-        let dep = dep_ctor n in
-        let deps = Typing_deps.get_bazooka dep in
-        DepSet.union deps acc
+        DepSet.add acc (Dep.make (dep_ctor n))
       end
     in
     let deps = add_deps_of_sset (fun n -> Dep.Fun n) n_funs DepSet.empty in
@@ -409,19 +407,6 @@ module ServerInitCommon = struct
     let deps = add_deps_of_sset (fun n -> Dep.Class n) n_types deps in
     let deps = add_deps_of_sset (fun n -> Dep.GConst n) n_consts deps in
     let deps = add_deps_of_sset (fun n -> Dep.GConstName n) n_consts deps in
-    (* We need to type check all classes that have extend dependencies on the
-     * classes that have changed
-     *)
-    let extend_deps =
-        SSet.fold ~f:begin fun class_name acc ->
-        let hash = Typing_deps.Dep.make (Dep.Class class_name) in
-        Decl_compare.get_extend_deps hash acc
-      end n_classes ~init:DepSet.empty in
-    let deps = DepSet.union deps extend_deps in
-    let deps = DepSet.fold extend_deps ~init:deps ~f:begin fun dep acc ->
-    let deps = Typing_deps.get_ideps_from_hash dep in
-      DepSet.union deps acc
-    end in
     deps
 
   (* We start of with a list of files that have changed since the state was
@@ -447,7 +432,7 @@ module ServerInitCommon = struct
     let names = Relative_path.Map.fold fast ~f:begin fun _k v acc ->
       FileInfo.merge_names v acc
     end ~init:FileInfo.empty_names in
-    let deps = get_all_deps names in
+    let deps = names_to_deps names |> Typing_deps.add_all_deps in
     let to_recheck = Typing_deps.get_files deps in
     (* We still need to typecheck files whose declarations did not change *)
     let to_recheck = Relative_path.Set.union to_recheck similar_files in

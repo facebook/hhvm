@@ -225,3 +225,37 @@ let update_files fileInfo =
       Hashtbl.replace !ifiles def (Relative_path.Set.add previous filename)
     end defs
   end
+
+let rec get_extend_deps ~visited ~source_class ~acc =
+  if DepSet.mem !visited source_class
+  then acc
+  else begin
+    visited := DepSet.add !visited source_class;
+    let cid_hash = Dep.extends_of_class source_class in
+    let ideps = get_ideps_from_hash cid_hash in
+    DepSet.fold ~f:begin fun obj acc ->
+      if Dep.is_class obj
+      then
+        let acc = DepSet.add acc obj in
+        get_extend_deps visited obj acc
+      else acc
+    end ideps ~init:acc
+  end
+
+let add_extend_deps deps =
+  let trace = ref DepSet.empty in
+  DepSet.fold deps
+    ~init:deps
+    ~f:begin fun dep acc ->
+      if not @@ Dep.is_class dep then acc else
+      get_extend_deps trace dep acc
+    end
+
+let add_typing_deps deps =
+  DepSet.fold deps
+    ~init:deps
+    ~f:begin fun dep acc ->
+      DepSet.union (get_ideps_from_hash dep) acc
+    end
+
+let add_all_deps x =  x |> add_extend_deps |> add_typing_deps

@@ -219,27 +219,6 @@ let class_big_diff class1 class2 =
   class1.dc_enum_type <> class2.dc_enum_type
 
 (*****************************************************************************)
-(* Given a class name adds all the subclasses, we need a "trace" to follow
- * what we have already added.
- *)
-(*****************************************************************************)
-let rec get_extend_deps_ trace cid_hash to_redecl =
-  if DepSet.mem !trace cid_hash
-  then to_redecl
-  else begin
-    trace := DepSet.add !trace cid_hash;
-    let cid_hash = Typing_deps.Dep.extends_of_class cid_hash in
-    let ideps = Typing_deps.get_ideps_from_hash cid_hash in
-    DepSet.fold ~f:begin fun obj acc ->
-      if Typing_deps.Dep.is_class obj
-      then
-        let to_redecl = DepSet.add acc obj in
-        get_extend_deps_ trace obj to_redecl
-      else acc
-    end ideps ~init:to_redecl
-  end
-
-(*****************************************************************************)
 (* GET EVERYTHING, don't think, don't try to be subtle, don't try to be
  * smart what so ever, just get EVERYTHING that ever used the class "cid"
  * (cid = class identifier).
@@ -251,11 +230,11 @@ and get_all_dependencies trace cid (to_redecl, to_recheck) =
   let to_redecl = DepSet.union bazooka to_redecl in
   let to_recheck = DepSet.union bazooka to_recheck in
   let cid_hash = Typing_deps.Dep.make (Dep.Class cid) in
-  let to_redecl = get_extend_deps_ trace cid_hash to_redecl in
+  let to_redecl = Typing_deps.get_extend_deps trace cid_hash to_redecl in
   to_redecl, to_recheck
 
 let get_extend_deps cid_hash to_redecl =
-  get_extend_deps_ (ref DepSet.empty) cid_hash to_redecl
+  Typing_deps.get_extend_deps (ref DepSet.empty) cid_hash to_redecl
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
@@ -368,10 +347,12 @@ let get_class_deps old_classes new_classes trace cid (to_redecl, to_recheck) =
              * positions differ. We therefore must redeclare the sub-classes
              * but not recheck them.
             *)
-            let to_redecl = get_extend_deps_ trace cid_hash to_redecl in
+            let to_redecl =
+              Typing_deps.get_extend_deps trace cid_hash to_redecl in
             to_redecl, to_recheck
         else
-          let to_redecl = get_extend_deps_ trace cid_hash to_redecl in
+          let to_redecl =
+            Typing_deps.get_extend_deps trace cid_hash to_redecl in
           let to_recheck = DepSet.union to_redecl to_recheck in
           let to_recheck =
             DepSet.union (Typing_deps.get_ideps (Dep.AllMembers cid)) to_recheck

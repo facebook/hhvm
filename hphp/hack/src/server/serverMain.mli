@@ -24,3 +24,8 @@ val serve_one_iteration:
   ServerEnv.env ->
   ClientProvider.t ->
   ServerEnv.env
+
+(* Main loop can choose to batch several rechecks together. Setting this will
+ * disable this behavior, forcing only one recheck per serve_one_iteration
+ * call. This is useful in tests to observe intermediate state. *)
+val force_break_recheck_loop_for_test: bool -> unit

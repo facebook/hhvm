@@ -15,6 +15,15 @@ val setup_server: ?custom_config:ServerConfig.t ->
 
 val setup_disk: ServerEnv.env -> disk_changes_type -> ServerEnv.env
 
+val save_state: disk_changes_type -> string -> unit
+
+val load_state:
+  saved_state_dir:string ->
+  disk_state:disk_changes_type ->
+  changes_since_saved_state:string list ->
+  use_precheked_files:bool ->
+  ServerEnv.env
+
 val connect_persistent_client: ServerEnv.env -> ServerEnv.env
 
 val default_loop_input: ('a, 'b) loop_inputs
@@ -115,3 +124,7 @@ val assert_ide_autocomplete :
 
 val assert_status :
   (ServerCommandTypes.Server_status.t, 'a) loop_outputs -> string -> unit
+
+val assert_needs_recheck: ServerEnv.env -> string -> unit
+
+val assert_needs_no_recheck: ServerEnv.env -> string -> unit

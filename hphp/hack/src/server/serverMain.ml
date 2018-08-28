@@ -21,6 +21,11 @@ let exit_on_parent_exit () = Parent.exit_on_parent_exit 10 60
 
 let () = Printexc.record_backtrace true
 
+let force_break_recheck_loop_for_test_ref = ref false
+
+let force_break_recheck_loop_for_test x =
+  force_break_recheck_loop_for_test_ref := x
+
 module MainInit : sig
   val go:
     genv ->
@@ -406,13 +411,16 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
       total_rechecked_count = acc.total_rechecked_count + res.ServerTypeCheck.total_rechecked_count;
     } in
     (* Avoid batching ide rechecks with disk rechecks - there might be
-      * other ide edits to process first and we want to give the main loop
-      * a chance to process them first.
-      * Similarly, if a recheck was interrupted because of arrival of command
-      * that needs writes, break the recheck loop to give that command chance
-      * to be handled in main loop *)
-    if lazy_check || Option.is_some env.pending_command_needs_writes
-      then acc, env else
+     * other ide edits to process first and we want to give the main loop
+     * a chance to process them first.
+     * Similarly, if a recheck was interrupted because of arrival of command
+     * that needs writes, break the recheck loop to give that command chance
+     * to be handled in main loop.
+     * Finally, tests have ability to opt-out of batching completely. *)
+    if lazy_check ||
+      Option.is_some env.pending_command_needs_writes ||
+      !force_break_recheck_loop_for_test_ref
+    then acc, env else
       recheck_loop acc genv env new_client has_persistent_connection_request
   end
 

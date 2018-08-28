@@ -51,18 +51,22 @@ let genv = ref { ServerEnvBuild.default_genv with
   ServerEnv.config = server_config
 }
 
+(* Init part common to fresh and saved state init *)
+let test_init_common () =
+  Printexc.record_backtrace true;
+  EventLogger.init EventLogger.Event_logger_fake 0.0;
+  Relative_path.set_path_prefix Relative_path.Root (Path.make root);
+  Relative_path.set_path_prefix Relative_path.Hhi (Path.make hhi);
+  let _ = SharedMem.init GlobalConfig.default_sharedmem_config in
+  ()
+
 (* Hhi files are loaded during server setup. If given a list of string + contents, we add them
 to the test disk and add them to disk_needs_parsing. After one server run loop, they will be loaded.
 This isn't exactly the same as how initialization does it, but the purpose is not to test the hhi
 files, but to test incremental mode behavior with Hhi files present.
 *)
 let setup_server ?custom_config ?(hhi_files = []) ()  =
-  Printexc.record_backtrace true;
-  EventLogger.init EventLogger.Event_logger_fake 0.0;
-  Relative_path.set_path_prefix Relative_path.Root (Path.make root);
-  Relative_path.set_path_prefix Relative_path.Hhi (Path.make hhi);
-  let _ = SharedMem.init GlobalConfig.default_sharedmem_config in
-
+  test_init_common ();
   List.iter hhi_files ~f:(fun (fn, contents) ->
     TestDisk.set (Filename.concat hhi fn) contents
   );
@@ -337,6 +341,64 @@ let assert_env_errors env expected =
 let assert_no_errors env =
   assert_env_errors env ""
 
+let saved_state_filename = "test_saved_state"
+
+let in_daemon f =
+  let handle = Daemon.fork
+     ~channel_mode:`socket
+     Unix.(stdout, stderr)
+     (fun () _channels -> f ()) ()
+  in
+  match Unix.waitpid [] (handle.Daemon.pid) with
+  | _, Unix.WEXITED 0 -> ()
+  | _ -> assert false
+
+let save_state disk_changes temp_dir =
+  in_daemon @@ begin fun () ->
+    let env = setup_server () in
+    let env = setup_disk env disk_changes in
+    assert_no_errors env;
+    ServerInit.save_state !genv env (temp_dir ^ "/" ^ saved_state_filename)
+  end
+
+let load_state
+    ~saved_state_dir
+    ~disk_state
+    ~changes_since_saved_state
+    ~use_precheked_files =
+  (* In production, saved state is only used in conjunction with lazy init
+   * right now, and I'm not convinced if it even works in any other
+   * configuration. *)
+  genv := { !genv with
+    ServerEnv.local_config = { !genv.ServerEnv.local_config with
+      ServerLocalConfig.lazy_parse = true;
+      lazy_init = true;
+      prechecked_files = use_precheked_files;
+    }
+  };
+  test_init_common ();
+
+  let disk_changes = List.map disk_state (fun (x, y) -> root ^ x, y) in
+  List.iter disk_changes (fun (path, contents) -> TestDisk.set path contents);
+
+  let changes = List.map changes_since_saved_state
+    (fun x -> Relative_path.create_detect_prefix (root ^ x)) in
+
+  let saved_state_fn = saved_state_dir ^ "/" ^ saved_state_filename in
+  let deptable_fn = saved_state_dir ^ "/" ^ saved_state_filename ^ ".sql" in
+
+  let load_mini_approach = ServerInit.Precomputed {
+    ServerArgs.saved_state_fn;
+    (* in Precomputed scenario, base revision should only be used in logging,
+     * which is irrelevant in tests *)
+    corresponding_base_revision = "-1";
+    deptable_fn;
+    changes;
+  } in
+  match ServerInit.init ~load_mini_approach !genv with
+  | env, ServerInit.Mini_load _ -> env
+  | _ -> assert false
+
 let diagnostics_to_string x =
   let buf = Buffer.create 1024 in
   SMap.iter x ~f:begin fun path errors ->
@@ -458,3 +520,13 @@ let assert_status loop_output expected =
   in
   let results_as_string = errors_to_string error_list in
   assertEqual expected results_as_string
+
+let assert_needs_recheck env x =
+  assert Relative_path.(
+    Set.mem env.ServerEnv.needs_recheck (create_detect_prefix (root ^ x))
+  )
+
+let assert_needs_no_recheck env x =
+  assert (not Relative_path.(
+    Set.mem env.ServerEnv.needs_recheck (create_detect_prefix (root ^ x))
+  ))

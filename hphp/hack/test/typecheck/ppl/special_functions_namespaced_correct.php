@@ -14,12 +14,16 @@ class Infer {
   public function condition(string $s): int {
     return 0;
   }
+  public function sample_model(string $s): int {
+    return 0;
+  }
 }
 
 function sample(int $k): void {}
 function observe(int $k): void {}
 function condition(int $k): void {}
 function factor(int $k): void {}
+function sample_model(int $k): void {}
 
 //// PPL.php
 <?hh // strict
@@ -43,11 +47,13 @@ class MyClass {
     $x = sample("hi");
     $x = factor("hi");
     $x = observe("hi");
-    condition("hi");
+    $x = condition("hi");
+    $x = sample_model("hi");
 
     $x = \sample("hi");
     $x = \factor("hi");
     $x = \observe("hi");
-    \condition("hi");
+    $x = \condition("hi");
+    $x = \sample_model("hi");
   }
 }

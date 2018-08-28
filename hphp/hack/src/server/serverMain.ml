@@ -96,7 +96,7 @@ module Program =
       let updates = Relative_path.(relativize_set Root updates) in
       let to_recheck =
         Relative_path.Set.filter updates begin fun update ->
-          ServerEnv.file_filter (Relative_path.to_absolute update)
+          FindUtils.file_filter (Relative_path.to_absolute update)
         end in
       let config_in_updates =
         Relative_path.Set.mem updates ServerConfig.filename in

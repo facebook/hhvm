@@ -82,23 +82,12 @@ let process_parse_result
     acc, errorl, error_files
   end
 
-let really_parse ~quick popt acc fn =
+let parse ~quick popt acc fn =
+  if not @@ FindUtils.path_filter fn then acc else
   let res = Errors.do_with_context fn Errors.Parsing @@
     fun () -> Full_fidelity_ast.defensive_from_file ~quick popt fn
   in
   process_parse_result ~quick acc fn res popt
-
-let parse ?(quick = false) popt (acc, errorl, error_files) fn =
-  (* Ugly hack... hack build requires that we keep JS files in our
-   * files_info map, but we don't want to actually read them from disk
-   * because we don't do anything with them. See also
-   * ServerMain.Program.make_next_files *)
-  if FindUtils.is_php (Relative_path.suffix fn) then
-    really_parse ~quick popt (acc, errorl, error_files) fn
-  else
-    let info = empty_file_info in
-    let acc = Relative_path.Map.add acc ~key:fn ~data:info in
-    acc, errorl, error_files
 
 (* Merging the results when the operation is done in parallel *)
 let merge_parse
@@ -131,6 +120,7 @@ let parse_parallel ?(quick = false) workers get_next popt =
       ~next:get_next
 
 let parse_sequential ~quick fn content acc popt =
+  if not @@ FindUtils.path_filter fn then acc else
   let res =
     Errors.do_with_context fn Errors.Parsing begin fun () ->
       (* DISGUSTING: so far, parser was used only for text files from disk, and
@@ -163,16 +153,9 @@ let go ?(quick = false) workers files_set ~get_next popt ~trace =
   let acc = parse_parallel ~quick workers get_next popt in
   let fast, errorl, failed_parsing =
     Relative_path.Set.fold files_set ~init:acc ~f:(
-      fun fn (acc, errorl, error_files) ->
+      fun fn acc ->
         let content = File_heap.get_ide_contents_unsafe fn in
-        if FindUtils.is_php (Relative_path.suffix fn)
-          && not (FilesToIgnore.should_ignore (Relative_path.suffix fn)) then
-          parse_sequential ~quick fn content
-            (acc, errorl, error_files) popt
-        else
-          let info = empty_file_info in
-          let acc = Relative_path.Map.add acc ~key:fn ~data:info in
-          acc, errorl, error_files
+        parse_sequential ~quick fn content acc popt
       ) in
   if trace then log_parsing_results fast;
   fast, errorl, failed_parsing

@@ -82,7 +82,7 @@ module ServerInitCommon = struct
   let make_next_files genv : Relative_path.t list Bucket.next =
     let next_files_root = compose
       (List.map ~f:(Relative_path.(create Root)))
-      (genv.indexer ServerEnv.file_filter) in
+      (genv.indexer FindUtils.file_filter) in
     let hhi_root = Hhi.get_hhi_root () in
     let hhi_filter = FindUtils.is_php in
     let next_files_hhi = compose
@@ -103,7 +103,7 @@ module ServerInitCommon = struct
       (fun root -> compose
         (List.map ~f:Relative_path.create_detect_prefix)
         (Find.make_next_files
-          ~filter:ServerEnv.file_filter
+          ~filter:FindUtils.file_filter
           root)
       ) |> concat_next_files
     in
@@ -338,10 +338,7 @@ module ServerInitCommon = struct
     let fast = FileInfo.saved_to_hack_files saved in
     (* Filter out non php files *)
     let fast = Relative_path.Map.filter fast
-      ~f:(fun s _ ->
-          let fn = (Relative_path.to_absolute s) in
-          not (FilesToIgnore.should_ignore fn)
-          && FindUtils.is_php fn) in
+      ~f:(fun s _ -> FindUtils.path_filter s) in
 
     Relative_path.Map.iter fast
     ~f: (fun fn names ->
@@ -469,7 +466,7 @@ module ServerInitCommon = struct
       | Notifier_synchronous_changes updates
       | Notifier_async_changes updates -> updates in
     let updates = SSet.filter updates (fun p ->
-      string_starts_with p root && ServerEnv.file_filter p) in
+      string_starts_with p root && FindUtils.file_filter p) in
     let changed_while_parsing = Relative_path.(relativize_set Root updates) in
     Ok (loaded_info, changed_while_parsing)
 
@@ -658,9 +655,8 @@ module ServerLazyInit : InitKind = struct
       let dirty_files =
         Relative_path.Set.union dirty_files changed_while_parsing in
       let dirty_files =
-        Relative_path.Set.filter dirty_files ~f:(fun fn ->
-          not (FilesToIgnore.should_ignore (Relative_path.suffix fn))
-       ) in
+        Relative_path.Set.filter dirty_files ~f:FindUtils.path_filter
+      in
       (*
         Tracked targets are build files that are tracked by version control.
         We don't need to typecheck them, but we do need to parse them to load

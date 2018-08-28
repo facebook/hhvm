@@ -45,12 +45,7 @@ let get_from_local_cache ~full popt file_name =
   | Some ast -> ast
   | None ->
     let f contents =
-      let contents =
-        if (FindUtils.is_php fn
-        && not (FilesToIgnore.should_ignore fn))
-        then contents
-        else ""
-      in
+      let contents = if (FindUtils.file_filter fn) then contents else "" in
       let source = Full_fidelity_source_text.make file_name contents in
       match get_file_mode source with
       | None -> []

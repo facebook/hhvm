@@ -169,11 +169,6 @@ and init_env = {
   init_type : string;
 }
 
-let file_filter f =
-  (* Filter the relative path *)
-  let f = Relative_path.strip_root_if_possible f in
-  (FindUtils.is_php f && not (FilesToIgnore.should_ignore f))
-
 let list_files env oc =
   let acc = List.fold_right
     ~f:begin fun error acc ->

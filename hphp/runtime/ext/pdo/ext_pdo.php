@@ -15,7 +15,7 @@ class PDO {
   function __construct(string $dsn,
                        string $username = "",
                        string $password = "",
-                       ?array $options = NULL): void;
+                       ?darray<string, mixed> $options = NULL): void;
 
   /* Prepares an SQL statement to be executed by the PDOStatement::execute()
    * method. The SQL statement can contain zero or more named (:name) or
@@ -54,7 +54,7 @@ class PDO {
    */
   <<__Native>>
   function prepare(string $statement,
-                   array $options = []): mixed;
+                   darray<arraykey, mixed> $options = darray[]): mixed;
 
   /* Turns off autocommit mode. While autocommit mode is turned off, changes
    * made to the database via the PDO object instance are not committed until
@@ -222,7 +222,7 @@ class PDO {
    * operation performed on a particular statement handle.
    */
   <<__Native>>
-  function errorInfo(): array;
+  function errorInfo(): varray<mixed>;
 
   /* PDO::query() executes an SQL statement in a single function call, returning
    * the result set (if any) returned by the statement as a PDOStatement object.
@@ -340,7 +340,7 @@ class PDOStatement implements Iterator {
    * @return mixed - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function execute(?array $params = NULL): mixed;
+  function execute(?arraylike $params = NULL): mixed;
 
   /* Fetches a row from a result set associated with a PDOStatement object. The
    * fetch_style parameter determines how PDO returns the row.
@@ -538,7 +538,7 @@ class PDOStatement implements Iterator {
    * message.
    */
   <<__Native>>
-  function errorInfo(): array;
+  function errorInfo(): varray<mixed>;
 
   /* Sets an attribute on the statement. Currently, no generic attributes are
    * set but only driver specific: PDO::ATTR_CURSOR_NAME (Firebird and ODBC

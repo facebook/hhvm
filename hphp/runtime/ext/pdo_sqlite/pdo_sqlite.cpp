@@ -604,8 +604,8 @@ bool PDOSqliteStatement::getColumnMeta(int64_t colno, Array &ret) {
     return false;
   }
 
-  ret = Array::Create();
-  Array flags = Array::Create();
+  ret = Array::CreateDArray();
+  Array flags = Array::CreateVArray();
   switch (sqlite3_column_type(m_stmt, colno)) {
   case SQLITE_NULL:    ret.set(s_native_type, s_null);    break;
   case SQLITE_FLOAT:   ret.set(s_native_type, s_double);  break;

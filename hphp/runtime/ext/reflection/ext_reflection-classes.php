@@ -318,6 +318,13 @@ class ReflectionParameter implements Reflector {
       'hh\\void' => 1,
       'hh\\this' => 1,
       'hh\\arraykey' => 1,
+      'hh\\varray' => 1,
+      'hh\\darray' => 1,
+      'hh\\varray_or_darray' => 1,
+      'hh\\arraylike' => 1,
+      'hh\\vec' => 1,
+      'hh\\dict' => 1,
+      'hh\\keyset' => 1,
       'array' => 1,
       'callable' => 1,
     );

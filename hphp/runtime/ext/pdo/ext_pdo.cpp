@@ -425,10 +425,11 @@ void pdo_raise_impl_error(sp_PDOResource rsrc, PDOStatement* stmt,
   if (dbh->error_mode != PDO_ERRMODE_EXCEPTION) {
     raise_warning("%s", err.c_str());
   } else {
-    Array info;
+    VArrayInit info(2);
     info.append(String(*pdo_err, CopyString));
     info.append(0LL);
-    throw_pdo_exception(String(sqlstate, CopyString), info, "%s", err.c_str());
+    throw_pdo_exception(String(sqlstate, CopyString), info.toArray(), "%s",
+                        err.c_str());
   }
 }
 
@@ -457,7 +458,7 @@ void pdo_handle_error(sp_PDOResource rsrc, PDOStatement* stmt) {
   String supp;
   Array info;
   if (dbh->support(PDOConnection::MethodFetchErr)) {
-    info = Array::Create();
+    info = Array::CreateVArray();
     info.append(String(*pdo_err, CopyString));
     if (dbh->fetchErr(stmt, info)) {
       if (info.exists(1)) {
@@ -1331,7 +1332,7 @@ static Array HHVM_METHOD(PDO, errorinfo) {
 
   assertx(data->m_dbh->conn()->driver);
 
-  Array ret;
+  Array ret = Array::CreateVArray();
   if (data->m_dbh->query_stmt) {
     ret.append(String(data->m_dbh->query_stmt->error_code, CopyString));
   } else {
@@ -1773,7 +1774,7 @@ static bool do_fetch(sp_PDOStatement stmt,
   case PDO_FETCH_BOTH:
   case PDO_FETCH_NUM:
   case PDO_FETCH_NAMED:
-    ret = Array::Create();
+    ret = Array::CreateDArray();
     break;
 
   case PDO_FETCH_KEY_PAIR:
@@ -1784,7 +1785,7 @@ static bool do_fetch(sp_PDOStatement stmt,
       return false;
     }
     if (!return_all) {
-      ret = Array::Create();
+      ret = Array::CreateDArray();
     }
     break;
 
@@ -1921,11 +1922,11 @@ static bool do_fetch(sp_PDOStatement stmt,
 
     case PDO_FETCH_NAMED: {
       /* already have an item with this name? */
-      forceToArray(ret);
+      forceToDArray(ret);
       if (ret.toArrRef().exists(name)) {
         auto const curr_val = ret.toArrRef().lvalAt(name).unboxed();
         if (!isArrayLikeType(curr_val.type())) {
-          Array arr = Array::Create();
+          Array arr = Array::CreateVArray();
           arr.append(curr_val.tv());
           arr.append(val);
           ret.toArray().set(name, arr);
@@ -1966,7 +1967,7 @@ static bool do_fetch(sp_PDOStatement stmt,
       break;
 
     case PDO_FETCH_FUNC:
-      forceToArray(stmt->fetch.values).set(idx, val);
+      forceToDArray(stmt->fetch.values).set(idx, val);
       break;
 
     default:
@@ -2907,7 +2908,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
     if ((how & PDO_FETCH_GROUP) || how == PDO_FETCH_KEY_PAIR ||
         (how == PDO_FETCH_USE_DEFAULT &&
          self->m_stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)) {
-      return_value = Array::Create();
+      return_value = Array::CreateDArray();
       return_all = &return_value;
     }
     if (!do_fetch(self->m_stmt, true, data, (PDOFetchType)(how | flags),
@@ -2929,7 +2930,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
         continue;
       }
     } else {
-      return_value = Array::Create();
+      return_value = Array::CreateVArray();
       do {
         return_value.toArrRef().append(data);
         data.unset();
@@ -2949,7 +2950,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
 
     /* on no results, return an empty array */
     if (!return_value.isArray()) {
-      return_value = Array::Create();
+      return_value = Array::CreateDArray();
     }
   }
   return return_value;
@@ -3019,7 +3020,7 @@ static Array HHVM_METHOD(PDOStatement, errorinfo) {
     return null_array;
   }
 
-  Array ret;
+  Array ret = Array::CreateVArray();
   ret.append(String(data->m_stmt->error_code, CopyString));
 
   if (data->m_stmt->dbh->conn()->support(PDOConnection::MethodFetchErr)) {

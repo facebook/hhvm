@@ -46,6 +46,7 @@ TRACE_SET_MOD(mcg);
  *   PC Relative
  *     ADR/ADRP - Builds PC relatative addresses.
  *     B[.<cc>] (immediate) - Branch to a PC relative address.
+ *     BL (immediate) - Branch with link to a PC relative address.
  *     LDR (literal) - Loads a literal from a PC relative address.
  *
  *   Immediates
@@ -525,6 +526,7 @@ bool optimizeFarJmp(Env& env, TCA srcAddr, TCA destAddr,
  *   LDR (literal)
  *   B.<cc> (immediate)
  *   B (immediate)
+ *   BL (immediate)
  *
  * destCount, srcCount and rewrites are updated to reflect when an
  * instruction(s) is rewritten to a different instruction sequence.
@@ -610,6 +612,7 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
         isRelative = false;
       }
     } else if (src->IsUncondBranchImm()) {
+      // Handle both B and BL forms of UncondBranchImm.
       imm >>= kInstructionSizeLog2;
       if (!is_int26(imm) || env.far.count(src)) {
         env.destBlock.setFrontier(destAddr);
@@ -619,7 +622,10 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
         a.SetScratchRegisters(vixl::NoReg, vixl::NoReg);
         auto const tmp = rVixlScratch0;
         a.Mov(tmp, src->ImmPCOffsetTarget(srcFrom));
-        a.Br(tmp);
+        assertx(src->Mask(UnconditionalBranchMask) == B ||
+                src->Mask(UnconditionalBranchMask) == BL);
+        if (src->Mask(UnconditionalBranchMask) == BL) a.Blr(tmp);
+        else a.Br(tmp);
         a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
 
         destCount += (env.destBlock.frontier() - destAddr)
@@ -1086,6 +1092,7 @@ size_t relocateImpl(Env& env) {
            *   ADR/ADRP
            *   LDR (literal)
            *   B[.<cc>] (immediate)
+           *   BL (immediate)
            *   CB[N]Z
            *   TB[N]Z
            */
@@ -1227,6 +1234,7 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
    *   ADR/ADRP
    *   LDR (literal)
    *   B[.<cc>] (immediate)
+   *   BL (immediate)
    *   CB[N]Z
    *   TB[N]Z
    */

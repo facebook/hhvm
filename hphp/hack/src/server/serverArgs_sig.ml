@@ -5,6 +5,7 @@ module Types = struct
     saved_state_fn   : string;
     corresponding_base_revision : string;
     deptable_fn      : string;
+    prechecked_changes : Relative_path.t list;
     changes          : Relative_path.t list;
   }
 

@@ -4,7 +4,7 @@ type native_load_result = {
   is_cached : bool;
   state_distance : int;
   deptable_fn : string;
-  dirty_files : (string list) Future.t;
+  dirty_files : (string list * string list) Future.t;
 }
 
 type mini_state_handle = {

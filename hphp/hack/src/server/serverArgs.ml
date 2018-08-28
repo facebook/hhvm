@@ -116,6 +116,9 @@ let parse_mini_state_json (json, _keytrace) =
         saved_state_fn = state;
         corresponding_base_revision = for_base_rev;
         deptable_fn = deptable;
+        (* TODO: prechecked changes are a work in progress, only used in
+         * tests *)
+        prechecked_changes = [];
         changes = changes;
       })
 

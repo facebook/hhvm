@@ -48,7 +48,10 @@ type loaded_info =
  {
    saved_state_fn : string;
    corresponding_rev : Hg.rev;
-   dirty_files : Relative_path.Set.t;
+  (* Files changed between saved state revision and current public merge base *)
+   dirty_master_files : Relative_path.Set.t;
+  (* Files changed between public merge base and current revision *)
+   dirty_local_files : Relative_path.Set.t;
    old_saved : FileInfo.saved_state_info;
    state_distance: int option;
  }
@@ -145,14 +148,19 @@ module ServerInitCommon = struct
         (** Mercurial can respond with 90 thousand file changes in about 3 minutes. *)
         |> Future.get ~timeout:200
         |> Core_result.map_error ~f:Future.error_to_exn
-        >>= fun dirty_files ->
+        >>= fun (dirty_master_files, dirty_local_files) ->
       let () = HackEventLogger.state_loader_dirty_files t in
-      let dirty_files = List.map dirty_files Relative_path.from_root in
-      let dirty_files = Relative_path.set_of_list dirty_files in
+      let list_to_set x =
+        List.map x Relative_path.from_root |> Relative_path.set_of_list in
+
+      let dirty_master_files = list_to_set dirty_master_files in
+      let dirty_local_files = list_to_set dirty_local_files in
+
       Ok {
         saved_state_fn = result.State_loader.saved_state_fn;
         corresponding_rev = result.State_loader.corresponding_rev;
-        dirty_files;
+        dirty_master_files;
+        dirty_local_files;
         old_saved;
         state_distance = Some result.State_loader.state_distance;
       }
@@ -163,15 +171,17 @@ module ServerInitCommon = struct
     let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
     match approach with
     | Precomputed { ServerArgs.saved_state_fn;
-      corresponding_base_revision; deptable_fn; changes } ->
+      corresponding_base_revision; deptable_fn; changes; prechecked_changes } ->
       lock_and_load_deptable deptable_fn ~ignore_hh_version;
       let changes = Relative_path.set_of_list changes in
+      let prechecked_changes = Relative_path.set_of_list prechecked_changes in
       let chan = open_in saved_state_fn in
       let old_saved = Marshal.from_channel chan in
       let get_loaded_info = (fun () -> Ok {
         saved_state_fn;
         corresponding_rev = (Hg.Svn_rev (int_of_string (corresponding_base_revision)));
-        dirty_files = changes;
+        dirty_master_files = prechecked_changes;
+        dirty_local_files = changes;
         old_saved;
         state_distance = None;
       }) in
@@ -579,9 +589,12 @@ module ServerEagerInit : InitKind = struct
     let state = get_state_future genv root state_future timeout in
     match state with
     | Ok ({
-      dirty_files;
+      dirty_master_files;
+      dirty_local_files = dirty_files;
       old_saved;
       _}, changed_while_parsing) ->
+      (* TODO: not implemented *)
+      assert (Relative_path.Set.is_empty dirty_master_files);
       let old_fast = FileInfo.saved_to_fast old_saved in
       (* During eager init, we don't need to worry about tracked targets since
          they we end up parsing everything anyways
@@ -642,10 +655,13 @@ module ServerLazyInit : InitKind = struct
 
     match state with
     | Ok ({
-        dirty_files;
+        dirty_local_files = dirty_files;
+        dirty_master_files;
         old_saved;
         _},
       changed_while_parsing) ->
+      (* TODO: not implemented *)
+      assert (Relative_path.Set.is_empty dirty_master_files);
       let build_targets, tracked_targets = get_build_targets env in
       Hh_logger.log "Successfully loaded mini-state";
       let t = Unix.gettimeofday () in

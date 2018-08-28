@@ -26,7 +26,8 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
       "A.php", a_contents "string";
       "test.php", test_contents;
       ]
-    ~changes_since_saved_state:["A.php"]
+    ~master_changes:[]
+    ~local_changes:["A.php"]
     ~use_precheked_files:false
   in
 

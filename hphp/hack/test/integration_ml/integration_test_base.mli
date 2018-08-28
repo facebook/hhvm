@@ -20,7 +20,8 @@ val save_state: disk_changes_type -> string -> unit
 val load_state:
   saved_state_dir:string ->
   disk_state:disk_changes_type ->
-  changes_since_saved_state:string list ->
+  master_changes:string list ->
+  local_changes:string list ->
   use_precheked_files:bool ->
   ServerEnv.env
 

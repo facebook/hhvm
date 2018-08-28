@@ -364,7 +364,8 @@ let save_state disk_changes temp_dir =
 let load_state
     ~saved_state_dir
     ~disk_state
-    ~changes_since_saved_state
+    ~master_changes
+    ~local_changes
     ~use_precheked_files =
   (* In production, saved state is only used in conjunction with lazy init
    * right now, and I'm not convinced if it even works in any other
@@ -381,7 +382,9 @@ let load_state
   let disk_changes = List.map disk_state (fun (x, y) -> root ^ x, y) in
   List.iter disk_changes (fun (path, contents) -> TestDisk.set path contents);
 
-  let changes = List.map changes_since_saved_state
+  let prechecked_changes = List.map master_changes
+    (fun x -> Relative_path.create_detect_prefix (root ^ x)) in
+  let changes = List.map local_changes
     (fun x -> Relative_path.create_detect_prefix (root ^ x)) in
 
   let saved_state_fn = saved_state_dir ^ "/" ^ saved_state_filename in
@@ -393,6 +396,7 @@ let load_state
      * which is irrelevant in tests *)
     corresponding_base_revision = "-1";
     deptable_fn;
+    prechecked_changes;
     changes;
   } in
   match ServerInit.init ~load_mini_approach !genv with

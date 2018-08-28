@@ -29,11 +29,13 @@ let init
   ~use_full_fidelity_parser:_
   ~interrupt_on_watchman:_
   ~interrupt_on_client:_
+  ~prechecked_files:_
   = ()
 let init_monitor
   ?exit_on_parent_exit:_
   ~search_chunk_size:_
   ~devinfra_saved_state_lookup:_
+  ~prechecked_files:_
   _ _ _ _ = ()
 let init_end ~state_distance:_ ~approach_name:_ ~init_error:_ _ _ = ()
 let starting_first_server _ = ()

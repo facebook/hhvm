@@ -51,6 +51,7 @@ let monitor_daemon_main (options: ServerArgs.options) =
     ~exit_on_parent_exit
     ~devinfra_saved_state_lookup:local_config.ServerLocalConfig.devinfra_saved_state_lookup
     ~search_chunk_size:local_config.ServerLocalConfig.search_chunk_size
+    ~prechecked_files:local_config.ServerLocalConfig.prechecked_files
     (ServerArgs.root options) init_id
     (Unix.gettimeofday ()) false;
   Utils.profile := ServerArgs.profile_log options;

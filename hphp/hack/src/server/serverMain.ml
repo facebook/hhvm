@@ -826,6 +826,7 @@ let setup_server ~informant_managed ~monitor_pid options handle =
   let use_sql =
     LoadScriptConfig.use_sql load_script_config in
   let devinfra_saved_state_lookup = local_config.ServerLocalConfig.devinfra_saved_state_lookup in
+  let prechecked_files = local_config.ServerLocalConfig.prechecked_files in
   if Sys_utils.is_test_mode ()
   then EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0
   else HackEventLogger.init
@@ -843,7 +844,8 @@ let setup_server ~informant_managed ~monitor_pid options handle =
     ~load_tiny_state
     ~use_full_fidelity_parser
     ~interrupt_on_watchman
-    ~interrupt_on_client;
+    ~interrupt_on_client
+    ~prechecked_files;
   let root_s = Path.to_string root in
   let check_mode = ServerArgs.check_mode options in
   if not check_mode && Sys_utils.is_nfs root_s && not enable_on_nfs then begin

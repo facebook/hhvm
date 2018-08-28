@@ -47,6 +47,7 @@ type t = {
   interrupt_on_watchman : bool;
   interrupt_on_client : bool;
   trace_parsing : bool;
+  prechecked_files : bool;
 }
 
 let default = {
@@ -82,6 +83,7 @@ let default = {
   interrupt_on_watchman = false;
   interrupt_on_client = false;
   trace_parsing = false;
+  prechecked_files = false;
 }
 
 let path =
@@ -187,6 +189,8 @@ let load_ fn ~silent =
     ~default:default.use_full_fidelity_parser config in
   let trace_parsing = bool_if_version "trace_parsing"
     ~default:default.trace_parsing config in
+  let prechecked_files = bool_if_version "prechecked_files"
+    ~default:default.prechecked_files config in
   {
     use_watchman;
     watchman_init_timeout;
@@ -219,6 +223,7 @@ let load_ fn ~silent =
     interrupt_on_watchman;
     interrupt_on_client;
     trace_parsing;
+    prechecked_files;
   }
 
 let load ~silent =

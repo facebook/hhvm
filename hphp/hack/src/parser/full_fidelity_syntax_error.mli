@@ -297,6 +297,8 @@ val nested_unary_reference : string
 val toplevel_statements : string
 val invalid_reified : string
 val shadowing_reified : string
+val static_property_in_reified_class : string
+val static_method_in_reified_class : string
 val dollar_unary : string
 val decl_outside_global_scope : string
 val experimental_in_codegen_without_hacksperimental : string

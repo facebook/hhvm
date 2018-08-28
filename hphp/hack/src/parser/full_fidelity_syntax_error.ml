@@ -551,6 +551,10 @@ let invalid_reified =
   "Invalid place to put reified"
 let shadowing_reified =
   "You may not shadow a reified parameter"
+let static_property_in_reified_class =
+  "You may not use static properties in a class with reified type parameters"
+let static_method_in_reified_class =
+  "You may not use static methods in a class with reified type parameters"
 
 let dollar_unary = "The dollar sign ('$') cannot be used as a unary operator"
 

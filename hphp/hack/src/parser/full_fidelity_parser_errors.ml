@@ -1101,6 +1101,22 @@ let special_method_param_errors node parents errors =
     errors
   | _ -> errors
 
+let is_in_reified_class parents =
+  List.exists parents ~f:(fun node ->
+    match syntax node with
+    | ClassishDeclaration {
+      classish_type_parameters = {
+        syntax = TypeParameters {
+          type_parameters_parameters = l; _ }; _}; _ } ->
+      syntax_to_list_no_separators l
+      |> List.exists ~f:(fun p ->
+          match syntax p with
+          | TypeParameter { type_reified; _} -> not @@ is_missing type_reified
+          | _ -> false
+         )
+    | _ -> false
+  )
+
 let methodish_errors env node parents errors =
   match syntax node with
   (* TODO how to narrow the range of error *)
@@ -1186,6 +1202,11 @@ let methodish_errors env node parents errors =
     let errors =
       special_method_param_errors
       md.methodish_function_decl_header parents errors in
+    let errors =
+      if methodish_contains_static node && is_in_reified_class parents then
+        make_error_from_node node SyntaxError.static_method_in_reified_class
+        :: errors else errors
+    in
     errors
   | _ -> errors
 
@@ -2193,7 +2214,7 @@ let reified_parameter_errors node errors =
           type_parameters_parameters errors
   | _ -> errors
 
-let class_reified_param_errors node errors =
+let class_reified_param_errors node parents errors =
   match syntax node with
   | ClassishDeclaration cd ->
     let reified_params, errors = match syntax cd.classish_type_parameters with
@@ -2223,6 +2244,10 @@ let class_reified_param_errors node errors =
         |> List.fold_right ~init:errors ~f:check_method
       | _ -> errors in
     errors
+  | PropertyDeclaration _ ->
+    if methodish_contains_static node && is_in_reified_class parents then
+      make_error_from_node node SyntaxError.static_property_in_reified_class
+      :: errors else errors
   | _ -> errors
 
 let classish_errors env node parents namespace_name names errors =
@@ -2377,7 +2402,6 @@ let classish_errors env node parents namespace_name names errors =
         check_type_name env.syntax_tree cd.classish_name namespace_name name location names errors
       | _ ->
         names, errors in
-    let errors = class_reified_param_errors node errors in
     names, errors
   | _ -> names, errors
 
@@ -3164,7 +3188,8 @@ let find_syntax_errors env =
       | ClassishDeclaration _ ->
         let names, errors =
           classish_errors env node parents namespace_name names errors in
-          trait_require_clauses, names, errors
+        let errors = class_reified_param_errors node parents errors in
+        trait_require_clauses, names, errors
       | ConstDeclaration _ ->
         let errors =
           class_element_errors env node parents errors in
@@ -3192,6 +3217,7 @@ let find_syntax_errors env =
       | PropertyDeclaration _ ->
         let errors =
           class_property_multiple_visibility_error env node parents errors in
+        let errors = class_reified_param_errors node parents errors in
         trait_require_clauses, names, errors
       | Enumerator _ ->
         let errors = enum_errors node errors in

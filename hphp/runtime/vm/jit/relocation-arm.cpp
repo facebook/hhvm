@@ -233,7 +233,8 @@ bool writePCRelative(Instruction* instr, Instruction* target,
 
   auto const imm = static_cast<int64_t>(Instruction::Cast(target) - from);
   if ((instr->IsPCRelAddressing() && !is_int21(imm)) ||
-      (instr->IsLoadLiteral() && !is_int19(imm)) ||
+      (instr->IsLoadLiteral() &&
+       !is_int19(imm >> kInstructionSizeLog2)) ||
       (instr->IsCondBranchImm() &&
        !is_int19(imm >> kInstructionSizeLog2)) ||
       (instr->IsUncondBranchImm() &&
@@ -571,6 +572,7 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
         isRelative = false;
       }
     } else if (src->IsLoadLiteral()) {
+      imm >>= kInstructionSizeLog2;
       if (!is_int19(imm) || env.far.count(src)) {
         env.destBlock.setFrontier(destAddr);
         destCount--;

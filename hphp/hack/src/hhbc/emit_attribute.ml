@@ -17,7 +17,15 @@ let from_attribute_base namespace attribute_id arguments =
     let attribute_arguments =
       Ast_constant_folder.literals_from_exprs_with_index namespace arguments
     in
-    Hhas_attribute.make (snd attribute_id) attribute_arguments
+    let fq_id =
+      let id = snd attribute_id in
+      if String.is_prefix ~prefix:"__" id
+      then id (* don't do anything to builtin attributes *)
+      else
+        let fq_id, _ = Hhbc_id.Class.elaborate_id namespace attribute_id in
+        Php_escaping.escape (Hhbc_id.Class.to_raw_string fq_id)
+    in
+    Hhas_attribute.make fq_id attribute_arguments
   with Ast_constant_folder.UserDefinedConstant ->
     Emit_fatal.raise_fatal_parse (fst attribute_id)
       "User-defined constants are not allowed in user attribute expressions"

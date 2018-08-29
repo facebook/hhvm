@@ -1259,6 +1259,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       ; embedded_member_name     = name
       }
       ->
+        if is_object_creation_expression recv && not env.codegen then
+        raise_parsing_error env (`Node recv) SyntaxError.invalid_constructor_method_call;
         let recv = pExpr recv env in
         let name = pExpr ~location:MemberSelect name env in
         let op = pNullFlavor op env in

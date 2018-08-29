@@ -1372,12 +1372,6 @@ module WithStatementAndDeclAndTypeParser
         let (parser, missing3) = Make.missing parser (pos parser) in
         (parser, missing1, missing2, missing3)
     in
-    let codegen = Env.codegen (env parser) in
-    let parser =
-      if peek_token_kind parser = MinusGreaterThan && not codegen
-      then with_error parser SyntaxError.invalid_constructor_method_call
-      else parser
-    in
     Make.constructor_call parser designator left args right
 
   and parse_function_call parser receiver =

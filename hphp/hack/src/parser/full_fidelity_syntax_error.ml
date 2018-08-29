@@ -246,6 +246,7 @@ let error2077 = "Cannot use empty list"
 let async_not_last = "The 'async' modifier must be directly before the 'function' keyword."
 let list_as_subscript = "A subscript index cannot be a list"
 let vdarray_in_php = "varray and darray are only allowed in Hack files"
+let uppercase_kw text = "Keyword " ^ text ^ " must be written in lowercase"
 let using_st_function_scoped_top_level =
   "Using statement in function scoped form may only be used at the top " ^
   "level of a function or a method"

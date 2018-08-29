@@ -61,7 +61,6 @@ module FullFidelityParseArgs = struct
     lower_coroutines : bool;
     enable_hh_syntax : bool;
     fail_open : bool;
-    force_hh_syntax : bool;
     (* Defining the input *)
     files : string list;
   }
@@ -88,7 +87,6 @@ module FullFidelityParseArgs = struct
     lower_coroutines
     enable_hh_syntax
     fail_open
-    force_hh_syntax
     show_file_name
     files = {
     full_fidelity_json;
@@ -112,7 +110,6 @@ module FullFidelityParseArgs = struct
     lower_coroutines;
     enable_hh_syntax;
     fail_open;
-    force_hh_syntax;
     show_file_name;
     files }
 
@@ -151,7 +148,6 @@ module FullFidelityParseArgs = struct
     let lower_coroutines = ref true in
     let enable_hh_syntax = ref false in
     let fail_open = ref true in
-    let force_hh_syntax = ref false in
     let show_file_name = ref false in
     let set_show_file_name () = show_file_name := true in
     let files = ref [] in
@@ -248,7 +244,7 @@ No errors are filtered out.";
         Arg.Clear fail_open,
         "Unset the fail_open option for the parser.";
       "--force-hh-syntax",
-        Arg.Set force_hh_syntax,
+        Arg.Set enable_hh_syntax,
         "Force hh syntax for the parser.";
       "--show-file-name",
         Arg.Unit set_show_file_name,
@@ -277,7 +273,6 @@ No errors are filtered out.";
       !lower_coroutines
       !enable_hh_syntax
       !fail_open
-      !force_hh_syntax
       !show_file_name
       (List.rev !files)
 end
@@ -306,15 +301,14 @@ let handle_existing_file args filename =
   let popt = ParserOptions.with_hh_syntax_for_hhvm popt
     (args.codegen && args.enable_hh_syntax) in
 
-  if args.force_hh_syntax then begin
-    Full_fidelity_lexer.Env.set ~force_hh:true ~enable_xhp:true;
-  end;
-
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
   let source_text = SourceText.from_file file in
   let _, mode = Full_fidelity_parser.get_language_and_mode source_text in
-  let env = Full_fidelity_parser_env.make ?mode () in
+  let env = Full_fidelity_parser_env.make
+    ~force_hh:args.enable_hh_syntax
+    ~enable_xhp:args.enable_hh_syntax
+    ?mode () in
   let syntax_tree = SyntaxTree.make ~env source_text in
   let editable = SyntaxTransforms.editable_from_positioned syntax_tree in
 
@@ -367,6 +361,7 @@ let handle_existing_file args filename =
         ~quick_mode:args.quick_mode
         ~lower_coroutines:args.lower_coroutines
         ~enable_hh_syntax:args.enable_hh_syntax
+        ~enable_xhp:args.enable_hh_syntax
         ~parser_options:popt
         ~fail_open:args.fail_open
         ~is_hh_file:args.is_hh_file

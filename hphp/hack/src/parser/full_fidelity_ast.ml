@@ -28,6 +28,7 @@ type env =
   ; quick_mode               : bool
   ; lower_coroutines         : bool
   ; enable_hh_syntax         : bool
+  ; enable_xhp               : bool
   ; fail_open                : bool
   ; parser_options           : ParserOptions.t
   ; fi_mode                  : FileInfo.mode
@@ -64,6 +65,7 @@ let make_env
   ?(quick_mode               = false                   )
   ?(lower_coroutines         = true                    )
   ?(enable_hh_syntax         = false                   )
+  ?enable_xhp
   ?(fail_open                = true                    )
   ?(parser_options           = ParserOptions.default   )
   ?(fi_mode                  = FileInfo.Mpartial       )
@@ -72,7 +74,11 @@ let make_env
   ?(hacksperimental          = false                   )
   (file : Relative_path.t)
   : env
-  = let parser_options = ParserOptions.with_hh_syntax_for_hhvm parser_options
+  =
+    let enable_xhp = match enable_xhp with
+      | Some b -> b
+      | None -> enable_hh_syntax in
+    let parser_options = ParserOptions.with_hh_syntax_for_hhvm parser_options
       (codegen && (enable_hh_syntax || is_hh_file)) in
     { is_hh_file
     ; codegen = codegen || systemlib_compat_mode
@@ -90,6 +96,7 @@ let make_env
          )
     ; lower_coroutines
     ; enable_hh_syntax
+    ; enable_xhp
     ; parser_options
     ; fi_mode
     ; fail_open
@@ -135,7 +142,7 @@ module NS = Namespaces
 
 let is_hack (env : env) = env.is_hh_file || env.enable_hh_syntax
 let is_typechecker env =
-   is_hack env && (not env.codegen)
+  is_hack env && (not env.codegen)
 
 let drop_pstr : int -> pstring -> pstring = fun cnt (pos, str) ->
   let len = String.length str in
@@ -3242,6 +3249,8 @@ let parse_text
       Full_fidelity_parser_env.make
         ~hhvm_compat_mode:env.codegen
         ~codegen:env.codegen
+        ~force_hh:env.enable_hh_syntax
+        ~enable_xhp:env.enable_xhp
         ~php5_compat_mode:env.php5_compat_mode
         ~lang:lang
         ~mode

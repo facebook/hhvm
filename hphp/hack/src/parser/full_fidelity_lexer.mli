@@ -8,7 +8,7 @@
  *)
 
 module Env : sig
-  val set : force_hh:bool -> enable_xhp:bool -> unit
+  val set : force_hh:bool -> enable_xhp:bool -> codegen:bool -> unit
 end
 
 module WithToken : functor (Token : Lexable_token_sig.LexableToken_S) -> sig
@@ -17,7 +17,12 @@ module WithToken : functor (Token : Lexable_token_sig.LexableToken_S) -> sig
     | Literal_execution_string
     | Literal_double_quoted
     | Literal_heredoc of string [@@deriving show]
-  val make : ?is_experimental_mode:bool -> Full_fidelity_source_text.t -> t
+  val make :
+    ?is_experimental_mode:bool ->
+    ?force_hh:bool ->
+    ?enable_xhp:bool ->
+    ?codegen:bool ->
+    Full_fidelity_source_text.t -> t
   val make_at : ?is_experimental_mode:bool -> Full_fidelity_source_text.t -> int -> t
   val source : t -> Full_fidelity_source_text.t
   val errors : t -> Full_fidelity_syntax_error.t list

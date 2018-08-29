@@ -1,5 +1,5 @@
-((script 767
-  ((list 767
+((script 709
+  ((list 709
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4
@@ -63,19 +63,6 @@
            (constructor_call 28
             ((() name 28 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())))))))
        (() ";" 1 ((whitespace 3) (single_line_comment 12) (end_of_line 1)))))
-     (expression_statement 20
-      ((binary_expression 19
-        ((variable 3 ((() variable 3 ((whitespace 1)))))
-         (() = 1 ((whitespace 1)))
-         (object_creation_expression 13
-          ((() new 3 ((whitespace 1)))
-           (constructor_call 9
-            ((simple_type_specifier 5 ((() name 5 ()))) (() "(" 1 ())
-             (list 2
-              ((list_item 2
-                ((literal 2 ((() decimal_literal 2 ()))) (missing 0 ())))))
-             (() ")" 1 ())))))))
-       (() ";" 1 ((whitespace 3) (single_line_comment 34) (end_of_line 1)))))
      (expression_statement 44
       ((binary_expression 43
         ((variable 3 ((() variable 3 ((whitespace 1)))))

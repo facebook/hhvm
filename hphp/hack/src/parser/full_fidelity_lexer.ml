@@ -17,14 +17,16 @@ module Env = struct
   let force_hh_opt = ref false
   let enable_xhp_opt = ref false
   let is_hh_file = ref true
+  let backend_is_codegen = ref true
 
   let set_is_hh_file b = is_hh_file := b
-  let set ~force_hh ~enable_xhp =
+  let set ~force_hh ~enable_xhp ~codegen =
     force_hh_opt := force_hh;
-    enable_xhp_opt := enable_xhp
-
+    enable_xhp_opt := enable_xhp;
+    backend_is_codegen := codegen
   let is_hh () = !is_hh_file || !force_hh_opt
   let enable_xhp () = is_hh () || !enable_xhp_opt
+  let force_kw_in_lowercase () = is_hh () && not !backend_is_codegen
 
 end
 
@@ -39,7 +41,12 @@ module Lexer : sig
     is_experimental_mode : bool;
   } [@@deriving show]
   [@@@warning "+32"]
-  val make : ?is_experimental_mode:bool -> SourceText.t -> t
+  val make :
+    ?is_experimental_mode:bool ->
+    ?force_hh:bool ->
+    ?enable_xhp:bool ->
+    ?codegen:bool ->
+    Full_fidelity_source_text.t -> t
   val make_at : ?is_experimental_mode:bool -> SourceText.t -> int -> t
   val start : t -> int
   val source : t -> SourceText.t
@@ -67,7 +74,13 @@ end = struct
     is_experimental_mode : bool; (* write-once: record updates should not update this field *)
   } [@@deriving show]
 
-  let make ?(is_experimental_mode = false) text =
+  let make
+    ?(is_experimental_mode = false)
+    ?(force_hh = false)
+    ?(enable_xhp = false)
+    ?(codegen = false)
+    text =
+    Env.set ~force_hh ~enable_xhp ~codegen;
     { text; start = 0; offset = 0; errors = []; is_experimental_mode }
 
   let start  x = x.start
@@ -1433,16 +1446,31 @@ let as_case_insensitive_keyword text =
   | "inout" | "using" when Env.is_hh () -> lower
   | _ -> text
 
+let enforce_lowercase lexer ~original_text ~lowered_text =
+  if Env.force_kw_in_lowercase () then
+    match lowered_text with
+    | "true" | "false" | "null" -> lexer
+    | _ ->
+      if original_text <> lowered_text then
+        with_error lexer (SyntaxError.uppercase_kw original_text)
+      else lexer
+  else lexer
+
 let as_keyword kind lexer =
   if kind = TokenKind.Name then
-    let text = as_case_insensitive_keyword (current_text lexer) in
+    let original_text = current_text lexer in
+    let text = as_case_insensitive_keyword original_text in
     let is_hack = Env.is_hh () and allow_xhp = Env.enable_xhp () in
     match TokenKind.from_string text ~is_hack ~allow_xhp with
-    | Some TokenKind.Let when (not (is_experimental_mode lexer)) -> TokenKind.Name
-    | Some keyword -> keyword
-    | _ -> TokenKind.Name
+    | Some TokenKind.Let when (not (is_experimental_mode lexer)) ->
+      lexer, TokenKind.Name
+    | Some keyword ->
+      let lexer = enforce_lowercase lexer ~original_text ~lowered_text:text in
+      lexer, keyword
+    | _ ->
+      lexer, TokenKind.Name
   else
-    kind
+    lexer, kind
 
 (* scanner takes a lexer, returns a lexer and a kind *)
 let scan_token_and_leading_trivia scanner as_name lexer  =
@@ -1451,7 +1479,7 @@ let scan_token_and_leading_trivia scanner as_name lexer  =
   (* Remember where we were when we started this token *)
   let lexer = start_new_lexeme lexer in
   let (lexer, kind) = scanner lexer in
-  let kind = if as_name then kind else as_keyword kind lexer in
+  let (lexer, kind) = if as_name then lexer, kind else as_keyword kind lexer in
   let w = width lexer in
   (lexer, kind, w, leading)
 
@@ -1637,6 +1665,7 @@ let skip_to_end_of_markup lexer ~is_leading_section =
       Env.set_is_hh_file false;
       make_long_tag lexer 3
     | '=', _, _ ->
+      Env.set_is_hh_file false;
       begin
         (* skip = *)
         let lexer = advance lexer 1 in
@@ -1645,6 +1674,7 @@ let skip_to_end_of_markup lexer ~is_leading_section =
         lexer, markup_text, Some (less_than_question_token, Some equal)
       end
     | _ ->
+      Env.set_is_hh_file false;
       lexer, markup_text, Some (less_than_question_token, None)
   in
   let rec aux lexer index =

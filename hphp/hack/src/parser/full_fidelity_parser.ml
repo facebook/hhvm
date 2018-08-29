@@ -90,8 +90,14 @@ type t = {
   sc_state : SCWithToken.t;
 }
 
-let make env text =
-  { lexer = Lexer.make ~is_experimental_mode:(Env.is_experimental_mode env) text
+let make (env:Env.t) text =
+  let lexer = Lexer.make
+    ~is_experimental_mode:(Env.is_experimental_mode env)
+    ~force_hh:(Env.force_hh env)
+    ~enable_xhp:(Env.enable_xhp env)
+    ~codegen:(Env.codegen env)
+    text in
+  { lexer
   ; errors = []
   ; context = Context.empty
   ; env

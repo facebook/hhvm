@@ -171,6 +171,7 @@ val error2077 : string
 val async_not_last : string
 val list_as_subscript : string
 val vdarray_in_php : string
+val uppercase_kw : string -> string
 val using_st_function_scoped_top_level : string
 val const_in_trait : string
 val const_visibility : string

@@ -39,6 +39,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -306,8 +307,10 @@ bool HHVM_FUNCTION(array_key_exists,
     ObjectData* obj = searchCell->m_data.pobj;
     if (obj->isCollection()) {
       return collections::contains(obj, key);
+    } else if (obj->instanceof(c_Closure::classof())) {
+      return false;
     }
-    return HHVM_FN(array_key_exists)(key, search.toArray());
+    return HHVM_FN(array_key_exists)(key, obj->toArray(false, true));
   } else {
     throw_bad_type_exception("array_key_exists expects an array or an object; "
                              "false returned.");

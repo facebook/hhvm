@@ -44,6 +44,8 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
+#include "hphp/runtime/ext/std/ext_std_closure.h"
+
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
 
@@ -183,6 +185,8 @@ bool ak_exist_string(const ArrayData* arr, const StringData* key) {
 bool ak_exist_int_obj(ObjectData* obj, int64_t key) {
   if (obj->isCollection()) {
     return collections::contains(obj, key);
+  } else if (obj->instanceof(c_Closure::classof())) {
+    return false;
   }
   auto const arr = obj->toArray(false, true);
   return arr.get()->exists(key);
@@ -191,6 +195,8 @@ bool ak_exist_int_obj(ObjectData* obj, int64_t key) {
 bool ak_exist_string_obj(ObjectData* obj, StringData* key) {
   if (obj->isCollection()) {
     return collections::contains(obj, Variant{key});
+  } else if (obj->instanceof(c_Closure::classof())) {
+    return false;
   }
   auto const arr = obj->toArray(false, true);
   return ak_exist_string_impl<false>(arr.get(), key);

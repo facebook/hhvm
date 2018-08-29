@@ -2007,7 +2007,8 @@ bool strtr_slow(const Array& arr, StringBuffer& result, String& key,
   memcpy(key.mutableData(), s + pos, maxlen);
   for (int len = maxlen; len >= minlen; len--) {
     key.setSize(len);
-    auto const rval = arr->get(arr.convertKey(key));
+    auto const key_tval = make_tv<KindOfString>(key.get());
+    auto const rval = arr->get(arr.convertKey(key_tval));
     if (!rval.is_dummy()) {
       String replace = tvCastToString(rval.tv());
       if (!replace.empty()) {
@@ -2097,6 +2098,8 @@ Variant HHVM_FUNCTION(strtr,
     // Nothing to translate
     return str;
   }
+
+  SuppressHackArrCompatNotices suppress;
 
   for (ArrayIter iter(arr); iter; ++iter) {
     auto const search = iter.first().toString();

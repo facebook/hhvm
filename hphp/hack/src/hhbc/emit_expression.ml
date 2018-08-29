@@ -264,35 +264,6 @@ let is_global_namespace env =
 let enable_intrinsics_extension () =
   Hhbc_options.enable_intrinsics_extension !Hhbc_options.compiler_options
 
-let is_special_function env e args =
-  match snd e with
-  | A.Id (_, s) ->
-  begin
-    let n = List.length args in
-    match String.lowercase s with
-    | "isset" -> n > 0
-    | "__hhas_adata"
-    | "empty" -> n = 1
-    | "__hhvm_intrinsics\\get_reified_type"
-      when enable_intrinsics_extension () -> n = 1
-    | "define" when is_global_namespace env ->
-      begin match args with
-      | [_, A.String _; _] -> true
-      | _ -> false
-      end
-    | "eval" -> n = 1
-    | "idx" -> not (jit_enable_rename_function ()) && (n = 2 || n = 3)
-    | "class_alias" when is_global_namespace env ->
-      begin
-        match args with
-        | [_, A.String _; _, A.String _]
-        | [_, A.String _; _, A.String _; _] -> true
-        | _ -> false
-      end
-   | _ -> false
-  end
-  | _ -> false
-
 let optimize_null_check () =
   Hhbc_options.optimize_null_check !Hhbc_options.compiler_options
 
@@ -859,8 +830,51 @@ and emit_shape env expr fl =
   emit_expr ~need_ref:false env (p, A.Darray fl)
 
 and emit_call_expr env pos e targs args uargs =
-  let instrs, flavor = emit_call env pos e targs args uargs in
-  emit_pos_then pos instrs, flavor
+  match snd e, targs, args, uargs with
+  | A.Id (_, "__hhas_adata"), _, [ (_, A.String data) ], [] ->
+    let v = Typed_value.HhasAdata data in
+    emit_pos_then pos @@ instr (ILitConst (TypedValue v)), Flavor.Cell
+  | A.Id (_, id), _, _, []
+    when String.lowercase id = "isset" ->
+    emit_call_isset_exprs env pos args, Flavor.Cell
+  | A.Id (_, id), _, [arg1], []
+    when String.lowercase id = "empty" ->
+    emit_call_empty_expr env pos arg1, Flavor.Cell
+  | A.Id (_, id), _, ([_; _] | [_; _; _]), []
+    when String.lowercase id = "idx" && not (jit_enable_rename_function ()) ->
+    emit_idx env pos args, Flavor.Cell
+  | A.Id (_, id), _, [(_, A.String s); e], []
+    when String.lowercase id = "define" && is_global_namespace env ->
+    emit_define env pos s e, Flavor.Cell
+  | A.Id (_, id), _, [arg1], []
+    when String.lowercase id = "eval" ->
+    emit_eval env pos arg1, Flavor.Cell
+  | A.Id (_, "class_alias"), _, [_, A.String c1; _, A.String c2], []
+    when is_global_namespace env -> gather [
+      emit_pos pos;
+      instr_true;
+      instr_alias_cls c1 c2
+    ], Flavor.Cell
+  | A.Id (_, "class_alias"), _, [_, A.String c1; _, A.String c2; arg3], []
+    when is_global_namespace env -> gather [
+      emit_expr ~need_ref:false env arg3;
+      emit_pos pos;
+      instr_alias_cls c1 c2
+    ], Flavor.Cell
+  | A.Id (_, "get_class"), _, [], [] ->
+    emit_get_class_no_args (), Flavor.Cell
+  | A.Id (_, s), _, [], []
+    when (String.lowercase s = "exit" || String.lowercase s = "die") ->
+    emit_pos_then pos @@ emit_exit env None, Flavor.Cell
+  | A.Id (_, s), _, [arg1], []
+    when (String.lowercase s = "exit" || String.lowercase s = "die") ->
+    emit_pos_then pos @@ emit_exit env (Some arg1), Flavor.Cell
+  | A.Id (_, "__hhvm_intrinsics\\get_reified_type"), _, [ (_, A.Id (_, s)) ], []
+    when enable_intrinsics_extension () ->
+    emit_pos_then pos @@ emit_reified_type env s, Flavor.Cell
+  | _, _, _, _ ->
+    let instrs, flavor = emit_call env pos e targs args uargs in
+    emit_pos_then pos instrs, flavor
 
 and emit_known_class_id env id =
   let fq_id, _ = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
@@ -1294,7 +1308,7 @@ and emit_set_range_expr env pos name kind args =
 and emit_call_isset_exprs env pos exprs =
   match exprs with
   | [] -> Emit_fatal.raise_fatal_parse
-    pos "cannot call isset without any arguments"
+    pos "Cannot use isset() without any arguments"
   | [expr] -> emit_call_isset_expr env pos expr
   | _ ->
     let n = List.length exprs in
@@ -1364,17 +1378,6 @@ and emit_get_class_no_args () =
     instr_fpushfuncd 0 (Hhbc_id.Function.from_raw_string "get_class");
     instr_fcall (make_fcall_args 0);
     instr_unboxr
-  ]
-
-and emit_class_alias es =
-  let c1, c2 = match es with
-    | (_, A.String c1) :: (_, A.String c2) :: _ -> c1, c2
-    | _ -> failwith "emit_class_alias: impossible"
-  in
-  let default = if List.length es = 2 then instr_true else instr_string c2 in
-  gather [
-    default;
-    instr_alias_cls c1 c2
   ]
 
 and try_inline_gen_call env e =
@@ -1686,7 +1689,6 @@ and emit_reified_type env name =
 
 and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
   match expr_ with
-  | A.Call ((_, A.Id (_, "__hhas_adata")), _, [ (_, A.String _) ], [])
   | A.Float _ | A.String _ | A.Int _ | A.Null | A.False | A.True ->
     let v = Ast_constant_folder.expr_to_typed_value (Emit_env.get_namespace env) expr in
     emit_pos_then pos @@
@@ -1735,34 +1737,6 @@ and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
   | A.Obj_get (expr, prop, nullflavor) ->
     let query_op = if need_ref then QueryOp.Empty else QueryOp.CGet in
     fst (emit_obj_get ~need_ref env pos query_op expr prop nullflavor)
-
-  | A.Call ((_, A.Id (_, id)), _, exprs, [])
-    when String.lowercase id = "isset" ->
-    emit_box_if_necessary pos need_ref @@ emit_call_isset_exprs env pos exprs
-  | A.Call ((_, A.Id (_, id)), _, [expr], [])
-    when String.lowercase id = "empty" ->
-    emit_box_if_necessary pos need_ref @@ emit_call_empty_expr env pos expr
-  | A.Call ((_, A.Id (_, id)), _, ([_; _] | [_; _; _] as es), _)
-    when  String.lowercase id = "idx" && not (jit_enable_rename_function ()) ->
-    emit_box_if_necessary pos need_ref @@ emit_idx env pos es
-  | A.Call ((_, A.Id (_, id)), _, [(_, A.String s); e], _)
-    when String.lowercase id = "define" && is_global_namespace env ->
-    emit_box_if_necessary pos need_ref @@ emit_define env pos s e
-  | A.Call ((_, A.Id (_, id)), _, [expr], _) when String.lowercase id = "eval" ->
-    emit_box_if_necessary pos need_ref @@ emit_eval env pos expr
-  | A.Call ((_, A.Id (_, "class_alias")), _, es, _)
-    when is_global_namespace env ->
-    emit_pos_then pos @@
-    emit_box_if_necessary pos need_ref @@ emit_class_alias es
-  | A.Call ((_, A.Id (_, "get_class")), _, [], _) ->
-    emit_box_if_necessary pos need_ref @@ emit_get_class_no_args ()
-  | A.Call ((_, A.Id (_, s)), _, es, _)
-    when (String.lowercase s = "exit" || String.lowercase s = "die") ->
-    emit_pos_then pos @@
-    emit_exit env (List.hd es)
-  | A.Call ((_, A.Id (_, "__hhvm_intrinsics\\get_reified_type")), _, [ (_, A.Id (_, s)) ], [])
-    when enable_intrinsics_extension () ->
-    emit_pos_then pos @@ emit_reified_type env s
   | A.Call (e, targs, args, uargs) ->
     emit_box_or_unbox_if_necessary pos need_ref @@
       emit_call_expr env pos e targs args uargs
@@ -3561,8 +3535,7 @@ and emit_call env pos (_, expr_ as expr) targs args uargs =
  *)
 and emit_flavored_expr env ?last_pos (pos, expr_ as expr) =
   match expr_ with
-  | A.Call (e, targs, args, uargs)
-    when not (is_special_function env e args) ->
+  | A.Call (e, targs, args, uargs) ->
     emit_call_expr env pos e targs args uargs
   | _ ->
     let need_ref = binary_assignment_rhs_starts_with_ref expr in

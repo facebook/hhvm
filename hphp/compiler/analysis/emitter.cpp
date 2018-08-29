@@ -345,12 +345,6 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
         const char hhbc_ext[] = "hhas";
         if (!strcmp(dot + 1, hhbc_ext)) {
           ue = assemble_string(code, codeLen, filename, md5, nativeFuncs);
-          if (BuiltinSymbols::s_systemAr) {
-            assertx(ue->m_filepath->data()[0] == '/' &&
-                    ue->m_filepath->data()[1] == ':');
-            BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
-            ue = assemble_string(code, codeLen, filename, md5, nativeFuncs);
-          }
         }
       }
     }
@@ -363,12 +357,6 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       assertx(uc);
       try {
         ue = uc->compile();
-        if (BuiltinSymbols::s_systemAr) {
-          assertx(ue->m_filepath->data()[0] == '/' &&
-                  ue->m_filepath->data()[1] == ':');
-          BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
-          ue = uc->compile();
-        }
       } catch (const BadCompilerException& exc) {
         Logger::Error("Bad external compiler: %s", exc.what());
         return nullptr;
@@ -378,7 +366,13 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     // NOTE: Repo errors are ignored!
     Repo::get().commitUnit(ue.get(), unitOrigin);
     unit = ue->create();
-    ue.reset();
+    if (BuiltinSymbols::s_systemAr) {
+      assertx(ue->m_filepath->data()[0] == '/' &&
+              ue->m_filepath->data()[1] == ':');
+      BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
+    } else {
+      ue.reset();
+    }
 
     if (unit->sn() == -1) {
       // the unit was not committed to the Repo, probably because

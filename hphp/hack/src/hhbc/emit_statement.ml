@@ -1154,7 +1154,8 @@ and emit_foreach_ env pos collection iterator block =
     Emit_env.do_in_loop_body loop_break_label loop_continue_label env
       ~iter:(mutable_iter, iterator_number) block emit_stmt in
   let result = gather [
-    emit_expr ~last_pos:pos ~need_ref:mutable_iter env collection;
+    emit_expr ~need_ref:mutable_iter env collection;
+    emit_pos (fst collection);
     init;
     instr_try_fault
       fault_label

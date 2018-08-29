@@ -617,15 +617,19 @@ and emit_binop ~need_ref env pos op e1 e2 =
     | _ ->
       default ()
 
-and emit_box_if_necessary pos need_ref instr =
-  if need_ref then
-    gather [
-      instr;
-      emit_pos pos;
-      instr_box
-    ]
-  else
-    instr
+and emit_box_if_necessary pos need_ref instrs =
+  match need_ref with
+  | false -> instrs
+  | true -> gather [ instrs; emit_pos pos; instr_box ]
+
+and emit_box_or_unbox_if_necessary pos need_ref (instrs, flavor) =
+  match need_ref, flavor with
+  | false, Flavor.Cell -> instrs
+  | false, Flavor.Ref -> gather [ instrs; emit_pos pos; instr_unbox ]
+  | false, Flavor.ReturnVal -> gather [ instrs; emit_pos pos; instr_unboxr ]
+  | true, Flavor.Cell -> gather [ instrs; emit_pos pos; instr_box ]
+  | true, Flavor.Ref -> instrs
+  | true, Flavor.ReturnVal -> gather [ instrs; emit_pos pos; instr_boxr ]
 
 and emit_instanceof env pos e1 e2 =
   match (e1, e2) with
@@ -854,19 +858,9 @@ and emit_shape env expr fl =
   in
   emit_expr ~need_ref:false env (p, A.Darray fl)
 
-and emit_call_expr ?last_pos ~need_ref env expr =
-  let instrs, flavor = emit_flavored_expr env expr in
-  let pos = Option.value ~default:(fst expr) last_pos in
-  gather [
-    instrs;
-    (* Box/unbox as needed *)
-    match need_ref, flavor with
-    | false, Flavor.Ref -> emit_pos_then pos instr_unbox
-    | false, Flavor.ReturnVal -> emit_pos_then pos instr_unboxr
-    | true, Flavor.Cell -> emit_pos_then pos instr_box
-    | true, Flavor.ReturnVal -> emit_pos_then pos instr_boxr
-    | _ -> empty
-  ]
+and emit_call_expr env pos e targs args uargs =
+  let instrs, flavor = emit_call env pos e targs args uargs in
+  emit_pos_then pos instrs, flavor
 
 and emit_known_class_id env id =
   let fq_id, _ = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
@@ -1769,8 +1763,9 @@ and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
   | A.Call ((_, A.Id (_, "__hhvm_intrinsics\\get_reified_type")), _, [ (_, A.Id (_, s)) ], [])
     when enable_intrinsics_extension () ->
     emit_pos_then pos @@ emit_reified_type env s
-  | A.Call _ ->
-    emit_call_expr ?last_pos ~need_ref env expr
+  | A.Call (e, targs, args, uargs) ->
+    emit_box_or_unbox_if_necessary pos need_ref @@
+      emit_call_expr env pos e targs args uargs
   | A.Execution_operator es ->
     emit_box_if_necessary pos need_ref @@
       emit_execution_operator env pos es
@@ -3566,10 +3561,9 @@ and emit_call env pos (_, expr_ as expr) targs args uargs =
  *)
 and emit_flavored_expr env ?last_pos (pos, expr_ as expr) =
   match expr_ with
-  | A.Call (e, tal, args, uargs)
+  | A.Call (e, targs, args, uargs)
     when not (is_special_function env e args) ->
-    let instrs, flavor = emit_call env pos e tal args uargs in
-    emit_pos_then pos instrs, flavor
+    emit_call_expr env pos e targs args uargs
   | _ ->
     let need_ref = binary_assignment_rhs_starts_with_ref expr in
     let flavor = if need_ref then Flavor.Ref else Flavor.Cell in

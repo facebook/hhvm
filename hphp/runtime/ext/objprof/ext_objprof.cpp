@@ -570,7 +570,7 @@ std::pair<int, double> tvGetSize(
         ref_ref_count
       );
 
-      Cell* cell = ref->tv();
+      Cell* cell = ref->cell();
       auto size_of_tv_pair = tvGetSize(
         *cell,
         source,
@@ -659,7 +659,7 @@ void tvGetStrings(
     }
     case HPHP::KindOfRef: {
       RefData* ref = tv.m_data.pref;
-      Cell* cell = ref->tv();
+      Cell* cell = ref->cell();
       tvGetStrings(*cell, metrics, path, pointers, val_stack);
       break;
     }

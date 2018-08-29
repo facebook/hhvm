@@ -402,8 +402,8 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
     if (UNLIKELY(isRefType(e.data.m_type))) {
       auto ref = e.data.m_data.pref;
       // See also tvDupWithRef()
-      if (!ref->isReferenced() && ref->tv()->m_data.parr != &other) {
-        cellDup(*ref->tv(), *reinterpret_cast<Cell*>(&e.data));
+      if (!ref->isReferenced() && ref->cell()->m_data.parr != &other) {
+        cellDup(*ref->cell(), *reinterpret_cast<Cell*>(&e.data));
         continue;
       } else if (dest_hk == HeaderKind::Dict) {
         ad->m_used = i;
@@ -853,8 +853,8 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
       if (UNLIKELY(isRefType(elm->data.m_type))) {
         auto ref = elm->data.m_data.pref;
         // See also tvDupWithRef()
-        if (!ref->isReferenced() && ref->tv()->m_data.parr != old) {
-          cellDup(*ref->tv(), elm->data);
+        if (!ref->isReferenced() && ref->cell()->m_data.parr != old) {
+          cellDup(*ref->cell(), elm->data);
           continue;
         }
       }

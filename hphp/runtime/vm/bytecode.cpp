@@ -795,7 +795,7 @@ static std::string toStringElm(const TypedValue* tv) {
   case KindOfRef:
     os << "V:(";
     os << "@" << tv->m_data.pref;
-    os << toStringElm(tv->m_data.pref->tv());
+    os << toStringElm(tv->m_data.pref->cell());
     os << ")";
     return os.str();
   case KindOfUninit:
@@ -5793,7 +5793,7 @@ iopWIterInitK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
 }
 
 inline bool initIteratorM(Iter* it, Ref* r1, TypedValue *val, TypedValue *key) {
-  TypedValue* rtv = r1->m_data.pref->tv();
+  TypedValue* rtv = r1->m_data.pref->cell();
   if (isArrayLikeType(rtv->m_type)) {
     return new_miter_array_key(it, r1->m_data.pref, val, key);
   }
@@ -6175,9 +6175,9 @@ OPTBLD_INLINE void iopStaticLocDef(local_var loc, const StringData* var) {
     if (LIKELY(!staticLocalData.isInit())) {
       staticLocalData->ref.initInRDS();
       staticLocalData.markInit();
-      cellCopy(*initVal, *staticLocalData->ref.tv());
+      cellCopy(*initVal, *staticLocalData->ref.cell());
     } else {
-      cellMove(*initVal, *staticLocalData->ref.tv());
+      cellMove(*initVal, *staticLocalData->ref.cell());
     }
     return &staticLocalData->ref;
   }();
@@ -6205,7 +6205,7 @@ OPTBLD_INLINE void iopStaticLocInit(local_var loc, const StringData* var) {
     if (!staticLocalData.isInit()) {
       staticLocalData->ref.initInRDS();
       staticLocalData.markInit();
-      cellCopy(*initVal, *staticLocalData->ref.tv());
+      cellCopy(*initVal, *staticLocalData->ref.cell());
     }
     return &staticLocalData->ref;
   }();

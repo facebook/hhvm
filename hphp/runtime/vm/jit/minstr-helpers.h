@@ -154,7 +154,7 @@ inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
     // to incref the inner cell and drop our reference to the RefData.
     // Otherwise we do nothing, since we already own a reference to result.
     if (UNLIKELY(isRefType(localTvRef.m_type))) {
-      auto inner = *localTvRef.m_data.pref->tv();
+      auto inner = *localTvRef.m_data.pref->cell();
       tvIncRefGen(inner);
       decRefRef(localTvRef.m_data.pref);
       return inner;
@@ -954,7 +954,7 @@ ARRAYSET_HELPER_TABLE(X)
 inline                                                                   \
 void nm(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) { \
   arraySetImpl<keyType, checkForInt, true, intishWarn>(                  \
-    a, key, value, ref->tv()                                             \
+    a, key, value, ref->cell()                                           \
   );                                                                     \
 }
 ARRAYSET_REF_HELPER_TABLE(X)
@@ -977,7 +977,7 @@ inline ArrayData* vecSetI(ArrayData* a, int64_t key, Cell value) {
 
 inline void vecSetIR(ArrayData* a, int64_t key, Cell value,
                      RefData* ref) {
-  vecSetImpl<true>(a, key, value, ref->tv());
+  vecSetImpl<true>(a, key, value, ref->cell());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1018,7 +1018,7 @@ DICTSET_HELPER_TABLE(X)
 #define X(nm, keyType)                                                  \
 inline                                                                  \
 void nm(ArrayData* a, key_type<keyType> key, Cell val, RefData* ref) {  \
-  dictSetImpl<keyType, true>(a, key, val, ref->tv());                   \
+  dictSetImpl<keyType, true>(a, key, val, ref->cell());                 \
 }
 DICTSET_REF_HELPER_TABLE(X)
 #undef X

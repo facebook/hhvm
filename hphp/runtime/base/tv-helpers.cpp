@@ -169,7 +169,7 @@ bool tvIsPlausible(TypedValue tv) {
     assertx(uintptr_t(tv.m_data.pref) % sizeof(void*) == 0);
     assertx(tv.m_data.pref->kindIsValid());
     assertx(tv.m_data.pref->checkCount());
-    tv = *tv.m_data.pref->tv();
+    tv = *tv.m_data.pref->cell();
   }
   return cellIsPlausible(tv);
 }

@@ -217,7 +217,7 @@ ALWAYS_INLINE const Object& asCObjRef(tv_rval tv) {
 }
 
 ALWAYS_INLINE const Object& toCObjRef(tv_rval tv) {
-  return asCObjRef(tvIsRef(tv) ? val(tv).pref->tv() : tv);
+  return asCObjRef(tvIsRef(tv) ? val(tv).pref->cell() : tv);
 }
 
 ALWAYS_INLINE Object toObject(tv_rval tv) {

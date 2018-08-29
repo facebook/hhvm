@@ -134,7 +134,7 @@ bool UrlFile::open(const String& input_url, const String& mode) {
     Variant varFrom(m_responseHeaders);
     const auto tvFrom(varFrom.asTypedValue());
     if (isRefType(tvTo->m_type)) {
-      tvTo = tvTo->m_data.pref->tv();
+      tvTo = tvTo->m_data.pref->cell();
     }
     tvDup(*tvFrom, *tvTo);
   } else if ((fp->func()->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {

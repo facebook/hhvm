@@ -172,7 +172,7 @@ void cgCheckStk(IRLS& env, const IRInstruction* inst) {
 
 void cgCheckRefInner(IRLS& env, const IRInstruction* inst) {
   if (inst->typeParam() >= TInitCell) return;
-  auto const base = srcLoc(env, inst, 0).reg()[RefData::tvOffset()];
+  auto const base = srcLoc(env, inst, 0).reg()[RefData::cellOffset()];
 
   emitTypeCheck(vmain(env), env, inst->typeParam(),
                 base + TVOFF(m_type), base + TVOFF(m_data), inst->taken());

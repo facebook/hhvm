@@ -567,7 +567,7 @@ int64_t HHVM_FUNCTION(extract,
   auto arrByRef = false;
   auto arr_tv = vref_array.wrapped().asTypedValue();
   if (isRefType(arr_tv->m_type)) {
-    arr_tv = arr_tv->m_data.pref->tv();
+    arr_tv = arr_tv->m_data.pref->cell();
     arrByRef = true;
   }
   if (!isArrayLikeType(arr_tv->m_type)) {
@@ -607,7 +607,7 @@ int64_t HHVM_FUNCTION(extract,
     };
 
     if (arrByRef) {
-      return extr_refs(tvAsVariant(vref_array.getRefData()->tv()).asArrRef());
+      return extr_refs(tvAsVariant(vref_array.getRefData()->cell()).asArrRef());
     }
     Array tmp = carr;
     return extr_refs(tmp);

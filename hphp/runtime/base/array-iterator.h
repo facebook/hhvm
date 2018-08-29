@@ -360,7 +360,7 @@ private:
  * be a different array or a non-array value.  When this happens, the
  * MArrayIter unregisters itself with the old array (pointed to by
  * m_container) and registers itself with the new array (pointed to by
- * m_ref->tv().m_data.parr) and resumes iteration at the position
+ * m_ref->cell().m_data.parr) and resumes iteration at the position
  * pointed to by the new array's internal cursor (ArrayData::m_pos).
  * If m_ref points to a non-array value, iteration terminates.
  */
@@ -448,8 +448,8 @@ struct MArrayIter {
 private:
   ArrayData* getData() const {
     assertx(hasRef());
-    return isArrayType(m_ref->tv()->m_type)
-      ? m_ref->tv()->m_data.parr
+    return isArrayType(m_ref->cell()->m_type)
+      ? m_ref->cell()->m_data.parr
       : nullptr;
   }
 

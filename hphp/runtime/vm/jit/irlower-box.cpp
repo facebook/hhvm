@@ -91,7 +91,7 @@ void cgUnboxPtr(IRLS& env, const IRInstruction* inst) {
   emitCmpTVType(v, sf, KindOfRef, type_ptr);
 
   auto const val_ptr = memTVValPtr(src, srcLoc);
-  if (RefData::tvOffset() == 0) {
+  if (RefData::cellOffset() == 0) {
     v << cloadq{CC_E, sf, srcLoc.reg(valIdx), val_ptr, dstLoc.reg(valIdx)};
     if (wide) {
       static_assert(TVOFF(m_data) == 0, "");
@@ -106,7 +106,7 @@ void cgUnboxPtr(IRLS& env, const IRInstruction* inst) {
   auto const ref_ptr = v.makeReg();
   auto const cell_ptr = v.makeReg();
   v << load{val_ptr, ref_ptr};
-  v << lea{ref_ptr[RefData::tvOffset()], cell_ptr};
+  v << lea{ref_ptr[RefData::cellOffset()], cell_ptr};
   v << cmovq{CC_E, sf, srcLoc.reg(valIdx), cell_ptr, dstLoc.reg(valIdx)};
   if (wide) {
     static_assert(TVOFF(m_data) == 0, "");

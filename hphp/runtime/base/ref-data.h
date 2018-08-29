@@ -53,9 +53,9 @@ struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
   /*
    * Create a RefData, allocated in the request local heap.
    */
-  static RefData* Make(TypedValue tv) {
+  static RefData* Make(Cell v) {
     return new (tl_heap->objMalloc(sizeof(RefData)))
-      RefData(tv.m_type, tv.m_data.num);
+      RefData(v.m_type, v.m_data.num);
   }
 
   ~RefData();
@@ -77,25 +77,25 @@ struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
   bool kindIsValid() const { return m_kind == HeaderKind::Ref; }
 
   /*
-   * Note, despite the name, this can never return a non-Cell.
+   * This can never return a non-Cell.
    */
-  const Cell* tv() const {
+  const Cell* cell() const {
     assertx(kindIsValid());
-    return &m_tv;
+    return &m_cell;
   }
-  Cell* tv() {
+  Cell* cell() {
     assertx(kindIsValid());
-    return &m_tv;
+    return &m_cell;
   }
 
   const Variant* var() const {
-    return reinterpret_cast<const Variant*>(tv());
+    return reinterpret_cast<const Variant*>(cell());
   }
   Variant* var() {
-    return reinterpret_cast<Variant*>(tv());
+    return reinterpret_cast<Variant*>(cell());
   }
 
-  static constexpr int tvOffset() { return offsetof(RefData, m_tv); }
+  static constexpr int cellOffset() { return offsetof(RefData, m_cell); }
 
   void assertValid() const { assertx(kindIsValid()); }
 
@@ -110,15 +110,15 @@ private:
     // count=OneReference
     initHeader_16(HeaderKind::Ref, OneReference, 0);
     if (!isNullType(t)) {
-      m_tv.m_type = t;
-      m_tv.m_data.num = datum;
+      m_cell.m_type = t;
+      m_cell.m_data.num = datum;
     } else {
-      m_tv.m_type = KindOfNull;
+      m_cell.m_type = KindOfNull;
     }
   }
 
 private:
-  TypedValue m_tv;
+  Cell m_cell;
 };
 
 ALWAYS_INLINE void decRefRef(RefData* ref) {

@@ -1420,11 +1420,11 @@ void VariableSerializer::serializeRef(tv_rval tv, bool isArrayKey) {
       writeOverflow(tv);
     } else {
       // Tell the inner variant to skip the nesting check for data inside
-      serializeVariant(val(tv).pref->tv(), isArrayKey, true);
+      serializeVariant(val(tv).pref->cell(), isArrayKey, true);
     }
     decNestedLevel(tv);
   } else {
-    serializeVariant(val(tv).pref->tv(), isArrayKey);
+    serializeVariant(val(tv).pref->cell(), isArrayKey);
   }
 }
 

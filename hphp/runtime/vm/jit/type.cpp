@@ -825,7 +825,7 @@ Type typeFromTV(tv_rval tv, const Class* ctx) {
   else if (outer == KindOfPersistentKeyset) outer = KindOfKeyset;
 
   if (isRefType(outer)) {
-    inner = val(tv).pref->tv()->m_type;
+    inner = val(tv).pref->cell()->m_type;
     if (inner == KindOfPersistentString) inner = KindOfString;
     else if (inner == KindOfPersistentArray) inner = KindOfArray;
     else if (inner == KindOfPersistentVec) inner = KindOfVec;

@@ -329,8 +329,8 @@ bool PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad) {
       assertx(!adIn->isVecArray());
       auto ref = elm->m_data.pref;
       // See also tvDupWithRef()
-      if (!ref->isReferenced() && ref->tv()->m_data.parr != adIn) {
-        cellDup(*ref->tv(), *elm);
+      if (!ref->isReferenced() && ref->cell()->m_data.parr != adIn) {
+        cellDup(*ref->cell(), *elm);
         continue;
       } else if (convertingPackedToVec) {
         for (--elm; elm >= packedData(ad); --elm) {

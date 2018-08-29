@@ -175,7 +175,7 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
                                  res->heapSize() - sizeof(ResourceHdr));
     }
     case HeaderKind::Ref:
-      scanner.scan(*static_cast<const RefData*>(h)->tv());
+      scanner.scan(*static_cast<const RefData*>(h)->cell());
       return;
     case HeaderKind::Cpp:
     case HeaderKind::SmallMalloc:

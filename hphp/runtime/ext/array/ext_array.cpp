@@ -1446,7 +1446,7 @@ static Variant iter_op_impl(VRefParam refParam, OpPtr op, const String& objOp,
       !ad->noCopyOnWrite()) {
     ad = ad->copy();
     if (LIKELY(refParam.isRefData())) {
-      cellMove(make_array_like_tv(ad), *refParam.getRefData()->tv());
+      cellMove(make_array_like_tv(ad), *refParam.getRefData()->cell());
     } else {
       req::ptr<ArrayData> tmp(ad, req::ptr<ArrayData>::NoIncRef{});
       return (ad->*op)();

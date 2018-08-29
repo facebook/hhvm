@@ -498,7 +498,7 @@ void MArrayIter::escalateCheck() {
   if (!data) return;
   auto const esc = data->escalate();
   if (data != esc) {
-    cellMove(make_array_like_tv(esc), *getRef()->tv());
+    cellMove(make_array_like_tv(esc), *getRef()->cell());
   }
 }
 
@@ -514,7 +514,7 @@ ArrayData* MArrayIter::cowCheck() {
   // of creating the first one.
   auto copy = data->copy();
   if (strong_iterators_exist()) move_strong_iterators(copy, data);
-  cellMove(make_array_like_tv(copy), *getRef()->tv());
+  cellMove(make_array_like_tv(copy), *getRef()->cell());
   return copy;
 }
 
@@ -663,7 +663,7 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
     auto const cur = arrIter.nvSecond();
     if (isRefType(cur.type())) {
       if (!withRef || !cur.val().pref->isReferenced()) {
-        cellDup(*(cur.val().pref->tv()), *out);
+        cellDup(*(cur.val().pref->cell()), *out);
       } else {
         refDup(cur.tv(), *out);
       }
@@ -1212,7 +1212,7 @@ int64_t new_miter_array_key(Iter* dest, RefData* v1,
                            TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, v1);
 
-  TypedValue* rtv = v1->tv();
+  auto rtv = v1->cell();
   assertx(isArrayLikeType(rtv->m_type));
   ArrayData* ad = rtv->m_data.parr;
 
@@ -1238,7 +1238,7 @@ int64_t new_miter_array_key(Iter* dest, RefData* v1,
 
 int64_t new_miter_object(Iter* dest, RefData* ref, Class* ctx,
                       TypedValue* valOut, TypedValue* keyOut) {
-  ObjectData *obj = ref->tv()->m_data.pobj;
+  ObjectData *obj = ref->cell()->m_data.pobj;
   if (obj->isCollection()) {
     raise_error("Collection elements cannot be taken by reference");
   }

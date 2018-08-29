@@ -130,7 +130,7 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
 bool tvCastToBoolean(TypedValue tv) {
   assertx(tvIsPlausible(tv));
   if (isRefType(tv.m_type)) {
-    tv = *tv.m_data.pref->tv();
+    tv = *tv.m_data.pref->cell();
   }
   return cellToBool(tv);
 }
@@ -292,7 +292,7 @@ void tvCastToInt64InPlace(TypedValue* tv) {
 int64_t tvCastToInt64(TypedValue tv) {
   assertx(tvIsPlausible(tv));
   if (isRefType(tv.m_type)) {
-    tv = *tv.m_data.pref->tv();
+    tv = *tv.m_data.pref->cell();
   }
   return cellToInt(tv);
 }
@@ -300,7 +300,7 @@ int64_t tvCastToInt64(TypedValue tv) {
 double tvCastToDouble(TypedValue tv) {
   assertx(tvIsPlausible(tv));
   if (isRefType(tv.m_type)) {
-    tv = *tv.m_data.pref->tv();
+    tv = *tv.m_data.pref->cell();
   }
 
   switch (tv.m_type) {
@@ -456,7 +456,7 @@ void cellCastToStringInPlace(tv_lval tv) {
 StringData* tvCastToStringData(TypedValue tv) {
   assertx(tvIsPlausible(tv));
   if (isRefType(tv.m_type)) {
-    tv = *tv.m_data.pref->tv();
+    tv = *tv.m_data.pref->cell();
   }
   return cellCastToStringData(tv);
 }
@@ -544,7 +544,7 @@ String tvCastToString(TypedValue tv) {
 ArrayData* tvCastToArrayLikeData(TypedValue tv) {
   assertx(tvIsPlausible(tv));
   if (isRefType(tv.m_type)) {
-    tv = *tv.m_data.pref->tv();
+    tv = *tv.m_data.pref->cell();
   }
 
   switch (tv.m_type) {
@@ -1313,7 +1313,7 @@ void tvCastToDArrayInPlace(TypedValue* tv) {
 ObjectData* tvCastToObjectData(TypedValue tv) {
   assertx(tvIsPlausible(tv));
   if (isRefType(tv.m_type)) {
-    tv = *tv.m_data.pref->tv();
+    tv = *tv.m_data.pref->cell();
   }
 
   switch (tv.m_type) {

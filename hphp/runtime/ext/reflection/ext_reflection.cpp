@@ -665,7 +665,7 @@ static Array get_function_static_variables(const Func* func) {
     ai.setUnknownKey(
       VarNR(sv.name),
       staticLocalData.isInit()
-        ? tvAsCVarRef(staticLocalData.get()->ref.tv())
+        ? tvAsCVarRef(staticLocalData.get()->ref.cell())
         : uninit_variant
     );
   }

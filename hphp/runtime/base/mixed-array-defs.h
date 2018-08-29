@@ -311,7 +311,7 @@ void ConvertTvToUncounted(
     DataWalker::PointerMap* seen = nullptr) {
   if (isRefType(source->m_type)) {
     // unbox
-    auto const inner = source->m_data.pref->tv();
+    auto const inner = source->m_data.pref->cell();
     tvCopy(*inner, *source);
   }
 

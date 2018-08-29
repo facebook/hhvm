@@ -72,7 +72,7 @@ void cgInitStaticLoc(IRLS& env, const IRInstruction* inst) {
   // Initialize the RefData by storing the new value into it's TypedValue and
   // incrementing the RefData reference count (which will set it to 1).
   auto mem = rvmtl()[link.handle() + rds::StaticLocalData::ref_offset()];
-  storeTV(v, mem + RefData::tvOffset(), srcLoc(env, inst, 0), inst->src(0));
+  storeTV(v, mem + RefData::cellOffset(), srcLoc(env, inst, 0), inst->src(0));
   emitStoreRefCount(v, OneReference, mem);
   v << storebi{uint8_t(HeaderKind::Ref), mem + (int)HeaderKindOffset};
   markRDSHandleInitialized(v, link.handle());

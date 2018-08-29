@@ -118,7 +118,7 @@ ArrayData* ArrayCommon::ToKeyset(ArrayData* a, bool) {
         if (v.m_data.pref->isReferenced()) {
           throwRefInvalidArrayValueException(init.toArray());
         }
-        v = *v.m_data.pref->tv();
+        v = *v.m_data.pref->cell();
         assertx(!isRefType(v.m_type));
       }
 
@@ -173,7 +173,7 @@ ArrayCommon::CheckForRefs(const ArrayData* ad) {
     [&](TypedValue v) {
       if (UNLIKELY(isRefType(v.m_type))) {
         auto const ref = v.m_data.pref;
-        if (ref->isReferenced() || ref->tv()->m_data.parr == ad) {
+        if (ref->isReferenced() || ref->cell()->m_data.parr == ad) {
           result = RefCheckResult::Fail;
           return true;
         }

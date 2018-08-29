@@ -103,7 +103,7 @@ bool DataWalker::visitTypedValue(TypedValue rval,
       features.isCircular = true;
       if (canStopWalk(features)) return true;
     }
-    rval = *rval.m_data.pref->tv();
+    rval = *rval.m_data.pref->cell();
   }
 
   if (rval.m_type == KindOfObject) {

@@ -61,7 +61,7 @@ enable_if_lval_t<T&&, void> tvUnbox(T&& tv) {
   assertx(refIsPlausible(as_tv(tv)));
 
   auto const r = val(tv).pref;
-  auto const inner = r->tv();
+  auto const inner = r->cell();
   assertx(cellIsPlausible(*inner));
 
   val(tv).num = inner->m_data.num;
@@ -84,16 +84,16 @@ enable_if_lval_t<T&&, void> tvUnboxIfNeeded(T&& tv) {
  * Return a reference to an unboxed `tv'.
  */
 ALWAYS_INLINE Cell& tvToCell(TypedValue& tv) {
-  return LIKELY(!isRefType(tv.m_type)) ? tv : *tv.m_data.pref->tv();
+  return LIKELY(!isRefType(tv.m_type)) ? tv : *tv.m_data.pref->cell();
 }
 ALWAYS_INLINE Cell tvToCell(const TypedValue& tv) {
-  return LIKELY(!isRefType(tv.m_type)) ? tv : *tv.m_data.pref->tv();
+  return LIKELY(!isRefType(tv.m_type)) ? tv : *tv.m_data.pref->cell();
 }
 ALWAYS_INLINE Cell* tvToCell(TypedValue* tv) {
-  return LIKELY(!isRefType(tv->m_type)) ? tv : tv->m_data.pref->tv();
+  return LIKELY(!isRefType(tv->m_type)) ? tv : tv->m_data.pref->cell();
 }
 ALWAYS_INLINE const Cell* tvToCell(const TypedValue* tv) {
-  return LIKELY(!isRefType(tv->m_type)) ? tv : tv->m_data.pref->tv();
+  return LIKELY(!isRefType(tv->m_type)) ? tv : tv->m_data.pref->cell();
 }
 template<bool is_const, typename tag_t>
 INLINE_FLATTEN tv_val<is_const, tag_t> tvToCell(tv_val<is_const, tag_t> tv) {
@@ -102,7 +102,7 @@ INLINE_FLATTEN tv_val<is_const, tag_t> tvToCell(tv_val<is_const, tag_t> tv) {
 template<bool is_const, typename tag_t>
 INLINE_FLATTEN
 tv_val<is_const, tag_t> tv_val<is_const, tag_t>::unboxed() const {
-  return LIKELY(!isRefType(type())) ? *this : tv_val { val().pref->tv() };
+  return LIKELY(!isRefType(type())) ? *this : tv_val { val().pref->cell() };
 }
 
 /*
@@ -115,8 +115,8 @@ tv_val<is_const, tag_t> tv_val<is_const, tag_t>::unboxed() const {
  */
 ALWAYS_INLINE Cell tvToInitCell(TypedValue tv) {
   if (UNLIKELY(isRefType(tv.m_type))) {
-    assertx(tv.m_data.pref->tv()->m_type != KindOfUninit);
-    return *tv.m_data.pref->tv();
+    assertx(tv.m_data.pref->cell()->m_type != KindOfUninit);
+    return *tv.m_data.pref->cell();
   }
   if (tv.m_type == KindOfUninit) return make_tv<KindOfNull>();
   return tv;
@@ -230,7 +230,7 @@ tvDupWithRef(const TypedValue& fr, T&& to, Fn should_demote) {
   }
   auto ref = fr.m_data.pref;
   if (should_demote(ref)) {
-    cellDup(*ref->tv(), to);
+    cellDup(*ref->cell(), to);
     return;
   }
   assertx(isRefType(type(to)));
@@ -268,8 +268,8 @@ tvDupWithRef(const TypedValue& fr, T&& to, const ArrayData* container) {
   assertx(container);
   detail::tvDupWithRef(fr, to, [&] (RefData* ref) {
     return !ref->isReferenced() &&
-           (!isArrayType(ref->tv()->m_type) ||
-            container != ref->tv()->m_data.parr);
+           (!isArrayType(ref->cell()->m_type) ||
+            container != ref->cell()->m_data.parr);
   });
 }
 

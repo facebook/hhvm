@@ -166,13 +166,19 @@ inline Cell ArrayData::nvGetKey(ssize_t pos) const {
   return g_array_funcs.nvGetKey[kind()](this, pos);
 }
 
+inline bool ArrayData::notCyclic(Cell v) const {
+  return !tvIsArrayLike(v) || v.m_data.parr != this;
+}
+
 inline ArrayData* ArrayData::set(int64_t k, Cell v, bool copy) {
   assertx(cellIsPlausible(v));
+  assertx(copy || notCyclic(v));
   return g_array_funcs.setInt[kind()](this, k, v, copy);
 }
 
 inline ArrayData* ArrayData::set(StringData* k, Cell v, bool copy) {
   assertx(cellIsPlausible(v));
+  assertx(copy || notCyclic(v));
   return g_array_funcs.setStr[kind()](this, k, v, copy);
 }
 
@@ -231,6 +237,7 @@ inline ArrayData* ArrayData::remove(const StringData* k, bool copy) {
 
 inline ArrayData* ArrayData::append(Cell v, bool copy) {
   assertx(v.m_type != KindOfUninit);
+  assertx(copy || notCyclic(v));
   return g_array_funcs.append[kind()](this, v, copy);
 }
 

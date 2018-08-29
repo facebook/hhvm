@@ -843,6 +843,7 @@ ArrayData* PackedArray::SetInt(ArrayData* adIn, int64_t k, Cell v, bool copy) {
 
 ArrayData*
 PackedArray::SetIntVec(ArrayData* adIn, int64_t k, Cell v, bool copy) {
+  assertx(copy || adIn->notCyclic(v));
   return MutableOpIntVec(adIn, k, copy,
     [&] (ArrayData* ad) { setElemNoRef(packedData(ad)[k], v); return ad; }
   );
@@ -1073,6 +1074,7 @@ bool PackedArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
 ArrayData* PackedArray::Append(ArrayData* adIn, Cell v, bool copy) {
   assertx(checkInvariants(adIn));
   assertx(v.m_type != KindOfUninit);
+  assertx(copy || adIn->notCyclic(v));
   auto const ad = PrepareForInsert(adIn, copy);
   cellDup(v, packedData(ad)[ad->m_size++]);
   return ad;

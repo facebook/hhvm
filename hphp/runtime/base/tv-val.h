@@ -119,6 +119,7 @@ public:
   INLINE_FLATTEN tv_val(tv_val<is_const> lval, with_tag_t<Tag> t);
 
   INLINE_FLATTEN bool operator==(tv_val other) const;
+  INLINE_FLATTEN bool operator!=(tv_val other) const;
 
   /*
    * Whether this tv_val is set.
@@ -203,6 +204,10 @@ private:
       return m_tv == o.m_tv;
     }
 
+    INLINE_FLATTEN bool operator!=(const storage& o) const {
+      return m_tv != o.m_tv;
+    }
+
     INLINE_FLATTEN type_t* type() const { return &m_tv->m_type; }
     INLINE_FLATTEN value_t* val() const { return &m_tv->m_data; }
 
@@ -235,6 +240,10 @@ private:
 
     INLINE_FLATTEN bool operator==(const wide_storage& o) const {
       return m_val == o.m_val && (m_type == o.m_type || m_val == nullptr);
+    }
+
+    INLINE_FLATTEN bool operator!=(const wide_storage& o) const {
+      return !operator==(o);
     }
 
     INLINE_FLATTEN type_t* type() const {

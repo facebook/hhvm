@@ -655,10 +655,10 @@ void IniSetting::ParserCallback::makeSettingSub(const String& key,
   if (skip) {
     Logger::Warning("A false recursive setting at key %s with offset %s and "
                     "value %s. Value is literal or pointing to setting that "
-                    "does not exist. Skipping!", key.toCppString().c_str(),
+                    "does not exist. Skipping!", key.c_str(),
                     offset.c_str(), value.c_str());
   } else if (offset == ":") {
-   cur_settings.toArrRef().setRef(key, base);
+    cur_settings.toArrRef().setRef(key, base);
   } else if (offset == "@") {
     cur_settings.toArrRef().set(key, *base);
   } else {
@@ -692,6 +692,9 @@ void IniSetting::ParserCallback::traverseToSet(const String &key,
   }
   if (isSymlink) {
     toArrRef(first).setRef(index, value);
+  } else if (first == value) {
+    Logger::Warning("Skipping recursive setting at key %s with offset %s.",
+                    key.c_str(), offset.c_str());
   } else {
     toArrRef(first).set(index, *value);
   }

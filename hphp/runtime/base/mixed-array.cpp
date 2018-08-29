@@ -1140,11 +1140,13 @@ arr_lval MixedArray::LvalNewRef(ArrayData* ad, bool copy) {
 }
 
 ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, Cell v, bool copy) {
+  assertx(copy || ad->notCyclic(v));
   return asMixed(ad)->prepareForInsert(copy)->update(k, v);
 }
 
 ArrayData*
 MixedArray::SetStr(ArrayData* ad, StringData* k, Cell v, bool copy) {
+  assertx(copy || ad->notCyclic(v));
   return asMixed(ad)->prepareForInsert(copy)->update(k, v);
 }
 
@@ -1268,6 +1270,7 @@ ArrayData* MixedArray::Copy(const ArrayData* ad) {
 }
 
 ArrayData* MixedArray::Append(ArrayData* ad, Cell v, bool copy) {
+  assertx(copy || ad->notCyclic(v));
   auto a = asMixed(ad);
   if (UNLIKELY(a->m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "

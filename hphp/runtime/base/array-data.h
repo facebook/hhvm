@@ -350,6 +350,11 @@ public:
   bool noCopyOnWrite() const;
 
   /*
+   * ensure a circular self-reference is not being created
+   */
+  bool notCyclic(Cell v) const;
+
+  /*
    * Should int-like string keys be implicitly converted to integers before
    * they are inserted?
    */

@@ -48,6 +48,11 @@ bool tv_val<is_const, tag_t>::operator==(tv_val other) const {
 }
 
 template<bool is_const, typename tag_t>
+bool tv_val<is_const, tag_t>::operator!=(tv_val other) const {
+  return m_s != other.m_s;
+}
+
+template<bool is_const, typename tag_t>
 bool tv_val<is_const, tag_t>::is_set() const {
   return m_s.val();
 }

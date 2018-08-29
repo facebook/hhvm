@@ -1591,16 +1591,14 @@ auto arrayRefShuffle(ArrayData* oldData, ArrayData* newData, tv_lval base) {
   return ShuffleReturn<setRef>::do_return(newData);
 }
 
-
 /**
  * SetElem helper with Array base and Int64 key
  */
 template<bool setResult, bool intishWarn>
 inline ArrayData* SetElemArrayPre(ArrayData* a,
                                   int64_t key,
-                                  Cell* value,
-                                  bool copy) {
-  return a->set(key, *value, copy);
+                                  Cell* value) {
+  return a->set(key, *value, a->cowCheck());
 }
 
 /**
@@ -1609,48 +1607,45 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
 template<bool setResult, bool intishWarn>
 inline ArrayData* SetElemArrayPre(ArrayData* a,
                                   StringData* key,
-                                  Cell* value,
-                                  bool copy) {
+                                  Cell* value) {
   int64_t n;
   assertx(a->isPHPArray());
+  bool copy = a->cowCheck();
   if (key->isStrictlyInteger(n)) {
     if (intishWarn) raise_intish_index_cast();
     return a->set(n, *value, copy);
-  } else {
-    return a->set(key, *value, copy);
   }
+  return a->set(key, *value, copy);
 }
 
 template<bool setResult, bool intishWarn>
 inline ArrayData* SetElemArrayPre(ArrayData* a,
                                   TypedValue key,
-                                  Cell* value,
-                                  bool copy) {
+                                  Cell* value) {
   if (isStringType(key.m_type)) {
     return SetElemArrayPre<setResult, intishWarn>(
-      a, key.m_data.pstr, value, copy
+      a, key.m_data.pstr, value
     );
   }
   if (key.m_type == KindOfInt64) {
     return SetElemArrayPre<setResult, false>(
-      a, key.m_data.num, value, copy
+      a, key.m_data.num, value
     );
   }
   if (isFuncType(key.m_type)) {
     return SetElemArrayPre<setResult, intishWarn>(
-      a, const_cast<StringData*>(funcToStringHelper(key.m_data.pfunc)), value,
-      copy
+      a, const_cast<StringData*>(funcToStringHelper(key.m_data.pfunc)), value
     );
   }
   if (checkHACMisc()) {
     raiseHackArrCompatImplicitArrayKey(&key);
   }
   if (isNullType(key.m_type)) {
-    return a->set(staticEmptyString(), *value, copy);
+    return a->set(staticEmptyString(), *value, a->cowCheck());
   }
   if (!isArrayLikeType(key.m_type) && key.m_type != KindOfObject) {
     return SetElemArrayPre<setResult, false>(a, tvAsCVarRef(&key).toInt64(),
-                                             value, copy);
+                                             value);
   }
 
   raise_warning("Illegal offset type");
@@ -1674,10 +1669,7 @@ inline void SetElemArray(tv_lval base, key_type<keyType> key,
   assertx(tvIsPlausible(*base));
 
   ArrayData* a = val(base).parr;
-  bool copy = a->cowCheck() ||
-    (tvIsArray(value) && value->m_data.parr == a);
-
-  auto* newData = SetElemArrayPre<setResult, intishWarn>(a, key, value, copy);
+  auto* newData = SetElemArrayPre<setResult, intishWarn>(a, key, value);
   assertx(newData->isPHPArray());
 
   arrayRefShuffle<true, KindOfArray>(a, newData, base);
@@ -1689,27 +1681,27 @@ inline void SetElemArray(tv_lval base, key_type<keyType> key,
 template<bool setResult>
 inline ArrayData* SetElemVecPre(ArrayData* a,
                                 int64_t key,
-                                Cell* value,
-                                bool copy) {
-  return PackedArray::SetIntVec(a, key, *value, copy);
+                                Cell* value) {
+  return PackedArray::SetIntVec(a, key, *value, a->cowCheck());
 }
 
 template <bool setResult>
 inline ArrayData*
-SetElemVecPre(ArrayData* a, StringData* key, Cell* /*value*/, bool /*copy*/) {
+SetElemVecPre(ArrayData* a, StringData* key, Cell* /*value*/) {
   throwInvalidArrayKeyException(key, a);
 }
 
 template<bool setResult>
 inline ArrayData* SetElemVecPre(ArrayData* a,
                                 TypedValue key,
-                                Cell* value,
-                                bool copy) {
+                                Cell* value) {
   auto const dt = key.m_type;
-  if (LIKELY(isIntType(dt))) return SetElemVecPre<setResult>(a, key.m_data.num,
-                                                             value, copy);
-  if (isStringType(dt))      return SetElemVecPre<setResult>(a, key.m_data.pstr,
-                                                             value, copy);
+  if (LIKELY(isIntType(dt))) {
+    return SetElemVecPre<setResult>(a, key.m_data.num, value);
+  }
+  if (isStringType(dt)) {
+    return SetElemVecPre<setResult>(a, key.m_data.pstr, value);
+  }
   throwInvalidArrayKeyException(&key, a);
 }
 
@@ -1720,9 +1712,7 @@ inline void SetElemVec(tv_lval base, key_type<keyType> key,
   assertx(tvIsPlausible(*base));
 
   ArrayData* a = val(base).parr;
-  bool copy = a->cowCheck() || (tvIsVec(value) && value->m_data.parr == a);
-
-  auto* newData = SetElemVecPre<setResult>(a, key, value, copy);
+  auto* newData = SetElemVecPre<setResult>(a, key, value);
   assertx(newData->isVecArray());
 
   arrayRefShuffle<true, KindOfVec>(a, newData, base);
@@ -1734,29 +1724,28 @@ inline void SetElemVec(tv_lval base, key_type<keyType> key,
 template<bool setResult>
 inline ArrayData* SetElemDictPre(ArrayData* a,
                                  int64_t key,
-                                 Cell* value,
-                                 bool copy) {
-  return MixedArray::SetIntDict(a, key, *value, copy);
+                                 Cell* value) {
+  return MixedArray::SetIntDict(a, key, *value, a->cowCheck());
 }
 
 template<bool setResult>
 inline ArrayData* SetElemDictPre(ArrayData* a,
                                  StringData* key,
-                                 Cell* value,
-                                 bool copy) {
-  return MixedArray::SetStrDict(a, key, *value, copy);
+                                 Cell* value) {
+  return MixedArray::SetStrDict(a, key, *value, a->cowCheck());
 }
 
 template<bool setResult>
 inline ArrayData* SetElemDictPre(ArrayData* a,
                                  TypedValue key,
-                                 Cell* value,
-                                 bool copy) {
+                                 Cell* value) {
   auto const dt = key.m_type;
-  if (isIntType(dt))    return SetElemDictPre<setResult>(a, key.m_data.num,
-                                                         value, copy);
-  if (isStringType(dt)) return SetElemDictPre<setResult>(a, key.m_data.pstr,
-                                                         value, copy);
+  if (isIntType(dt)) {
+    return SetElemDictPre<setResult>(a, key.m_data.num, value);
+  }
+  if (isStringType(dt)) {
+    return SetElemDictPre<setResult>(a, key.m_data.pstr, value);
+  }
   throwInvalidArrayKeyException(&key, a);
 }
 
@@ -1767,10 +1756,7 @@ inline void SetElemDict(tv_lval base, key_type<keyType> key,
   assertx(tvIsPlausible(*base));
 
   ArrayData* a = val(base).parr;
-  bool copy = a->cowCheck() ||
-    (tvIsDict(value) && value->m_data.parr == a);
-
-  auto newData = SetElemDictPre<setResult>(a, key, value, copy);
+  auto newData = SetElemDictPre<setResult>(a, key, value);
   assertx(newData->isDict());
 
   arrayRefShuffle<true, KindOfDict>(a, newData, base);
@@ -1929,9 +1915,7 @@ inline void SetNewElemArray(tv_lval base, Cell* value) {
   assertx(tvIsArray(base));
   assertx(tvIsPlausible(*base));
   auto a = val(base).parr;
-  auto const copy = a->cowCheck() ||
-    (tvIsArray(value) && value->m_data.parr == a);
-  auto a2 = a->append(*value, copy);
+  auto a2 = a->append(*value, a->cowCheck());
   if (a2 != a) {
     type(base) = KindOfArray;
     val(base).parr = a2;
@@ -1947,9 +1931,7 @@ inline void SetNewElemVec(tv_lval base, Cell* value) {
   assertx(tvIsVec(base));
   assertx(tvIsPlausible(*base));
   auto a = val(base).parr;
-  auto const copy = a->cowCheck() ||
-    (tvIsVec(value) && value->m_data.parr == a);
-  auto a2 = PackedArray::AppendVec(a, *value, copy);
+  auto a2 = PackedArray::AppendVec(a, *value, a->cowCheck());
   if (a2 != a) {
     type(base) = KindOfVec;
     val(base).parr = a2;
@@ -1966,9 +1948,7 @@ inline void SetNewElemDict(tv_lval base, Cell* value) {
   assertx(tvIsDict(base));
   assertx(tvIsPlausible(*base));
   auto a = val(base).parr;
-  auto const copy = a->cowCheck() ||
-    (tvIsDict(value) && value->m_data.parr == a);
-  auto a2 = MixedArray::AppendDict(a, *value, copy);
+  auto a2 = MixedArray::AppendDict(a, *value, a->cowCheck());
   if (a2 != a) {
     type(base) = KindOfDict;
     val(base).parr = a2;
@@ -1985,9 +1965,7 @@ inline void SetNewElemKeyset(tv_lval base, Cell* value) {
   assertx(tvIsKeyset(base));
   assertx(tvIsPlausible(*base));
   auto a = val(base).parr;
-  auto const copy = a->cowCheck() ||
-    (tvIsKeyset(value) && value->m_data.parr == a);
-  auto a2 = SetArray::Append(a, *value, copy);
+  auto a2 = SetArray::Append(a, *value, a->cowCheck());
   if (a2 != a) {
     type(base) = KindOfKeyset;
     val(base).parr = a2;

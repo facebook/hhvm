@@ -270,6 +270,7 @@ let load config_filename options =
     (bool_ "unsafe_rx" ~default:true config)
     (bool_ "disallow_implicit_returns_in_non_void_functions"
        ~default:false config)
+    (bool_ "disallow_unset_on_varray" ~default:false config)
     (prepare_ignored_fixme_codes config)
     forward_compat_level
   in

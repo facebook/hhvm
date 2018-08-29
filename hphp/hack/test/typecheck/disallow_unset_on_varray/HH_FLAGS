@@ -1,0 +1,4 @@
+--safe_vector_array
+--safe_array
+--disallow-unset-on-varray
+--all-errors

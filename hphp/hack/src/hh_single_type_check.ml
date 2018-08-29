@@ -152,6 +152,7 @@ let parse_options () =
   let allow_return_by_ref = ref false in
   let allow_array_cell_pass_by_ref = ref false in
   let void_is_type_of_null = ref false in
+  let disallow_unset_on_varray = ref false in
   let auto_namespace_map = ref [] in
   let dont_assume_php = ref false in
   let unsafe_rx = ref false in
@@ -316,6 +317,9 @@ let parse_options () =
     "--void-is-type-of-null",
         Arg.Set void_is_type_of_null,
         " Make void the type of null";
+    "--disallow-unset-on-varray",
+        Arg.Set disallow_unset_on_varray,
+        " Disallow unsetting indices from varrays";
     "--unsafe-rx",
         Arg.Set unsafe_rx,
         " Disables reactivity related errors"
@@ -341,6 +345,7 @@ let parse_options () =
       GlobalOptions.tco_disallow_array_as_tuple = not !allow_array_as_tuple;
       GlobalOptions.tco_disallow_return_by_ref = not !allow_return_by_ref;
       GlobalOptions.tco_disallow_array_cell_pass_by_ref = not !allow_array_cell_pass_by_ref;
+      GlobalOptions.tco_disallow_unset_on_varray = !disallow_unset_on_varray;
       GlobalOptions.po_auto_namespace_map = !auto_namespace_map;
   } in
   let tcopt = {

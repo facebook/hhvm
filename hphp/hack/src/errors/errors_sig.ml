@@ -180,6 +180,7 @@ module type S = sig
   val empty_in_strict : Pos.t -> unit
   val isset_in_strict : Pos.t -> unit
   val unset_nonidx_in_strict : Pos.t -> (Pos.t * string) list -> unit
+  val unset_nonidx_in_strict_no_varray : Pos.t -> (Pos.t * string) list -> unit
   val unpacking_disallowed_builtin_function : Pos.t -> string -> unit
   val array_get_arity : Pos.t -> string -> Pos.t -> unit
   val typing_error : Pos.t -> string -> unit

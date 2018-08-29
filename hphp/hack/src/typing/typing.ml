@@ -3707,6 +3707,12 @@ and is_abstract_ft fty = match fty with
      Core_list.iter tel ~f:(Typing_mutability.check_unset_target env);
      if uel <> [] then
        Errors.unpacking_disallowed_builtin_function p pseudo_func;
+     let disallow_varray =
+       TypecheckerOptions.disallow_unset_on_varray (Env.get_options env) in
+     let unset_error = if disallow_varray then
+        Errors.unset_nonidx_in_strict_no_varray
+      else
+        Errors.unset_nonidx_in_strict in
      let env = if Env.is_strict env then
        (match el, uel with
          | [(_, Array_get ((_, Class_const _), Some _))], [] ->
@@ -3714,22 +3720,24 @@ and is_abstract_ft fty = match fty with
            env
          | [(_, Array_get (ea, Some _))], [] ->
            let env, _te, ty = expr env ea in
-           let tany = Typing_utils.tany env in
+           let tany = (Reason.Rnone, Typing_utils.tany env) in
            if List.exists ~f:(fun super -> SubType.is_sub_type env ty super) [
              (Reason.Rnone, (Tclass ((Pos.none, SN.Collections.cDict),
-               [(Reason.Rnone, tany); (Reason.Rnone, tany)])));
+               [tany; tany])));
              (Reason.Rnone, (Tclass ((Pos.none, SN.Collections.cKeyset),
-               [(Reason.Rnone, tany)])));
-             (Reason.Rnone, Tarraykind AKany)
+               [tany])));
+             if disallow_varray then
+               (Reason.Rnone, Tarraykind (AKmap (tany, tany)))
+             else (Reason.Rnone, Tarraykind AKany);
            ] then env
            else begin
              let env, (r, ety) = Env.expand_type env ty in
-             Errors.unset_nonidx_in_strict
+               unset_error
                p
                (Reason.to_string ("This is " ^ Typing_print.error ety) r);
              env
            end
-         | _ -> Errors.unset_nonidx_in_strict p []; env)
+         | _ -> unset_error p []; env)
        else env in
       (match el with
         | [(p, Obj_get (_, _, OG_nullsafe))] ->

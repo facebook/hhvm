@@ -2038,6 +2038,12 @@ let unset_nonidx_in_strict pos msgs =
            "or dict indexing"] @
      msgs)
 
+let unset_nonidx_in_strict_no_varray pos msgs =
+  add_list (Typing.err_code Typing.UnsetNonidxInStrict)
+    ([pos, "In strict mode, unset is banned except on dict-like array, "^
+           "darray, keyset, or dict indexing"] @
+     msgs)
+
 let unpacking_disallowed_builtin_function pos name =
   let name = Utils.strip_ns name in
   add (Typing.err_code Typing.UnpackingDisallowed) pos

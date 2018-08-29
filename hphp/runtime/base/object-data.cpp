@@ -78,16 +78,6 @@ const StaticString
   s_call("__call"),
   s_clone("__clone");
 
-Array convert_to_array(const ObjectData* obj, Class* cls) {
-  auto const prop = obj->getProp(cls, s_storage.get());
-
-  // We currently do not special case ArrayObjects / ArrayIterators in
-  // reflectionClass. Until, either ArrayObject moves to HNI or a special
-  // case is added to reflection unset should be turned off.
-  assertx(prop.is_set() /* && prop.type() != KindOfUninit */);
-  return tvCastToArrayLike(prop.tv());
-}
-
 ALWAYS_INLINE
 void invoke_destructor(ObjectData* obj, const Func* dtor) {
   try {
@@ -621,9 +611,9 @@ void ObjectData::o_getArray(Array& props,
   );
 }
 
-// a constant for arrayobjects that changes the way the array is
-// converted to an object
-const int64_t ARRAYOBJ_STD_PROP_LIST = 1;
+// a constant for ArrayObjects AND ArrayIterators that changes the way the
+// object is converted to an array
+const int64_t ARRAY_OBJ_ITERATOR_STD_PROP_LIST = 1;
 
 const StaticString s_flags("flags");
 
@@ -640,19 +630,30 @@ Array ObjectData::toArray(bool pubOnly /* = false */,
     // assert into an if and add cases.
     assertx(instanceof(SimpleXMLElement_classof()));
     return SimpleXMLElement_objectCast(this, KindOfArray).toArray();
-  } else if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass))) {
-    auto const flags = getProp(SystemLib::s_ArrayObjectClass, s_flags.get());
-    assertx(flags.is_set());
+  } else if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass)) ||
+             UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
+    auto const cls = [&]() {
+      if (instanceof(SystemLib::s_ArrayObjectClass)) {
+        return SystemLib::s_ArrayObjectClass;
+      }
+      assertx(instanceof(SystemLib::s_ArrayIteratorClass));
+      return SystemLib::s_ArrayIteratorClass;
+    }();
 
+    auto const flags = getProp(cls, s_flags.get());
+    assertx(flags.is_set());
     if (UNLIKELY(flags.type() == KindOfInt64 &&
-                 flags.val().num == ARRAYOBJ_STD_PROP_LIST)) {
+                 flags.val().num == ARRAY_OBJ_ITERATOR_STD_PROP_LIST)) {
       auto ret = Array::Create();
       o_getArray(ret, true, ignoreLateInit);
       return ret;
     }
-    return convert_to_array(this, SystemLib::s_ArrayObjectClass);
-  } else if (UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
-    return convert_to_array(this, SystemLib::s_ArrayIteratorClass);
+
+    check_recursion_throw();
+
+    auto const storage = getProp(cls, s_storage.get());
+    assertx(storage.is_set());
+    return tvCastToArrayLike(storage.tv());
   } else if (UNLIKELY(instanceof(c_Closure::classof()))) {
     return Array::Create(Object(const_cast<ObjectData*>(this)));
   } else if (UNLIKELY(instanceof(DateTimeData::getClass()))) {

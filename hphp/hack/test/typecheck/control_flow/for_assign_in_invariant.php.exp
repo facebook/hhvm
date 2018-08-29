@@ -354,21 +354,15 @@ Invalid argument (Typing[4110])
   This is an object of type BD
   File "for_assign_in_invariant.php", line 59, characters 12-12:
   It is incompatible with an object of type A
-File "for_assign_in_invariant.php", line 80, characters 13-14:
-Invalid argument (Typing[4110])
-  File "for_assign_in_invariant.php", line 27, characters 20-21:
-  This is an object of type CE
-  File "for_assign_in_invariant.php", line 28, characters 70-71:
-  It is incompatible with a nullable type
 File "for_assign_in_invariant.php", line 81, characters 12-13:
 Invalid argument (Typing[4110])
   File "for_assign_in_invariant.php", line 20, characters 19-19:
   This is an object of type C
-  File "for_assign_in_invariant.php", line 28, characters 70-71:
-  It is incompatible with a nullable type
+  File "for_assign_in_invariant.php", line 28, characters 71-71:
+  It is incompatible with an object of type E
 File "for_assign_in_invariant.php", line 82, characters 12-13:
 Invalid argument (Typing[4110])
   File "for_assign_in_invariant.php", line 21, characters 19-19:
   This is an object of type E
-  File "for_assign_in_invariant.php", line 28, characters 70-71:
-  It is incompatible with a nullable type
+  File "for_assign_in_invariant.php", line 73, characters 14-14:
+  It is incompatible with an object of type C

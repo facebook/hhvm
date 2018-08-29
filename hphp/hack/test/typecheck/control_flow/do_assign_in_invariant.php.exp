@@ -160,24 +160,18 @@ Invalid argument (Typing[4110])
   This is an object of type D
   File "do_assign_in_invariant.php", line 75, characters 14-14:
   It is incompatible with an object of type B
-File "do_assign_in_invariant.php", line 72, characters 15-16:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 27, characters 20-21:
-  This is an object of type AE
-  File "do_assign_in_invariant.php", line 33, characters 54-55:
-  It is incompatible with a nullable type
 File "do_assign_in_invariant.php", line 73, characters 14-15:
 Invalid argument (Typing[4110])
   File "do_assign_in_invariant.php", line 19, characters 19-19:
   This is an object of type A
-  File "do_assign_in_invariant.php", line 33, characters 54-55:
-  It is incompatible with a nullable type
+  File "do_assign_in_invariant.php", line 33, characters 55-55:
+  It is incompatible with an object of type E
 File "do_assign_in_invariant.php", line 74, characters 14-15:
 Invalid argument (Typing[4110])
   File "do_assign_in_invariant.php", line 22, characters 19-19:
   This is an object of type E
-  File "do_assign_in_invariant.php", line 33, characters 54-55:
-  It is incompatible with a nullable type
+  File "do_assign_in_invariant.php", line 69, characters 12-12:
+  It is incompatible with an object of type A
 File "do_assign_in_invariant.php", line 86, characters 39-40:
 Invalid argument (Typing[4110])
   File "do_assign_in_invariant.php", line 33, characters 41-41:
@@ -202,24 +196,18 @@ Invalid argument (Typing[4110])
   This is an object of type D
   File "do_assign_in_invariant.php", line 75, characters 14-14:
   It is incompatible with an object of type B
-File "do_assign_in_invariant.php", line 72, characters 15-16:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 27, characters 20-21:
-  This is an object of type AE
-  File "do_assign_in_invariant.php", line 33, characters 54-55:
-  It is incompatible with a nullable type
 File "do_assign_in_invariant.php", line 73, characters 14-15:
 Invalid argument (Typing[4110])
   File "do_assign_in_invariant.php", line 19, characters 19-19:
   This is an object of type A
-  File "do_assign_in_invariant.php", line 33, characters 54-55:
-  It is incompatible with a nullable type
+  File "do_assign_in_invariant.php", line 33, characters 55-55:
+  It is incompatible with an object of type E
 File "do_assign_in_invariant.php", line 74, characters 14-15:
 Invalid argument (Typing[4110])
   File "do_assign_in_invariant.php", line 22, characters 19-19:
   This is an object of type E
-  File "do_assign_in_invariant.php", line 33, characters 54-55:
-  It is incompatible with a nullable type
+  File "do_assign_in_invariant.php", line 69, characters 12-12:
+  It is incompatible with an object of type A
 File "do_assign_in_invariant.php", line 86, characters 39-40:
 Invalid argument (Typing[4110])
   File "do_assign_in_invariant.php", line 33, characters 41-41:

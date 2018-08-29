@@ -2081,12 +2081,12 @@ and expr_
               ~f:(Env.set_local_expr_id env x1) in
           make_result env (T.Binop(Ast.Eq None, te1, te2)) ty
       | _ ->
-        make_result env (T.Binop(Ast.Eq None, te1, te2)) ty
+          make_result env (T.Binop(Ast.Eq None, te1, te2)) ty
       )
   | Binop ((Ast.AMpamp | Ast.BArbar as bop), e1, e2) ->
       let c = bop = Ast.AMpamp in
-      let lenv = env.Env.lenv in
       let env, te1, _ = expr env e1 in
+      let lenv = env.Env.lenv in
       let env = condition env c e1 in
       let env, te2, _ = raw_expr in_cond env e2 in
       let env = { env with Env.lenv = lenv } in
@@ -6027,10 +6027,16 @@ and refine_lvalue_type env e ~refine =
   | _ -> env
 
 and condition_nullity ~nonnull env e =
-  let refine = if nonnull
-    then TUtils.non_null
-    else (fun env ty -> env, ty) in
-  refine_lvalue_type env e ~refine
+  match e with
+  (* assignment: both the rhs and lhs of the '=' must be made null/non-null *)
+  | _, Binop (Ast.Eq None, var, e) ->
+      let env = condition_nullity ~nonnull env e in
+      condition_nullity ~nonnull env var
+  | _ ->
+    let refine env ty = if nonnull
+      then TUtils.non_null env ty
+      else env, ty in
+    refine_lvalue_type env e ~refine
 
 and condition_isset env = function
   | _, Array_get (x, _) -> condition_isset env x
@@ -6070,7 +6076,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), e, (_, Null)) when not tparamet ->
       let env, _ = expr env e in
       condition_nullity ~nonnull:true env e
-  | (p, (Lvar _ | Obj_get _ | Class_get _) as e) ->
+  | (p, (Lvar _ | Obj_get _ | Class_get _ | Binop (Ast.Eq None, _, _)) as e) ->
       let env, ty = expr env e in
       let env, ety = Env.expand_type env ty in
       (match ety with
@@ -6081,12 +6087,6 @@ and condition ?lhs_of_null_coalesce env tparamet =
         | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
         ) ->
           condition env (not tparamet) (p, Binop (Ast.Eqeq, e, (p, Null))))
-  | _, Binop (Ast.Eq None, var, e) when tparamet ->
-      let env, _ = expr env e in
-      condition_nullity ~nonnull:true env var
-  | p1, Binop (Ast.Eq None, (_, (Lvar _ | Obj_get _) as lv), (p2, _)) ->
-      let env, _ = expr env (p1, Binop (Ast.Eq None, lv, (p2, Null))) in
-      condition env tparamet lv
   | p, Binop ((Ast.Diff | Ast.Diff2 as op), e1, e2) ->
       let op = if op = Ast.Diff then Ast.Eqeq else Ast.EQeqeq in
       condition env (not tparamet) (p, Binop (op, e1, e2))

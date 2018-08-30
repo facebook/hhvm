@@ -53,7 +53,6 @@ module Process_status_comparator = struct
     let is_equal exp actual = exp = actual
 end;;
 
-
 module type Pattern_substitutions = sig
   (** List of key-value pairs. We perform these key to value
    * substitutions in-order.
@@ -136,7 +135,7 @@ module Make_asserter (Comp : Comparator) = struct
       ()
     else
       let () = Printf.eprintf
-        "Error: assertion failure. Expected: %s; But Found: %s\n"
+        "Error: assertion failure. Expected: '%s'; But Found: '%s'\n"
         (Comp.to_string exp) (Comp.to_string actual) in
       let () = Printf.eprintf "Assertion msg: %s\n" failure_msg in
       assert false
@@ -152,7 +151,7 @@ module Make_asserter (Comp : Comparator) = struct
       let exp_strs = List.map Comp.to_string exp in
       let actual_strs = List.map Comp.to_string actual in
       let () = Printf.eprintf
-        "Error: Assertion failure. Expected:\n%s\n\n But Found:\n%s\n"
+        "Error: Assertion failure. Expected:\n'%s'\n\n But Found:\n'%s'\n"
         (String.concat "\n" exp_strs) (String.concat "\n" actual_strs) in
       let () = Printf.eprintf "Assertion msg: %s" failure_msg in
       assert false

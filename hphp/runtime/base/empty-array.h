@@ -111,8 +111,6 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
                               tv_lval v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k,
                               tv_lval v, bool copy);
-  static constexpr auto AddInt = &SetInt;
-  static constexpr auto AddStr = &SetStr;
   static constexpr auto IterBegin = &ArrayCommon::ReturnInvalidIndex;
   static constexpr auto IterLast = &ArrayCommon::ReturnInvalidIndex;
   static constexpr auto IterEnd = &ArrayCommon::ReturnInvalidIndex;

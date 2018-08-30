@@ -209,24 +209,6 @@ inline ArrayData* ArrayData::setRef(StringData* k, tv_lval v, bool copy) {
   return g_array_funcs.setRefStr[kind()](this, k, v, copy);
 }
 
-inline ArrayData* ArrayData::add(int64_t k, Cell v, bool copy) {
-  assertx(cellIsPlausible(v));
-  return g_array_funcs.addInt[kind()](this, k, v, copy);
-}
-
-inline ArrayData* ArrayData::add(StringData* k, Cell v, bool copy) {
-  assertx(cellIsPlausible(v));
-  return g_array_funcs.addStr[kind()](this, k, v, copy);
-}
-
-inline ArrayData* ArrayData::add(int64_t k, const Variant& v, bool copy) {
-  return g_array_funcs.addInt[kind()](this, k, *v.toCell(), copy);
-}
-
-inline ArrayData* ArrayData::add(StringData* k, const Variant& v, bool copy) {
-  return g_array_funcs.addStr[kind()](this, k, *v.toCell(), copy);
-}
-
 inline ArrayData* ArrayData::remove(int64_t k, bool copy) {
   return g_array_funcs.removeInt[kind()](this, k, copy);
 }
@@ -453,15 +435,6 @@ inline ArrayData* ArrayData::setRef(Cell k, Variant& v, bool copy) {
   return setRef(k, tv_lval{v.asTypedValue()}, copy);
 }
 
-inline ArrayData* ArrayData::add(Cell k, Cell v, bool copy) {
-  assertx(cellIsPlausible(k));
-  assertx(cellIsPlausible(v));
-  assertx(IsValidKey(k));
-
-  return detail::isIntKey(k) ? add(detail::getIntKey(k), v, copy)
-                             : add(detail::getStringKey(k), v, copy);
-}
-
 inline ArrayData* ArrayData::remove(Cell k, bool copy) {
   assertx(IsValidKey(k));
   return detail::isIntKey(k) ? remove(detail::getIntKey(k), copy)
@@ -546,22 +519,6 @@ inline ArrayData* ArrayData::setRef(const String& k, Variant& v, bool copy) {
 
 inline ArrayData* ArrayData::setRef(const Variant& k, Variant& v, bool copy) {
   return setRef(k, tv_lval{v.asTypedValue()}, copy);
-}
-
-inline ArrayData* ArrayData::add(const String& k, Cell v, bool copy) {
-  assertx(cellIsPlausible(v));
-  assertx(IsValidKey(k));
-  return add(k.get(), v, copy);
-}
-
-inline ArrayData* ArrayData::add(const String& k, const Variant& v,
-                                 bool copy) {
-  return add(k, *v.toCell(), copy);
-}
-
-inline ArrayData* ArrayData::add(const Variant& k, const Variant& v,
-                                 bool copy) {
-  return add(*k.toCell(), *v.toCell(), copy);
 }
 
 inline ArrayData* ArrayData::remove(const String& k, bool copy) {

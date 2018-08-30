@@ -65,8 +65,6 @@ struct APCLocalArray final : ArrayData,
                               tv_lval v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k,
                               tv_lval v, bool copy);
-  static constexpr auto AddInt = &SetInt;
-  static constexpr auto AddStr = &SetStr;
   static ArrayData *RemoveInt(ArrayData* ad, int64_t k, bool copy);
   static ArrayData *RemoveStr(ArrayData* ad, const StringData* k, bool copy);
   static ArrayData* Copy(const ArrayData*);

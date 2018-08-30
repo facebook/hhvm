@@ -351,7 +351,7 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
       });
     } else if (!name.isNull()) {
       this->performOp([&]{
-        return this->m_arr->add(
+        return this->m_arr->set(
           VarNR::MakeKey(name).tv(), tvToInitCell(tv), false
         );
       });
@@ -363,13 +363,13 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
                              bool keyConverted = false) {
     if (keyConverted) {
       this->performOp([&]{
-        return this->m_arr->add(name.asInitCellTmp(), tvToInitCell(tv), false);
+        return this->m_arr->set(name.asInitCellTmp(), tvToInitCell(tv), false);
       });
     } else {
       auto const k = name.toKey(this->m_arr).tv();
       if (!isNullType(k.m_type)) {
         this->performOp([&]{
-          return this->m_arr->add(k, tvToInitCell(tv), false);
+          return this->m_arr->set(k, tvToInitCell(tv), false);
         });
       }
     }
@@ -381,13 +381,13 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
                              bool keyConverted = false) {
     if (keyConverted) {
       this->performOp([&]{
-        return this->m_arr->add(name, tvToInitCell(tv), false);
+        return this->m_arr->set(name, tvToInitCell(tv), false);
       });
     } else {
       auto const k = Variant(name).toKey(this->m_arr).tv();
       if (!isNullType(k.m_type)) {
         this->performOp([&]{
-          return this->m_arr->add(k, tvToInitCell(tv), false);
+          return this->m_arr->set(k, tvToInitCell(tv), false);
         });
       }
     }
@@ -798,18 +798,18 @@ struct DArrayInit {
    */
   DArrayInit& add(int64_t name, TypedValue tv,
                   bool /*keyConverted*/ = false) {
-    performOp([&]{ return m_arr->add(name, tvToInitCell(tv), false); });
+    performOp([&]{ return m_arr->set(name, tvToInitCell(tv), false); });
     return *this;
   }
 
   DArrayInit& add(const String& name, TypedValue tv,
                   bool keyConverted = false) {
     if (keyConverted) {
-      performOp([&]{ return m_arr->add(name, tvToInitCell(tv), false); });
+      performOp([&]{ return m_arr->set(name, tvToInitCell(tv), false); });
     } else if (!name.isNull()) {
       performOp(
         [&]{
-          return m_arr->add(VarNR::MakeKey(name).tv(), tvToInitCell(tv), false);
+          return m_arr->set(VarNR::MakeKey(name).tv(), tvToInitCell(tv), false);
         }
       );
     }
@@ -820,12 +820,12 @@ struct DArrayInit {
                   bool keyConverted = false) {
     if (keyConverted) {
       performOp(
-        [&]{ return m_arr->add(name.asInitCellTmp(), tvToInitCell(tv), false); }
+        [&]{ return m_arr->set(name.asInitCellTmp(), tvToInitCell(tv), false); }
       );
     } else {
       auto const k = name.toKey(m_arr).tv();
       if (!isNullType(k.m_type)) {
-        performOp([&]{ return m_arr->add(k, tvToInitCell(tv), false); });
+        performOp([&]{ return m_arr->set(k, tvToInitCell(tv), false); });
       }
     }
     return *this;
@@ -835,11 +835,11 @@ struct DArrayInit {
   DArrayInit& add(const T& name, TypedValue tv,
                   bool keyConverted = false) {
     if (keyConverted) {
-      performOp([&]{ return m_arr->add(name, tvToInitCell(tv), false); });
+      performOp([&]{ return m_arr->set(name, tvToInitCell(tv), false); });
     } else {
       auto const k = Variant(name).toKey(m_arr).tv();
       if (!isNullType(k.m_type)) {
-        performOp([&]{ return m_arr->add(k, tvToInitCell(tv), false); });
+        performOp([&]{ return m_arr->set(k, tvToInitCell(tv), false); });
       }
     }
     return *this;

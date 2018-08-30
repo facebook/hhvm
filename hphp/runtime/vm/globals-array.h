@@ -98,8 +98,6 @@ public:
                               tv_lval v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k,
                               tv_lval v, bool copy);
-  static constexpr auto AddInt = &SetInt;
-  static constexpr auto AddStr = &SetStr;
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
 

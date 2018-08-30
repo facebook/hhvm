@@ -464,18 +464,6 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(SetRefStr)
 
   /*
-   * ArrayData* AddInt(ArrayData*, int64_t key, Cell, bool copy)
-   * ArrayData* AddStr(ArrayData*, StringData* key, Cell, bool copy)
-   *
-   *   These functions have the same effects as SetInt and SetStr,
-   *   respectively, except that the array may assume that it does not
-   *   already contain a value for the key `key' if it can make the
-   *   operation more efficient.
-   */
-  DISPATCH(SetInt)
-  DISPATCH(SetStr)
-
-  /*
    * ArrayData* RemoveInt(ArrayData*, int64_t key, bool copy)
    *
    *   Remove an array element with an integer key.  If there was no

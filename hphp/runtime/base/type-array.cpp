@@ -726,7 +726,7 @@ void Array::addImpl(const T& key, TypedValue v) {
   if (!m_arr) {
     m_arr = Ptr::attach(ArrayData::Create(key, v));
   } else {
-    auto const escalated = m_arr->add(key, tvToCell(v), m_arr->cowCheck());
+    auto const escalated = m_arr->set(key, tvToCell(v), m_arr->cowCheck());
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   }
 }

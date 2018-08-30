@@ -514,22 +514,6 @@ public:
   ArrayData* setRef(const Variant& k, Variant& v, bool copy);
 
   /*
-   * Exactly like set(), but possibly optimized for the case where the key does
-   * not already exist in the array.
-   *
-   * @requires: !exists(k)
-   */
-  ArrayData* add(int64_t k, Cell v, bool copy);
-  ArrayData* add(StringData* k, Cell v, bool copy);
-  ArrayData* add(Cell k, Cell v, bool copy);
-  ArrayData* add(const String& k, Cell v, bool copy);
-
-  ArrayData* add(int64_t k, const Variant& v, bool copy);
-  ArrayData* add(StringData* k, const Variant& v, bool copy);
-  ArrayData* add(const String& k, const Variant& v, bool copy);
-  ArrayData* add(const Variant& k, const Variant& v, bool copy);
-
-  /*
    * Remove the value at key `k', making a copy first if `copy' is set.
    *
    * Return `this' if copy/escalation are not needed, or a copied/escalated
@@ -964,8 +948,6 @@ struct ArrayFunctions {
                               tv_lval v, bool copy);
   ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k,
                               tv_lval v, bool copy);
-  ArrayData* (*addInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);
-  ArrayData* (*addStr[NK])(ArrayData*, StringData* k, Cell v, bool copy);
   ArrayData* (*removeInt[NK])(ArrayData*, int64_t k, bool copy);
   ArrayData* (*removeStr[NK])(ArrayData*, const StringData* k, bool copy);
   ssize_t (*iterBegin[NK])(const ArrayData*);

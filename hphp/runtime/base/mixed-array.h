@@ -319,7 +319,6 @@ private:
   using ArrayData::lvalNew;
   using ArrayData::set;
   using ArrayData::setRef;
-  using ArrayData::add;
   using ArrayData::remove;
   using ArrayData::release;
 

@@ -17,10 +17,10 @@
 #ifndef incl_HPHP_LOW_PTR_H_
 #define incl_HPHP_LOW_PTR_H_
 
+#include "hphp/util/low-ptr-def.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/portability.h"
 
-#include <folly/CPortability.h> // FOLLY_SANITIZE
 #include <folly/Format.h>
 
 #include <algorithm>
@@ -196,10 +196,6 @@ struct AtomicStorage {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-#if FOLLY_SANITIZE
-#undef USE_LOWPTR
-#endif
 
 #ifdef USE_LOWPTR
 constexpr bool use_lowptr = true;

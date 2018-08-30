@@ -132,12 +132,10 @@ struct c_Pair : ObjectData {
   TypedValue* getElms() { return &elm0; }
   const TypedValue* getElms() const { return &elm0; }
 
-#ifndef USE_LOWPTR
-  // Add 4 bytes here to keep m_size aligned the same way as in BaseVector and
-  // HashCollection.
-  UNUSED uint32_t dummy;
-#endif
-  uint32_t m_size;
+  // make sure we're aligned to 8 bytes, otherwise in non-lowptr
+  // builds, m_size will fill a hole in ObjectData, and won't be at
+  // collections::FAST_SIZE_OFFSET (see static_assert below).
+  alignas(8) uint32_t m_size;
 
   TypedValue elm0;
   TypedValue elm1;

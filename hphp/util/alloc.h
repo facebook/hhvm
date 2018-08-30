@@ -28,6 +28,7 @@
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/exception.h"
+#include "hphp/util/low-ptr-def.h"
 
 #if FOLLY_SANITIZE
 // ASan is less precise than valgrind so we'll need a superset of those tweaks

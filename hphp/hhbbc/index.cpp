@@ -543,7 +543,7 @@ struct ClassInfo {
 };
 
 using MagicMapInfo = struct {
-  ClassInfo::MagicFnInfo (ClassInfo::*pmem);
+  ClassInfo::MagicFnInfo ClassInfo::*pmem;
   Attr attrBit;
 };
 

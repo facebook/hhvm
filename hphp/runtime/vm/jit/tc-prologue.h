@@ -30,7 +30,7 @@ namespace tc {
  *
  * Precondition: calling thread owns both code and metadata locks
  */
-TCA emitFuncPrologueOptInternal(PrologueMetaInfo& info);
+void emitFuncPrologueOptInternal(PrologueMetaInfo& info);
 
 /*
  * Publish the metadata for the given func prologue.  Returns whether or not it

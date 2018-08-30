@@ -93,6 +93,8 @@ let check_file dynamic_view_files opts errors (fn, file_infos) =
 
 let check_files dynamic_view_files opts errors fnl  =
   SharedMem.invalidate_caches();
+  File_heap.FileHeap.LocalChanges.push_stack ();
+  Parser_heap.ParserHeap.LocalChanges.push_stack ();
   let check_file =
     if !Utils.profile
     then (fun acc fn ->
@@ -107,6 +109,8 @@ let check_files dynamic_view_files opts errors fnl  =
     else check_file dynamic_view_files opts in
   let errors = List.fold_left fnl ~f:check_file ~init:errors in
   TypingLogger.flush_buffer ();
+  Parser_heap.ParserHeap.LocalChanges.pop_stack ();
+  File_heap.FileHeap.LocalChanges.pop_stack ();
   errors
 
 let load_and_check_files dynamic_view_files acc fnl =

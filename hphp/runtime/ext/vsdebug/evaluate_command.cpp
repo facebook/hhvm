@@ -241,7 +241,7 @@ bool EvaluateCommand::executeImpl(
   try {
     const auto& presentationHint = serializedResult["presentationHint"];
     body["presentationHint"] = presentationHint;
-  } catch (std::out_of_range e) {
+  } catch (std::out_of_range &e) {
   }
 
   return false;

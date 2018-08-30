@@ -140,7 +140,7 @@ bool SetVariableCommand::executeImpl(
         );
       }
     }
-  } catch (DebuggerCommandException e) {
+  } catch (DebuggerCommandException &e) {
     m_debugger->sendUserMessage(
       e.what(),
       DebugTransport::OutputLevelError
@@ -333,7 +333,7 @@ void SetVariableCommand::setVariableValue(
     case KindOfInt64:
       try {
         typedVariable->m_data.num = std::stoi(value, nullptr, 0);
-      } catch (std::exception e) {
+      } catch (std::exception &e) {
         throw DebuggerCommandException("Invalid value specified.");
       }
       break;
@@ -341,7 +341,7 @@ void SetVariableCommand::setVariableValue(
     case KindOfDouble:
       try {
         typedVariable->m_data.dbl = std::stod(value);
-      } catch (std::exception e) {
+      } catch (std::exception &e) {
         throw DebuggerCommandException("Invalid value specified.");
       }
       break;

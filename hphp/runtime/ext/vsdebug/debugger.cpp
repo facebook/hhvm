@@ -912,7 +912,7 @@ bool Debugger::executeClientCommand(
       sendCommandResponse(command, responseMsg);
     }
     return resumeThread;
-  } catch (DebuggerCommandException e) {
+  } catch (DebuggerCommandException &e) {
     reportClientMessageError(command->getMessage(), e.what());
   } catch (...) {
     reportClientMessageError(command->getMessage(), InternalErrorMsg);
@@ -1141,7 +1141,7 @@ void Debugger::onClientMessage(folly::dynamic& message) {
       if (!type.isString() || type.getString().empty()) {
         throw DebuggerCommandException("Invalid command type.");
       }
-    } catch (std::out_of_range e) {
+    } catch (std::out_of_range &e) {
       throw DebuggerCommandException(
         "Message is missing a required attribute."
       );
@@ -1159,7 +1159,7 @@ void Debugger::onClientMessage(folly::dynamic& message) {
           errorMsg += "\" was invalid or is not implemented in the debugger.";
           throw DebuggerCommandException(errorMsg.c_str());
         }
-      } catch (std::out_of_range e) {
+      } catch (std::out_of_range &e) {
       }
 
       throw DebuggerCommandException(
@@ -1218,7 +1218,7 @@ void Debugger::onClientMessage(folly::dynamic& message) {
       default:
         assertx(false);
     }
-  } catch (DebuggerCommandException e) {
+  } catch (DebuggerCommandException &e) {
     reportClientMessageError(message, e.what());
   } catch (...) {
     reportClientMessageError(message, InternalErrorMsg);

@@ -2,7 +2,7 @@ set(CXX_SOURCES "systemlib.cpp")
 
 add_library(hphp_system STATIC ${CXX_SOURCES})
 if (ENABLE_ASYNC_MYSQL)
-  add_dependencies(hphp_system webscalesqlclient)
+  add_dependencies(hphp_system fbmysqlclient)
 endif ()
 
 auto_sources(files "*.h" "${CMAKE_CURRENT_SOURCE_DIR}")

@@ -906,10 +906,10 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBMEMCACHED")
     endif()
   elseif (${libraryName} STREQUAL "mysql")
-    # mysql checks - if we're using async mysql, we use webscalesqlclient from
+    # mysql checks - if we're using async mysql, we use fbmysqlclient from
     # third-party/ instead
     if (ENABLE_ASYNC_MYSQL)
-      set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/webscalesqlclient/src/)
+      set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/fb-mysql/src/)
       set(MYSQL_CLIENT_LIBS
         ${MYSQL_CLIENT_LIB_DIR}/libmysql/libfbmysqlclient_r.a
       )
@@ -918,7 +918,7 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
         HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(
           ${RE2_INCLUDE_DIR}
           ${TP_DIR}/squangle/src/
-          ${TP_DIR}/webscalesqlclient/src/include/
+          ${TP_DIR}/fb-mysql/src/include/
         )
         HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DENABLE_ASYNC_MYSQL=1")
       endif()

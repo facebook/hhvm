@@ -13,10 +13,10 @@ dependency, but lets' end that.
  CMakeLists.txt | 16 +++++++++++-----
  1 file changed, 11 insertions(+), 5 deletions(-)
 
-diff --git a/third-party/webscalesqlclient/src/CMakeLists.txt b/third-party/webscalesqlclient/src/CMakeLists.txt
+diff --git a/third-party/fb-mysql/src/CMakeLists.txt b/third-party/fb-mysql/src/CMakeLists.txt
 index 66cb9db7cd..49d1a489f0 100644
---- a/third-party/webscalesqlclient/src/CMakeLists.txt
-+++ b/third-party/webscalesqlclient/src/CMakeLists.txt
+--- a/third-party/fb-mysql/src/CMakeLists.txt
++++ b/third-party/fb-mysql/src/CMakeLists.txt
 @@ -176,7 +176,6 @@ INCLUDE(zlib)
  INCLUDE(zstd)
  INCLUDE(libevent)

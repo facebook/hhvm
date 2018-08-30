@@ -196,11 +196,11 @@ module WithExpressionAndStatementAndTypeParser
     *)
 
     let (parser, token) = fetch_token parser in
-    (* Not `require_name` but `require_name_allow_keywords`, because the parser
+    (* Not `require_name` but `require_name_allow_non_reserved`, because the parser
      * must allow keywords in the place of identifiers; at least to parse .hhi
      * files.
      *)
-    let (parser, name) = require_name_allow_keywords parser in
+    let (parser, name) = require_name_allow_non_reserved parser in
     let (parser, generic) =
       with_type_parser parser TypeParser.parse_generic_parameter_list_opt
     in
@@ -222,7 +222,7 @@ module WithExpressionAndStatementAndTypeParser
 
     (* TODO: We must allow TRUE to be a legal enum member name; here we allow
       any keyword.  Consider making this more strict. *)
-    let (parser, name) = require_name_allow_keywords parser in
+    let (parser, name) = require_name_allow_all_keywords parser in
     let (parser, equal) = require_equal parser in
     let (parser, value) = parse_expression parser in
     let (parser, semicolon) = require_semicolon parser in
@@ -285,7 +285,7 @@ module WithExpressionAndStatementAndTypeParser
       Make.missing parser (pos parser)
     | _ ->
       (* TODO: Death to PHPisms; keywords as namespace names *)
-      require_name_allow_keywords parser in
+      require_name_allow_non_reserved parser in
     let (parser, body) = parse_namespace_body parser in
     Make.namespace_declaration parser namespace_token name body
 
@@ -1250,7 +1250,7 @@ module WithExpressionAndStatementAndTypeParser
   and is_type_in_const parser =
     let before = List.length (errors parser) in
     let (parser1, _) = parse_type_specifier parser in
-    let (parser1, _) = require_name_allow_keywords parser1 in
+    let (parser1, _) = require_name_allow_all_keywords parser1 in
     List.length (errors parser1) = before
 
   and parse_constant_declarator parser =
@@ -1264,7 +1264,7 @@ module WithExpressionAndStatementAndTypeParser
     (* This permits abstract variables to have an initializer, and vice-versa.
        This is deliberate, and those errors will be detected after the syntax
        tree is created. *)
-    let (parser, const_name) = require_name_allow_keywords parser in
+    let (parser, const_name) = require_name_allow_all_keywords parser in
     let (parser, initializer_) = parse_simple_initializer_opt parser in
     Make.constant_declarator parser const_name initializer_
 
@@ -1293,7 +1293,7 @@ module WithExpressionAndStatementAndTypeParser
   *)
   and parse_type_const_declaration parser abstr const =
     let (parser, type_token) = assert_token parser Type in
-    let (parser, name) = require_name_allow_keywords parser in
+    let (parser, name) = require_name_allow_non_reserved parser in
     let (parser, generic_type_parameter_list) =
       parse_generic_type_parameter_list_opt parser
     in
@@ -1645,19 +1645,14 @@ module WithExpressionAndStatementAndTypeParser
     | LeftParen ->
       (* It turns out, it was just a verbose lambda; YOLO PHP *)
       Make.missing parser (pos parser)
-    | Trait | Interface | Class | Static | Using | Inout
-    | Instanceof | Array | Throw | Print | As | And
-    | Or | Xor | New | Const | Eval
-      when not is_methodish ->
-      (* these are illegal for function names *)
-      (* ERROR RECOVERY: Eat the offending token. *)
-      report_error parser1 token
-    | _ ->
-      (* TODO: We might have a non-reserved keyword as the name here
-      What we do here is accept any keyword;
-      what we *should* do is figure out which other keywords are
-      reserved and which are not, and reject the reserved keywords. *)
+    | Isset | Unset | Empty ->
+      (* We need to parse those as names as they are defined in hhi *)
       let (parser, token) = next_token_as_name parser in
+      Make.token parser token
+    | _ ->
+      let (parser, token) = if is_methodish
+        then next_token_as_name parser
+        else next_token_non_reserved_as_name parser in
       if Token.kind token = Name then
         Make.token parser token
       else

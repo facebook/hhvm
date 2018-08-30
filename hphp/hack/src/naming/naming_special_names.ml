@@ -237,8 +237,7 @@ module PseudoFunctions = struct
 
   let empty = "\\empty"
   let isset = "\\isset"
-  let unset_no_ns = "unset"
-  let unset = "\\" ^ unset_no_ns
+  let unset = "\\unset"
   let hh_show = "\\hh_show"
   let hh_show_env = "\\hh_show_env"
   let hh_log_level = "\\hh_log_level"

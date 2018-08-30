@@ -819,6 +819,8 @@ class EditableToken extends EditableSyntax
        return new GlobalToken(leading, trailing);
     case 'goto':
        return new GotoToken(leading, trailing);
+    case '__halt_compiler':
+       return new HaltCompilerToken(leading, trailing);
     case 'if':
        return new IfToken(leading, trailing);
     case 'implements':
@@ -937,6 +939,8 @@ class EditableToken extends EditableSyntax
        return new XorToken(leading, trailing);
     case 'yield':
        return new YieldToken(leading, trailing);
+    case 'null':
+       return new NullLiteralToken(leading, trailing);
     case '[':
        return new LeftBracketToken(leading, trailing);
     case ']':
@@ -1067,8 +1071,6 @@ class EditableToken extends EditableSyntax
        return new DollarDollarToken(leading, trailing);
     case '|>':
        return new BarGreaterThanToken(leading, trailing);
-    case 'null':
-       return new NullLiteralToken(leading, trailing);
     case '/>':
        return new SlashGreaterThanToken(leading, trailing);
     case '</':
@@ -1077,8 +1079,6 @@ class EditableToken extends EditableSyntax
        return new LessThanQuestionToken(leading, trailing);
     case '?>':
        return new QuestionGreaterThanToken(leading, trailing);
-    case '__halt_compiler':
-       return new HaltCompilerToken(leading, trailing);
 
     case 'error_token':
        return new ErrorTokenToken(leading, trailing, token_text);
@@ -1585,6 +1585,13 @@ class GotoToken extends EditableToken
     super('goto', leading, trailing, 'goto');
   }
 }
+class HaltCompilerToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('__halt_compiler', leading, trailing, '__halt_compiler');
+  }
+}
 class IfToken extends EditableToken
 {
   constructor(leading, trailing)
@@ -1996,6 +2003,13 @@ class YieldToken extends EditableToken
   constructor(leading, trailing)
   {
     super('yield', leading, trailing, 'yield');
+  }
+}
+class NullLiteralToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('null', leading, trailing, 'null');
   }
 }
 class LeftBracketToken extends EditableToken
@@ -2453,13 +2467,6 @@ class BarGreaterThanToken extends EditableToken
     super('|>', leading, trailing, '|>');
   }
 }
-class NullLiteralToken extends EditableToken
-{
-  constructor(leading, trailing)
-  {
-    super('null', leading, trailing, 'null');
-  }
-}
 class SlashGreaterThanToken extends EditableToken
 {
   constructor(leading, trailing)
@@ -2486,13 +2493,6 @@ class QuestionGreaterThanToken extends EditableToken
   constructor(leading, trailing)
   {
     super('?>', leading, trailing, '?>');
-  }
-}
-class HaltCompilerToken extends EditableToken
-{
-  constructor(leading, trailing)
-  {
-    super('__halt_compiler', leading, trailing, '__halt_compiler');
   }
 }
 
@@ -21244,6 +21244,7 @@ exports.FromToken = FromToken;
 exports.FunctionToken = FunctionToken;
 exports.GlobalToken = GlobalToken;
 exports.GotoToken = GotoToken;
+exports.HaltCompilerToken = HaltCompilerToken;
 exports.IfToken = IfToken;
 exports.ImplementsToken = ImplementsToken;
 exports.IncludeToken = IncludeToken;
@@ -21303,6 +21304,7 @@ exports.WhereToken = WhereToken;
 exports.WhileToken = WhileToken;
 exports.XorToken = XorToken;
 exports.YieldToken = YieldToken;
+exports.NullLiteralToken = NullLiteralToken;
 exports.LeftBracketToken = LeftBracketToken;
 exports.RightBracketToken = RightBracketToken;
 exports.LeftParenToken = LeftParenToken;
@@ -21368,12 +21370,10 @@ exports.QuestionMinusGreaterThanToken = QuestionMinusGreaterThanToken;
 exports.DotDotDotToken = DotDotDotToken;
 exports.DollarDollarToken = DollarDollarToken;
 exports.BarGreaterThanToken = BarGreaterThanToken;
-exports.NullLiteralToken = NullLiteralToken;
 exports.SlashGreaterThanToken = SlashGreaterThanToken;
 exports.LessThanSlashToken = LessThanSlashToken;
 exports.LessThanQuestionToken = LessThanQuestionToken;
 exports.QuestionGreaterThanToken = QuestionGreaterThanToken;
-exports.HaltCompilerToken = HaltCompilerToken;
 
 exports.ErrorTokenToken = ErrorTokenToken;
 exports.NameToken = NameToken;

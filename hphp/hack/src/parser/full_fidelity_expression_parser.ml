@@ -169,10 +169,7 @@ module WithStatementAndDeclAndTypeParser
     with_operator_precedence parser operator parse_expression
 
   and parse_as_name_or_error parser =
-    (* TODO: Are there "reserved" keywords that absolutely cannot start
-       an expression? If so, list them above and make them produce an
-       error. *)
-    let (parser1, token) = next_token_as_name parser in
+    let (parser1, token) = next_token_non_reserved_as_name parser in
     match (Token.kind token) with
     | Name ->
       let (parser, token) = Make.token parser1 token in
@@ -2281,7 +2278,10 @@ module WithStatementAndDeclAndTypeParser
     | LeftBrace -> parse_async_block parser attribute_spec
     | Variable
     | LeftParen -> parse_lambda_expression parser attribute_spec
-    | _ -> parse_as_name_or_error parser
+    | _ ->
+      let (parser, static_or_async_or_coroutine_as_name) = next_token_as_name
+        parser in
+      Make.token parser static_or_async_or_coroutine_as_name
 
   and parse_async_block parser attribute_spec =
     (*
@@ -2639,7 +2639,9 @@ module WithStatementAndDeclAndTypeParser
     if peek_token_kind parser1 = ColonColon then
       Make.token parser1 qualifier
     else
-      parse_as_name_or_error parser
+      let (parser, parent_or_self_or_static_as_name) = next_token_as_name
+        parser in
+      Make.token parser parent_or_self_or_static_as_name
 
   and parse_scope_resolution_expression parser qualifier =
     (* SPEC

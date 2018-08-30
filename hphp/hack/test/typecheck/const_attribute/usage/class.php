@@ -4,10 +4,10 @@
 class Concrete {}
 
 <<__Const>>
-abstract class Abstract {}
+abstract class AbstractC {}
 
 <<__Const>>
-final class Final {}
+final class FinalC {}
 
 <<__Const>>
 abstract final class AbstractFinal {}

@@ -211,7 +211,7 @@ val not_allowed_in_write : string -> string
 val reassign_this : string
 val strict_types_first_statement : string
 val async_magic_method : name:string -> string
-val reserved_keyword_as_class_name : string
+val reserved_keyword_as_class_name : string -> string
 val inout_param_in_async_generator : string
 val inout_param_in_generator : string
 val inout_param_in_async : string
@@ -265,7 +265,7 @@ val instanceof_paren: string -> string
 val instanceof_invalid_scope_resolution: string
 val instanceof_memberselection_inside_scoperesolution: string
 val instanceof_missing_subscript_index: string
-val instanceof_unknown_node: string -> string
+val instanceof_new_unknown_node: string -> string
 val instanceof_reference: string
 val invalid_await_use: string
 val invalid_constructor_method_call: string
@@ -308,4 +308,3 @@ val illegal_interpolated_brace_with_embedded_dollar_expression : string
 val type_alias_to_type_constant: string
 val method_calls_on_xhp_expression : string
 val interface_with_memoize : string
-val unset_as_expression : string

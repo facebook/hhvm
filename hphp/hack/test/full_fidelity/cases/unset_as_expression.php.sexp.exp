@@ -21,7 +21,7 @@
              (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())))
            (() ==> 3 ((whitespace 1)))
            (function_call_expression 14
-            ((() name 5 ()) (() "(" 1 ())
+            ((() unset 5 ()) (() "(" 1 ())
              (list 7
               ((list_item 7
                 ((member_selection_expression 7

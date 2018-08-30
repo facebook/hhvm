@@ -103,6 +103,9 @@ module WithParser(Parser : Parser_S) = struct
     in
       lex_ahead (lexer parser) lookahead
 
+  (**
+   * If the next token is a name or keyword, scan it as a name.
+   *)
   let next_token_as_name parser =
     (* TODO: This isn't right.  Pass flags to the lexer. *)
     let lexer = lexer parser in
@@ -110,14 +113,20 @@ module WithParser(Parser : Parser_S) = struct
     let parser = with_lexer parser lexer in
     (parser, token)
 
-  let peek_token_as_name ?(lookahead=0) parser =
-    let rec lex_ahead lexer n =
-      let (next_lexer, token) = Lexer.next_token_as_name lexer in
-      match n with
-      | 0 -> token
-      | _ -> lex_ahead next_lexer (n-1)
-    in
-      lex_ahead (lexer parser) lookahead
+  (**
+   * If the next token is a name or an non-reserved keyword, scan it as
+   * a name otherwise as a keyword.
+   *
+   * NB: A "reserved" keyword is in practice a keyword that cannot be used
+   * as a class name or function name, for example, control flow keywords or
+   * declaration keywords are reserved.
+   *)
+  let next_token_non_reserved_as_name parser =
+    (* TODO: This isn't right.  Pass flags to the lexer. *)
+    let lexer = lexer parser in
+    let (lexer, token) = Lexer.next_token_non_reserved_as_name lexer in
+    let parser = with_lexer parser lexer in
+    (parser, token)
 
   let peek_token_kind ?(lookahead=0) parser =
     Token.kind (peek_token ~lookahead parser)
@@ -310,8 +319,18 @@ module WithParser(Parser : Parser_S) = struct
   let require_name parser =
     require_token parser TokenKind.Name SyntaxError.error1004
 
-  let require_name_allow_keywords parser =
+  let require_name_allow_all_keywords parser =
     let (parser1, token) = next_token_as_name parser in
+    if (Token.kind token) = TokenKind.Name then
+      Make.token parser1 token
+    else
+      (* ERROR RECOVERY: Create a missing token for the expected token,
+         and continue on from the current token. Don't skip it. *)
+      let parser = with_error parser SyntaxError.error1004 in
+      Make.missing parser (pos parser)
+
+  let require_name_allow_non_reserved parser =
+    let (parser1, token) = next_token_non_reserved_as_name parser in
     if (Token.kind token) = TokenKind.Name then
       Make.token parser1 token
     else
@@ -322,7 +341,7 @@ module WithParser(Parser : Parser_S) = struct
 
   let require_name_allow_std_constants parser =
     let start_offset = Lexer.end_offset @@ lexer parser in
-    let (parser1, token) = require_name_allow_keywords parser in
+    let (parser1, token) = require_name_allow_non_reserved parser in
     let end_offset = Lexer.end_offset @@ lexer parser1 in
     let source = Lexer.source @@ lexer parser in
     let text = SourceText.sub source start_offset (end_offset - start_offset) in
@@ -437,7 +456,7 @@ module WithParser(Parser : Parser_S) = struct
     (parser, name)
 
   let scan_name_or_qualified_name parser =
-    let parser1, token = next_token_as_name parser in
+    let parser1, token = next_token_non_reserved_as_name parser in
     match Token.kind token with
     | TokenKind.Name ->
       let (parser, token) = Make.token parser1 token in
@@ -474,7 +493,7 @@ module WithParser(Parser : Parser_S) = struct
   (* We accept either a Name or a QualifiedName token when looking for a
      qualified name. *)
   let require_qualified_name parser =
-    let (parser1, name) = next_token_as_name parser in
+    let (parser1, name) = next_token_non_reserved_as_name parser in
     match Token.kind name with
     | TokenKind.Name ->
       let (parser, token) = Make.token parser1 name in

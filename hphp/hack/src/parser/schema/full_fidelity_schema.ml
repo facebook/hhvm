@@ -49,6 +49,22 @@ type token_node = {
     token_text : string;
     hack_only : bool;
     is_xhp : bool;
+    (* Whether the token is allowed as identifier, i.e., in practice, whether
+     * it is allowed as function name or class name.
+     * For example, darray is allowed as identifier. The following is legit:
+     *
+     *   function darray() {}
+     *
+     * NB 1: This does not apply to names of constants, enum members, class
+     * members including methods: for those, absolutely all keywords are
+     * allowed.
+     *
+     * NB 2: for class names, in addition, a few other keywords are "reserved",
+     * i.e. not allowed as class names. These include type names like int or
+     * bool. Those "reserved" keywords are not defined here. See syntax error
+     * `reserved_keyword_as_class_name`.
+     *)
+    allowed_as_identifier : bool;
 }
 
 type transformation =
@@ -100,13 +116,19 @@ module LF = Language_flags
 
 module Optional_flags = struct
   let xhp = "xhp"
+  (** See documentation of token_node.allowed_as_identifier. *)
+  let allowed_as_identifier = "allowed_as_identifier"
 
   let is_recognized : string -> bool = function
-    | "xhp" -> true
+    | "xhp"
+    | "allowed_as_identifier" -> true
     | _ -> false
 
   let is_xhp : string list -> bool = fun flags ->
     List.mem xhp flags
+
+  let is_allowed_as_identifier : string list -> bool = function flags ->
+    List.mem allowed_as_identifier flags
 end
 module OF = Optional_flags
 
@@ -118,6 +140,7 @@ let token_node_from_list l =
       token_text;
       hack_only = LF.is_hack_only language;
       is_xhp = OF.is_xhp optional_flags;
+      allowed_as_identifier = OF.is_allowed_as_identifier optional_flags;
     }
   | _ -> failwith "bad token schema"
 
@@ -164,35 +187,35 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Abstract"; "abstract"; LF.php_and_hack ];
   [ "And"; "and"; LF.php_and_hack ];
   [ "Array"; "array"; LF.php_and_hack ];
-  [ "Arraykey"; "arraykey"; LF.hack_only ];
+  [ "Arraykey"; "arraykey"; LF.hack_only; OF.allowed_as_identifier ];
   [ "As"; "as"; LF.php_and_hack ];
   [ "Async"; "async"; LF.hack_only ];
-  [ "Attribute"; "attribute"; LF.hack_only; OF.xhp ];
+  [ "Attribute"; "attribute"; LF.hack_only; OF.xhp; OF.allowed_as_identifier ];
   [ "Await"; "await"; LF.hack_only ];
   [ "Backslash"; "\\"; LF.php_and_hack ];
-  [ "Binary"; "binary"; LF.php_and_hack ];
-  [ "Bool"; "bool"; LF.php_and_hack ];
-  [ "Boolean"; "boolean"; LF.php_and_hack ];
+  [ "Binary"; "binary"; LF.php_and_hack; OF.allowed_as_identifier ];
+  [ "Bool"; "bool"; LF.php_and_hack; OF.allowed_as_identifier ];
+  [ "Boolean"; "boolean"; LF.php_and_hack; OF.allowed_as_identifier ];
   [ "Break"; "break"; LF.php_and_hack ];
   [ "Case"; "case"; LF.php_and_hack ];
   [ "Catch"; "catch"; LF.php_and_hack ];
-  [ "Category"; "category"; LF.hack_only; OF.xhp ];
-  [ "Children"; "children"; LF.hack_only; OF.xhp ];
+  [ "Category"; "category"; LF.hack_only; OF.xhp; OF.allowed_as_identifier ];
+  [ "Children"; "children"; LF.hack_only; OF.xhp; OF.allowed_as_identifier ];
   [ "Class"; "class"; LF.php_and_hack ];
-  [ "Classname"; "classname"; LF.hack_only ];
+  [ "Classname"; "classname"; LF.hack_only; OF.allowed_as_identifier ];
   [ "Clone"; "clone"; LF.php_and_hack ];
   [ "Const"; "const"; LF.php_and_hack ];
   [ "Construct"; "__construct"; LF.php_and_hack ];
   [ "Continue"; "continue"; LF.php_and_hack ];
-  [ "Coroutine"; "coroutine"; LF.hack_only ];
-  [ "Darray"; "darray"; LF.hack_only ];
+  [ "Coroutine"; "coroutine"; LF.hack_only; OF.allowed_as_identifier ];
+  [ "Darray"; "darray"; LF.hack_only; OF.allowed_as_identifier ];
   [ "Declare"; "declare"; LF.php_and_hack ];
   [ "Default"; "default"; LF.php_and_hack ];
-  [ "Define"; "define"; LF.php_and_hack ];
+  [ "Define"; "define"; LF.php_and_hack; OF.allowed_as_identifier ];
   [ "Destruct"; "__destruct"; LF.php_and_hack ];
-  [ "Dict"; "dict"; LF.php_and_hack ];
+  [ "Dict"; "dict"; LF.php_and_hack; OF.allowed_as_identifier ];
   [ "Do"; "do"; LF.php_and_hack ];
-  [ "Double"; "double"; LF.php_and_hack ];
+  [ "Double"; "double"; LF.php_and_hack; OF.allowed_as_identifier ];
   [ "Echo"; "echo"; LF.php_and_hack ];
   [ "Else"; "else"; LF.php_and_hack ];
   [ "Elseif"; "elseif"; LF.php_and_hack ];
@@ -203,19 +226,20 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Endif"; "endif"; LF.php_and_hack ];
   [ "Endswitch" ; "endswitch"; LF.php_and_hack ];
   [ "Endwhile"; "endwhile"; LF.php_and_hack ];
-  [ "Enum"; "enum"; LF.hack_only; OF.xhp ];
+  [ "Enum"; "enum"; LF.hack_only; OF.xhp; OF.allowed_as_identifier ];
   [ "Eval"; "eval"; LF.php_and_hack ];
   [ "Extends"; "extends"; LF.php_and_hack ];
-  [ "Fallthrough"; "fallthrough"; LF.hack_only ];
-  [ "Float"; "float"; LF.php_and_hack ];
+  [ "Fallthrough"; "fallthrough"; LF.hack_only; OF.allowed_as_identifier ];
+  [ "Float"; "float"; LF.php_and_hack; OF.allowed_as_identifier ];
   [ "Final"; "final"; LF.php_and_hack ];
   [ "Finally"; "finally"; LF.php_and_hack ];
   [ "For"; "for"; LF.php_and_hack ];
   [ "Foreach"; "foreach"; LF.php_and_hack ];
-  [ "From"; "from"; LF.php_and_hack ];
+  [ "From"; "from"; LF.php_and_hack; OF.allowed_as_identifier ];
   [ "Function"; "function"; LF.php_and_hack ];
   [ "Global"; "global"; LF.php_and_hack ];
   [ "Goto"; "goto"; LF.php_and_hack ];
+  [ "HaltCompiler"; "__halt_compiler"; LF.php_and_hack ];
   [ "If"; "if"; LF.php_and_hack ];
   [ "Implements"; "implements"; LF.php_and_hack ];
   [ "Include"; "include"; LF.php_and_hack ];
@@ -223,58 +247,59 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Inout"; "inout"; LF.hack_only ];
   [ "Instanceof"; "instanceof"; LF.php_and_hack ];
   [ "Insteadof"; "insteadof"; LF.php_and_hack ];
-  [ "Int"; "int"; LF.php_and_hack ];
-  [ "Integer"; "integer"; LF.php_and_hack ];
+  [ "Int"; "int"; LF.php_and_hack; OF.allowed_as_identifier ];
+  [ "Integer"; "integer"; LF.php_and_hack; OF.allowed_as_identifier ];
   [ "Interface"; "interface"; LF.php_and_hack ];
-  [ "Is"; "is"; LF.hack_only ];
+  [ "Is"; "is"; LF.hack_only; OF.allowed_as_identifier ];
   [ "Isset"; "isset"; LF.php_and_hack ];
-  [ "Keyset"; "keyset"; LF.php_and_hack ];
-  [ "Let"; "let"; LF.hack_only ];
+  [ "Keyset"; "keyset"; LF.php_and_hack; OF.allowed_as_identifier ];
+  [ "Let"; "let"; LF.hack_only; OF.allowed_as_identifier ];
   [ "List"; "list"; LF.php_and_hack ];
-  [ "Mixed"; "mixed"; LF.hack_only ];
-  [ "Namespace"; "namespace"; LF.php_and_hack ];
+  [ "Mixed"; "mixed"; LF.hack_only; OF.allowed_as_identifier ];
+  [ "Namespace"; "namespace"; LF.php_and_hack; OF.allowed_as_identifier ];
   [ "New"; "new"; LF.php_and_hack ];
-  [ "Newtype"; "newtype"; LF.hack_only ];
-  [ "Noreturn"; "noreturn"; LF.hack_only ];
-  [ "Num"; "num"; LF.hack_only ];
-  [ "Object"; "object"; LF.php_and_hack ];
+  [ "Newtype"; "newtype"; LF.hack_only; OF.allowed_as_identifier ];
+  [ "Noreturn"; "noreturn"; LF.hack_only; OF.allowed_as_identifier ];
+  [ "Num"; "num"; LF.hack_only; OF.allowed_as_identifier ];
+  [ "Object"; "object"; LF.php_and_hack; OF.allowed_as_identifier ];
   [ "Or"; "or"; LF.php_and_hack ];
-  [ "Parent"; "parent"; LF.php_and_hack ];
+  [ "Parent"; "parent"; LF.php_and_hack; OF.allowed_as_identifier ];
   [ "Print"; "print"; LF.php_and_hack ];
   [ "Private"; "private"; LF.php_and_hack ];
   [ "Protected"; "protected"; LF.php_and_hack ];
   [ "Public"; "public"; LF.php_and_hack ];
-  [ "Real"; "real"; LF.php_and_hack ];
-  [ "Reified"; "reified"; LF.hack_only ];
+  [ "Real"; "real"; LF.php_and_hack; OF.allowed_as_identifier ];
+  [ "Reified"; "reified"; LF.hack_only; OF.allowed_as_identifier ];
   [ "Require"; "require"; LF.php_and_hack ];
   [ "Require_once"; "require_once"; LF.php_and_hack ];
   [ "Required"; "required"; LF.hack_only; OF.xhp ];
-  [ "Resource"; "resource"; LF.php_and_hack ];
+  [ "Resource"; "resource"; LF.php_and_hack; OF.allowed_as_identifier ];
   [ "Return"; "return"; LF.php_and_hack ];
-  [ "Self"; "self"; LF.php_and_hack ];
+  [ "Self"; "self"; LF.php_and_hack; OF.allowed_as_identifier ];
   [ "Shape"; "shape"; LF.hack_only ];
   [ "Static"; "static"; LF.php_and_hack ];
-  [ "String"; "string"; LF.php_and_hack ];
-  [ "Super"; "super"; LF.php_and_hack ];
-  [ "Suspend"; "suspend"; LF.hack_only ];
+  [ "String"; "string"; LF.php_and_hack; OF.allowed_as_identifier ];
+  [ "Super"; "super"; LF.php_and_hack; OF.allowed_as_identifier ];
+  [ "Suspend"; "suspend"; LF.hack_only; OF.allowed_as_identifier ];
   [ "Switch"; "switch"; LF.php_and_hack ];
-  [ "This"; "this"; LF.hack_only ];
+  [ "This"; "this"; LF.hack_only; OF.allowed_as_identifier ];
   [ "Throw"; "throw"; LF.php_and_hack ];
   [ "Trait"; "trait"; LF.php_and_hack ];
   [ "Try"; "try"; LF.php_and_hack ];
   [ "Tuple"; "tuple"; LF.hack_only ];
-  [ "Type"; "type"; LF.hack_only ];
+  [ "Type"; "type"; LF.hack_only; OF.allowed_as_identifier ];
   [ "Unset"; "unset"; LF.php_and_hack ];
   [ "Use"; "use"; LF.php_and_hack ];
   [ "Using"; "using"; LF.hack_only ];
   [ "Var"; "var"; LF.php_and_hack ];
-  [ "Varray"; "varray"; LF.hack_only ];
-  [ "Vec"; "vec"; LF.php_and_hack ];
-  [ "Void"; "void"; LF.php_and_hack ];
-  [ "Where"; "where"; LF.hack_only ];
+  [ "Varray"; "varray"; LF.hack_only; OF.allowed_as_identifier ];
+  [ "Vec"; "vec"; LF.php_and_hack; OF.allowed_as_identifier ];
+  [ "Void"; "void"; LF.php_and_hack; OF.allowed_as_identifier ];
+  [ "Where"; "where"; LF.hack_only; OF.allowed_as_identifier ];
   [ "While"; "while"; LF.php_and_hack ];
   [ "Xor"; "xor"; LF.php_and_hack ];
   [ "Yield"; "yield"; LF.php_and_hack ];
+  [ "NullLiteral"; "null"; LF.php_and_hack; OF.allowed_as_identifier ];
   [ "LeftBracket"; "["; LF.php_and_hack ];
   [ "RightBracket"; "]"; LF.php_and_hack ];
   [ "LeftParen"; "("; LF.php_and_hack ];
@@ -340,12 +365,10 @@ let given_text_tokens = List.map token_node_from_list [
   [ "DotDotDot"; "..."; LF.php_and_hack ];
   [ "DollarDollar"; "$$"; LF.php_and_hack ];
   [ "BarGreaterThan"; "|>"; LF.php_and_hack ];
-  [ "NullLiteral"; "null"; LF.php_and_hack ];
   [ "SlashGreaterThan"; "/>"; LF.php_and_hack ];
   [ "LessThanSlash"; "</"; LF.php_and_hack ];
   [ "LessThanQuestion";"<?"; LF.php_and_hack ];
-  [ "QuestionGreaterThan"; "?>"; LF.php_and_hack ];
-  [ "HaltCompiler"; "__halt_compiler"; LF.php_and_hack ]]
+  [ "QuestionGreaterThan"; "?>"; LF.php_and_hack ]]
 
 let trivia_kinds = List.map trivia_node_from_list [
   [ "WhiteSpace"; "whitespace" ];

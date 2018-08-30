@@ -96,28 +96,28 @@ let test_mypair_cases = [
 ]
 
 let loop_assignment = "<?hh // strict
-function use(mixed $item): void {}
+function douse(mixed $item): void {}
 function cond(): bool { return true; }
 function loop_assignment(): void {
   $x = 1;
 // ^5:4
   while (true) {
-    use($x);
-//      ^8:9
+    douse($x);
+//        ^8:11
     if (cond())
       $x = 'foo';
 //    ^11:7
   }
-  use($x);
-//    ^14:7
+  douse($x);
+//      ^14:9
 }
 "
 
 let loop_assignment_cases = [
   ("loop_assignment.php", 5, 4), "int";
-  ("loop_assignment.php", 8, 9), "(string | int)";
+  ("loop_assignment.php", 8, 11), "(string | int)";
   ("loop_assignment.php", 11, 7), "string";
-  ("loop_assignment.php", 14, 7), "(string | int)";
+  ("loop_assignment.php", 14, 9), "(string | int)";
 ]
 
 let lambda1 = "<?hh // strict

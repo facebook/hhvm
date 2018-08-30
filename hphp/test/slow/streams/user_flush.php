@@ -4,7 +4,7 @@ class none {
   function stream_write($d) { echo "write\n"; return strlen($d); }
   function stream_close()   { echo "close\n"; }
 }
-class null extends none {
+class noll extends none {
   function stream_flush()   { echo "flush did something\n"; }
 }
 class no extends none {
@@ -14,17 +14,17 @@ class yes extends none {
   function stream_flush()   { echo "flush succeeded\n"; return true; }
 }
 stream_register_wrapper("none", "none");
-stream_register_wrapper("null", "null");
+stream_register_wrapper("noll", "noll");
 stream_register_wrapper("yes", "yes");
 stream_register_wrapper("no", "no");
 
 var_dump(copy(__FILE__, "none://this")); echo "\n";
-var_dump(copy(__FILE__, "null://this")); echo "\n";
+var_dump(copy(__FILE__, "noll://this")); echo "\n";
 var_dump(copy(__FILE__, "yes://this")); echo "\n";
 var_dump(copy(__FILE__, "no://this")); echo "\n";
 
 var_dump(file_put_contents("none://this", "missing")); echo "\n";
-var_dump(file_put_contents("null://this", "must return bool")); echo "\n";
+var_dump(file_put_contents("noll://this", "must return bool")); echo "\n";
 var_dump(file_put_contents("yes://this", "explicit success")); echo "\n";
 var_dump(file_put_contents("no://this", "explicit failure")); echo "\n";
 
@@ -37,10 +37,10 @@ var_dump(fflush($f));
 var_dump(fclose($f));
 echo "\n";
 
-$f = fopen("null://this", "r");
+$f = fopen("noll://this", "r");
 var_dump(fclose($f));
 var_dump(fclose($f));
-$f = fopen("null://this", "r");
+$f = fopen("noll://this", "r");
 var_dump(fflush($f));
 var_dump(fflush($f));
 var_dump(fclose($f));

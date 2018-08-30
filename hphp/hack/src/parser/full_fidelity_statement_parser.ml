@@ -1036,14 +1036,14 @@ module WithExpressionAndDeclAndTypeParser
       Make.return_statement parser return_token expr semi_token
 
   and parse_goto_label parser =
-    let parser, goto_label_name = next_token_as_name parser in
+    let parser, goto_label_name = next_token_non_reserved_as_name parser in
     let (parser, goto_label_name) = Make.token parser goto_label_name in
     let parser, colon = require_colon parser in
     Make.goto_label parser goto_label_name colon
 
   and parse_goto_statement parser =
     let parser, goto = assert_token parser Goto in
-    let parser, goto_label_name = next_token_as_name parser in
+    let parser, goto_label_name = next_token_non_reserved_as_name parser in
     let (parser, goto_label_name) = Make.token parser goto_label_name in
     let parser, semicolon = require_semicolon parser in
     Make.goto_statement parser goto goto_label_name semicolon

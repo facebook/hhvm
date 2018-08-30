@@ -626,7 +626,7 @@ let fun_template yielding node suspension_kind env =
   ; f_doc_comment     = None
   ; f_static          = false
   ; f_external        = false  (* true if this declaration has no body
-                                  because it is anexternal function declaration
+                                  because it is an external function declaration
                                   (e.g. from an HHI file)*)
   }
 

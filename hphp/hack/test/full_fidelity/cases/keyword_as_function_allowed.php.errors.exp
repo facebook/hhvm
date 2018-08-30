@@ -1,0 +1,101 @@
+(58,12)-(58,12) A lambda arrow ('==>') is expected here.
+(63,8)-(63,8) An expression is expected here.
+(64,5)-(64,5) A name is expected here.
+(64,6)-(64,6) A type specifier is expected here.
+(64,7)-(64,7) A left brace ('{') is expected here.
+(64,7)-(64,7) Invalid expression in constant initializer
+(64,8)-(65,1) An expression is expected here.
+(65,12)-(65,12) An equals sign ('=') is expected here.
+(65,13)-(65,13) Invalid expression in constant initializer
+(65,14)-(65,14) An expression is expected here.
+(66,6)-(66,6) An equals sign ('=') is expected here.
+(66,7)-(66,7) Invalid expression in constant initializer
+(66,8)-(66,8) An expression is expected here.
+(67,6)-(67,6) An equals sign ('=') is expected here.
+(67,7)-(67,7) Invalid expression in constant initializer
+(67,8)-(67,8) An expression is expected here.
+(68,5)-(68,5) An equals sign ('=') is expected here.
+(68,6)-(68,6) Invalid expression in constant initializer
+(68,7)-(68,7) An expression is expected here.
+(69,4)-(69,4) An equals sign ('=') is expected here.
+(69,5)-(69,5) Invalid expression in constant initializer
+(69,6)-(69,6) An expression is expected here.
+(70,8)-(70,8) An equals sign ('=') is expected here.
+(70,9)-(70,9) Invalid expression in constant initializer
+(70,10)-(70,10) An expression is expected here.
+(71,3)-(71,3) An equals sign ('=') is expected here.
+(71,4)-(71,4) Invalid expression in constant initializer
+(71,5)-(71,5) An expression is expected here.
+(72,6)-(72,6) An equals sign ('=') is expected here.
+(72,7)-(72,7) Invalid expression in constant initializer
+(72,8)-(72,8) An expression is expected here.
+(73,7)-(73,7) An equals sign ('=') is expected here.
+(73,8)-(73,8) Invalid expression in constant initializer
+(73,9)-(73,9) An expression is expected here.
+(74,4)-(74,4) An equals sign ('=') is expected here.
+(74,5)-(74,5) Invalid expression in constant initializer
+(74,6)-(74,6) An expression is expected here.
+(75,6)-(75,6) An equals sign ('=') is expected here.
+(75,7)-(75,7) Invalid expression in constant initializer
+(75,8)-(75,8) An expression is expected here.
+(76,8)-(76,8) An equals sign ('=') is expected here.
+(76,9)-(76,9) Invalid expression in constant initializer
+(76,10)-(76,10) An expression is expected here.
+(77,9)-(77,9) An equals sign ('=') is expected here.
+(77,10)-(77,10) Invalid expression in constant initializer
+(77,11)-(77,11) An expression is expected here.
+(78,5)-(78,5) An equals sign ('=') is expected here.
+(78,6)-(78,6) Invalid expression in constant initializer
+(78,7)-(78,7) An expression is expected here.
+(79,4)-(79,4) An equals sign ('=') is expected here.
+(79,5)-(79,5) Invalid expression in constant initializer
+(79,6)-(79,6) An expression is expected here.
+(80,7)-(80,7) An equals sign ('=') is expected here.
+(80,8)-(80,8) Invalid expression in constant initializer
+(80,9)-(80,9) An expression is expected here.
+(81,7)-(81,7) An equals sign ('=') is expected here.
+(81,8)-(81,8) Invalid expression in constant initializer
+(81,9)-(81,9) An expression is expected here.
+(82,5)-(82,5) An equals sign ('=') is expected here.
+(82,6)-(82,6) Invalid expression in constant initializer
+(82,7)-(82,7) An expression is expected here.
+(83,9)-(83,9) An equals sign ('=') is expected here.
+(83,10)-(83,10) Invalid expression in constant initializer
+(83,11)-(83,11) An expression is expected here.
+(84,5)-(84,5) An equals sign ('=') is expected here.
+(84,6)-(84,6) Invalid expression in constant initializer
+(84,7)-(84,7) An expression is expected here.
+(85,7)-(85,7) An equals sign ('=') is expected here.
+(85,8)-(85,8) Invalid expression in constant initializer
+(85,9)-(85,9) An expression is expected here.
+(86,6)-(86,6) An equals sign ('=') is expected here.
+(86,7)-(86,7) Invalid expression in constant initializer
+(86,8)-(86,8) An expression is expected here.
+(87,8)-(87,8) An equals sign ('=') is expected here.
+(87,9)-(87,9) Invalid expression in constant initializer
+(87,10)-(87,10) An expression is expected here.
+(88,5)-(88,5) An equals sign ('=') is expected here.
+(88,6)-(88,6) Invalid expression in constant initializer
+(88,7)-(88,7) An expression is expected here.
+(89,5)-(89,5) An equals sign ('=') is expected here.
+(89,6)-(89,6) Invalid expression in constant initializer
+(89,7)-(89,7) An expression is expected here.
+(90,5)-(90,5) An equals sign ('=') is expected here.
+(90,6)-(90,6) Invalid expression in constant initializer
+(90,7)-(90,7) An expression is expected here.
+(91,6)-(91,6) An equals sign ('=') is expected here.
+(91,7)-(91,7) Invalid expression in constant initializer
+(91,8)-(91,8) An expression is expected here.
+(92,7)-(92,7) An equals sign ('=') is expected here.
+(92,8)-(92,8) Invalid expression in constant initializer
+(92,9)-(92,9) An expression is expected here.
+(93,4)-(93,4) An equals sign ('=') is expected here.
+(93,5)-(93,5) Invalid expression in constant initializer
+(93,6)-(93,6) An expression is expected here.
+(94,5)-(94,5) An equals sign ('=') is expected here.
+(94,6)-(94,6) Invalid expression in constant initializer
+(94,7)-(94,7) An expression is expected here.
+(95,6)-(95,6) An equals sign ('=') is expected here.
+(95,7)-(95,7) Invalid expression in constant initializer
+(95,8)-(95,8) An expression is expected here.
+(95,9)-(96,1) A right brace ('}') is expected here.

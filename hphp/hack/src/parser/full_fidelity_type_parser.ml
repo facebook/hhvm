@@ -252,7 +252,7 @@ and parse_variance_opt parser =
 and parse_type_parameter parser =
   let (parser, reified) = optional_token parser Reified in
   let (parser, variance) = parse_variance_opt parser in
-  let (parser, type_name) = require_name_allow_keywords parser in
+  let (parser, type_name) = require_name_allow_all_keywords parser in
   let (parser, constraints) =
     parse_list_until_none parser parse_generic_type_constraint_opt
   in

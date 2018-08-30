@@ -343,8 +343,8 @@ let strict_types_first_statement =
 let async_magic_method ~name =
   "cannot declare constructors, destructors, and magic methods such as '"^ name ^ "' async"
 
-let reserved_keyword_as_class_name =
-  "You may not use a reserved keyword for a class name"
+let reserved_keyword_as_class_name class_name =
+  "Cannot use '" ^ class_name ^ "' as class name as it is reserved"
 let xhp_class_multiple_category_decls =
   "An XHP class cannot have multiple category declarations"
 let inout_param_in_generator =
@@ -472,8 +472,8 @@ let instanceof_memberselection_inside_scoperesolution = "A scope resolution (::)
 let instanceof_missing_subscript_index = "A subscript expression ([]) on the right side of an " ^
   "instanceof operator must have an index"
 
-let instanceof_unknown_node msg =
-  Printf.sprintf "Unexpected node on right hand side of instanceof: %s" msg
+let instanceof_new_unknown_node msg =
+  Printf.sprintf "Unexpected node on right hand side of new or instanceof: %s" msg
 
 let instanceof_reference = "References are not allowed on the right side of an instanceof operation"
 
@@ -576,6 +576,3 @@ let type_alias_to_type_constant =
 
 let interface_with_memoize =
   "Memoize is not allowed on interface methods"
-
-let unset_as_expression =
-  "unset() cannot be used as an expression"

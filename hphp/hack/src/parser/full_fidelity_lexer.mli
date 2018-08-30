@@ -44,6 +44,7 @@ module WithToken : functor (Token : Lexable_token_sig.LexableToken_S) -> sig
     - '=' is case of short '<?=' tag *)
     (Token.t * Token.t option) option
   val next_token_as_name : t -> t * Token.t
+  val next_token_non_reserved_as_name : t -> t * Token.t
   val next_token_in_type : t -> t * Token.t
   val next_docstring_header : t -> t * Token.t * String.t
   val next_xhp_element_token : no_trailing:bool -> t

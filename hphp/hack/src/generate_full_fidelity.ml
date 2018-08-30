@@ -2191,6 +2191,8 @@ module GenerateFFTokenKind = struct
     let guards = add_guard_or_pad ""
       ~cond:(x.is_xhp, "(is_hack || allow_xhp)")
       ~else_cond:(x.hack_only, "is_hack") in
+    let guards = add_guard_or_pad guards
+      ~cond:(x.allowed_as_identifier, "not only_reserved") in
     sprintf "  | \"%s\"%s %s-> Some %s\n" token_text spacer guards x.token_kind
 
   let to_to_string x =
@@ -2210,10 +2212,10 @@ KIND_DECLARATIONS_GIVEN_TEXT  (* Variable text tokens *)
 KIND_DECLARATIONS_VARIABLE_TEXT
   [@@deriving show]
 
-let from_string keyword ~is_hack ~allow_xhp =
+let from_string keyword ~is_hack ~allow_xhp ~only_reserved =
   match keyword with
-  | \"true\"         -> Some BooleanLiteral
-  | \"false\"        -> Some BooleanLiteral
+  | \"true\"                                        when not only_reserved -> Some BooleanLiteral
+  | \"false\"                                       when not only_reserved -> Some BooleanLiteral
 FROM_STRING_GIVEN_TEXT  | _              -> None
 
 let to_string kind =

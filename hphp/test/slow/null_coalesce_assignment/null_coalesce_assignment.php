@@ -220,7 +220,7 @@ function test_object_get(): void {
   VS($obj->addme ??= "added", "added");
   VS($obj->counter ??= "don't add me", 0);
 
-  $obj->addmetoo ??= () ==> echo("add me too");
+  $obj->addmetoo ??= () ==> print("add me too");
   $fortytwo = 42;
   VS($obj->$fortytwo ??= "addmethree", "addmethree");
 

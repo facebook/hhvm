@@ -706,15 +706,12 @@ let produce_error_for_header acc check node error error_node =
     error error_node
 
 
-let is_reserved_keyword env classish_name =
-  let name = text classish_name in
-  (* TODO: What else goes here? *)
+let cant_be_classish_name env name =
   match String.lowercase name with
-  | "eval" | "isset" | "unset" | "empty" | "const" | "new"
-  | "and"  | "or"    | "xor"  | "as" | "print" | "throw"
-  | "array" | "instanceof" | "trait" | "class" | "interface"
-  | "static" -> true
-  | "using" | "inout" when is_hack env -> true
+  | "false" | "null" | "parent" | "self" | "true" ->
+    true
+  | "callable" | "classname" | "darray" | "this" | "varray"
+    when is_hack env -> true
   | _ -> false
 
 (* Given a function_declaration_header node, returns its function_name
@@ -1705,7 +1702,8 @@ let new_variable_errors node =
       [ make_error_from_node node SyntaxError.instanceof_invalid_scope_resolution ]
 
     | _ ->
-      let error_msg = SyntaxError.instanceof_unknown_node (SyntaxKind.to_string @@ kind node) in
+      let error_msg = SyntaxError.instanceof_new_unknown_node
+        (SyntaxKind.to_string @@ kind node) in
       [ make_error_from_node node error_msg ]
   in
   helper node ~inside_scope_resolution:false
@@ -1818,11 +1816,6 @@ let expression_errors env namespace_name node parents errors =
     in
     let errors =
       function_call_on_xhp_name_errors env function_call_receiver errors in
-    let errors =
-      if text function_call_receiver = Naming_special_names.PseudoFunctions.unset_no_ns
-      then make_error_from_node function_call_receiver SyntaxError.unset_as_expression :: errors
-      else errors
-    in
     errors
   | ListExpression { list_members; _ }
     when is_hhvm_compat env ->
@@ -2338,9 +2331,11 @@ let classish_errors env node parents namespace_name names errors =
       (classish_sealed_final env) ()
       SyntaxError.sealed_final cd.classish_attribute in
     let errors =
+      let classish_name = text cd.classish_name in
       produce_error errors
-      (is_reserved_keyword env) cd.classish_name
-      SyntaxError.reserved_keyword_as_class_name cd.classish_name in
+      (cant_be_classish_name env) classish_name
+      (SyntaxError.reserved_keyword_as_class_name classish_name)
+      cd.classish_name in
     let errors =
       produce_error errors
       classish_declaration_check ()

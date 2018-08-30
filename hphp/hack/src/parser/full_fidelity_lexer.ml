@@ -1177,15 +1177,15 @@ let rec scan_token_impl : bool -> lexer -> (lexer * TokenKind.t) =
       let lexer = with_error lexer SyntaxError.error0006 in
       (advance lexer 1, TokenKind.ErrorToken)
 
-let scan_token : bool -> lexer -> lexer * TokenKind.t =
-  fun in_type lexer ->
+let scan_token : in_type:bool -> lexer -> lexer * TokenKind.t =
+  fun ~in_type lexer ->
   Stats_container.wrap_nullary_fn_timing
     ?stats:(Stats_container.get_instance ())
     ~key:"full_fidelity_lexer:scan_token"
     ~f:(fun () -> scan_token_impl in_type lexer)
 
-let scan_token_inside_type = scan_token true
-let scan_token_outside_type = scan_token false
+let scan_token_inside_type = scan_token ~in_type:true
+let scan_token_outside_type = scan_token ~in_type:false
 
 (* Lexing trivia *)
 
@@ -1423,6 +1423,8 @@ let is_next_xhp_class_name lexer =
   let (lexer, _) = scan_leading_php_trivia lexer in
   is_xhp_class_name lexer
 
+type kw_set = [ `AllKeywords | `NonReservedKeywords | `NoKeywords ]
+
 let as_case_insensitive_keyword text =
   (* Some keywords are case-insensitive in Hack or PHP. *)
   (* TODO: Consider making non-lowercase versions of these keywords errors
@@ -1456,12 +1458,12 @@ let enforce_lowercase lexer ~original_text ~lowered_text =
       else lexer
   else lexer
 
-let as_keyword kind lexer =
+let as_keyword ~only_reserved kind lexer =
   if kind = TokenKind.Name then
     let original_text = current_text lexer in
     let text = as_case_insensitive_keyword original_text in
     let is_hack = Env.is_hh () and allow_xhp = Env.enable_xhp () in
-    match TokenKind.from_string text ~is_hack ~allow_xhp with
+    match TokenKind.from_string text ~is_hack ~allow_xhp ~only_reserved with
     | Some TokenKind.Let when (not (is_experimental_mode lexer)) ->
       lexer, TokenKind.Name
     | Some keyword ->
@@ -1473,21 +1475,24 @@ let as_keyword kind lexer =
     lexer, kind
 
 (* scanner takes a lexer, returns a lexer and a kind *)
-let scan_token_and_leading_trivia scanner as_name lexer  =
+let scan_token_and_leading_trivia scanner ~(as_name:kw_set) lexer  =
   (* Get past the leading trivia *)
   let (lexer, leading) = scan_leading_php_trivia lexer in
   (* Remember where we were when we started this token *)
   let lexer = start_new_lexeme lexer in
   let (lexer, kind) = scanner lexer in
-  let (lexer, kind) = if as_name then lexer, kind else as_keyword kind lexer in
+  let (lexer, kind) = match as_name with
+    | `AllKeywords -> lexer, kind
+    | `NonReservedKeywords -> as_keyword ~only_reserved:true kind lexer
+    | `NoKeywords -> as_keyword ~only_reserved:false kind lexer in
   let w = width lexer in
   (lexer, kind, w, leading)
 
 (* scanner takes a lexer, returns a lexer and a kind *)
-let scan_token_and_trivia scanner as_name lexer  =
+let scan_token_and_trivia scanner ~(as_name:kw_set) lexer  =
   let token_start = offset lexer in
   let (lexer, kind, w, leading) =
-    scan_token_and_leading_trivia scanner as_name lexer in
+    scan_token_and_leading_trivia scanner ~as_name lexer in
   let (lexer, trailing) =
     match kind with
     | TokenKind.DoubleQuotedStringLiteralHead -> (lexer, [])
@@ -1516,12 +1521,18 @@ let scan_assert_progress tokenizer lexer  =
       "failed to make progress at %d\n" (offset lexer)
   end
 
-let scan_next_token ~as_name scanner lexer =
-  let tokenizer = scan_token_and_trivia scanner as_name in
+let scan_next_token ~(as_name:kw_set) scanner lexer =
+  let tokenizer = scan_token_and_trivia scanner ~as_name in
   scan_assert_progress tokenizer lexer
 
-let scan_next_token_as_name = scan_next_token ~as_name:true
-let scan_next_token_as_keyword = scan_next_token ~as_name:false
+let scan_next_token_as_name =
+  scan_next_token ~as_name:`AllKeywords
+
+let scan_next_token_as_keyword =
+  scan_next_token ~as_name:`NoKeywords
+
+let scan_next_token_nonreserved_as_name =
+  scan_next_token ~as_name:`NonReservedKeywords
 
 (* Entrypoints *)
 (* TODO: Instead of passing Boolean flags, create a flags enum? *)
@@ -1540,8 +1551,8 @@ let next_token = (* takes a lexer, returns a (lexer, token) *)
 let next_token_no_trailing lexer =
   let tokenizer lexer =
     let token_start = offset lexer in
-    let (lexer, kind, w, leading) =
-      scan_token_and_leading_trivia scan_token_outside_type false lexer in
+    let (lexer, kind, w, leading) = scan_token_and_leading_trivia
+      scan_token_outside_type ~as_name:`NoKeywords lexer in
     (lexer, Token.make kind (source lexer) token_start w leading []) in
   scan_assert_progress tokenizer lexer
 
@@ -1575,6 +1586,9 @@ let next_docstring_header lexer =
 let next_token_as_name lexer =
   scan_next_token_as_name scan_token_outside_type lexer
 
+let next_token_non_reserved_as_name lexer =
+  scan_next_token_nonreserved_as_name scan_token_outside_type lexer
+
 let next_token_in_type lexer =
   scan_next_token_as_keyword scan_token_inside_type lexer
 
@@ -1582,8 +1596,8 @@ let next_xhp_element_token ~no_trailing lexer =
   (* XHP elements have whitespace, newlines and Hack comments. *)
   let tokenizer lexer =
     let token_start = offset lexer in
-    let (lexer, kind, w, leading) =
-      scan_token_and_leading_trivia scan_xhp_token true lexer in
+    let (lexer, kind, w, leading) = scan_token_and_leading_trivia
+      scan_xhp_token ~as_name:`AllKeywords lexer in
     (* We do not scan trivia after an XHPOpen's >. If that is the beginning of
        an XHP body then we want any whitespace or newlines to be leading trivia
        of the body token. *)
@@ -1623,10 +1637,10 @@ let next_xhp_body_token lexer =
   scan_assert_progress scanner lexer
 
 let next_xhp_class_name lexer =
-  scan_token_and_trivia scan_xhp_class_name false lexer
+  scan_token_and_trivia scan_xhp_class_name ~as_name:`NoKeywords lexer
 
 let next_xhp_name lexer =
-  scan_token_and_trivia scan_xhp_element_name false lexer
+  scan_token_and_trivia scan_xhp_element_name ~as_name:`NoKeywords lexer
 
 let make_markup_token lexer =
   Token.make TokenKind.Markup (source lexer) (start lexer) (width lexer) [] []
@@ -1723,7 +1737,7 @@ let scan_xhp_category_name lexer =
     scan_token false lexer
 
 let next_xhp_category_name lexer =
-  scan_token_and_trivia scan_xhp_category_name false lexer
+  scan_token_and_trivia scan_xhp_category_name ~as_name:`NoKeywords lexer
 
 let rescan_halt_compiler lexer last_token =
   (* __halt_compiler stops parsing of the file.

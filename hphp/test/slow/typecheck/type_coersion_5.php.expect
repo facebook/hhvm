@@ -86,25 +86,25 @@ WARNING: {closure}() expects parameter 1 to be string, null given
 
 Array
 Builtin:
-WARNING: array_count_values() expects parameter 1 to be array, boolean given
+WARNING: __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, boolean given
 User:
 WARNING: {closure}() expects parameter 1 to be array, boolean given
 Builtin:
-WARNING: array_count_values() expects parameter 1 to be array, integer given
+WARNING: __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, integer given
 User:
 WARNING: {closure}() expects parameter 1 to be array, integer given
 Builtin:
-WARNING: array_count_values() expects parameter 1 to be array, float given
+WARNING: __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, float given
 User:
 WARNING: {closure}() expects parameter 1 to be array, float given
 Builtin:
-WARNING: array_count_values() expects parameter 1 to be array, string given
+WARNING: __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, string given
 User:
 WARNING: {closure}() expects parameter 1 to be array, string given
 Builtin:
 User:
 Builtin:
-WARNING: array_count_values() expects parameter 1 to be array, null given
+WARNING: __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, null given
 User:
 WARNING: {closure}() expects parameter 1 to be array, null given
 

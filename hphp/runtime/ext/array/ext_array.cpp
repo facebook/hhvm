@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/request-event-handler.h"
@@ -202,9 +203,21 @@ TypedValue HHVM_FUNCTION(array_combine,
 }
 
 TypedValue HHVM_FUNCTION(array_count_values,
-                         ArrayArg input) {
+                         const Variant& input) {
   SuppressHackArrCompatNotices suppress;
-  return tvReturn(ArrayUtil::CountValues(ArrNR(input.get())));
+  if (!isContainer(input)) {
+    raise_warning("array_count_values() expects parameter 1 to be array, "
+                  "%s given",
+                  getDataTypeString(input.getType()).c_str());
+    return make_tv<KindOfNull>();
+  }
+  return tvReturn(
+    ArrayUtil::CountValues(
+      input.isArray()
+        ? input.asCArrRef()
+        // If this isn't exactly an Array, then it must be a hack collection,
+        // so it is safe to get the object data
+        : collections::toArray(input.getObjectData())));
 }
 
 TypedValue HHVM_FUNCTION(array_fill_keys,
@@ -1297,7 +1310,7 @@ bool HHVM_FUNCTION(array_walk,
   return true;
 }
 
-static void compact(PointerSet& seen, VarEnv* v, Array &ret,
+static void compact(PointerSet& seen, VarEnv* v, Array& ret,
                     const Variant& var) {
   if (var.isArray()) {
     auto adata = var.getArrayData();
@@ -1324,7 +1337,7 @@ static void compact(PointerSet& seen, VarEnv* v, Array &ret,
 Array HHVM_FUNCTION(compact,
                     const Variant& varname,
                     const Array& args /* = null array */) {
-  Array ret = Array::attach(PackedArray::MakeReserve(args.size() + 1));
+  Array ret = Array::CreateDArray();
   VarEnv* v = g_context->getOrCreateVarEnv();
   if (v) {
     PointerSet seen;

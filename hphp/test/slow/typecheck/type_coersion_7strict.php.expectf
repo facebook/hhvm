@@ -56,17 +56,17 @@ No Error
 [user] Argument 1 passed to {closure}() must be of the type string, null given
 
 Array
-[builtin] array_count_values() expects parameter 1 to be array, boolean given
+[builtin] __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, boolean given
 [user] Argument 1 passed to {closure}() must be of the type array, boolean given
-[builtin] array_count_values() expects parameter 1 to be array, integer given
+[builtin] __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, integer given
 [user] Argument 1 passed to {closure}() must be of the type array, integer given
-[builtin] array_count_values() expects parameter 1 to be array, float given
+[builtin] __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, float given
 [user] Argument 1 passed to {closure}() must be of the type array, float given
-[builtin] array_count_values() expects parameter 1 to be array, string given
+[builtin] __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, string given
 [user] Argument 1 passed to {closure}() must be of the type array, string given
 No Error
 No Error
-[builtin] array_count_values() expects parameter 1 to be array, null given
+[builtin] __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, null given
 [user] Argument 1 passed to {closure}() must be of the type array, null given
 
 Object

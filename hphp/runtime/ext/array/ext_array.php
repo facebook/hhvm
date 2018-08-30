@@ -74,7 +74,7 @@ function array_combine(mixed $keys, mixed $values): mixed;
  *
  */
 <<__Native, __IsFoldable>>
-function array_count_values(array $input): mixed;
+function array_count_values(arraylike $input): mixed;
 
 /**
  * Fills an array with the value of the value parameter, using the values of
@@ -593,7 +593,7 @@ function array_walk(mixed &$input,
  *
  */
 <<__Native("ReadsCallerFrame")>>
-function compact(mixed $varname, ...$argv): array;
+function compact(mixed $varname, ...$argv): darray;
 
 /**
  * This function shuffles (randomizes the order of the elements in) an array.

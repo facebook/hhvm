@@ -14,11 +14,11 @@ String
 WARNING: rtrim() expects parameter 1 to be string, array given
 
 Array
-WARNING: array_count_values() expects parameter 1 to be array, boolean given
-WARNING: array_count_values() expects parameter 1 to be array, integer given
-WARNING: array_count_values() expects parameter 1 to be array, double given
-WARNING: array_count_values() expects parameter 1 to be array, string given
-WARNING: array_count_values() expects parameter 1 to be array, null given
+WARNING: __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, boolean given
+WARNING: __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, integer given
+WARNING: __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, double given
+WARNING: __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, string given
+WARNING: __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, null given
 
 Object
 WARNING: get_object_vars() expects parameter 1 to be object, boolean given

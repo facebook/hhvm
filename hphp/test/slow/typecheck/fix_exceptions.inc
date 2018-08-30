@@ -4,7 +4,7 @@ function fix_err($errmsg, $user_format) {
 
   if (defined('HHVM_VERSION')) {
     if (!$user_format) {
-      $errmsg = preg_replace('/Argument (\d+) passed to ([\w\{\}]+)\(\) must be an instance of (\w+), (\w+) given/',
+      $errmsg = preg_replace('/Argument (\d+) passed to ([\w\\\{\}]+)\(\) must be an instance of (\w+), (\w+) given/',
                              '\2() expects parameter \1 to be \3, \4 given',
                              $errmsg);
     }

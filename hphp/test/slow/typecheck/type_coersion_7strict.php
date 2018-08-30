@@ -29,7 +29,8 @@ check("Int64", function ($v) { return str_pad("abc", $v); },
 check("Double", function ($v) { return number_format($v); },
       function (float $v) { });
 check("String", function ($v) { return rtrim($v); }, function (string $v) { });
-check("Array", function ($v) { return array_count_values($v); },
+check("Array",
+      function ($v) { return __hhvm_intrinsics\dummy_array_builtin($v); },
       function (array $v) { });
 check("Object", function ($v) { return get_object_vars($v); },
       function (object $v) { });

@@ -23,7 +23,7 @@ open Typing_deps
 (* The neutral element of declaration (cf procs/multiWorker.mli) *)
 (*****************************************************************************)
 let otf_neutral =  Errors.empty
-let compute_deps_neutral = DepSet.empty, DepSet.empty
+let compute_deps_neutral = DepSet.empty, DepSet.empty, DepSet.empty
 
 (*****************************************************************************)
 (* This is the place where we are going to put everything necessary for
@@ -56,13 +56,14 @@ let on_the_fly_decl_file tcopt errors fn =
 (*****************************************************************************)
 
 let compute_classes_deps old_classes new_classes acc classes =
-  let to_redecl, to_recheck = acc in
-  let rdd, rdc =
+  let changed, to_redecl, to_recheck = acc in
+  let rc, rdd, rdc =
     Decl_compare.get_classes_deps old_classes new_classes classes
   in
+  let changed = DepSet.union rc changed in
   let to_redecl = DepSet.union rdd to_redecl in
   let to_recheck = DepSet.union rdc to_recheck in
-  to_redecl, to_recheck
+  changed, to_redecl, to_recheck
 
 (*****************************************************************************)
 (* Given a set of functions, compare the old and the new type and deduce
@@ -70,11 +71,12 @@ let compute_classes_deps old_classes new_classes acc classes =
  *)
 (*****************************************************************************)
 
-let compute_funs_deps old_funs (to_redecl, to_recheck) funs =
-  let rdd, rdc = Decl_compare.get_funs_deps old_funs funs in
+let compute_funs_deps old_funs (changed, to_redecl, to_recheck) funs =
+  let rc, rdd, rdc = Decl_compare.get_funs_deps old_funs funs in
+  let changed = DepSet.union rc changed in
   let to_redecl = DepSet.union rdd to_redecl in
   let to_recheck = DepSet.union rdc to_recheck in
-  to_redecl, to_recheck
+  changed, to_redecl, to_recheck
 
 (*****************************************************************************)
 (* Given a set of typedefs, compare the old and the new type and deduce
@@ -82,11 +84,12 @@ let compute_funs_deps old_funs (to_redecl, to_recheck) funs =
  *)
 (*****************************************************************************)
 
-let compute_types_deps old_types (to_redecl, to_recheck) types =
-  let rdc = Decl_compare.get_types_deps old_types types in
+let compute_types_deps old_types (changed, to_redecl, to_recheck) types =
+  let rc, rdc = Decl_compare.get_types_deps old_types types in
+  let changed = DepSet.union rc changed in
   let to_redecl = DepSet.union rdc to_redecl in
   let to_recheck = DepSet.union rdc to_recheck in
-  to_redecl, to_recheck
+  changed, to_redecl, to_recheck
 
 (*****************************************************************************)
 (* Given a set of global constants, compare the old and the new type and
@@ -94,11 +97,12 @@ let compute_types_deps old_types (to_redecl, to_recheck) types =
  *)
 (*****************************************************************************)
 
-let compute_gconsts_deps old_gconsts (to_redecl, to_recheck) gconsts =
-  let rdd, rdc = Decl_compare.get_gconsts_deps old_gconsts gconsts in
+let compute_gconsts_deps old_gconsts (changed, to_redecl, to_recheck) gconsts =
+  let rc, rdd, rdc = Decl_compare.get_gconsts_deps old_gconsts gconsts in
+  let changed = DepSet.union rc changed in
   let to_redecl = DepSet.union rdd to_redecl in
   let to_recheck = DepSet.union rdc to_recheck in
-  to_redecl, to_recheck
+  changed, to_redecl, to_recheck
 
 (*****************************************************************************)
 (* Redeclares a list of files
@@ -123,7 +127,7 @@ let compute_deps fast filel =
   let names =
     List.fold_left infol ~f:FileInfo.merge_names ~init:FileInfo.empty_names in
   let { FileInfo.n_classes; n_funs; n_types; n_consts } = names in
-  let acc = DepSet.empty, DepSet.empty in
+  let acc = DepSet.empty, DepSet.empty, DepSet.empty in
   (* Fetching everything at once is faster *)
   let old_funs = Decl_heap.Funs.get_old_batch n_funs in
   let acc = compute_funs_deps old_funs acc n_funs in
@@ -137,9 +141,9 @@ let compute_deps fast filel =
   let old_classes = Decl_heap.Classes.get_old_batch n_classes in
   let new_classes = Decl_heap.Classes.get_batch n_classes in
   let compare_classes = compute_classes_deps old_classes new_classes in
-  let (to_redecl, to_recheck) = compare_classes acc n_classes in
+  let (changed, to_redecl, to_recheck) = compare_classes acc n_classes in
 
-  to_redecl, to_recheck
+  changed, to_redecl, to_recheck
 
 (*****************************************************************************)
 (* Load the environment and then redeclare *)
@@ -170,8 +174,10 @@ let load_and_compute_deps _acc filel =
 let merge_on_the_fly errorl1 errorl2 =
   Errors.merge errorl1 errorl2
 
-let merge_compute_deps (to_redecl1, to_recheck1) (to_redecl2, to_recheck2) =
-  DepSet.union to_redecl1 to_redecl2, DepSet.union to_recheck1 to_recheck2
+let merge_compute_deps
+    (changed1, to_redecl1, to_recheck1) (changed2, to_redecl2, to_recheck2) =
+  DepSet.union changed1 changed2,
+    DepSet.union to_redecl1 to_redecl2, DepSet.union to_recheck1 to_recheck2
 
 (*****************************************************************************)
 (* The parallel worker *)
@@ -187,7 +193,7 @@ let parallel_otf_decl workers bucket_size tcopt fast fnl =
         ~merge:merge_on_the_fly
         ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
     in
-    let to_redecl, to_recheck =
+    let changed, to_redecl, to_recheck =
       MultiWorker.call
         workers
         ~job:load_and_compute_deps
@@ -196,7 +202,7 @@ let parallel_otf_decl workers bucket_size tcopt fast fnl =
         ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
     in
     OnTheFlyStore.clear();
-    errors, to_redecl, to_recheck
+    errors, changed, to_redecl, to_recheck
   with e ->
     if SharedMem.is_heap_overflow () then
       Exit_status.exit Exit_status.Redecl_heap_overflow
@@ -356,8 +362,8 @@ let redo_type_decl workers ~bucket_size tcopt all_oldified_defs fast defs =
     if List.length fnl < 10
     then
       let errors = otf_decl_files tcopt fnl in
-      let to_redecl, to_recheck = compute_deps fast fnl in
-      errors, to_redecl, to_recheck
+      let changed, to_redecl, to_recheck = compute_deps fast fnl in
+      errors, changed, to_redecl, to_recheck
     else parallel_otf_decl workers bucket_size tcopt fast fnl
   in
   remove_old_defs defs all_elems;

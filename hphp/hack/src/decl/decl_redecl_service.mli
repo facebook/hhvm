@@ -17,7 +17,7 @@ val redo_type_decl :
   FileInfo.names ->
   FileInfo.fast ->
   FileInfo.names ->
-  Errors.t * DepSet.t * DepSet.t
+  Errors.t * DepSet.t * DepSet.t * DepSet.t
 
 (**
  * Exposed for tests only!

@@ -705,9 +705,10 @@ end = functor(CheckKind:CheckKindType) -> struct
     let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
     debug_print_fast_keys genv "to_redecl_phase1" fast;
     let defs_to_redecl = get_defs fast in
-    let _, to_redecl_phase2_deps, to_recheck1 =
+    let _, changes, to_redecl_phase2_deps, to_recheck1 =
       Decl_redecl_service.redo_type_decl
         ~bucket_size genv.workers env.tcopt oldified_defs fast defs_to_redecl in
+    ignore changes; (* TODO: compare those against prechecked files *)
 
     (* Things that were redeclared are no longer in old heap, so we substract
      * defs_ro_redecl from oldified_defs *)
@@ -740,7 +741,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let oldified_defs = FileInfo.merge_names oldified_defs defs_to_oldify in
 
     let defs_to_redecl_phase2 = get_defs fast_redecl_phase2_now in
-    let errorl', _to_redecl2, to_recheck2 =
+    let errorl', _changes, _to_redecl2, to_recheck2 =
       Decl_redecl_service.redo_type_decl ~bucket_size genv.workers
         env.tcopt oldified_defs fast_redecl_phase2_now defs_to_redecl_phase2 in
 

@@ -188,6 +188,8 @@ module ClassEltDiff = struct
     |> compare_smeths class1 class2
 end
 
+let add_changed acc dep = DepSet.add acc (Dep.make dep)
+
 (*****************************************************************************)
 (* Determines if there is a "big" difference between two classes
  * What it really means: most of the time, a change in a class doesn't affect
@@ -225,13 +227,14 @@ let class_big_diff class1 class2 =
  * Hence the name "get_bazooka".
  *)
 (*****************************************************************************)
-and get_all_dependencies trace cid (to_redecl, to_recheck) =
-  let bazooka = Typing_deps.get_bazooka (Dep.Class cid) in
+and get_all_dependencies trace cid (changed, to_redecl, to_recheck) =
+  let dep = Dep.Class cid in
+  let bazooka = Typing_deps.get_bazooka dep in
   let to_redecl = DepSet.union bazooka to_redecl in
   let to_recheck = DepSet.union bazooka to_recheck in
-  let cid_hash = Typing_deps.Dep.make (Dep.Class cid) in
+  let cid_hash = Typing_deps.Dep.make dep in
   let to_redecl = Typing_deps.get_extend_deps trace cid_hash to_redecl in
-  to_redecl, to_recheck
+  add_changed changed dep, to_redecl, to_recheck
 
 let get_extend_deps cid_hash to_redecl =
   Typing_deps.get_extend_deps (ref DepSet.empty) cid_hash to_redecl
@@ -241,7 +244,7 @@ let get_extend_deps cid_hash to_redecl =
  * the old and the new type signature of "fid" (function identifier).
 *)
 (*****************************************************************************)
-let get_fun_deps old_funs fid (to_redecl, to_recheck) =
+let get_fun_deps old_funs fid (changed, to_redecl, to_recheck) =
   match SMap.find_unsafe fid old_funs, Decl_heap.Funs.get fid with
   (* Note that we must include all dependencies even if we get the None, None
    * case. Due to the fact we can declare types lazily, there may be no
@@ -250,97 +253,109 @@ let get_fun_deps old_funs fid (to_redecl, to_recheck) =
    * will also lack a definition of `foo`. Now we must recheck all the use
    * sites of `foo` to make sure there are no dangling references. *)
   | None, _ | _, None ->
-      let where_fun_is_used = Typing_deps.get_bazooka (Dep.Fun fid) in
+      let dep = Dep.Fun fid in
+      let where_fun_is_used = Typing_deps.get_bazooka dep in
       let to_recheck = DepSet.union where_fun_is_used to_recheck in
       let fun_name = Typing_deps.get_bazooka (Dep.FunName fid) in
-      DepSet.union fun_name to_redecl, DepSet.union fun_name to_recheck
+      add_changed changed dep,
+        DepSet.union fun_name to_redecl, DepSet.union fun_name to_recheck
   | Some fty1, Some fty2 ->
       let fty1 = Decl_pos_utils.NormalizeSig.fun_type fty1 in
       let fty2 = Decl_pos_utils.NormalizeSig.fun_type fty2 in
       let is_same_signature = fty1 = fty2 in
       if is_same_signature
-      then to_redecl, to_recheck
+      then changed, to_redecl, to_recheck
       else
         (* No need to add Dep.FunName stuff here -- we found a function with the
          * right name already otherwise we'd be in the None case above. *)
-        let where_fun_is_used = Typing_deps.get_bazooka (Dep.Fun fid) in
-        to_redecl, DepSet.union where_fun_is_used to_recheck
+        let dep = Dep.Fun fid in
+        let where_fun_is_used = Typing_deps.get_bazooka dep in
+        add_changed changed dep,
+          to_redecl, DepSet.union where_fun_is_used to_recheck
 
 let get_funs_deps old_funs funs =
-  SSet.fold (get_fun_deps old_funs) funs (DepSet.empty, DepSet.empty)
+  SSet.fold (get_fun_deps old_funs) funs (DepSet.empty, DepSet.empty, DepSet.empty)
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
  * the old and the new typedef
 *)
 (*****************************************************************************)
-let get_type_deps old_types tid to_recheck =
+let get_type_deps old_types tid (changed, to_recheck) =
   match SMap.find_unsafe tid old_types, Decl_heap.Typedefs.get tid with
   | None, _ | _, None ->
-      let bazooka = Typing_deps.get_bazooka (Dep.Class tid) in
-      DepSet.union bazooka to_recheck
+      let dep = Dep.Class tid in
+      let bazooka = Typing_deps.get_bazooka dep in
+      add_changed changed dep, DepSet.union bazooka to_recheck
   | Some tdef1, Some tdef2 ->
       let tdef1 = Decl_pos_utils.NormalizeSig.typedef tdef1 in
       let tdef2 = Decl_pos_utils.NormalizeSig.typedef tdef2 in
       let is_same_signature = tdef1 = tdef2 in
       if is_same_signature
-      then to_recheck
+      then changed, to_recheck
       else
-        let where_type_is_used = Typing_deps.get_ideps (Dep.Class tid) in
+        let dep = Dep.Class tid in
+        let where_type_is_used = Typing_deps.get_ideps dep in
         let to_recheck = DepSet.union where_type_is_used to_recheck in
-        to_recheck
+        add_changed changed dep, to_recheck
 
 let get_types_deps old_types types =
-  SSet.fold (get_type_deps old_types) types DepSet.empty
+  SSet.fold (get_type_deps old_types) types (DepSet.empty, DepSet.empty)
 
 (*****************************************************************************)
 (* Determine which top level definitions have to be rechecked if the constant
  * changed.
  *)
 (*****************************************************************************)
-let get_gconst_deps old_gconsts cst_id (to_redecl, to_recheck) =
+let get_gconst_deps old_gconsts cst_id (changed, to_redecl, to_recheck) =
   let cst1 = SMap.find_unsafe cst_id old_gconsts in
   let cst2 = Decl_heap.GConsts.get cst_id in
   match cst1, cst2 with
   | None, _ | _, None ->
-      let where_const_is_used = Typing_deps.get_bazooka (Dep.GConst cst_id) in
+      let dep = Dep.GConst cst_id in
+      let where_const_is_used = Typing_deps.get_bazooka dep in
       let to_recheck = DepSet.union where_const_is_used to_recheck in
       let const_name = Typing_deps.get_bazooka (Dep.GConstName cst_id) in
-      DepSet.union const_name to_redecl, DepSet.union const_name to_recheck
+      add_changed changed dep,
+        DepSet.union const_name to_redecl, DepSet.union const_name to_recheck
   | Some cst1, Some cst2 ->
       let is_same_signature = cst1 = cst2 in
       if is_same_signature
-      then to_redecl, to_recheck
+      then changed, to_redecl, to_recheck
       else
-        let where_type_is_used = Typing_deps.get_ideps (Dep.GConst cst_id) in
+        let dep = Dep.GConst cst_id in
+        let where_type_is_used = Typing_deps.get_ideps dep in
         let to_recheck = DepSet.union where_type_is_used to_recheck in
-        to_redecl, to_recheck
+        add_changed changed dep, to_redecl, to_recheck
 
 let get_gconsts_deps old_gconsts gconsts =
-  SSet.fold (get_gconst_deps old_gconsts) gconsts (DepSet.empty, DepSet.empty)
+  SSet.fold (get_gconst_deps old_gconsts) gconsts
+    (DepSet.empty, DepSet.empty, DepSet.empty)
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
  * the old and the new type signature of "cid" (class identifier).
 *)
 (*****************************************************************************)
-let get_class_deps old_classes new_classes trace cid (to_redecl, to_recheck) =
+let get_class_deps old_classes new_classes trace cid
+    (changed, to_redecl, to_recheck) =
   match SMap.find_unsafe cid old_classes, SMap.find_unsafe cid new_classes with
   | None, _ | _, None ->
-      get_all_dependencies trace cid (to_redecl, to_recheck)
+      get_all_dependencies trace cid (changed, to_redecl, to_recheck)
   | Some class1, Some class2 when class_big_diff class1 class2 ->
-      get_all_dependencies trace cid (to_redecl, to_recheck)
+      get_all_dependencies trace cid (changed, to_redecl, to_recheck)
   | Some class1, Some class2 ->
       let nclass1 = Decl_pos_utils.NormalizeSig.class_type class1 in
       let nclass2 = Decl_pos_utils.NormalizeSig.class_type class2 in
       let deps, is_unchanged = ClassDiff.compare cid nclass1 nclass2 in
-      let cid_hash = Typing_deps.Dep.make (Dep.Class cid) in
-      let to_redecl, to_recheck =
+      let dep = Dep.Class cid in
+      let cid_hash = Typing_deps.Dep.make dep in
+      let changed, to_redecl, to_recheck =
         if is_unchanged
         then
           let _, is_unchanged = ClassDiff.compare cid class1 class2 in
           if is_unchanged
-          then to_redecl, to_recheck
+          then changed, to_redecl, to_recheck
           else
             (* If we reach this case it means that class1 and class2
              * have the same signatures, but that some of their
@@ -349,7 +364,7 @@ let get_class_deps old_classes new_classes trace cid (to_redecl, to_recheck) =
             *)
             let to_redecl =
               Typing_deps.get_extend_deps trace cid_hash to_redecl in
-            to_redecl, to_recheck
+            changed, to_redecl, to_recheck
         else
           let to_redecl =
             Typing_deps.get_extend_deps trace cid_hash to_redecl in
@@ -357,7 +372,8 @@ let get_class_deps old_classes new_classes trace cid (to_redecl, to_recheck) =
           let to_recheck =
             DepSet.union (Typing_deps.get_ideps (Dep.AllMembers cid)) to_recheck
           in
-          DepSet.union deps to_redecl, DepSet.union deps to_recheck
+          add_changed changed dep,
+            DepSet.union deps to_redecl, DepSet.union deps to_recheck
       in
 
       (* This adds additional files to recheck if the type signature of a class
@@ -365,12 +381,13 @@ let get_class_deps old_classes new_classes trace cid (to_redecl, to_recheck) =
        * because the type is not folded in anyway so it won't affect any other
        * classes.
        *)
-      let deps, _ = ClassEltDiff.compare class1 class2 in
+      let deps, is_changed = ClassEltDiff.compare class1 class2 in
+      let changed = if is_changed = `Changed then add_changed changed dep else changed in
       (* TODO: should not need to add to to_redecl *)
-      DepSet.union deps to_redecl, DepSet.union deps to_recheck
+      changed, DepSet.union deps to_redecl, DepSet.union deps to_recheck
 
 let get_classes_deps old_classes new_classes classes =
   SSet.fold
     (get_class_deps old_classes new_classes (ref DepSet.empty))
     classes
-    (DepSet.empty, DepSet.empty)
+    (DepSet.empty, DepSet.empty, DepSet.empty)

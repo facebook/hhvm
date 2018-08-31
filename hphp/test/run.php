@@ -451,6 +451,7 @@ function get_options($argv) {
     'include:' => 'i:',
     'include-pattern:' => 'I:',
     '*repo' => 'r',
+    '*repo-single' => '',
     '*repo-threads:' => '',
     '*hhbbc2' => '',
     '*mode:' => 'm:',
@@ -562,7 +563,13 @@ function get_options($argv) {
     exit(1);
   }
 
-  if (isset($options['hhbbc2'])) $options['repo'] = true;
+  if (isset($options['hhbbc2']) || isset($options['repo-single'])) {
+    if (isset($options['hhbbc2']) && isset($options['repo-single'])) {
+      echo "repo-single and hhbbc2 are mutually exclusive options\n";
+      exit(1);
+    }
+    $options['repo'] = true;
+  }
 
   return array($options, $files);
 }
@@ -902,6 +909,10 @@ function hhvm_cmd_impl() {
   return $cmds[0];
 }
 
+function repo_single($options, $test) {
+  return isset($options['repo-single']) && !file_exists($test . ".hhbbc_opts");
+}
+
 // Return the command and the env to run it in.
 function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
   if ($test_run === null) {
@@ -961,8 +972,10 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
   }
 
   if (isset($options['repo'])) {
+    $repo_suffix = repo_single($options, $test) ? 'hhbc' : 'hhbbc';
+
     $program = isset($options['hackc']) ? "hackc" : "hhvm";
-    $hhbbc_repo = "\"$test.repo/$program.hhbbc\"";
+    $hhbbc_repo = "\"$test.repo/$program.$repo_suffix\"";
     $cmd .= ' -vRepo.Authoritative=true -vRepo.Commit=0';
     $cmd .= " -vRepo.Central.Path=$hhbbc_repo";
   }
@@ -1047,7 +1060,7 @@ function hphp_cmd($options, $test, $program) {
   return implode(" ", array(
     hhvm_path(),
     '--hphp',
-    '-vUseHHBBC=false',
+    '-vUseHHBBC='. (repo_single($options, $test) ? 'true' : 'false'),
     '--config',
     find_test_ext($test, 'ini', 'hphp_config'),
     '-vRuntime.ResourceLimit.CoreFileSize=0',
@@ -1144,7 +1157,7 @@ function exec_with_stack($cmd) {
 function repo_mode_compile($options, $test, $program) {
   $hphp = hphp_cmd($options, $test, $program);
   $result = exec_with_stack($hphp);
-  if ($result === true) {
+  if ($result === true && !repo_single($options, $test)) {
     $hhbbc = hhbbc_cmd($options, $test, $program);
     $result = exec_with_stack($hhbbc);
   }
@@ -2395,19 +2408,24 @@ function print_commands($tests, $options) {
     // How to run it with hhbbc:
     $program = isset($options['hackc']) ? "hackc" : "hhvm";
     $hhbbc_cmds = hphp_cmd($options, $test, $program)."\n";
-    $hhbbc_cmd  = hhbbc_cmd($options, $test, $program)."\n";
-    $hhbbc_cmds .= $hhbbc_cmd;
-    if (isset($options['hhbbc2'])) {
-      foreach ((array)$command as $c) {
-        $hhbbc_cmds .= $c." -vEval.DumpHhas=1 > $test.before.round_trip.hhas\n";
-      }
-      $hhbbc_cmds .= "mv $test.repo/$program.hhbbc $test.repo/$program.hhbc\n";
+    if (!repo_single($options, $test)) {
+      $hhbbc_cmd  = hhbbc_cmd($options, $test, $program)."\n";
       $hhbbc_cmds .= $hhbbc_cmd;
-      foreach ((array)$command as $c) {
-        $hhbbc_cmds .= $c." -vEval.DumpHhas=1 > $test.after.round_trip.hhas\n";
+      if (isset($options['hhbbc2'])) {
+        foreach ((array)$command as $c) {
+          $hhbbc_cmds .=
+            $c." -vEval.DumpHhas=1 > $test.before.round_trip.hhas\n";
+        }
+        $hhbbc_cmds .=
+          "mv $test.repo/$program.hhbbc $test.repo/$program.hhbc\n";
+        $hhbbc_cmds .= $hhbbc_cmd;
+        foreach ((array)$command as $c) {
+          $hhbbc_cmds .=
+            $c." -vEval.DumpHhas=1 > $test.after.round_trip.hhas\n";
+        }
+        $hhbbc_cmds .=
+          "diff $test.before.round_trip.hhas $test.after.round_trip.hhas\n";
       }
-      $hhbbc_cmds .=
-        "diff $test.before.round_trip.hhas $test.after.round_trip.hhas\n";
     }
     if (isset($options['jit-serialize'])) {
       $hhbbc_cmds .=

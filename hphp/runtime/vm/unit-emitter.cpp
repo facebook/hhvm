@@ -322,7 +322,7 @@ using SrcLoc = std::vector<std::pair<Offset, SourceLoc>>;
 /*
  * Create a LineTable from `srcLoc'.
  */
-LineTable createLineTable(SrcLoc& srcLoc, Offset bclen) {
+LineTable createLineTable(const SrcLoc& srcLoc, Offset bclen) {
   LineTable lines;
   if (srcLoc.empty()) {
     return lines;
@@ -550,8 +550,11 @@ bool UnitEmitter::check(bool verbose) const {
   );
 }
 
-std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
+std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   INC_TPC(unit_load);
+
+  assertx(m_fMap.empty());
+  SCOPE_EXIT { m_fMap.clear(); };
 
   static const bool kVerify = debug || RuntimeOption::EvalVerify ||
     RuntimeOption::EvalVerifyOnly || RuntimeOption::EvalFatalOnVerifyError;
@@ -751,8 +754,6 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
               [] (const Func* a, const Func* b) {
                 return a->past() < b->past();
               });
-
-    m_fMap.clear();
   } else {
     assertx(!m_litstrs.size());
     assertx(m_arrayTypeTable.empty());

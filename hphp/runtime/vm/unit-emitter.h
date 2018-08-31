@@ -85,7 +85,7 @@ struct UnitEmitter {
   /*
    * Instatiate a runtime Unit*.
    */
-  std::unique_ptr<Unit> create(bool saveLineTable = false);
+  std::unique_ptr<Unit> create(bool saveLineTable = false) const;
 
   template<class SerDe> void serdeMetaData(SerDe&);
 
@@ -441,8 +441,6 @@ private:
    * FuncEmitter tables.
    */
   std::vector<FuncEmitter*> m_fes;
-  hphp_hash_map<const FuncEmitter*, Func*,
-                pointer_hash<FuncEmitter>> m_fMap;
 
   /*
    * PreClassEmitter table.
@@ -477,8 +475,21 @@ private:
    * format we'll want it in when we go to create a Unit.
    */
   std::vector<std::pair<Offset,SourceLoc>> m_sourceLocTab;
-  std::vector<const FuncEmitter*> m_feTab;
   LineTable m_lineTable;
+
+  /*
+   * A list of all functions and methods; used to generate
+   * Unit::m_funcTable.
+   */
+  std::vector<const FuncEmitter*> m_feTab;
+
+  /*
+   * Used during create to keep track of the Func that each
+   * FuncEmitter created.
+   */
+  mutable hphp_hash_map<const FuncEmitter*, Func*,
+                        pointer_hash<FuncEmitter>> m_fMap;
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////

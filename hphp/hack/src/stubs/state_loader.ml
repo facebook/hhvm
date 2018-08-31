@@ -29,5 +29,11 @@ let fetch_mini_state
   ~config_hash:_
   _ = raise Not_supported
 
-let mk_state_future ~config:_ ~use_canary:_ ?mini_state_handle:_ ~config_hash:_ ~tiny:_ _ =
-  raise Not_supported
+let mk_state_future
+  ~config:_
+  ~use_canary:_
+  ?mini_state_handle:_
+  ~config_hash:_
+  ~tiny:_ _
+  ~use_prechecked_files:_
+  = raise Not_supported

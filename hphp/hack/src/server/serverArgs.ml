@@ -105,22 +105,23 @@ let parse_mini_state_json (json, _keytrace) =
   let json = Hh_json.Access.return json in
   let open Hh_json.Access in
   json >>= get_string "state" >>= fun (state, _state_keytrace) ->
-    json >>= get_string "corresponding_base_revision"
-      >>= fun (for_base_rev, _for_base_rev_keytrace) ->
-    json >>= get_string "deptable" >>= fun (deptable, _deptable_keytrace) ->
-    json >>= get_array "changes" >>= fun (changes, _) ->
-      let changes = List.fold_left
-        (fun acc file -> (Hh_json.get_string_exn file) :: acc) [] changes in
-      let changes = List.map Relative_path.from_root changes in
-      return (Mini_state_target_info {
-        saved_state_fn = state;
-        corresponding_base_revision = for_base_rev;
-        deptable_fn = deptable;
-        (* TODO: prechecked changes are a work in progress, only used in
-         * tests *)
-        prechecked_changes = [];
-        changes = changes;
-      })
+  json >>= get_string "corresponding_base_revision"
+    >>= fun (for_base_rev, _for_base_rev_keytrace) ->
+  json >>= get_string "deptable" >>= fun (deptable, _deptable_keytrace) ->
+  json >>= get_array "prechecked_changes" >>= fun (prechecked_changes, _) ->
+  json >>= get_array "changes" >>= fun (changes, _) ->
+    let array_to_path_list = List.map
+      (fun file -> Hh_json.get_string_exn file |> Relative_path.from_root)
+    in
+    let prechecked_changes = array_to_path_list prechecked_changes in
+    let changes = array_to_path_list changes in
+    return (Mini_state_target_info {
+      saved_state_fn = state;
+      corresponding_base_revision = for_base_rev;
+      deptable_fn = deptable;
+      prechecked_changes;
+      changes;
+    })
 
 let verify_with_mini_state v = match !v with
   | None -> None

@@ -22,6 +22,7 @@ let intersect_with_master_deps ~deps ~dirty_master_deps =
   more_deps, dirty_master_deps
 
 let update_rechecked_files env rechecked =
+  let t = Unix.gettimeofday () in
   let add_rechecked dirty_deps =
     let rechecked_files = Relative_path.Map.fold rechecked
       ~init:dirty_deps.rechecked_files
@@ -31,12 +32,15 @@ let update_rechecked_files env rechecked =
     in
     { dirty_deps with rechecked_files }
   in
-  set env @@ match env.prechecked_files with
+  let env = set env @@ match env.prechecked_files with
   | Prechecked_files_disabled -> Prechecked_files_disabled
   | Initial_typechecking dirty_deps ->
     Initial_typechecking (add_rechecked dirty_deps)
   | Prechecked_files_ready dirty_deps ->
     Prechecked_files_ready (add_rechecked dirty_deps)
+  in
+  HackEventLogger.prechecked_update_rechecked t;
+  env
 
 let update_after_recheck env rechecked =
   let env = update_rechecked_files env rechecked in
@@ -47,6 +51,7 @@ let update_after_recheck env rechecked =
       rechecked_files;
       clean_local_deps;
     } ->
+    let t = Unix.gettimeofday () in
     assert (Typing_deps.DepSet.is_empty clean_local_deps);
     Hh_logger.log "Finished rechecking dirty files, evaluating their fanout";
     let deps = Typing_deps.add_all_deps dirty_local_deps in
@@ -58,15 +63,17 @@ let update_after_recheck env rechecked =
     let needs_recheck = Typing_deps.get_files deps in
     let needs_recheck = Relative_path.Set.diff needs_recheck rechecked_files in
 
-    let env = if Relative_path.Set.is_empty needs_recheck then env else begin
-      Hh_logger.log "Adding %d files to recheck"
-        (Relative_path.Set.cardinal needs_recheck);
+    let size = Relative_path.Set.cardinal needs_recheck in
+    let env = if size = 0 then env else begin
+      Hh_logger.log "Adding %d files to recheck" size;
       let full_check = Full_check_started in
       let init_env = { env.init_env with needs_full_init = true } in
       { env with needs_recheck; full_check; init_env }
     end in
     let clean_local_deps = dirty_local_deps in
     let dirty_local_deps = Typing_deps.DepSet.empty in
+    HackEventLogger.prechecked_evaluate_init t size;
+
     set env (Prechecked_files_ready {
       dirty_local_deps;
       dirty_master_deps;
@@ -85,6 +92,7 @@ let update_after_local_changes env changes =
   | Prechecked_files_ready dirty_deps ->
     let changes = Typing_deps.DepSet.diff changes dirty_deps.clean_local_deps in
     if Typing_deps.DepSet.is_empty changes then env else
+    let t = Unix.gettimeofday () in
     let clean_local_deps =
       Typing_deps.DepSet.union dirty_deps.clean_local_deps changes in
     let changes = Typing_deps.add_all_deps changes in
@@ -94,13 +102,14 @@ let update_after_local_changes env changes =
     let needs_recheck = Typing_deps.get_files deps in
     let needs_recheck =
       Relative_path.Set.diff needs_recheck dirty_deps.rechecked_files in
-    let env = if Relative_path.Set.is_empty needs_recheck then env else begin
-      Hh_logger.log "Adding %d files to recheck"
-        (Relative_path.Set.cardinal needs_recheck);
+    let size = Relative_path.Set.cardinal needs_recheck in
+    let env = if size = 0 then env else begin
+      Hh_logger.log "Adding %d files to recheck" size;
       let needs_recheck =
         Relative_path.Set.union env.needs_recheck needs_recheck in
       { env with needs_recheck;}
     end in
+    HackEventLogger.prechecked_evaluate_incremental t size;
     set env (Prechecked_files_ready { dirty_deps with
       dirty_master_deps;
       clean_local_deps;

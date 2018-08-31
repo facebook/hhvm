@@ -759,9 +759,18 @@ void Vgen::emit(const mcprep& i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const call& i) {
-  recordAddressImmediate();
-  a->Mov(rAsm, reinterpret_cast<uint64_t>(i.target));
-  a->Blr(rAsm);
+  // If target can be addressed by pc relative offset (signed 26 bits), emit
+  // PC relative Branch and Link. Else, emit target address into code and load
+  // from there.
+  auto diff = (i.target - a->frontier()) >> vixl::kInstructionSizeLog2;
+  if (vixl::is_int26(diff)) {
+    recordAddressImmediate();
+    a->bl(diff);
+  } else {
+    recordAddressImmediate();
+    a->Mov(rAsm, i.target);
+    a->Blr(rAsm);
+  }
   if (i.watch) {
     *i.watch = a->frontier();
     env.meta.watchpoints.push_back(i.watch);

@@ -433,20 +433,29 @@ module ServerInitCommon = struct
    * similar_files: we only need to typecheck these,
    *    not their dependencies since their decl are unchanged
    **)
-  let type_check_dirty genv env old_fast fast dirty_files similar_files t =
+  let type_check_dirty genv env old_fast fast
+      dirty_master_files dirty_local_files similar_files t =
+    let dirty_files =
+      Relative_path.Set.union dirty_master_files dirty_local_files in
     let start_t = Unix.gettimeofday () in
     let fast = get_dirty_fast old_fast fast dirty_files in
-    let names = Relative_path.Map.fold fast ~f:begin fun _k v acc ->
-      FileInfo.merge_names v acc
+    let names s = Relative_path.Map.fold fast ~f:begin fun k v acc ->
+      if Relative_path.Set.mem s k then FileInfo.merge_names v acc
+      else acc
     end ~init:FileInfo.empty_names in
-    let deps = names_to_deps names in
+    let master_deps = names dirty_master_files |> names_to_deps in
+    let local_deps = names dirty_local_files |> names_to_deps in
+    (* TODO: need to remember those and use when going from
+     * Initial_typechecking to Prechecked_files_ready *)
+    ignore master_deps;
 
     let env, to_recheck = if use_prechecked_files genv then begin
-      ServerPrecheckedFiles.set env (Initial_typechecking { dirty_local_deps = deps }),
+      ServerPrecheckedFiles.set env (Initial_typechecking { dirty_local_deps = local_deps }),
       (* Start with dirty files only *)
       Relative_path.Set.empty
     end else begin
       (* Start with full fan-out immediately *)
+      let deps = Typing_deps.DepSet.union master_deps local_deps in
       let deps = Typing_deps.add_all_deps deps in
       let to_recheck = Typing_deps.get_files deps in
       env, to_recheck
@@ -619,7 +628,12 @@ module ServerEagerInit : InitKind = struct
         disk_needs_parsing =
           Relative_path.Set.union env.disk_needs_parsing changed_while_parsing;
       } in
-      type_check_dirty genv env old_fast fast dirty_files Relative_path.Set.empty t, state
+
+      let dirty_master_files = Relative_path.Set.empty in
+      let similar_files = Relative_path.Set.empty in
+
+      type_check_dirty genv env old_fast fast
+        dirty_master_files dirty_files similar_files t, state
     | Error err ->
       (* Fall back to type-checking everything *)
       SharedMem.cleanup_sqlite ();
@@ -657,13 +671,15 @@ module ServerLazyInit : InitKind = struct
 
     match state with
     | Ok ({
-        dirty_local_files = dirty_files;
+        dirty_local_files;
         dirty_master_files;
         old_saved;
         _},
       changed_while_parsing) ->
-      (* TODO: not implemented *)
-      assert (Relative_path.Set.is_empty dirty_master_files);
+
+      (* Parse and name all dirty files uniformly *)
+      let dirty_files =
+        Relative_path.Set.union dirty_master_files dirty_local_files in
       let build_targets, tracked_targets = get_build_targets env in
       Hh_logger.log "Successfully loaded mini-state";
       let t = Unix.gettimeofday () in
@@ -726,7 +742,7 @@ module ServerLazyInit : InitKind = struct
       on the file have not changed and we only need to retypecheck that file,
       not all of its dependencies.
       We call these files "similar" to their previous versions. *)
-      let similar_files, dirty_files = Relative_path.Set.partition
+      let partition_similar dirty_files = Relative_path.Set.partition
       (fun f ->
           let info1 = Relative_path.Map.get old_info f in
           let info2 = Relative_path.Map.get env.files_info f in
@@ -741,6 +757,14 @@ module ServerLazyInit : InitKind = struct
             false
         ) dirty_files in
 
+     let similar_master_files, dirty_master_files =
+       partition_similar dirty_master_files in
+     let similar_local_files, dirty_local_files =
+       partition_similar dirty_local_files in
+
+     let similar_files =
+       Relative_path.Set.union similar_master_files similar_local_files in
+
       let env = { env with
         files_info=Relative_path.Map.union env.files_info old_info;
       } in
@@ -749,7 +773,8 @@ module ServerLazyInit : InitKind = struct
 
       let t = update_search genv old_saved t in
 
-      type_check_dirty genv env old_fast fast dirty_files similar_files t, state
+      type_check_dirty genv env old_fast fast
+        dirty_master_files dirty_local_files similar_files t, state
     | Error err ->
       (* Fall back to type-checking everything *)
       fallback_init genv env err, state

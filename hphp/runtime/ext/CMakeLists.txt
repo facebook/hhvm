@@ -50,7 +50,7 @@ auto_source_group("hphp_runtime_ext" "${CMAKE_CURRENT_SOURCE_DIR}"
   ${ASM_SOURCES} ${C_SOURCES} ${CXX_SOURCES} ${HEADER_SOURCES})
 add_dependencies(hphp_runtime_ext hphp_runtime_static)
 if (ENABLE_ASYNC_MYSQL)
-  add_dependencies(hphp_runtime_ext webscalesqlclient squangle)
+  add_dependencies(hphp_runtime_ext fbmysqlclient squangle)
 endif ()
 object_library_ld_link_libraries(hphp_runtime_ext hphp_zend ${HRE_LINK_LIBRARIES})
 object_library_hphp_link(hphp_runtime_ext)

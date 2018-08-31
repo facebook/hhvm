@@ -1,0 +1,57 @@
+From ce1dee7e5be6df81ca775b2cff39f0751c4a340e Mon Sep 17 00:00:00 2001
+From: Fred Emmott <fe@fb.com>
+Date: Thu, 30 Aug 2018 10:47:43 -0700
+Subject: [PATCH] Don't require readline + zstd if not building client+server
+
+e.g. HHVM is just building the client library, so:
+- doesn't need either
+- **must not** link against readline
+
+HHVM has previously been patching the CMake file to remove the readline
+dependency, but lets' end that.
+---
+ CMakeLists.txt | 16 +++++++++++-----
+ 1 file changed, 11 insertions(+), 5 deletions(-)
+
+diff --git a/third-party/fb-mysql/src/CMakeLists.txt b/third-party/fb-mysql/src/CMakeLists.txt
+index 66cb9db7cd..49d1a489f0 100644
+--- a/third-party/fb-mysql/src/CMakeLists.txt
++++ b/third-party/fb-mysql/src/CMakeLists.txt
+@@ -176,7 +176,6 @@ INCLUDE(zlib)
+ INCLUDE(zstd)
+ INCLUDE(libevent)
+ INCLUDE(ssl)
+-INCLUDE(readline)
+ INCLUDE(mysql_version)
+ INCLUDE(libutils)
+ INCLUDE(dtrace)
+@@ -503,15 +502,22 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/include)
+ 
+ # Add bundled or system zlib.
+ MYSQL_CHECK_ZLIB_WITH_COMPRESS()
+-# Add zstd.
+-MYSQL_CHECK_ZSTD()
+ # Add bundled yassl/taocrypt or system openssl.
+ MYSQL_CHECK_SSL()
+-# Find system readline.
+-MYSQL_CHECK_READLINE()
+ # Add libevent
+ MYSQL_CHECK_LIBEVENT()
+ 
++IF(NOT WITHOUT_SERVER)
++  # Add zstd.
++  MYSQL_CHECK_ZSTD()
++  # Find system readline.
++  # If we're not building the server, we also don't build the CLI client tools
++  # so don't need it. If we're building a library without anything else,
++  # readline is unneccessary, and as it's GPL, potentially causes license
++  # issues.
++  MYSQL_CHECK_READLINE()
++ENDIF()
++
+ #
+ # Setup maintainer mode options by the end. Platform checks are
+ # not run with the warning options as to not perturb fragile checks
+-- 
+2.13.5
+

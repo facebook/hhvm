@@ -73,6 +73,7 @@ type client_check_env = {
   ignore_hh_version: bool;
   dynamic_view: bool;
   sort_results: bool;
+  prechecked : bool option;
 }
 
 let mode_to_string = function

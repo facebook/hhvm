@@ -7,6 +7,8 @@
  *
  *)
 
+val should_use: ServerArgs.options -> ServerLocalConfig.t -> bool
+
 val set:
   ServerEnv.env -> ServerEnv.prechecked_files_status -> ServerEnv.env
 

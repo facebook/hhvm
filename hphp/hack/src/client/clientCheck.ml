@@ -87,6 +87,7 @@ let connect ?(use_priority_pipe=false) args =
     do_post_handoff_handshake = true;
     ignore_hh_version = args.ignore_hh_version;
     use_priority_pipe;
+    prechecked = args.prechecked;
   }
 
 let rpc args command =

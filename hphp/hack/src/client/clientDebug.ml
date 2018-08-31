@@ -27,6 +27,7 @@ let main env =
     do_post_handoff_handshake = true;
     ignore_hh_version = false;
     use_priority_pipe = false;
+    prechecked = None;
   } in
   ServerCommand.connect_debug oc;
   (* Exit this via ctrl-C *)

@@ -9,6 +9,10 @@
 
 open ServerEnv
 
+let should_use options local_config =
+  Option.value (ServerArgs.prechecked options)
+    ~default:local_config.ServerLocalConfig.prechecked_files
+
 let set env prechecked_files = { env with prechecked_files }
 
 let intersect_with_master_deps ~deps ~dirty_master_deps =

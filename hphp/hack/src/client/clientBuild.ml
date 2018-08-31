@@ -79,6 +79,7 @@ let main_exn env =
     do_post_handoff_handshake = true;
     ignore_hh_version = false;
     use_priority_pipe = false;
+    prechecked = None;
   } in
   let old_svnrev = Option.try_with begin fun () ->
     Sys_utils.read_file ServerBuild.svnrev_path

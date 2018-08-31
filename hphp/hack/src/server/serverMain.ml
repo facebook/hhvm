@@ -834,7 +834,7 @@ let setup_server ~informant_managed ~monitor_pid options handle =
   let use_sql =
     LoadScriptConfig.use_sql load_script_config in
   let devinfra_saved_state_lookup = local_config.ServerLocalConfig.devinfra_saved_state_lookup in
-  let prechecked_files = local_config.ServerLocalConfig.prechecked_files in
+  let prechecked_files = ServerPrecheckedFiles.should_use options local_config in
   if Sys_utils.is_test_mode ()
   then EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0
   else HackEventLogger.init

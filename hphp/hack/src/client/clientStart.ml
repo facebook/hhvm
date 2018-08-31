@@ -29,6 +29,7 @@ type env = {
   debug_port: Unix.file_descr option;
   ignore_hh_version : bool;
   dynamic_view : bool;
+  prechecked : bool option;
 }
 
 let start_server env =
@@ -59,6 +60,8 @@ let start_server env =
       [| "--waiting-client"; string_of_int (Handle.get_handle out_fd) |];
       if env.ignore_hh_version then [| "--ignore-hh-version" |] else [||];
       if env.dynamic_view then [| "--dynamic-view"|] else [||];
+      if env.prechecked = Some true then [| "--prechecked" |] else [||];
+      if env.prechecked = Some false then [| "--no-prechecked" |] else [||];
       match env.debug_port with
         | None -> [| |]
         | Some fd ->

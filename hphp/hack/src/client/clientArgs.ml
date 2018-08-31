@@ -35,6 +35,14 @@ module Common_argspecs = struct
     ("--from",
       Arg.Set_string value_ref,
       " so we know who's calling hh_client - e.g. nuclide, vim, emacs, vscode")
+
+  let prechecked value_ref =
+    "--prechecked", Arg.Unit (fun () -> value_ref := Some true),
+    " override value of \"prechecked_files\" flag from hh.conf"
+
+  let no_prechecked value_ref =
+    "--no-prechecked", Arg.Unit (fun () -> value_ref := Some false),
+    " override value of \"prechecked_files\" flag from hh.conf"
 end
 
 
@@ -86,6 +94,7 @@ let parse_check_args cmd =
   let ignore_hh_version = ref false in
   let dynamic_view = ref false in
   let sort_results = ref false in
+  let prechecked = ref None in
 
   (* custom behaviors *)
   let set_from x () = from := x in
@@ -424,6 +433,8 @@ let parse_check_args cmd =
     "--sort-results",
       Arg.Set sort_results,
       " sort output for CST search.";
+    Common_argspecs.prechecked prechecked;
+    Common_argspecs.no_prechecked prechecked;
 
     (* deprecated *)
     "--retry-if-init",
@@ -496,6 +507,7 @@ let parse_check_args cmd =
     ignore_hh_version = !ignore_hh_version;
     dynamic_view = !dynamic_view;
     sort_results = !sort_results;
+    prechecked = !prechecked;
   }
 
 let parse_start_env command =
@@ -510,6 +522,7 @@ let parse_start_env command =
   let profile_log = ref false in
   let ai_mode = ref None in
   let ignore_hh_version = ref false in
+  let prechecked = ref None in
   let wait_deprecation_msg () = Printf.eprintf
     "WARNING: --wait is deprecated, does nothing, and will be going away \
      soon!\n%!" in
@@ -525,6 +538,8 @@ let parse_start_env command =
     "  run ai with options ";
     "--ignore-hh-version", Arg.Set ignore_hh_version,
       " ignore hh_version check when loading saved states (default: false)";
+    Common_argspecs.prechecked prechecked;
+    Common_argspecs.no_prechecked prechecked;
   ] in
   let args = parse_without_command options usage command in
   let root =
@@ -546,6 +561,7 @@ let parse_start_env command =
     debug_port = None;
     ignore_hh_version = !ignore_hh_version;
     dynamic_view = false;
+    prechecked = !prechecked;
   }
 
 let parse_start_args () =

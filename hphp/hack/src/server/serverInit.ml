@@ -132,7 +132,7 @@ module ServerInitCommon = struct
     let native_load_error e = raise (Native_loader_failure (State_loader.error_string e)) in
     let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
     let devinfra_saved_state_lookup = genv.local_config.SLC.devinfra_saved_state_lookup in
-    let use_prechecked_files = genv.local_config.SLC.prechecked_files in
+    let use_prechecked_files = ServerPrecheckedFiles.should_use genv.options genv.local_config in
     State_loader.mk_state_future ~config:genv.local_config.SLC.state_loader_timeouts
       ~devinfra_saved_state_lookup
       ~use_canary ?mini_state_handle
@@ -352,7 +352,7 @@ module ServerInitCommon = struct
   (* Prechecked files are gated with a flag and not supported in AI/check/saving
    * of saved state modes. *)
   let use_prechecked_files genv =
-    genv.local_config.ServerLocalConfig.prechecked_files &&
+    ServerPrecheckedFiles.should_use genv.options genv.local_config &&
     ServerArgs.ai_mode genv.options = None &&
     (not @@ is_check_mode genv.options) &&
     ServerArgs.save_filename genv.options = None

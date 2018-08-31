@@ -1585,6 +1585,7 @@ let rec connect_client
       do_post_handoff_handshake = false;
       ignore_hh_version = false;
       use_priority_pipe = true;
+      prechecked = None;
     } in
   try
     let ClientConnect.{channels = ic, oc; _} =
@@ -1658,6 +1659,7 @@ let start_server (root: Path.t) : unit =
       debug_port = None;
       ignore_hh_version = false;
       dynamic_view = !cached_toggle_state;
+      prechecked = None;
     } in
   let _exit_status = ClientStart.main env_start in
   ()

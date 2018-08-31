@@ -54,6 +54,7 @@ module type S = sig
   val file_info_on_disk   : options -> bool
   val dynamic_view        : options -> bool
   val gen_saved_ignore_type_errors  : options -> bool
+  val prechecked          : options -> bool option
 
   (****************************************************************************)
   (* Setters *)

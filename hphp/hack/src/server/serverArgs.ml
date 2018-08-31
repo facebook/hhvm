@@ -33,6 +33,7 @@ type options = {
   file_info_on_disk : bool;
   dynamic_view      : bool;
   gen_saved_ignore_type_errors : bool;
+  prechecked       : bool option;
 }
 
 (*****************************************************************************)
@@ -86,6 +87,7 @@ module Messages = struct
   let file_info_on_disk = " [experimental] store file-info in sqlite db."
   let dynamic_view      = " start with dynamic view for IDE files on by default."
   let gen_saved_ignore_type_errors = " generate a saved state even if there are type errors."
+  let prechecked = " override value of \"prechecked_files\" flag from hh.conf"
 end
 
 let print_json_version () =
@@ -200,6 +202,7 @@ let parse_options () =
   let set_wait      = fun fd ->
     waiting_client := Some (Handle.wrap_handle fd) in
   let set_with_mini_state = fun s -> with_mini_state := Some s in
+  let prechecked = ref None in
   let options =
     ["--debug"         , Arg.Set debug           , Messages.debug;
      "--ai"            , Arg.String set_ai       , Messages.ai;
@@ -228,6 +231,10 @@ let parse_options () =
      "--file-info-on-disk", Arg.Set file_info_on_disk , Messages.file_info_on_disk;
      "--dynamic-view", Arg.Set dynamic_view,     Messages.dynamic_view;
      "--gen-saved-ignore-type-errors", Arg.Set gen_saved_ignore_type_errors, Messages.gen_saved_ignore_type_errors;
+     "--prechecked",    Arg.Unit (fun () -> prechecked := Some true),
+      Messages.prechecked;
+     "--no-prechecked", Arg.Unit (fun () -> prechecked := Some false),
+      Messages.prechecked;
     ] in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
@@ -284,6 +291,7 @@ let parse_options () =
     file_info_on_disk = !file_info_on_disk;
     dynamic_view      = !dynamic_view;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
+    prechecked = !prechecked;
   }
 
 (* useful in testing code *)
@@ -307,6 +315,7 @@ let default_options ~root = {
   file_info_on_disk = false;
   dynamic_view = false;
   gen_saved_ignore_type_errors = false;
+  prechecked = None;
 }
 
 (*****************************************************************************)
@@ -332,6 +341,7 @@ let ignore_hh_version options = options.ignore_hh_version
 let file_info_on_disk options = options.file_info_on_disk
 let dynamic_view options = options.dynamic_view
 let gen_saved_ignore_type_errors options = options.gen_saved_ignore_type_errors
+let prechecked options = options.prechecked
 
 (*****************************************************************************)
 (* Setters *)
@@ -369,6 +379,7 @@ let to_string
     file_info_on_disk;
     dynamic_view;
     gen_saved_ignore_type_errors;
+    prechecked;
   } =
     let ai_mode_str = match ai_mode with
       | None -> "<>"
@@ -385,6 +396,9 @@ let to_string
     let save_filename_str = match save_filename with
       | None -> "<>"
       | Some path -> path in
+    let prechecked_str = match prechecked with
+      | None -> "<>"
+      | Some b -> string_of_bool b in
     ([
       "ServerArgs.options({";
       "json_mode: "; string_of_bool json_mode; ", ";
@@ -404,7 +418,8 @@ let to_string
       "watchman_debug_logging: "; string_of_bool watchman_debug_logging; ", ";
       "ignore_hh_version: "; string_of_bool ignore_hh_version; ", ";
       "file_info_on_disk: "; string_of_bool file_info_on_disk; ", ";
-      "dynamic_view: "; string_of_bool dynamic_view;
-      "gen_saved_ignore_type_errors: "; string_of_bool gen_saved_ignore_type_errors;
+      "dynamic_view: "; string_of_bool dynamic_view; ", ";
+      "gen_saved_ignore_type_errors: "; string_of_bool gen_saved_ignore_type_errors; ", ";
+      "prechecked: "; prechecked_str;
       "})"
     ] |> String.concat "")

@@ -104,7 +104,9 @@ HEADER_DIRS=\
   $(ROOT)/heap
 
 NATIVE_C_FILES=\
+  heap/hh_assert.c\
   heap/hh_shared.c\
+  heap/hh_shared_sqlite.c\
   libancillary/libancillary-stubs.c\
   third-party/libancillary/fd_recv.c\
   third-party/libancillary/fd_send.c\

@@ -40,15 +40,15 @@ if (LIBINOTIFY_INCLUDE_DIR)
   include_directories(${LIBINOTIFY_INCLUDE_DIR})
 endif()
 
-# mysql checks - if we're using async mysql, we use webscalesqlclient from
+# mysql checks - if we're using async mysql, we use fbmysqlclient from
 # third-party/ instead
 if (ENABLE_ASYNC_MYSQL)
   include_directories(
     ${RE2_INCLUDE_DIR}
     ${TP_DIR}/squangle/src/
-    ${TP_DIR}/webscalesqlclient/src/include/
+    ${TP_DIR}/fb-mysql/src/include/
   )
-  set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/webscalesqlclient/src/)
+  set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/fb-mysql/src/)
   set(MYSQL_CLIENT_LIBS
     ${MYSQL_CLIENT_LIB_DIR}/libmysql/libfbmysqlclient_r.a
   )

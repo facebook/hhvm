@@ -6405,7 +6405,7 @@ and safely_refine_class_type
   env, obj_ty_simplified
 
 and is_instance_var = function
-  | _, (Lvar _ | This) -> true
+  | _, (Lvar _ | This | Dollardollar _) -> true
   | _, Obj_get ((_, This), (_, Id _), _) -> true
   | _, Obj_get ((_, Lvar _), (_, Id _), _) -> true
   | _, Class_get (_, _) -> true
@@ -6418,6 +6418,7 @@ and get_instance_var env = function
   | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
     let env, local = Env.FakeMembers.make p env obj member_name in
     env, (p, local)
+  | _, Dollardollar (p, x)
   | _, Lvar (p, x) -> env, (p, x)
   | p, This -> env, (p, this)
   | _ -> failwith "Should only be called when is_instance_var is true"

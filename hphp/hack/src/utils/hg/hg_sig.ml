@@ -63,9 +63,11 @@ module type S = sig
     val current_working_copy_base_rev_returns : svn_rev Future.t -> unit
     val reset_current_working_copy_base_rev_returns : unit -> unit
     val closest_svn_ancestor_bind_value : hg_rev -> svn_rev Future.t -> unit
-    val files_changed_since_rev_returns : (string list) Future.t -> unit
+    val files_changed_since_rev_returns :
+      rev:rev -> (string list) Future.t -> unit
     val files_changed_since_rev_to_rev_returns :
       start:rev -> finish:rev -> (string list) Future.t -> unit
     val reset_files_changed_since_rev_to_rev_returns : unit -> unit
+    val reset_files_changed_since_rev_returns : unit -> unit
   end
 end

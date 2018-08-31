@@ -13,7 +13,7 @@
  * have the proper type, and restricts what types can be used for enums.
  *)
 (*****************************************************************************)
-open Hh_core
+open Core_kernel
 open Nast
 open Typing_defs
 open Utils

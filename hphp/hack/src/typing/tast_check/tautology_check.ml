@@ -7,6 +7,9 @@
  *
  *)
 
+[@@@warning "-33"]
+open Core_kernel
+[@@@warning "+33"]
 open Ast_defs
 open Tast
 

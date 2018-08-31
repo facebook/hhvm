@@ -7,7 +7,10 @@
  *
  *)
 
-open Hh_core
+[@@@warning "-33"]
+open Core_kernel
+[@@@warning "+33"]
+open Common
 open Typing_defs
 
 module Env = Typing_env

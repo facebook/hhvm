@@ -7,6 +7,9 @@
  *
  *)
 
+[@@@warning "-33"]
+open Core_kernel
+[@@@warning "+33"]
 open Aast_defs
 open Tast
 open Typing_defs

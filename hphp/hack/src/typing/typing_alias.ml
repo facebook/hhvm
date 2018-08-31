@@ -31,7 +31,8 @@
  *)
 (*****************************************************************************)
 
-open Hh_core
+open Core_kernel
+open Common
 open Nast
 
 module Env = Typing_env
@@ -49,7 +50,7 @@ module Env = Typing_env
 module Dep = struct
 
   let add x1 x2 acc =
-    let prev = try SMap.find_unsafe x1 acc with Not_found -> [] in
+    let prev = try SMap.find_unsafe x1 acc with Caml.Not_found -> [] in
     SMap.add x1 (x2 :: prev) acc
 
   let get key acc =

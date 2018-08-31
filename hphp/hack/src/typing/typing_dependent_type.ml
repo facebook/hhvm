@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Typing_defs
 
 module ExprDepTy = struct

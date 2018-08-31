@@ -7,12 +7,12 @@
  *
  *)
 
+open Core_kernel
 module TUtils = Typing_utils
 module N = Nast
 module Reason = Typing_reason
 module Env = Typing_env
 open Typing_defs
-open Hh_core
 
 let check_constraint env ck cstr_ty ty =
   let env, ety = Env.expand_type env ty in

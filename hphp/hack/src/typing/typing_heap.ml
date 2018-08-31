@@ -7,6 +7,8 @@
  *
  *)
 
+open Core_kernel
+
 module type ReadOnly = sig
   type key
   type t
@@ -47,7 +49,7 @@ module Classes = struct
 
   let find_unsafe key =
     match get key with
-    | None -> raise Not_found
+    | None -> raise Caml.Not_found
     | Some x -> x
 
   let mem key =

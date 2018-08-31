@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 
 let (id_hooks: (Pos.t * string -> Typing_env.env -> unit) list ref) = ref []
 

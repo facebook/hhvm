@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 open Typing_defs
 module T = Tast
 
@@ -49,7 +50,7 @@ let expand_ty env ty =
     | (p, Tanon(x, y)) -> (p, Tanon(x,y))
     | (p, Terr) -> (p, Terr)
 
-  and exp_tys tyl = List.map exp_ty tyl
+  and exp_tys tyl = List.map ~f:exp_ty tyl
 
   and exp_fun_type { ft_pos; ft_deprecated; ft_arity; ft_abstract; ft_tparams;
                      ft_where_constraints; ft_ret; ft_params;
@@ -59,10 +60,10 @@ let expand_ty env ty =
                      ft_returns_void_to_rx } =
   { ft_pos; ft_deprecated; ft_arity; ft_abstract; ft_reactive; ft_is_coroutine;
     ft_return_disposable; ft_ret_by_ref; ft_mutability; ft_returns_mutable;
-    ft_tparams = List.map exp_tparam ft_tparams;
-    ft_where_constraints = List.map exp_where_constraint ft_where_constraints;
+    ft_tparams = List.map ~f:exp_tparam ft_tparams;
+    ft_where_constraints = List.map ~f:exp_where_constraint ft_where_constraints;
     ft_ret = exp_ty ft_ret;
-    ft_params = List.map exp_fun_param ft_params;
+    ft_params = List.map ~f:exp_fun_param ft_params;
     ft_decl_errors; ft_returns_void_to_rx;
   }
 
@@ -96,7 +97,7 @@ let expand_ty env ty =
     | AKenum _ | AKgeneric _ | AKdependent _ -> ak
 
   and exp_tparam (var, id, cstrs, reified) =
-    (var, id, List.map (fun (ck, ty) -> (ck, exp_ty ty)) cstrs, reified)
+    (var, id, List.map ~f:(fun (ck, ty) -> (ck, exp_ty ty)) cstrs, reified)
 
   and exp_where_constraint (ty1, ck, ty2) = (exp_ty ty1, ck, exp_ty ty2) in
   exp_ty ty

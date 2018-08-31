@@ -39,6 +39,7 @@
  *     - constant
  *)
 
+open Core_kernel
 module SourceText = Full_fidelity_positioned_syntax.SourceText
 module Token = Full_fidelity_positioned_token
 module Trivia = Full_fidelity_positioned_trivia

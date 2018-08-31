@@ -9,7 +9,7 @@
 
 
 (* module checking that all the class members are properly initialized *)
-open Hh_core
+open Core_kernel
 open Nast
 open Utils
 

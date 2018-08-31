@@ -7,6 +7,9 @@
  *
  *)
 
+[@@@warning "-33"]
+open Core_kernel
+[@@@warning "+33"]
 module TySet = Typing_set
 
 type tparam_bounds = TySet.t

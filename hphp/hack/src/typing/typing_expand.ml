@@ -7,7 +7,7 @@
  *
  *)
 
-
+open Core_kernel
 (*****************************************************************************)
 (* Gets rid of all the type variables,
  * this is only useful when declaring class constants.

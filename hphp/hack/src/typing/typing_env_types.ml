@@ -8,7 +8,7 @@
  *)
 
 (* cf: typing_env_types_sig.mli - These files should be the same *)
-
+open Core_kernel
 open Typing_defs
 open Type_parameter_env
 module TySet = Typing_set

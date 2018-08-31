@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 open Typing_defs
 open Typing_reason
 
@@ -66,4 +67,4 @@ let check_implements check_new_object attr_interface
       env
 
 let check_def env check_new_object kind f_attrs =
-  List.fold_right (check_implements check_new_object kind) f_attrs env
+  List.fold_right ~f:(check_implements check_new_object kind) f_attrs ~init:env

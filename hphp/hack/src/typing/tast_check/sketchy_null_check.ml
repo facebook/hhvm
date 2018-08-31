@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Ast_defs
 open Aast_defs
 open Tast

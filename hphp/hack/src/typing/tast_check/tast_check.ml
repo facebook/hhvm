@@ -7,6 +7,9 @@
  *
  *)
 
+[@@@warning "-33"]
+open Core_kernel
+[@@@warning "+33"]
 let visitor = Tast_visitor.iter_with [
   Shape_field_check.handler;
   Sketchy_null_check.handler;

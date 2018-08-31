@@ -7,7 +7,8 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
+open Common
 open Typing_defs
 open Type_mapper
 
@@ -161,7 +162,7 @@ let akshape_keys_consistent field_name_x field_name_y =
 let akshape_key_consistent_with_map field_name fdm =
   try
     akshape_keys_consistent field_name (fst (ShapeMap.min_binding fdm))
-  with Not_found -> true
+  with Caml.Not_found -> true
 
 let is_shape_like_array env = function
   | [] -> false

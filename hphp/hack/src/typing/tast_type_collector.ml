@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 
 type collected_type = Tast_env.env * Typing_defs.phase_ty [@@deriving show]
 

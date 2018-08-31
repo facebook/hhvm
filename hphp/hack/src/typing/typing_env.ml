@@ -7,8 +7,9 @@
  *
  *)
 
+open Core_kernel
+open Common
 include Typing_env_types
-open Hh_core
 open Decl_env
 open Typing_defs
 open Nast
@@ -527,13 +528,13 @@ let get_static_member is_method env class_ mid =
 let suggest_member members mid =
   let members = SMap.fold begin fun x {ce_type = lazy (r, _); _} acc ->
     let pos = Reason.to_pos r in
-    SMap.add (String.lowercase_ascii x) (pos, x) acc
+    SMap.add (String.lowercase x) (pos, x) acc
   end members SMap.empty
   in
   SMap.get mid members
 
 let suggest_static_member is_method class_ mid =
-  let mid = String.lowercase_ascii mid in
+  let mid = String.lowercase mid in
   let members = if is_method then class_.tc_smethods else class_.tc_sprops in
   suggest_member members mid
 
@@ -555,7 +556,7 @@ let get_member is_method env class_ mid =
   ce_opt
 
 let suggest_member is_method class_ mid =
-  let mid = String.lowercase_ascii mid in
+  let mid = String.lowercase mid in
   let members = if is_method then class_.tc_methods else class_.tc_props in
   suggest_member members mid
 

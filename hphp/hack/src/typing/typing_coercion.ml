@@ -7,16 +7,17 @@
  *
  *)
 
- open Typing_defs
+open Core_kernel
+open Typing_defs
 
- module Reason  = Typing_reason
- module TUtils  = Typing_utils
- module Env     = Typing_env
- module Inst    = Decl_instantiate
- module Unify   = Typing_unify
- module TDef    = Typing_tdef
- module SubType = Typing_subtype
- module Phase   = Typing_phase
+module Reason  = Typing_reason
+module TUtils  = Typing_utils
+module Env     = Typing_env
+module Inst    = Decl_instantiate
+module Unify   = Typing_unify
+module TDef    = Typing_tdef
+module SubType = Typing_subtype
+module Phase   = Typing_phase
 
 (*
 * These are the main coercion functions.
@@ -70,7 +71,7 @@ let rec can_coerce ?seen:(seen=[]) env ty_have ty_expect =
   (* We can also find coercion targets through generics, wherein all that
    * matters is that the lower bound is somewhere a valid coercion target *)
   | _, (_, Tabstract (AKgeneric name, _)) ->
-    if List.mem name seen (* this will break cycles *)
+    if List.mem ~equal:(=) seen name (* this will break cycles *)
     then None
     else
     let seen = name::seen in

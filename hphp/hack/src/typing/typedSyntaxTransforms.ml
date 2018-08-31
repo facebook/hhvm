@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 module PS = Full_fidelity_positioned_syntax
 module PositionedTree = Full_fidelity_syntax_tree
   .WithSyntax(PS)
@@ -30,7 +31,7 @@ let typed_from_positioned
     | _ ->
       let kind = PS.kind positioned_node in
       let positioneds = PS.children positioned_node in
-      let typeds = List.map aux positioneds in
+      let typeds = List.map ~f:aux positioneds in
       let syntax = TS.syntax_from_children kind typeds in
       TS.make syntax (TS.positioned_value_to_typed position types value)
   in

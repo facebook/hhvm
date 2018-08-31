@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Typing_defs
 
 (* Pretty-printing for the Typing_defs.ty data structure.

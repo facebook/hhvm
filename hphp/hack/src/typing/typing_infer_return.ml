@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 
 type t =
   Typing_env.env *
@@ -50,7 +50,7 @@ let type_from_hint tcopt file hint =
   Typing_phase.localize_with_self tenv decl_ty
 
 let just_return types =
-  List.filter types ~f:(fun (_, _, kind, _) -> kind == Typing_suggest.Kreturn)
+  List.filter types ~f:(fun (_, _, kind, _) -> phys_equal kind Typing_suggest.Kreturn)
 
 let compare_pos (p1, _) (_, p2, _, _) =
   match Pos.compare p1 p2 with
@@ -71,10 +71,10 @@ let collect_types_and_funs tcopt def =
 
 let types_table types funs =
   let types = just_return types in
-  let tbl = Hashtbl.create (List.length funs) in
+  let tbl = Caml.Hashtbl.create (List.length funs) in
   List.iter types
     begin fun (env, pos, k, ty) ->
-      Hashtbl.add tbl pos (env, pos, k, ty);
+      Caml.Hashtbl.add tbl pos (env, pos, k, ty);
     end;
   tbl
 
@@ -86,7 +86,7 @@ let process_types_and_funs ~process tcopt def =
   | _ ->
     let tbl = types_table types funs in
     List.iter funs
-      ~f:(fun (pos, id) -> process (pos, id) (Hashtbl.find_all tbl pos))
+      ~f:(fun (pos, id) -> process (pos, id) (Caml.Hashtbl.find_all tbl pos))
 
 let get_inferred_types tcopt fnl ~process =
   List.iter fnl

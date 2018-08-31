@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Ide_api_types
 open Typing_defs
 open Utils
@@ -85,7 +85,7 @@ let empty_counter =
  * debugging purposes should be enough. *)
 let merge_pos_stats_samples l1 l2 =
   let rec pick_n acc n m l =
-    if n == 0 then acc
+    if n = 0 then acc
     else if m <= n then l @ acc else match l with
       | [] -> acc
       | h::tl ->

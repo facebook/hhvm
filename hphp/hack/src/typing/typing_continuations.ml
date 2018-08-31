@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 module Continuations = struct
   type t =
     | Next

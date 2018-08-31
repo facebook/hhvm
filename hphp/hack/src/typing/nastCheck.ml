@@ -21,8 +21,8 @@
 *)
 
 
+open Core_kernel
 open Autocomplete
-open Hh_core
 open Nast
 open String_utils
 open Typing_defs
@@ -363,8 +363,8 @@ module CheckFunctionBody = struct
 end
 
 let is_magic =
-  let h = Hashtbl.create 23 in
-  let a x = Hashtbl.add h x true in
+  let h = Caml.Hashtbl.create 23 in
+  let a x = Caml.Hashtbl.add h x true in
   a SN.Members.__set;
   a SN.Members.__isset;
   a SN.Members.__get;
@@ -372,7 +372,7 @@ let is_magic =
   a SN.Members.__call;
   a SN.Members.__callStatic;
   fun (_, s) ->
-    Hashtbl.mem h s
+    Caml.Hashtbl.mem h s
 
 let check_conditionally_reactive_annotation_params p params ~is_method =
   match params with
@@ -438,7 +438,7 @@ let rec fun_ tenv f named_body =
 
 and func ~is_efun env f named_body =
   let p, fname = f.f_name in
-  let fname_lower = String.lowercase_ascii (strip_ns fname) in
+  let fname_lower = String.lowercase (strip_ns fname) in
   if fname_lower = SN.Members.__construct || fname_lower = "using"
   then Errors.illegal_function_name p fname;
   check_coroutines_enabled (f.f_fun_kind = Ast.FCoroutine) env p;
@@ -1035,7 +1035,7 @@ and method_ (env, is_static) m =
   (match env.class_name with
   | Some cname ->
       let p, mname = m.m_name in
-      if String.lowercase_ascii (strip_ns cname) = String.lowercase_ascii mname
+      if String.lowercase (strip_ns cname) = String.lowercase mname
           && env.class_kind <> Some Ast.Ctrait
       then Errors.dangerous_method_name p
       else ()

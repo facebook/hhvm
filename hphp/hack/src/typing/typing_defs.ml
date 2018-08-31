@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 
 module Reason = Typing_reason
 module SN = Naming_special_names
@@ -588,7 +588,7 @@ module AbstractKind = struct
          | `expr i ->
              let display_id = Reason.get_expr_display_id i in
              "<expr#"^string_of_int display_id^">" in
-       String.concat "::" (dt::ids)
+       String.concat ~sep:"::" (dt::ids)
 
   let is_generic_dep_ty s = String_utils.is_substring "::" s
 end
@@ -714,7 +714,7 @@ let rec ty_compare ty1 ty2 =
     | Tshape (known1, fields1), Tshape (known2, fields2) ->
       begin match shape_fields_known_compare known1 known2 with
       | 0 ->
-        List.compare ~cmp:(fun (k1,v1) (k2,v2) ->
+        List.compare (fun (k1,v1) (k2,v2) ->
           match compare k1 k2 with
           | 0 -> shape_field_type_compare v1 v2
           | n -> n)
@@ -757,7 +757,7 @@ let rec ty_compare ty1 ty2 =
     end
 
   and ft_params_compare params1 params2 =
-    List.compare ~cmp:ft_param_compare params1 params2
+    List.compare ft_param_compare params1 params2
 
   and ft_param_compare param1 param2 =
     match ty_compare param1.fp_type param2.fp_type with
@@ -768,7 +768,7 @@ let rec ty_compare ty1 ty2 =
     | n -> n
 
   and tyl_compare tyl1 tyl2 =
-    List.compare ~cmp:ty_compare tyl1 tyl2
+    List.compare ty_compare tyl1 tyl2
 
   and opt_ty_compare opt_ty1 opt_ty2 =
     match opt_ty1, opt_ty2 with

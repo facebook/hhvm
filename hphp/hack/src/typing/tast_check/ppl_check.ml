@@ -8,7 +8,7 @@
  *)
 
 (* Typing code concerned the <<__PPL>> attribute. *)
-open Hh_core
+open Core_kernel
 open Typing_defs
 open Tast
 open Decl_defs
@@ -40,7 +40,7 @@ let check_ppl_class c =
     | _, Nast.Happly ((_, name), _) ->
       begin match Decl_heap.Classes.get name with
         | Some parent_type ->
-          if parent_type.dc_ppl != is_ppl
+          if not (phys_equal parent_type.dc_ppl is_ppl)
           then error parent_type.dc_pos parent_class_string parent_type.dc_name verb
           else ()
         | None -> ()
@@ -69,7 +69,7 @@ let check_ppl_obj_get env ((p, ty), e) =
           then Errors.invalid_ppl_call p "from a different class";
           if Env.get_inside_constructor env
           then Errors.invalid_ppl_call p "from inside a <<__PPL>> class constructor";
-          if e != This
+          if not (phys_equal e This)
           then Errors.invalid_ppl_call p
             "inside a <<__PPL>> class unless using $this-> or $this:: syntax";
           ()

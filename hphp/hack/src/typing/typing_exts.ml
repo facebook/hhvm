@@ -27,7 +27,7 @@ Ad-hoc rules for typing some common idioms
 
 *)
 
-open Hh_core
+open Core_kernel
 open Typing_defs
 open Utils
 
@@ -40,10 +40,10 @@ let magic_method_name input =
   match input with
     | None -> "format_eof"
     | Some c ->
-        let uc = Char.uppercase_ascii c
-        and lc = Char.lowercase_ascii c in
-          if lc == uc then Printf.sprintf "format_0x%02x" (Char.code lc)
-          else if c == uc then "format_upcase_" ^ String.make 1 lc
+        let uc = Char.uppercase c
+        and lc = Char.lowercase c in
+          if phys_equal lc uc then Printf.sprintf "format_0x%02x" (Char.to_int lc)
+          else if phys_equal c uc then "format_upcase_" ^ String.make 1 lc
           else "format_" ^ String.make 1 lc
 
 let lookup_magic_type (env:Env.env) (class_:locl ty) (fname:string) :

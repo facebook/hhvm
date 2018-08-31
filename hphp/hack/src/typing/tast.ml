@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 (* This is the current notion of type in the typed AST.
  * In future we might want to reconsider this and define a new representation
  * that omits type inference artefacts such as type variables and lambda

@@ -7,8 +7,8 @@
  *
  *)
 
+open Core_kernel
 open Ast
-open Hh_core
 open Utils
 
 module FuncTerm = Typing_func_terminality

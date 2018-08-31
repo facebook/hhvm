@@ -267,14 +267,14 @@ let fun_reactivity env attrs params =
       treat function reactivity as generic that is determined from the reactivity
       of arguments annotated with __AtMostRxAsFunc. Declared reactivity is used as a
       upper boundary of the reactivity function can have. *)
-    if Core_list.exists params ~f:param_has_at_most_rx_as_func
+    if List.exists params ~f:param_has_at_most_rx_as_func
     then RxVar (Some r)
     else r in
 
   let r =
     (* if at least one of arguments have <<__OnlyRxIfImpl>> attribute -
       treat function reactivity as conditional that is determined at the callsite *)
-    if Core_list.exists params
+    if List.exists params
       ~f:(fun { param_user_attributes = p; _ } ->
         Attributes.mem UA.uaOnlyRxIfImpl p)
     then MaybeReactive r
@@ -3704,7 +3704,7 @@ and is_abstract_ft fty = match fty with
   | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.unset ->
     check_function_in_suspend SN.PseudoFunctions.unset;
      let env, tel, _ = exprs env el in
-     Core_list.iter tel ~f:(Typing_mutability.check_unset_target env);
+     List.iter tel ~f:(Typing_mutability.check_unset_target env);
      if uel <> [] then
        Errors.unpacking_disallowed_builtin_function p pseudo_func;
      let disallow_varray =
@@ -5564,7 +5564,7 @@ and call_ ~expected ~method_call_info ~is_expr_statement pos env fty el uel =
       | None -> failwith "missing parameter in check_args" in
     let tel, tys =
       let l = List.map rl (fun (_, opt) -> get_param opt) in
-      Core_list.unzip l in
+      List.unzip l in
     TR.check_call env method_call_info pos r2 ft tys;
     let env, tuel, arity, did_unpack =
       match uel with

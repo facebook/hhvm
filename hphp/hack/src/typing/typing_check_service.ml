@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 
 module Env = Typing_env
 module TLazyHeap = Typing_lazy_heap

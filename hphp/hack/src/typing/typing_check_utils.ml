@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 
 let type_file tcopt fn {FileInfo.funs; classes; typedefs; consts; _} =
   let errors, tast = Errors.do_with_context fn Errors.Typing begin fun () ->

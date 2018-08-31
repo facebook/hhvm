@@ -174,8 +174,8 @@ let get_effective_reactivity env r ft arg_types =
     else acc in
   match r with
   | RxVar (Some rx) | MaybeReactive (RxVar (Some rx)) | rx ->
-    begin match Core_list.zip ft.ft_params arg_types with
-    | Some l -> Core_list.fold ~init:(rx, None) ~f:go l
+    begin match List.zip ft.ft_params arg_types with
+    | Some l -> List.fold ~init:(rx, None) ~f:go l
     | None -> r, None
     end
 
@@ -209,7 +209,7 @@ let check_call env method_info pos reason ft arg_types =
     (* receiver is conditionally reactive *)
     Option.is_some (condition_type_from_reactivity ft.ft_reactive) ||
     (* one of arguments is conditionally reactive *)
-    Core_list.exists ft.ft_params ~f:begin function
+    List.exists ft.ft_params ~f:begin function
     | { fp_rx_annotation = Some (Param_rx_if_impl _); _ } -> true
     | _ -> false
     end in
@@ -228,10 +228,10 @@ let check_call env method_info pos reason ft arg_types =
           true in
       allow_call &&
       (* check that conditions for all arguments are met *)
-      begin match Core_list.zip ft.ft_params arg_types with
+      begin match List.zip ft.ft_params arg_types with
       | None -> false
       | Some l ->
-        Core_list.for_all l ~f:begin function
+        List.for_all l ~f:begin function
         | { fp_rx_annotation = Some Param_rx_if_impl ty; _ }, arg_ty ->
           check_only_rx_if_impl env ~is_receiver:false ~is_self:false pos reason arg_ty ty
         (* | { fp_rx_condition = Some Param_rxfunc; fp_type; _ }, arg_ty ->
@@ -265,7 +265,7 @@ let rec get_name = function
 
 let disallow_static_or_global_in_reactive_context ~is_static env el =
   Env.error_if_reactive_context env @@ begin fun () ->
-    (Core_list.hd el) |> Option.iter ~f:(fun n ->
+    (List.hd el) |> Option.iter ~f:(fun n ->
       let p = fst n in
       let name = get_name n in
       if is_static then Errors.static_in_reactive_context p name
@@ -286,7 +286,7 @@ let check_foreach_collection env p t =
   let rec check t =
     let env, t = Env.expand_type env t in
     match t with
-    | _, Tunresolved l -> Core_list.for_all l ~f:check
+    | _, Tunresolved l -> List.for_all l ~f:check
     | t ->
       (* collection type should be subtype or conditioned to Rx\Traversable *)
       if not (SubType.is_sub_type env t rxTraversableType ||

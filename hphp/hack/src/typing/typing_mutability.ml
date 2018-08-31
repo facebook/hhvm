@@ -298,7 +298,7 @@ let check_mutability_fun_params env mut_args fty el =
     end;
     begin match fty.ft_arity with
     | Fvariadic (_, p) ->
-      Core_list.fold_left ~init:mut_args ~f:(check_borrowing env p) remaining_exprs
+      List.fold_left ~init:mut_args ~f:(check_borrowing env p) remaining_exprs
       |> ignore
     | _ -> ()
     end
@@ -359,10 +359,10 @@ let rec is_byval_collection_type env ty =
       x = SN.Collections.cKeyset
     | _, (Tarraykind _ | Ttuple _ | Tshape _)
       -> true
-    | _, Tunresolved tl -> Core_list.for_all tl ~f:(is_byval_collection_type env)
+    | _, Tunresolved tl -> List.for_all tl ~f:(is_byval_collection_type env)
     | _ -> false in
   let _, tl = Typing_utils.get_all_supertypes env ty in
-  Core_list.for_all tl ~f:check
+  List.for_all tl ~f:check
 
 let rec is_valid_mutable_subscript_expression_target env v =
   match v with

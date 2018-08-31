@@ -380,7 +380,7 @@ let check_conditionally_reactive_annotation_params p params ~is_method =
   | _ -> Errors.conditionally_reactive_annotation_invalid_arguments ~is_method p
 
 let check_conditionally_reactive_annotations is_reactive p method_name user_attributes =
-  ignore @@ Core_list.fold user_attributes
+  ignore @@ List.fold user_attributes
     ~init:false
     ~f:(fun seen { ua_name = (_, name); ua_params } ->
     if name = SN.UserAttributes.uaOnlyRxIfImpl
@@ -406,7 +406,7 @@ let is_some_reactivity_attribute { ua_name = (_, name); _ } =
 
 (* During NastCheck, all reactivity kinds are the same *)
 let fun_is_reactive user_attributes =
-  Core_list.exists user_attributes ~f:is_some_reactivity_attribute
+  List.exists user_attributes ~f:is_some_reactivity_attribute
 
 let ensure_single_reactivity_attribute user_attributes =
   let rec check l seen =
@@ -1063,7 +1063,7 @@ and check_maybe_rx_attributes_on_params env parent_attrs params =
       true
     | _ ->  seen_atmost_rx_as_rxfunc in
   let has_param_with_atmost_rx_as_rxfunc =
-    Core_list.fold_left params ~init:false ~f:check_param in
+    List.fold_left params ~init:false ~f:check_param in
   match parent_only_rx_if_args, has_param_with_atmost_rx_as_rxfunc with
   | Some { ua_name = (p, _); _ }, false ->
     Errors.no_atmost_rx_as_rxfunc_for_rx_if_args p

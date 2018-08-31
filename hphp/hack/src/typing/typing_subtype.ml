@@ -63,7 +63,7 @@ module ConditionTypes = struct
       | Some (_, cls) when cls.tc_tparams = [] -> ty
       | Some (((p, _) as sid), cls) ->
       let params =
-        Core_list.map cls.tc_tparams
+        List.map cls.tc_tparams
           ~f:(fun (_, (p, x), _, _) -> Reason.Rwitness p, Tgeneric x) in
       let subst =
         Decl_instantiate.make_subst cls.tc_tparams [] in

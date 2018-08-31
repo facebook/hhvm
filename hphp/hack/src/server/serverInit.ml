@@ -347,6 +347,13 @@ module ServerInitCommon = struct
     HackEventLogger.update_search_end t;
     Hh_logger.log_duration "Loading search indices" t
 
+  (* Prechecked files are gated with a flag and not supported in AI/check/saving
+   * of saved state modes. *)
+  let use_prechecked_files genv =
+    genv.local_config.ServerLocalConfig.prechecked_files &&
+    ServerArgs.ai_mode genv.options = None &&
+    (not @@ is_check_mode genv.options) &&
+    ServerArgs.save_filename genv.options = None
 
   let type_check genv env fast t =
     if ServerArgs.ai_mode genv.options <> None then env, t
@@ -354,6 +361,9 @@ module ServerInitCommon = struct
       is_check_mode genv.options ||
       (ServerArgs.save_filename genv.options <> None)
     then begin
+      (* Prechecked files are not supported in AI/check/saving-state modes, we
+       * should always recheck everything necessary up-front.*)
+      assert (env.prechecked_files = Prechecked_files_disabled);
       let count = Relative_path.Map.cardinal fast in
       let logstring = Printf.sprintf "Type-check %d files" count in
       Hh_logger.log "Begin %s" logstring;
@@ -429,8 +439,18 @@ module ServerInitCommon = struct
     let names = Relative_path.Map.fold fast ~f:begin fun _k v acc ->
       FileInfo.merge_names v acc
     end ~init:FileInfo.empty_names in
-    let deps = names_to_deps names |> Typing_deps.add_all_deps in
-    let to_recheck = Typing_deps.get_files deps in
+    let deps = names_to_deps names in
+
+    let env, to_recheck = if use_prechecked_files genv then begin
+      ServerPrecheckedFiles.set env (Initial_typechecking { dirty_local_deps = deps }),
+      (* Start with dirty files only *)
+      Relative_path.Set.empty
+    end else begin
+      (* Start with full fan-out immediately *)
+      let deps = Typing_deps.add_all_deps deps in
+      let to_recheck = Typing_deps.get_files deps in
+      env, to_recheck
+    end in
     (* We still need to typecheck files whose declarations did not change *)
     let to_recheck = Relative_path.Set.union to_recheck similar_files in
     let fast = extend_fast fast env.files_info to_recheck in

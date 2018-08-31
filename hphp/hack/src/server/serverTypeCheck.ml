@@ -847,6 +847,9 @@ end = functor(CheckKind:CheckKindType) -> struct
       needs_recheck
       diag_subscribe
     in
+    let deptable_unlocked = Typing_deps.allow_dependency_table_reads true in
+    let new_env = ServerPrecheckedFiles.update_after_recheck new_env in
+    let _ : bool = Typing_deps.allow_dependency_table_reads deptable_unlocked in
 
     new_env, {reparse_count; total_rechecked_count;}
 end

@@ -226,6 +226,7 @@ let make_env config =
     needs_phase2_redecl = Relative_path.Set.empty;
     needs_recheck = Relative_path.Set.empty;
     full_check = Full_check_done;
+    prechecked_files = Prechecked_files_disabled;
     can_interrupt = true;
     interrupt_handlers = (fun _ _ -> []);
     pending_command_needs_writes = None;

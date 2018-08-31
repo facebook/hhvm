@@ -135,6 +135,7 @@ type env = {
     needs_recheck : Relative_path.Set.t;
     init_env : init_env;
     full_check : full_check_status;
+    prechecked_files : prechecked_files_status;
     (* Not every caller of rechecks expects that they can be interrupted,
      * so making it opt-in by setting this flag at call site *)
     can_interrupt : bool;
@@ -156,6 +157,21 @@ type env = {
     diag_subscribe : Diagnostic_subscription.t option;
     recent_recheck_loop_stats : recheck_loop_stats;
   }
+
+and dirty_deps = {
+  (* We are rechecking dirty files to bootstrap the dependency graph.
+   * After this is done we need to also recheck full fan-out (in this updated
+   * graph) of provided set. *)
+  dirty_local_deps : Typing_deps.DepSet.t;
+}
+
+(* When using prechecked files we split initial typechecking in two phases
+ * (dirty files and a subset of their fan-out). Other init types compute the
+ * full fan-out up-front. *)
+and prechecked_files_status =
+  | Prechecked_files_disabled
+  | Initial_typechecking of dirty_deps
+  | Prechecked_files_ready
 
 and init_env = {
   init_start_t : float;

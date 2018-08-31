@@ -1342,7 +1342,6 @@ void emit_finish_func(EmitUnitState& state,
                      info.maxFpiDepth * kNumActRecCells;
 
   fe.finish(fe.ue().bcPos(), false /* load */);
-  fe.ue().recordFunction(&fe);
 }
 
 void emit_init_func(FuncEmitter& fe, const php::Func& func) {

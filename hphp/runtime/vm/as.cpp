@@ -731,7 +731,6 @@ struct AsmState {
       clsRefCountToCells(fe->numClsRefSlots());
 
     fe->finish(ue->bcPos(), false);
-    ue->recordFunction(fe);
 
     fe = 0;
     fpiRegs.clear();

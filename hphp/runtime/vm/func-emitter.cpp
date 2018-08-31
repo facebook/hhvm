@@ -623,7 +623,6 @@ void FuncRepoProxy::GetFuncsStmt
       }
       fe->setEHTabIsSorted();
       fe->finish(fe->past, true);
-      ue.recordFunction(fe);
     }
   } while (!query.done());
   txn.commit();

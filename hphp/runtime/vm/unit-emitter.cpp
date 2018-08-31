@@ -197,7 +197,6 @@ void UnitEmitter::addTrivialPseudoMain() {
   emitOp(OpRetC);
   mfe->maxStackCells = 1;
   mfe->finish(bcPos(), false);
-  recordFunction(mfe);
 
   TypedValue mainReturn;
   mainReturn.m_data.num = 1;
@@ -225,16 +224,12 @@ void UnitEmitter::appendTopEmitter(FuncEmitter* fe) {
   m_fes.push_back(fe);
 }
 
-void UnitEmitter::recordFunction(FuncEmitter* fe) {
-  m_feTab.push_back(fe);
-}
-
 Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
                            const StringData* name, Attr attrs,
                            int numParams) {
-  auto f = new (Func::allocFuncMem(numParams)) Func(unit, name, attrs);
-  m_fMap[fe] = f;
-  return f;
+  auto const func = new (Func::allocFuncMem(numParams)) Func(unit, name, attrs);
+  if (unit.m_extended) unit.getExtended()->m_funcTable.push_back(func);
+  return func;
 }
 
 
@@ -553,9 +548,6 @@ bool UnitEmitter::check(bool verbose) const {
 std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   INC_TPC(unit_load);
 
-  assertx(m_fMap.empty());
-  SCOPE_EXIT { m_fMap.clear(); };
-
   static const bool kVerify = debug || RuntimeOption::EvalVerify ||
     RuntimeOption::EvalVerifyOnly || RuntimeOption::EvalFatalOnVerifyError;
   static const bool kVerifyVerboseSystem =
@@ -648,7 +640,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   u->m_mergeInfo.store(mi, std::memory_order_relaxed);
   ix = 0;
   for (auto& fe : m_fes) {
-    Func* func = fe->create(*u);
+    auto const func = fe->create(*u);
     if (func->top()) {
       if (!mi->m_firstHoistableFunc) {
         mi->m_firstHoistableFunc = ix;
@@ -741,12 +733,6 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
       ux->m_namedInfo.push_back(s);
     }
     ux->m_arrayTypeTable = m_arrayTypeTable;
-
-    for (auto const fe : m_feTab) {
-      assertx(m_fMap.find(fe) != m_fMap.end());
-      auto const func = m_fMap.find(fe)->second;
-      ux->m_funcTable.push_back(func);
-    }
 
     // Funcs can be recorded out of order when loading them from the
     // repo currently.  So sort 'em here.
@@ -1347,7 +1333,6 @@ createFatalUnit(StringData* filename, const MD5& md5, FatalOp /*op*/,
   fe->maxStackCells = 1;
   // XXX line numbers are bogus
   fe->finish(ue->bcPos(), false);
-  ue->recordFunction(fe);
   return ue;
 }
 

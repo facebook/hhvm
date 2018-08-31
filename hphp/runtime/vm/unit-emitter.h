@@ -198,21 +198,10 @@ struct UnitEmitter {
   void appendTopEmitter(FuncEmitter* fe);
 
   /*
-   * Finish adding a FuncEmitter to the Unit and record its bytecode range.
-   *
-   * This can only be done once for each FuncEmitter, after it is added to the
-   * FE vector.  None of the bytecode ranges of FuncEmitters added to the Unit
-   * are allowed to overlap.
-   *
-   * Takes logical ownership of `fe'.
-   */
-  void recordFunction(FuncEmitter* fe);
-
-  /*
    * Create a new function for `fe'.
    *
    * This should only be called from fe->create(), and just constructs a new
-   * Func* and records it as emitted from `fe'.
+   * Func* and adds it to unit.m_funcTable if required.
    */
   Func* newFunc(const FuncEmitter* fe, Unit& unit, const StringData* name,
                 Attr attrs, int numParams);
@@ -476,20 +465,6 @@ private:
    */
   std::vector<std::pair<Offset,SourceLoc>> m_sourceLocTab;
   LineTable m_lineTable;
-
-  /*
-   * A list of all functions and methods; used to generate
-   * Unit::m_funcTable.
-   */
-  std::vector<const FuncEmitter*> m_feTab;
-
-  /*
-   * Used during create to keep track of the Func that each
-   * FuncEmitter created.
-   */
-  mutable hphp_hash_map<const FuncEmitter*, Func*,
-                        pointer_hash<FuncEmitter>> m_fMap;
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////

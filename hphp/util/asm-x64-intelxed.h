@@ -35,9 +35,6 @@ struct XedInit {
   }
 };
 
-///////////////////////////////////////////////////////////////////////////////
-
-typedef bool(*immFitFunc)(int64_t, int);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -54,8 +51,6 @@ private:
   }
 
   static constexpr auto nullrip = RIPRelativeRef(DispRIP(0));
-  static constexpr auto immfitSigned = deltaFits;
-  static constexpr auto immfitUnsigned = (immFitFunc)magFits;
 
 public:
   explicit XedAssembler(CodeBlock& cb) : X64AssemblerBase(cb) {}
@@ -101,13 +96,11 @@ public:
 #define STORE_OP(name, instr)                                         \
   void name##w(Immed i, MemoryRef m) {                                \
     xedInstrIM(instr, i, m, IMMPROP(sz::word,                         \
-                                    sz::word | sz::byte,              \
-                                    immfitSigned), sz::word);         \
+                                    sz::word | sz::byte), sz::word);  \
   }                                                                   \
   void name##l(Immed i, MemoryRef m) {                                \
     xedInstrIM(instr, i, m, IMMPROP(sz::dword,                        \
-                                    sz::dword | sz::byte,             \
-                                    immfitSigned), sz::dword);        \
+                                    sz::dword | sz::byte), sz::dword);\
   }                                                                   \
   void name##w(Reg16 r, MemoryRef m) { xedInstrRM(instr, r, m); }     \
   void name##l(Reg32 r, MemoryRef m) { xedInstrRM(instr, r, m); }     \
@@ -124,29 +117,25 @@ public:
   void name##w(Reg16 r1, Reg16 r2)   { xedInstrRR(instr, r1, r2); }   \
   void name##l(Immed i, Reg32 r) {                                    \
     xedInstrIR(instr, i, r, IMMPROP(sz::dword,                        \
-                                    sz::dword | sz::byte,             \
-                                    immfitSigned));                   \
+                                    sz::dword | sz::byte));           \
   }                                                                   \
   void name##w(Immed i, Reg16 r) {                                    \
     xedInstrIR(instr, i, r, IMMPROP(sz::word,                         \
-                                    sz::word | sz::byte,              \
-                                    immfitSigned));                   \
+                                    sz::word | sz::byte));            \
   }                                                                   \
   BYTE_REG_OP(name, instr)
 
 #define IMM64_STORE_OP(name, instr)                                   \
   void name##q(Immed i, MemoryRef m) {                                \
     xedInstrIM(instr, i, m, IMMPROP(sz::dword,                        \
-                                    sz::dword | sz::byte,             \
-                                    immfitSigned), sz::qword);        \
+                                    sz::dword | sz::byte), sz::qword);\
   }
 
 #define IMM64R_OP(name, instr)                                        \
   void name##q(Immed imm, Reg64 r) {                                  \
     always_assert(imm.fits(sz::dword));                               \
     xedInstrIR(instr, imm, r, IMMPROP(sz::dword,                      \
-                                      sz::dword | sz::byte,           \
-                                      immfitSigned));                 \
+                                      sz::dword | sz::byte));         \
   }
 
 #define FULL_OP(name, instr)                                          \
@@ -158,7 +147,7 @@ public:
 
   // We rename x64's mov to store and load for improved code
   // readability.
-#define IMMPROP(size, allsizes, func) size
+#define IMMPROP(size, allsizes) size
   LOAD_OP        (load, XED_ICLASS_MOV)
   STORE_OP       (store,XED_ICLASS_MOV)
   IMM64_STORE_OP (store,XED_ICLASS_MOV)
@@ -166,7 +155,7 @@ public:
   FULL_OP        (test, XED_ICLASS_TEST)
 #undef IMMPROP
 
-#define IMMPROP(size, allsizes, func) allsizes, func
+#define IMMPROP(size, allsizes) allsizes
   FULL_OP(add, XED_ICLASS_ADD)
   FULL_OP(xor, XED_ICLASS_XOR)
   FULL_OP(sub, XED_ICLASS_SUB)
@@ -188,8 +177,7 @@ public:
 
   // 64-bit immediates work with mov to a register.
   void movq(Immed64 imm, Reg64 r) { xedInstrIR(XED_ICLASS_MOV, imm, r,
-                                               sz::qword | sz::dword,
-                                               immfitSigned); }
+                                               sz::qword | sz::dword); }
 
   // movzbx is a special snowflake. We don't have movzbq because it behaves
   // exactly the same as movzbl but takes an extra byte.
@@ -253,8 +241,7 @@ public:
 
   //special case for push(imm)
   void push(Immed64 i) {
-    xed_encoder_operand_t op = toXedOperand(i, sz::byte | sz::word | sz::dword,
-                                            immfitSigned);
+    xed_encoder_operand_t op = toXedOperand(i, sz::byte | sz::word | sz::dword);
     xedEmit(XED_ICLASS_PUSH, op, op.width_bits < 32 ? 16 : 64);
   }
 
@@ -724,29 +711,31 @@ private:
                       bytesToBits(memSize));
   }
 
-  template<typename immtype>
-  xed_encoder_operand_t toXedOperand(const immtype& immed, int immSize) {
-    return xed_imm0(XedImmValue(immed, immSize).uq, bytesToBits(immSize));
-  }
-
   xed_encoder_operand_t toXedOperand(CodeAddress address, int size) {
     return xed_relbr(safe_cast<int32_t>((int64_t)address), bytesToBits(size));
   }
 
   template<typename immtype>
-  xed_encoder_operand_t toXedOperand(const immtype& immed,
-                                     int immSizes, immFitFunc func) {
-    immSizes = reduceImmSize(immed.q(), immSizes, func);
+  xed_encoder_operand_t toXedOperand(const immtype& immed, int immSizes) {
+    assert((immSizes != 0) &&
+           (immSizes & ~(sz::byte | sz::word | sz::dword | sz::qword)) == 0);
+    if ((immSizes & (immSizes - 1)) != 0) {
+      immSizes = reduceImmSize(immed.q(), immSizes);
+    }
     return xed_imm0(XedImmValue(immed, immSizes).uq, bytesToBits(immSizes));
   }
 
-  int reduceImmSize(int64_t value, int allowedSizes, immFitFunc func) {
-    for (int crtSize = sz::byte; crtSize < sz::qword; crtSize <<= 1) {
-      if ((allowedSizes & crtSize) && (*func)(value, crtSize)) return crtSize;
+  ALWAYS_INLINE
+  int reduceImmSize(int64_t value, int allowedSizes) {
+    while (allowedSizes) {
+      int crtSize = (allowedSizes & -allowedSizes);
+      if (crtSize == sz::qword || deltaFits(value, crtSize)) {
+        return crtSize;
+      }
+      allowedSizes ^= crtSize;
     }
-    assertx((allowedSizes & sz::qword) &&
-            "Could not find an optimal size for Immed");
-    return sz::qword;
+    assertx(false && "Could not find an optimal size for Immed");
+    return sz::nosize;
   }
 
   /*
@@ -807,14 +796,6 @@ private:
     xedEmit(instr, toXedOperand(r), toXedOperand(i, immSize),       \
             bitsize);                                               \
   }                                                                 \
-                                                                    \
-  ALWAYS_INLINE                                                     \
-  void xedInstrIR(xed_iclass_enum_t instr, const Immed& i,          \
-                  const Reg##bitsize& r,                            \
-                  int immSize, immFitFunc fitFunc) {                \
-    xedEmit(instr, toXedOperand(r),                                 \
-            toXedOperand(i, immSize, fitFunc), bitsize);            \
-  }
 
 #define XED_WRAP_X XED_INSTIR_WRAPPER_IMPL
   XED_WRAP_IMPL()
@@ -828,8 +809,8 @@ private:
 
   ALWAYS_INLINE
   void xedInstrIR(xed_iclass_enum_t instr, const Immed64& i, const Reg64& r,
-                  int immSize, immFitFunc fitFunc) {
-    xedEmit(instr, toXedOperand(r), toXedOperand(i, immSize, fitFunc),
+                  int immSize) {
+    xedEmit(instr, toXedOperand(r), toXedOperand(i, immSize),
             bytesToBits(sz::qword));
   }
 
@@ -898,7 +879,8 @@ private:
 
   ALWAYS_INLINE
   void xedInstrI(xed_iclass_enum_t instr, const Immed& i, int immSize) {
-    xedEmit(instr, toXedOperand(i, immSize), bytesToBits(immSize));
+    xed_encoder_operand_t op = toXedOperand(i, immSize);
+    xedEmit(instr, op, op.width_bits);
   }
 
   // instr(mem)
@@ -928,7 +910,8 @@ private:
   ALWAYS_INLINE
   void xedInstrIM(xed_iclass_enum_t instr, const Immed& i, const MemoryRef& m,
                   int size = sz::qword) {
-    xedEmit(instr,  toXedOperand(m, size), toXedOperand(i, size),
+    assert(size && (size & (size - 1)) == 0);
+    xedEmit(instr, toXedOperand(m, size), toXedOperand(i, size),
             bytesToBits(size));
   }
 
@@ -936,13 +919,6 @@ private:
   void xedInstrIM(xed_iclass_enum_t instr, const Immed& i, const MemoryRef& m,
                   int immSize, int memSize) {
     xedEmit(instr, toXedOperand(m, memSize), toXedOperand(i, immSize),
-            bytesToBits(memSize));
-  }
-
-  ALWAYS_INLINE
-  void xedInstrIM(xed_iclass_enum_t instr, const Immed& i, const MemoryRef& m,
-                  int immSize, immFitFunc fitFunc, int memSize) {
-    xedEmit(instr, toXedOperand(m, memSize), toXedOperand(i, immSize, fitFunc),
             bytesToBits(memSize));
   }
 

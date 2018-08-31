@@ -100,6 +100,9 @@ MODULES=\
   $(FSNOTIFY)\
   $(INOTIFY)
 
+HEADER_DIRS=\
+  $(ROOT)/heap
+
 NATIVE_C_FILES=\
   heap/hh_shared.c\
   libancillary/libancillary-stubs.c\
@@ -136,6 +139,7 @@ TARGETS=$(foreach target,$(TARGETS_BASE),$(target).$(TARGET_EXT))
 
 # Find all source files (all files not in _build dir)
 ALL_SRC_FILES=$(call rwildcard,$(patsubst _build,,$(wildcard *)),*.*)
+ALL_INCLUDE_PATHS=$(EXTRA_INCLUDE_PATHS) $(HEADER_DIRS)
 
 ################################################################################
 #                                    Rules                                     #
@@ -146,7 +150,7 @@ NATIVE_OBJECT_FILES=$(OBJECT_FILES_TO_BUILD) utils/get_build_id.gen.o utils/get_
 INCLUDE_OPTS=$(foreach dir,$(MODULES),-I $(dir))
 NATIVE_LIB_OPTS=$(foreach lib, $(NATIVE_LIBRARIES),-cclib -l$(lib))
 EXTRA_NATIVE_LIB_OPTS=$(foreach lib, $(EXTRA_NATIVE_LIBRARIES),-cclib -l$(lib))
-EXTRA_INCLUDE_OPTS=$(foreach dir, $(EXTRA_INCLUDE_PATHS),-ccopt -I$(dir))
+EXTRA_INCLUDE_OPTS=$(foreach dir, $(ALL_INCLUDE_PATHS),-ccopt -I$(dir))
 EXTRA_CC_OPTS=$(foreach opt, $(EXTRA_CC_FLAGS),-ccopt $(opt))
 EXTRA_LINK=$(EXTRA_LINK_OPTS) $(foreach dir, $(EXTRA_LIB_PATHS),-cclib -L$(dir))
 FRAMEWORK_OPTS=$(foreach framework, $(FRAMEWORKS),-cclib -framework -cclib $(framework))

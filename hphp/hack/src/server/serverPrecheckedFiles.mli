@@ -11,3 +11,8 @@ val set:
   ServerEnv.env -> ServerEnv.prechecked_files_status -> ServerEnv.env
 
 val update_after_recheck: ServerEnv.env -> ServerEnv.env
+
+val update_after_local_changes:
+  ServerEnv.env ->
+  Typing_deps.DepSet.t ->
+  ServerEnv.env

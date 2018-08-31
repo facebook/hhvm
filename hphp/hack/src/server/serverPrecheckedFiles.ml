@@ -41,3 +41,13 @@ let update_after_recheck env =
     end in
     set env Prechecked_files_ready
   | _ -> env
+
+let update_after_local_changes env changes =
+  match env.prechecked_files with
+  | Prechecked_files_disabled -> env
+  | Initial_typechecking { dirty_local_deps; dirty_master_deps } ->
+    let dirty_local_deps = Typing_deps.DepSet.union changes dirty_local_deps in
+    set env (Initial_typechecking { dirty_local_deps; dirty_master_deps })
+  | Prechecked_files_ready ->
+    (* TODO *)
+    env

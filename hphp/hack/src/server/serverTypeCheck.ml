@@ -708,7 +708,6 @@ end = functor(CheckKind:CheckKindType) -> struct
     let _, changes, to_redecl_phase2_deps, to_recheck1 =
       Decl_redecl_service.redo_type_decl
         ~bucket_size genv.workers env.tcopt oldified_defs fast defs_to_redecl in
-    ignore changes; (* TODO: compare those against prechecked files *)
 
     (* Things that were redeclared are no longer in old heap, so we substract
      * defs_ro_redecl from oldified_defs *)
@@ -769,6 +768,9 @@ end = functor(CheckKind:CheckKindType) -> struct
     let t = Hh_logger.log_duration logstring t in
     let env = CheckKind.get_env_after_decl
       ~old_env:env ~files_info ~failed_naming in
+    Hh_logger.log "Begin evaluating prechecked changes";
+    let env = ServerPrecheckedFiles.update_after_local_changes env changes in
+    let t = Hh_logger.log_duration "Evaluating prechecked changes" t in
 
     let _ : bool = Typing_deps.allow_dependency_table_reads
       deptable_unlocked in

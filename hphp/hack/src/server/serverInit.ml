@@ -452,6 +452,7 @@ module ServerInitCommon = struct
           rechecked_files = Relative_path.Set.empty;
           dirty_local_deps = local_deps;
           dirty_master_deps = master_deps;
+          clean_local_deps = Typing_deps.DepSet.empty;
       }),
       (* Start with dirty files only *)
       Relative_path.Set.empty

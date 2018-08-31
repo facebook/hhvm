@@ -167,6 +167,9 @@ and dirty_deps = {
   dirty_master_deps : Typing_deps.DepSet.t;
   (* Files that have been rechecked since server startup *)
   rechecked_files : Relative_path.Set.t;
+  (* Those deps have already been checked against their interaction with
+   * dirty_master_deps. Storing them here to avoid checking it over and over *)
+  clean_local_deps : Typing_deps.DepSet.t;
 }
 
 (* When using prechecked files we split initial typechecking in two phases

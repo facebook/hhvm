@@ -37,8 +37,13 @@ let update_rechecked_files env rechecked =
 let update_after_recheck env rechecked =
   let env = update_rechecked_files env rechecked in
     match env.full_check, env.prechecked_files with
-  | Full_check_done, Initial_typechecking
-      { dirty_local_deps; dirty_master_deps; rechecked_files } ->
+  | Full_check_done, Initial_typechecking {
+      dirty_local_deps;
+      dirty_master_deps;
+      rechecked_files;
+      clean_local_deps;
+    } ->
+    assert (Typing_deps.DepSet.is_empty clean_local_deps);
     Hh_logger.log "Finished rechecking dirty files, evaluating their fanout";
     let deps = Typing_deps.add_all_deps dirty_local_deps in
     (* Take any prechecked files that could have been affected by local changes
@@ -56,11 +61,13 @@ let update_after_recheck env rechecked =
       let init_env = { env.init_env with needs_full_init = true } in
       { env with needs_recheck; full_check; init_env }
     end in
+    let clean_local_deps = dirty_local_deps in
     let dirty_local_deps = Typing_deps.DepSet.empty in
     set env (Prechecked_files_ready {
       dirty_local_deps;
       dirty_master_deps;
-      rechecked_files
+      rechecked_files;
+      clean_local_deps;
     })
   | _ -> env
 
@@ -72,6 +79,10 @@ let update_after_local_changes env changes =
       Typing_deps.DepSet.union changes dirty_deps.dirty_local_deps in
     set env (Initial_typechecking { dirty_deps with dirty_local_deps })
   | Prechecked_files_ready dirty_deps ->
+    let changes = Typing_deps.DepSet.diff changes dirty_deps.clean_local_deps in
+    if Typing_deps.DepSet.is_empty changes then env else
+    let clean_local_deps =
+      Typing_deps.DepSet.union dirty_deps.clean_local_deps changes in
     let changes = Typing_deps.add_all_deps changes in
     let deps, dirty_master_deps = intersect_with_master_deps
       ~deps:changes
@@ -88,4 +99,5 @@ let update_after_local_changes env changes =
     end in
     set env (Prechecked_files_ready { dirty_deps with
       dirty_master_deps;
+      clean_local_deps;
     })

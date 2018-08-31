@@ -134,13 +134,13 @@ or any arbitrary union of primitive types. Primitive types exist for
 Hack-visible types such as `Int`, `Obj`, and `Bool`, and runtime-internal types
 such as `FramePtr`, `Func`, and `Cls`. Primitive types also exist for PHP
 references and pointers to PHP/Hack values: for each primitive PHP/Hack type
-`T`, `BoxedT`, `PtrToT`, and
-`PtrToBoxedT` also exist. A number of types commonly thought of as primitives
-are actually unions: `Str` is defined as `{PersistentStr+CountedStr}` and
-`Arr` is defined as `{PersistentArr+CountedArr}`. Predefined `constexpr Type`
-objects are provided for primitive types and many common union types: simply
-prepend `T` to the name of the type (so `TInt` represents to `Int` type, `TCell`
-represents the `Cell` type, etc...).
+`T`, `BoxedT`, `PtrToT`, and `PtrToBoxedT` also exist. A number of types
+commonly thought of as primitives are actually unions: `Str` is defined as
+`{PersistentStr+CountedStr}` and `Arr` is defined as
+`{PersistentArr+CountedArr}`. Predefined `constexpr Type` objects are provided
+for primitive types and many common union types: simply prepend `T` to the name
+of the type (so `TInt` represents the `Int` type, `TCell` represents the `Cell`
+type, etc...).
 
 In addition to arbitrary unions of primitive types, `Type` can also represent
 constant values and "specialized" types. A constant `Type` may represent the
@@ -159,8 +159,8 @@ empty set (also called `Bottom`).
 As previously mentioned, types in HHIR represent a mix of Hack-visible types and
 internal types. The following table describes types representing Hack values.
 Note that the types used here are more specific than what can be discriminated
-by user code (e.g., StaticStr and CountedStr both appear as type "string" at the
-Hack level).
+by user code (e.g., `StaticStr` and `CountedStr` both appear as type "string" at
+the Hack level).
 
   Type           | HHVM representation
   ---------------|-------------------
@@ -175,16 +175,17 @@ Hack level).
   PersistentStr  | `StringData*` `{StaticStr+UncountedStr}`
   CountedStr     | `StringData*` where `isRefCounted() == true`
   Str            | `StringData*` `{PersistentStr+CountedStr}`
-  StaticArr      | `ArrayData*` where `isStatic() == true`
-  UncountedArr   | `ArrayData*` where `isUncounted() == true`
-  PersistentArr  | `ArrayData*` `{StaticArr+UncountedArr}`
-  CountedArr     | `ArrayData*` where `isRefCounted() == true`
-  Arr            | `ArrayData*` `{PersistentArr+CountedArr}`
+  \*Arr          | `ArrayData*` (same variants as `Str`)
+  \*Vec          | `ArrayData*` where `kind() == VecArray`
+  \*Dict         | `ArrayData*` where `kind() == Dict`
+  \*Keyset       | `ArrayData*` where `kind() == Keyset`
   UncountedInit  | `TypedValue`: `{Null+Bool+Int+Dbl+PersistentStr+PersistentArr}`
   Uncounted      | `TypedValue`: `{UncountedInit+Uninit}`
   Obj            | `ObjectData*`
   Obj<=Class     | `ObjectData*` of the specified Class or one of its subclasses
   Obj=Class      | `ObjectData*` of the specified Class (not a subtype)
+  Cls            | `Class*`
+  Func           | `Func*`
   Counted        | `{CountedStr+CountedArr+Obj+BoxedCell}`
   Cell           | `{Null+Bool+Int+Dbl+Str+Arr+Obj}`
 
@@ -212,8 +213,6 @@ visible at the PHP level.
   PtrToT         | Exists for all T in `Gen`. Represents a `TypedValue*`
   Bottom         | No value, `{}`. Subtype of every other type
   Top            | Supertype of every other type
-  Cls            | `Class*`
-  Func           | `Func*`
   VarEnv         | `VarEnv*`
   NamedEntity    | `NamedEntity*`
   Cctx           | A `Class*` with the lowest bit set (as stored in `ActRec::m_cls`)
@@ -223,6 +222,66 @@ visible at the PHP level.
   FramePtr       | Pointer to a frame on the VM execution stack
   TCA            | Machine code address
   Nullptr        | C++ `nullptr`
+
+### Usage guidelines
+
+We've observed some common misuses of `Type` from people new to the codebase.
+They are described here, along with how to avoid them.
+
+#### Comparison operators
+
+Since a `Type` represents a set of values, the standard comparison operators on
+`Type` perform the corresponding set operations:
+
+- `==`, `!=`: Equality/inequality
+- `<`, `>`: Strict subset/strict superset
+- `<=`, `>=`: Non-strict subset/non-strict superset
+
+One important consequence of this is that a [strict weak
+ordering](https://en.cppreference.com/w/cpp/named_req/Compare) does not exist
+for `Type` objects, which means `Type` cannot be used with algorithms like
+`std::sort()`. Put another way, many pairs of `Type`s cannot be ordered: both
+`TInt < TStr` and `TInt >= TStr` are `false`, for example. As long as you think
+in terms of set comparisons and not numerical ordering, it should be fairly
+intuitive.
+
+To check if a value is of a certain type, you almost always want to use `<=`.
+So, instead of `val->type() == TInt`, use `val->type() <= TInt`, or more
+compactly, `val->isA(TInt)`. Using exact equality in this situation would give
+unexpected results if `val` had a constant type, like `Int<5>`, or if we ever
+added other subtypes of `Int` (with value range information, for example).
+
+A related problem is determining when a value is *not* of a certain type. Here,
+the difference between "`val` is not known to be an `Int`" and "`val` is known
+to not be an `Int`" is crucial. The former is expressed with `!(val->type() <=
+TInt)`, while the latter is `!val->type().maybe(TInt)`. Types like `{Str+Int}`
+illustrate the difference between these two predicates: `((TStr | TInt) <= Int)
+== false` and `(TStr | TInt).maybe(TInt) == true`.
+
+#### Inner types
+
+HHIR programs are in SSA form, so a value can't change once it has been defined.
+This implies that the value's type also can't change, which requires extra
+consideration when working with types that have inner types, like `PtrToFoo`.
+The immutability of types also applies to these inner types, so when reading
+from or writing to a `PtrToInt`, it is safe to assume the the pointee is always
+an `Int`.
+
+This may sound obvious, but there are some situations in which you may find
+yourself wanting to construct a value with an inner type that can't be relied
+on. Flow-sensitive type information should not be used to feed inner types,
+especially runtime type guards. Much of HHBBC's type inference is
+flow-insensitive, and that can safely feed inner types of pointers.
+
+There is one small tweak to the rule "a value's type cannot change once
+defined": if the pointee is destroyed, the pointer can't be safely dereferenced,
+and the type doesn't have to be valid anymore. One example of this is an object
+property that HHBBC says is always a `Dbl`. It's safe to create a `PtrToDbl`
+pointer to the property, because the information from HHBBC is flow-insensitive.
+But if the object is freed and a new object is allocated at the same memory
+address, it's possible that this pointer will now point to something completely
+different. This is fine, because dereferencing the pointer would be analogous a
+use-after-free bug in C++, resulting in undefined behavior.
 
 ### Values, Instructions, and Blocks
 
@@ -251,10 +310,10 @@ A `Block` represents a basic block in a control flow graph. A pointer to one
 end" instructions, meaning they must be the last instruction in their `Block`
 and they contain one or more `Edge`s to other `Block`s. `Jmp` is the simplest
 block end instruction; it represents an unconditional jump to a destination
-block. `CheckType` is an example of an instruction with two `Edge`s: "taken"
-and "next". It compares the runtime type of its source value to its `typeParam`,
-jumping to "taken" block if the type doesn't match, and jumping to the "next" block if
-it does.
+block. `CheckType` is an example of an instruction with two `Edge`s: "taken" and
+"next". It compares the runtime type of its source value to its `typeParam`,
+jumping to "taken" block if the type doesn't match, and jumping to the "next"
+block if it does.
 
 While block end instructions may only exist at the end of a `Block`, there are
 two instructions that may only exist at the beginning of a `Block`: `DefLabel`

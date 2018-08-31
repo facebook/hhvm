@@ -1,4 +1,4 @@
-#Using ini
+# Using ini
 
 ini usage in HHVM is fairly similar to that of php-src, albeit currently with
 some limitations and enhancements. For example, HHVM currently doesn't support

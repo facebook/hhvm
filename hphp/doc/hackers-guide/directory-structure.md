@@ -3,15 +3,11 @@
 There are over 1000 C++ files in HHVM's codebase, split into a number of
 different directories. This is a rough overview of what lives where (all paths are under `hphp/`):
 
-`compiler/`: The compiler front end. Work is underway to replace this with an experiment parser and bytecode emitter writte in OCaml, first announced [here](https://hhvm.com/blog/2017/11/17/hhvm-3-23.html).\
-`compiler/analysis/`: AST optimization, and the bytecode emitter.\
-`compiler/expression/`: AST nodes for expressions.\
-`compiler/parser/`: Parser implementation to create an AST.\
-`compiler/statement/`: AST nodes for statements.
+`compiler/`: The old parser and bytecode emitter. This is deprecated and is currently being removed; the new replacement is in `hack/src/hhbc`.
 
 `doc/`: Documentation, of varying age and quality.
 
-`hack/`: The Hack typechecker and experimental bytecode emitter.
+`hack/src/`: The Hack parser, typechecker, bytecode emitter, and various other Hack-related tools.
 
 `hhbbc/`: HipHop Bytecode-to-Bytecode Compiler, our ahead-of-time static analysis program.
 

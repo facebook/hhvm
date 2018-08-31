@@ -52,10 +52,8 @@ token stream and converts that to an [abstract syntax
 tree](https://en.wikipedia.org/wiki/Abstract_syntax_tree), or AST. This AST is
 then converted to a stream of [bytecode
 instructions](https://en.wikipedia.org/wiki/Bytecode) by the bytecode emitter.
-There are currently two implementations of everything described so far: the
-existing C++ implementation that is part of HHVM, and HackC, a new OCaml
-implementation that will eventually become the default and share a parser with
-the Hack typechecker.
+Everything up to this point is written in OCaml; the rest of HHVM is written in
+C++ and assembly.
 
 After the bytecode and associated metadata are created, our bytecode optimizer,
 HHBBC, is optionally run. Finally, the bytecode, optimized or not, is stored
@@ -79,23 +77,39 @@ by register allocation, and finally, code generation. Once various metadata is
 recorded and the code is relocated to the appropriate place, it is ready to be
 executed.
 
-## HHVM Internals
+## Getting Started
 
-The rest of this guide is broken into articles by major component:
+If you're not sure where to start, skimming these articles is a good first step:
 
 * [Directory structure](directory-structure.md)
-* HHBC spec
+* [FAQ](faq.md)
+* [Glossary](glossary.md)
+
+## HHVM Internals
+
+The articles in this section go into more detail about their respective
+components:
+
+* [HHBC spec](../bytecode.specification)
 * Frontend
   * Parser
   * Emitter
   * HHBBC
   * ...
 * VM Runtime
-  * Runtime data structures
-    * Unit
-    * Func
-    * PreClass/Class
-    * SrcKey
+  * [Core data structures](data-structures.md)
+    * [Hack-visible](data-structures.md#hack-visible-values)
+      * [Datatype, Value, and TypedValue](data-structures.md#datatype-value-and-typedvalue)
+      * [ArrayData](data-structures.md#arraydata)
+      * [StringData](data-structures.md#stringdata)
+      * [ObjectData](data-structures.md#objectdata)
+      * [Smart pointer wrappers](data-structures.md#smart-pointer-wrappers)
+      * [RefData](data-structures.md#refdata)
+    * [Runtime-internal](data-structures.md#runtime-internal-data-structures)
+      * [Unit](data-structures.md#unit)
+      * [PreClass/Class](data-structures.md#preclass-and-class)
+      * [Func](data-structures.md#func)
+  * [Memory management](memory-management.md)
   * Execution Context
   * [Bytecode interpreter](bytecode-interpreter.md)
   * Unwinder

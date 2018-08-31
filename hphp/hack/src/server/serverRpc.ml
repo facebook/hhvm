@@ -195,7 +195,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           env.tcopt env.popt class_name meth_name
       end
     | CST_SEARCH { sort_results; input; files_to_search }->
-      try
+      begin try
         env, CstSearchService.go genv ~sort_results ~files_to_search input
       with
       | MultiThreadedCall.Coalesced_failures failures ->
@@ -209,3 +209,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let msg = Printexc.to_string e in
         let stack = Printexc.get_backtrace () in
         env, Error (Printf.sprintf "%s\n%s" msg stack)
+      end
+    | NO_PRECHECKED_FILES ->
+      ServerPrecheckedFiles.expand_all env, ()

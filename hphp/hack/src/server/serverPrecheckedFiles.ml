@@ -105,3 +105,26 @@ let update_after_local_changes env changes =
       dirty_master_deps;
       clean_local_deps;
     })
+
+let expand_all env =
+  match env.prechecked_files with
+  | Prechecked_files_disabled -> env
+  | Initial_typechecking dirty_deps
+  | Prechecked_files_ready dirty_deps ->
+    let deps = Typing_deps.add_all_deps dirty_deps.dirty_master_deps in
+    let needs_recheck = Typing_deps.get_files deps in
+    let needs_recheck =
+      Relative_path.Set.diff needs_recheck dirty_deps.rechecked_files in
+    let env = if Relative_path.Set.is_empty needs_recheck then env else begin
+      Hh_logger.log "Adding %d files to recheck after expanding all master deps"
+        (Relative_path.Set.cardinal needs_recheck);
+      let needs_recheck =
+        Relative_path.Set.union env.needs_recheck needs_recheck in
+      { env with
+        needs_recheck;
+        full_check = Full_check_started;
+      }
+    end in
+    set env (Prechecked_files_ready { dirty_deps with
+      dirty_master_deps = Typing_deps.DepSet.empty;
+    })

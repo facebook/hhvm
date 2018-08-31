@@ -1,3 +1,5 @@
+open Integration_test_base_types
+
 module Test = Integration_test_base
 (* Simplest prechecked files scenario: master and local changes are completely
  * independent, and there is no incremental mode involved. *)
@@ -13,6 +15,22 @@ function %s(): int { return %s(); }
 |}
 
 let d_errors = {|
+File "/d.php", line 2, characters 28-30:
+Invalid return type (Typing[4110])
+File "/d.php", line 2, characters 15-17:
+This is an int
+File "/c.php", line 2, characters 15-20:
+It is incompatible with a string
+|}
+
+let all_errors = {|
+File "/b.php", line 2, characters 28-30:
+Invalid return type (Typing[4110])
+File "/b.php", line 2, characters 15-17:
+This is an int
+File "/a.php", line 2, characters 15-20:
+It is incompatible with a string
+
 File "/d.php", line 2, characters 28-30:
 Invalid return type (Typing[4110])
 File "/d.php", line 2, characters 15-17:
@@ -66,4 +84,14 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   let env, _ = Test.(run_loop_once env default_loop_input) in
 
   Test.assert_env_errors env d_errors;
+
+  let env, _ = Test.(run_loop_once env { default_loop_input with
+    new_client = Some (RequestResponse (ServerCommandTypes.NO_PRECHECKED_FILES))
+  }) in
+
+  Test.assert_needs_recheck env "b.php";
+
+  let env, _ = Test.full_check env in
+
+  Test.assert_env_errors env all_errors;
   ()

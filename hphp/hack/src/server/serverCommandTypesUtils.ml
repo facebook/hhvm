@@ -52,6 +52,7 @@ let debug_describe_t : type a. a t -> string = function
   | RAGE                       -> "RAGE"
   | DYNAMIC_VIEW             _ -> "DYNAMIC_VIEW"
   | CST_SEARCH               _ -> "CST_SEARCH"
+  | NO_PRECHECKED_FILES        -> "NO_PRECHECKED_FILES"
 
 let debug_describe_cmd : type a. a command -> string = function
   | Rpc rpc -> debug_describe_t rpc

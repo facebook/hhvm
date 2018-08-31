@@ -332,6 +332,7 @@ let main args =
       Exit_status.No_error
     | MODE_STATUS ->
       let ignore_ide = ClientMessages.ignore_ide_from args.from in
+      if args.prechecked = Some false then rpc args (Rpc.NO_PRECHECKED_FILES);
       let status = rpc args (Rpc.STATUS ignore_ide) in
       ClientCheckStatus.go status args.output_json args.from
     | MODE_STATUS_SINGLE filename ->

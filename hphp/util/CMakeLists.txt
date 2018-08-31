@@ -31,12 +31,12 @@ if (NOT MSVC)
 endif()
 
 add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/util/low-ptr-def.h
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/low-ptr-def.h
   COMMAND INSTALL_DIR=${CMAKE_CURRENT_BINARY_DIR} bash ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate-low-ptr.sh ignored
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate-low-ptr.sh
 )
 
-list(APPEND HEADER_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/util/low-ptr-def.h)
+list(APPEND HEADER_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/low-ptr-def.h)
 
 HHVM_PUBLIC_HEADERS(util ${HEADER_SOURCES})
 

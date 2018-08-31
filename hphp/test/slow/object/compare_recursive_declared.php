@@ -14,4 +14,8 @@ function main() {
   var_dump($recur === $recur);
   var_dump($recur !== $recur);
 }
+
+<<__EntryPoint>>
+function main_compare_recursive_declared() {
 main();
+}

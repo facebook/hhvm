@@ -55,4 +55,8 @@ function main() {
   $count++;
   apc_store('test-count', $count);
 }
+
+<<__EntryPoint>>
+function main_bad_arrays() {
 main();
+}

@@ -18,9 +18,13 @@ class Y {
  var_dump(get_class_methods($this));
  }
 }
+
+<<__EntryPoint>>
+function main_1334() {
 $x = new X;
 $x->a();
 $y = new Y;
 $y->a();
 var_dump(get_class_methods($x));
 var_dump(get_class_methods($y));
+}

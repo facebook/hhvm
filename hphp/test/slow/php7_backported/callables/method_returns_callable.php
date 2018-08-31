@@ -8,4 +8,8 @@ class MyClass {
   }
 }
 
+
+<<__EntryPoint>>
+function main_method_returns_callable() {
 (new MyClass())->doStuff()();
+}

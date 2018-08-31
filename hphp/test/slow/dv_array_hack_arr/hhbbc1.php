@@ -27,4 +27,8 @@ function test() {
   var_dump(is_varray($x));
   var_dump(is_darray($x));
 }
+
+<<__EntryPoint>>
+function main_hhbbc1() {
 test();
+}

@@ -52,4 +52,8 @@ function test() {
     )
   );
 }
+
+<<__EntryPoint>>
+function main_suppress_builtins() {
 test();
+}

@@ -17,5 +17,9 @@ class Y extends D {
   }
 }
 
+
+<<__EntryPoint>>
+function main_public_static_props_001() {
 (new B)->goB();
 (new Y)->go();
+}

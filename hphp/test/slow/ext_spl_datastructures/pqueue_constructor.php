@@ -16,6 +16,9 @@ class MyPriorityQueue extends \SplPriorityQueue {
   }
 }
 
+
+<<__EntryPoint>>
+function main_pqueue_constructor() {
 $data  = array(
   array('test1', 1),
   array('test3', 3),
@@ -28,3 +31,4 @@ foreach ($data as $entry) {
 }
 
 var_dump($queue->sort());
+}

@@ -4,6 +4,9 @@ function intProvider((function (int...):void) $fn):void {
   $fn(1, 2, 3, 4, 5);
 }
 
+
+<<__EntryPoint>>
+function main_lambdas_variadic_ints() {
 print "Int provider ...\$x\n";
 intProvider((...$x) ==> {
   var_dump($x);
@@ -42,3 +45,4 @@ $lambda2 = (int ...$x) ==> {
 };
 
 intProvider($lambda2);
+}

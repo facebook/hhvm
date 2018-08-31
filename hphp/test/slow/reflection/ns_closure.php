@@ -2,8 +2,12 @@
 
 namespace foo;
 
+
+<<__EntryPoint>>
+function main_ns_closure() {
 $a = function () {};
 $r = new \ReflectionFunction($a);
 var_dump($r->inNamespace());
 var_dump($r->getNamespaceName());
 var_dump($r->getName());
+}

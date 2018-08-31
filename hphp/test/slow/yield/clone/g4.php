@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_g4() {
 $foo = function ($a1, &$a2) {
   $a1 += 10;
   $a2 += 100;
@@ -46,3 +49,4 @@ for ($x->next(); $x->valid(); $x->next()) {
 }
 echo "--------\n";
 var_dump($a1, $a2);
+}

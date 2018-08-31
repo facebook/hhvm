@@ -9,5 +9,9 @@ function __autoload($name) {
   }
   var_dump($name);
 }
+
+<<__EntryPoint>>
+function main_1228() {
 new CaT(1);
 class_exists('cat', false);
+}

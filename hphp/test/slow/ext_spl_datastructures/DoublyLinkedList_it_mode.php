@@ -43,6 +43,9 @@ function test(SplDoublyLinkedList $l) {
   echo PHP_EOL;
 }
 
+
+<<__EntryPoint>>
+function main_doubly_linked_list_it_mode() {
 echo "FIFO:", PHP_EOL;
 test(new SplDoublyLinkedList());
 
@@ -52,3 +55,4 @@ $list->setIteratorMode(SplDoublyLinkedList::IT_MODE_LIFO);
 echo "-------------------------", PHP_EOL;
 echo "LIFO:", PHP_EOL;
 test($list);
+}

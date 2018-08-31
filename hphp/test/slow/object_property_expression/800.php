@@ -11,4 +11,8 @@ function test() {
   $x->foo('hello');
   var_dump($x);
 }
+
+<<__EntryPoint>>
+function main_800() {
 test();
+}

@@ -16,5 +16,9 @@ function test($a) {
   out($b);
  out($c);
 }
+
+<<__EntryPoint>>
+function main_1741() {
 test(0);
 test('foo');
+}

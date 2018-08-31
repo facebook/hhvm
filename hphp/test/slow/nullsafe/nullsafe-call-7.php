@@ -24,4 +24,8 @@ function main() {
   var_dump($x);
   echo "Done\n";
 }
+
+<<__EntryPoint>>
+function main_nullsafe_call_7() {
 main();
+}

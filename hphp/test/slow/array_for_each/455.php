@@ -21,4 +21,8 @@ function f5() {
       break;
   }
 }
+
+<<__EntryPoint>>
+function main_455() {
 f5();
+}

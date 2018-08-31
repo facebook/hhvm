@@ -97,4 +97,8 @@ function main() {
   var_dump($original, $new, $callee, $caller, $a);
 }
 
+
+<<__EntryPoint>>
+function main_complex_expr() {
 main();
+}

@@ -16,8 +16,12 @@ class C1 {
 class C2 {
   public $p2;
 }
+
+<<__EntryPoint>>
+function main_787() {
 $c2 = new C2();
 $c2->p = new C1();
 $c2->p->a = 1;
 $c2->p->a .= 1;
 print $c2->p->a;
+}

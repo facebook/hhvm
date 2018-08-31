@@ -15,5 +15,9 @@ function n_unindent() {
 function render($arg1, $arg2) {
     return      '<div id="captcha" class="'.$arg1.'">'.      n_indent().      $arg2 .      n_unindent().      '</div>';
 }
+
+<<__EntryPoint>>
+function main_1585() {
 $GLOBALS['n_indent_level'] = 0;
 var_dump(render("foo", "bar"));
+}

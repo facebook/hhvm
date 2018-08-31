@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_null_path() {
 error_reporting(-1);
 
 $path1 = '/etc/passwd' . chr(0) . '/foo/bar.jpg';
@@ -55,3 +58,4 @@ var_dump(mkdir($path1));
 var_dump(chdir($path1));
 var_dump(chroot($path1));
 var_dump(scandir($path1));
+}

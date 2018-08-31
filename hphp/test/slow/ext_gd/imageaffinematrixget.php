@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_imageaffinematrixget() {
 var_dump(imageaffinematrixget(IMG_AFFINE_TRANSLATE,
                               array("x" => "a", "y" => 0)));
 var_dump(imageaffinematrixget(IMG_AFFINE_TRANSLATE,
@@ -32,3 +35,4 @@ var_dump(imageaffinematrixget(IMG_AFFINE_SCALE,
 var_dump(imageaffinematrixget(IMG_AFFINE_ROTATE, 1));
 var_dump(imageaffinematrixget(IMG_AFFINE_SHEAR_HORIZONTAL, 1));
 var_dump(imageaffinematrixget(IMG_AFFINE_SHEAR_VERTICAL, 1));
+}

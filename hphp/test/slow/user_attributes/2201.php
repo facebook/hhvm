@@ -92,8 +92,11 @@ class D extends C {
 }
 }
 
+
 //------------------------
 
+<<__EntryPoint>>
+function main_2201() {
 doboth('no_attrs');
 doboth('simple_attr');
 doboth('two_attrs');
@@ -109,3 +112,4 @@ doboth('o', 'D');
 doboth('p', 'D');
 doboth('q', 'D');
 doboth('wxy', 'D');
+}

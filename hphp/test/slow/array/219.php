@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_219() {
 $a = array(1, 2);
  foreach ($a as $item) {
    print 'A['.$item.']';
@@ -9,3 +12,4 @@ $a = array(1, 2);
    print 'B['.$item.']';
  }
 var_dump($a);
+}

@@ -29,4 +29,8 @@ async function foo() {
   return $res1 + $res2 * $res3;
 }
 
+
+<<__EntryPoint>>
+function main_immed_lambda2() {
 var_dump(HH\Asio\join(foo()));
+}

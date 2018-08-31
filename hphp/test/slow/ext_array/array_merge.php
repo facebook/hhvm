@@ -61,9 +61,13 @@ function g() {
   var_dump(array_merge($a, array($b)));
 }
 
+
+<<__EntryPoint>>
+function main_array_merge() {
 a();
 b();
 c();
 d();
 e();
 f();
+}

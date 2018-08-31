@@ -7,9 +7,6 @@ class NewStyle {
 class SubNewStyle extends NewStyle {
 }
 
-var_dump((new ReflectionClass('NewStyle'))->getConstructor()->getName());
-var_dump((new ReflectionClass('SubNewStyle'))->getConstructor()->getName());
-
 class OldStyle {
   public function OldStyle($x) {
   }
@@ -18,5 +15,12 @@ class OldStyle {
 class SubOldStyle extends OldStyle {
 }
 
+
+<<__EntryPoint>>
+function main_class_constructors() {
+var_dump((new ReflectionClass('NewStyle'))->getConstructor()->getName());
+var_dump((new ReflectionClass('SubNewStyle'))->getConstructor()->getName());
+
 var_dump((new ReflectionClass('OldStyle'))->getConstructor()->getName());
 var_dump((new ReflectionClass('SubOldStyle'))->getConstructor()->getName());
+}

@@ -33,6 +33,9 @@ function is_vec_or_dict_(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_hack_array() {
 is_vec_(1);
 is_vec_(true);
 is_vec_(1.5);
@@ -82,3 +85,4 @@ is_vec_or_dict_(array());
 is_vec_or_dict_(vec[]);
 is_vec_or_dict_(dict[]);
 is_vec_or_dict_(keyset[]);
+}

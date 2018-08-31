@@ -18,7 +18,10 @@ function find_node($array,$node) {
   return array();
 }
 
+
 // WITH XML_OPTION_SKIP_WHITE=0 WORKS FINE
+<<__EntryPoint>>
+function main_xml_option_skip_white() {
 $array=read_xml(0);
 $node=find_node($array,"query");
 print_r($node);
@@ -27,3 +30,4 @@ print_r($node);
 $array=read_xml(1);
 $node=find_node($array,"query");
 print_r($node);
+}

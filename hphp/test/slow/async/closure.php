@@ -5,16 +5,10 @@ function block() {
     RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
     1,
   );
-};
-
+}
 async function ret() {
   return 0;
 }
-
-$global = async function () {
-  $x = await ret();
-  var_dump($x);
-};
 
 async function inFunc() {
   $x = async function($a) { static $x; return $a; };
@@ -37,6 +31,16 @@ class F {
   }
 }
 
+<<__EntryPoint>>
+function main_closure() {
+;
+
+$global = async function () {
+  $x = await ret();
+  var_dump($x);
+};
+
 HH\Asio\join($global());
 HH\Asio\join(inFunc());
 HH\Asio\join(F::inMeth());
+}

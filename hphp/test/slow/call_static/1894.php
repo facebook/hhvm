@@ -10,10 +10,14 @@ class b1 {
     a1::foo();
   }
 }
-set_error_handler('h');
  function h() {
  var_dump('errored');
 }
+
+<<__EntryPoint>>
+function main_1894() {
+set_error_handler('h');
 $obj = new b1;
 $obj->test();
 var_dump('end');
+}

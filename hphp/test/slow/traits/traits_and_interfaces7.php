@@ -1,7 +1,5 @@
 <?hh
 
-error_reporting(-1);
-
 interface I {
   const XYZ = 'const from I';
 }
@@ -33,5 +31,11 @@ function reflect() {
   print_r(get_class_constants($rc));
 }
 
+
+<<__EntryPoint>>
+function main_traits_and_interfaces7() {
+error_reporting(-1);
+
 main();
 reflect();
+}

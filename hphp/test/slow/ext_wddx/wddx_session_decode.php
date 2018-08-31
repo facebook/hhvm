@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_wddx_session_decode() {
 ini_set("session.serialize_handler","wddx");
 session_start();
 $str = "<wddxPacket version='1.0'><header/><data><struct>
@@ -11,3 +14,4 @@ session_decode($str);
 $data = $_SESSION;
 
 var_dump($data);
+}

@@ -85,4 +85,8 @@ function test() {
   $p->getTransport()->buff[1] = pack('C', 0x42);
   var_dump(thrift_protocol_read_compact($p, 'TestStruct'));
 }
+
+<<__EntryPoint>>
+function main_1559() {
 test();
+}

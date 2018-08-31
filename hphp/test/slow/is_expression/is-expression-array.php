@@ -8,4 +8,8 @@ function is_array_(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_array() {
 is_array_(array());
+}

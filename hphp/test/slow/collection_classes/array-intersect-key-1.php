@@ -49,5 +49,9 @@ function main() {
   var_dump(array_intersect_key($v1, $m2, $m3));
   var_dump(array_intersect_key($m1, $m2, $m3));
 }
-main();
 
+
+<<__EntryPoint>>
+function main_array_intersect_key_1() {
+main();
+}

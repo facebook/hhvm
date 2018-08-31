@@ -1,5 +1,11 @@
 <?php
+ function bar() {
+ return 123;
+}
 
+
+<<__EntryPoint>>
+function main_1240() {
 $a = bar();
  if ($a) {
  function fOO() {
@@ -9,7 +15,5 @@ $a = bar();
  function Foo() {
 }
  }
- function bar() {
- return 123;
-}
  foo();
+}

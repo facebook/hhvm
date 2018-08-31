@@ -11,7 +11,11 @@ function dump_property($rp) {
   var_dump($rp->getDocComment(), $rp->getTypeText(), $rp->getDefaultValue());
 }
 
+
+<<__EntryPoint>>
+function main_dynamic_property() {
 $a = new stdClass;
 $a->a = 'a';
 dump_property((new ReflectionObject($a))->getProperty('a'));
 dump_property((new ReflectionProperty($a, 'a')));
+}

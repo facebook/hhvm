@@ -21,4 +21,8 @@ function x() {
   $x = new ReflectionFunction($x ==> $x + $y);
   var_dump($x->getStaticVariables());
 }
+
+<<__EntryPoint>>
+function main_closure_static_locals() {
 x();
+}

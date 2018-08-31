@@ -4,4 +4,8 @@ class A {
     return \STDIN;
   }
 }
+
+<<__EntryPoint>>
+function main_stdin() {
 var_dump(A::b());
+}

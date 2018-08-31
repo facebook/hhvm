@@ -9,6 +9,9 @@ class C {
   }
 }
 
+
+<<__EntryPoint>>
+function main_type_annotation2() {
 $info1 = type_structure(C::class, 'T');
 $info2 = type_structure(new C, 'T');
 
@@ -16,3 +19,4 @@ var_dump($info1 === $info2);
 var_dump(C::check($info1));
 
 var_dump($info1);
+}

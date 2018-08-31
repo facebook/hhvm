@@ -48,5 +48,9 @@ function main() {
   var_dump(array_diff($v1, $m2, $m3));
   var_dump(array_diff($m1, $m2, $m3));
 }
-main();
 
+
+<<__EntryPoint>>
+function main_array_diff_1() {
+main();
+}

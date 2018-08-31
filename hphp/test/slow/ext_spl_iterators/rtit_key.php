@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_rtit_key() {
 $rait = new RecursiveArrayIterator([
   'a' => 0,
   1,
@@ -32,4 +35,5 @@ foreach($rtit as $key=>$val) {
 
 foreach($rtit_bypass as $key=>$val) {
   var_dump($rtit_bypass->key());
+}
 }

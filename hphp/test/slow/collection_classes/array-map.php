@@ -1,5 +1,4 @@
 <?hh
-error_reporting(0);
 
 function plusOne($x) { return $x + 1; }
 function multiply($x, $y) {
@@ -56,4 +55,9 @@ function main() {
   test_mapping();
   test_key_conversion();
 }
+
+<<__EntryPoint>>
+function main_array_map() {
+error_reporting(0);
 main();
+}

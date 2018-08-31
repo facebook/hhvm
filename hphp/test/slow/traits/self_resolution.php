@@ -18,8 +18,12 @@ class SubThing extends Thing {
   use Stuff;
 }
 
+
+<<__EntryPoint>>
+function main_self_resolution() {
 $a = new Thing();
 $a->checkSelf();
 $b = new SubThing();
 $b->checkSelf();
 $b->checkParent();
+}

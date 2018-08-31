@@ -8,6 +8,10 @@ class native {
   private $native = 1337;
 }
 
+
+<<__EntryPoint>>
+function main_serialized_native_data_key_conflict() {
 $serialized = serialize(new native());
 var_dump(json_encode($serialized));
 var_dump(unserialize($serialized));
+}

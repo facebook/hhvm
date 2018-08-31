@@ -82,4 +82,8 @@ function test() {
   var_dump(is_darray($x3));
 }
 
+
+<<__EntryPoint>>
+function main_giant() {
 test();
+}

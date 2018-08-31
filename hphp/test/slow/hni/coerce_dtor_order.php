@@ -12,4 +12,8 @@ function foo(): void {
   set_error_handler('err');
   hash(new X(1), new X(2));
 }
+
+<<__EntryPoint>>
+function main_coerce_dtor_order() {
 foo();
+}

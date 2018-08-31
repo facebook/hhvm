@@ -39,4 +39,8 @@ function main() {
   var_dump(strlen("new stdClass()"));
 }
 
+
+<<__EntryPoint>>
+function main_strlen() {
 main();
+}

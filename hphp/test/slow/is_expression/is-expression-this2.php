@@ -16,6 +16,9 @@ class C {
 
 final class D extends C {}
 
+
+<<__EntryPoint>>
+function main_is_expression_this2() {
 C::isThis(new C());
 C::isThis(new D());
 C::isThis(new stdClass());
@@ -40,3 +43,4 @@ echo "\n";
 
 T::isThis(new C());
 T::isThis(new D());
+}

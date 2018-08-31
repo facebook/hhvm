@@ -15,5 +15,9 @@ function test($x) {
   $a[0][1] = 1;
   var_dump($a, $b);
   }
+
+<<__EntryPoint>>
+function main_438() {
 test(array(false));
 var_dump(array(false));
+}

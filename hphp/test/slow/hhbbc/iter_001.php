@@ -7,4 +7,8 @@ function foo() {
     $v->heh();
   }
 }
+
+<<__EntryPoint>>
+function main_iter_001() {
 foo();
+}

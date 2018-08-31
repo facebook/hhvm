@@ -22,5 +22,9 @@ class MyClass {
   use Hello2 {
   }
 }
+
+<<__EntryPoint>>
+function main_1986() {
 $o = new MyClass();
 $o->sayNum();
+}

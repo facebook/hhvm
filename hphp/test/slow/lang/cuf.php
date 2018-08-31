@@ -1,5 +1,4 @@
 <?php
-error_reporting(-1);
 
 class A {
   public function meth() {
@@ -686,4 +685,9 @@ function main() {
   $b->doStaticMeth();
   $g->doStaticMeth();
 }
+
+<<__EntryPoint>>
+function main_cuf() {
+error_reporting(-1);
 main();
+}

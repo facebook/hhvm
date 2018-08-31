@@ -13,4 +13,8 @@ function main() {
   var_dump((new Foo)->go());
 }
 
+
+<<__EntryPoint>>
+function main_array_009() {
 main();
+}

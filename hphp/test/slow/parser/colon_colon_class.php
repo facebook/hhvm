@@ -35,4 +35,8 @@ function main() {
   interface E {}
   var_dump(E::class);
 }
+
+<<__EntryPoint>>
+function main_colon_colon_class() {
 main();
+}

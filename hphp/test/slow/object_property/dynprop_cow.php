@@ -80,6 +80,9 @@ function test_dim_unset() {
   var_dump($x);
 }
 
+
+<<__EntryPoint>>
+function main_dynprop_cow() {
 test_read();
 test_dim_read();
 test_read_quiet();
@@ -88,3 +91,4 @@ test_set();
 test_dim_set();
 test_unset();
 test_dim_unset();
+}

@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_token_get_all_elseif() {
 $code = '<?php
 if ($a == 1) {
 } else if ($a == 2) {
@@ -14,4 +17,5 @@ foreach (token_get_all($code) as $token) {
     $token[0] = token_name($token[0]);
   }
   var_dump($token);
+}
 }

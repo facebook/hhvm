@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_issue_3160() {
 $str = <<<'EOL'
   <?php
     echo "$var";
@@ -8,3 +11,4 @@ $str = <<<'EOL'
 EOL;
 
 highlight_string($str);
+}

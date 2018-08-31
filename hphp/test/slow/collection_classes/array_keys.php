@@ -57,5 +57,9 @@ function main() {
   f(array_keys($pair, 22, true));
   f(array_keys($pair, '22', true));
 }
-main();
 
+
+<<__EntryPoint>>
+function main_array_keys() {
+main();
+}

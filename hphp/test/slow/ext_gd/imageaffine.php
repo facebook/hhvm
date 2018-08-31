@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_imageaffine() {
 $base_img = tempnam('/tmp', 'test-imageaffine');
 $tgt_img = tempnam('/tmp', 'test-imageaffine');
 
@@ -41,4 +44,5 @@ foreach($arrAffine as $aff) {
 }
 foreach ($toDelete as $file) {
     @unlink($file);
+}
 }

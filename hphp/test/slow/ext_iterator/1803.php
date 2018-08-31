@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1803() {
 $directory = __DIR__."/../../sample_dir";
 $fileSPLObjects = new RecursiveIteratorIterator(
   new RecursiveDirectoryIterator($directory),
@@ -64,3 +67,4 @@ foreach( $fileSPLObjects as $fullFileName => $fileSPLObject ) {
 }
 asort($files);
 var_dump(array_values($files));
+}

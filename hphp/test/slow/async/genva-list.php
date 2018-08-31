@@ -160,4 +160,8 @@ function derp() {
   HH\Asio\join(herp());
 }
 
+
+<<__EntryPoint>>
+function main_genva_list() {
 derp();
+}

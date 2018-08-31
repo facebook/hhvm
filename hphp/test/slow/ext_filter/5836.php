@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_5836() {
 $data = array(
   'true'     => '1',
   'false'    => '0',
@@ -23,3 +26,4 @@ $args = array(
 );
 
 var_dump(filter_var_array($data, $args));
+}

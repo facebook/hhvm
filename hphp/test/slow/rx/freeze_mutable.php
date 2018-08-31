@@ -27,4 +27,8 @@ function main(): void {
   var_dump($mutable->getBar());
 }
 
+
+<<__EntryPoint>>
+function main_freeze_mutable() {
 main();
+}

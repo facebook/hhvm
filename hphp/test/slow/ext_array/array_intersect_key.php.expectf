@@ -5,5 +5,5 @@ array(2) {
   int(3)
 }
 
-Warning: array_intersect_key() expects parameter 1 to be an array or collection in %s/test/slow/ext_array/array_intersect_key.php on line 6
+Warning: array_intersect_key() expects parameter 1 to be an array or collection in %s/test/slow/ext_array/array_intersect_key.php on line 9
 NULL

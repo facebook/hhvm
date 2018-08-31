@@ -8,6 +8,9 @@ function foo() {
   $x += 1000;
   yield $x;
 }
+
+<<__EntryPoint>>
+function main_g8() {
 $x = foo();
 $x->rewind();
 $y1 = clone $x;
@@ -22,4 +25,5 @@ for ($y1->next(); $y1->valid(); $y1->next()) {
 echo "========\n";
 for ($y2->next(); $y2->valid(); $y2->next()) {
   echo $y2->current() . "\n";
+}
 }

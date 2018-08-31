@@ -2,6 +2,9 @@
 function __autoload($name) {
   throw new Exception($name);
 }
+
+<<__EntryPoint>>
+function main_clsref_side_effects() {
 try {
   echo AAA::$a; //zend_fetch_var_address_helper
 } catch (Exception $e) {
@@ -29,3 +32,4 @@ try {
   }
 }
 echo 'okey';
+}

@@ -25,4 +25,8 @@ function test($foo) {
   id(new X(bar()))->foo();
   id(new $foo(bar()))->foo();
 }
+
+<<__EntryPoint>>
+function main_1835() {
 test('X');
+}

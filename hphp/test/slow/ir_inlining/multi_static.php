@@ -39,4 +39,8 @@ function main() {
   var_dump($g->current());
 }
 
+
+<<__EntryPoint>>
+function main_multi_static() {
 main();
+}

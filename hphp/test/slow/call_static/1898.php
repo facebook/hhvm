@@ -13,7 +13,11 @@ class b1 {
     a1::foo();
   }
 }
+
+<<__EntryPoint>>
+function main_1898() {
 $obj = new a1;
 $obj->test();
 $obj = new b1;
 $obj->test();
+}

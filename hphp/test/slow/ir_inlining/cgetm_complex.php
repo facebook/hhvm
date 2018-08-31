@@ -23,4 +23,8 @@ function main(CGetM $k) {
   return $k->getVal();
 }
 
+
+<<__EntryPoint>>
+function main_cgetm_complex() {
 main(new CGetM());
+}

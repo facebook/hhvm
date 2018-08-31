@@ -12,5 +12,9 @@ function g9() {
     }
   }
 }
+
+<<__EntryPoint>>
+function main_482() {
 foreach (g9() as $_) {
+}
 }

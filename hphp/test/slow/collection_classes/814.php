@@ -5,6 +5,9 @@ function cmp($x, $y) {
   if ($x > $y) return -1;
   return 0;
 }
+
+<<__EntryPoint>>
+function main_814() {
 $v = new Vector;
 $v[] = 'c';
 $v[] = 'a';
@@ -28,4 +31,5 @@ echo "------------------------\n";
 uasort(&$m, 'cmp');
 foreach ($m as $key => $val) {
   echo $key . ' ' . $val . "\n";
+}
 }

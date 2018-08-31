@@ -49,7 +49,11 @@ function test_intlike_keys() {
   var_dump([10 => 10, 20 => 20, '30' => 30]);
 }
 
+
+<<__EntryPoint>>
+function main_scalars() {
 test_keys();
 test_cmp();
 test_add();
 test_intlike_keys();
+}

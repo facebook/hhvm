@@ -34,4 +34,8 @@ $a['bar'] ^= f();
 $a['bar'] <<= f();
 $a['bar'] >>= f();
 }
+
+<<__EntryPoint>>
+function main_434() {
 test(new A);
+}

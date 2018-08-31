@@ -6,4 +6,8 @@ function main() {
   var_dump(fstat($f));
 }
 
+
+<<__EntryPoint>>
+function main_fstat_memfile() {
 main();
+}

@@ -1,6 +1,9 @@
 <?php
+
 // https://github.com/php/php-src/pull/865
 
+<<__EntryPoint>>
+function main_bug68128() {
 $array = new ArrayIterator(array('a', array('b', 'c')));
 $regex = new RegexIterator($array, '/Array/');
 
@@ -32,4 +35,5 @@ foreach ($rRegexIterator as $key1 => $value1) {
     print_r($value1);
     echo "\n";
   }
+}
 }

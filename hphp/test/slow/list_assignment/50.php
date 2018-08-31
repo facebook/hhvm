@@ -7,6 +7,10 @@ class X {
     var_dump($a, $b);
   }
 }
+
+<<__EntryPoint>>
+function main_50() {
 $x = new X;
 $x->foo();
 X::$val = null;
+}

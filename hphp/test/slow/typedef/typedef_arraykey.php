@@ -1,5 +1,4 @@
 <?hh
-error_reporting(-1);
 function handler($errno, $errmsg) {
   if ($errno === E_RECOVERABLE_ERROR) {
     echo "E_RECOVERABLE_ERROR: $errmsg\n";
@@ -7,7 +6,6 @@ function handler($errno, $errmsg) {
     return false;
   }
 }
-set_error_handler('handler');
 type X = arraykey;
 newtype Y = ?arraykey;
 newtype A = arraykey;
@@ -37,4 +35,10 @@ function main() {
   d('foo');
   echo "Done\n";
 }
+
+<<__EntryPoint>>
+function main_typedef_arraykey() {
+error_reporting(-1);
+set_error_handler('handler');
 main();
+}

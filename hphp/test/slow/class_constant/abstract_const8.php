@@ -18,4 +18,8 @@ function main() {
   echo 'Done', "\n";
 }
 
+
+<<__EntryPoint>>
+function main_abstract_const8() {
 main();
+}

@@ -1,4 +1,8 @@
 #not-a-hashbang
 #test
 
-<?php var_dump(true);
+<?php
+<<__EntryPoint>>
+function main_hashbang_regression() {
+var_dump(true);
+}

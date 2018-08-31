@@ -18,4 +18,8 @@ function main() {
   var_dump($a->getBar());
 }
 
+
+<<__EntryPoint>>
+function main_private_props_015() {
 main();
+}

@@ -14,4 +14,8 @@ function test() {
   }
   var_dump($x);
 }
+
+<<__EntryPoint>>
+function main_2186() {
 test();
+}

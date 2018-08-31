@@ -18,4 +18,8 @@ function main() {
   Foob::heh()->yo();
 }
 
+
+<<__EntryPoint>>
+function main_static_props_002() {
 main();
+}

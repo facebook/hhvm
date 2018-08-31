@@ -10,4 +10,8 @@ function main() {
   variadic_by_ref($a, $b);
   var_dump($a, $b);
 }
+
+<<__EntryPoint>>
+function main_by_reference() {
 main();
+}

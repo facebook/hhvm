@@ -123,6 +123,10 @@ function round_trip_tests() {
   round_trip(darray[0 => varray[1, 2, 3], 1 => varray[4, 5, 6]]);
 }
 
+
+<<__EntryPoint>>
+function main_serialize() {
 serialize_tests();
 unserialize_tests();
 round_trip_tests();
+}

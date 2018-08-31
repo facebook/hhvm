@@ -14,5 +14,9 @@ class C extends B {
  return "hello\n";
  }
 }
+
+<<__EntryPoint>>
+function main_2121() {
 $o = new C;
 echo $o->foo();
+}

@@ -6,4 +6,8 @@ class A {
   public $d = 'd';
   public $e = array(array('e'));
 }
+
+<<__EntryPoint>>
+function main_var_export() {
 var_export(new A);
+}

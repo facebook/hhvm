@@ -11,4 +11,8 @@ function main() {
   return $merge;
 }
 
+
+<<__EntryPoint>>
+function main_empty_merge() {
 var_dump(main());
+}

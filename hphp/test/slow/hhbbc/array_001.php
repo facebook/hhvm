@@ -10,4 +10,8 @@ function main() {
   var_dump(c(true));
   var_dump(c(false));
 }
+
+<<__EntryPoint>>
+function main_array_001() {
 main();
+}

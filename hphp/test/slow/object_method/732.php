@@ -7,5 +7,9 @@ class c {
     var_dump($$t);
   }
 }
+
+<<__EntryPoint>>
+function main_732() {
 $x = new c;
 $x->x();
+}

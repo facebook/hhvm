@@ -38,4 +38,8 @@ __CLaSS__}
     var_dump($arr);
   }
 }
+
+<<__EntryPoint>>
+function main_672() {
 tEst::eXclaiM();
+}

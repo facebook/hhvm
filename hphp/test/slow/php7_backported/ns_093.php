@@ -17,5 +17,3 @@ use Foo\Bar\
 };
 
 echo "\nDone\n";
-
-

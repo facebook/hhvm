@@ -18,8 +18,12 @@ class B {
   use T;
 }
 
+
+<<__EntryPoint>>
+function main_trait_generator_closure_001() {
 $a = new A;
 $f = $a->f();
 foreach ($f() as $v) {
   var_dump($v);
+}
 }

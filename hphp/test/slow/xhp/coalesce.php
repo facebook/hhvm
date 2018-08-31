@@ -6,6 +6,10 @@ class :foo {
   }
 }
 
+
+<<__EntryPoint>>
+function main_coalesce() {
 $a = null;
 $b = $a ?? <foo />;
 var_dump((string) $b);
+}

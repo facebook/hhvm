@@ -81,6 +81,9 @@ function f_3($x) {
   case "baz": print "baz";
   }
 }
+
+<<__EntryPoint>>
+function main_1755() {
 f_1("");
 f_1(null);
 f_1(false);
@@ -117,3 +120,4 @@ f_3("foo");
 f_3("bar");
 f_3("baz");
 f_3("def");
+}

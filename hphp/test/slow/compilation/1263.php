@@ -3,4 +3,8 @@
 function test() {
  return array();
 }
- reset(test());
+
+ <<__EntryPoint>>
+function main_1263() {
+reset(test());
+}

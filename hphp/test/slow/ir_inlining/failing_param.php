@@ -13,4 +13,8 @@ function main() {
  }
 }
 
+
+<<__EntryPoint>>
+function main_failing_param() {
 main();
+}

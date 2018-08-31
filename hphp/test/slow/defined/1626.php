@@ -1,7 +1,4 @@
 <?php
-
-define('THIRTEEN', 13);
-define('ONE', 1);
 class Foo {
   const ZERO        = 0;
   function f() {
@@ -37,6 +34,12 @@ class Bar extends Foo {
 class Goo {
   const ZERO = Bar::ZERO;
 }
+
+
+<<__EntryPoint>>
+function main_1626() {
+define('THIRTEEN', 13);
+define('ONE', 1);
 $a = 'Foo::ZERO';
 if (defined($a)) {
   var_dump(Foo::ZERO);
@@ -53,3 +56,4 @@ $obj = new Foo;
 $obj->f();
 $obj = new Bar;
 $obj->f();
+}

@@ -18,4 +18,8 @@ function main() {
   return B::foo() + C::foo();
 }
 
+
+<<__EntryPoint>>
+function main_inline_lateboundcls() {
 echo var_dump(main());
+}

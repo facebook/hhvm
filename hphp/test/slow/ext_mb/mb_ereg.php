@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_mb_ereg() {
 var_dump(!mb_ereg_match("a", "some apples"));
 var_dump(mb_ereg_match("a", "a kiwi"));
 var_dump(mb_ereg_match(".*a", "some apples"));
@@ -106,3 +109,4 @@ $str = "XYZ";
 $matches = array();
 var_dump(mb_eregi("z", $str, $matches));
 var_dump($matches);
+}

@@ -61,5 +61,9 @@ function main() {
   f(array_intersect($m1, $s2, $s3));
   f(array_intersect($s1, $s2, $s3));
 }
-main();
 
+
+<<__EntryPoint>>
+function main_array_intersect_2() {
+main();
+}

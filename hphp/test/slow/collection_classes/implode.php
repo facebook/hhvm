@@ -25,4 +25,8 @@ function main() {
   var_dump(strlen($set_implode) === strlen($arr_implode));
   var_dump(new Set(explode(', ', $set_implode)) == $s);
 }
+
+<<__EntryPoint>>
+function main_implode() {
 main();
+}

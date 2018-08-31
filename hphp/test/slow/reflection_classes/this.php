@@ -31,5 +31,9 @@ class C {
   public function m() : this { return $this; }
 }
 
+
+<<__EntryPoint>>
+function main_this() {
 $rc = new ReflectionClass('C');
 printClass($rc);
+}

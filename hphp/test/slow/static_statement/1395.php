@@ -7,4 +7,8 @@ function test() {
   $static_var ++;
   echo $static_var;
 }
+
+<<__EntryPoint>>
+function main_1395() {
 test();
+}

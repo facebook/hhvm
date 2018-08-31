@@ -6,4 +6,8 @@ function is_soft(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_soft() {
 is_function(1);
+}

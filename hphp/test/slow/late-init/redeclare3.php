@@ -25,5 +25,9 @@ class B extends A {
   <<__LateInit>> private static $p7;
 }
 
+
+<<__EntryPoint>>
+function main_redeclare3() {
 new B();
 echo "DONE\n";
+}

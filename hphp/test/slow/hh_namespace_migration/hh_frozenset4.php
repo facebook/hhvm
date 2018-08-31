@@ -15,4 +15,8 @@ function main() {
   $custom_set = new ImmSet();
 }
 
+
+<<__EntryPoint>>
+function main_hh_frozenset4() {
 main();
+}

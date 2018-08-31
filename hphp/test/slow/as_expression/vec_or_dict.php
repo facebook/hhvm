@@ -8,6 +8,9 @@ function f(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_vec_or_dict() {
 f(1);
 f(false);
 f(1.5);
@@ -18,3 +21,4 @@ f(vec[]);
 f(dict[]);
 f(keyset[]);
 f(null);
+}

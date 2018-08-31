@@ -20,4 +20,8 @@ function main() {
   var_dump($y);
 }
 
+
+<<__EntryPoint>>
+function main_magic_call_003() {
 main();
+}

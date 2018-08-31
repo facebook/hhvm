@@ -44,5 +44,9 @@ async function mainAsync() {
   echo "Leaving mainAsync\n";
 }
 
+
+<<__EntryPoint>>
+function main_bad_disposable() {
 main();
 HH\Asio\join(mainAsync());
+}

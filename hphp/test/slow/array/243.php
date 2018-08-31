@@ -11,5 +11,9 @@ function test($a) {
   var_dump('one');
   var_dump($x);
 }
+
+<<__EntryPoint>>
+function main_243() {
 test(1);
 var_dump('three');
+}

@@ -1,14 +1,10 @@
 <?php
 
-require_once('fix_exceptions.inc');
-
 function errHandler($errno, $errmsg, $file, $line) {
   $errmsg = str_replace('long', 'integer', $errmsg);
   printf("WARNING: ".fix_err($errmsg, false)."\n");
   return true;
 }
-
-set_error_handler('errHandler', E_ALL);
 
 function check($kind, $builtin_fn, $user_fn) {
   echo "\n$kind\n";
@@ -19,6 +15,13 @@ function check($kind, $builtin_fn, $user_fn) {
     $user_fn($v);
   }
 }
+
+
+<<__EntryPoint>>
+function main_type_coersion_5() {
+require_once('fix_exceptions.inc');
+
+set_error_handler('errHandler', E_ALL);
 
 check("Boolean", function ($v) { return sha1("abc", $v); },
       function (boolean $v) { });
@@ -33,3 +36,4 @@ check("Array",
       function (array $v) { });
 check("Object", function ($v) { return get_object_vars($v); },
       function (object $v) { });
+}

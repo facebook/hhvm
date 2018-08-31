@@ -15,14 +15,18 @@ class A implements I1 {
     use T;
 }
 
-if (isset($g)) {
-  class A {}
-}
-
 abstract class B extends A implements I2 {
     use X;
 }
 
 class C extends B {}
 
+
+<<__EntryPoint>>
+function main_abstract_final_override() {
+if (isset($g)) {
+  class A {}
+}
+
 var_dump(new C);
+}

@@ -46,8 +46,12 @@ function test_preg_split() {
   var_dump(preg_split("//", "string", 3, PREG_SPLIT_OFFSET_CAPTURE | PREG_FB_HACK_ARRAYS | PREG_SPLIT_NO_EMPTY));
 }
 
+
+<<__EntryPoint>>
+function main_hack_arrays() {
 test_preg_match();
 test_preg_grep();
 test_preg_split();
 
 var_dump(PREG_FB_HACK_ARRAYS === PREG_HACK_ARR);
+}

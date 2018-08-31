@@ -1,1 +1,1 @@
-Fatal error: Switch statements may only contain one ('default' clause\.|default: clause) in [^\n\r]+\/switch-default-multiple\.php on line (8|9)
+Fatal error: Switch statements may only contain one ('default' clause\.|default: clause) in [^\n\r]+\/switch-default-multiple\.php on line (11|12)

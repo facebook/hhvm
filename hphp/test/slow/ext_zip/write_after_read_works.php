@@ -1,5 +1,8 @@
 <?php
+
 // Create test ZIP file
+<<__EntryPoint>>
+function main_write_after_read_works() {
 $zip_setup = new ZipArchive();
 $zip_setup->open('hello.zip', ZipArchive::OVERWRITE | ZipArchive::CREATE);
 $zip_setup->addFromString('hello.txt', 'Old value here');
@@ -25,3 +28,4 @@ echo 'Reloaded value hello.txt: ', $zip->getFromName('hello.txt'), "\n";
 echo 'Reloaded value hello2.txt: ', $zip->getFromName('hello2.txt'), "\n";
 
 unlink('hello.zip');
+}

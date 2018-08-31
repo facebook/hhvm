@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1372() {
 assert_options(ASSERT_ACTIVE, 0);
 assert_options(ASSERT_WARNING, 0);
 var_dump(assert(false));
@@ -15,3 +18,4 @@ var_dump(assert(false));
 var_dump(assert_options(ASSERT_ACTIVE, 2));
 var_dump(assert_options(ASSERT_WARNING, 0));
 var_dump(assert(false));
+}

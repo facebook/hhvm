@@ -38,6 +38,9 @@ function execute($class_name, $method_name, $instance) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_get_closure_instance() {
 execute('A', 'M1', new A(true));
 execute('A', 'M2', new A(42));
 execute('A', 'M3', new A(array()));
@@ -47,3 +50,4 @@ execute('A', 'M1', new B());
 execute('A', 'M2', new B());
 execute('A', 'M3', new B());
 execute('A', 'M4', new B('NOT STATIC'));
+}

@@ -72,4 +72,8 @@ function main() {
   checkNums($d);
 }
 
+
+<<__EntryPoint>>
+function main_invalid_index() {
 main();
+}

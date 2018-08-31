@@ -20,14 +20,18 @@ function test() {
   $a = new B();
   $a->t($arr['hello'], $arr);
 }
+function test2(&$a, $b) {
+  $a = $b;
+}
+
+<<__EntryPoint>>
+function main_1090() {
 test();
 $arr = array('hello' => 1);
 $x = &$arr['hello'];
 $arr['hello'] = $x;
 var_dump($arr);
-function test2(&$a, $b) {
-  $a = $b;
-}
 $v = 10;
 test2($v, $v);
 var_dump($v);
+}

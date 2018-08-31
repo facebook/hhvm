@@ -34,4 +34,8 @@ function main() {
   // We can't construct a Map or ImmMap from a Set.
 }
 
+
+<<__EntryPoint>>
+function main_constructors() {
 main();
+}

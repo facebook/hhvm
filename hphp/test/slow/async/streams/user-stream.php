@@ -5,6 +5,9 @@ class MyStream {
     return true;
   }
 }
+
+<<__EntryPoint>>
+function main_user_stream() {
 stream_wrapper_register('mystream', 'MyStream');
 
 try {
@@ -13,4 +16,5 @@ try {
   var_dump(HH\Asio\join($wh));
 } catch (Exception $e) {
   echo "Exception: ", $e->getMessage(), "\n";
+}
 }

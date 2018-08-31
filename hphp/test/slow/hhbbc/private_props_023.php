@@ -20,4 +20,8 @@ function test($x) {
   var_dump($x->bar());
 }
 
+
+<<__EntryPoint>>
+function main_private_props_023() {
 test(new X);
+}

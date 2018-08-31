@@ -21,4 +21,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_array_fill_keys_tostring() {
 main();
+}

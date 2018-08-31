@@ -3,6 +3,9 @@
 function add($a, $b) {
  return $a + $b;
  }
+
+<<__EntryPoint>>
+function main_1808() {
 $server = new SoapServer(NULL, array('uri' => 'http://test-uri'));
 $str = '<?xml version="1.0" '
 .       'encoding="ISO-8859-1"?>'
@@ -19,3 +22,4 @@ $str = '<?xml version="1.0" '
 .       '</ns1:Add>  </SOAP-ENV:Body></SOAP-ENV:Envelope>';
 $server->addFunction('Add');
 $server->handle($str);
+}

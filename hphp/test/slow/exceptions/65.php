@@ -1,7 +1,4 @@
 <?php
-
-error_reporting(-1);
-set_error_handler('handle');
 function handle() {
  throw new exception;
  }
@@ -30,7 +27,14 @@ function test($f) {
     var_dump($f.':Caught');
   }
 }
+
+
+<<__EntryPoint>>
+function main_65() {
+error_reporting(-1);
+set_error_handler('handle');
 test('test1');
 test('test2');
 test('test3');
 var_dump('not reached');
+}

@@ -21,4 +21,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_property_order() {
 main();
+}

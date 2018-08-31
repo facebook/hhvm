@@ -22,5 +22,9 @@ class xml {
 }
 }
 
+
+<<__EntryPoint>>
+function main_1667() {
 $xml_parser = new xml();
 $xml_parser->parse('<A ID="hallo">PHP</A>');
+}

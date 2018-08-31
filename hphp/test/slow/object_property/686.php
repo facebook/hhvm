@@ -19,8 +19,6 @@ class B extends A {
     var_dump($this->pri);
   }
 }
-$obj = new B();
- $obj->bar();
 class C extends B {
   public $pri = 'c-pri';
   public $pro = 'c-pro';
@@ -29,10 +27,6 @@ class C extends B {
     var_dump($this->pro);
   }
 }
-$obj = new C;
- $obj->bar();
- $obj->bar2();
-var_dump(serialize($obj));
 class Base {
   protected $pro = 1;
   private $pri = 'base-pri';
@@ -62,6 +56,15 @@ class DD extends D {
     var_dump($this->pri);
   }
 }
+
+<<__EntryPoint>>
+function main_686() {
+$obj = new B();
+ $obj->bar();
+$obj = new C;
+ $obj->bar();
+ $obj->bar2();
+var_dump(serialize($obj));
 if (false) {
   class R{
 }
@@ -75,3 +78,4 @@ $d->qqq();
 $d->qq();
 $d->q();
 $d->q0();
+}

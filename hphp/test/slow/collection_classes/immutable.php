@@ -8,5 +8,9 @@ function main() {
   var_dump((ImmSet {1, 2})->immutable());
   var_dump((Pair {1, 2})->immutable());
 }
-main();
 
+
+<<__EntryPoint>>
+function main_immutable() {
+main();
+}

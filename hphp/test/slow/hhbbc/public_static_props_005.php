@@ -7,5 +7,9 @@ class Foo {
   }
 }
 
+
+<<__EntryPoint>>
+function main_public_static_props_005() {
 (new Foo)->go();
 var_dump(Foo::$heh);
+}

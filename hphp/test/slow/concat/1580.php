@@ -8,4 +8,8 @@ function bar() {
   $s = foo();
   echo $s;
 }
+
+<<__EntryPoint>>
+function main_1580() {
 bar();
+}

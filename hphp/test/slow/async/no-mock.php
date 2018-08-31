@@ -7,8 +7,12 @@ class MyWaitHandle extends Awaitable {
   }
 }
 
+
+<<__EntryPoint>>
+function main_no_mock() {
 try {
   $wh = new MyWaitHandle;
 } catch (Exception $e) {
   echo "Exception: ", $e->getMessage(), "\n";
+}
 }

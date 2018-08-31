@@ -20,4 +20,8 @@ try {
   echo "Exception: ", $e->getMessage(), "\n";
 }
 }
+
+<<__EntryPoint>>
+function main_waithandle_result() {
 f();
+}

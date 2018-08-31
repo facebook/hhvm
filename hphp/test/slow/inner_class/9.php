@@ -8,5 +8,9 @@ class test {
  inner();
 }
  }
- $obj = new Test();
+
+ <<__EntryPoint>>
+function main_9() {
+$obj = new Test();
  $obj->p();
+}

@@ -25,6 +25,9 @@ function convert_simplexml_to_array($sxml) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_1642() {
 $xml = <<<EOM
 <root list="true">
   <node key="key1" list="true">
@@ -42,3 +45,4 @@ EOM;
 
 $sxml = simplexml_load_string($xml);
 var_dump(convert_simplexml_to_array($sxml));
+}

@@ -28,6 +28,12 @@ class F1 {
     return $a0 > 10;
   }
 }
+function mk($n) {
+  return $n . '::__invoke';
+}
+
+<<__EntryPoint>>
+function main_764() {
 $c = new C1;
 $d = new D1;
 $e = new E1;
@@ -43,8 +49,6 @@ call_user_func_array($e, array(0, 1));
 $c->__invoke(0, 1);
 $d->__invoke(0, 1);
 $e->__invoke(0, 1);
-function mk($n) {
-  return $n . '::__invoke';
-}
 (new E1)->test();
 var_dump(array_filter(array(0, 1, 11, 13), new F1));
+}

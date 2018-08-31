@@ -1,8 +1,4 @@
 <?hh
-
-$length = 10000000;
-$prefixKey = str_repeat("a",$length);
-$prefixValue = str_repeat("b",$length);
 // Generate giant string and store it into APC
 function dump($i, $flag): int {
   global $prefixKey, $prefixValue;
@@ -30,7 +26,15 @@ function OOM_leak_test(): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_apc_oom() {
+$length = 10000000;
+$prefixKey = str_repeat("a",$length);
+$prefixValue = str_repeat("b",$length);
+
 echo "APC out of memory test begins!\n";
 OOM_auto_trigger_test();
 OOM_leak_test();
 echo "passed\n";
+}

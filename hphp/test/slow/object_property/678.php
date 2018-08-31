@@ -8,5 +8,9 @@ class A {
   }
 }
 
+
+<<__EntryPoint>>
+function main_678() {
 $obj = new A();
 var_dump($obj->prop);
+}

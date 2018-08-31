@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1595() {
 define('AAA', true);
 define('BBB', false);
 define('CCC', null);
@@ -25,3 +28,4 @@ $a = AAA ? "AAA" : "!AAA";
 $b = BBB ? "BBB" : "!BBB";
 $c = CCC ? "CCC" : "!CCC";
 echo "$a$b$c\n";
+}

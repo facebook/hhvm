@@ -26,4 +26,8 @@ function main() {
   var_dump($x);
 }
 
+
+<<__EntryPoint>>
+function main_variadic_inout() {
 main();
+}

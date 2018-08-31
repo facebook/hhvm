@@ -6,4 +6,8 @@ function foo() {
     $x = array('foo' => $x);
   }
 }
+
+<<__EntryPoint>>
+function main_array_010() {
 foo();
+}

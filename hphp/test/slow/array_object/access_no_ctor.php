@@ -7,4 +7,8 @@ class C extends ArrayObject {
   }
 }
 
+
+<<__EntryPoint>>
+function main_access_no_ctor() {
 $c = new C(3);
+}

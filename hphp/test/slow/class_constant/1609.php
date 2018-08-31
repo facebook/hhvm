@@ -16,5 +16,9 @@ class Z extends Y implements X {
     print Y::B;
   }
 }
+
+<<__EntryPoint>>
+function main_1609() {
 $z = new Z;
 $z->x();
+}

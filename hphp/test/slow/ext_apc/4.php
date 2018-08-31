@@ -1,6 +1,9 @@
 <?php
 
+
 // reproducing a memory leak (3/26/09)
+<<__EntryPoint>>
+function main_4() {
 apc_add("apcdata", array("a" => "test", "b" => 1)); // MapVariant
 
 $apcdata = apc_fetch("apcdata");
@@ -20,3 +23,4 @@ if ($apcdata !== array("apcdata" => array("a" => "test", "b" => 1))) {
 }
 
 echo "ok\n";
+}

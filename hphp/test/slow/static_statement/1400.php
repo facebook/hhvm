@@ -1,7 +1,4 @@
 <?php
-
-static $static_var = 1;
-echo $static_var . "\n";
 function test(){
   static $static_var = -1;
   echo $static_var . "\n";
@@ -10,5 +7,12 @@ function test(){
   $static_var++;
   echo $static_var . "\n";
 }
+
+
+<<__EntryPoint>>
+function main_1400() {
+static $static_var = 1;
+echo $static_var . "\n";
 test();
 test();
+}

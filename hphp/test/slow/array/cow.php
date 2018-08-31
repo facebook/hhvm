@@ -19,4 +19,8 @@ function main() {
   var_dump(cow());
 }
 
+
+<<__EntryPoint>>
+function main_cow() {
 main();
+}

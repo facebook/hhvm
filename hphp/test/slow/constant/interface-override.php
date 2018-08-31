@@ -11,4 +11,8 @@ class A extends X {
 class B extends A {}
 class C extends A { const v = 44; }
 
+
+<<__EntryPoint>>
+function main_interface_override() {
 var_dump(X::v, A::v, B::v, C::v);
+}

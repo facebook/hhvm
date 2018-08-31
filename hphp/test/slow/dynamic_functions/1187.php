@@ -1,5 +1,12 @@
 <?php
+function foo() {
+}
+function goo(&$p) {
+}
 
+
+<<__EntryPoint>>
+function main_1187() {
 $a = 'test';
 if ($a) {
   function bar() {
@@ -9,11 +16,8 @@ if ($a) {
   function bar() {
 }
 }
-function foo() {
-}
-function goo(&$p) {
-}
 $goo = 'goo';
 goo(foo());
 $goo(foo());
 bar(foo());
+}

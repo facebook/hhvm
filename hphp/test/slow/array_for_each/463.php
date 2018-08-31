@@ -21,4 +21,8 @@ function f9() {
       break;
   }
 }
+
+<<__EntryPoint>>
+function main_463() {
 f9();
+}

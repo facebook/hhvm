@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1411() {
 if (false) {
   echo "case 1\n";
 }
@@ -110,4 +113,5 @@ if ($a) {
   function f9() {
     $v = 1;
   }
+}
 }

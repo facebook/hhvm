@@ -3,6 +3,9 @@
 function add($a, $b) {
  return $a + $b;
  }
+
+<<__EntryPoint>>
+function main_headers_sent_no_warn() {
 var_dump(headers_sent()); // false
 var_dump(headers_sent()); //true
 $server = new SoapServer(NULL, array('uri' => 'http://test-uri'));
@@ -23,3 +26,4 @@ $server->addFunction('Add');
 $server->handle($str);
 var_dump(headers_sent()); // true
 var_dump(headers_list()); // empty
+}

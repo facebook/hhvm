@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_array_walk_closure() {
 $acc = 0;
 $callback = function (&$value, $key, $extra = 1) use(&$acc) {
   $value += $extra;
@@ -10,3 +13,4 @@ $fruit = array('lemons' => 2);
 array_walk($fruit, $callback);
 var_dump($fruit['lemons']);
 var_dump($acc);
+}

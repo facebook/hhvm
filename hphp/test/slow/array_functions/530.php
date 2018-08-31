@@ -2,6 +2,9 @@
 
 class A {
  }
+
+<<__EntryPoint>>
+function main_530() {
 $o = new A;
 $f = '10';
 $o->$f = 100;
@@ -16,3 +19,4 @@ var_dump(array_merge($a, $b));
 var_dump(array_merge_recursive($a, $b));
 var_dump(array_reverse($a));
 var_dump(array_chunk($a, 2));
+}

@@ -21,5 +21,9 @@ function test(I $i) {
   var_dump($i::FOO);
 }
 
+
+<<__EntryPoint>>
+function main_interface_diff_slots() {
 test(new A());
 test(new B());
+}

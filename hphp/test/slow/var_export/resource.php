@@ -7,4 +7,8 @@ function test() {
   var_dump(var_export($f, true));
 }
 
+
+<<__EntryPoint>>
+function main_resource() {
 test();
+}

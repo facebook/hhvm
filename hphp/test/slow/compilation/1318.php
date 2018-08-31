@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1318() {
 if (isset($g)) {
   class X {
     private static $i = null;
@@ -10,5 +13,6 @@ if (isset($g)) {
 }
  else {
   class X {
+}
 }
 }

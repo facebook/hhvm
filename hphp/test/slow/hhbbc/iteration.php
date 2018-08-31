@@ -161,6 +161,9 @@ function fun14() {
   return $sum;
 }
 
+
+<<__EntryPoint>>
+function main_iteration() {
 var_dump(fun1());
 var_dump(fun2());
 var_dump(fun3());
@@ -175,3 +178,4 @@ var_dump(fun11());
 var_dump(fun12());
 var_dump(fun13());
 var_dump(fun14());
+}

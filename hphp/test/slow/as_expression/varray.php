@@ -8,4 +8,8 @@ function f(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_varray() {
 f(varray[]);
+}

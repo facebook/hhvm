@@ -111,4 +111,8 @@ function main() {
   );
 }
 
+
+<<__EntryPoint>>
+function main_arraylike() {
 main();
+}

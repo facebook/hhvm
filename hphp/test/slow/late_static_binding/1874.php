@@ -9,4 +9,8 @@ class B {
 class C extends B {
   public static $a = 1000;
 }
+
+<<__EntryPoint>>
+function main_1874() {
 call_user_func(array('C', 'f'));
+}

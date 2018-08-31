@@ -10,6 +10,10 @@ class Example {
       }
    }
 }
+
+<<__EntryPoint>>
+function main_739() {
 Example::whatever();
 $inst = new Example();
 $inst->whatever();
+}

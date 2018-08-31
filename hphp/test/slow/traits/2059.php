@@ -26,6 +26,9 @@ class T {
     Y::test8 as test82;
   }
 }
+
+<<__EntryPoint>>
+function main_2059() {
 var_dump(T::test());
 var_dump(T::test1());
 var_dump(T::test2());
@@ -52,3 +55,4 @@ var_dump($obj->test82(1, 2, 3, 4, 5, 6, 7, 8));
 var_dump(call_user_func(array($obj, "test8"), 1, 2, 3, 4, 5, 6, 7, 8));
 var_dump(call_user_func(array($obj, "test81"), 1, 2, 3, 4, 5, 6, 7, 8));
 var_dump(call_user_func(array($obj, "test82"), 1, 2, 3, 4, 5, 6, 7, 8));
+}

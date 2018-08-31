@@ -37,4 +37,8 @@ function main() {
   var_dump(keyset(dict[1 => 'a', 2 => 100, 3 => 'b']));
 }
 
+
+<<__EntryPoint>>
+function main_simplify_literal_convert() {
 main();
+}

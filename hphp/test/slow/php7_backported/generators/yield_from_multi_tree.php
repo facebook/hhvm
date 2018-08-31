@@ -10,6 +10,9 @@ function gen($gen, $level) {
   }
   yield from $gen;
 }
+
+<<__EntryPoint>>
+function main_yield_from_multi_tree() {
 foreach (range(0, 6) as $levels) {
   print "$levels level".($levels == 1 ? "" : "s")."\n\n";
   $all = array();
@@ -29,4 +32,5 @@ foreach (range(0, 6) as $levels) {
     }
   }
   print "\n\n";
+}
 }

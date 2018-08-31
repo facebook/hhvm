@@ -24,8 +24,12 @@ final class D {
   const C::Cint type = 200;
 }
 
+
+<<__EntryPoint>>
+function main_type_constant() {
 define('type', 123);
 var_dump(type + 123);
 var_dump(type - 123);
 var_dump(C::type + D::type);
 var_dump(C::type - D::type);
+}

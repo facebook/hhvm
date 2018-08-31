@@ -10,13 +10,17 @@ function doh($x, $y) {
     }
   }
 }
-fb_setprofile('doh');
 
 function hey() {
   yield new stdclass;
 }
 
+
+<<__EntryPoint>>
+function main_yield_suspend_hook() {
+fb_setprofile('doh');
+
 for ($i = 0; $i < 3; ++$i) {
   try { foreach (hey() as $k) {} } catch (Exception $x) {}
 }
-
+}

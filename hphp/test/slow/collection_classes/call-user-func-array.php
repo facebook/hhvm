@@ -58,5 +58,9 @@ function main() {
   $cufa('C::foo', Pair {11, 'a'});
   echo "\n";
 }
-main();
 
+
+<<__EntryPoint>>
+function main_call_user_func_array() {
+main();
+}

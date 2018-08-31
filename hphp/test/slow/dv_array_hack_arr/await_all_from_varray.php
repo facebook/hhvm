@@ -10,5 +10,9 @@ async function test() {
   await AwaitAllWaitHandle::fromVArray($x);
 }
 
+
+<<__EntryPoint>>
+function main_await_all_from_varray() {
 HH\Asio\join(test());
 echo "DONE\n";
+}

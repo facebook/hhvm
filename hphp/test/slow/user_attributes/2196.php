@@ -27,4 +27,8 @@ function test() {
 
   MockAbsFinalClass::f();
 }
+
+<<__EntryPoint>>
+function main_2196() {
 test();
+}

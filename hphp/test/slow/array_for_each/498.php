@@ -14,4 +14,8 @@ function k4() {
   var_dump(current(&$arr2));
   var_dump(current(&$arr));
 }
+
+<<__EntryPoint>>
+function main_498() {
 k4();
+}

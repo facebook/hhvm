@@ -70,6 +70,9 @@ class ArrayAccessImpl2 extends ArrayAccessImpl {
  else        return false;
   }
 }
+
+<<__EntryPoint>>
+function main_436() {
 offsetGet('foo');
 $data = new ArrayAccessImpl();
 $data['string']="Just a simple string";
@@ -99,3 +102,4 @@ print_r($data2['blank_array']);
 print_r(isset($data2['blank_array']));
 unset($data2['blank_array']);
 print_r($data2);
+}

@@ -8,4 +8,8 @@ function main() {
     $a);
   var_dump(count(array_keys($a)));
 }
+
+<<__EntryPoint>>
+function main_depth_limit() {
 main();
+}

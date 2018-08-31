@@ -11,4 +11,8 @@ function foo() {
     var_dump($child->nodeValue);
   }
 }
+
+<<__EntryPoint>>
+function main_1680() {
 foo();
+}

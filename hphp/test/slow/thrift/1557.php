@@ -73,4 +73,8 @@ function test() {
   thrift_protocol_write_binary($p, 'foomethod', 1, $v1, 20, true);
   var_dump(thrift_protocol_read_binary($p, 'TestStruct', true));
 }
+
+<<__EntryPoint>>
+function main_1557() {
 test();
+}

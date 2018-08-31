@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_set_indent_string_error() {
 $writer = xmlwriter_open_memory();
 xmlwriter_set_indent_string($writer, '#');
 // The second arg is supposedly required. But just keep executing anyway and use
@@ -14,3 +17,4 @@ xmlwriter_end_element($writer);
 xmlwriter_end_document($writer);
 
 var_dump(xmlwriter_output_memory($writer));
+}

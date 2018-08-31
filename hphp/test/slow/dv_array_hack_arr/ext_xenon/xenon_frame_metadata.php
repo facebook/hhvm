@@ -16,6 +16,9 @@ function main() {
   foo('world');
 }
 
+
+<<__EntryPoint>>
+function main_xenon_frame_metadata() {
 main();
 
 $last = null;
@@ -29,4 +32,5 @@ foreach (xenon_get_data() as $sample) {
       }
     }
   }
+}
 }

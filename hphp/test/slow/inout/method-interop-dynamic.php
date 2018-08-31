@@ -112,5 +112,9 @@ function main($obj, $Herp, $foo, $bar, $fizz, $buzz) {
   echo "$f9, $k9\n";
 }
 
+
+<<__EntryPoint>>
+function main_method_interop_dynamic() {
 $obj = new Herp;
 main($obj, 'Herp', 'foo', 'bar', 'fizz', 'buzz');
+}

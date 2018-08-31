@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_chr_invalid_type() {
 $inputs = [
   -1, 0, 1, 2, 128, 255,
   "0string", "1string", "2",
@@ -12,4 +15,5 @@ $inputs = [
 
 foreach ($inputs as $v) {
   var_dump(bin2hex(chr($v)));
+}
 }

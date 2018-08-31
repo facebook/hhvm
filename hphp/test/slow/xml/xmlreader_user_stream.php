@@ -31,4 +31,8 @@ function main() {
   var_dump($r->readOuterXML());
   var_dump($r->readInnerXML());
 }
+
+<<__EntryPoint>>
+function main_xmlreader_user_stream() {
 main();
+}

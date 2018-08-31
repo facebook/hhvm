@@ -8,5 +8,9 @@ class TestArray extends ArrayObject
     }
 }
 
+
+<<__EntryPoint>>
+function main_offset_exists_extended() {
 $test = new TestArray();
 var_dump(isset($test['abc']));
+}

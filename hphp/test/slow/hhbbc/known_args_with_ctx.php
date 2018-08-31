@@ -12,4 +12,8 @@ class Y {
   function g() {}
 }
 
+
+<<__EntryPoint>>
+function main_known_args_with_ctx() {
 var_dump((new Y)->f());
+}

@@ -35,5 +35,9 @@ function run_test() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_2184() {
 foreach (run_test() as $_) {
+}
 }

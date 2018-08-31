@@ -23,4 +23,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_vector_resize() {
 main();
+}

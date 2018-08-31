@@ -7,5 +7,9 @@ async function test() {
   $x = [f(), f(), f()];
   await gena($x);
 }
+
+<<__EntryPoint>>
+function main_gena() {
 HH\Asio\join(test());
 echo "DONE\n";
+}

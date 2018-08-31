@@ -188,4 +188,8 @@ function test() {
   var_dump(DARR4 >= ARR4);
   var_dump(DARR4 <=> ARR4);
 }
+
+<<__EntryPoint>>
+function main_comparisons() {
 test();
+}

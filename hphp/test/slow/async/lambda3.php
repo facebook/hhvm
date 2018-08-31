@@ -21,4 +21,8 @@ async function foo() {
   );
 }
 
+
+<<__EntryPoint>>
+function main_lambda3() {
 var_dump(HH\Asio\join(foo()));
+}

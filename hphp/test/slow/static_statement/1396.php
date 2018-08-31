@@ -9,4 +9,8 @@ class A {
   echo $static_var;
 }
  }
+
+<<__EntryPoint>>
+function main_1396() {
 A::test();
+}

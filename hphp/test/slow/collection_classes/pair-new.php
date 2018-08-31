@@ -11,4 +11,8 @@ function main() {
     echo $e->getMessage(), "\n";
   }
 }
+
+<<__EntryPoint>>
+function main_pair_new() {
 main();
+}

@@ -28,4 +28,8 @@ function main() {
   reverse(ImmMap { 10 => 'foo', 20 => 'bar', 30 => 'baz'});
 }
 
+
+<<__EntryPoint>>
+function main_array_reverse() {
 main();
+}

@@ -1,6 +1,4 @@
 <?php
-
-define('MUST_PREPARE', 0);
 function must_prepare($x) {
   if ($x == MUST_PREPARE) {
      $x = 2;
@@ -17,5 +15,11 @@ trait EntWithViewerComments {
 class EntShare {
   use EntWithViewerComments;
 }
+
+
+<<__EntryPoint>>
+function main_2060() {
+define('MUST_PREPARE', 0);
 $obj1 = new EntShare;
 $obj1->canViewerComment();
+}

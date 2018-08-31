@@ -1,6 +1,10 @@
 <?php
 
+
+
 // Create an iterator to be limited
+<<__EntryPoint>>
+function main_limit_iterator() {
 $fruits = new ArrayIterator(array(
   'apple',
   'banana',
@@ -21,4 +25,4 @@ echo "\n";
 foreach (new LimitIterator($fruits, 2) as $fruit) {
   var_dump($fruit);
 }
-
+}

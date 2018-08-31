@@ -7,4 +7,8 @@ function main($v) {
   var_dump($v->toImmVector());
 }
 
+
+<<__EntryPoint>>
+function main_vector_reserve_vs_immutable() {
 main(Vector {1, 2, 3});
+}

@@ -17,4 +17,8 @@ function main() {
   }
   var_dump($f);
 }
+
+<<__EntryPoint>>
+function main_constprop_exceptions() {
 main();
+}

@@ -13,4 +13,8 @@ function main() {
   addAndDump(Set {1, 2});
 }
 
+
+<<__EntryPoint>>
+function main_set_addall_vs_immutable() {
 main();
+}

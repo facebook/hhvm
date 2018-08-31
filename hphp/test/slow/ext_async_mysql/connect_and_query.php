@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_connect_and_query() {
 try {
   $options = new AsyncMysqlConnectionOptions();
   $options->setTotalTimeout(10);
@@ -21,3 +24,4 @@ try {
 }
 // walk the heap to make sure we haven't corrupted it
 heapgraph_create();
+}

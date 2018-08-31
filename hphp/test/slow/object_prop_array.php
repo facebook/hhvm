@@ -21,5 +21,9 @@ class D extends C {
   public $r;
 }
 
+
+<<__EntryPoint>>
+function main_object_prop_array() {
 var_dump(HH\object_prop_array(new C));
 var_dump(HH\object_prop_array(new D));
+}

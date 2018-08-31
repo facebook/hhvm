@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_array_intersect() {
 $array1 = array(
   "a" => "green",
   "red",
@@ -11,3 +14,4 @@ $array2 = array(
   "red"
 );
 var_dump(array_intersect($array1, $array2));
+}

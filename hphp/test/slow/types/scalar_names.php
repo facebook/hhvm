@@ -1,19 +1,5 @@
 <?php
 
-// It's important that we're in a "<?php" file and that HH syntax
-// is not enabled, otherwise this test would fatal at parse time
-
-set_error_handler(
-  function(
-    HH\int $errno,
-    HH\string $errstr
-  ) {
-    printf("ERROR (%d): %s\n ==> ", $errno, $errstr);
-    // ON ERROR RESUME NEXT;
-    return true;
-  }
-);
-
 class string {
 }
 
@@ -50,6 +36,23 @@ function test_bool(bool $foo) { var_dump($foo); }
 function test_resource(resource $foo) { var_dump($foo); }
 function test_arraykey(arraykey $foo) { var_dump($foo); }
 function test_num(num $foo) { var_dump($foo); }
+
+
+// It's important that we're in a "<?php" file and that HH syntax
+// is not enabled, otherwise this test would fatal at parse time
+
+<<__EntryPoint>>
+function main_scalar_names() {
+set_error_handler(
+  function(
+    HH\int $errno,
+    HH\string $errstr
+  ) {
+    printf("ERROR (%d): %s\n ==> ", $errno, $errstr);
+    // ON ERROR RESUME NEXT;
+    return true;
+  }
+);
 
 print("--- CORRECT USAGE ---\n");
 
@@ -91,3 +94,4 @@ test_resource(STDIN);
 test_arraykey('herp');
 test_arraykey(123);
 test_num(1.23);
+}

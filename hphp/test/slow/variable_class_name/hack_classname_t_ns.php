@@ -20,4 +20,8 @@ function main(): void {
   var_dump(baz(Terp::class));
 }
 
+
+<<__EntryPoint>>
+function main_hack_classname_t_ns() {
 main();
+}

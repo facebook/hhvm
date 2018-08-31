@@ -36,7 +36,11 @@ function main($x) {
   Foo::set(456);
 }
 
+
+<<__EntryPoint>>
+function main_cls_ref_pdce() {
 main(1);
 main(1);
 main(1);
 main(1);
+}

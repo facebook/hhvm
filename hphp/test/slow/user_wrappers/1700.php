@@ -25,6 +25,9 @@ class FifoStream {
  echo "Close\n";
  }
 }
+
+<<__EntryPoint>>
+function main_1700() {
 var_dump(stream_wrapper_register('fifo', 'FifoStream'));
 $fp = fopen('fifo://testing', 'w+');
 var_dump(fwrite($fp, "Data one...\n"));
@@ -35,3 +38,4 @@ while(!feof($fp)) {
   var_dump(fgets($fp));
 }
 fclose($fp);
+}

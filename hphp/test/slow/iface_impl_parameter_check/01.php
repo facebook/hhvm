@@ -16,4 +16,8 @@ interface I2 {
 class C2 extends PDO implements I2 {
 }
 
+
+<<__EntryPoint>>
+function main_01() {
 print("Success\n");
+}

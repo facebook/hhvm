@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_no_double_slash() {
 $streams = array(
   'data:,A%20brief%20note',
   'data:application/vnd-xxx-query,select_vcount,fcol_from_fieldtable/local',
@@ -15,4 +18,5 @@ $streams = array(
 foreach ($streams as $stream)
 {
   var_dump(@file_get_contents($stream));
+}
 }

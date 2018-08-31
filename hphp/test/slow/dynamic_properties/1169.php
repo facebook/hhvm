@@ -6,6 +6,10 @@ class A {
  class B {
  public $a = 2;
 }
- $obj = 1;
+
+ <<__EntryPoint>>
+function main_1169() {
+$obj = 1;
  $obj = new A();
  var_dump($obj->a);
+}

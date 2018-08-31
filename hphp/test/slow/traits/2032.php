@@ -26,4 +26,3 @@ $o->sayHello();
 $o->sayWorld();
 $o->sayExclamationMark();
 ?>
-

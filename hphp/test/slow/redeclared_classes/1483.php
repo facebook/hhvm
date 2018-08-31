@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1483() {
 if (isset($g)) {
   class X {
 }
@@ -12,4 +15,5 @@ if (isset($g)) {
       X::foo(1,2,3);
     }
   }
+}
 }

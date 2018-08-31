@@ -17,4 +17,8 @@ function test() {
   var_dump($a);
 }
 
+
+<<__EntryPoint>>
+function main_array_splice_destructors() {
 test();
+}

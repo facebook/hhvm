@@ -11,4 +11,8 @@ function t() {
   $x = 1;
   foo::ioo($x, $y);
 }
+
+<<__EntryPoint>>
+function main_782() {
 t();
+}

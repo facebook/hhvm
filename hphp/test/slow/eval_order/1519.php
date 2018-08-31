@@ -24,4 +24,8 @@ function foo() {
   $obj->b = new C;
   $obj->b->a = f();
 }
+
+<<__EntryPoint>>
+function main_1519() {
 foo();
+}

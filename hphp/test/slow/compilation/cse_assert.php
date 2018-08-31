@@ -5,4 +5,8 @@ function test($x) {
   return array($y + 1, $y + 1,);
 }
 
+
+<<__EntryPoint>>
+function main_cse_assert() {
 var_dump(test(0));
+}

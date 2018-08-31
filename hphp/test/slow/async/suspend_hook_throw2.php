@@ -5,7 +5,6 @@ function thrower($why, $what) {
     throw new exception;
   }
 }
-fb_setprofile('thrower');
 
 class dtor {
   function __construct(private $i) {}
@@ -26,7 +25,6 @@ async function thing() {
   await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT,0);
   echo "thing3\n";
 }
-$y = thing();
 
 function get($y) {
   try {
@@ -37,7 +35,13 @@ function get($y) {
   echo "leaving get\n";
 }
 
+<<__EntryPoint>>
+function main_suspend_hook_throw2() {
+fb_setprofile('thrower');
+$y = thing();
+
 $x = get($y);
 // Dtor1 should print after this, because the wait handle is still alive and
 // blocked on thing().
 echo "done\n";
+}

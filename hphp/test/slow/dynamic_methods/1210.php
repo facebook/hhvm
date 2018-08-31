@@ -8,5 +8,9 @@ class z {
  echo 'method';
  }
 }
+
+<<__EntryPoint>>
+function main_1210() {
 $z = new z;
 $z->z();
+}

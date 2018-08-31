@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_getsockname() {
 $s = socket_create(AF_UNIX, SOCK_STREAM, 0);
 var_dump($s);
 
@@ -16,3 +19,4 @@ var_dump($f === $n);
 
 socket_close($s);
 unlink($f);
+}

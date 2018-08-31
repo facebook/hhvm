@@ -10,4 +10,8 @@ function k2() {
   var_dump(current(&$arr));
   var_dump(current(&$arr2));
 }
+
+<<__EntryPoint>>
+function main_496() {
 k2();
+}

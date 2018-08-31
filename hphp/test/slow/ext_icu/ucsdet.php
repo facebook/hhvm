@@ -304,6 +304,9 @@ function test_utf16() {
     getunicode("\ufeffHello, world!")) == true);
 }
 
+
+<<__EntryPoint>>
+function main_ucsdet() {
 test_basics();
 test_cannot_detect();
 test_declared_encoding();
@@ -320,3 +323,4 @@ test_koi8r();
 test_windows_1251();
 test_utf8();
 test_utf16();
+}

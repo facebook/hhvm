@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_autoload_set_paths_maps() {
 HH\autoload_set_paths(
   Map {
     'class' => Map {
@@ -10,3 +13,4 @@ HH\autoload_set_paths(
 );
 
 var_dump(new B());
+}

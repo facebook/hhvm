@@ -12,4 +12,8 @@ FUNCTION test() {
   ECHO "AFTER CREATE\n";
 }
 
+
+<<__EntryPoint>>
+function main_hack_using() {
 test();
+}

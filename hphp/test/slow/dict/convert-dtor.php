@@ -83,4 +83,8 @@ function main() {
   echo "====================================================\n";
 }
 
+
+<<__EntryPoint>>
+function main_convert_dtor() {
 main();
+}

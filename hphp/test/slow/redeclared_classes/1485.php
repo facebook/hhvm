@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1485() {
 if (true) {
   class A {
     private $a = 1;
@@ -25,3 +28,4 @@ if (true) {
 $obj = new B;
 $obj->f();
 var_dump($obj);
+}

@@ -8,6 +8,10 @@ function foo($arr) {
   return $children;
 }
 
+
+<<__EntryPoint>>
+function main_bug_relax2() {
 var_dump(foo(array()));
 var_dump(foo(array(1)));
 var_dump(foo(array(2)));
+}

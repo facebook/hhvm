@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_array_uintersect_assoc() {
 $array1 = array(
   "a" => "green",
   "b" => "brown",
@@ -13,3 +16,4 @@ $array2 = array(
   "red"
 );
 var_dump(array_uintersect_assoc($array1, $array2, 'strcasecmp'));
+}

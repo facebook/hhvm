@@ -8,4 +8,8 @@ function is_varray_or_darray_(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_varray_or_darray() {
 is_varray_or_darray_(varray[]);
+}

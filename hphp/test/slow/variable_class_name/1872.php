@@ -17,7 +17,11 @@ class G extends B {
   }
 }
 
+
+<<__EntryPoint>>
+function main_1872() {
 $g = new G();
 $g->f4missing(3);
 echo "finish
 ";
+}

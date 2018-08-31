@@ -16,6 +16,9 @@ class Child extends Base implements I {
   const type W = self::self;
 }
 
+
+<<__EntryPoint>>
+function main_type_annotation_self1() {
 var_dump(type_structure(Base::class, 'T'));
 var_dump(type_structure(Base::class, 'U'));
 
@@ -26,3 +29,4 @@ var_dump(type_structure(Child::class, 'W'));
 
 $x = new ReflectionTypeConstant(Child::class, 'W');
 var_dump($x->getAssignedTypeText());
+}

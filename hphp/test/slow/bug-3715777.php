@@ -16,6 +16,10 @@ function getImpliedChecks(array $arg): array {
   return $implied_checks;
 }
 
+
+<<__EntryPoint>>
+function main_bug_3715777() {
 for ($i = 0; $i < 10; $i++) {
   var_dump(getImpliedChecks(array(array(1,2,3), array(4,5,6), array(7,8,9))));
+}
 }

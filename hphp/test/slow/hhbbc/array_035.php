@@ -12,4 +12,8 @@ function main() {
   $y->heh();
   $yy->heh();
 }
+
+<<__EntryPoint>>
+function main_array_035() {
 main();
+}

@@ -8,4 +8,8 @@ function main() {
   var_dump(DateTime::getLastErrors());
 }
 
+
+<<__EntryPoint>>
+function main_ext_datetime() {
 main();
+}

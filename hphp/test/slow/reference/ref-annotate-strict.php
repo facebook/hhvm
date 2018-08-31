@@ -106,8 +106,6 @@ function main($foo, $cuf, $cufa) {
   expect_fail(() ==> foo('x', 'y', array()));
 }
 
-main('foo', 'call_user_func', 'call_user_func_array');
-
 function foo2($x, $y, $z, $t, $q) {
   var_dump("foo", $x);
 }
@@ -119,4 +117,10 @@ function bar($name, $obj, $params, $data, &$done) {
 function intercept() {
   fb_intercept('foo2', 'bar', null);
   foo2(1, 2, 3, 4, 5);
+}
+
+
+<<__EntryPoint>>
+function main_ref_annotate_strict() {
+main('foo', 'call_user_func', 'call_user_func_array');
 }

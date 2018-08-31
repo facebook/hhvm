@@ -17,5 +17,9 @@ function test() {
   call('bar');
   call('baz');
 }
+
+<<__EntryPoint>>
+function main_dynamic() {
 test();
 test();
+}

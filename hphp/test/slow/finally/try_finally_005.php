@@ -7,6 +7,7 @@ function foo () {
 label:
    return 1;
 }
+?>
+
 
 foo();
-?>

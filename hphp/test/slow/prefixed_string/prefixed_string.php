@@ -9,4 +9,8 @@ function f(): void {
   echo($s);
 }
 
+
+<<__EntryPoint>>
+function main_prefixed_string() {
 f();
+}

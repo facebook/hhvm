@@ -18,4 +18,8 @@ function go() {
   var_dump((new X("yoyoyo"))->thing());
 }
 
+
+<<__EntryPoint>>
+function main_refcount001() {
 go();
+}

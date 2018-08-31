@@ -51,4 +51,8 @@ function testPointerModifications() {
   echo "Disabling STD_PROP_LIST and checking current value: ";
   echo current($arrayObject), "\n";
 }
+
+<<__EntryPoint>>
+function main_pointer_modifications() {
 testPointerModifications();
+}

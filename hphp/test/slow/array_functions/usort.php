@@ -9,4 +9,8 @@ function main($a) {
   var_dump($a);
 }
 
+
+<<__EntryPoint>>
+function main_usort() {
 main(array(1,2));
+}

@@ -8,4 +8,8 @@ function main() {
   var_dump($m->isEmpty());
 }
 
+
+<<__EntryPoint>>
+function main_hh_map1() {
 main();
+}

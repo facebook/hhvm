@@ -14,4 +14,8 @@ function main() {
   xml_set_element_handler($p, 'parse_callback', '');
   xml_parse($p, "<tag><child/></tag>", true);
 }
+
+<<__EntryPoint>>
+function main_1668() {
 main();
+}

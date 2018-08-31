@@ -11,10 +11,14 @@ class c2 extends b2 {
     b2::foo();
   }
 }
-set_error_handler('h');
 function h() {
  var_dump('errored');
 }
+
+<<__EntryPoint>>
+function main_1891() {
+set_error_handler('h');
 $obj = new c2;
 $obj->test1a();
 var_dump('end');
+}

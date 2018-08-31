@@ -2,7 +2,7 @@ string(3) "php"
 string(3) "php"
 string(10) "php_binary"
 
-Warning: ini_set(): Cannot find serialization handler 'abcdef' in %s on line 7
+Warning: ini_set(): Cannot find serialization handler 'abcdef' in %s on line 10
 bool(false)
 string(10) "php_binary"
 string(4) "1440"

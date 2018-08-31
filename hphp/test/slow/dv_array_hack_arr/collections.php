@@ -13,6 +13,9 @@ function test($c) {
   var_dump(is_darray($x2));
 }
 
+
+<<__EntryPoint>>
+function main_collections() {
 test(Vector{});
 test(Map{});
 test(Set{});
@@ -29,3 +32,4 @@ test(Pair{'abc', 'def'});
 test(ImmVector{100, 200, 300});
 test(ImmMap{'a' => 100, 'b' => 200});
 test(ImmSet{'a', 'b', 'c'});
+}

@@ -7,6 +7,10 @@ class TestClass {
   }
 }
 
+
+<<__EntryPoint>>
+function main_shape_type_param_with_optional_fields() {
 TestClass::test();
 
 echo "Done.";
+}

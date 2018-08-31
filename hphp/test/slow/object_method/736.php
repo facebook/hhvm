@@ -1,14 +1,4 @@
 <?php
-
-/*
-   some random tests used for debugging fast method call and various  invoke paths
-   // php53 means this feature cannot be tested under php 5.2
-*/
-
-$fix249639=0;
- // when this task is fixed or o_id on static calls
-
-global $trace;
 function f2 ($a) {
   return $a+200;
 }
@@ -140,6 +130,19 @@ function error_handler ($errnor, $errstr, $errfile, $errline) {
   //echo ">>>\n";
   return true;
 }
+
+
+/*
+   some random tests used for debugging fast method call and various  invoke paths
+   // php53 means this feature cannot be tested under php 5.2
+*/
+
+<<__EntryPoint>>
+function main_736() {
+$fix249639=0;
+ // when this task is fixed or o_id on static calls
+
+global $trace;
 // test invoke_builtin_static_method
 //echo "bar == ",
 //    call_user_func_array(array('Normalizer','normalize'),array("bar")), "\n";
@@ -236,3 +239,4 @@ fclose($ourFileHandle);
 unlink($ourFileName);
 
 echo "done\n";
+}

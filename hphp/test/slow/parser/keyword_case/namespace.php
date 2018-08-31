@@ -8,4 +8,8 @@ FUNCTION test() {
 
 NAMESPACE BAR;
 USE FOO As BAZ;
+
+<<__EntryPoint>>
+function main_namespace() {
 BAZ\test();
+}

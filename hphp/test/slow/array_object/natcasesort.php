@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_natcasesort() {
 $array = array(
   'IMG0.png',
   'img12.png',
@@ -19,3 +22,4 @@ print_r($arr1);
 $arr2->natcasesort();
 echo "\nNatural order sorting (case-insensitive)\n";
 print_r($arr2);
+}

@@ -61,4 +61,4 @@ array(2) {
   bool(false)
 }
 
-Warning: Unable to find extension 'THIS_EXTENSION_SHOULD_NOT_EXIST' in %s/test/slow/ext_options/ini_get_all.php on line 21
+Warning: Unable to find extension 'THIS_EXTENSION_SHOULD_NOT_EXIST' in %s/test/slow/ext_options/ini_get_all.php on line 24

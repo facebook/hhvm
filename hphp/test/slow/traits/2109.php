@@ -18,5 +18,9 @@ class C extends B {
     parent::init();
   }
 }
+
+<<__EntryPoint>>
+function main_2109() {
 $obj = new C;
 $obj->init();
+}

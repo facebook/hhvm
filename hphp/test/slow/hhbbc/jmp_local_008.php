@@ -10,4 +10,8 @@ function foo($x) {
   var_dump($y);
 }
 
+
+<<__EntryPoint>>
+function main_jmp_local_008() {
 foo();
+}

@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1447() {
 serialize(!null);
 serialize(!true);
 serialize(!false);
@@ -285,3 +288,4 @@ serialize((float)"1.7e+319");
 serialize((double)"1.7e+319");
 serialize((real)"1.7e+319");
 serialize((string)"1.7e+319");
+}

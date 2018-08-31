@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_array_sum() {
 $a = array(2, 4, 6, 8);
 var_dump(array_sum($a));
 $b = array("a" => 1.2, "b" => 2.3, "c" => 3.4);
@@ -12,3 +15,4 @@ $e = ImmMap { 'one' => 1, 'two' => 2 };
 var_dump(array_sum($e));
 $f = Vector{1.2, 3.4};
 var_dump(array_sum($f));
+}

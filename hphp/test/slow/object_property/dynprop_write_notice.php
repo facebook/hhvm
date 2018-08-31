@@ -24,4 +24,8 @@ function main() {
   test(new Extends_stdClass());
   test(new Extends___PHP_Incomplete_Class());
 }
+
+<<__EntryPoint>>
+function main_dynprop_write_notice() {
 main();
+}

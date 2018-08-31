@@ -15,7 +15,11 @@ class C1 extends B1 {
     parent::__construct($id);
   }
 }
+
+<<__EntryPoint>>
+function main_780() {
 $x = new C1(100);
 echo $x->id."\n";
 $x->zz(1);
 echo $x->id."\n";
+}

@@ -15,4 +15,8 @@ function main($bar) {
   var_dump($bar);
 }
 
+
+<<__EntryPoint>>
+function main_pipevar_3() {
 main("Goodbye");
+}

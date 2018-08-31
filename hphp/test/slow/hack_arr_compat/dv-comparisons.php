@@ -89,6 +89,9 @@ function test_literals() {
 
 function handler($errno, $errstr) { throw new Exception($errstr); }
 
+
+<<__EntryPoint>>
+function main_dv_comparisons() {
 echo "============== test_all ==============================\n";
 test_all();
 echo "============== literals ==============================\n";
@@ -100,3 +103,4 @@ echo "============== test_all (exn) ========================\n";
 test_all();
 echo "============== literals (exn) ========================\n";
 test_literals();
+}

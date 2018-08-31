@@ -1,9 +1,12 @@
 <?php
+
 /* See extra_by_reference_nested_over_same_array_mutation_mixed.php which shows
  * that this also works as expected in the RFC if the array starts out as mixed,
  * and extra_by_reference_nested_over_same_array_mutation_using_set.php which
  * shows that this works if we promote to mixed via a set instead of an unset.
  */
+<<__EntryPoint>>
+function main_09_by_reference_nested_over_same_array_mutation() {
 $a = [0, 1, 2, 3];
 foreach ($a as &$x) {
   foreach ($a as &$y) {
@@ -13,4 +16,5 @@ foreach ($a as &$x) {
       unset($a[2]);
     }
   }
+}
 }

@@ -1,4 +1,5 @@
 <?hh
+
 /**
  * This is unserializing an intentionally bad (but technically valid) string
  * to test that values that were overwritten during unserialization can still
@@ -8,6 +9,8 @@
  * stdClass resurrects the inner stdClass value.
  */
 
+<<__EntryPoint>>
+function main_unserialize_reference_overwritten() {
 var_dump(unserialize(
   'O:8:"stdClass":3:{' .
     's:1:"a";a:1:{' .
@@ -19,3 +22,4 @@ var_dump(unserialize(
     's:1:"b";R:3;' .
   '}'
 ));
+}

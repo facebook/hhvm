@@ -18,6 +18,9 @@ function literals() {
   $x['abc'] = 10;
 }
 
+
+<<__EntryPoint>>
+function main_varr_to_darr() {
 test(varray[]);
 test(darray[]);
 test([]);
@@ -31,3 +34,4 @@ test(dict['a' => 10, 'b' => 20]);
 test(varray[1, 2, 3, 4, 5, 6, 7, 8]);
 
 literals();
+}

@@ -9,6 +9,9 @@ function autoload_second($name) {
 function __autoload($name) {
   echo __METHOD__ . "\n";
 }
+
+<<__EntryPoint>>
+function main_1231() {
 echo "**************\n";
 class_exists('A');
 echo "**************\n";
@@ -33,5 +36,6 @@ if (true) {
   class C {
 }
   class D {
+}
 }
 }

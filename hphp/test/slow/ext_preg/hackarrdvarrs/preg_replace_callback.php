@@ -10,4 +10,8 @@ function preg_replace_callback_main() {
   ));
 }
 
+
+<<__EntryPoint>>
+function main_preg_replace_callback() {
 preg_replace_callback_main();
+}

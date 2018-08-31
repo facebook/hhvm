@@ -7,4 +7,8 @@ function foo($params) {
   return $params;
 }
 
+
+<<__EntryPoint>>
+function main_dce_006() {
 var_dump(foo(array('id' => 42)));
+}

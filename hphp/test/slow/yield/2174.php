@@ -3,9 +3,6 @@
 function f($x) {
   yield $x;
 }
-$c = f(32);
-var_dump($c->getOrigFuncName());
-var_dump($c->getCalledClass());
 class X {
   function f($x) {
     yield $x;
@@ -16,6 +13,12 @@ class X {
 }
 class Y extends X {
 }
+
+<<__EntryPoint>>
+function main_2174() {
+$c = f(32);
+var_dump($c->getOrigFuncName());
+var_dump($c->getCalledClass());
 $x = new X;
 $c = $x->f(32);
 var_dump($c->getOrigFuncName());
@@ -33,3 +36,4 @@ $fcn = function ($x) {
 $c = $fcn(32);
 var_dump($c->getOrigFuncName());
 var_dump($c->getCalledClass());
+}

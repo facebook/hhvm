@@ -10,6 +10,9 @@ function takes_rx_keyedtraverable<Tk, Tv>(
   return $x;
 }
 
+
+<<__EntryPoint>>
+function main_arrays_as_rx_traversable() {
 takes_rx_traverable(vec[]);
 takes_rx_traverable(dict[]);
 takes_rx_traverable(keyset[]);
@@ -22,3 +25,4 @@ takes_rx_keyedtraverable(keyset[]);
 takes_rx_keyedtraverable(varray[]);
 takes_rx_keyedtraverable(darray[]);
 takes_rx_keyedtraverable(array());
+}

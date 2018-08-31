@@ -27,4 +27,8 @@ function main($c1, $c2, $c3, $c4) {
   var_dump($c1, $c2, $c3, $c4);
 }
 
+
+<<__EntryPoint>>
+function main_inline_decref() {
 main('ceeone', 'ceetwo', 'ceethree', 'ceefour');
+}

@@ -36,4 +36,8 @@ function main() {
     echo "Exception: " . $e->getMessage() . "\n";
   }
 }
+
+<<__EntryPoint>>
+function main_destructure() {
 main();
+}

@@ -12,4 +12,8 @@ function test() {
  else $b = new Exception();
   return $b;
 }
+
+<<__EntryPoint>>
+function main_1157() {
 test();
+}

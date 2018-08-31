@@ -3,8 +3,12 @@
 class A {
  public static $foo = 123;
 }
- $a = foo();
  function foo() {
  return 'foo';
 }
+
+ <<__EntryPoint>>
+function main_1237() {
+$a = foo();
  var_dump(A::$$a);
+}

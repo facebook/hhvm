@@ -13,4 +13,8 @@ function main() {
   echo "DON'T PRINT ME!";
 }
 
+
+<<__EntryPoint>>
+function main_handler_fatal() {
 main();
+}

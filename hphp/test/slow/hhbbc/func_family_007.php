@@ -17,6 +17,10 @@ function main(Base $b) {
   var_dump($x);
 }
 
+
+
+<<__EntryPoint>>
+function main_func_family_007() {
 main(new Base);
 main(new Derived);
-
+}

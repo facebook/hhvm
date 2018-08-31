@@ -11,4 +11,8 @@ class Foo {
   }
 }
 
+
+<<__EntryPoint>>
+function main_private_props_008() {
 (new Foo)->heh();
+}

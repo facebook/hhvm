@@ -10,4 +10,8 @@ async function test() {
     echo "FAIL\n";
   }
 }
+
+<<__EntryPoint>>
+function main_await_as_expr_in_using() {
 \HH\Asio\join(test());
+}

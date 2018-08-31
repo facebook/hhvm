@@ -9,6 +9,9 @@ class c extends stdClass {
   function factory(): self { return new c; }
   function pfactory(): parent { return new stdClass; }
 }
+
+<<__EntryPoint>>
+function main_reflection_type_detailed() {
 $closure = function (Test $a): Test { return $a; };
 echo "*** functions\n";
 foreach ([
@@ -62,4 +65,5 @@ foreach ([
     var_dump($ra->isBuiltin());
     var_dump((string)$ra);
   }
+}
 }

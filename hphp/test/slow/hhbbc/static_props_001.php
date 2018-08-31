@@ -23,5 +23,9 @@ function main() {
   Foob::heh();
 }
 
-main();
 
+
+<<__EntryPoint>>
+function main_static_props_001() {
+main();
+}

@@ -33,4 +33,8 @@ function f() {
   var_dump(Foo<array,int>::$staticProp);
   var_dump(Foo<Blah<array>,Blah<int>>::$staticProp);
 }
+
+<<__EntryPoint>>
+function main_2214() {
 echo "Done\n";
+}

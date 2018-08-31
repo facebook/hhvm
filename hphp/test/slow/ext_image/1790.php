@@ -1,6 +1,9 @@
 <?php
 
+
 // Create a 100*30 image
+<<__EntryPoint>>
+function main_1790() {
 $im = imagecreate(100, 30);
 // White background and blue text
 $bg = imagecolorallocate($im, 255, 255, 255);
@@ -13,3 +16,4 @@ imagepng($im);
 $md5 = md5(ob_get_clean());
 imagedestroy($im);
 echo "md5: $md5\n";
+}

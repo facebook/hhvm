@@ -7,6 +7,9 @@ class MyWrapper {
     return true;
   }
 }
+
+<<__EntryPoint>>
+function main_stream_is_local() {
 stream_wrapper_register('wrap', 'MyWrapper');
 
 var_dump(stream_is_local(4));
@@ -21,4 +24,5 @@ foreach (array(
 ) as $file) {
   var_dump(stream_is_local($file));
   var_dump(stream_is_local(fopen($file, 'r')));
+}
 }

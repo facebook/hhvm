@@ -1,7 +1,4 @@
 <?php
-
-define('INIT1', "1");
-define('INIT2', "2");
 trait t1 {
  static public $x = INIT1;
  }
@@ -14,5 +11,12 @@ trait t {
 class c {
  use t;
  }
+
+
+<<__EntryPoint>>
+function main_2097() {
+define('INIT1', "1");
+define('INIT2', "2");
 var_dump(c::$x);
 var_dump(c::$y);
+}

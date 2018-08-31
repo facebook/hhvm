@@ -7,4 +7,8 @@ function test($s) {
   $s .= 'd';
  var_dump($a[$s]);
 }
+
+<<__EntryPoint>>
+function main_170() {
 test('ab');
+}

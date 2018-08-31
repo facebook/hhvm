@@ -31,4 +31,8 @@ foo()}
   unset($a->c->d);
   var_dump($x, $a, $s);
 }
+
+<<__EntryPoint>>
+function main_798() {
 test(new X, array(), false);
+}

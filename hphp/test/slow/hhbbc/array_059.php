@@ -10,5 +10,9 @@ function a($x) {
   return $z;
 }
 
+
+<<__EntryPoint>>
+function main_array_059() {
 a(true);
 a(false);
+}

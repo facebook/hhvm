@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_prop_empty() {
 $xml = new SimpleXMLElement(<<<EOF
 <foo>
     <bar />
@@ -15,3 +18,4 @@ var_dump(empty($xml->baz));
 var_dump(empty($xml->bak));
 var_dump(empty($xml->bat));
 var_dump(empty($xml->baq));
+}

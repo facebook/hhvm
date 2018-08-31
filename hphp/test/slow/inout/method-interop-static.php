@@ -74,4 +74,8 @@ function main() {
   echo "$f2, $k2\n";
 }
 
+
+<<__EntryPoint>>
+function main_method_interop_static() {
 main();
+}

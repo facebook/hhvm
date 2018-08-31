@@ -31,5 +31,9 @@ function const_fold() {
   echo foo().bar()."\n";
 }
 
+
+<<__EntryPoint>>
+function main_constants() {
 main();
 const_fold();
+}

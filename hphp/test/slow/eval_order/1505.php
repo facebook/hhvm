@@ -10,6 +10,9 @@ class A {
     return $this;
   }
 }
+
+<<__EntryPoint>>
+function main_1505() {
 $a = new A();
 var_dump($a->q('1')->foo + $a->q('2')->bar);
 var_dump($a->q('1')->foo - $a->q('2')->bar);
@@ -35,3 +38,4 @@ var_dump($a->q('1')->foo > $a->q('2')->bar);
 var_dump($a->q('1')->foo >= $a->q('2')->bar);
 var_dump($a->q('1')->foo < $a->q('2')->bar);
 var_dump($a->q('1')->foo <= $a->q('2')->bar);
+}

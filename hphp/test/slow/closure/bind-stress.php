@@ -73,6 +73,9 @@ class Bar {
 
 class Baz {}
 
+
+<<__EntryPoint>>
+function main_bind_stress() {
 $foo = new Foo;
 $bar = new Bar;
 $baz = new Baz;
@@ -115,3 +118,4 @@ echo "================================================================\n";
 echo "\$s2 = \$Cl->bindTo(\$foo, 'Baz')\n";
 $s2 = $Cl->bindTo($foo, 'Baz');
 $s2();
+}

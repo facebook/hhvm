@@ -19,4 +19,8 @@ function f(): dict {
   return $result;
 }
 
+
+<<__EntryPoint>>
+function main_preg_replace_impl_type() {
 f();
+}

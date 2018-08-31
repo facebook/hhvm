@@ -2,4 +2,8 @@
 function foo(@int $x){
  echo 1;
  }
- foo('hi');
+
+ <<__EntryPoint>>
+function main_2209() {
+foo('hi');
+}

@@ -1,6 +1,9 @@
 <?php
 
-class X{};
+class X{}
+<<__EntryPoint>>
+function main_arg_checking() {
+;
 
 $utc = new \DateTimeZone('UTC');
 $amsterdam = new \DateTimeZone('Europe/Amsterdam');
@@ -15,3 +18,4 @@ var_dump($date->sub($utc));
 var_dump($date->diff(new X()));
 var_dump(date_format(new X(), "Y"));
 var_dump(date_create("2012-10-10", new X()));
+}

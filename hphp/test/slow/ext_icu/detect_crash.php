@@ -19,4 +19,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_detect_crash() {
 main();
+}

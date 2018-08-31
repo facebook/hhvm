@@ -9,8 +9,12 @@ function x($x) {
   return $x;
 }
 
+
+<<__EntryPoint>>
+function main_refcount_callbuiltin() {
 x("asd".mt_rand());
 x("asd".mt_rand());
 x("asd".mt_rand());
 x("asd".mt_rand());
 x("asd".mt_rand());
+}

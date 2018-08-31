@@ -10,7 +10,6 @@ function test($a, $b) {
   }
   var_dump($buf);
 }
-test(array('a', 'b', 'c'), array('u', 'v'));
 function test2($a, $b) {
   $buf = 'hello';
   foreach ($a as $v) {
@@ -22,7 +21,6 @@ function test2($a, $b) {
   }
   var_dump($buf);
 }
-test2(array('a', 'b', 'c'), array('u', 'v'));
 function test3($a, $b) {
   $buf = 'hello';
   foreach ($a as $v) {
@@ -33,4 +31,10 @@ function test3($a, $b) {
   }
   var_dump($buf);
 }
+
+<<__EntryPoint>>
+function main_165() {
+test(array('a', 'b', 'c'), array('u', 'v'));
+test2(array('a', 'b', 'c'), array('u', 'v'));
 test3(array('a', 'b', 'c'), array('u', 'v'));
+}

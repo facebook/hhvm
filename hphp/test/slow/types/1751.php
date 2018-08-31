@@ -8,4 +8,8 @@ function main($a, $b) {
   var_dump(is_object($a) xor is_object($b));
 }
 
+
+<<__EntryPoint>>
+function main_1751() {
 main(new stdclass, new stdclass);
+}

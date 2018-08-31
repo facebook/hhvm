@@ -46,5 +46,9 @@ function main() {
   $c->send(null);
   echo "Finished!\n";
 }
+
+<<__EntryPoint>>
+function main_2183() {
 main();
 echo "Returned from main safely\n";
+}

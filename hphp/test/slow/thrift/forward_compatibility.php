@@ -133,4 +133,8 @@ function main() {
   testCompact();
 }
 
+
+<<__EntryPoint>>
+function main_forward_compatibility() {
 main();
+}

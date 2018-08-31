@@ -11,5 +11,9 @@ function foo() {
     echo 'yes';
   }
 }
+
+<<__EntryPoint>>
+function main_1218() {
 foo();
 foo();
+}

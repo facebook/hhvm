@@ -11,4 +11,8 @@ function main() {
   var_dump($c);
 }
 
+
+<<__EntryPoint>>
+function main_specialized_inner() {
 main();
+}

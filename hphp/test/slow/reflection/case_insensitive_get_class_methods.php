@@ -31,4 +31,8 @@ var_dump(get_class_methods('G'));
 var_dump(get_class_methods('K'));
 
 }
+
+<<__EntryPoint>>
+function main_case_insensitive_get_class_methods() {
 main();
+}

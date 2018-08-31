@@ -19,4 +19,8 @@ function main() {
   var_dump(array_fill_keys($m, $val));
   var_dump(array_fill_keys($s, $val));
 }
+
+<<__EntryPoint>>
+function main_array_fill_keys() {
 main();
+}

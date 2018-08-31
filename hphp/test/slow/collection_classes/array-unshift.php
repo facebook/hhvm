@@ -26,5 +26,9 @@ function main() {
   var_dump(array_unshift(&$x7, 3, 'j'));
   var_dump($x7);
 }
-main();
 
+
+<<__EntryPoint>>
+function main_array_unshift() {
+main();
+}

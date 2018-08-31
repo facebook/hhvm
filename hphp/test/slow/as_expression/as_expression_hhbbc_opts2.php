@@ -10,6 +10,10 @@ function f(mixed $x) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_as_expression_hhbbc_opts2() {
 f(1);
 try { f(true); } catch (Exception $_) {}
 try { f("wow"); } catch (Exception $_) {}
+}

@@ -16,4 +16,8 @@ function main() {
   var_dump(append_to_self());
 }
 
+
+<<__EntryPoint>>
+function main_append_to_self() {
 main();
+}

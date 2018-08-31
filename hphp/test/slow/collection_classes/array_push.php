@@ -18,5 +18,9 @@ function main() {
   $m = Map{};
   array_push(&$m, 'a');
 }
+
+<<__EntryPoint>>
+function main_array_push() {
 main();
 echo "Done\n";
+}

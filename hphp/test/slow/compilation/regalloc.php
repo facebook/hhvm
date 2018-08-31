@@ -60,7 +60,11 @@ class A {
     }
 }
 
+
+<<__EntryPoint>>
+function main_regalloc() {
 for ($i = 0; $i < 5; $i++) {
   $m = A::f();
   var_dump($m['b9'][0]);
+}
 }

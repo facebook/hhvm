@@ -1,5 +1,10 @@
 <?php
+class BbBb {
+}
 
+
+<<__EntryPoint>>
+function main_1356() {
 $z=true;
 if ($z) {
   class AaaA {
@@ -12,11 +17,10 @@ if ($z) {
   class aAAa {
 }
 }
-class BbBb {
-}
 $r = new ReflectionClass('aaaa');
 var_dump($r->getName());
 $r = new ReflectionClass('bbbb');
 var_dump($r->getName());
 $a = new aaaa;
 $a->f();
+}

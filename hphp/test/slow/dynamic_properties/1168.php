@@ -15,5 +15,9 @@ class A {
  var_dump($this->a);
   }
 }
- $obj = new B();
+
+ <<__EntryPoint>>
+function main_1168() {
+$obj = new B();
  $obj->test();
+}

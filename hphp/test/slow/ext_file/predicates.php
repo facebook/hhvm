@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_predicates() {
 $tempfile = tempnam('/tmp', 'vmextfiletest');
 var_dump(is_file($tempfile));
 var_dump(is_dir($tempfile));
@@ -49,3 +52,4 @@ mkdir($tempfile);
 var_dump(is_dir($relativetempfile));
 rmdir($tempfile);
 var_dump(is_dir($relativetempfile));
+}

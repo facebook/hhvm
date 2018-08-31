@@ -12,4 +12,8 @@ function make_uniqid($prefix = '') {
   return $uniqid;
 }
 
+
+<<__EntryPoint>>
+function main_sink_jcc() {
 x();x();x();x();x();x();x();
+}

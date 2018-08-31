@@ -12,4 +12,8 @@ function test() {
   echo get_class(z(false)), "\n";
   echo "Done\n";
 }
+
+<<__EntryPoint>>
+function main_return_type_opt_bug() {
 test();
+}

@@ -32,4 +32,8 @@ function main() {
   var_dump($a, $b, $c);
 }
 
+
+<<__EntryPoint>>
+function main_fb_intercept_bad_handler() {
 main();
+}

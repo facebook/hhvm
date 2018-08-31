@@ -9,10 +9,6 @@ class X implements SessionHandlerInterface {
   function write($x, $y) {}
 }
 
-session_set_save_handler(new X, true);
-register_shutdown_function("shut");
-register_shutdown_function("baz");
-
 function shut() {
   session_set_save_handler(new X, false);
   var_dump(__METHOD__);
@@ -20,4 +16,12 @@ function shut() {
 
 function baz() {
   var_dump(__METHOD__);
+}
+
+
+<<__EntryPoint>>
+function main_shutdown() {
+session_set_save_handler(new X, true);
+register_shutdown_function("shut");
+register_shutdown_function("baz");
 }

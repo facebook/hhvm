@@ -13,4 +13,8 @@ function test() {
   $f = unserialize($s);
   var_dump($f->blah(123));
 }
+
+<<__EntryPoint>>
+function main_no_serialize1() {
 test();
+}

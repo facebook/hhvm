@@ -7,7 +7,7 @@ array(2) {
 }
 bool(true)
 
-Notice: Constant FLUB already defined in %s/test/slow/constant/1602.php on line 6
+Notice: Constant FLUB already defined in %s/test/slow/constant/1602.php on line 9
 bool(false)
 int(1230)
 bool(true)

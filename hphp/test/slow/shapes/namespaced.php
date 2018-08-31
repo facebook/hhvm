@@ -9,4 +9,8 @@ function do_stuff(Foo $shape): void {
   var_dump($herp);
 }
 
+
+<<__EntryPoint>>
+function main_namespaced() {
 do_stuff(shape('herp' => 'derp'));
+}

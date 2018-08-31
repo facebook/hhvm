@@ -19,4 +19,8 @@ function main() {
   return $a;
 }
 
+
+<<__EntryPoint>>
+function main_extend_local() {
 var_dump(main());
+}

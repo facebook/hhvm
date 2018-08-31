@@ -12,4 +12,8 @@ function main() {
   var_dump(unserialize(serialize($nzero)));
   print_r($nzero);
 }
+
+<<__EntryPoint>>
+function main_zero() {
 main();
+}

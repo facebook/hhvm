@@ -44,4 +44,8 @@ function main() {
   echo $k;
   echo "\n";
 }
+
+<<__EntryPoint>>
+function main_fluent() {
 main();
+}

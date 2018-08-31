@@ -1,9 +1,12 @@
 <?php
 
+
 // Copyright (c) 2015 Thomas Punt
 // https://github.com/tpunt/PHP7-Reference/blob/master/LICENSE.md
 // https://github.com/tpunt/PHP7-Reference#preg_replace_callback_array-function
 
+<<__EntryPoint>>
+function main_preg_replace_callback_array_use_tokens() {
 $tokenStream = []; // [tokenName, lexeme] pairs
 
 $input = <<<'end'
@@ -33,3 +36,4 @@ $ret = preg_replace_callback_array(
 
 var_dump($ret);
 var_dump($tokenStream);
+}

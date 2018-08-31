@@ -24,4 +24,8 @@ function main() {
   t($closure6);
 }
 
+
+<<__EntryPoint>>
+function main_classname() {
 main();
+}

@@ -18,4 +18,8 @@ function loop() {
     $d = (bool)__hhvm_intrinsics\launder_value(true);
   }
 }
+
+<<__EntryPoint>>
+function main_equiv_locals() {
 loop();
+}

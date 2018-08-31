@@ -4,26 +4,6 @@
 function get() {
  return true;
  }
-if (get()) {
-  class X {
-
-    public function yielder() {
- yield 'first';
- }
-  }
-}
- else {
-  class X {
-
-    public function yielder() {
- yield 'second';
- }
-  }
-}
-$x = new X;
-foreach ($x->yielder() as $foo) {
- var_dump($foo);
- }
 
 // derive from redec gen
 class Foo {
@@ -34,34 +14,6 @@ class Foo {
  yield $this->fooMsg();
  }
 }
-if (get()) {
-  class Bar extends Foo {
-    public function fooMsg() {
- return 'bar';
- }
-    public function barMsg() {
- return 'bar';
- }
-    public function barGen() {
- yield $this->barMsg();
- }
-  }
-}
- else {
-  class Bar extends Foo {
-}
-}
-$f = new Foo;
-foreach ($f->fooGen() as $foo) {
- var_dump($foo);
- }
-$b = new Bar;
-foreach ($b->fooGen() as $foo) {
- var_dump($foo);
- }
-foreach ($b->barGen() as $foo) {
- var_dump($foo);
- }
 
 // conditional derive from redec gen
 function get0() {
@@ -123,5 +75,57 @@ function f($x) {
  var_dump($foo);
  }
 }
+
+<<__EntryPoint>>
+function main_2165() {
+if (get()) {
+  class X {
+
+    public function yielder() {
+ yield 'first';
+ }
+  }
+}
+ else {
+  class X {
+
+    public function yielder() {
+ yield 'second';
+ }
+  }
+}
+$x = new X;
+foreach ($x->yielder() as $foo) {
+ var_dump($foo);
+ }
+if (get()) {
+  class Bar extends Foo {
+    public function fooMsg() {
+ return 'bar';
+ }
+    public function barMsg() {
+ return 'bar';
+ }
+    public function barGen() {
+ yield $this->barMsg();
+ }
+  }
+}
+ else {
+  class Bar extends Foo {
+}
+}
+$f = new Foo;
+foreach ($f->fooGen() as $foo) {
+ var_dump($foo);
+ }
+$b = new Bar;
+foreach ($b->fooGen() as $foo) {
+ var_dump($foo);
+ }
+foreach ($b->barGen() as $foo) {
+ var_dump($foo);
+ }
 f(true);
 f(false);
+}

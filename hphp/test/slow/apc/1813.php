@@ -1,5 +1,9 @@
 <?php
 
+
+
+<<__EntryPoint>>
+function main_1813() {
 $a = array(1);
 $a[] =& $a[0];
 $a[0] = 2;
@@ -21,4 +25,4 @@ $b = apc_fetch('table', $b);
 print_r($b);
 $b[0] = 3;
 print_r($b);
-
+}

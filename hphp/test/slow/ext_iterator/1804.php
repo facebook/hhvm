@@ -16,4 +16,8 @@ function getFiles(&$rdi,$depth=0) {
   asort($files);
   var_dump(array_values($files));
 }
+
+<<__EntryPoint>>
+function main_1804() {
 getFiles(new RecursiveDirectoryIterator(__DIR__.'/../../sample_dir'));
+}

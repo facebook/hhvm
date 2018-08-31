@@ -42,6 +42,9 @@ final class SimpleSoftCache2<Tk1, Tk2, Tv> {
   }
 }
 
+
+<<__EntryPoint>>
+function main_softcache() {
 $c = new SimpleSoftCache2;
 $c->set('a', dict[1=>2,'1'=>'2']);
 $c->set2('a', 'b', 'c');
@@ -53,3 +56,4 @@ var_dump($c->get('a'));
 var_dump($c->get2('x', 'y'));
 $c->nuke();
 var_dump($c->get('a'));
+}

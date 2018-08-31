@@ -89,6 +89,9 @@ function test_yield() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_control_flow() {
 test_and_or_xor();
 test_if_elseif_else(0);
 test_if_elseif_else(1);
@@ -106,3 +109,4 @@ test_break_continue();
 test_goto();
 var_dump(test_return());
 test_yield();
+}

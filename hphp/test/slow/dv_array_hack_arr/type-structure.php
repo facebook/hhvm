@@ -72,4 +72,8 @@ function main() {
   dump(type_structure(D::class, 'U'));
 
 }
+
+<<__EntryPoint>>
+function main_type_structure() {
 main();
+}

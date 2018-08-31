@@ -16,6 +16,9 @@ function g(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_primitive_union() {
 f(1);
 f(false);
 f(1.5);
@@ -39,3 +42,4 @@ g(vec[]);
 g(dict[]);
 g(keyset[]);
 g(null);
+}

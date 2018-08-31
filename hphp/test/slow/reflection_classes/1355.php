@@ -17,5 +17,9 @@ abstract class aa extends c {
 class a extends aa {
   public static $arr = array('v');
 }
+
+<<__EntryPoint>>
+function main_1355() {
 $x = new a;
 var_dump($x->g());
+}

@@ -13,7 +13,11 @@ function foo() {
   return $c->childNodes;
 }
 
+
+<<__EntryPoint>>
+function main_dom_iter_lifetime_v2() {
 foreach (foo() as $x) {
   var_dump($x->nodeValue);
 }
 var_dump($x->nodeValue);
+}

@@ -37,6 +37,10 @@ function test() {
 
   $x = 'array_map'; $x($a ==> $a, []);
 }
+
+<<__EntryPoint>>
+function main_builtins() {
 test();
 echo "======================================================\n";
 test();
+}

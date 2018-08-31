@@ -13,8 +13,12 @@ function foo() {
   return $c;
 }
 
+
+<<__EntryPoint>>
+function main_release_nodes() {
 $x = foo();
 while ($x) {
   var_dump($x->tagName);
   $x = $x->parentNode;
+}
 }

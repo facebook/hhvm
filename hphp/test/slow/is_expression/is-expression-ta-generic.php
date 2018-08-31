@@ -8,4 +8,8 @@ function is_generic(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_ta_generic() {
 is_generic(tuple(1, 'foo', true));
+}

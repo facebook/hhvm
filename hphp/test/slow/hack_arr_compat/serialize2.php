@@ -86,6 +86,9 @@ function test($name, $options) {
   var_dump(HH\serialize_with_options($obj, $options));
 }
 
+
+<<__EntryPoint>>
+function main_serialize2() {
 literals();
 
 test("normal", dict[]);
@@ -103,3 +106,4 @@ test(
     "warnOnPHPArrays" => true
   ]
 );
+}

@@ -26,6 +26,9 @@ function make_tests($tests, $c1, $c2) {
   return $tests;
 }
 
+
+<<__EntryPoint>>
+function main_callable() {
 $tests = vec[]
   |> make_tests(
       $$,
@@ -47,4 +50,5 @@ while ($count < count($tests)) {
   apc_store('count', $count);
   echo "====================================================\n";
   var_dump($test[0]($test[1], $test[2]));
+}
 }

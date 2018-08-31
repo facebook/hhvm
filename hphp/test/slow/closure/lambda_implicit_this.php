@@ -64,6 +64,9 @@ class D extends C {
   }
 }
 
+
+<<__EntryPoint>>
+function main_lambda_implicit_this() {
 D::test();
 
 echo "\nouter:\n\n";
@@ -71,3 +74,4 @@ echo "\nouter:\n\n";
 $l4 = () ==> var_dump(2);
 $r4 = new ReflectionFunction($l4);
 var_dump($r4->getClosureThis());
+}

@@ -8,4 +8,8 @@ function foo() {
   $list_expected = "[$expected,$expected]";
   var_dump($expected, $list_expected);
 }
+
+<<__EntryPoint>>
+function main_1706() {
 foo();
+}

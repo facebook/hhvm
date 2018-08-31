@@ -11,4 +11,8 @@ function reflect($name) {
 function main() {
   reflect('hash_algos');
 }
+
+<<__EntryPoint>>
+function main_hni_return_type() {
 main();
+}

@@ -14,5 +14,9 @@ function g($a) {
   bar(&$a[0], $a[0], $a[0], $a[0]++);
   bar(&$a[0], $a[0], $a[0], $a[0]);
 }
+
+<<__EntryPoint>>
+function main_540() {
 f(array(0));
 g(array(0));
+}

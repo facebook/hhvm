@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_819() {
 $v1 = Vector {
 5}
 ;
@@ -33,3 +36,4 @@ var_dump($v == false);
 var_dump($v == true);
 var_dump($v == 1);
 var_dump($v == "Vector");
+}

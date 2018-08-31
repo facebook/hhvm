@@ -18,6 +18,9 @@ class goo extends bar {
     var_dump(get_parent_class());
   }
 }
+
+<<__EntryPoint>>
+function main_1458() {
 $bar = new bar;
 $foo = new foo;
 $goo = new goo;
@@ -40,3 +43,4 @@ var_dump(get_parent_class(" "));
 var_dump(get_parent_class(new stdclass));
 var_dump(get_parent_class(array()));
 var_dump(get_parent_class(1));
+}

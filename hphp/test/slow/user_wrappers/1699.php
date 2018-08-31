@@ -18,6 +18,9 @@ class TestStream {
     return $this->s >= $this->eofth;
   }
 }
+
+<<__EntryPoint>>
+function main_1699() {
 stream_wrapper_register('test', 'TestStream');
 $f = fopen('test://nonempty2nd', 'r');
 while (!feof($f)) {
@@ -33,4 +36,5 @@ $f = fopen('test://eofafter2nd', 'r');
 while (!feof($f)) {
   $line = stream_get_line($f, 99, "\n");
   var_dump($line);
+}
 }

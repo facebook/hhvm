@@ -6,5 +6,9 @@ class C {
  echo "__unset $k\n";
  }
 }
+
+<<__EntryPoint>>
+function main_755() {
 $obj = new C;
 unset($obj->foo);
+}

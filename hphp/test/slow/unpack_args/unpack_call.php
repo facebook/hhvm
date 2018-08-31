@@ -149,4 +149,8 @@ function main() {
   echo "Done\n";
 }
 
+
+<<__EntryPoint>>
+function main_unpack_call() {
 main();
+}

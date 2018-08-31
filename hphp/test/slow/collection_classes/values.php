@@ -14,4 +14,8 @@ function main() {
   var_dump(get_class($x->lazy()->values()));
   var_dump(get_class($x->lazy()->map($fn)->values()));
 }
+
+<<__EntryPoint>>
+function main_values() {
 main();
+}

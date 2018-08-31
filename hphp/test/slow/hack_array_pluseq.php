@@ -15,6 +15,9 @@ function main($a, $a2, $a3) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_hack_array_pluseq() {
 $a1 = array(1, 2, 3);
 $a2 = array("1", "b", "c");
 
@@ -53,3 +56,4 @@ main([], keyset[], $k1);
 main([], $v1, vec[]);
 main([], $d1, dict[]);
 main([], $k1, keyset[]);
+}

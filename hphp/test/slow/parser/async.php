@@ -14,4 +14,8 @@ abstract class C {
   async static function f11() {}
   async final function f13() {}
 }
+
+<<__EntryPoint>>
+function main_async() {
 echo "Done\n";
+}

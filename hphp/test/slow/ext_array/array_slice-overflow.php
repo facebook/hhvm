@@ -13,4 +13,8 @@ function make_array() {
   );
 }
 
+
+<<__EntryPoint>>
+function main_array_slice_overflow() {
 var_dump(make_array());
+}

@@ -15,8 +15,12 @@ function f() {
 function test() {
  $a = new A(f());
  }
+
+<<__EntryPoint>>
+function main_781() {
 try {
  test();
  }
  catch (Exception $e) {
  }
+}

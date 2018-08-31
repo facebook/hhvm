@@ -12,4 +12,8 @@ function main($x) {
   return test($x, $x);
 }
 
+
+<<__EntryPoint>>
+function main_testb() {
 var_dump(main(242));
+}

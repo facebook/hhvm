@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_array_as_callback() {
 $session_handler = new SessionHandler();
 session_set_save_handler(
     array($session_handler, 'open'),
@@ -12,3 +15,4 @@ session_set_save_handler(
 
 $_SESSION['a'] = 'A';
 var_dump($_SESSION);
+}

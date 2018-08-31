@@ -10,7 +10,11 @@ class A_B__C {
   public function bar() {}
 }
 
+
+<<__EntryPoint>>
+function main_deprecated_xhp_class_method() {
 $x = <x:composable-element />;
 $x->foo();
 $c = new A_B__C();
 $c->bar();
+}

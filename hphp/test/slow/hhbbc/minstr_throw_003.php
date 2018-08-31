@@ -1,7 +1,6 @@
 <?php
 
 function err($x) { throw new Exception(); }
-set_error_handler('err');
 function foo() {
   try {
     $x[][][]->foo = 2;
@@ -10,4 +9,9 @@ function foo() {
     var_dump($x);
   }
 }
+
+<<__EntryPoint>>
+function main_minstr_throw_003() {
+set_error_handler('err');
 foo();
+}

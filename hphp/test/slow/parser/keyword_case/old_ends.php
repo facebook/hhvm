@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_old_ends() {
 DECLARE (success=true) :
   ECHO "I DO DECLARE\n";
 ENDDECLARE;
@@ -31,3 +34,4 @@ WHILE (TRUE) :
 ENDWHILE;
 
 ECHO "DONE\n";
+}

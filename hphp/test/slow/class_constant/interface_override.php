@@ -11,4 +11,8 @@ class Y extends X {
   const int q = 1;
   const x = 'foo';
 }
+
+<<__EntryPoint>>
+function main_interface_override() {
 var_dump(Y::foo());
+}

@@ -115,4 +115,8 @@ function main() {
     (object)[10 => 'doesnt', 11 => 'matter']
   );
 }
+
+<<__EntryPoint>>
+function main_collections() {
 main();
+}

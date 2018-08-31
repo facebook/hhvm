@@ -29,4 +29,8 @@ function test() {
   var_dump(func2(10, 'b', 'z'));
   var_dump(func2(10, 'b', 'z'));
 }
+
+<<__EntryPoint>>
+function main_type_hint() {
 test();
+}

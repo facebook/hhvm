@@ -1,7 +1,10 @@
 <?php
 
+
 // originally based on ext/standard/tests/file/stream_rfc2397_001.phpt
 
+<<__EntryPoint>>
+function main_simple() {
 $data = 'data://,hello world';
 
 var_dump(file_get_contents($data));
@@ -20,4 +23,5 @@ $streams = array(
 
 foreach ($streams as $stream) {
   var_dump(file_get_contents($stream));
+}
 }

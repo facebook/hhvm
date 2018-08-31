@@ -1,5 +1,9 @@
 <?php
+
+
 // A valid json string
+<<__EntryPoint>>
+function main_json_last_error() {
 $json[] = '{"Organization": "PHP Documentation Team"}';
 
 // An invalid json string which will cause an syntax
@@ -18,4 +22,4 @@ foreach ($json as $string) {
     echo json_last_error_msg();
     echo "\n";
 }
-
+}

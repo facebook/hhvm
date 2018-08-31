@@ -7,4 +7,8 @@ class A {
  return new parent();
 }
  }
- var_dump(B::foo());
+
+ <<__EntryPoint>>
+function main_777() {
+var_dump(B::foo());
+}

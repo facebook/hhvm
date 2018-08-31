@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_get_html_trans_table_bad() {
 $encodings = array(
   null,
   '',
@@ -11,4 +14,5 @@ foreach ($encodings as $encoding) {
   #  var_dump(count($a));
   ksort($a);
   var_dump($a);
+}
 }

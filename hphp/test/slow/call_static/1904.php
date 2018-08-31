@@ -10,5 +10,9 @@ class SubClass extends BaseClass {
     echo "Calling SubClass static method '$name' "         . implode(', ', $arguments). "\n";
   }
 }
+
+<<__EntryPoint>>
+function main_1904() {
 SubClass::foo();
 BaseClass::foo();
+}

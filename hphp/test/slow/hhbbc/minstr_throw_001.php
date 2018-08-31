@@ -5,8 +5,6 @@ function err() {
   if (++$x == 2) throw new Exception('asd');
 }
 
-set_error_handler('err');
-
 function main() {
   $x = null;
 
@@ -20,5 +18,11 @@ function main() {
   }
 }
 
-main();
 
+
+<<__EntryPoint>>
+function main_minstr_throw_001() {
+set_error_handler('err');
+
+main();
+}

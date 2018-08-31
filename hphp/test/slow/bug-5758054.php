@@ -13,6 +13,10 @@ function y() {
   $$x = 5;
 }
 
+
+<<__EntryPoint>>
+function main_bug_5758054() {
 y(new leaker());
 
 echo "done\n";
+}

@@ -22,5 +22,9 @@ class A {
 }
 
 
+
+<<__EntryPoint>>
+function main_prop_from_traits() {
 $a = new A();
 $a->t();
+}

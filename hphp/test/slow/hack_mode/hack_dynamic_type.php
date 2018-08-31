@@ -16,5 +16,9 @@ function test() : void {
   foo(new C(), 5);
 }
 
+
+<<__EntryPoint>>
+function main_hack_dynamic_type() {
 test();
 var_dump("done");
+}

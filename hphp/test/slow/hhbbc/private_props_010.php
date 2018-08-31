@@ -16,4 +16,8 @@ function main() {
   var_dump($a->heh(0));
   var_dump($a->getY());
 }
+
+<<__EntryPoint>>
+function main_private_props_010() {
 main();
+}

@@ -5,6 +5,9 @@ class Foo {
   public function __construct($x) { $this->x = $x; }
 }
 
+
+<<__EntryPoint>>
+function main_property_constructor() {
 $a = new Foo(42);
 
 $gotException = false;
@@ -33,3 +36,4 @@ var_dump($gotException);
 
 $b = new ReflectionProperty($a, 'x');
 var_dump($b instanceof ReflectionProperty);
+}

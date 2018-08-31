@@ -44,4 +44,8 @@ function main() {
   var_dump(get(keyset['value', 'value2']));
   var_dump(get(Vector{'value', 'value2'}));
 }
+
+<<__EntryPoint>>
+function main_memoize() {
 main();
+}

@@ -41,7 +41,7 @@ int(1)
 int(0)
 int(1)
 
-Warning: No ending delimiter '/' found: [/abc\/] in %s/test/slow/ext_preg/preg_match_literal.php on line 71
+Warning: No ending delimiter '/' found: [/abc\/] in %s/test/slow/ext_preg/preg_match_literal.php on line 74
 bool(false)
 int(1)
 int(1)

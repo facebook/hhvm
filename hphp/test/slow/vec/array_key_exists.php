@@ -6,4 +6,8 @@ function main() {
   var_dump(array_key_exists(mt_rand(count($v),PHP_INT_MAX), $v));
 }
 
+
+<<__EntryPoint>>
+function main_array_key_exists() {
 main();
+}

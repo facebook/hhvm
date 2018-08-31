@@ -30,4 +30,8 @@ function main() {
   var_dump(ImmMap {42 => '42'} ==    Map {42 =>  42 });
   var_dump(ImmMap {42 => '42'} == ImmMap {42 =>  42 });
 }
+
+<<__EntryPoint>>
+function main_equals_intish_string_keys() {
 main();
+}

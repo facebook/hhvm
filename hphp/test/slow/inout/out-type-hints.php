@@ -1,10 +1,5 @@
 <?hh
 
-set_error_handler(($errno, $errstr, $errfile, $errline) ==> {
-  echo "[$errno] $errstr\n";
-  throw new Exception();
-});
-
 function foo($x, inout int $y): string {
   return ($y = $x);
 }
@@ -24,4 +19,13 @@ function main() {
   var_dump($r, $b, $c);
 }
 
+
+<<__EntryPoint>>
+function main_out_type_hints() {
+set_error_handler(($errno, $errstr, $errfile, $errline) ==> {
+  echo "[$errno] $errstr\n";
+  throw new Exception();
+});
+
 main();
+}

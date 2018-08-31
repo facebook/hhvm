@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1801() {
 $ite=new RecursiveDirectoryIterator(__DIR__.'/../../sample_dir/');
 $bytestotal=0;
 $nbfiles=0;
@@ -16,3 +19,4 @@ asort($files);
 var_dump(array_values($files));
 $bytestotal=number_format($bytestotal);
 echo "Total: $nbfiles files, $bytestotal bytes\n";
+}

@@ -1,18 +1,4 @@
 <?php
-
-$y = true;
-define('foo', $y ? 1 : 0);
-if (false) {
-  class redecClass {
-  }
-}
- else {
-  final class redecClass {
-    const redecConst = foo;
-    const redecConst2 = 456;
-    public static $fx = foo;
-  }
-}
 class T {
   const c = foo;
   const c2 = redecClass::redecConst;
@@ -43,4 +29,22 @@ function test() {
   var_dump(normal::C);
   var_dump(normal::$xx);
 }
+
+
+<<__EntryPoint>>
+function main_681() {
+$y = true;
+define('foo', $y ? 1 : 0);
+if (false) {
+  class redecClass {
+  }
+}
+ else {
+  final class redecClass {
+    const redecConst = foo;
+    const redecConst2 = 456;
+    public static $fx = foo;
+  }
+}
 test();
+}

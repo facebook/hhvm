@@ -11,4 +11,8 @@ class B extends A {
   }
 }
 
+
+<<__EntryPoint>>
+function main_ctor_compat_case_insensitve() {
 $b = new B;
+}

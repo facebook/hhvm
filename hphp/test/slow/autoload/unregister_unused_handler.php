@@ -7,6 +7,9 @@ function b($class) {
   print "b\n";
 }
 
+
+<<__EntryPoint>>
+function main_unregister_unused_handler() {
 spl_autoload_register('a');
 spl_autoload_register('b');
 var_dump(spl_autoload_functions()); // a and b
@@ -16,3 +19,4 @@ spl_autoload_unregister('b');
 var_dump(spl_autoload_functions()); // still a
 spl_autoload_unregister('a');
 var_dump(spl_autoload_functions() === array());
+}

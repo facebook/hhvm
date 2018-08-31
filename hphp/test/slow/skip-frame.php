@@ -63,6 +63,9 @@ function run($c) {
   $c();
 }
 
+
+<<__EntryPoint>>
+function main_skip_frame() {
 run('change_local');
 run('add_local');
 run('all_vars');
@@ -70,3 +73,4 @@ run('compact_extract');
 run('get_arg');
 run('change_local_method');
 run('all_vars_method');
+}

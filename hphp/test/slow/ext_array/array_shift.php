@@ -25,7 +25,11 @@ function d() {
   var_dump($fruit);
 }
 
+
+<<__EntryPoint>>
+function main_array_shift() {
 a();
 b();
 c();
 d();
+}

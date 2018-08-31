@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1799() {
 $dir = new DirectoryIterator(__DIR__.'/../../sample_dir');
 $files = array();
  // order changes per machine
@@ -11,3 +14,4 @@ while($dir->valid()) {
 }
 asort($files);
 var_dump(array_values($files));
+}

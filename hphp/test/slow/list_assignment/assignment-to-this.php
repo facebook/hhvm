@@ -9,4 +9,8 @@ function main() {
   $c->test();
   echo "Done\n";
 }
+
+<<__EntryPoint>>
+function main_assignment_to_this() {
 main();
+}

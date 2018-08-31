@@ -14,6 +14,10 @@ function main2() {
   call_user_func_array('no_return', $foo);
 }
 
+
+<<__EntryPoint>>
+function main_fcall_noreturn() {
 try { main1(); } catch (exception $e) { echo "o"; }
 try { main2(); } catch (exception $f) { echo "k"; }
 echo "\n";
+}

@@ -1,7 +1,4 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
-
-$cls_i2_is_recursive = false;
 
 function __autoload($cls) {
   if ($cls === "H2") {
@@ -165,4 +162,11 @@ function main() {
   echo "================ $test ===================\n";
   $test();
 }
+
+// Copyright 2004-present Facebook. All Rights Reserved.
+
+<<__EntryPoint>>
+function main_recursive() {
+$cls_i2_is_recursive = false;
 main();
+}

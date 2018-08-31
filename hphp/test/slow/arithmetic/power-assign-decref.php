@@ -1,7 +1,5 @@
 <?php
 
-error_reporting(E_NOTICE);
-
 class D {
   public $id;
 
@@ -46,4 +44,10 @@ function main() {
   var_dump($i9);
 }
 
+
+<<__EntryPoint>>
+function main_power_assign_decref() {
+error_reporting(E_NOTICE);
+
 main();
+}

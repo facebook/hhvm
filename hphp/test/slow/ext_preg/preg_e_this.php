@@ -18,7 +18,11 @@ class A {
   }
 }
 
+
+<<__EntryPoint>>
+function main_preg_e_this() {
 error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
 $a = new A();
 $a->foo();
 A::baz();
+}

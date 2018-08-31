@@ -70,9 +70,13 @@ function main($x) {
   X::getuirc($x);
 }
 
+
+<<__EntryPoint>>
+function main_bug_4976291() {
 for ($i=0; $i < 20; $i++) {
   main(new F);
   main(new H);
 }
 
 echo "Done\n";
+}

@@ -21,6 +21,9 @@ class D /* no relationship to C */ {
 }
 class E extends C {}
 
+
+<<__EntryPoint>>
+function main_is_expression_tc_this2() {
 $c = new C();
 $d = new D();
 $e = new E();
@@ -34,3 +37,4 @@ echo "\n";
 $d->isET($c);
 $d->isET($d);
 $d->isET($e);
+}

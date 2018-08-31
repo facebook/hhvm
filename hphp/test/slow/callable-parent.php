@@ -19,8 +19,12 @@ class Magic extends NoMagic {
   function __call($meth, $args) { }
 }
 
+
+<<__EntryPoint>>
+function main_callable_parent() {
 $nomagic = new NoMagic();
 $nomagic->checkCallables();
 
 $magic = new Magic();
 $magic->checkCallables();
+}

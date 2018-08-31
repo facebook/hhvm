@@ -29,4 +29,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_concat_empty() {
 main();
+}

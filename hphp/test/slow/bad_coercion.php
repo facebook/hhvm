@@ -4,6 +4,9 @@ function test_is_nan($v) {
   var_dump(is_nan($v));
 }
 
+
+<<__EntryPoint>>
+function main_bad_coercion() {
 $values = array(
   0,
   '0',
@@ -15,4 +18,5 @@ $values = array(
 
 foreach ($values as $v) {
   test_is_nan($v);
+}
 }

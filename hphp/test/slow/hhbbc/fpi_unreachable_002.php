@@ -6,4 +6,8 @@ function main() {
   var_dump(func1(true) ? func1(123) : func2(456));
 }
 
+
+<<__EntryPoint>>
+function main_fpi_unreachable_002() {
 main();
+}

@@ -8,4 +8,8 @@ function h3() {
   var_dump(current($x));
   var_dump(current($y));
 }
+
+<<__EntryPoint>>
+function main_252() {
 h3();
+}

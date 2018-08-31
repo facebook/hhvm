@@ -12,7 +12,11 @@ async function foo($uid) {
   return await $result_cache[$uid];
 }
 
+
+<<__EntryPoint>>
+function main_ref_count() {
 $i = 0;
 while ($i++ < 15) {
   HH\Asio\join(foo(0));
+}
 }

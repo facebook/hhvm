@@ -30,5 +30,9 @@ function blah() {
   }
 }
 
-blah();
 
+
+<<__EntryPoint>>
+function main_finally_break_003() {
+blah();
+}

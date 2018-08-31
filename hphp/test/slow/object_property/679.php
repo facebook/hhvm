@@ -9,6 +9,10 @@ class A {
  class B extends A {
  public $a = 'test';
 }
- $obj = new B();
+
+ <<__EntryPoint>>
+function main_679() {
+$obj = new B();
  $obj->foo();
  var_dump($obj->a);
+}

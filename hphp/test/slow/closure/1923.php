@@ -9,4 +9,8 @@ function f() {
   $f(true);
   var_dump($test);
 }
+
+<<__EntryPoint>>
+function main_1923() {
 f();
+}

@@ -11,4 +11,8 @@ function main() {
   var_dump($a->unknown == null);
   var_dump(null == $a->unknown);
 }
+
+<<__EntryPoint>>
+function main_empty_node() {
 main();
+}

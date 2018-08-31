@@ -124,6 +124,9 @@ function dump_param($param) {
      if ($name == 'method1') $func->invoke($obj, 'invoked');
    }
 }
+
+<<__EntryPoint>>
+function main_1354() {
 $func = new ReflectionFunction('func1');
  dump_func($func);
  $func = new ReflectionFunction('func2');
@@ -134,3 +137,4 @@ $cls = new ReflectionClass('cls1');
 $cls = new ReflectionClass('cls2');
  $obj = $cls->newInstance();
  dump_class($cls, $obj);
+}

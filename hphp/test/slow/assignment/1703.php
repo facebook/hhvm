@@ -23,6 +23,9 @@ class ClassA {
 function foo() {
   f($val2 = 1);
 }
+
+<<__EntryPoint>>
+function main_1703() {
 $obj = new ClassA();
 var_dump($obj);
 $obj->foo();
@@ -32,3 +35,4 @@ var_dump($obj);
 $obj->goo();
 var_dump($obj);
 $obj->zoo();
+}

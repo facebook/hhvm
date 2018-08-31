@@ -208,5 +208,9 @@ function main() {
   echo "Done\n";
 }
 
-main();
 
+
+<<__EntryPoint>>
+function main_json_decode_collections() {
+main();
+}

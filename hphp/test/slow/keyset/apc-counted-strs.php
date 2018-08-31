@@ -19,4 +19,8 @@ function main() {
   return $ks;
 }
 
+
+<<__EntryPoint>>
+function main_apc_counted_strs() {
 var_dump(array_keys(main()));
+}

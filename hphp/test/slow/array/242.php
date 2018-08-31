@@ -8,4 +8,8 @@ function test($q, $a, $b, $c) {
     var_dump(end(&$x[0]));
   }
 }
+
+<<__EntryPoint>>
+function main_242() {
 test(5, array(0,1), 0, 'foo');
+}

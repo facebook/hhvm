@@ -12,4 +12,8 @@ abstract class C {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_tc_abstract() {
 C::isT('foo');
+}

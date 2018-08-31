@@ -87,6 +87,9 @@ function test_iconv_substr() {
      "\xC3\x9C\xC3\x9D");
 }
 
+
+<<__EntryPoint>>
+function main_ext_iconv() {
 test_iconv_mime_encode();
 test_iconv_mime_decode();
 test_iconv_mime_decode_headers();
@@ -97,3 +100,4 @@ test_iconv_strlen();
 test_iconv_strpos();
 test_iconv_strrpos();
 test_iconv_substr();
+}

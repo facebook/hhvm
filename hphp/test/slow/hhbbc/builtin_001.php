@@ -8,4 +8,8 @@ function foo(string $s) {
   echo "\n";
 }
 
+
+<<__EntryPoint>>
+function main_builtin_001() {
 foo("12");
+}

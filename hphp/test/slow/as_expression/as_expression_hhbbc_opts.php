@@ -25,8 +25,12 @@ function h() {
 }
 
 
+
+<<__EntryPoint>>
+function main_as_expression_hhbbc_opts() {
 f();
 try {
   g();
 } catch (Exception $_) {}
 h();
+}

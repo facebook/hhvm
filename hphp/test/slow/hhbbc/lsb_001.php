@@ -16,5 +16,9 @@ function main() {
   echo "\n";
 }
 
-main();
 
+
+<<__EntryPoint>>
+function main_lsb_001() {
+main();
+}

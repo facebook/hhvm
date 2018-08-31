@@ -15,6 +15,10 @@ function h1(&$arr, $i) {
   }
   end(&$arr);
 }
+
+<<__EntryPoint>>
+function main_489() {
 $arr = array('a','b','c');
 h1(&$arr, 10);
 var_dump($arr);
+}

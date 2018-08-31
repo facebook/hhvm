@@ -14,6 +14,10 @@ function b() {
   var_dump($fruit);
 }
 
+
+
+<<__EntryPoint>>
+function main_array_pop() {
 a();
 b();
-
+}

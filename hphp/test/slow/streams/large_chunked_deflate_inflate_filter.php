@@ -52,4 +52,8 @@ function main() {
 */
 }
 
+
+<<__EntryPoint>>
+function main_large_chunked_deflate_inflate_filter() {
 main();
+}

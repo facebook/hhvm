@@ -23,6 +23,9 @@ function h($x, $y) {
   }
   var_dump($x[$y]['foo']);
 }
+
+<<__EntryPoint>>
+function main_534() {
 f(null, 'e');
 f(array(), 'e');
 f(array('e' => array('baz' => 40)), 'e');
@@ -31,3 +34,4 @@ var_dump(f(array(), 'y'));
 var_dump(f(array(), array()));
 h(array(), 0);
 h(array(array()), 0);
+}

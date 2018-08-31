@@ -10,5 +10,9 @@ class Thing {
   }
 }
 
+
+<<__EntryPoint>>
+function main_traits_and_interfaces9() {
 $t = new Thing;
 var_dump($t->foo());
+}

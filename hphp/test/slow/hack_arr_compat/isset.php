@@ -8,5 +8,9 @@ class A {
   }
 }
 
+
+<<__EntryPoint>>
+function main_isset() {
 $x = new A();
 var_dump($x->get('abc', 'def', 'ghi'));
+}

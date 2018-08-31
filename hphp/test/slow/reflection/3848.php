@@ -19,13 +19,6 @@ class MyReflectionFunction extends ReflectionFunction
 function f() {
 }
 
-$reflection = new MyReflectionFunction('f');
-$reflection->testProperty = 'foo';
-
-var_dump($reflection->name);
-var_dump($reflection->testProperty);
-var_dump($reflection->undefinedProperty);
-
 
 #===============================================================================
 # ReflectionClass.
@@ -45,13 +38,6 @@ class MyReflectionClass extends ReflectionClass
 
 class TestClass{
 }
-
-$reflection = new MyReflectionClass('TestClass');
-$reflection->testProperty = 'foo';
-
-var_dump($reflection->name);
-var_dump($reflection->testProperty);
-var_dump($reflection->undefinedProperty);
 
 
 #===============================================================================
@@ -75,6 +61,23 @@ class TestClassWithMethod{
   }
 }
 
+
+<<__EntryPoint>>
+function main_3848() {
+$reflection = new MyReflectionFunction('f');
+$reflection->testProperty = 'foo';
+
+var_dump($reflection->name);
+var_dump($reflection->testProperty);
+var_dump($reflection->undefinedProperty);
+
+$reflection = new MyReflectionClass('TestClass');
+$reflection->testProperty = 'foo';
+
+var_dump($reflection->name);
+var_dump($reflection->testProperty);
+var_dump($reflection->undefinedProperty);
+
 $reflection = new MyReflectionMethod('TestClassWithMethod::m');
 $reflection->testProperty = 'foo';
 
@@ -82,3 +85,4 @@ var_dump($reflection->name);
 var_dump($reflection->class);
 var_dump($reflection->testProperty);
 var_dump($reflection->undefinedProperty);
+}

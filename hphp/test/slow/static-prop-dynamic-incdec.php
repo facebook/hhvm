@@ -11,4 +11,8 @@ function test() {
   var_dump($c::$$p);
 }
 
+
+<<__EntryPoint>>
+function main_static_prop_dynamic_incdec() {
 test();
+}

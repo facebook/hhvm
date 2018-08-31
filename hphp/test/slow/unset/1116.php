@@ -18,4 +18,8 @@ function test() {
   echo 'after unset
 ';
 }
+
+<<__EntryPoint>>
+function main_1116() {
 test();
+}

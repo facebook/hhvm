@@ -35,6 +35,9 @@ function i(&$x) {
   $y = 40;
   var_dump(func_get_arg(0));
 }
+
+<<__EntryPoint>>
+function main_27() {
 f(10);
 $x = 1;
 g(0, $x, 2);
@@ -42,3 +45,4 @@ h(0, $x, array(1, 2), 3);
 $x = 10;
 i($x);
 i();
+}

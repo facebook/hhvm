@@ -7,4 +7,8 @@ function main() {
   foo(inout $x[1][2][3]);
 }
 
+
+<<__EntryPoint>>
+function main_bad_call_11() {
 main();
+}

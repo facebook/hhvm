@@ -84,6 +84,9 @@ class O implements I {
 <<__Memoize>>
 function memoizeObj(I $obj) { static $i = 150; return $i++; }
 
+
+<<__EntryPoint>>
+function main_args() {
 echo "Test each kind of function call with one and many args\n";
 $a = new A();
 echo $a->oneArgMeth(1).' ';
@@ -180,3 +183,4 @@ echo memoizeObj(new O('a')).' ';
 echo memoizeObj(new O('a')).' ';
 echo memoizeObj(new O('b')).' ';
 echo memoizeObj(new O('b')).' ';
+}

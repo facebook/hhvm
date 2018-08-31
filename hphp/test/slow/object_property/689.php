@@ -12,4 +12,8 @@ class A {
     }
   }
 }
+
+<<__EntryPoint>>
+function main_689() {
 A::foo();
+}

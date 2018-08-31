@@ -5,4 +5,8 @@ function foo() {
   var_dump($arr);
   return $arr;
 }
+
+<<__EntryPoint>>
+function main_1167() {
 foo();
+}

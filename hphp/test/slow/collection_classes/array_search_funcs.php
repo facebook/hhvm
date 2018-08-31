@@ -32,6 +32,10 @@ function nested() {
   var_dump(array_search('o', $a));
 }
 
+
+<<__EntryPoint>>
+function main_array_search_funcs() {
 basic();
 strict();
 nested();
+}

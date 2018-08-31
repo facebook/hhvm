@@ -14,12 +14,6 @@ function good() {
   var_dump($f_hack() + $f_php7());
 }
 
-good();
-
-set_error_handler(function ($no, $str) {
-  throw new Exception($str);
-});
-
 function bad() {
   $x = 1;
 
@@ -46,4 +40,14 @@ function bad() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_return_types() {
+good();
+
+set_error_handler(function ($no, $str) {
+  throw new Exception($str);
+});
+
 bad();
+}

@@ -36,5 +36,9 @@ function main() {
   $x8 = Set {};
   var_dump(array_shift(&$x8));
 }
-main();
 
+
+<<__EntryPoint>>
+function main_array_shift() {
+main();
+}

@@ -104,5 +104,9 @@ function main() {
   }
 }
 
-main();
 
+
+<<__EntryPoint>>
+function main_reflection_method_get_prototype() {
+main();
+}

@@ -43,4 +43,8 @@ function main() {
     echo "\n";
   }
 }
+
+<<__EntryPoint>>
+function main_collection_isset() {
 main();
+}

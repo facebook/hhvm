@@ -15,4 +15,8 @@ function g($key, $old, $new, $s = false) {
 function f($a0, $a1) {
   return 'should_be_modified';
 }
+
+<<__EntryPoint>>
+function main_1707() {
 var_dump(g('key', 'old', 'new', true));
+}

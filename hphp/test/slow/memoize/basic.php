@@ -336,6 +336,9 @@ function runTraitMethods() {
            [$b, 'func5']);
 }
 
+
+<<__EntryPoint>>
+function main_basic() {
 error_reporting(0);
 
 runFreeFuncs();
@@ -344,3 +347,4 @@ runMethods();
 runSingleMethods();
 runTraitStatics();
 runTraitMethods();
+}

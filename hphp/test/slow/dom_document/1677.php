@@ -39,7 +39,10 @@ function rerender($html, $frag = false) {
       }
     }
   }
-  $fragment = 'Hello, <b>world</b>.';
+
+  <<__EntryPoint>>
+function main_1677() {
+$fragment = 'Hello, <b>world</b>.';
   $document = '<html><body><div style="color:red">    <p class="thing">'.$fragment.'</p></div>';
   echo rerender($fragment, true)."
 
@@ -47,3 +50,4 @@ function rerender($html, $frag = false) {
   echo rerender($document, false)."
 
 ";
+}

@@ -16,9 +16,13 @@ function bar() {
   return foo();
 }
 
+
+<<__EntryPoint>>
+function main_constant_functions() {
 var_dump(bar());
 var_dump(foo(3, 4));
 var_dump(X::bar());
 var_dump(X::bar());
 var_dump(X::bar(2, 2));
 var_dump(X::bar(2, 2));
+}

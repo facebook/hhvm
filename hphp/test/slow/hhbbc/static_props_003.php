@@ -13,5 +13,9 @@ class Foob {
     return self::$a;
   }
 }
+
+<<__EntryPoint>>
+function main_static_props_003() {
 var_dump(Foob::asd());
 var_dump(Foob::wat());
+}

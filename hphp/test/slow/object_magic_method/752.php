@@ -5,6 +5,10 @@ class A {
  var_dump($a, $b[0], $b[1]);
 }
 }
- $obj = new A();
+
+ <<__EntryPoint>>
+function main_752() {
+$obj = new A();
  $a = 1;
  $obj->test($a, 'ss');
+}

@@ -17,4 +17,8 @@ function test($x) {
   xsort($a);
   var_dump($a);
 }
+
+<<__EntryPoint>>
+function main_1773() {
 test(230);
+}

@@ -1,7 +1,4 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
-
-$got_notice = false;
 function handler($errno, $errstr, $errfile, $errline, $errcontext='',
                  $errtrace = array()) {
   global $got_notice;
@@ -83,4 +80,11 @@ function main() {
   do_compares(1, 2);
 }
 
+// Copyright 2004-present Facebook. All Rights Reserved.
+
+<<__EntryPoint>>
+function main_compare() {
+$got_notice = false;
+
 main();
+}

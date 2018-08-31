@@ -5,4 +5,8 @@ function main($a, $b, $c) {
   $ks = keyset[$a, &$b, &$c];
   return $ks;
 }
+
+<<__EntryPoint>>
+function main_init_parse_error2() {
 main(1, 2, 3);
+}

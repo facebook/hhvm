@@ -9,7 +9,11 @@ trait T {
 class X {
  use T;
  }
+
+<<__EntryPoint>>
+function main_2070() {
 $x = new X;
 foreach ($x->foo('this') as $v) {
  var_dump($v);
  }
+}

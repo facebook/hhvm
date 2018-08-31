@@ -39,4 +39,8 @@ function main() {
   unlink($fname);
 }
 
+
+<<__EntryPoint>>
+function main_user_filter_remove() {
 main();
+}

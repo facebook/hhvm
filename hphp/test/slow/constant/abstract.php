@@ -19,4 +19,8 @@ class b extends a {
     echo "Pass\n";
   }
 }
+
+<<__EntryPoint>>
+function main_abstract() {
 (new b)->main();
+}

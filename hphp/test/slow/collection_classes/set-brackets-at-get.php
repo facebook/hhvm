@@ -59,4 +59,8 @@ function main() {
   unset($x['b']);
   var_dump($x);
 }
+
+<<__EntryPoint>>
+function main_set_brackets_at_get() {
 main();
+}

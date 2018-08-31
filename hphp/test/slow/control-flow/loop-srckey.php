@@ -11,7 +11,11 @@ function subdomains($domain) {
   return $domains;
 }
 
+
+<<__EntryPoint>>
+function main_loop_srckey() {
 $domains = array_fill(0, 22, 'www.facebook');
 foreach ($domains as $d) {
   var_dump(subdomains($d));
+}
 }

@@ -45,8 +45,12 @@ function foo($x) {
   unset($z, $y);
   var_dump($x);
 }
+
+<<__EntryPoint>>
+function main_697() {
 $y = new y;
 foo($y);
 $z = new z;
 foo($z);
 unset($z, $y);
+}

@@ -16,4 +16,8 @@ function test(string $s) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_isa_inference() {
 test('X');
+}

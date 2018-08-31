@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_include_empty_files() {
 $empty = tempnam(sys_get_temp_dir(), 'Empty');
 $empty_php = tempnam(sys_get_temp_dir(), 'EmptyPHP');
 
@@ -13,3 +16,4 @@ require($empty_php);
 
 @unlink($empty);
 @unlink($empty_php);
+}

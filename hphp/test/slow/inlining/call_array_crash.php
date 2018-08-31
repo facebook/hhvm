@@ -26,6 +26,9 @@ function main(bool $b, array $x) {
   return count($q);
 }
 
+
+<<__EntryPoint>>
+function main_call_array_crash() {
 $small = array('array_fill', 0, 10, 'foo');
 $large = array('array_fill', 0, 10000000000, 'foo');
 $easy = array($small, $small, $small, $small);
@@ -35,3 +38,4 @@ main(false, $small);
 main(false, $small);
 main(false, $small);
 main(true, $large);
+}

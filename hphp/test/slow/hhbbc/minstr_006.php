@@ -15,4 +15,8 @@ function main() {
   var_dump($f->getter());
 }
 
+
+<<__EntryPoint>>
+function main_minstr_006() {
 main();
+}

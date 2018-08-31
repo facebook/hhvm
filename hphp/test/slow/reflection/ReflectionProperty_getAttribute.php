@@ -10,6 +10,9 @@ class C {
     public $pp,
   ) {}
 }
+
+<<__EntryPoint>>
+function main_reflection_property_get_attribute() {
 $rp = new ReflectionProperty(C::class, 'p');
 var_dump($rp->getAttribute('B'));
 var_dump($rp->getAttribute('lol'));
@@ -22,3 +25,4 @@ var_dump($rp->getAttribute('ohai'));
 $c = new C(false);
 $c->dynamic = 'lol';
 var_dump((new ReflectionProperty($c, 'dynamic'))->getAttribute('wry'));
+}

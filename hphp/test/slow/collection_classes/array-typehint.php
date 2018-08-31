@@ -1,5 +1,4 @@
 <?hh
-error_reporting(-1);
 function handler($errno, $errmsg) {
   if ($errno === E_RECOVERABLE_ERROR) {
     throw new Exception("Type constraint failed");
@@ -11,7 +10,6 @@ function handler($errno, $errmsg) {
     return false;
   }
 }
-set_error_handler('handler');
 
 function helper($x) {
   var_dump($x);
@@ -67,4 +65,10 @@ function main() {
     }
   }
 }
+
+<<__EntryPoint>>
+function main_array_typehint() {
+error_reporting(-1);
+set_error_handler('handler');
 main();
+}

@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_804() {
 try {
   $v = new Vector();
   $v->containsKey(1);
@@ -31,4 +34,5 @@ try {
 }
  catch (Exception $e) {
   echo "Test failed\n";
+}
 }

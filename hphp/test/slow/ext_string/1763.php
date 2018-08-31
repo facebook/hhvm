@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1763() {
 error_reporting(0);
 var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', array(0)));
 var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', array(0), 3));
@@ -28,3 +31,4 @@ var_dump(sscanf("30", "%da", $out));
 var_dump($out);
 var_dump(sscanf("-", "%da", $out));
 var_dump($out);
+}

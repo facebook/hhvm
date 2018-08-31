@@ -49,7 +49,11 @@ function test($x) {
   var_dump(is_dict($x));
 }
 
+
+<<__EntryPoint>>
+function main_xhp() {
 test(:node1::xhpAttributeDeclaration());
 test(:node2::xhpAttributeDeclaration());
 test(:node3::xhpAttributeDeclaration());
 test(:node4::xhpAttributeDeclaration());
+}

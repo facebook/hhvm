@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_stream_socket_get_name() {
 $name = "";
 $errstr = "Could not grab a random socket file in 10 tries.";
 $errno = "";
@@ -19,4 +22,5 @@ if (!$socket) {
   var_dump($name == $socket_path);
   fclose($socket);
   unlink($name);
+}
 }

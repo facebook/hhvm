@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1931() {
 $myfunc = function() {
   echo "hello, world!\n";
 }
@@ -10,3 +13,4 @@ call_user_func_array($myfunc, array());
 $isc = is_callable($myfunc, false, $p);
 echo "is_callable(\$myfunc) = $isc\n";
 var_dump($p);
+}

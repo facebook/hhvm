@@ -66,4 +66,8 @@ function main() {
   // TODO: add toImmMap() once it exists.
 }
 
+
+<<__EntryPoint>>
+function main_materialization() {
 main();
+}

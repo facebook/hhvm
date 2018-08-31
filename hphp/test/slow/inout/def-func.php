@@ -19,4 +19,8 @@ function main($nontop) {
   var_dump($a, $x2, $y2);
 }
 
+
+<<__EntryPoint>>
+function main_def_func() {
 main('nontop');
+}

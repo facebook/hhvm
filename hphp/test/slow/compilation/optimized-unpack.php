@@ -8,4 +8,8 @@ class X {
     foo(...self::FOO);
   }
 }
+
+<<__EntryPoint>>
+function main_optimized_unpack() {
 X::bar();
+}

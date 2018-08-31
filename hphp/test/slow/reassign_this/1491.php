@@ -4,4 +4,8 @@ function foo() {
   $this = 2;
   echo "You should not see this";
  }
- foo();
+
+ <<__EntryPoint>>
+function main_1491() {
+foo();
+}

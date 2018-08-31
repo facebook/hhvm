@@ -1,6 +1,9 @@
 <?php
+
 // This example is taken from the PHP reference docs for the
 // preg_replace_callback_array() function, with slight modification.
+<<__EntryPoint>>
+function main_preg_replace_callback_array_php_docs() {
 $subject = 'Aaafaaba BbaCZbx';
 $count = 0;
 $ret = preg_replace_callback_array(
@@ -13,3 +16,4 @@ $ret = preg_replace_callback_array(
 
 var_dump($ret);
 var_dump($count);
+}

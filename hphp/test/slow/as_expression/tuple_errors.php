@@ -18,6 +18,9 @@ function g(mixed $x) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_tuple_errors() {
 $arr = vec[
   tuple(1, true, "hi"),
   tuple(1, 1, "hi"),
@@ -34,4 +37,5 @@ foreach ($arr as $k => $a) {
 echo "\n";
 foreach ($arr as $k => $a) {
   g($a);
+}
 }

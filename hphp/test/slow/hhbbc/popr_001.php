@@ -11,4 +11,8 @@ function main() {
   bar($a);
 }
 
+
+<<__EntryPoint>>
+function main_popr_001() {
 main();
+}

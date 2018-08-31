@@ -11,7 +11,11 @@ function bar(&$a) {
 function goo($name, $obj, $params, $data, &$done) {
   return $data(&$params[0]);
 }
+
+<<__EntryPoint>>
+function main_1198() {
 fb_intercept('foo', 'goo', 'bar');
 $a = 0;
 foo(&$a);
 var_dump($a);
+}

@@ -42,4 +42,8 @@ function main() {
   var_dump(2 ** 64);
 }
 
+
+<<__EntryPoint>>
+function main_power() {
 main();
+}

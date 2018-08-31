@@ -14,5 +14,9 @@ function foo() {
   var_dump($arr);
   var_dump($arr2);
 }
+
+<<__EntryPoint>>
+function main_494() {
 foreach (foo() as $_) {
+}
 }

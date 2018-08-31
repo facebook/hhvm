@@ -16,5 +16,9 @@ async function g() {
   return $b;
 }
 
+
+<<__EntryPoint>>
+function main_await_in_finally_block() {
 $r = HH\Asio\join(g());
 var_dump($r);
+}

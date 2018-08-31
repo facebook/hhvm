@@ -5,8 +5,6 @@ function foo() {
  return 12;
 }
 
-fb_intercept('foo', 'bar', "hello");
-
 class lol { public function __destruct() { echo "lol\n"; } }
 function & bar() {
   var_dump(func_get_args());
@@ -19,6 +17,12 @@ function main() {
   $l = foo(1,2);
 }
 
+
+
+<<__EntryPoint>>
+function main_extra_args() {
+fb_intercept('foo', 'bar', "hello");
+
 main();
 echo "done\n";
-
+}

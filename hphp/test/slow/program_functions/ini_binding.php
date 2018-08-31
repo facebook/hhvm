@@ -1,5 +1,8 @@
 <?php
+
 // These are set in our custom ini file for this test
+<<__EntryPoint>>
+function main_ini_binding() {
 var_dump(ini_get("hhvm.allow_hhas"));
 var_dump(ini_get("hhvm.jit_timer"));
 var_dump(ini_get("hhvm.gdb_sync_chunks"));
@@ -25,3 +28,4 @@ var_dump(ini_get("hhvm.hhir_licm"));
 var_dump(ini_get("hhvm.this_should_not_work"));
 var_dump(ini_get("hhvm.jit_ahot_size"));
 var_dump(ini_get("hhvm.hhirlicm"));
+}

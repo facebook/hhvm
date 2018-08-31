@@ -21,4 +21,8 @@ class Y {
   }
 }
 
+
+<<__EntryPoint>>
+function main_intersection_bug() {
 var_dump(X::foo(new Y));
+}

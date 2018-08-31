@@ -10,6 +10,10 @@ function from($a = 0) {
 function gen() {
   yield from from();
 }
+
+<<__EntryPoint>>
+function main_recursive_yield_from() {
 foreach(gen() as $v) {
   var_dump($v);
+}
 }

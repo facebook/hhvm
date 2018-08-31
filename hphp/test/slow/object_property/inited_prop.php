@@ -25,4 +25,8 @@ function main() {
   Thing::doStuff(11, 22);
 }
 
+
+<<__EntryPoint>>
+function main_inited_prop() {
 main();
+}

@@ -11,5 +11,9 @@ class A implements Serializable {
     $this->b = $props['b'];
   }
 }
- $obj = unserialize(serialize(new A()));
+
+ <<__EntryPoint>>
+function main_1540() {
+$obj = unserialize(serialize(new A()));
  var_dump($obj->b);
+}

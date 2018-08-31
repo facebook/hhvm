@@ -6,4 +6,8 @@ trait T1 {
 
 class X {
   use T1;
-};
+}
+<<__EntryPoint>>
+function main_require_constraint_nonexistent_if() {
+;
+}

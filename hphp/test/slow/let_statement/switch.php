@@ -22,6 +22,10 @@ function foo(int $i): void {
 }
 
 
+
+<<__EntryPoint>>
+function main_switch() {
 var_dump(foo(1));
 var_dump(foo(2));
 var_dump(foo(42));
+}

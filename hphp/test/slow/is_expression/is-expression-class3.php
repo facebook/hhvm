@@ -30,6 +30,9 @@ function is_D(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_class3() {
 $d = new D();
 is_D($d);
 is_C($d);
@@ -54,3 +57,4 @@ $n = null;
 is_D($n);
 is_C($n);
 is_I($n);
+}

@@ -14,7 +14,11 @@ function main($cl1) {
   var_dump($cl1(inout $x), $x, $cl2(&$x), $x, $cl3(inout $x), $x);
 }
 
+
+<<__EntryPoint>>
+function main_closure() {
 main((inout $x) ==> {
   $x = 4;
   return 5;
 });
+}

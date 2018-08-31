@@ -13,6 +13,9 @@ class C {
 final class D extends C {}
 final class E extends C {}
 
+
+<<__EntryPoint>>
+function main_is_expression_tc_this() {
 $d = new D();
 D::isT($d);
 C::isT($d);
@@ -32,3 +35,4 @@ $c = new C();
 D::isT($c);
 C::isT($c);
 E::isT($c);
+}

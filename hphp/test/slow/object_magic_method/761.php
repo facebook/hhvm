@@ -18,4 +18,8 @@ function test($x) {
   $x->real++;
   var_dump($x);
 }
+
+<<__EntryPoint>>
+function main_761() {
 test(new X);
+}

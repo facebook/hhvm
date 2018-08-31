@@ -1,7 +1,5 @@
 <?php
 
-require 'logger.inc';
-
 function main() {
   echo "goto within using\n";
   using (new Logger()) {
@@ -22,4 +20,10 @@ function main() {
 
   echo "Leaving main\n";
 }
+
+
+<<__EntryPoint>>
+function main_goto() {
+require 'logger.inc';
 main();
+}

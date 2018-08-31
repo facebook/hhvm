@@ -1,5 +1,9 @@
 <?php
 
+
+
+<<__EntryPoint>>
+function main_941() {
 $i = 0;
  print ++$i;
  print "\t";
@@ -331,4 +335,4 @@ $i = 0;
  print "\t";
  print "'1' !== ''	";
  print "\n";
-
+}

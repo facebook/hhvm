@@ -96,5 +96,9 @@ function main() {
   $x->pop();
   unset($x);
 }
-main();
 
+
+<<__EntryPoint>>
+function main_vector_buffer_sharing() {
+main();
+}

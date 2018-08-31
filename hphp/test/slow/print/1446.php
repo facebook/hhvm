@@ -1,6 +1,9 @@
 <?php
 
+
 // disable array -> "Array" conversion notice
+<<__EntryPoint>>
+function main_1446() {
 error_reporting(error_reporting() & ~E_NOTICE);
 
 print_r(array("\0" => 1));
@@ -55,3 +58,4 @@ $a = array("\'" => "\'");
 print_r($a);
 $a = array("\a" => "\a");
 print_r($a);
+}

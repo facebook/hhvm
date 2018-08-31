@@ -7,4 +7,8 @@ function test() {
   byRef(&$x?->y); // error
 }
 
+
+<<__EntryPoint>>
+function main_nullsafe_prop_13() {
 test();
+}

@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_serialize() {
 echo("\n*** string serialize-and-unserialize ***\n");
 $ret = null;
 var_dump(fb_unserialize(fb_serialize("test"), &$ret));
@@ -97,3 +100,4 @@ var_dump(
   )
 );
 var_dump($ret);
+}

@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_glob() {
 $path = 'glob://' . __DIR__ . '/../../sample_dir/*';
 
 $iters = array(
@@ -17,4 +20,5 @@ foreach ($iters as $iter) {
   foreach ($iter as $file) {
     echo "$file\n";
   }
+}
 }

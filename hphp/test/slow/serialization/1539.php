@@ -8,4 +8,8 @@ class A implements Serializable {
   public function unserialize($serialized) {
   }
 }
- var_dump(unserialize(serialize(new A())));
+
+ <<__EntryPoint>>
+function main_1539() {
+var_dump(unserialize(serialize(new A())));
+}

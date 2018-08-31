@@ -19,10 +19,14 @@ function test() {
   var_dump($a);
 }
 
+
+<<__EntryPoint>>
+function main_variadic_by_ref() {
 test();
 set_error_handler('error');
 try {
   test();
 } catch (Exception $e) {
   echo "Exception: {$e->getMessage()}\n";
+}
 }

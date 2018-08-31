@@ -14,5 +14,9 @@ class C {
   use T;
 }
 
+
+<<__EntryPoint>>
+function main_method_in_trait() {
 C::fun(false);
 T::fun(false);
+}

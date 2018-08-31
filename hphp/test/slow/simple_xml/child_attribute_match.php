@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_child_attribute_match() {
 $p = new SimpleXMLElement('<parent/>');
 $c = $p->addChild('child', '123');
 $c->addAttribute('attr', 'hi');
@@ -16,3 +19,4 @@ foreach ($p->children()[0]->attributes() as $k => $v) {
 }
 
 var_dump(count($cattrs) === count($pcattrs));
+}

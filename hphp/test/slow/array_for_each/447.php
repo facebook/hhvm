@@ -20,4 +20,8 @@ function f1() {
   }
   var_dump($foo);
 }
+
+<<__EntryPoint>>
+function main_447() {
 f1();
+}

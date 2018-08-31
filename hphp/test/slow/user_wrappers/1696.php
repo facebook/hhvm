@@ -8,5 +8,9 @@ class PrivateWrapper {
     return fopen('pw://foo', 'r');
   }
 }
+
+<<__EntryPoint>>
+function main_1696() {
 stream_wrapper_register('pw', 'PrivateWrapper');
 var_dump(is_resource(PrivateWrapper::openme()));
+}

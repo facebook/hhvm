@@ -22,4 +22,8 @@ function test() {
   foo($h -= 5);
   $h = null;
 }
+
+<<__EntryPoint>>
+function main_1094() {
 test();
+}

@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_natsort() {
 $array = array("img12.png", "img10.png", "img2.png", "img1.png");
 
 $arr1 = new ArrayObject($array);
@@ -12,3 +15,4 @@ print_r($arr1);
 $arr2->natsort();
 echo "\nNatural order sorting\n";
 print_r($arr2);
+}

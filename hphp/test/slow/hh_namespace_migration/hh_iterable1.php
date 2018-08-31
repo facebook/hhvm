@@ -22,4 +22,8 @@ function main() {
   asIterable($c);
 }
 
+
+<<__EntryPoint>>
+function main_hh_iterable1() {
 main();
+}

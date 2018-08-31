@@ -8,7 +8,11 @@ function f() {
 ;
   return $a;
 }
+
+<<__EntryPoint>>
+function main_2154() {
 $f = f();
 foreach ($f() as $v) {
  var_dump($v);
  }
+}

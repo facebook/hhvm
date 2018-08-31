@@ -14,4 +14,8 @@ function foo($value) {
   var_dump(count($property_keys));
 }
 
+
+<<__EntryPoint>>
+function main_ref_annotate_builtin() {
 foo(new X);
+}

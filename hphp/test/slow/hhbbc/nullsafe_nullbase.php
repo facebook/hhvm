@@ -1,7 +1,6 @@
 <?hh
 
 function err() { throw new exception; }
-set_error_handler('err');
 
 class somecls {
  public function x(&$k) {}
@@ -16,4 +15,9 @@ function foo(somecls $z) {
  }
 }
 
+<<__EntryPoint>>
+function main_nullsafe_nullbase() {
+set_error_handler('err');
+
 foo(new somecls);
+}

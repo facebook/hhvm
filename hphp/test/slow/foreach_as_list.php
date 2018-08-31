@@ -20,4 +20,8 @@ function baz():void {
     echo $p->i;
   }
 }
+
+<<__EntryPoint>>
+function main_foreach_as_list() {
 baz();
+}

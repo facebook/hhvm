@@ -14,6 +14,9 @@ class StreamWrapper {
   function stream_read($count) { return ''; }
 }
 
+
+<<__EntryPoint>>
+function main_xmlreader_user_file() {
 stream_wrapper_register('streamwrapper', 'StreamWrapper');
 
 
@@ -23,3 +26,4 @@ $reader = new XMLReader();
 var_dump($reader->open('streamwrapper://'));
 
 var_dump($reader->close());
+}

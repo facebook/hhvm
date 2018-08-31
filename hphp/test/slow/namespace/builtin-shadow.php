@@ -20,4 +20,8 @@ function main() {
   \extract(&$arr);
   var_dump($var);
 }
+
+<<__EntryPoint>>
+function main_builtin_shadow() {
 main();
+}

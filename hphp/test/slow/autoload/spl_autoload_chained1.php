@@ -1,7 +1,5 @@
 <?php
 
-spl_autoload_register('my_autoload');
-
 function my_autoload($class) {
   var_dump($class);
   $test = class_exists($class);
@@ -26,4 +24,10 @@ function my_autoload($class) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_spl_autoload_chained1() {
+spl_autoload_register('my_autoload');
+
 $a = new A();
+}

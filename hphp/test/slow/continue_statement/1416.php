@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1416() {
 for ($i = 0;
 $i<3;
 $i++) {
@@ -23,4 +26,5 @@ $i<10;
 $i++) {
   if ($i % 2 == 0) continue;
   echo $i . "\n";
+}
 }

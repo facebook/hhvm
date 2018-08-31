@@ -14,4 +14,8 @@ class Test
     }
 }
 
+
+<<__EntryPoint>>
+function main_gcc_4_9_bug() {
 var_dump((new Test())->foo());
+}

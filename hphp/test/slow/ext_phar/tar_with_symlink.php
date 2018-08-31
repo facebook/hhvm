@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_tar_with_symlink() {
 $pd = new PharData(__DIR__.'/tgz/with_symlink.tar.gz');
 
 $tempdir = tempnam(sys_get_temp_dir(),'');
@@ -28,3 +31,4 @@ foreach ($rii as $path => $info) {
   }
 }
 rmdir($tempdir);
+}

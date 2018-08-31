@@ -20,8 +20,12 @@ function test($cname, $mname) {
   echo "$cname:$mname:";
  var_dump($m->isConstructor());
 }
+
+<<__EntryPoint>>
+function main_1339() {
 test('X', 'X');
 test('Y', 'Y');
 test('Y', 'y');
 test('Z', 'Z');
 test('Z', 'z');
+}

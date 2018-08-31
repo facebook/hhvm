@@ -20,5 +20,9 @@ done:
   var_dump($foo);
 }
 
+
+<<__EntryPoint>>
+function main_func_family_012() {
 foo(new Base, new Obj);
 foo(new Obj, new Obj);
+}

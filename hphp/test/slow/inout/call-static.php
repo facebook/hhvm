@@ -73,4 +73,8 @@ function main() {
   echo "$a $b\n";
 }
 
+
+<<__EntryPoint>>
+function main_call_static() {
 main();
+}

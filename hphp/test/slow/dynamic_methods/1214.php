@@ -30,9 +30,13 @@ class Child extends Parent_ {
     }
   }
 }
+
+<<__EntryPoint>>
+function main_1214() {
 $c = new Child;
 $c->entry();
 $c->entry('overridden');
 Child::entry();
 Child::callParent('calledHere');
 Child::callParent('overridden');
+}

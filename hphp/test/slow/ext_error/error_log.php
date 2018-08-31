@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_error_log() {
 $log_string = 'hello world';
 $filename = tempnam(null, 'errorlog_test');
 
@@ -17,3 +20,4 @@ var_dump($content);
 fclose($f);
 
 unlink($filename);
+}

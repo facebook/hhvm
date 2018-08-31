@@ -4,8 +4,6 @@ function test() {
   (new X)->foo();
 }
 
-apc_add('foo', 0);
-
 function setup() {
   $i = apc_inc('foo', 1);
   var_dump($i);
@@ -31,5 +29,11 @@ function setup() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_func_guards() {
+apc_add('foo', 0);
+
 setup();
 test();
+}

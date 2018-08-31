@@ -36,4 +36,8 @@ function test_all() {
     }
   }
 }
+
+<<__EntryPoint>>
+function main_array_merge() {
 test_all();
+}

@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_3() {
 $complexMap = array(
   "f" => "facebook",
   "a" => array("b" => 1,
@@ -43,3 +46,4 @@ if (apc_fetch("a") !== array("b" => 1,
                              "c" => array("d", "e"))) echo "no\n";
 
 echo "ok\n";
+}

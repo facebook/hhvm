@@ -72,5 +72,9 @@ function test() {
     $p->getTransport()->buff);
   thrift_protocol_read_binary($p, 'TestStruct', true);
 }
+
+<<__EntryPoint>>
+function main_thrift() {
 test();
 print "Done\n";
+}

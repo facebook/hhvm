@@ -8,5 +8,9 @@ class F {
   }
 }
 
+
+<<__EntryPoint>>
+function main_simple_meth_static() {
 var_dump(HH\Asio\join(F::ret1()));
 var_dump(HH\Asio\join(F::await1()));
+}

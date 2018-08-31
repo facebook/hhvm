@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_array_invalid_argument() {
 try {
   $arrit = new ArrayIterator(42);
 } catch(InvalidArgumentException $e) {
@@ -17,4 +20,5 @@ try {
   $arrobj->exchangeArray(42);
 } catch (InvalidArgumentException $e) {
   echo "ArrObj::exchangeArray: " . $e->getMessage() . "\n";
+}
 }

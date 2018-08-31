@@ -31,4 +31,8 @@ function test() {
   echo 'Done', "\n";
 }
 
+
+<<__EntryPoint>>
+function main_deprecation() {
 test();
+}

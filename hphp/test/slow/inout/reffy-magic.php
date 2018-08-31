@@ -18,4 +18,8 @@ function main() {
   bar($x);
 }
 
+
+<<__EntryPoint>>
+function main_reffy_magic() {
 main();
+}

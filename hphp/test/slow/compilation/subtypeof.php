@@ -28,4 +28,8 @@ function throwError(Exception $ex) {
   throw $ex;
 }
 
+
+<<__EntryPoint>>
+function main_subtypeof() {
 var_dump(foo(42));
+}

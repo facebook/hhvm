@@ -22,4 +22,8 @@ async function crash() {
   echo "should have exited!\n";
 }
 
+
+<<__EntryPoint>>
+function main_await_cpp_exception() {
 HH\Asio\join(crash());
+}

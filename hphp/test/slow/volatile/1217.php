@@ -8,8 +8,12 @@ function foo() {
 function bar() {
   return defined('Auth_OpenID_NO_MATH_SUPPORT');
 }
+
+<<__EntryPoint>>
+function main_1217() {
 if (defined('M_PI')) {
   var_dump(bar());
   foo();
   var_dump(bar());
+}
 }

@@ -17,4 +17,8 @@ function get2() {
 }
 
 function foo() { return get1() === get2(); }
+
+<<__EntryPoint>>
+function main_hhbbc2() {
 var_dump(foo());
+}

@@ -22,4 +22,8 @@ final class X {
   }
 }
 
+
+<<__EntryPoint>>
+function main_assert_ratl() {
 (new X)->bar();
+}

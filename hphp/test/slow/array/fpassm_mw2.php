@@ -10,4 +10,8 @@ function main() {
   var_dump($a);
   byval($a[][0]);
 }
+
+<<__EntryPoint>>
+function main_fpassm_mw2() {
 main();
+}

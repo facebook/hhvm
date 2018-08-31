@@ -47,5 +47,9 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_generator_body() {
 main();
 echo "\n";
+}

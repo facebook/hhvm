@@ -15,4 +15,8 @@ function main() {
   $custom_map = new Map();
 }
 
+
+<<__EntryPoint>>
+function main_hh_map4() {
 main();
+}

@@ -15,4 +15,8 @@ function main() {
   Foo::main();
   var_dump(Foo::get());
 }
+
+<<__EntryPoint>>
+function main_static_props_016() {
 main();
+}

@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1922() {
 $x = false;
 $f = function ($arg0) use (&$x) {
  $x = $arg0;
@@ -7,3 +10,4 @@ $f = function ($arg0) use (&$x) {
 ;
 $f(32);
 var_dump($x);
+}

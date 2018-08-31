@@ -14,4 +14,8 @@ function main() {
   $b[] = 'foo';
   echo "Done\n";
 }
+
+<<__EntryPoint>>
+function main_large_packed_array() {
 main();
+}

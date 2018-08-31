@@ -19,4 +19,8 @@ function main(): void {
   (new ImplSub())->doStuff(new ParamSub());
 }
 
+
+<<__EntryPoint>>
+function main_abstract_variance() {
 main();
+}

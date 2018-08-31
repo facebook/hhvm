@@ -26,6 +26,10 @@ function main() {
   convert_alot($arr);
 }
 
+
+<<__EntryPoint>>
+function main_ref_fail_leak() {
 ini_set('memory_limit', '18M');
 main();
 echo "OK\n";
+}

@@ -27,4 +27,8 @@ function test() {
   $x->f();
   $y->f();
 }
+
+<<__EntryPoint>>
+function main_1876() {
 test();
+}

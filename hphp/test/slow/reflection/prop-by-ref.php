@@ -18,4 +18,8 @@ function main() {
   test($x);
 }
 
+
+<<__EntryPoint>>
+function main_prop_by_ref() {
 main();
+}

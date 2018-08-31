@@ -30,6 +30,9 @@ function as_D(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_class() {
 $d = new D();
 as_D($d);
 as_C($d);
@@ -49,3 +52,4 @@ $f = new F();
 as_D($f);
 as_C($f);
 as_I($f);
+}

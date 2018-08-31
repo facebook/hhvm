@@ -13,6 +13,9 @@ function gen() {
   yield $x++;
   yield $x++;
 }
+
+<<__EntryPoint>>
+function main_2177() {
 $cc = makeClosureCont();
 foreach ($cc() as $v) {
  var_dump($v);
@@ -27,3 +30,4 @@ foreach (gen() as $v) {
 foreach (gen() as $v) {
  var_dump($v);
  }
+}

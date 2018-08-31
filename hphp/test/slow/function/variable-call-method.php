@@ -12,4 +12,8 @@ function g() {
   var_dump($f('foo'));
 }
 
+
+<<__EntryPoint>>
+function main_variable_call_method() {
 g();
+}

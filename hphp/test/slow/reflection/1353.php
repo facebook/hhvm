@@ -17,5 +17,9 @@ function __autoload($name) {
   }
   var_dump($name);
 }
+
+<<__EntryPoint>>
+function main_1353() {
 $r1 = new ReflectionClass('C');
 $r2 = new ReflectionMethod('M', 'foo');
+}

@@ -12,6 +12,9 @@ function is_shape(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_shape2() {
 is_shape(null);
 is_shape(new stdClass());
 is_shape(tuple(1, true));
@@ -26,3 +29,4 @@ is_shape(shape('a' => 1, 'b' => true, 'c' => null));
 echo "\n";
 is_shape(shape('a' => 1, 'b' => true, 'c' => 'c', 'd' => null));
 is_shape(shape('a' => 1, 'b' => true, 'd' => null));
+}

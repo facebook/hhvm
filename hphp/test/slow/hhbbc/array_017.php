@@ -18,4 +18,8 @@ function main() {
   var_dump($x['yoyo']['stuff']['other']['foo']['heh']);
   var_dump($x['yoyo']['stuff']);
 }
+
+<<__EntryPoint>>
+function main_array_017() {
 main();
+}

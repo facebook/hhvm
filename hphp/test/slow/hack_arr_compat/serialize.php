@@ -26,4 +26,8 @@ function main() {
   test_prop_order();
 }
 
+
+<<__EntryPoint>>
+function main_serialize() {
 main();
+}

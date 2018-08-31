@@ -84,4 +84,8 @@ function main() {
   run([$a, 'alwaysThrows1'], [$a, 'alwaysThrows1']);
   run([$b, 'alwaysThrows'], [$c, 'alwaysThrows']);
 }
+
+<<__EntryPoint>>
+function main_unreachable() {
 main();
+}

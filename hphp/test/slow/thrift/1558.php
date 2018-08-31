@@ -81,4 +81,8 @@ function test() {
   thrift_protocol_write_compact($p, 'foomethod', 1, $v1, 20);
   var_dump(md5($p->getTransport()->buff));
 }
+
+<<__EntryPoint>>
+function main_1558() {
 test();
+}

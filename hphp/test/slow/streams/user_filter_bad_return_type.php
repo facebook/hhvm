@@ -55,4 +55,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_user_filter_bad_return_type() {
 main();
+}

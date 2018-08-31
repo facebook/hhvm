@@ -13,4 +13,8 @@ function main() {
   var_dump(test($c));
   var_dump(test(null));
 }
+
+<<__EntryPoint>>
+function main_nullsafe_call_2() {
 main();
+}

@@ -6,4 +6,8 @@ function foo($x) {
     $x = array(0);
   }
 }
+
+<<__EntryPoint>>
+function main_miter_surprise() {
 foo(array(1,2,3,4));
+}

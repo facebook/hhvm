@@ -2,6 +2,9 @@
 
 class X {
 }
+
+<<__EntryPoint>>
+function main_1549() {
 $a = new X;
 $q = array(1,2,3);
 $a->foo = &$q;
@@ -17,3 +20,4 @@ $A = unserialize($s);
 var_dump($A);
 $r = &$A->bar;
 var_dump(array_keys($r));
+}

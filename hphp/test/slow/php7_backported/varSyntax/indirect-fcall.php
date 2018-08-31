@@ -1,5 +1,11 @@
 <?php
 function id($x = 'id') { return $x; }
+class Test {
+    public static function id($x = [__CLASS__, 'id']) { return $x; }
+}
+
+<<__EntryPoint>>
+function main_indirect_fcall() {
 var_dump(0);
 id('var_dump')(1);
 id('id')('var_dump')(2);
@@ -13,11 +19,9 @@ $id($id)('var_dump')(7);
 ($f = function($x = null) use (&$f) {
     return $x ?: $f;
 })()()()('var_dump')(9);
-class Test {
-    public static function id($x = [__CLASS__, 'id']) { return $x; }
-}
 $obj = new Test;
 [$obj, 'id']()('id')($id)('var_dump')(10);
 ['Test', 'id']()()('var_dump')(11);
 'id'()('id')('var_dump')(12);
 ('i' . 'd')()('var_dump')(13);
+}

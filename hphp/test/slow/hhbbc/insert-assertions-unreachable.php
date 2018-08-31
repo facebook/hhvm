@@ -13,4 +13,8 @@ function build() {
   return $d;
 }
 
+
+<<__EntryPoint>>
+function main_insert_assertions_unreachable() {
 var_dump(build());
+}

@@ -10,4 +10,8 @@ function test() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_array_filter_autoload() {
 test();
+}

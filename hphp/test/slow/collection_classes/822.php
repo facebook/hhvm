@@ -30,7 +30,11 @@ function j() {
   $v = new Vector(gen());
   var_dump($v);
 }
+
+<<__EntryPoint>>
+function main_822() {
 f();
 g();
 h();
 j();
+}

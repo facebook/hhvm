@@ -22,5 +22,9 @@ function f9() {
       break;
   }
 }
+
+<<__EntryPoint>>
+function main_464() {
 foreach (f9() as $_) {
+}
 }

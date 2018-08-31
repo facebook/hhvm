@@ -3,5 +3,9 @@
 function test() {
  var_dump(func_get_args());
 }
- $a = 'Test';
+
+ <<__EntryPoint>>
+function main_1177() {
+$a = 'Test';
  $a();
+}

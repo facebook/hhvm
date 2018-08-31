@@ -13,4 +13,8 @@ function main() {
   foreach ($x as $v) { $$y = 1; }
   echo "Done\n";
 }
+
+<<__EntryPoint>>
+function main_imm_iteration_bug() {
 main();
+}

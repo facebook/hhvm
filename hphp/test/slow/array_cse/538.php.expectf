@@ -11,7 +11,7 @@ array(1) {
 }
 string(3) "abc"
 
-Notice: Undefined index: 0 in %s/test/slow/array_cse/538.php on line 17
+Notice: Undefined index: 0 in %s/test/slow/array_cse/538.php on line 15
 array(1) {
   [0]=>
   int(10)
@@ -24,4 +24,4 @@ string(3) "A/B"
 string(2) "e1"
 string(2) "e1"
 
-Warning: Cannot use a scalar value as an array in %s/test/slow/array_cse/538.php on line 38
+Warning: Cannot use a scalar value as an array in %s/test/slow/array_cse/538.php on line 30

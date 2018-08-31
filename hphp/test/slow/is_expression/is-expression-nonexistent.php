@@ -6,4 +6,8 @@ function is_nonexistent(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_nonexistent() {
 is_nonexistent(new stdClass());
+}

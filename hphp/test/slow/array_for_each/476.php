@@ -12,5 +12,9 @@ function g6() {
     }
   }
 }
+
+<<__EntryPoint>>
+function main_476() {
 foreach (g6() as $_) {
+}
 }

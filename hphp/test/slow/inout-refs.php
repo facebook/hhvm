@@ -11,4 +11,8 @@ function main() {
   var_dump($a);
 }
 
+
+<<__EntryPoint>>
+function main_inout_refs() {
 main();
+}

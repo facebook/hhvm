@@ -5,6 +5,9 @@ class A {
 }
  class B extends A {
 }
+
+<<__EntryPoint>>
+function main_644() {
 $obj1 = new A();
  $obj2 = new A();
  $obj2->a++;
@@ -19,3 +22,4 @@ var_dump($obj1 instanceof A);
 var_dump($obj3 instanceof A);
 var_dump($obj1 instanceof B);
 var_dump($obj3 instanceof B);
+}

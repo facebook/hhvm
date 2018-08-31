@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_shared_memory() {
 $ret = shm_attach(0xDEADBEEF);
 if ($ret === false) { echo "failed\n"; exit(1); }
 shm_remove($ret); // just in case its left over from an earlier run
@@ -32,3 +35,4 @@ $ret = shm_get_var($index, 1234);
 var_dump($ret === false);
 
 shm_remove($index);
+}

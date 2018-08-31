@@ -75,4 +75,8 @@ function quux($b, $a) {
 function main() {
   foo('tofu');
 }
+
+<<__EntryPoint>>
+function main_catch_trace_rematerialize() {
 main();
+}

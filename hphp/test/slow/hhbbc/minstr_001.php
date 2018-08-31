@@ -6,5 +6,9 @@ function foo() {
   var_dump($x);
 }
 
-foo();
 
+
+<<__EntryPoint>>
+function main_minstr_001() {
+foo();
+}

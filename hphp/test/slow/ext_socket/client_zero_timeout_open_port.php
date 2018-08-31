@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_client_zero_timeout_open_port() {
 $socket = null;
 while (!$socket) {
   $port = rand(50000, 65535);
@@ -19,4 +22,5 @@ if ($elapsed > 1) {
   print "FAILURE";
 } else {
   print "SUCCESS";
+}
 }

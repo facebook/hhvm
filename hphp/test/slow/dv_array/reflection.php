@@ -64,6 +64,9 @@ function test($func) {
   echo "======================================================\n";
 }
 
+
+<<__EntryPoint>>
+function main_reflection() {
 test('f');
 test('g');
 
@@ -86,3 +89,4 @@ $rp = new ReflectionProperty('C', 'p3');
 var_dump($rp->getDefaultValue());
 var_dump(is_darray($rp->getDefaultValue()));
 var_dump($rp->getTypeText());
+}

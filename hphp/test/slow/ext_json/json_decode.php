@@ -1,6 +1,9 @@
 <?php
 
 
+
+<<__EntryPoint>>
+function main_json_decode() {
 $arr = array("fbid" => 101501853510151001);
 var_dump(json_decode(json_encode($arr), true));
 
@@ -35,3 +38,4 @@ var_dump(json_decode("[{\"a\":\"apple\"},{\"b\":\"banana\"}]", true));
 
 $a = "[{\"a\":[{\"n\":\"1st\"}]},{\"b\":[{\"n\":\"2nd\"}]}]";
 var_dump(json_decode($a, true));
+}

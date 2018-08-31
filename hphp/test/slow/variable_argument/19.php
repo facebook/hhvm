@@ -6,5 +6,9 @@ class A {
   var_dump(func_get_args());
 }
 }
- $obj = new A(1, 2, 3);
+
+ <<__EntryPoint>>
+function main_19() {
+$obj = new A(1, 2, 3);
  $obj = new A('test');
+}

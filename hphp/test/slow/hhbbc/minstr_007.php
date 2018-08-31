@@ -22,4 +22,8 @@ function main() {
   var_dump($foo->heh($a, 'str'));
   var_dump($foo->getter());
 }
+
+<<__EntryPoint>>
+function main_minstr_007() {
 main();
+}

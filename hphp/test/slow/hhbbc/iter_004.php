@@ -8,4 +8,8 @@ function foo() {
   }
   return 1;
 }
+
+<<__EntryPoint>>
+function main_iter_004() {
 foo();
+}

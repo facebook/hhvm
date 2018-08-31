@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_6928() {
 $text =  "a\tb\tc\t\n";
 $text .= "a\tb\tc\n";
 $text .= "1\t2\t";
@@ -12,3 +15,4 @@ foreach($file as $row) {
 }
 
 $file = null;
+}

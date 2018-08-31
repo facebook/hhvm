@@ -12,4 +12,8 @@ function main() {
   $x = foo();
   echo $x['other']['foo'] . "\n";
 }
+
+<<__EntryPoint>>
+function main_array_016() {
 main();
+}

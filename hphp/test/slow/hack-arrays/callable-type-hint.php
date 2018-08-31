@@ -19,5 +19,9 @@ function test() {
   returns_callable(keyset['A', 'func']);
 }
 
+
+<<__EntryPoint>>
+function main_callable_type_hint() {
 test();
 echo "DONE\n";
+}

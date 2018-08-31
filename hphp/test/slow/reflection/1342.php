@@ -14,4 +14,8 @@ function test() {
     var_dump($m->name);
   }
 }
+
+<<__EntryPoint>>
+function main_1342() {
 test();
+}

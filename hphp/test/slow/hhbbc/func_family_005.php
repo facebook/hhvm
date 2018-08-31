@@ -20,7 +20,11 @@ function main(Base $b, string $l) {
   var_dump($x);
 }
 
+
+
+<<__EntryPoint>>
+function main_func_family_005() {
 $l = (string)mt_rand();
 main(new D2, $l);
 main(new D1, $l);
-
+}

@@ -6,7 +6,11 @@ class :x {
   }
 }
 
+
+<<__EntryPoint>>
+function main_xhp() {
 $x = 42;
 :x::foo(&$x);
 
 var_dump($x);
+}

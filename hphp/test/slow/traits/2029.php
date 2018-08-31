@@ -13,4 +13,3 @@ trait TestTrait {
 	echo A::test();
 
 ?>
-

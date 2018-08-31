@@ -8,4 +8,8 @@ function foo($e, $m) {
 function test($x) {
   return foo('a', $x);
 }
+
+<<__EntryPoint>>
+function main_1830() {
 var_dump(test('b'));
+}

@@ -18,4 +18,8 @@ function main() {
     echo "$v\n";
   }
 }
+
+<<__EntryPoint>>
+function main_set_addall_bug() {
 main();
+}

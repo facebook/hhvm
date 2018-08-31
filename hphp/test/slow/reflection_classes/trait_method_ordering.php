@@ -52,6 +52,9 @@ class B4 extends A2 {
   public function zmethod() {}
 }
 
+
+<<__EntryPoint>>
+function main_trait_method_ordering() {
 foreach (array('B1', 'B2', 'B3', 'B4') as $name) {
   $obj = new ReflectionClass($name);
   var_dump(array_map(
@@ -60,4 +63,5 @@ foreach (array('B1', 'B2', 'B3', 'B4') as $name) {
     },
     $obj->getMethods()
   ));
+}
 }

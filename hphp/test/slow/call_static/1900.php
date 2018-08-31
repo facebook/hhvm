@@ -8,6 +8,10 @@ class MethodTest {
         var_dump($name, implode(', ', $arguments));
     }
 }
+
+<<__EntryPoint>>
+function main_1900() {
 $obj = new MethodTest;
 $obj->runTest('in object context');
 MethodTest::runTest('in static context');
+}

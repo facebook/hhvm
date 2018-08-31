@@ -69,6 +69,9 @@ function test2($a, $b, $c, $d, $e) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_type_hints_builtins() {
 test1();
 test2(
   tuple(true, false),
@@ -77,3 +80,4 @@ test2(
   darray[],
   []
 );
+}

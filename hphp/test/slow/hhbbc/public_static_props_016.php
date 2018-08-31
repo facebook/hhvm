@@ -9,5 +9,9 @@ class X {
   }
 }
 
+
+<<__EntryPoint>>
+function main_public_static_props_016() {
 var_dump(X::z());
 var_dump(X::z());
+}

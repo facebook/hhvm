@@ -28,6 +28,9 @@ function is_tkeyset(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_ta_array() {
 is_tvec(vec['foo']);
 is_tvec(vec[1]);
 is_tvec(dict[]);
@@ -52,3 +55,4 @@ is_tkeyset(dict[]);
 is_tkeyset(dict['a' => 'b']);
 is_tkeyset(keyset[]);
 is_tkeyset(keyset['foo']);
+}

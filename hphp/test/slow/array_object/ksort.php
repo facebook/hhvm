@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_ksort() {
 $fruits = array(
   "d" => "lemon",
   "a" => "orange",
@@ -11,4 +14,5 @@ $fruitArrayObject->ksort();
 
 foreach ($fruitArrayObject as $key => $val) {
   echo "$key = $val\n";
+}
 }

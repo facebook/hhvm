@@ -29,4 +29,8 @@ function main() {
   nulls_in_haystack();
 }
 
+
+<<__EntryPoint>>
+function main_strpbrk_null() {
 main();
+}

@@ -18,4 +18,8 @@ function main() {
   $y = $y[$l];
   $y->heh();
 }
+
+<<__EntryPoint>>
+function main_array_041() {
 main();
+}

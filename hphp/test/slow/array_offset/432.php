@@ -3,6 +3,9 @@
 function f(&$elem) {
 $elem = 44;
 }
+
+<<__EntryPoint>>
+function main_432() {
 $arr = array();
 $arr[PHP_INT_MAX-1] = 1;
 $arr[PHP_INT_MAX] = 2;
@@ -13,3 +16,4 @@ unset($arr[PHP_INT_MAX]);
 unset($arr[PHP_INT_MAX-1]);
 f($arr[]);
 var_dump($arr);
+}

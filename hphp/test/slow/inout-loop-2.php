@@ -20,4 +20,8 @@ function main() {
   echo "done\n";
 }
 
+
+<<__EntryPoint>>
+function main_inout_loop_2() {
 main();
+}

@@ -6,4 +6,8 @@ function test() {
   $y .= 'hello';
   echo $x;
 }
+
+<<__EntryPoint>>
+function main_1105() {
 test();
+}

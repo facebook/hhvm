@@ -110,6 +110,9 @@ async function main($exit_type) {
   } while ($res);
 }
 
+
+<<__EntryPoint>>
+function main_async_generators() {
 Exception::setTraceOptions(DEBUG_BACKTRACE_IGNORE_ARGS);
 echo "start\n";
 for ($exit_type = 0; $exit_type < 4; ++$exit_type) {
@@ -122,3 +125,4 @@ for ($exit_type = 0; $exit_type < 4; ++$exit_type) {
   }
 }
 echo "end\n";
+}

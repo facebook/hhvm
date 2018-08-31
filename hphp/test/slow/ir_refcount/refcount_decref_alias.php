@@ -21,4 +21,8 @@ function go() {
   var_dump((new X([new stdclass]))->thing());
 }
 
+
+<<__EntryPoint>>
+function main_refcount_decref_alias() {
 go();
+}

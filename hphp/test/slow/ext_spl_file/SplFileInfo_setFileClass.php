@@ -2,6 +2,9 @@
 
 class MyFileObject extends SplFileObject {}
 
+
+<<__EntryPoint>>
+function main_spl_file_info_set_file_class() {
 $info = new SplFileInfo(__FILE__);
 
 $info->setFileClass('MyFileObject');
@@ -14,4 +17,5 @@ try {
     $info->setFileClass('stdClass');
 } catch (UnexpectedValueException $e) {
     echo $e->getMessage(), "\n";
+}
 }

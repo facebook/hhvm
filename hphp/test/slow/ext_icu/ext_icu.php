@@ -251,6 +251,10 @@ function test_icu_tokenize() {
      ")\n");
 }
 
+
+<<__EntryPoint>>
+function main_ext_icu() {
 test_icu_match();
 test_icu_transliterate();
 test_icu_tokenize();
+}

@@ -9,12 +9,6 @@ class MyTextNode extends DOMText {
     return "__get: $name";
   }
 }
-$dom = new DOMDocument();
-$dom->registerNodeClass('DOMText', 'MyTextNode');
-$node = $dom->appendChild($dom->createElement('Foo', 'Bar'));
-
-var_dump($node->firstChild->textContent); // Impl-level
-var_dump($node->firstChild->nonExisting); // User-level __get
 
 // -----------------------------------------------------------
 // 2. Explicit override of the native magic prop.
@@ -31,11 +25,6 @@ class MyTextExplicit extends DOMText {
   }
 }
 
-$my_text = new MyTextExplicit('Foo', 'Bar');
-
-var_dump($my_text->textContent); // User-level
-var_dump($my_text->nonExisting); // User-level
-
 // -----------------------------------------------------------
 // 3. Explicit override of simple prop.
 // -----------------------------------------------------------
@@ -47,7 +36,22 @@ class MyTextDirect extends DOMText {
   }
 }
 
+<<__EntryPoint>>
+function main_native_magic_props_domtext() {
+$dom = new DOMDocument();
+$dom->registerNodeClass('DOMText', 'MyTextNode');
+$node = $dom->appendChild($dom->createElement('Foo', 'Bar'));
+
+var_dump($node->firstChild->textContent); // Impl-level
+var_dump($node->firstChild->nonExisting); // User-level __get
+
+$my_text = new MyTextExplicit('Foo', 'Bar');
+
+var_dump($my_text->textContent); // User-level
+var_dump($my_text->nonExisting); // User-level
+
 $my_text = new MyTextDirect('Foo', 'Bar');
 
 var_dump($my_text->textContent); // 10
 var_dump($my_text->nonExisting); // Unhandled
+}

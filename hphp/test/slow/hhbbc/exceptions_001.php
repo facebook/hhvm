@@ -1,7 +1,5 @@
 <?php
 
-error_reporting(-1);
-
 function heh() {
   static $x = 0;
   echo "ok $x\n";
@@ -9,7 +7,6 @@ function heh() {
     throw new Exception('a');
   }
 }
-set_error_handler('heh');
 
 function foo() {
   try {
@@ -21,4 +18,11 @@ function foo() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_exceptions_001() {
+error_reporting(-1);
+set_error_handler('heh');
+
 foo();
+}

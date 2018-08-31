@@ -41,4 +41,8 @@ function main() {
   ind($arr);
   ifoo($arr);
 }
+
+<<__EntryPoint>>
+function main_array_traversable_2() {
 main();
+}

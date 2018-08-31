@@ -15,4 +15,8 @@ class A {
     return array('b', 'c', 'd');
   }
 }
+
+<<__EntryPoint>>
+function main_with_sleep() {
 main();
+}

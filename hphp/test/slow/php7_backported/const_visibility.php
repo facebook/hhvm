@@ -15,6 +15,10 @@ class Bar extends Foo {
   }
 }
 
+
+<<__EntryPoint>>
+function main_const_visibility() {
 var_dump(Foo::NOVIS);
 var_dump(Foo::PUBVIS);
 var_dump((new Bar())->getProtected());
+}

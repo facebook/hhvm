@@ -9,7 +9,7 @@ array(1) {
   string(3) "aaa"
 }
 
-Warning: htmlspecialchars() expects parameter 1 to be string, array given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 17
+Warning: htmlspecialchars() expects parameter 1 to be string, array given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 20
 NULL
 int(42)
 string(2) "42"

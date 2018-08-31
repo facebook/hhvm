@@ -6,6 +6,9 @@ function test($a) {
   var_dump($a);
 }
 
+
+<<__EntryPoint>>
+function main_shuffle() {
 srand(1234);
 
 test([]);
@@ -33,3 +36,4 @@ test(3.14);
 test(STDIN);
 test(new stdclass);
 test(Vector{1, 2, 3, 4});
+}

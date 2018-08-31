@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1089() {
 $a = array('a'=>0);
 $ref = &$a['a'];
 var_dump($a);
@@ -14,3 +17,4 @@ $b = $a;
 var_dump($a,$b);
 $b[0] = 1;
 var_dump($a,$b);
+}

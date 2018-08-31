@@ -43,4 +43,8 @@ function main() {
   var_dump($ret === array_map('g2', $a, array('a', 'b', 'c', 'd')));
 }
 
+
+<<__EntryPoint>>
+function main_reentry() {
 main();
+}

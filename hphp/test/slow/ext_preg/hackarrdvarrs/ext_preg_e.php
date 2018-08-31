@@ -54,4 +54,8 @@ function test_preg_replace() {
   ));
 }
 
+
+<<__EntryPoint>>
+function main_ext_preg_e() {
 test_preg_replace();
+}

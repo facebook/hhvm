@@ -11,4 +11,8 @@ function test() {
   A::set(__hhvm_intrinsics\launder_value(new stdclass));
   var_dump((bool)A::get());
 }
+
+<<__EntryPoint>>
+function main_array_obj_key() {
 test();
+}

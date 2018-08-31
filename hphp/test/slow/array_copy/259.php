@@ -5,4 +5,8 @@ function f($b) {
   $a[0] = $a;
  var_dump($a);
 }
+
+<<__EntryPoint>>
+function main_259() {
 f(false);
+}

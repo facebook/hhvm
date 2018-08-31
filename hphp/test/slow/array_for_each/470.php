@@ -18,5 +18,9 @@ function g3() {
     }
   }
 }
+
+<<__EntryPoint>>
+function main_470() {
 foreach (g3() as $_) {
+}
 }

@@ -16,7 +16,11 @@ function main(Base $b, string $l, bool $ref) {
   var_dump($x);
 }
 
+
+
+<<__EntryPoint>>
+function main_func_family_006() {
 $l = (string)mt_rand();
 main(new D2, $l, true);
 main(new D1, $l, false);
-
+}

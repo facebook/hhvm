@@ -28,4 +28,8 @@ function main() {
   (new Buz)->hello(); echo "\n";
 }
 
+
+<<__EntryPoint>>
+function main_opt_type_structure() {
 for ($i = 0; $i < 10; $i++) main();
+}

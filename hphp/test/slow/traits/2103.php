@@ -26,6 +26,9 @@ class A {
     return 'doSomethingPublicInTrait';
   }
 }
+
+<<__EntryPoint>>
+function main_2103() {
 $a = new A();
 echo $a->testDoSomething()."
 ";
@@ -33,3 +36,4 @@ echo $a->testDoSomethingInTrait()."
 ";
 echo $a->testDoSomethingPublicInTrait()."
 ";
+}

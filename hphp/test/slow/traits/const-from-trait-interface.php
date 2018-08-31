@@ -9,5 +9,9 @@ class C {
   const v = 42;
 }
 class D extends C {}
+
+<<__EntryPoint>>
+function main_const_from_trait_interface() {
 $c = new D;
 var_dump($c instanceof I);
+}

@@ -10,4 +10,8 @@ function main() {
   f(...$args, 'scalar', ...$args);
 }
 
+
+<<__EntryPoint>>
+function main_unpack_call_error() {
 main();
+}

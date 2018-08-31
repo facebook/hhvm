@@ -1,7 +1,10 @@
 <?hh
+
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 // Generate 10k random bytes
+<<__EntryPoint>>
+function main_zip_stream() {
 srand(42);
 $num_bytes = 10000;
 $orig_bytes = '';
@@ -44,4 +47,5 @@ try {
   }
 } finally {
   $zf->close();
+}
 }

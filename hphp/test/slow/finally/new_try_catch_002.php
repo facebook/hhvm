@@ -33,5 +33,9 @@ function blah() {
   }
 }
 
-var_dump(blah());
 
+
+<<__EntryPoint>>
+function main_new_try_catch_002() {
+var_dump(blah());
+}

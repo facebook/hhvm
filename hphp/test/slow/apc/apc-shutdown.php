@@ -7,5 +7,9 @@ function foo() {
   apc_store('x', null);
 }
 
+
+<<__EntryPoint>>
+function main_apc_shutdown() {
 foo();
 echo "ok\n";
+}

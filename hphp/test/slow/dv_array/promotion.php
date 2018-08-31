@@ -32,4 +32,8 @@ function test() {
   $x[100] = 'x';
   dump($x);
 }
+
+<<__EntryPoint>>
+function main_promotion() {
 test();
+}

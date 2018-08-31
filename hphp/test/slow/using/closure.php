@@ -1,7 +1,5 @@
 <?hh
 
-require 'logger.inc';
-
 function main() {
   echo "Creating closure\n";
   $x = function($throw) {
@@ -24,4 +22,10 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_closure() {
+require 'logger.inc';
+
 main();
+}

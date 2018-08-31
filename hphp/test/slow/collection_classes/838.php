@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_838() {
 $s1 = Set {
 }
 ;
@@ -56,3 +59,4 @@ var_dump($m == false);
 var_dump($m == true);
 var_dump($m == 1);
 var_dump($m == "Set");
+}

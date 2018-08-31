@@ -35,4 +35,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_try_catch_call_002() {
 main();
+}

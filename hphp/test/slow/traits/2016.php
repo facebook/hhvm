@@ -25,4 +25,3 @@ $o = new MyHelloWorld();
 $o->saySomething();
 $o->sayWorld();
 ?>
-

@@ -29,4 +29,8 @@ function test() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_gc() {
 test();
+}

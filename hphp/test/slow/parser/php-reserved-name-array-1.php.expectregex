@@ -1,1 +1,3 @@
-((Fatal error\: syntax error, unexpected T_ARRAY in [^\r\n]+ on line 3)|(Fatal error\: A name is expected here\. in [^\r\n]+\/parser\/php\-reserved\-name\-array\-1\.php on line 3))
+
+((Fatal error\: syntax error, unexpected T_ARRAY in [^\r\n]+ on line 6)|(Fatal error\: You may not use a reserved keyword for a class name in [^\r\n]+\/parser\/php\-reserved\-name\-array\-1\.php on line 6))
+

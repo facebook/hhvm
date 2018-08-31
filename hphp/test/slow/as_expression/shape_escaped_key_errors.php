@@ -9,6 +9,9 @@ function f(mixed $x) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_shape_escaped_key_errors() {
 $arr = vec[
   shape('h\'"i' => 'wow', "w\'o\\w" => "hi"),
   shape('h\'"i' => 1, "w\'o\\w" => 2),
@@ -16,4 +19,5 @@ $arr = vec[
 
 foreach ($arr as $a) {
   f($a);
+}
 }

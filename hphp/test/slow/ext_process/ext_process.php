@@ -7,8 +7,12 @@ function VS($x, $y) {
 }
 function VERIFY($x) { VS($x !== false, true); }
 
+
+
 //////////////////////////////////////////////////////////////////////
 
+<<__EntryPoint>>
+function main_ext_process() {
 $pid = pcntl_fork();
 if ($pid == 0) {
   exit(123);
@@ -79,4 +83,4 @@ if ($pid == 0) {
 }
 pcntl_waitpid(0, $status);
 VS(pcntl_wtermsig($status), 0);
-
+}

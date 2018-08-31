@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1793() {
 $filename = 'test/images/test1pix.jpg';
 $image = exif_thumbnail($filename, $width, $height, $type);
 if ($image!==false) {
@@ -8,4 +11,5 @@ if ($image!==false) {
 }
  else {
   echo 'No thumbnail available';
+}
 }

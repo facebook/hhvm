@@ -20,5 +20,9 @@ class ClassAutoloader {
   }
 }
 
+
+<<__EntryPoint>>
+function main_spl_autoload_register_class_private_string_class() {
 $autoloader = new ClassAutoloader();
 $obj = new testCore();
+}

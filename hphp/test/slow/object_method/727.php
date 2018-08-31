@@ -16,6 +16,9 @@ class foo {
     echo 'in test4';
   }
 }
+
+<<__EntryPoint>>
+function main_727() {
 $obj = new foo();
 $obj->test2();
 foo::test1();
@@ -23,3 +26,4 @@ foo::test2();
 foo::test3();
 $obj->test3();
 $obj->test4();
+}

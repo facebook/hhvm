@@ -99,4 +99,8 @@ function bar() {
   f8($a, $a, $a);
   var_dump($a);
 }
+
+<<__EntryPoint>>
+function main_24() {
 bar();
+}

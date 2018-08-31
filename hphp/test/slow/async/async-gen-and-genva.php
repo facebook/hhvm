@@ -47,4 +47,8 @@ async function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_async_gen_and_genva() {
 \HH\Asio\join(main());
+}

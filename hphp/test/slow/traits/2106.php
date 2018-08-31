@@ -16,6 +16,10 @@ class UsePrivateState extends Base {
 }
 class DerivedUsePrivateState extends UsePrivateState {
 }
+
+<<__EntryPoint>>
+function main_2106() {
 $state = new DerivedUsePrivateState();
 $method = new ReflectionMethod('DerivedUsePrivateState', 'getFoo');
 echo $method->invoke($state)."\n";
+}

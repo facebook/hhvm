@@ -13,8 +13,12 @@ class A {
 }
 class B extends A {
 }
+
+<<__EntryPoint>>
+function main_1885() {
 $array = array('foo');
 array_map('B::foo', $array);
 call_user_func('B::foo');
 call_user_func(array('B', 'foo'));
 A::bar();
+}

@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_readline_info() {
 error_reporting(E_ALL & ~E_WARNING);
 
 // Changeable
@@ -12,3 +15,4 @@ var_dump(readline_info('readline_name'));
 // Not Changeable
 var_dump(readline_info('library_version', 'Fake') ==
          readline_info('library_version'));
+}

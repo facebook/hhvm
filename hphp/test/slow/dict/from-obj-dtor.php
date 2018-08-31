@@ -29,5 +29,9 @@ function test() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_from_obj_dtor() {
 error_reporting(E_ERROR);
 test();
+}

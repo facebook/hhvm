@@ -15,4 +15,8 @@ function main() {
   var_dump($y1, $y2, $y3);
 }
 
+
+<<__EntryPoint>>
+function main_builtin_interop() {
 main();
+}

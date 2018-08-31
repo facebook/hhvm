@@ -51,5 +51,9 @@ async function test_gena() {
   var_dump(is_darray($x3));
 }
 
+
+<<__EntryPoint>>
+function main_genva() {
 \HH\Asio\join(test_genva());
 \HH\Asio\join(test_gena());
+}

@@ -115,4 +115,8 @@ function main() {
   show_keyed_iter(ImmMap::fromItems((Vector {Pair {1, 2}, Pair {3, 4}, Pair {5, 6}})));
 }
 
+
+<<__EntryPoint>>
+function main_api() {
 main();
+}

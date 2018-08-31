@@ -30,5 +30,9 @@ function main() {
   f(array_values($pair));
   f($pair->toValuesArray());
 }
-main();
 
+
+<<__EntryPoint>>
+function main_array_values() {
+main();
+}

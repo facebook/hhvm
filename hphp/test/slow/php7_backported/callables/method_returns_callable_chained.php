@@ -11,4 +11,8 @@ class MyClass {
   }
 }
 
+
+<<__EntryPoint>>
+function main_method_returns_callable_chained() {
 (new MyClass())->doStuff()()();
+}

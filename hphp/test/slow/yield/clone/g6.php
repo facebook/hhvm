@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_g6() {
 $a1 = 1;
 $a2 = -999999999;
 $foo = function () use ($a1, &$a2) {
@@ -46,3 +49,4 @@ for ($x->next(); $x->valid(); $x->next()) {
 }
 echo "--------\n";
 var_dump($a1, $a2);
+}

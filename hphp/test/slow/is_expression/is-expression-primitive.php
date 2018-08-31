@@ -14,8 +14,12 @@ function main(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_primitive() {
 main(true);
 main(0);
 main(1.5);
 main("foo");
 main(STDIN);
+}

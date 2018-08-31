@@ -5,5 +5,9 @@ class test {
  print 'test';
 }
  }
- $obj = new Test();
+
+ <<__EntryPoint>>
+function main_8() {
+$obj = new Test();
  $obj->p();
+}

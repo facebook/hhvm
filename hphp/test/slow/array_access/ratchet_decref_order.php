@@ -1,7 +1,6 @@
 <?php
 
 function err() { echo "err\n"; }
-set_error_handler('err');
 
 class dtor implements ArrayAccess {
   private $num;
@@ -33,5 +32,10 @@ function heh2($x, $foo) {
   } catch (exception $x) { return null; }
 }
 
+<<__EntryPoint>>
+function main_ratchet_decref_order() {
+set_error_handler('err');
+
 var_dump(heh2(new heh, 0));
 echo "ok\n";
+}

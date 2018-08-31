@@ -1,5 +1,8 @@
 <?php
+
 // This example is from https://github.com/facebook/hhvm/issues/3440
+<<__EntryPoint>>
+function main_c14n() {
 $xml = '<?xml version="1.0"?>' . "\n"
 . '<samlp:Response xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xm'
 . 'lns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Destination="https://pro'
@@ -30,3 +33,4 @@ $res = $doc->loadXML($xml);
 
 $caNode = $doc->C14N(true, false, null, ['xs', 'xsi', 'saml']);
 echo md5($caNode);
+}

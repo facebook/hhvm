@@ -1,5 +1,9 @@
 <?php
 
+
+
+<<__EntryPoint>>
+function main_draw_font() {
 $draw = new ImagickDraw;
 
 $font_path = __DIR__.'/php_imagick_tests/anonymous_pro_minus.ttf';
@@ -29,4 +33,4 @@ try {
 } catch (ImagickDrawException $ex) {
   var_dump($ex->getMessage());
 }
-
+}

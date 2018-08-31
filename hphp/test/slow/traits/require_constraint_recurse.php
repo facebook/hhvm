@@ -37,4 +37,8 @@ function main() {
   $c = new C();
   $c->bar();
 }
+
+<<__EntryPoint>>
+function main_require_constraint_recurse() {
 main();
+}

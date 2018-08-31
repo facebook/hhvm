@@ -53,4 +53,8 @@ function test() {
   $a();
 }
 
+
+<<__EntryPoint>>
+function main_late_bound_class() {
 test();
+}

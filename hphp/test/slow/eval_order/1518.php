@@ -18,4 +18,8 @@ function test() {
  f($a->f, $a->g);
  var_dump($a);
 }
+
+<<__EntryPoint>>
+function main_1518() {
 test();
+}

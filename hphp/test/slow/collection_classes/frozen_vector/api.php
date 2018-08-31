@@ -8,8 +8,7 @@ function show_elems($fs) {
     var_dump($e);
   }
   echo "----\n";
-};
-
+}
 function materialization_methods() {
   $fv = ImmVector {1, 2, 3};
 
@@ -61,4 +60,9 @@ function main() {
   static_methods();
 }
 
+<<__EntryPoint>>
+function main_api() {
+;
+
 main();
+}

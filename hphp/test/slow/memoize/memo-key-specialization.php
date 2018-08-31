@@ -1,30 +1,21 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
-
-set_error_handler(
-  function($errno, $errstr) { echo "ERROR: " . $errstr . "\n"; }
-);
 
 class Cls1 implements IMemoizeParam {
   public function __construct(public string $x) {}
   public function getInstanceKey(): string {
     echo "Cls1::getInstanceKey\n"; return $this->x;
   }
-};
-class Cls2 implements IMemoizeParam {
+}class Cls2 implements IMemoizeParam {
   public function __construct(public int $x) {}
   public function getInstanceKey(): int {
     echo "Cls2::getInstanceKey\n"; return $this->x;
   }
-};
-class Cls3 implements IMemoizeParam {
+}class Cls3 implements IMemoizeParam {
   public function __construct(public $x) {}
   public function getInstanceKey() {
     echo "Cls3::getInstanceKey\n"; return $this->x;
   }
-};
-class Cls4 {};
-
+}class Cls4 {}
 <<__Memoize>> function takes_int(int $x)          { echo "takes_int\n"; return $x; }
 <<__Memoize>> function takes_bool(bool $x)        { echo "takes_bool\n"; return $x; }
 <<__Memoize>> function takes_str(string $x)       { echo "takes_str\n"; return $x; }
@@ -133,6 +124,19 @@ function test() {
   }
 }
 
+// Copyright 2004-present Facebook. All Rights Reserved.
+
+<<__EntryPoint>>
+function main_memo_key_specialization() {
+set_error_handler(
+  function($errno, $errstr) { echo "ERROR: " . $errstr . "\n"; }
+);
+;
+;
+;
+;
+
 test();
 echo "=======================================\n";
 test();
+}

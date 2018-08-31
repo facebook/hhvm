@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_idn_uts46_basic() {
 $utf8dn = "www.fu\xc3\x9fball.com";
 $asciiNonTrans = "www.xn--fuball-cta.com";
 
@@ -17,3 +20,4 @@ var_dump($info);
 echo "reverse, ok, with details:", "\n";
 var_dump(idn_to_utf8($asciiNonTrans, 0, INTL_IDNA_VARIANT_UTS46, $info));
 var_dump($info);
+}

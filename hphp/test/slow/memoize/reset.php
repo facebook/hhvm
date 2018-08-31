@@ -212,4 +212,8 @@ function main() {
   testTraitSingleMethods();
   testFreeFuncs();
 }
+
+<<__EntryPoint>>
+function main_reset() {
 main();
+}

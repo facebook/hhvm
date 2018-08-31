@@ -32,9 +32,13 @@ class Bar extends ReflectionClass {
 
 }
 
+
+<<__EntryPoint>>
+function main_serialize_with_sleep_and_wakeup() {
 $rc = new Bar(Foo::class);
 $rc->prop = 1337;
 $rc->dontSerializeMe = "serialized";
 $serialized = serialize($rc);
 var_dump(json_encode($serialized));
 var_dump(unserialize($serialized));
+}

@@ -1,7 +1,10 @@
 <?php
 
+
 //////////////////////////////////////////////////////////////////////
 
+<<__EntryPoint>>
+function main_ext_string() {
 var_dump(addcslashes("ABCDEFGH\n", "A..D\n"));
 
 var_dump(stripcslashes("\\A\\B\\C\\DEFGH\\n"));
@@ -446,3 +449,4 @@ var_dump(wordwrap("123  12345  123", 8, "ab", 1));
 var_dump(wordwrap("1234", 1, "ab", 1));
 var_dump(wordwrap("12345 1234567890", 5, "|", 1));
 var_dump(wordwrap("123 1234567890 123", 10, "|==", 1));
+}

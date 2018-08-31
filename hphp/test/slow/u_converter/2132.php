@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_2132() {
 foreach(array('?','','??') as $subst) {
   $opts = array('to_subst' => $subst);
   $ret = UConverter::transcode("This is an ascii string", 'ascii', 'utf-8', $opts);
@@ -16,4 +19,5 @@ foreach(array('?','','??') as $subst) {
  else {
     var_dump($ret);
   }
+}
 }

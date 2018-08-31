@@ -4,6 +4,7 @@ function foo(bar\int $a): int {
     return $a;
 }
 
-foo(10);
-
 ?>
+
+
+foo(10);

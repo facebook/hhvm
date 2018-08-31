@@ -16,5 +16,9 @@ function gen() {
   var_dump($foo);
   yield null;
 }
+
+<<__EntryPoint>>
+function main_230() {
 foreach (gen() as $_) {
+}
 }

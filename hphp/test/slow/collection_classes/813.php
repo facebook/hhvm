@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_813() {
 $v = new Vector;
 $v[] = 'c';
 $v[] = 'a';
@@ -24,4 +27,5 @@ echo "------------------------\n";
 asort(&$m);
 foreach ($m as $key => $val) {
   echo $key . ' ' . $val . "\n";
+}
 }

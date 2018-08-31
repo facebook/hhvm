@@ -27,7 +27,11 @@ function c() {
   var_dump($array);
 }
 
+
+
+<<__EntryPoint>>
+function main_array_multisort() {
 a();
 b();
 c();
-
+}

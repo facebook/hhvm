@@ -1,7 +1,5 @@
 <?hh
 
-require 'logger.inc';
-
 function main() {
   echo "Entering main()\n";
   using new Logger();
@@ -55,6 +53,11 @@ class Foo {
   }
 }
 
+
+<<__EntryPoint>>
+function main_functions() {
+require 'logger.inc';
+
 main();
 echo "Returned from main\n";
 HH\Asio\join(mainAsync());
@@ -64,4 +67,5 @@ try {
   thrower();
 } catch (Exception $e) {
   var_dump($e->getMessage());
+}
 }

@@ -1,6 +1,9 @@
 <?php
+
 // Copyright 2004-present Facebook. All Rights Reserved.
 
+<<__EntryPoint>>
+function main_copy_directory() {
 $file_path = dirname(__FILE__);
 $src_dir = "$file_path/copy_dir_src";
 $dest_dir = "$file_path/copy_dir_dest";
@@ -22,3 +25,4 @@ echo "dest exists: " . (file_exists($dest_dir) ? "true" : "false");
 unlink("$src_dir/a.txt");
 unlink("$src_dir/b.txt");
 rmdir("$src_dir");
+}

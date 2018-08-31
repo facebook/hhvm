@@ -35,4 +35,8 @@ function test() {
   var_dump(is_darray($x));
 }
 
+
+<<__EntryPoint>>
+function main_shapes() {
 test();
+}

@@ -5,8 +5,7 @@ function block() { // simulates blocking I/O
     RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
     1,
   );
-};
-
+}
 class CWithClosures {
   public function __construct(private $a) {}
 
@@ -50,4 +49,9 @@ function main() {
   $c = new CWithClosures('prop-a');
   $c->test('a');
 }
+
+<<__EntryPoint>>
+function main_closures() {
+;
 main();
+}

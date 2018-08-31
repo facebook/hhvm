@@ -12,4 +12,8 @@ function main() {
   echo "4";
 }
 
+
+<<__EntryPoint>>
+function main_nested() {
 main();
+}

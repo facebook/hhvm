@@ -34,4 +34,8 @@ function main() {
     dump_unordered($v->toSet());
   }
 }
+
+<<__EntryPoint>>
+function main_materialize_methods_1() {
 main();
+}

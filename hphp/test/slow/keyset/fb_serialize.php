@@ -21,6 +21,9 @@ function serde($v) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_fb_serialize() {
 serde(keyset[]);
 serde(keyset[1, 2, 3]);
 serde(keyset['a', 'b', 'c']);
@@ -36,3 +39,4 @@ serde(dict['a' => 1,
            'c' => keyset[1, 2, 3],
            'd' => keyset['a', 'b', 'c'],
            'e' => keyset[]]);
+}

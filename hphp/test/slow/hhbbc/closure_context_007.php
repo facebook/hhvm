@@ -30,4 +30,8 @@ async function main() {
   }
   var_dump($obj->get());
 }
+
+<<__EntryPoint>>
+function main_closure_context_007() {
 main();
+}

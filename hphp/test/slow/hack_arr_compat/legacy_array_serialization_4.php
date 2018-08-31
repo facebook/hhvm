@@ -9,4 +9,8 @@ function test_cow_vec() {
   echo serialize($a) . "\n";
 }
 
+
+<<__EntryPoint>>
+function main_legacy_array_serialization_4() {
 test_cow_vec();
+}

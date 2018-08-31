@@ -8,6 +8,9 @@ function tupleProvider((function ((int, int)...): void) $fn):void {
   );
 }
 
+
+<<__EntryPoint>>
+function main_lambdas_variadic_tuples() {
 print "Tuple provider ...\$x\n";
 tupleProvider((...$x) ==> {
   var_dump($x);
@@ -36,3 +39,4 @@ $lambda2 = (...$x) ==> {
 };
 
 tupleProvider($lambda2);
+}

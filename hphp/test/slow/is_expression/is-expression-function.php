@@ -6,4 +6,8 @@ function is_function(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_function() {
 is_function(() ==> 1);
+}

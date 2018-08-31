@@ -7,4 +7,8 @@ class A {
  }
  class B extends A {
 }
- $a = new B('test');
+
+ <<__EntryPoint>>
+function main_1272() {
+$a = new B('test');
+}

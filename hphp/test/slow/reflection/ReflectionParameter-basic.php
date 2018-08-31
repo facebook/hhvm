@@ -2,6 +2,9 @@
 function foo(string $a, int $b, float $c, bool $d, Exception &$e,
              callable $f = null, resource $g = null, $noType = 'whatever') {}
 
+
+<<__EntryPoint>>
+function main_reflection_parameter_basic() {
 $reflectionFunction = new ReflectionFunction('foo');
 foreach ($reflectionFunction->getParameters() as $parameter) {
   echo 'name: ';
@@ -48,4 +51,5 @@ foreach ($reflectionFunction->getParameters() as $parameter) {
            ? $parameter->getDefaultValueConstantName()
            : 'no default value');
   echo PHP_EOL, PHP_EOL;
+}
 }

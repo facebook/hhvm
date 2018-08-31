@@ -8,4 +8,8 @@ function test() {
   echo 'not reached';
 }
 
+
+<<__EntryPoint>>
+function main_nullsafe_prop_11() {
 test();
+}

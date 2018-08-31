@@ -8,4 +8,8 @@ function foo(Validator $func) {
 
 function asd(mixed $k): bool { return true; }
 
+
+<<__EntryPoint>>
+function main_typedef_closure() {
 foo('asd');
+}

@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_pipevar_2() {
 $foo = "Hello!";
 array(1, 2, 3)
   |> array_map($x ==> $x + 1, $$)
@@ -11,3 +14,4 @@ array(1, 2, 3)
   |> var_dump($$);
 
 var_dump($foo);
+}

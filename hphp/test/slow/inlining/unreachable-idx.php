@@ -30,5 +30,9 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_unreachable_idx() {
 main();
 echo "Success";
+}

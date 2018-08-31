@@ -15,4 +15,8 @@ function main() {
   $obj = new derived();
 }
 
+
+<<__EntryPoint>>
+function main_ctor_name_clash() {
 main();
+}

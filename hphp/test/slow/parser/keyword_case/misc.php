@@ -19,8 +19,12 @@ Function test_callable(Callable $c) {
   $c();
 }
 
+
+<<__EntryPoint>>
+function main_misc() {
 test_array_list();
 test_closure_use();
 test_callable(Function() {
   ECHO "CALL ME DEFINITELY\n";
 });
+}

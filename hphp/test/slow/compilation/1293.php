@@ -1,14 +1,7 @@
 <?php
-
-$data = new stdclass;
-$type = 'OCI-Lob';
-if ($data instanceof $type) {
-  echo 'true';
-}
 class X {
   static $foo;
 }
-;
 function test() {
   $x = new X;
   $foo = 'foo';
@@ -21,4 +14,15 @@ function test() {
 );
     echo true;
   }
+}
+
+
+<<__EntryPoint>>
+function main_1293() {
+$data = new stdclass;
+$type = 'OCI-Lob';
+if ($data instanceof $type) {
+  echo 'true';
+}
+;
 }

@@ -85,4 +85,8 @@ async function run() {
   await run_one('condition_block_nice_fail');
 }
 
+
+<<__EntryPoint>>
+function main_condition() {
 HH\Asio\join(run());
+}

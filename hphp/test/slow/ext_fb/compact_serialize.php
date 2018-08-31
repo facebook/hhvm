@@ -77,4 +77,8 @@ function main() {
   var_dump(fb_compact_unserialize($s, $ret));
 }
 
+
+<<__EntryPoint>>
+function main_compact_serialize() {
 main();
+}

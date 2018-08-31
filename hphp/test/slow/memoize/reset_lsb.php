@@ -62,4 +62,8 @@ function main() {
   run("C");
 }
 
+
+<<__EntryPoint>>
+function main_reset_lsb() {
 main();
+}

@@ -10,4 +10,8 @@ function main() {
   var_dump($a);
 }
 
+
+<<__EntryPoint>>
+function main_inout_param_mixed_hint() {
 main();
+}

@@ -45,4 +45,8 @@ function main() {
   }
   echo "Done with main\n";
 }
+
+<<__EntryPoint>>
+function main_loops() {
 main();
+}

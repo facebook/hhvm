@@ -13,5 +13,9 @@ class A {
   }
 }
 
+
+<<__EntryPoint>>
+function main_hhbbc4() {
 $a = new A;
 var_dump(\HH\Asio\join($a->gen()));
+}

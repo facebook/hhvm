@@ -15,6 +15,10 @@ function test() {
   return $end - $start;
 }
 
+
+<<__EntryPoint>>
+function main_dom_text_leak() {
 $x = test();
 $x = test();
 echo $x, "\n";
+}

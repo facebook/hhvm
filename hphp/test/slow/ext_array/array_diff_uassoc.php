@@ -23,4 +23,8 @@ function a() {
   var_dump($result);
 }
 
+
+<<__EntryPoint>>
+function main_array_diff_uassoc() {
 a();
+}

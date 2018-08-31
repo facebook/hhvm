@@ -29,4 +29,8 @@ function test() {
   var_dump($c);
 }
 
+
+<<__EntryPoint>>
+function main_dim_for_write() {
 test();
+}

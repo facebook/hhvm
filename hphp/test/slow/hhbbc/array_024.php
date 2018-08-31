@@ -11,4 +11,8 @@ function bar() {
   var_dump(is_null($val2));
   var_dump(is_array($val2));
 }
+
+<<__EntryPoint>>
+function main_array_024() {
 bar();
+}

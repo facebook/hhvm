@@ -8,6 +8,10 @@ class Foo {
   const INVALIDS = __METHOD__.':'.__FUNCTION__.':'.__TRAIT__.':'.__METHOD__;
 }
 
+
+<<__EntryPoint>>
+function main_magic_constants() {
 var_dump(WHERE_I_AM);
 var_dump(Foo::DOUBLE_THE_FUN);
 var_dump(Foo::INVALIDS);
+}

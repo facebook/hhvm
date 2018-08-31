@@ -50,4 +50,8 @@ function main($a) {
   return HH\Asio\join(A::genFoo($a));
 }
 
+
+<<__EntryPoint>>
+function main_xenon_crash() {
 var_dump(main(42));
+}

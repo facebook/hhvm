@@ -17,4 +17,8 @@ function test() {
   var_dump($a['obj']);
 }
 
+
+<<__EntryPoint>>
+function main_globals_vs_destructor() {
 test();
+}

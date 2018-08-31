@@ -22,5 +22,9 @@ function main() {
   }
 }
 
-main();
 
+
+<<__EntryPoint>>
+function main_finally_yield_002() {
+main();
+}

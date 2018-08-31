@@ -11,4 +11,8 @@ function main() {
     var_dump($k, $v);
   }
 }
+
+<<__EntryPoint>>
+function main_2233() {
 main();
+}

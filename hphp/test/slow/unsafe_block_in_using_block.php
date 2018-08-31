@@ -12,4 +12,8 @@ function foo(): void {
   echo "in unsafe block\n";
 }
 
+
+<<__EntryPoint>>
+function main_unsafe_block_in_using_block() {
 foo();
+}

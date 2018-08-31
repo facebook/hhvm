@@ -38,4 +38,8 @@ function main() {
   testIncDecElem($a, 'e');
   testIncDecNewElem($a, 'f');
 }
+
+<<__EntryPoint>>
+function main_promotion() {
 main();
+}

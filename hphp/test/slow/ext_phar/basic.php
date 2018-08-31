@@ -1,7 +1,10 @@
 <?php
+
 /**
  * Regular Phar
  */
+<<__EntryPoint>>
+function main_basic() {
 echo ".phar:\n";
 include __DIR__."/basic.phar";
 
@@ -95,3 +98,4 @@ include 'phar://'.__DIR__."/basic-tar-bz2.phar";
 
 echo "\n.phar (which is .phar.zip) with phar:// prefix:\n";
 include 'phar://'.__DIR__."/basic-zip.phar";
+}

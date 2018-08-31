@@ -13,4 +13,8 @@ function main() {
   $x = bar();
   if ($x) $x->heh();
 }
+
+<<__EntryPoint>>
+function main_array_044() {
 main();
+}

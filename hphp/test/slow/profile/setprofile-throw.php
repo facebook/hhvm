@@ -2,13 +2,6 @@
 
 function foo($t) { echo "From $t: This shouldn't happen!\n"; }
 
-fb_setprofile(function($what, $fun) {
-    if ($what == 'exit' && $fun == 'X::foo') {
-      echo "Throwing from $fun\n";
-      throw new Exception("Surprise!");
-    }
-  });
-
 class X {
   public function foo() {
     try {
@@ -33,4 +26,15 @@ function main($f) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_setprofile_throw() {
+fb_setprofile(function($what, $fun) {
+    if ($what == 'exit' && $fun == 'X::foo') {
+      echo "Throwing from $fun\n";
+      throw new Exception("Surprise!");
+    }
+  });
+
 main('X::foo');
+}

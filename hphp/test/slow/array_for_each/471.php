@@ -11,4 +11,8 @@ function g4() {
     }
   }
 }
+
+<<__EntryPoint>>
+function main_471() {
 g4();
+}

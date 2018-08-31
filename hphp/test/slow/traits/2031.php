@@ -25,4 +25,3 @@ $o->setWorld(' World!');
 $o->sayHelloWorld();
 
 ?>
-

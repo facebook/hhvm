@@ -235,8 +235,12 @@ function testBadSpec($ok, $bad) {
     echo $e->getMessage() . "\n";
   }
 }
+
+<<__EntryPoint>>
+function main_bad_spec() {
 $ok = EdgeObject::$_TSPEC;
 testBadSpec($ok, array(7 => array('var' => 'appId', 'type' => TType::STRING)));
 testBadSpec($ok, array());
 testBadSpec($ok, 42);
 testBadSpec($ok, array('foo' => 'bar'));
+}

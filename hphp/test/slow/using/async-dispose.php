@@ -17,6 +17,9 @@ async function two() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_async_dispose() {
 try {
   HH\Asio\join(one());
 } catch (Exception $e) {
@@ -27,4 +30,5 @@ try {
   HH\Asio\join(two());
 } catch (Exception $e) {
   var_dump($e->getMessage());
+}
 }

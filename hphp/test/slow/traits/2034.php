@@ -32,4 +32,3 @@ var_dump( trait_exists('MyTrait') );
 
 echo "Done";
 ?>
-

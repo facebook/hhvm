@@ -7,4 +7,8 @@ class MyClass {
     }
 }
 
+
+<<__EntryPoint>>
+function main_invokable() {
 (new MyClass())();
+}

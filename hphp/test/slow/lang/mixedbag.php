@@ -369,5 +369,9 @@ function main_function() {
   fannkuch(6);
 }
 
-main_function();
 
+
+<<__EntryPoint>>
+function main_mixedbag() {
+main_function();
+}

@@ -7,4 +7,8 @@ function main() {
   unlink($tempfile);
 }
 
+
+<<__EntryPoint>>
+function main_resource_to_array() {
 main();
+}

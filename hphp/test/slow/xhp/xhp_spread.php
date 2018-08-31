@@ -14,6 +14,9 @@ class :bar extends :foo {
   attribute string name, int age;
 }
 
+
+<<__EntryPoint>>
+function main_xhp_spread() {
 $bar = <bar name="test" age={21} />;
 <foo {...$bar} />;
 <foo name="foo1" {...$bar} name="foo2" />;
@@ -21,3 +24,4 @@ $bar = <bar name="test" age={21} />;
 <foo {...<bar name="test" age={21} />} />;
 <foo {...<bar name="test" {...$bar} age={21} />} />;
 <foo {...<bar />} />;
+}

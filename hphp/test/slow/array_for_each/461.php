@@ -18,4 +18,8 @@ function f8() {
       break;
   }
 }
+
+<<__EntryPoint>>
+function main_461() {
 f8();
+}

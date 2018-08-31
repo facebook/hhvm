@@ -10,6 +10,9 @@ function mark_legacy_and_serialize($arr) {
   echo "\n";
 }
 
+
+<<__EntryPoint>>
+function main_legacy_array_serialization_1() {
 mark_legacy_and_serialize(dict[]);
 mark_legacy_and_serialize(dict[
   "foo" => "quux",
@@ -21,3 +24,4 @@ mark_legacy_and_serialize(vec[1, 2, 3, vec[1, 2, 3]]);
 mark_legacy_and_serialize(array(1, 2, 3));
 mark_legacy_and_serialize(varray[1, 2, 3]);
 mark_legacy_and_serialize(darray["foo" => "bar"]);
+}

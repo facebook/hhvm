@@ -1,7 +1,6 @@
 <?php
 
 function err($x) { throw new Exception(); }
-set_error_handler('err');
 function foo() {
   $x[0]['asd'] = true;
   try {
@@ -11,4 +10,9 @@ function foo() {
     var_dump($x);
   }
 }
+
+<<__EntryPoint>>
+function main_minstr_throw_004() {
+set_error_handler('err');
 foo();
+}

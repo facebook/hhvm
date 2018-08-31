@@ -14,5 +14,9 @@ function foo($y) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_public_static_props_018() {
 foo(new Something);
 foo(2);
+}

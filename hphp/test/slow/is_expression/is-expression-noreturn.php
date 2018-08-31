@@ -8,6 +8,9 @@ function is_noreturn($x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_noreturn() {
 is_noreturn(null);
 is_noreturn(-1);
 is_noreturn(false);
@@ -17,3 +20,4 @@ is_noreturn(STDIN);
 is_noreturn(new stdClass());
 is_noreturn(tuple(1, 2, 3));
 is_noreturn(shape('a' => 1, 'b' => 2));
+}

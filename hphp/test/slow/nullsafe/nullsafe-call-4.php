@@ -27,4 +27,8 @@ function main() {
     echo get_class($e), ': ', $e->getMessage(), "\n";
   }
 }
+
+<<__EntryPoint>>
+function main_nullsafe_call_4() {
 main();
+}

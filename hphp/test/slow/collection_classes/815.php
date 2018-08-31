@@ -26,4 +26,8 @@ function f() {
 'a' => 1, 'b' => 2}
 );
 }
+
+<<__EntryPoint>>
+function main_815() {
 f();
+}

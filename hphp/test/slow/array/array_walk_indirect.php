@@ -14,4 +14,8 @@ function test($fun) {
   var_dump($acc);
 }
 
+
+<<__EntryPoint>>
+function main_array_walk_indirect() {
 test('array_walk');
+}

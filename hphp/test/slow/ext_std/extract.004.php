@@ -7,8 +7,12 @@ class A {
   }
 }
 
+
+<<__EntryPoint>>
+function main_extract_004() {
 A::b();
 
 $a = new A();
 $a::b();
 $a->b();
+}

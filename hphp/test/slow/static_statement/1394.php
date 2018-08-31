@@ -13,6 +13,10 @@ function test_unset_static() {
   $static_var = 20;
   echo "value of static_var after new assignment: $static_var\n";
 }
+
+<<__EntryPoint>>
+function main_1394() {
 test_unset_static();
 test_unset_static();
 test_unset_static();
+}

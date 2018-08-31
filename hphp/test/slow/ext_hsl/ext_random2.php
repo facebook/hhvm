@@ -1,4 +1,5 @@
 <?hh
+
 /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
@@ -15,5 +16,8 @@
    +----------------------------------------------------------------------+
 */
 
+<<__EntryPoint>>
+function main_ext_random2() {
 var_dump(HH\Lib\_Private\Native\random_int(0, PHP_INT_MAX));
 echo "\n";
+}

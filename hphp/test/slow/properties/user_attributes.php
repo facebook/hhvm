@@ -12,6 +12,10 @@ class C {
   public static int $d;
 }
 
+
+<<__EntryPoint>>
+function main_user_attributes() {
 foreach ((new ReflectionClass(C::class))->getProperties() as $prop) {
   var_dump($prop->getAttributes());
+}
 }

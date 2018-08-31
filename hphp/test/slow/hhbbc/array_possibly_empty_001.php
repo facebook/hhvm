@@ -17,4 +17,8 @@ function main() {
   $items[] = $time;
   return $items;
 }
+
+<<__EntryPoint>>
+function main_array_possibly_empty_001() {
 main();
+}

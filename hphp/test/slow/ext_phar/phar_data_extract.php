@@ -29,6 +29,9 @@ function getFileCount($path) {
   return $size;
 }
 
+
+<<__EntryPoint>>
+function main_phar_data_extract() {
 $directory = __DIR__."/tgz";
 $iterator = new DirectoryIterator($directory);
 $files = array();
@@ -59,4 +62,5 @@ foreach ($files as $path => $file) {
     }
   }
   rmdir($tmpdir);
+}
 }

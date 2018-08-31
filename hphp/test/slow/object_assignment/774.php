@@ -23,6 +23,9 @@ class foo {
   }
   var $val;
 }
+
+<<__EntryPoint>>
+function main_774() {
 $x = new foo();
 $x->bar();
 $ref5 = $x;
@@ -31,3 +34,4 @@ echo $x->val;
 $ref6 = &$x;
 $ref6->val = 7;
 echo $x->val;
+}

@@ -1,15 +1,5 @@
 <?hh
 
-$inputs = array(
-  array('1', '2', '10'),
-  array('y', 'k', 'i'),
-);
-
-$locales = array(
-  'en_US',
-  'lt_LT',
-);
-
 function sort_key_cmp(Collator $c, string $a, string $b) {
   $ka = $c->getSortKey($a);
   $kb = $c->getSortKey($b);
@@ -21,6 +11,19 @@ function sort_key_cmp(Collator $c, string $a, string $b) {
     return 1;
   }
 }
+
+
+<<__EntryPoint>>
+function main_get_sort_key() {
+$inputs = array(
+  array('1', '2', '10'),
+  array('y', 'k', 'i'),
+);
+
+$locales = array(
+  'en_US',
+  'lt_LT',
+);
 
 foreach ($inputs as $input) {
   foreach ($locales as $locale) {
@@ -35,4 +38,5 @@ foreach ($inputs as $input) {
     });
     var_dump(array($locale.' numeric' => $input));
   }
+}
 }

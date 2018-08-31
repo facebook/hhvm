@@ -13,4 +13,8 @@ function main() {
   addAndDump(Vector {1, 2});
 }
 
+
+<<__EntryPoint>>
+function main_vector_addall_vs_immutable() {
 main();
+}

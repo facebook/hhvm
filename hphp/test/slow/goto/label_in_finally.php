@@ -7,5 +7,9 @@ function foo() {
       echo "blah\n";
   }
 }
+
+<<__EntryPoint>>
+function main_label_in_finally() {
 foo();
 echo "Done\n";
+}

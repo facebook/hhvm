@@ -62,4 +62,8 @@ function main() {
   try { var_dump([vec[123], keyset['123']] >= [keyset['123'], vec[123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
   try { var_dump([vec[123], keyset['123']] <=> [keyset['123'], vec[123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
 }
+
+<<__EntryPoint>>
+function main_hphpc_literal() {
 main();
+}

@@ -85,6 +85,9 @@ function literals() {
   var_dump(is_dict(darray[]));
 }
 
+
+<<__EntryPoint>>
+function main_is_array_2() {
 echo "================= literals ===========================\n";
 literals();
 
@@ -189,3 +192,4 @@ dynamic_dict(dict[]);
 dynamic_dict(keyset[]);
 dynamic_dict(varray[]);
 dynamic_dict(darray[]);
+}

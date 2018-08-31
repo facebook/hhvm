@@ -49,10 +49,14 @@ function g() {
  return 0;
  }
 
+
+<<__EntryPoint>>
+function main_1502() {
 $a = array(1, 2);
 $values = array('a' => 1, 'b' => 2, 'c' => 3);
 $it = new MyIterator($values);
 foreach ($it as $a[f()] => $a[g()]) {
   print "$a[0]
 ";
+}
 }

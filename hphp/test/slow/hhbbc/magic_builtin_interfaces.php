@@ -50,4 +50,8 @@ function main() {
   $c = new C();
   type_hint_stringish($c);
 }
+
+<<__EntryPoint>>
+function main_magic_builtin_interfaces() {
 main();
+}

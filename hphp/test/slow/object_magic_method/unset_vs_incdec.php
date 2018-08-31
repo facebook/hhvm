@@ -10,7 +10,11 @@ class C {
   }
 }
 
+
+<<__EntryPoint>>
+function main_unset_vs_incdec() {
 $c = new C();
 unset($c->foo);
 var_dump($c->foo++);
 var_dump($c);
+}

@@ -1,7 +1,5 @@
 <?php
 
-print "Test begin\n";
-
 class C {
   function __construct() {
     print "In C::__construct()\n";
@@ -91,8 +89,14 @@ class K extends H {
   }
 }
 
+
+<<__EntryPoint>>
+function main_fpush_cls_method() {
+print "Test begin\n";
+
 (new I)->test();
 (new J)->test();
 (new K)->test();
 
 print "Test end\n";
+}

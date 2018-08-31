@@ -14,4 +14,8 @@ END;
   var_dump((string) $s->b);
 }
 
+
+<<__EntryPoint>>
+function main_simplexml_import_dom_refcount() {
 main();
+}

@@ -35,6 +35,57 @@ function getStr(int $len): string {
 
 // TEST: tracking works when enabled and not when disabled
 class EmptyClass {}
+
+// TEST: nullifying variables removes their tracking
+class EmptyClass2 {}
+
+// TEST: sizes of classes (including private props)
+class SimpleProps { // 19+16+16 = 51
+  private string $prop1 = "one"; // 3 (byte x char) + 16 (TypedValue bytes) = 19
+  protected int $prop2 = 2; // 16
+  public bool $prop3 = true; // 16
+}
+
+// TEST: sizes of arrays
+class SimpleArrays {
+  public array $arrEmpty = array(); // 16 (tv) + 16 (ArrayData) = 32
+  public array $arrMixed = array( // 32 (ArrayData) + 46 + 32 = 110
+    "somekey" => "someval", // 2 * (7 chars + 16 bytes object) = 46
+    321 => 3, // 16 * 2 = 32
+  );
+  public array<int> $arrNums = array(
+    2012,
+    2013,
+    2014
+  ); // 32 + (16 * 3) = 80
+}
+
+// TEST: sizes of dynamic props
+class DynamicClass {}
+
+// TEST: async handle
+async function myAsyncFunc(): Awaitable<int> { return 42; }
+class SharedStringClass {
+  public string $val_ref = null;
+  public function __construct(string $str) {
+    $this->val_ref = $str; // inc 2 + inc 3
+  }
+}
+class SharedArrayClass {
+  public array $val_ref = null;
+  public function __construct(array $arr) {
+    $this->val_ref = $arr;
+  }
+}
+class NestedArrayClass {
+  public array $val_ref = null;
+  public function __construct(array $arr) {
+    $this->val_ref = $arr;
+  }
+}
+
+<<__EntryPoint>>
+function main_objprof() {
 $myClass2 = new EmptyClass();              // ++
 $objs = objprof_get_data();
 $emptyCount = get_instances("EmptyClass", $objs);
@@ -42,9 +93,6 @@ echo $emptyCount ? "(GOOD) Tracking when enabled\n" :
      "(BAD) Not tracking when enabled: \n".var_export($objs, true)."\n";
 $ObjSize = get_bytes("EmptyClass", $objs) / $emptyCount;
 $objs = null;
-
-// TEST: nullifying variables removes their tracking
-class EmptyClass2 {}
 $myClass = new EmptyClass2();              // -- ++
 $myClass2 = new EmptyClass2();             // -- ++
 $objs = objprof_get_data();
@@ -62,13 +110,6 @@ echo $instances_after
   ? "(BAD) Untracking failed: ".var_export($objs, true)."\n"
   : "(GOOD) Untracking works\n";
 $objs = null;
-
-// TEST: sizes of classes (including private props)
-class SimpleProps { // 19+16+16 = 51
-  private string $prop1 = "one"; // 3 (byte x char) + 16 (TypedValue bytes) = 19
-  protected int $prop2 = 2; // 16
-  public bool $prop3 = true; // 16
-}
 $myClass = new SimpleProps();              // ++
 $objs = objprof_get_data();
 echo get_bytes('SimpleProps', $objs) == $ObjSize + 19 + 16 + 16 && // 83
@@ -76,20 +117,6 @@ echo get_bytes('SimpleProps', $objs) == $ObjSize + 19 + 16 + 16 && // 83
   ? "(GOOD) Bytes (props) works\n"
   : "(BAD) Bytes (props) failed: ".var_export($objs, true)."\n";
 $objs = null;
-
-// TEST: sizes of arrays
-class SimpleArrays {
-  public array $arrEmpty = array(); // 16 (tv) + 16 (ArrayData) = 32
-  public array $arrMixed = array( // 32 (ArrayData) + 46 + 32 = 110
-    "somekey" => "someval", // 2 * (7 chars + 16 bytes object) = 46
-    321 => 3, // 16 * 2 = 32
-  );
-  public array<int> $arrNums = array(
-    2012,
-    2013,
-    2014
-  ); // 32 + (16 * 3) = 80
-}
 $myClass = new SimpleArrays();
 $objs = objprof_get_data();
 echo get_bytes('SimpleArrays', $objs) == $ObjSize + 80 + 110 + 32 && // 254
@@ -97,9 +124,6 @@ echo get_bytes('SimpleArrays', $objs) == $ObjSize + 80 + 110 + 32 && // 254
   ? "(GOOD) Bytes (arrays) works\n"
   : "(BAD) Bytes (arrays) failed: ".var_export($objs, true)."\n";
 $objs = null;
-
-// TEST: sizes of dynamic props
-class DynamicClass {}
 $myClass = new DynamicClass();
 $dynamic_field = 'abcd'; // 16 + 4
 $dynamic_field2 = 1234;  // 16 + 4 (dynamic properties - always string)
@@ -111,9 +135,6 @@ echo get_bytes('DynamicClass', $objs) == $ObjSize + 20 + 20 + 32 && // 104
   ? "(GOOD) Bytes (dynamic) works\n"
   : "(BAD) Bytes (dynamic) failed: ".var_export($objs, true)."\n";
 $objs = null;
-
-// TEST: async handle
-async function myAsyncFunc(): Awaitable<int> { return 42; }
 $myClass = myAsyncFunc();
 $objs = objprof_get_data();
 echo get_bytes_eq(StaticWaitHandle::class, $objs) == 16 + $ObjSize // handle size
@@ -174,12 +195,6 @@ $objs = null;
 
 // TEST: multiple ref counted strings
 $mystr = getStr(9); // inc 1
-class SharedStringClass {
-  public string $val_ref = null;
-  public function __construct(string $str) {
-    $this->val_ref = $str; // inc 2 + inc 3
-  }
-}
 $myClass = new SharedStringClass($mystr);
 $myClass2 = new SharedStringClass($mystr);
 $objs = objprof_get_data();
@@ -194,12 +209,6 @@ $my_arr = array( // 32 + 88 = 120
   getStr(4) => getStr(8), // 4 + 8 + 16 + 16 = 44
   getStr(5) => getStr(7), // 5 + 7 + 16 + 16 = 44
 );
-class SharedArrayClass {
-  public array $val_ref = null;
-  public function __construct(array $arr) {
-    $this->val_ref = $arr;
-  }
-}
 $myClass = new SharedArrayClass($my_arr);
 $myClass2 = new SharedArrayClass($my_arr);
 $my_arr = null;
@@ -216,12 +225,6 @@ $myClass2 = null;
 $my_arr = array( // 32 + 76 = 108
   array(getStr(4) => getStr(8)), // 4 + 8 + 16 + 16 = 44 + 32 = 76
 );
-class NestedArrayClass {
-  public array $val_ref = null;
-  public function __construct(array $arr) {
-    $this->val_ref = $arr;
-  }
-}
 $myClass = new NestedArrayClass($my_arr);
 $my_arr = null;
 $objs = objprof_get_data();
@@ -235,3 +238,4 @@ $myClass = null;
 //$xml = simplexml_load_string('<root><hello>world</hello></root>');
 //$objs = objprof_get_data();
 echo "(GOOD) Got here without crashing\n";
+}

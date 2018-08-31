@@ -11,6 +11,9 @@ class C {
   const type X = Map<int, shape('foo'=>array, 'bar'=>bool)>;
 }
 
+
+<<__EntryPoint>>
+function main_type_annotation_shape1() {
 $x = new ReflectionTypeConstant('C', 'T');
 var_dump($x->getAssignedTypeText());
 var_dump($x->getTypeStructure());
@@ -26,3 +29,4 @@ var_dump($x->getTypeStructure());
 $x = new ReflectionTypeConstant('C', 'X');
 var_dump($x->getAssignedTypeText());
 var_dump($x->getTypeStructure());
+}

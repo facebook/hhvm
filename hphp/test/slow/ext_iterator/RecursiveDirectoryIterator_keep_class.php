@@ -16,4 +16,8 @@ function main() {
     var_dump($a);
   }
 }
+
+<<__EntryPoint>>
+function main_recursive_directory_iterator_keep_class() {
 main();
+}

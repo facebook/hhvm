@@ -109,4 +109,8 @@ function main() {
 
   ref_unserialize();
 }
+
+<<__EntryPoint>>
+function main_refs() {
 main();
+}

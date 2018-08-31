@@ -26,4 +26,8 @@ function main() {
   var_dump(ok());
 }
 
+
+<<__EntryPoint>>
+function main_static_props_008() {
 main();
+}

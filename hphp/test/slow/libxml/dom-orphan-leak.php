@@ -18,6 +18,10 @@ function test() {
   return $end - $start;
 }
 
+
+<<__EntryPoint>>
+function main_dom_orphan_leak() {
 $x = test();
 $x = test();
 echo $x, "\n";
+}

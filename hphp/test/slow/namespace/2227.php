@@ -13,6 +13,9 @@ class Foo {
     unset(Foo::$baz);
   }
 }
+
+<<__EntryPoint>>
+function main_2227() {
 if (rand(0, 1)) {
   class B {
     static $baz = 'baz';
@@ -35,3 +38,4 @@ $f = new Foo(array(0));
 var_dump(Foo::$baz);
 var_dump(B::FOO);
 var_dump(B::$baz);
+}

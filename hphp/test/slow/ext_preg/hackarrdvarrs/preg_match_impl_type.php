@@ -29,6 +29,10 @@ function h(): dict {
   return $captures;
 }
 
+
+<<__EntryPoint>>
+function main_preg_match_impl_type() {
 f();
 g();
 h();
+}

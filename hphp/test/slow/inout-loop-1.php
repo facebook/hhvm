@@ -1,7 +1,5 @@
 <?hh
 
-set_error_handler(() ==> { throw new Exception; });
-
 function foo(inout dict<int, int> $arr) {
   foreach ($arr as $val) {
     if ($arr[$val]) {
@@ -20,8 +18,14 @@ function main() {
   return $d;
 }
 
+
+<<__EntryPoint>>
+function main_inout_loop_1() {
+set_error_handler(() ==> { throw new Exception; });
+
 try {
   main();
 } catch (Exception $e) {
   echo "caught!\n";
+}
 }

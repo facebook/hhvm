@@ -19,4 +19,8 @@ class string {
 function foo(bool $b1, boolean $b2,             int $i1, integer $i2,             double $d1, float $d2, real $d3,             string $s) {
   var_dump(func_get_args());
 }
+
+<<__EntryPoint>>
+function main_2187() {
 foo(new bool, new boolean,    new int, new integer,    new double, new float, new real,    new string);
+}

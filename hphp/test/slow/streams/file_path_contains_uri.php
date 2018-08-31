@@ -20,4 +20,8 @@ function main() {
   rmdir($root);
 }
 
+
+<<__EntryPoint>>
+function main_file_path_contains_uri() {
 main();
+}

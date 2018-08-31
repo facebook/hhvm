@@ -12,6 +12,9 @@ class A {
   <<__Memoize, __Deprecated>> public function func6($a) { return $a; }
 }
 
+
+<<__EntryPoint>>
+function main_deprecated() {
 func1();
 func1();
 
@@ -30,3 +33,4 @@ $a->func5();
 
 $a->func6('ghi');
 $a->func6('ghi');
+}

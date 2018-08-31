@@ -20,4 +20,8 @@ function main() {
   doit($x);
 }
 
+
+<<__EntryPoint>>
+function main_alias_parameter_check() {
 main();
+}

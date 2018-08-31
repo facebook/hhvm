@@ -7,4 +7,8 @@ function hello() {
   ');
 }
 
+
+<<__EntryPoint>>
+function main_hello_world() {
 var_dump(hello());
+}

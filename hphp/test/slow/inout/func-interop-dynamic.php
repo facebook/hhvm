@@ -36,4 +36,8 @@ function main($foo, $bar) {
   echo "$g2, $h2\n";
 }
 
+
+<<__EntryPoint>>
+function main_func_interop_dynamic() {
 main('foo', 'bar');
+}

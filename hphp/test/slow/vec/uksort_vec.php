@@ -10,4 +10,8 @@ function main() {
   return $v;
 }
 
+
+<<__EntryPoint>>
+function main_uksort_vec() {
 var_dump(main());
+}

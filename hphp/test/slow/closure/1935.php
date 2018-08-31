@@ -10,6 +10,10 @@ function f() {
 ;
   return $closure;
 }
+
+<<__EntryPoint>>
+function main_1935() {
 $x = f();
 $x(2);
 $x(2);
+}

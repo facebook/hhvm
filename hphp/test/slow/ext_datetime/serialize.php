@@ -7,7 +7,11 @@ function check($name) {
   var_dump($o2 == $o);
   var_dump(isset($o2->_date_time) === false);
 }
-check('DateTime');
 
 class A extends DateTime {}
+
+<<__EntryPoint>>
+function main_serialize() {
+check('DateTime');
 check('A');
+}

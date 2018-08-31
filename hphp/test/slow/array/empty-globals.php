@@ -9,4 +9,8 @@ function main() {
   var_dump((bool)$g);
 }
 
+
+<<__EntryPoint>>
+function main_empty_globals() {
 main();
+}

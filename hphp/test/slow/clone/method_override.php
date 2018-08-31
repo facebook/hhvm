@@ -13,4 +13,8 @@ final class TestCloneWhat extends TestCloneWhatBase {
   }
 }
 
+
+<<__EntryPoint>>
+function main_method_override() {
 echo "Hello\n";
+}

@@ -7,4 +7,8 @@ function main() {
   }
   echo "Leaving main\n";
 }
+
+<<__EntryPoint>>
+function main_501() {
 main();
+}

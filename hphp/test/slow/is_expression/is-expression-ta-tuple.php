@@ -10,6 +10,9 @@ function is_tuple(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_ta_tuple() {
 is_tuple(null);
 is_tuple(new stdClass());
 is_tuple(darray[
@@ -23,3 +26,4 @@ is_tuple(tuple(1, 'string'));
 is_tuple(tuple(1, null, 1.5));
 is_tuple(tuple(1, null, 'string'));
 is_tuple(varray[1, null, 'string']);
+}

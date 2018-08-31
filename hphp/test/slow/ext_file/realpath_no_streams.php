@@ -9,6 +9,10 @@ class test {
     return array(0);
   }
 }
+
+<<__EntryPoint>>
+function main_realpath_no_streams() {
 stream_register_wrapper("test", "test");
 var_dump(realpath("test://hello"));
 echo "neither stream_stat nor url_stat\n";
+}

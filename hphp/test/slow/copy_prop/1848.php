@@ -8,4 +8,8 @@ function foo() {
   $b = 2;
   yield $a;
 }
+
+<<__EntryPoint>>
+function main_1848() {
 foreach (foo() as $x) var_dump($x);
+}

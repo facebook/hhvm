@@ -12,4 +12,8 @@ function main() {
   (new X)->f();
 }
 
+
+<<__EntryPoint>>
+function main_const_conflict() {
 main();
+}

@@ -15,4 +15,8 @@ function main() {
   bar($a);
 }
 
+
+<<__EntryPoint>>
+function main_disable_inlining() {
 main();
+}

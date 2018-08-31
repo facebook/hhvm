@@ -12,8 +12,12 @@ class A {
   }
 }
 
+
+<<__EntryPoint>>
+function main_extract_008() {
 new A();
 extract(['this' => 'a']);
 var_dump($this);
 extract(['this' => 'b']);
 var_dump($this);
+}

@@ -7,4 +7,8 @@ class A {
  var_dump(self::$a);
 }
  }
- A::test();
+
+ <<__EntryPoint>>
+function main_1245() {
+A::test();
+}

@@ -24,6 +24,9 @@ final class E extends C {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_tc_parent() {
 D::isT('foo');
 E::isT('foo');
 echo "\n";
@@ -38,3 +41,4 @@ E::isT(false);
 echo "\n";
 D::isT(STDIN);
 E::isT(STDIN);
+}

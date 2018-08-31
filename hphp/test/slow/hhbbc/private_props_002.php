@@ -21,4 +21,8 @@ function main() {
   $x->foo();
 }
 
+
+<<__EntryPoint>>
+function main_private_props_002() {
 main();
+}

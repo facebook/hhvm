@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_825() {
 $vec1 = Vector {
 11, 42, 73}
 ;
@@ -30,3 +33,4 @@ Pair {
 ;
 $mp3 = Map::fromItems($tuples);
 var_dump($mp3);
+}

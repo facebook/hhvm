@@ -24,4 +24,8 @@ function main() {
     echo "----\n";
   }
 }
+
+<<__EntryPoint>>
+function main_set_sort() {
 main();
+}

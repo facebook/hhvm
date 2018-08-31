@@ -11,4 +11,8 @@ function test($a) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_unused() {
 test("unused");
+}

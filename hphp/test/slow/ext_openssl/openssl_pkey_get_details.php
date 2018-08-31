@@ -13,4 +13,3 @@ print $key;
 $res = openssl_pkey_get_public($key);
 var_dump(openssl_pkey_get_details($res));
 ?>
-

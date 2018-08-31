@@ -32,9 +32,13 @@ async function bogusGena() {
   );
 }
 
+
+<<__EntryPoint>>
+function main_await_gena() {
 var_dump(HH\Asio\join(foo()));
 var_dump(HH\Asio\join(fooReschedule()));
 try {
   var_dump(HH\Asio\join(fooError()));
 } catch (Exception $e) { print $e->getMessage()."\n"; }
 var_dump(HH\Asio\join(bogusGena()));
+}

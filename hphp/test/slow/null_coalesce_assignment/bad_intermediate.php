@@ -27,4 +27,8 @@ function f(): void {
   var_dump($obj == $objeq);
 }
 
+
+<<__EntryPoint>>
+function main_bad_intermediate() {
 f();
+}

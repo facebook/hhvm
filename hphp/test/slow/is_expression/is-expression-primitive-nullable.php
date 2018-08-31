@@ -48,6 +48,9 @@ function is_keyset_(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_primitive_nullable() {
 is_bool_(null);
 is_bool_(true);
 
@@ -85,3 +88,4 @@ echo "---\n";
 
 is_keyset_(null);
 is_keyset_(keyset[]);
+}

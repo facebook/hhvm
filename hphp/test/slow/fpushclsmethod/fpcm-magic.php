@@ -14,4 +14,8 @@ class Test {
   }
 }
 
+
+<<__EntryPoint>>
+function main_fpcm_magic() {
 Test::main();
+}

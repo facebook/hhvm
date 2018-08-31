@@ -14,6 +14,10 @@ function b() {
   var_dump($result);
 }
 
+
+
+<<__EntryPoint>>
+function main_array_reverse() {
 a();
 b();
-
+}

@@ -36,4 +36,3 @@ var_dump($r->pipeline()
            ->delete($key)
            ->exists($key)
            ->exec());
-

@@ -14,4 +14,8 @@ function test() {
   fb_intercept('X::foo', 'bar', 'bar');
   X::foo();
 }
+
+<<__EntryPoint>>
+function main_1200() {
 test();
+}

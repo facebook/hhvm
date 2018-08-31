@@ -83,6 +83,10 @@ function test_arr() {
   $x2 <=> $x1;
 }
 
+
+<<__EntryPoint>>
+function main_side_effect_compares() {
 test_cls1();
 test_cls2();
 test_arr();
+}

@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1676() {
 $xml = <<< EOXML
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE courses [
@@ -78,3 +81,4 @@ echo "\n";
 
 $node = $ents->getNamedItem('xxx');
 var_dump($node);
+}

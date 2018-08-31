@@ -15,6 +15,9 @@ class X {
     return $name == 'baz' || $name == 'buz';
   }
 }
+
+<<__EntryPoint>>
+function main_690() {
 $x = new X;
 var_dump(isset($x->foo));
 var_dump(isset($x->baz));
@@ -31,3 +34,4 @@ var_dump(empty($x->priv_var));
 unset($x->pub_var);
 var_dump(isset($x->pub_var));
 var_dump(empty($x->pub_var));
+}

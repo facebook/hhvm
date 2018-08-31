@@ -17,5 +17,9 @@ function foo() {
     echo "ok\n";
   }
 }
+
+<<__EntryPoint>>
+function main_exception_dtor_order() {
 foo();
 echo "done\n";
+}

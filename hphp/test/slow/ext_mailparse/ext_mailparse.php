@@ -7,8 +7,11 @@ function VS($x, $y) {
 }
 function VERIFY($x) { VS($x != false, true); }
 
+
 //////////////////////////////////////////////////////////////////////
 
+<<__EntryPoint>>
+function main_ext_mailparse() {
 VS(ezmlm_hash("foo"), 40);
 
 $files = array("mime", "phpcvs1", "qp", "uue");
@@ -306,3 +309,4 @@ VS($output,
    "\n".
    "UUE\n".
    "this is a test\n");
+}

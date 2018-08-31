@@ -7,4 +7,8 @@ function foo() {
   var_dump(get_defined_vars());
 }
 
+
+<<__EntryPoint>>
+function main_extract_non_array() {
 foo();
+}

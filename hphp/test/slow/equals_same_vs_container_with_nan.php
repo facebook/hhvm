@@ -39,4 +39,8 @@ function test() {
   test_dictlike('Map', Map {'a' => 1}, Map {'a' => 1});
 }
 
+
+<<__EntryPoint>>
+function main_equals_same_vs_container_with_nan() {
 test();
+}

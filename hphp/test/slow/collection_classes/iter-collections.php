@@ -22,4 +22,8 @@ function main() {
   var_dump($sm);
 }
 
+
+<<__EntryPoint>>
+function main_iter_collections() {
 main();
+}

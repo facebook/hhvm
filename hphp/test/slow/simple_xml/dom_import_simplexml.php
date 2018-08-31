@@ -5,4 +5,8 @@ function main() {
   $dom = dom_import_simplexml($s);
   print $dom->ownerDocument->saveXML();
 }
+
+<<__EntryPoint>>
+function main_dom_import_simplexml() {
 main();
+}

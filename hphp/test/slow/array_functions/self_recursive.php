@@ -18,4 +18,8 @@ function main() {
   var_dump(compact($a));
 }
 
+
+<<__EntryPoint>>
+function main_self_recursive() {
 main();
+}

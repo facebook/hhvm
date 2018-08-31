@@ -12,6 +12,9 @@ function g(&$u0) {
  }
 ;
 }
+
+<<__EntryPoint>>
+function main_1938() {
 $x1 = 0;
 $f = f($x1);
 var_dump($x1);
@@ -23,3 +26,4 @@ $g = g($x2);
 var_dump($x2);
 $g();
 var_dump($x2);
+}

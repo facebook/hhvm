@@ -13,8 +13,12 @@ function g2() {
   return $g1result;
 }
 
+
+<<__EntryPoint>>
+function main_yield_from_expression_value() {
 $g = g2();
 foreach ($g as $yielded) {
   var_dump($yielded);
 }
 var_dump($g->getReturn());
+}

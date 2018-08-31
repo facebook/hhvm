@@ -13,4 +13,8 @@ function to_object($d) {
   var_dump($obj->blah);
 }
 
+
+<<__EntryPoint>>
+function main_to_object() {
 to_object(dict['abc' => 100, 'foobar' => 200, 'def' => 300]);
+}

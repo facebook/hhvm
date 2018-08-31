@@ -1,6 +1,4 @@
 <?php
-
-$y = array();
 function a() { return 1; }
 function foo() {
   global $y;
@@ -19,4 +17,10 @@ function bar() {
   var_dump($a);
 }
 
+
+<<__EntryPoint>>
+function main_array_ref_001() {
+$y = array();
+
 bar();
+}

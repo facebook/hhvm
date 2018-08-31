@@ -11,4 +11,8 @@ function main() {
   do_add([], [1, 2, 3]);
   do_add([1, 2, 3], [4, 5, 6]);
 }
+
+<<__EntryPoint>>
+function main_add() {
 main();
+}

@@ -10,4 +10,8 @@ function main() {
   unlink($fnam);
 }
 
+
+<<__EntryPoint>>
+function main_deflate_filter() {
 main();
+}

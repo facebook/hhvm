@@ -238,6 +238,9 @@ function test_stream_constants() {
   VS(STREAM_SOCK_SEQPACKET, 5);
 }
 
+
+<<__EntryPoint>>
+function main_ext_stream() {
 test_stream_copy_to_stream();
 test_stream_get_contents();
 test_stream_get_line();
@@ -254,3 +257,4 @@ test_stream_socket_sendto_issue324();
 test_stream_socket_shutdown();
 test_stream_socket_kind();
 test_stream_constants();
+}

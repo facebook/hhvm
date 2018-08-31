@@ -6,4 +6,8 @@ function test() {
 }
  inner();
 }
- test();
+
+ <<__EntryPoint>>
+function main_7() {
+test();
+}

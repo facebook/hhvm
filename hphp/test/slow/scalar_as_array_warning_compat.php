@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_scalar_as_array_warning_compat() {
 error_reporting(E_ALL);
 
 $bad_bases = array(
@@ -26,4 +29,5 @@ foreach ($bad_bases as $bad_base) {
   $result = ($bad_base[] = 1);
 
   echo "--End--\n\n";
+}
 }

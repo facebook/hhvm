@@ -6,4 +6,8 @@ function main() {
   $y = $x();
   var_dump(HH\Asio\join($y));
 }
+
+<<__EntryPoint>>
+function main_empty_closure() {
 main();
+}

@@ -22,4 +22,8 @@ function main(): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_resource() {
 main();
+}

@@ -29,4 +29,8 @@ function reflect () {
   var_dump(is_null($rp->getAttributeClass(__Attribute__PA::class))); // false
 }
 
+
+<<__EntryPoint>>
+function main_empty_attribute_default_arg_vs_missing() {
 echo reflect();
+}

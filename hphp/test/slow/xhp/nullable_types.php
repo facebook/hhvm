@@ -26,4 +26,8 @@ class :foo extends base {
   }
 }
 
+
+<<__EntryPoint>>
+function main_nullable_types() {
 :foo::dumpAttributes();
+}

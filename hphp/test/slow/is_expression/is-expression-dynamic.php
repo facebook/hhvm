@@ -8,6 +8,9 @@ function is_dynamic($x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_dynamic() {
 is_dynamic(null);
 is_dynamic(-1);
 is_dynamic(false);
@@ -17,3 +20,4 @@ is_dynamic(STDIN);
 is_dynamic(new stdClass());
 is_dynamic(tuple(1, 2, 3));
 is_dynamic(shape('a' => 1, 'b' => 2));
+}

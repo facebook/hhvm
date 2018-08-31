@@ -23,11 +23,14 @@ class Foo<X> implements Face<X> {
   const string BLEH = "b";
 }
 
-$blork = pair('c', '-');
-
 function right_shift_hack(Foo<Foo<Foo<Foo<Foo<Foo<Foo<Foo<Foo<Foo<Foo>,Foo>>,Foo>>>,Foo>>>> $bonk,
          (function(Foo,Bar):C) $d) {
 }
+
+
+<<__EntryPoint>>
+function main_2213() {
+$blork = pair('c', '-');
 
 $a = blarg('a','aa','aaa');
 $d = (function():string{
@@ -35,3 +38,4 @@ return 'd';
 }
 );
 echo vidx($a, 0), Foo::BLEH, car($blork), $d();
+}

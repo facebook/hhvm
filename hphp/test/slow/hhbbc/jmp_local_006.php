@@ -9,5 +9,9 @@ function main(array $x = null) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_jmp_local_006() {
 main(array());
 main(array(1,2,3));
+}

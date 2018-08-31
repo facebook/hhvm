@@ -28,4 +28,8 @@ function main() {
   var_dump($d);
 }
 
+
+<<__EntryPoint>>
+function main_dyn_props() {
 main();
+}

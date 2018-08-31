@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1679() {
 $dom = new DOMDocument();
 $dom->loadXML('<a><b><c /></b></a>');
 $remove = array();
@@ -14,3 +17,4 @@ foreach ($remove as $r) {
   $r->parentNode->removeChild($r);
 }
 echo $dom->saveXML();
+}

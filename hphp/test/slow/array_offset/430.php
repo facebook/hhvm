@@ -5,10 +5,13 @@ class A {
   const i2= -2;
   static $s = -4;
 }
-;
 class B {
   static $s = -5;
 }
+
+<<__EntryPoint>>
+function main_430() {
+;
 ;
 $attr=array();
 $attr[a::i1]='abc';
@@ -17,3 +20,4 @@ $attr[-3]='ghi';
 $attr[a::$s]='jkl';
 $attr[b::$s]='mno';
 var_dump($attr);
+}

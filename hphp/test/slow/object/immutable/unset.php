@@ -20,4 +20,8 @@ function test() {
   var_dump($c);
 }
 
+
+<<__EntryPoint>>
+function main_unset() {
 test();
+}

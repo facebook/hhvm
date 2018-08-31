@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_feof() {
 $tempfile = tempnam('/tmp', 'vmextfiletest');
 
 $f = fopen($tempfile, 'w');
@@ -13,3 +16,4 @@ echo "\n";
 var_dump(feof($f));
 
 unlink($tempfile);
+}

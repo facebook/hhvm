@@ -8,5 +8,9 @@ function f($code) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_single_line_comment_with_close_tag() {
 f("<?php // ?>\n");
 f("<?php // ?\n");
+}

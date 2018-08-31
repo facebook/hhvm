@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_fscanf() {
 $tempfile = tempnam('/tmp', 'vmextfiletest');
 
 $f = fopen($tempfile, 'w');
@@ -11,3 +14,4 @@ $res = fscanf($f, "%s %s");
 var_dump($res);
 
 unlink($tempfile);
+}

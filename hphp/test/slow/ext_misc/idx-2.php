@@ -30,4 +30,8 @@ function main() {
   test(ImmSet {'1', 1, 'hello', ''});
   test(Pair {'2', ''});
 }
+
+<<__EntryPoint>>
+function main_idx_2() {
 main();
+}

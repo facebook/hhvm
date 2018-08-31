@@ -15,6 +15,10 @@ class Y {
     var_dump(__METHOD__);
   }
 }
+
+<<__EntryPoint>>
+function main_1883() {
 $x = new X;
 $x->foo('y');
 $x->foo(new Y);
+}

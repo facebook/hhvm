@@ -115,4 +115,8 @@ async function testBacktrace(): Awaitable<void> {
   }
 }
 
+
+<<__EntryPoint>>
+function main_backtrace() {
 HH\Asio\join(testBacktrace());
+}

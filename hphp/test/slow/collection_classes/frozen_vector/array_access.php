@@ -8,4 +8,8 @@ function main() {
   var_dump($fv[2]);
 }
 
+
+<<__EntryPoint>>
+function main_array_access() {
 main();
+}

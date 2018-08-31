@@ -21,4 +21,8 @@ function bar($a) {
     var_dump($c);
   }
 }
+
+<<__EntryPoint>>
+function main_1740() {
 bar(1);
+}

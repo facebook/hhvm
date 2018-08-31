@@ -8,4 +8,8 @@ FUNCTION FOO<T1 AS INT, T2 super T1, PROHIBITED>(
   ECHO "NO CASH VALUE\n";
 }
 
+
+<<__EntryPoint>>
+function main_hack_generics() {
 FOO(1, 2, 3);
+}

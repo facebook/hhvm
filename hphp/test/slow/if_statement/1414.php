@@ -11,4 +11,8 @@ function test($a,$b = 0) {
     var_dump($a);
   }
 }
+
+<<__EntryPoint>>
+function main_1414() {
 test(3);
+}

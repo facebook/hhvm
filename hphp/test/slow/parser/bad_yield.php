@@ -7,4 +7,8 @@ class C {
   }
 }
 
+
+<<__EntryPoint>>
+function main_bad_yield() {
 echo "Done\n";
+}

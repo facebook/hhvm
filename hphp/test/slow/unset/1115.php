@@ -6,6 +6,9 @@ class A {
     $this->a = $p;
   }
 }
+
+<<__EntryPoint>>
+function main_1115() {
 ;
 $obj = new A(1);
 var_dump($obj);
@@ -23,3 +26,4 @@ $obj->b = 3;
 var_dump($obj);
 unset($obj->a, $obj->b);
 var_dump($obj);
+}

@@ -21,6 +21,9 @@ function serde($v) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_fb_serialize() {
 serde(dict[]);
 serde(dict[1 => 'a', 2 => 'b', 3 => 'c']);
 serde(dict['a' => 1, 'b' => 2, 'c' => 3]);
@@ -44,3 +47,4 @@ serde(['a' => 1,
        'c' => dict['a' => 1, 'b' => 2, 'c' => 3],
        'd' => dict[1 => 'a', 2 => 'b', 3 => 'c'],
        'e' => dict[]]);
+}

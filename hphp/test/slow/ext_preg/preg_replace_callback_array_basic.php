@@ -12,6 +12,9 @@ class Foo {
 function b() {
   return "b";
 }
+
+<<__EntryPoint>>
+function main_preg_replace_callback_array_basic() {
 var_dump(preg_replace_callback_array(
   array(
     "/a/" => 'b',
@@ -31,3 +34,4 @@ var_dump(preg_replace_callback_array(
     "/a/" => 'b',
     "/b/" => create_function('$a', 'return "ok";')), 'a', -1, $count));
 var_dump($count);
+}

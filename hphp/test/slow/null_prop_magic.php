@@ -7,6 +7,9 @@ class Foo {
   public function __unset($prop) { echo "__unset($prop)\n"; }
 }
 
+
+<<__EntryPoint>>
+function main_null_prop_magic() {
 $obj = new Foo;
 $prop = "\0myprop";
 
@@ -14,3 +17,4 @@ $obj->$prop = "should work";
 $_ = $obj->$prop;
 isset($obj->$prop);
 unset($obj->$prop);
+}

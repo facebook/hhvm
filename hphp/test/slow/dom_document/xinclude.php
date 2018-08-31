@@ -10,4 +10,8 @@ function main() {
   var_dump($doc->saveXML());
 }
 
+
+<<__EntryPoint>>
+function main_xinclude() {
 main();
+}

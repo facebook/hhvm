@@ -1,6 +1,9 @@
 <?php
 
+
 // create image
+<<__EntryPoint>>
+function main_1783() {
 $image = imagecreatetruecolor(100, 100);
 // allocate some solors
 $white    = imagecolorallocate($image, 0xFF, 0xFF, 0xFF);
@@ -25,3 +28,4 @@ imagepng($image);
 imagedestroy($image);
 $md5 = md5(ob_get_clean());
 echo "md5: $md5\n";
+}

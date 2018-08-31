@@ -10,4 +10,8 @@ function foo($t) {
     var_dump($y);
   }
 }
+
+<<__EntryPoint>>
+function main_2158() {
 foo(42);
+}

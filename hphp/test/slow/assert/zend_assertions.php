@@ -1,8 +1,5 @@
 <?php
 
-assert_options(ASSERT_ACTIVE, 1);
-assert_options(ASSERT_WARNING, 1);
-
 class C {
   public function __construct() {
     echo "in construct\n";
@@ -13,6 +10,10 @@ class C {
     return "toString";
   }
 }
+
+
+assert_options(ASSERT_ACTIVE, 1);
+assert_options(ASSERT_WARNING, 1);
 
 ini_set("zend.assertions", 1);
 $x = assert(false, new C);

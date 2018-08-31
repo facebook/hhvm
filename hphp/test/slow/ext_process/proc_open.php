@@ -7,6 +7,9 @@ function test_me($desc) {
   pcntl_waitpid($status["pid"], $child_status);
 }
 
+
+<<__EntryPoint>>
+function main_proc_open() {
 $desc = array(array("file", "php://stdin", "r"));
 test_me($desc);
 
@@ -24,3 +27,4 @@ test_me($desc);
 
 $desc = array(array("file", "php://memory", "r"));
 test_me($desc);
+}

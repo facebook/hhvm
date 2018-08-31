@@ -11,6 +11,9 @@ function is_xhp(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_xhp() {
 is_xhp(1);
 is_xhp(1.5);
 is_xhp('foo');
@@ -23,3 +26,4 @@ is_xhp(dict[]);
 is_xhp(keyset[]);
 is_xhp(<my-xhp />);
 is_xhp(<other-xhp />);
+}

@@ -63,6 +63,9 @@ class ChildClass extends ParentClass{
   public array $packedArr = array();
 }
 
+
+<<__EntryPoint>>
+function main_objprof_paths() {
 $childClass = new ChildClass();
 $childClass->parentNested = new NestedClass();
 $childClass->childNested = new NestedClass();
@@ -92,3 +95,4 @@ foreach ($objs as $name => $metrics) {
 }
 sort(&$pathstrs);
 echo implode("\n", $pathstrs)."\n";
+}

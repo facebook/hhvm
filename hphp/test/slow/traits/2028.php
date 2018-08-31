@@ -24,4 +24,3 @@ $o->sayHello();
 $o->sayWorld();
 
 ?>
-

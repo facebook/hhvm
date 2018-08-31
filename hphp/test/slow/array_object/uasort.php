@@ -8,7 +8,10 @@ function cmp($a, $b) {
     return ($a < $b) ? -1 : 1;
 }
 
+
 // Array to be sorted
+<<__EntryPoint>>
+function main_uasort() {
 $array = array(
  'a' => 4,
  'b' => 8,
@@ -25,3 +28,4 @@ print_r($arrayObject);
 // Sort and print the resulting array
 $arrayObject->uasort('cmp');
 print_r($arrayObject);
+}

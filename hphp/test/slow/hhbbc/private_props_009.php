@@ -21,4 +21,8 @@ function main() {
   var_dump((new Whatever(0))->hey());
 }
 
+
+<<__EntryPoint>>
+function main_private_props_009() {
 main();
+}

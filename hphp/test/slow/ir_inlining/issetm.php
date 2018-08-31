@@ -12,4 +12,8 @@ function main() {
   var_dump($v);
 }
 
+
+<<__EntryPoint>>
+function main_issetm() {
 main();
+}

@@ -15,4 +15,8 @@ function main() {
   f('a', 'b', ...$args);
 }
 
+
+<<__EntryPoint>>
+function main_unpack_call_invalid_arg() {
 main();
+}

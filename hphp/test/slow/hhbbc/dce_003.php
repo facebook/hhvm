@@ -13,6 +13,10 @@ function bar($ar) {
   }
   var_dump($tmp);
 }
+
+
+<<__EntryPoint>>
+function main_dce_003() {
 bar(array('a'));
 bar(array());
-
+}

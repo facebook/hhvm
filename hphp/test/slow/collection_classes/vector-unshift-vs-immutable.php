@@ -7,4 +7,8 @@ function unshiftAndDump($unshiftMe) {
   var_dump($v->immutable());
 }
 
+
+<<__EntryPoint>>
+function main_vector_unshift_vs_immutable() {
 unshiftAndDump(0);
+}

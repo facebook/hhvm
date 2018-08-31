@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_811() {
 $v = Vector::fromArray(array('foo'));
 var_dump($v[0]);
 var_dump($v->at(0));
@@ -10,3 +13,4 @@ var_dump($m[0]);
 var_dump($m->at(0));
 var_dump($m->get(0));
 var_dump($m->get(1));
+}

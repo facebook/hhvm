@@ -13,4 +13,8 @@ function g8() {
     }
   }
 }
+
+<<__EntryPoint>>
+function main_479() {
 g8();
+}

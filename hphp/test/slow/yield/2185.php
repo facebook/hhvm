@@ -10,6 +10,9 @@ function gen(int $mode) {
   yield 47;
 }
 
+
+<<__EntryPoint>>
+function main_2185() {
 for ($mode = 0;
  $mode < 3;
  ++$mode) {
@@ -27,4 +30,5 @@ for ($mode = 0;
   }
   var_dump($gen->valid());
   var_dump($gen->current());
+}
 }

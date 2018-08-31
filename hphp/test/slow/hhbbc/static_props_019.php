@@ -12,5 +12,9 @@ class Foo {
   }
 }
 
+
+<<__EntryPoint>>
+function main_static_props_019() {
 Foo::go();
 Foo::gone();
+}

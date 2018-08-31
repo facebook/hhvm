@@ -12,4 +12,8 @@ function main() {
   }
   var_dump(memory_get_usage() > $start_usage);
 }
+
+<<__EntryPoint>>
+function main_memory_get_usage() {
 main();
+}

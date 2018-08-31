@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_array_splice() {
 $params = array("a" => "aaa", "0" => "apple");
 unset($params['a']);
 array_splice($params, 0, 0, array(123 => "test"));
@@ -32,3 +35,4 @@ var_dump($input);
 $input = array("red", "green", "blue", "yellow");
 array_splice($input, 3, 0, "purple");
 var_dump($input);
+}

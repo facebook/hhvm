@@ -26,4 +26,8 @@ function x($a) {
       = new dtor(5)
   );
 }
+
+<<__EntryPoint>>
+function main_set_key_dtor3() {
 x(new A);
+}

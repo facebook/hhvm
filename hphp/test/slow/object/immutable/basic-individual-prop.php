@@ -34,4 +34,8 @@ function test() {
   var_dump($c);
 }
 
+
+<<__EntryPoint>>
+function main_basic_individual_prop() {
 test();
+}

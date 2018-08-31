@@ -31,4 +31,8 @@ function test() {
   var_dump($v);
 }
 
+
+<<__EntryPoint>>
+function main_vector_splice_destructors() {
 test();
+}

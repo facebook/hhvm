@@ -44,6 +44,9 @@ FINAL CLASS C EXTENDS A IMPLEMENTS I {
   }
 }
 
+
+<<__EntryPoint>>
+function main_class() {
 $c = NEW C();
 $c->x = 1;
 $c->y = "two";
@@ -54,3 +57,4 @@ $c2->y = 2;
 var_dump($c INSTANCEOF I);
 $c->test();
 $c2->test();
+}

@@ -13,5 +13,9 @@ trait Too {
 class Foo {
  use Too;
  }
+
+<<__EntryPoint>>
+function main_2084() {
 $a = Foo::bar();
 $a(456);
+}

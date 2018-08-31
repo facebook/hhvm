@@ -12,4 +12,8 @@ function test() {
   $x = new X;
   var_dump($x->x);
 }
+
+<<__EntryPoint>>
+function main_666() {
 test();
+}

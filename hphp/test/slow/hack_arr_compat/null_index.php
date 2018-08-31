@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_null_index() {
 echo "=== indexing into null ===\n";
 $t = null[3];
 $t = null;
@@ -36,3 +39,4 @@ $b = true;
 $b[1] = "foo";
 $b = true;
 $b["foo"] = "bar";
+}

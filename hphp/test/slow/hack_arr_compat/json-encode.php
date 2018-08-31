@@ -90,6 +90,9 @@ function test($name, $options) {
   var_dump(json_encode($obj, $options));
 }
 
+
+<<__EntryPoint>>
+function main_json_encode() {
 literals();
 
 test("normal", 0);
@@ -111,3 +114,4 @@ test(
   "everything",
   JSON_FB_WARN_PHP_ARRAYS | JSON_FB_WARN_DICTS | JSON_FB_FORCE_PHP_ARRAYS
 );
+}

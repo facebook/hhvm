@@ -55,4 +55,8 @@ async function test() {
   await test_long(new Foo());
 }
 
+
+<<__EntryPoint>>
+function main_genva_non_awaitable() {
 HH\Asio\join(test());
+}

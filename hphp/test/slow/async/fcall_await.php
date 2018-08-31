@@ -33,6 +33,9 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_fcall_await() {
 main();
 fb_setprofile(function($when, $func, $args) {
     if ($when == 'exit' &&
@@ -44,3 +47,4 @@ fb_setprofile(function($when, $func, $args) {
   });
 
 main();
+}

@@ -12,4 +12,8 @@ class X {
 function test() {
   X::bar(null);
 }
+
+<<__EntryPoint>>
+function main_1321() {
 test();
+}

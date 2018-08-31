@@ -11,6 +11,10 @@ function f($x) {
  var_dump($x);
  }
 }
+
+<<__EntryPoint>>
+function main_1854() {
 f(array(32));
 f('foobar');
 f(32);
+}

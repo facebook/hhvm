@@ -1,8 +1,5 @@
 <?hh
 
-error_reporting(-1);
-require_once __DIR__.'/variadic_funcs.inc';
-
 function test_cufa($args) {
   echo "\n", '********* ', __FUNCTION__, ' **********', "\n";
   var_dump($args);
@@ -83,4 +80,11 @@ function main() {
   call_user_func_array('test_stack_should_not_overflow', range(0, 10000));
   call_user_func_array('test_stack_should_not_overflow', range(0, 30000));
 }
+
+
+<<__EntryPoint>>
+function main_cufa() {
+error_reporting(-1);
+require_once __DIR__.'/variadic_funcs.inc';
 main();
+}

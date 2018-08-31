@@ -26,6 +26,10 @@ function jccMain($i) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_jumps() {
 gotoMain();
 jccMain(0);
 jccMain(2);
+}

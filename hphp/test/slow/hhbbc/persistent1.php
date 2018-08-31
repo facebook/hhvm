@@ -11,4 +11,8 @@ function main($x, $y) {
   var_dump(new X, new Y);
 }
 
+
+<<__EntryPoint>>
+function main_persistent1() {
 main('X', 'Y');
+}

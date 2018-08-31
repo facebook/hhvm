@@ -85,6 +85,9 @@ function member_ops($arr, $keys) {
   foreach ($keys as $key) { unset($arr[0][1][$key]); }
 }
 
+
+<<__EntryPoint>>
+function main_implicit_key() {
 $sub = [0 => 100, 1 => 100, "" => 100];
 $arr = [
   0 => [
@@ -107,3 +110,4 @@ $keys = [null, true, false, 1.5];
 basic_getters($arr, $keys);
 basic_setters($arr, $keys);
 member_ops($arr, $keys);
+}

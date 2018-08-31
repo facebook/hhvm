@@ -35,8 +35,12 @@ function runfoo() {
   return $end - $start;
 }
 
+
+<<__EntryPoint>>
+function main_dom_attr_leak() {
 foo();
 foo();
 runfoo();
 runfoo();
 echo runfoo(), "\n";
+}

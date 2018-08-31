@@ -22,8 +22,12 @@ function retry_bind_server() {
   throw new Exception("Couldn't bind server");
 }
 
+
+<<__EntryPoint>>
+function main_addr_junk() {
 list($port, $addr, $server) = retry_bind_server();
 $client_addr = $addr . "/foo/bar/baz";
 $client = stream_socket_client($client_addr);
 $s = stream_socket_accept($server);
 var_dump($client);
+}

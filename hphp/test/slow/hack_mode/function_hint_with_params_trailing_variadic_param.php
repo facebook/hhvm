@@ -10,5 +10,9 @@ class C {
   }
 }
 
+
+<<__EntryPoint>>
+function main_function_hint_with_params_trailing_variadic_param() {
 $c = new C();
 $c->foo(HH\fun('mymeth'));
+}

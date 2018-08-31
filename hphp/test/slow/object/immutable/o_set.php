@@ -21,4 +21,8 @@ function test() {
   var_dump($c);
 }
 
+
+<<__EntryPoint>>
+function main_o_set() {
 test();
+}

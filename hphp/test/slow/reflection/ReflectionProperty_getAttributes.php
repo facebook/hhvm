@@ -10,9 +10,13 @@ class C {
     public $pp,
   ) {}
 }
+
+<<__EntryPoint>>
+function main_reflection_property_get_attributes() {
 var_dump((new ReflectionProperty(C::class, 'p'))->getAttributes());
 var_dump((new ReflectionProperty(C::class, 'sp'))->getAttributes());
 var_dump((new ReflectionProperty(C::class, 'pp'))->getAttributes());
 $c = new C(false);
 $c->dynamic = 'lol';
 var_dump((new ReflectionProperty($c, 'dynamic'))->getAttributes());
+}

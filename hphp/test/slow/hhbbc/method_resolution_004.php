@@ -8,4 +8,8 @@ function main(X $y) {
   var_dump($y->go($asd));
 }
 
+
+<<__EntryPoint>>
+function main_method_resolution_004() {
 main(new N);
+}

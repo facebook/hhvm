@@ -17,6 +17,9 @@ final class E extends C {
   const type T = string;
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_tc_self() {
 D::isT('foo');
 C::isT('foo');
 E::isT('foo');
@@ -36,3 +39,4 @@ echo "\n";
 D::isT(STDIN);
 C::isT(STDIN);
 E::isT(STDIN);
+}

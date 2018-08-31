@@ -8,4 +8,8 @@ function f<T>(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_generic() {
 f(42);
+}

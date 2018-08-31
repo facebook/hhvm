@@ -29,4 +29,8 @@ final class Tree {
   }
 }
 
+
+<<__EntryPoint>>
+function main_refine_closure_crash() {
 var_dump(Tree::go(new R));
+}

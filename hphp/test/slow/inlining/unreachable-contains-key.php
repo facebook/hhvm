@@ -21,7 +21,11 @@ function main($base) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_unreachable_contains_key() {
 for ($i = 0; $i < 100; ++$i) {
   main([]);
   main(keyset[]);
+}
 }

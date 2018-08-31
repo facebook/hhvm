@@ -17,7 +17,11 @@ class b2 extends a2 {
     b2::foo();
   }
 }
+
+<<__EntryPoint>>
+function main_1897() {
 $obj = new a2;
 $obj->test();
 $obj = new b2;
 $obj->test();
+}

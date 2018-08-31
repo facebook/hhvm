@@ -58,4 +58,8 @@ function run_tests() {
   var_dump((array)keyset['1', '2', '3']);
   var_dump(darray(keyset['1', '2', '3']));
 }
+
+<<__EntryPoint>>
+function main_intlike() {
 run_tests();
+}

@@ -1,8 +1,5 @@
 <?hh
 
-error_reporting(-1);
-require_once __DIR__.'/variadic_funcs.inc';
-
 function test_standard_calls() {
   echo '========= ', __FUNCTION__, ' ==========', "\n";
   variadic_only_no_vv('a', 'b', 'c');
@@ -55,4 +52,11 @@ function main() {
   test_standard_insuffient_calls();
 }
 
+
+<<__EntryPoint>>
+function main_basic_calls() {
+error_reporting(-1);
+require_once __DIR__.'/variadic_funcs.inc';
+
 main();
+}

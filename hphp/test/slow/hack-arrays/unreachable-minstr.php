@@ -47,6 +47,10 @@ function keysetTest() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_unreachable_minstr() {
 vecTest();
 dictTest();
 keysetTest();
+}

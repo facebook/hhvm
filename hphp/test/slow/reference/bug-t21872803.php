@@ -17,4 +17,8 @@ function main() {
   var_dump(wat(array(6, 3, 7, 1, 8), true));
 }
 
+
+<<__EntryPoint>>
+function main_bug_t21872803() {
 main();
+}

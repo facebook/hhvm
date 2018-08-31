@@ -7,6 +7,9 @@ class A {
   }
 }
 
+
+<<__EntryPoint>>
+function main_1824() {
 $x = new A;
 $x->cache_gen = $x->gen('a', 'b');
 foreach ($x->cache_gen as $v) {
@@ -15,3 +18,4 @@ foreach ($x->cache_gen as $v) {
 apc_store('key', $x);
 $y = apc_fetch('key');
 var_dump($y->cache_gen);
+}

@@ -1,5 +1,8 @@
 <?php
+
 // Source php weakref extension
+<<__EntryPoint>>
+function main_weakref_basic_acquire_release() {
 $o = new StdClass;
 $wr = new WeakRef($o);
 $wr->acquire();
@@ -10,3 +13,4 @@ $wr->release();
 var_dump($wr->valid(), $wr->get());
 $wr->release();
 var_dump($wr->valid(), $wr->get());
+}

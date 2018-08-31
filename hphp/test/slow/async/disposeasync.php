@@ -6,4 +6,8 @@ class foo {
   }
 }
 
+
+<<__EntryPoint>>
+function main_disposeasync() {
 var_dump(new foo());
+}

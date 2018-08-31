@@ -5,4 +5,8 @@ function f($val = g()) {
   var_dump($val);
 }
 
+
+<<__EntryPoint>>
+function main_undefined_function_default() {
 f();
+}

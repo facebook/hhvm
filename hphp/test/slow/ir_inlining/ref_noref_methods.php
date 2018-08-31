@@ -26,8 +26,11 @@ function inline_run() {
   run(new Cls2());
 }
 
+
 // Profile a region within run() for both cases where $x->get() returns a ref
 // and not.
+<<__EntryPoint>>
+function main_ref_noref_methods() {
 $b = new Cls1();
 $d = new Cls2();
 for ($i = 0; $i < 100; $i++) {
@@ -43,3 +46,4 @@ for ($i = 0; $i < 200; $i++) {
 }
 
 echo "DONE\n";
+}

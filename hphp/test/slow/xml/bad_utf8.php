@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_bad_utf8() {
 var_dump(utf8_decode(addslashes("\xf0\xc0\xc0\xa7 or 1=1-- -")));
 
 $tests = array(
@@ -10,3 +13,4 @@ foreach ($tests as $t) {
   var_dump(bin2hex(utf8_decode($t)));
 }
 echo "Done.\n";
+}

@@ -16,5 +16,9 @@ class MyClass {
     Hello1::sayHello insteadof Hello2;
   }
 }
+
+<<__EntryPoint>>
+function main_1985() {
 $o = new MyClass();
 $o->sayHello();
+}

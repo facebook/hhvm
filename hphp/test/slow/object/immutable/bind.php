@@ -36,5 +36,9 @@ function test_bind() {
   var_dump($c, $li);
 }
 
+
+<<__EntryPoint>>
+function main_bind() {
 test_vget();
 test_bind();
+}

@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_include_path_parse_ini() {
 $direct_ini_file = "include_path_parse_direct_dir.ini";
 $nested_ini_file = "include_path_parse_nested_dir.ini";
 $nested_dir = "ini_files";
@@ -63,3 +66,4 @@ var_dump(parse_ini_file($fail_compress_ini_file));
 // but really we're just testing what happens if "http://" is the prefix.
 $http_file = "http://".$full_direct_ini_file;
 var_dump(parse_ini_file($http_file));
+}

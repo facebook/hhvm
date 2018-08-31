@@ -17,5 +17,9 @@ class Foo {
     $obj(789);
   }
 }
+
+<<__EntryPoint>>
+function main_1927() {
 $a = Foo::bar();
 Foo::baz($a);
+}

@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_random() {
 var_dump(strlen(random_bytes(7)));
 var_dump(random_int(1, 10));
 
@@ -9,3 +12,4 @@ var_dump(random_bytes(16) === random_bytes(16));
 var_dump(
   random_int(PHP_INT_MIN, PHP_INT_MAX) === random_int(PHP_INT_MIN, PHP_INT_MAX)
 );
+}

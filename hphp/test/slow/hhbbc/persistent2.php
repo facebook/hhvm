@@ -11,4 +11,8 @@ function main($z) {
   var_dump(z());
 }
 
+
+<<__EntryPoint>>
+function main_persistent2() {
 main('Z');
+}

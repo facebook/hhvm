@@ -25,4 +25,8 @@ abstract class B extends Unimpl {
   }
 }
 
+
+<<__EntryPoint>>
+function main_func_family_011() {
 B::doit("asd");
+}

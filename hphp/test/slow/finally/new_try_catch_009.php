@@ -58,4 +58,3 @@ function blah() {
 }
 
 var_dump(blah());
-

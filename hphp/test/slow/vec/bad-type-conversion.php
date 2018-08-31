@@ -25,4 +25,8 @@ function test() {
   var_dump(HH\Asio\join($x->f()));
 }
 
+
+<<__EntryPoint>>
+function main_bad_type_conversion() {
 test();
+}

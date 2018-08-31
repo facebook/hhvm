@@ -20,6 +20,9 @@ class EncryptedSessionHandler extends SessionHandler {
   }
 }
 
+
+<<__EntryPoint>>
+function main_encrypted_session_handler() {
 ini_set('session.save_handler', 'files');
 $handler = new EncryptedSessionHandler('mykey');
 session_set_save_handler($handler, true);
@@ -27,3 +30,4 @@ session_start();
 
 $_SESSION['a'] = 'A';
 var_dump($_SESSION['a']);
+}

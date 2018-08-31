@@ -7,4 +7,8 @@ function main() {
   $fs->add(2);
 }
 
+
+<<__EntryPoint>>
+function main_immutability2() {
 main();
+}

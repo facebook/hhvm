@@ -1,5 +1,4 @@
 <?hh
-error_reporting(-1);
 function handler($errno, $errmsg) {
   if ($errno === E_RECOVERABLE_ERROR) {
     echo "E_RECOVERABLE_ERROR: $errmsg\n";
@@ -7,7 +6,6 @@ function handler($errno, $errmsg) {
     return false;
   }
 }
-set_error_handler('handler');
 type X = callable;
 newtype Y = ?callable;
 newtype A = callable;
@@ -52,4 +50,10 @@ function main() {
   d(function () { return 123; });
   echo "Done\n";
 }
+
+<<__EntryPoint>>
+function main_typedef_callable() {
+error_reporting(-1);
+set_error_handler('handler');
 main();
+}

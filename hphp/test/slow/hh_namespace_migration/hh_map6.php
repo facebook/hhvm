@@ -9,4 +9,8 @@ function main() {
   var_dump($m2->count());
 }
 
+
+<<__EntryPoint>>
+function main_hh_map6() {
 main();
+}

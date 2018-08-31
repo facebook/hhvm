@@ -19,5 +19,9 @@ function f8() {
       break;
   }
 }
+
+<<__EntryPoint>>
+function main_462() {
 foreach (f8() as $_) {
+}
 }

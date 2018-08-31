@@ -36,4 +36,8 @@ function main() {
   var_dump($z);
 }
 
+
+<<__EntryPoint>>
+function main_try_catch_call_001() {
 main();
+}

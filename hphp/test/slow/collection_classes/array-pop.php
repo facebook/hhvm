@@ -22,4 +22,8 @@ function main() {
     var_dump($x);
   }
 }
+
+<<__EntryPoint>>
+function main_array_pop() {
 main();
+}

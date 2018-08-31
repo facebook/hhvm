@@ -7,4 +7,8 @@ function addAndDump($addMe) {
   var_dump($v->immutable());
 }
 
+
+<<__EntryPoint>>
+function main_vector_add_vs_immutable() {
 addAndDump(4);
+}

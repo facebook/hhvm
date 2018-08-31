@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_filter_var_invalid_uri() {
 $urls = array(
   "http://www.facebook.com/valid",
   "http://www.facebook.com/with space",
@@ -11,3 +14,4 @@ $urls = array(
 var_dump(array_map(function($url) {
   return filter_var($url, FILTER_VALIDATE_URL);
 }, $urls));
+}

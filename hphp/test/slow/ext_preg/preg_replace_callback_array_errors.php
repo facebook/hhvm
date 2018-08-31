@@ -1,7 +1,14 @@
 <?php
+function f() {
+  static $count = 1;
+  throw new Exception($count);
+}
+
 
 // From PHP 7 testing sources, with minor modification
 
+<<__EntryPoint>>
+function main_preg_replace_callback_array_errors() {
 var_dump(preg_replace_callback_array());
 var_dump(preg_replace_callback_array(1));
 var_dump(preg_replace_callback_array(1,2));
@@ -25,10 +32,6 @@ var_dump(preg_replace_callback_array(
   array("xx" => "notValid1", "yy" => "notValid2"), $a, -1, $b)
 );
 var_dump($b);
-function f() {
-  static $count = 1;
-  throw new Exception($count);
-}
 var_dump(preg_replace_callback_array(array('/\w' => 'f'), 'z'));
 try {
   var_dump(
@@ -44,3 +47,4 @@ try {
   var_dump($e->getMessage());
 }
 echo "Done\n";
+}

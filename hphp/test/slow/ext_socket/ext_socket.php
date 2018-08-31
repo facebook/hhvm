@@ -50,8 +50,11 @@ function get_client_server() {
   return array($client, $s);
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 
+<<__EntryPoint>>
+function main_ext_socket() {
 $s = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 var_dump($s);
 
@@ -130,3 +133,4 @@ var_dump($fsock !== false);
 var_dump($fsock != $fsock2);
 var_dump($errnum);
 var_dump($errstr);
+}

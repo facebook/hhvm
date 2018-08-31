@@ -14,5 +14,9 @@ function main() {
   foreach ($heh as $v) { var_dump($v); }
 }
 
+
+<<__EntryPoint>>
+function main_iter_006() {
 main();
 echo "done\n";
+}

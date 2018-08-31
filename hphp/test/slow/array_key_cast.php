@@ -53,5 +53,9 @@ function make_tests($func) {
   return __hhvm_intrinsics\launder_value($tests);
 }
 
+
+<<__EntryPoint>>
+function main_array_key_cast() {
 run_tests(make_tests('func_maker1'));
 run_tests(make_tests('func_maker2'));
+}

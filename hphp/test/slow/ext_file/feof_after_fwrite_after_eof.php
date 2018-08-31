@@ -25,4 +25,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_feof_after_fwrite_after_eof() {
 main();
+}

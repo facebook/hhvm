@@ -25,6 +25,9 @@ class C5 {
 }
 class D5 extends C5 {
 }
+
+<<__EntryPoint>>
+function main_767() {
 $c = new C4;
 $d = new D4;
 $c(0, 1);
@@ -44,3 +47,4 @@ $c();
  $d();
 $c();
  $d();
+}

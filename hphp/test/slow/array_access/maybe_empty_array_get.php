@@ -28,7 +28,11 @@ class Gronk {
   }
 }
 
+
+<<__EntryPoint>>
+function main_maybe_empty_array_get() {
 $y = new Gronk;
 
 $break = false;
 for ($i = 0; $i < 3; ++$i) $y->gronkify();
+}

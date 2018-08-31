@@ -24,5 +24,9 @@ async function bar() {
   echo "done\n";
 }
 
+
+<<__EntryPoint>>
+function main_genva_refcnt() {
 \HH\Asio\join(bar());
 echo "exit\n";
+}

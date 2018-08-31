@@ -25,4 +25,8 @@ function main() {
   monomorphic_dynamic::get();
 }
 
+
+<<__EntryPoint>>
+function main_static_props_011() {
 main();
+}

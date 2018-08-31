@@ -9,4 +9,8 @@ class X {
   static function foo() { return new X; }
 }
 
+
+<<__EntryPoint>>
+function main_refcount_bug() {
 var_dump(X::test());
+}

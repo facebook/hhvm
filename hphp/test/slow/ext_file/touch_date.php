@@ -4,6 +4,9 @@ function inRange($x, $a, $b) {
   return ($x >= $a && $x <= $b) ? "YES" : "NO";
 }
 
+
+<<__EntryPoint>>
+function main_touch_date() {
 $file = tempnam(sys_get_temp_dir(), 'touch_date');
 
 // No args
@@ -28,3 +31,4 @@ print($fileInfo->getMTime()."\n");
 print($fileInfo->getATime()."\n");
 
 @unlink($file);
+}

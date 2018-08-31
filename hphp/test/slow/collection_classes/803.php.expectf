@@ -10,7 +10,7 @@ array(0) {
 array(0) {
 }
 
-Warning: Set::toArray() for a set containing both int(123) and string('123') in %s/test/slow/collection_classes/803.php on line 18
+Warning: Set::toArray() for a set containing both int(123) and string('123') in %s/test/slow/collection_classes/803.php on line 21
 array(2) {
   [123]=>
   string(3) "123"

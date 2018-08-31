@@ -43,7 +43,6 @@ function testExtractFlag($q, $flagName, $flagValue) {
 
   echo "\n";
 }
-testExtractFlags();
 
 
 function testCloneGivesValidCopy() {
@@ -55,4 +54,9 @@ function testCloneGivesValidCopy() {
   echo "Top rank (even after killing the top in a clone) is: ";
   echo $q->top() . "\n";
 }
+
+<<__EntryPoint>>
+function main_spl_priority_queue_clone() {
+testExtractFlags();
 testCloneGivesValidCopy();
+}

@@ -29,4 +29,8 @@ function main() {
   var_dump(is_object(new stdclass));
 }
 
+
+<<__EntryPoint>>
+function main_is_object() {
 main();
+}

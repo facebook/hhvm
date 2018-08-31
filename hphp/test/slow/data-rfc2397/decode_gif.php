@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_decode_gif() {
 $streams = array(
   'stream_rfc2397_003.gif' =>
     'data://image/gif;base64,R0lGODdhMAAwAPAAAAAAAP///ywAAAAAMAAw
@@ -14,4 +17,5 @@ $streams = array(
 foreach($streams as $original => $stream) {
   var_dump(file_get_contents(dirname(__FILE__) . '/' . $original) ==
            file_get_contents($stream));
+}
 }

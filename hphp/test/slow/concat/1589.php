@@ -47,4 +47,8 @@ function bar() {
   print " hello $b->b\n";
   echo " hello $b->a $b->b $b->a $b->b";
 }
+
+<<__EntryPoint>>
+function main_1589() {
 bar();
+}

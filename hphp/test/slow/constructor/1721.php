@@ -15,7 +15,6 @@ class B extends A {
     $this->A();
   }
 }
-$obj = new B();
 class A2 {
   public function __construct() {
     echo "In A2::__construct\n";
@@ -31,7 +30,6 @@ class B2 extends A2 {
     parent::__construct();
   }
 }
-$obj = new B2();
 class C {
   public function C() {
 }
@@ -42,8 +40,6 @@ class D extends C {
     C::__construct();
   }
 }
-$obj = new D;
-$obj->c();
 class E {
   public function E() {
     echo "In E\n";
@@ -53,5 +49,13 @@ class E {
     E::__construct();
   }
 }
+
+<<__EntryPoint>>
+function main_1721() {
+$obj = new B();
+$obj = new B2();
+$obj = new D;
+$obj->c();
 $obj = new E;
 $obj->foo();
+}

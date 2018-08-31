@@ -89,8 +89,6 @@ function test() {
   }
   t17();
 }
-test();
-z();
 function __autoload($name) {
   var_dump('autoload ' . $name);
   switch ($name) {
@@ -182,4 +180,10 @@ function __autoload($name) {
       }
       break;
   }
+}
+
+<<__EntryPoint>>
+function main_1221() {
+test();
+z();
 }

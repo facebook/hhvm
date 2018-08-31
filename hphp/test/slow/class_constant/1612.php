@@ -9,4 +9,8 @@ class X {
     var_dump(__METHOD__, $this);
   }
 }
+
+<<__EntryPoint>>
+function main_1612() {
 X::foo();
+}

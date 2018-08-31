@@ -22,4 +22,8 @@ function f() {
   var_dump($pair->containsKey(1));
   var_dump($pair->containsKey(2));
 }
+
+<<__EntryPoint>>
+function main_826() {
 f();
+}

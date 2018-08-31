@@ -14,6 +14,9 @@ class c extends stdClass {
   function nfactory(): ?self { return new c; }
   function pfactory(): parent { return new stdClass; }
 }
+
+<<__EntryPoint>>
+function main_reflection_type_detailed_explicit_php7() {
 $closure = function (Test $a): Test { return $a; };
 $nclosure = function (?Test $a): ?Test { return $a; };
 echo "*** functions\n";
@@ -76,4 +79,5 @@ foreach ([
     var_dump($ra->isBuiltin());
     var_dump((string)$ra);
   }
+}
 }

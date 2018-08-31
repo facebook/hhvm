@@ -70,5 +70,9 @@ function blah() {
   return 666;
 }
 
-var_dump(blah());
 
+
+<<__EntryPoint>>
+function main_new_try_catch_014() {
+var_dump(blah());
+}

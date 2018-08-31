@@ -48,4 +48,8 @@ function main() {
   reflect();
 }
 
+
+<<__EntryPoint>>
+function main_abstract_const() {
 main();
+}

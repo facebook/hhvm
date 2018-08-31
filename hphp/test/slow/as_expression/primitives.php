@@ -15,8 +15,12 @@ function f(mixed $x) {
 }
 
 
+
+<<__EntryPoint>>
+function main_primitives() {
 $arr = [1, 2, 3, 3.14, Vector {}, "hiii"];
 
 foreach ($arr as $e) {
   f($e);
+}
 }

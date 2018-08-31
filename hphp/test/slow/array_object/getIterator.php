@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_get_iterator() {
 $array = array('1' => 'one',
                '2' => 'two',
                '3' => 'three');
@@ -12,4 +15,5 @@ while($iterator->valid()) {
     echo $iterator->key() . ' => ' . $iterator->current() . "\n";
 
     $iterator->next();
+}
 }

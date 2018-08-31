@@ -6,11 +6,6 @@ class X {
     $a++;
   }
 }
-;
-if (0) {
- class X{
-}
- }
 function f() {
 }
 function test() {
@@ -20,4 +15,13 @@ function test() {
   $x->y(0,$x->x);
   var_dump($x);
 }
+
+<<__EntryPoint>>
+function main_688() {
+;
+if (0) {
+ class X{
+}
+ }
 test();
+}

@@ -19,7 +19,11 @@ class Child extends Base{
     parent::foo($obj);
   }
 }
+
+<<__EntryPoint>>
+function main_get_object_vars() {
 $child_obj = new Child();
 $base_obj = new Base();
 $child_obj->foo($base_obj);
 $base_obj->foo($child_obj);
+}

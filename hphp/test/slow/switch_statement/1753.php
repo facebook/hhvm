@@ -25,6 +25,9 @@ function test() {
  break;
   }
 }
+
+<<__EntryPoint>>
+function main_1753() {
 $a = 2;
 switch ($a) {
   case ++$a: var_dump('ok');
@@ -49,3 +52,4 @@ switch ($$a) {
  break;
 }
 test();
+}

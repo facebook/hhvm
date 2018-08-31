@@ -33,6 +33,10 @@ class X {
   }
 }
 
+
+<<__EntryPoint>>
+function main_uninit_leak() {
 $x = new X();
 $x->f();
 echo "done\n";
+}

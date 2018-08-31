@@ -30,4 +30,8 @@ function main() {
   } catch (Exception $e) { print $e->getMessage()."\n"; }
   var_dump(\HH\Asio\join(test4()));
 }
+
+<<__EntryPoint>>
+function main_genva() {
 main();
+}

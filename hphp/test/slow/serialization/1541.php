@@ -50,4 +50,8 @@ function t() {
   $us = unserialize($s);
   var_dump($us);
 }
+
+<<__EntryPoint>>
+function main_1541() {
 t();
+}

@@ -29,4 +29,8 @@ function main() {
   var_dump($new_arr);
   echo "Done\n";
 }
+
+<<__EntryPoint>>
+function main_802() {
 main();
+}

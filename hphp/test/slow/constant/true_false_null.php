@@ -8,6 +8,10 @@ use const NOT_REALLY_TRUE as true;
 use const FAKE_FALSE as false;
 use const ANTI_NULL as null;
 
+
+<<__EntryPoint>>
+function main_true_false_null() {
 var_dump(true);
 var_dump(false);
 var_dump(null);
+}

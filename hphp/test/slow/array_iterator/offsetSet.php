@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_offset_set() {
 $it = new ArrayIterator();
 $it[] = "foo";
 $it[] = "bar";
@@ -10,3 +13,4 @@ foreach($it as $value) {
 }
 
 var_dump(sizeof($it));
+}

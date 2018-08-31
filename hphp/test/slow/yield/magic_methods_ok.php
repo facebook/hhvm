@@ -19,7 +19,11 @@ class Foo {
   }
 }
 
+
+<<__EntryPoint>>
+function main_magic_methods_ok() {
 var_dump(iterator_to_array(Foo::bar('a', 'b', 'c')));
 $foo = new Foo();
 var_dump(iterator_to_array($foo('d', 'e', 'f')));
 var_dump(iterator_to_array($foo->bar('d', 'e', 'f')));
+}

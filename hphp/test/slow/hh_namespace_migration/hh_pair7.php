@@ -29,4 +29,3 @@ namespace {
   Test\foo();
   bar();
 }
-

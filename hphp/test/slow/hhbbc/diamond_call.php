@@ -20,6 +20,9 @@ function diamond(something $state) {
   echo "done\n";
 }
 
+
+<<__EntryPoint>>
+function main_diamond_call() {
 diamond(new bsd);
 diamond(new bsd);
 diamond(new bsd);
@@ -44,3 +47,4 @@ diamond(new asd);
 diamond(new asd);
 diamond(new asd);
 for ($i = 0; $i < 1000; ++$i) { diamond(new asd); }
+}

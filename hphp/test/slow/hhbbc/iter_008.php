@@ -22,4 +22,8 @@ class C {
 function main() {
   var_dump(C::x("foobarkjh1k2j3nn"));
 }
+
+<<__EntryPoint>>
+function main_iter_008() {
 main();
+}

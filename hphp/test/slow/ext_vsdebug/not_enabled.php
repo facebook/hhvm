@@ -1,4 +1,5 @@
 <?hh
+
 require(__DIR__ . '/common.inc');
 
 /*

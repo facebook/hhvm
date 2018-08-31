@@ -24,6 +24,9 @@ class SetTest {
     $this->_vals[$name] = $value;
   }
 }
+
+<<__EntryPoint>>
+function main_43() {
 $o = new obj;
 $q = list($o['one'], $o['two'], list($o['three'])) =  array('eins', 'zwei', array('drei'));
 var_dump($o);
@@ -34,3 +37,4 @@ var_dump($x);
 $qq = list($x->one, $x->two, list($x->three)) = $q;
 var_dump($x);
 var_dump($qq);
+}

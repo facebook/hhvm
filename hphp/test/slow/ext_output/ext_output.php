@@ -14,8 +14,11 @@ function VS($x, $y) {
   }
 }
 
+
 //////////////////////////////////////////////////////////////////////
 
+<<__EntryPoint>>
+function main_ext_output() {
 ob_start();
 ob_start("mytolower");
 echo "TEst";
@@ -89,3 +92,4 @@ ob_end_clean();
 VS($handlers, array("default output handler", "mytolower"));
 
 echo "\nok\n";
+}

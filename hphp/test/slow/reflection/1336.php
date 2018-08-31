@@ -34,5 +34,9 @@ class D extends C {
  function bar() {
 }
  }
+
+<<__EntryPoint>>
+function main_1336() {
 var_dump(get_class_methods('B'));
 var_dump(get_class_methods('C'));
+}

@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_follow_symlink() {
 $p = dirname(__FILE__) . '/recursivedirectoryiterator_followsymlink_test/';
 
 mkdir($p . "test/dir1", 0777, true);
@@ -47,3 +50,4 @@ rmdir($p . "test/dir2");
 rmdir($p . "test/dir1");
 rmdir($p . "test");
 rmdir($p);
+}

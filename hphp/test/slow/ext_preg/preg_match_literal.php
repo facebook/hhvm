@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_preg_match_literal() {
 $subject = "Quick brown fox";
 var_dump(preg_match("#^Quick#", $subject));
 var_dump(preg_match("/fox\$/", $subject));
@@ -85,3 +88,4 @@ var_dump(preg_match('/^def/', 'abcdef', $matches, PREG_OFFSET_CAPTURE, 3));
 var_dump($matches);
 var_dump(preg_match('/def$/', 'abcdef', $matches, PREG_OFFSET_CAPTURE, 3));
 var_dump($matches);
+}

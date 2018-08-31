@@ -171,4 +171,8 @@ function main() {
   */
 }
 
+
+<<__EntryPoint>>
+function main_side_effects() {
 main();
+}

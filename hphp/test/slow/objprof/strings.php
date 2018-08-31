@@ -27,9 +27,6 @@ function getStr(int $len): string {
   }
   return $ret;
 }
-
-// TEST: simple props
-$shared = getStr(4);
 class SimpleProps {
   private string $prop1 = "one";
   protected int $prop2 = 2;
@@ -39,6 +36,15 @@ class SimpleProps {
   public string $prop6a;
   public string $prop6b;
 }
+
+// TEST: dynamic props
+class DynamicClass {}
+
+
+// TEST: simple props
+<<__EntryPoint>>
+function main_strings() {
+$shared = getStr(4);
 
 $myClass = new SimpleProps();
 $myClass->prop4 = getStr(3);
@@ -60,9 +66,6 @@ echo get_srefs('one', $objs) === 1 &&
   ? "(GOOD) Agg (props) works\n"
   : "(BAD) Agg (props) failed: ".var_export($objs, true)."\n";
 $objs = null;
-
-// TEST: dynamic props
-class DynamicClass {}
 $var = 'mykey1';
 $var2 = getStr(1);
 $myClass = new DynamicClass();
@@ -115,3 +118,4 @@ echo get_path('lol', $objs) === "HH\\Pair" &&
 $objs = null;
 
 echo "(GOOD) Got here without crashing\n";
+}

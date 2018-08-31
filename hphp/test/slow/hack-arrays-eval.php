@@ -83,8 +83,6 @@ function test_create_function() {
   var_dump($f8($d));
   var_dump($f9($k));
 }
-
-$array = [];
 function test_func($v = $array[] = vec[1, 2],
                    $d = $array[] = dict[100 => 'a', 200 => 'b'],
                    $k = $array[] = keyset['a', 'b']) {}
@@ -97,7 +95,13 @@ function test_default_value() {
   var_dump($r->getParameters()[2]->info['default']);
 }
 
+
+<<__EntryPoint>>
+function main_hack_arrays_eval() {
+$array = [];
+
 test_eval();
 test_assert();
 test_create_function();
 test_default_value();
+}

@@ -1,9 +1,12 @@
 <?php
 
+
 /* This is test/zend/bad/ext/spl/tests/iterator_042.php, except that it doesn't
  * test some systemlib + typehint violation + set_error_handler interactions
  * that should be fixed separately */
 
+<<__EntryPoint>>
+function main_append_iterator() {
 $it = new AppendIterator;
 
 $it->append(new ArrayIterator(array(1)));
@@ -23,4 +26,5 @@ foreach($it as $k => $v)
   var_dump($it->getIteratorIndex());
   var_dump($k);
   var_dump($v);
+}
 }

@@ -22,6 +22,10 @@ function keyset_foo($f, $k) {
   return $f($d[$k]);
 }
 
+
+<<__EntryPoint>>
+function main_crash_16258693() {
 var_dump(vec_foo('func1', 1));
 var_dump(dict_foo('func1', 2));
 var_dump(keyset_foo('func1', 2));
+}

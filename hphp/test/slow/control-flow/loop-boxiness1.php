@@ -13,7 +13,11 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_loop_boxiness1() {
 main();
 main();
 main();
 echo "Done\n";
+}

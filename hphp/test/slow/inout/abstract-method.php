@@ -16,4 +16,8 @@ class D extends B {
   public async function foo(int &$x): Awaitable<void> {}
 }
 
+
+<<__EntryPoint>>
+function main_abstract_method() {
 echo "Done.\n";
+}

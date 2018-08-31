@@ -35,4 +35,8 @@ function main() {
   echo $f.$ret."\n";
 }
 
+
+<<__EntryPoint>>
+function main_shadow() {
 main();
+}

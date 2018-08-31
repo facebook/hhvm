@@ -5,4 +5,8 @@ function foo() {
  echo 'Foo';
  a: echo 'Bar';
 }
- foo();
+
+ <<__EntryPoint>>
+function main_1910() {
+foo();
+}

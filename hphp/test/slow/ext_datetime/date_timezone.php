@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_date_timezone() {
 date_default_timezone_set("America/Los_Angeles");
 var_dump(date_default_timezone_get());
 
@@ -57,3 +60,4 @@ var_dump(timezone_name_get($tz));
 var_dump((bool)timezone_version_get());
 
 var_dump(timezone_open('sdf'));
+}

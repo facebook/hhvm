@@ -4,6 +4,7 @@ function foo () {
         echo "3";
    }
 }
+?>
+
 
 foo();
-?>

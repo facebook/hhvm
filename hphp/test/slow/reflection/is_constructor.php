@@ -38,4 +38,8 @@ function main() {
   var_dump($out);
 }
 
+
+<<__EntryPoint>>
+function main_is_constructor() {
 main();
+}

@@ -20,7 +20,10 @@ final class X {
       (int)$val
     );
   }
-};
+}
+<<__EntryPoint>>
+function main_unreachable_inlining() {
+;
 
 for ($i = 0; $i < 10; $i++) {
   try {
@@ -29,3 +32,4 @@ for ($i = 0; $i < 10; $i++) {
   }
 }
 var_dump('done');
+}

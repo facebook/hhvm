@@ -10,5 +10,9 @@ class C {
       private $y=2;
       use T;
 }
+
+<<__EntryPoint>>
+function main_2104() {
 $o = new C;
 $o->dump_vars();
+}

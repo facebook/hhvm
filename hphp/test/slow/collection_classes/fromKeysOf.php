@@ -6,8 +6,7 @@ function show_elems($name, $fs) {
   foreach ($fs as $e) {
     var_dump($e);
   }
-};
-
+}
 function set_from_keys($containers) {
   echo "Set::fromKeysOf...\n";
   foreach ($containers as $name => $c) {
@@ -47,4 +46,9 @@ function main() {
   set_from_keys($containers);
   vector_from_keys($containers);
 }
+
+<<__EntryPoint>>
+function main_from_keys_of() {
+;
 main();
+}

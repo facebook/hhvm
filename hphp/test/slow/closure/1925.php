@@ -10,5 +10,9 @@ class Foo {
     return $a;
   }
 }
+
+<<__EntryPoint>>
+function main_1925() {
 $a = Foo::bar();
 $a(456);
+}

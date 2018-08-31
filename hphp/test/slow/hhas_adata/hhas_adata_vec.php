@@ -31,6 +31,10 @@ function provide_hhas_adata_double_quoted() {
   );
 }
 
+
+<<__EntryPoint>>
+function main_hhas_adata_vec() {
 var_dump(provide_constant_vec() === provide_hhas_adata_nowdoc());
 var_dump(provide_constant_vec() === provide_hhas_adata_single_quoted());
 var_dump(provide_constant_vec() === provide_hhas_adata_double_quoted());
+}

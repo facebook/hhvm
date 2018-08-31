@@ -6,6 +6,10 @@ function test($magick) {
   }
 }
 
+
+
+<<__EntryPoint>>
+function main_magick_foreach() {
 $img = array(
   'magick:logo',
   __DIR__.'/facebook.png',
@@ -30,4 +34,4 @@ test($magick);
 $magick->setIteratorIndex(4);
 $magick->removeImage();
 test($magick);
-
+}

@@ -22,4 +22,8 @@ async function foo($a) {
   } while ($next < 2000);
 }
 
+
+<<__EntryPoint>>
+function main_lambda5() {
 HH\Asio\join(foo(42));
+}

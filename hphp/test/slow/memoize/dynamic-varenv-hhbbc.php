@@ -5,5 +5,9 @@
   echo "foo called\n";
   return $x;
 }
+
+<<__EntryPoint>>
+function main_dynamic_varenv_hhbbc() {
 var_dump(foo(123));
 var_dump(foo(123));
+}

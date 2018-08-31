@@ -6,5 +6,9 @@ class test {
     var_dump($this->blah);
   }
 }
+
+<<__EntryPoint>>
+function main_785() {
 $t = new test;
 $t->foo();
+}

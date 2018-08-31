@@ -25,4 +25,8 @@ function main() {
   var_dump(strlen($keyset_implode) === strlen($arr_implode));
   var_dump(keyset(explode(', ', $keyset_implode)) == $k);
 }
+
+<<__EntryPoint>>
+function main_implode_hack_array() {
 main();
+}

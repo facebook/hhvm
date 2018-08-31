@@ -7,7 +7,6 @@ function y() {
     throw new exception('z');
   }
 }
-set_error_handler('y');
 
 class ZZ {
   private $asd;
@@ -31,4 +30,9 @@ class ZZ {
   }
 }
 
+<<__EntryPoint>>
+function main_override_magic2() {
+set_error_handler('y');
+
 ZZ::x(new ZZ);
+}

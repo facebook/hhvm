@@ -8,4 +8,8 @@ abstract class bar {
 }
 class foo extends bar {
 }
+
+<<__EntryPoint>>
+function main_1456() {
 new foo;
+}

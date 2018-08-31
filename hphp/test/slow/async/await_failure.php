@@ -29,5 +29,9 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_await_failure() {
 main();
 echo "done\n";
+}

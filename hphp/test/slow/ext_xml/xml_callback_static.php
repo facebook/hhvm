@@ -12,6 +12,9 @@ class foo {
     }
 }
 
+
+<<__EntryPoint>>
+function main_xml_callback_static() {
 var_dump( is_callable( array( 'foo', 'elementOpen' ) ) );
 var_dump( is_callable( 'foo::elementClose' ) );
 
@@ -27,3 +30,4 @@ if ( 0 === xml_parse( $parser, "<root><a><b></b></a></root>" ) ) {
 }
 
 xml_parser_free( $parser );
+}

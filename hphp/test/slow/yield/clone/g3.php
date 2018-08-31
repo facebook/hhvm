@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_g3() {
 $foo = function ($a1, &$a2) {
   $a1 += 10;
   $a2 += 100;
@@ -42,3 +45,4 @@ foreach ($x as $v) {
 }
 echo "--------\n";
 var_dump($a1, $a2);
+}

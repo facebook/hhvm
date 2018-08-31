@@ -95,6 +95,9 @@ function test_indirect($c, $v) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_convert() {
 $values = vec[
   null,
   false,
@@ -157,4 +160,5 @@ $dvvalues = vec[
 $dvvalues = __hhvm_intrinsics\launder_value($dvvalues);
 foreach ($dvvalues as $v) {
   test_array($v);
+}
 }

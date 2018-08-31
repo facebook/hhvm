@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_curl_files() {
 $files = Map {
   "file://" . __FILE__ => null,
   "file://" . __FILE__ . ".expectf" => null,
@@ -14,3 +17,4 @@ HH\Asio\join(HH\Asio\m($handles))->mapWithKey(
     var_dump($contents === $actual);
   }
 );
+}

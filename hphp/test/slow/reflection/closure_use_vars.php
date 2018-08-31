@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_closure_use_vars() {
 $refVariable = false;
 $refName = 'refVariable';
 $callback = function() use (&$refVariable) { var_dump($refVariable); };
@@ -14,3 +17,4 @@ $callback();
 $refVariable = 'foo';
 var_dump($staticVariables[$refName]);
 $callback();
+}

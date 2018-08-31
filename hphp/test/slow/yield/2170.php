@@ -13,6 +13,10 @@ function foo($a) {
   }
   yield $x;
 }
+
+<<__EntryPoint>>
+function main_2170() {
 foreach(foo(3) as $x) {
  var_dump($x);
  }
+}

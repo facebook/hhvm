@@ -26,6 +26,9 @@ function test4() { return (new B)->test2(new A); }
 function test5() { return (new C)->test1(new A); }
 function test6() { return (new D)->test1(new A); }
 
+
+<<__EntryPoint>>
+function main_inaccessible_folding() {
 $tests = vec[
   'test1',
   'test2',
@@ -43,4 +46,5 @@ if ($count < count($tests)) {
   apc_store('count', $count);
   echo "====================== $test =======================\n";
   var_dump($test());
+}
 }

@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_lambda_in_nested_anon_class() {
 $a = new class {
   function func() {
     $b = new class {
@@ -15,3 +18,4 @@ $a = new class {
   }
 };
 $a->func();
+}

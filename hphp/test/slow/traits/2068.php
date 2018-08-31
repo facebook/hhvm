@@ -9,7 +9,11 @@ trait T {
 class F {
  use T;
  }
+
+
+<<__EntryPoint>>
+function main_2068() {
 foreach (F::fruit() as $fruit) {
  var_dump($fruit);
 }
-
+}

@@ -18,5 +18,9 @@ function test($a) {
   $a[1] = 5;
   var_dump(current(&$a));
 }
+
+<<__EntryPoint>>
+function main_235() {
 test(array(1));
 test(array(1,2,3,4,5,6,7,8,9));
+}

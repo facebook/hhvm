@@ -1,6 +1,9 @@
 <?php
 
+
 // method bits
+<<__EntryPoint>>
+function main_reflection_get_modifiers() {
 $public = 256;
 $private = 1024;
 $protected = 512;
@@ -28,4 +31,5 @@ $args = array(
 
 foreach ($args as $arg) {
   var_dump(Reflection::getModifierNames($arg));
+}
 }

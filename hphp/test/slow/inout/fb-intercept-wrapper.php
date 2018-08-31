@@ -32,4 +32,8 @@ function main() {
   meep(inout $a, $b, inout $c);
 }
 
+
+<<__EntryPoint>>
+function main_fb_intercept_wrapper() {
 main();
+}

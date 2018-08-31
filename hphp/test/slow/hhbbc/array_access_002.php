@@ -15,4 +15,8 @@ function foo() {
   var_dump(is_string($y));
 }
 
+
+<<__EntryPoint>>
+function main_array_access_002() {
 foo();
+}

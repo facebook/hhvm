@@ -12,6 +12,9 @@ class Foo {
   }
 }
 
+
+<<__EntryPoint>>
+function main_param_tostring_hh() {
 $method = (new ReflectionClass('Foo'))->getMethod('bar');
 
 var_dump(
@@ -22,3 +25,4 @@ var_dump(
     $method->getParameters()
   )
 );
+}

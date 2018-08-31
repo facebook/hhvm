@@ -16,5 +16,9 @@ function foo(int $i) {
   return vec[$a, $b];
 }
 
+
+<<__EntryPoint>>
+function main_cget_quiet_vec() {
 var_dump(foo(10));
 var_dump(foo(0));
+}

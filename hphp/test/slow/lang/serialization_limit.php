@@ -15,4 +15,8 @@ function test() {
   print_r($a, true);
 }
 
+
+<<__EntryPoint>>
+function main_serialization_limit() {
 test();
+}

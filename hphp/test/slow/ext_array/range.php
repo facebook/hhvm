@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_range() {
 $ret = range(0, 12);
 var_dump(count($ret));
 var_dump($ret[0]);
@@ -39,3 +42,4 @@ var_dump(count($ret) >= 1024);
 $ret = range('-9223372036854775298.0', '-9223372036854775294.0');
 var_dump(gettype($ret));
 var_dump(count($ret) >= 1024);
+}

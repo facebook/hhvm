@@ -6,4 +6,8 @@ function f() {
   var_dump($f());
 }
 
+
+<<__EntryPoint>>
+function main_as_expression_in_closure() {
 f();
+}

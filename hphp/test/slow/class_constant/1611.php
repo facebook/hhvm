@@ -13,4 +13,8 @@ class ABCD extends ATB {
     return array(      'a_ids'   => array(        ATB::PARAM_A => true,        ATB::PARAM_C   => array(          array('tcks', 'none'),          array('tcks', 'ids'),          ),        ATB::PARAM_B     =>          'aaaa',      ),      'user_id'   => array(        ATB::PARAM_A => true,        ATB::PARAM_C   => array(          array('tcks', 'none'),          array('tcks', 'id'),          ),        ATB::PARAM_B     =>          'bbbb',      ),    );
   }
 }
+
+<<__EntryPoint>>
+function main_1611() {
 var_dump(ABCD::foo());
+}

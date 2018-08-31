@@ -14,4 +14,8 @@ function main() {
   $local = 5;
   var_dump($o->b);
 }
+
+<<__EntryPoint>>
+function main_cget_ref() {
 main();
+}

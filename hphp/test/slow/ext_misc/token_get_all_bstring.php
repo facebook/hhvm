@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_token_get_all_bstring() {
 $code = '<?php b"$foo";';
 foreach (token_get_all($code) as $token) {
     if (is_string($token)) {
@@ -7,4 +10,5 @@ foreach (token_get_all($code) as $token) {
     } else {
         echo token_name($token[0]) . ": ", $token[1], "\n";
     }
+}
 }

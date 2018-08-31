@@ -10,4 +10,8 @@ Function test_inout() {
   ECHO $x;
 }
 
+
+<<__EntryPoint>>
+function main_hack_inout() {
 test_inout();
+}

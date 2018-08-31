@@ -23,6 +23,9 @@ class rii extends RecursiveIteratorIterator
   }
 }
 
+
+<<__EntryPoint>>
+function main_recursive_iterator_iterator_begin_end_iteration() {
 $ar = array(1, 2, array(31));
 
 $it = new rii(new ArrayObject($ar, 0, "RecursiveArrayIterator"));
@@ -36,3 +39,4 @@ while($it->valid()) // call EndIteration on last call
 
 $it->valid(); // Don't call EndIteration
 $it->valid(); // Don't
+}

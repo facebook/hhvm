@@ -13,4 +13,8 @@ function g() {
   f();
   var_dump('end');
 }
+
+<<__EntryPoint>>
+function main_1844() {
 g();
+}

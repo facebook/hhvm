@@ -48,4 +48,8 @@ function main() {
     }
   }
 }
+
+<<__EntryPoint>>
+function main_concat() {
 main();
+}

@@ -37,4 +37,8 @@ function blah() {
   echo "after label\n";
 }
 
+
+<<__EntryPoint>>
+function main_finally_goto_002() {
 blah();
+}

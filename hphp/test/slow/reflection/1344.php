@@ -13,4 +13,8 @@ function test() {
     var_dump($e->getMessage());
   }
 }
+
+<<__EntryPoint>>
+function main_1344() {
 test();
+}

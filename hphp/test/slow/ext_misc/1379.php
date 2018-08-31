@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1379() {
 var_dump(token_name(396));
 $str = "<?php
 
@@ -11,4 +14,5 @@ foreach ($arr as $t) {
   if ($t[0] == 396) {
     var_dump($t[1]);
   }
+}
 }

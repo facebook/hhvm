@@ -37,4 +37,8 @@ function test() {
     test_swap_while_iterating($a);
   }
 }
+
+<<__EntryPoint>>
+function main_strong_iterators_no_hack_array() {
 test();
+}

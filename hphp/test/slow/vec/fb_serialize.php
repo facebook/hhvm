@@ -21,6 +21,9 @@ function serde($v) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_fb_serialize() {
 serde(vec[]);
 serde(vec[1, 2, 3]);
 serde(vec['a', 'b', 'c']);
@@ -36,3 +39,4 @@ serde(['a' => 1,
        'c' => vec[1, 2, 3],
        'd' => vec['a', 'b', 'c'],
        'e' => vec[]]);
+}

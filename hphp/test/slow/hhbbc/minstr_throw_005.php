@@ -17,4 +17,8 @@ function foo() {
     var_dump($x);
   }
 }
+
+<<__EntryPoint>>
+function main_minstr_throw_005() {
 foo();
+}

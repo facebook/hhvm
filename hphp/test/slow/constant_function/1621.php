@@ -15,5 +15,9 @@ class JavaScriptPacker {
   }
   const JSFUNCTION_encode10 = 'function($charCode) { return $charCode; } ';
 }
+
+<<__EntryPoint>>
+function main_1621() {
 $obj = new JavaScriptPacker;
 $obj->foo();
+}

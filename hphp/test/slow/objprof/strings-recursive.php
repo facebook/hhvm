@@ -41,4 +41,8 @@ function main(): void {
   echo "---- the end ----\n";
 }
 
+
+<<__EntryPoint>>
+function main_strings_recursive() {
 main();
+}

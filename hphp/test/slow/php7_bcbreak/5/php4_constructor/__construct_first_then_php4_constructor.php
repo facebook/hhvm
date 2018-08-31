@@ -12,5 +12,6 @@ class Filter {
   }
 }
 
+
 $f = new Filter();
 $f->filter(3);

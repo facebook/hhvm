@@ -2,6 +2,9 @@
 
 function foo() { }
 
+
+<<__EntryPoint>>
+function main_readline_completion_function() {
 $data = array(
   'foo',
   'strtolower',
@@ -12,4 +15,5 @@ $data = array(
 
 foreach ($data as $callback) {
   readline_completion_function($callback);
+}
 }

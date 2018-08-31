@@ -11,4 +11,8 @@ function main() {
   $x = new Something(); // should infer the constructor returns Obj=another
 }
 
+
+<<__EntryPoint>>
+function main_abstract_ctor() {
 main();
+}

@@ -18,4 +18,8 @@ function foo() {
   lol($x);
 }
 
+
+<<__EntryPoint>>
+function main_dce_001() {
 foo();
+}

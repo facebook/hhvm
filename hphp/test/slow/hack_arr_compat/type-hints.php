@@ -345,4 +345,8 @@ function test() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_type_hints() {
 test();
+}

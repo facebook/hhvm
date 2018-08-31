@@ -17,7 +17,11 @@ function h1(&$arr, $i) {
   }
   end(&$arr);
 }
+
+<<__EntryPoint>>
+function main_490() {
 $arr = array('a','b','c');
 foreach (h1(&$arr, 10) as $_) {
 }
 var_dump($arr);
+}

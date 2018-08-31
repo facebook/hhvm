@@ -16,4 +16,8 @@ function prof($a, $b, $args) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_profile() {
 main();
+}

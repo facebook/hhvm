@@ -1,5 +1,12 @@
 <?hh
 
+function foo(MyVector $a) {
+  var_dump($a);
+}
+
+
+<<__EntryPoint>>
+function main_autoload_alias() {
 $base = dirname(__FILE__).'/';
 $map = array(
   'type'    => array('myvector' => 'autoload_alias.inc'),
@@ -8,8 +15,5 @@ $map = array(
 });
 \HH\autoload_set_paths($map, $base);
 
-function foo(MyVector $a) {
-  var_dump($a);
-}
-
 foo(Vector { });
+}

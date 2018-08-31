@@ -9,4 +9,8 @@ function h6() {
   var_dump(current($x));
   var_dump(current($y));
 }
+
+<<__EntryPoint>>
+function main_255() {
 h6();
+}

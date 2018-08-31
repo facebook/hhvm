@@ -42,4 +42,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_user_filter_oncreate() {
 main();
+}

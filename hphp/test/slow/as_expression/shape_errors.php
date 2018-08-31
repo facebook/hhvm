@@ -34,6 +34,9 @@ function test($arr, $f) {
   echo "\n";
 }
 
+
+<<__EntryPoint>>
+function main_shape_errors() {
 $arr = vec[
   shape('hi' => 'wow'),
   shape('hi' => 1, 'wow' => 2),
@@ -44,3 +47,4 @@ $arr = vec[
 test($arr, fun('f'));
 test($arr, fun('g'));
 test($arr, fun('h'));
+}

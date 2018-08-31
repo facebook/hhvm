@@ -13,4 +13,8 @@ function main() {
   array_walk_recursive($arr, 'hello_my_name_is_mwang');
 }
 
+
+<<__EntryPoint>>
+function main_fcall_helper_reentry() {
 main();
+}

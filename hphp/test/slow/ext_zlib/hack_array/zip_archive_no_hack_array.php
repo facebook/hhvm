@@ -17,6 +17,9 @@ function stat_targets(ZipArchive $zip): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_zip_archive_no_hack_array() {
 $opts = darray[
   'add_path' => 1,
   'remove_all_path' => 1,
@@ -41,3 +44,4 @@ foreach (TARGETS as $target) {
 }
 rmdir(OUTPUT_DIR);
 unlink(ZIP_NAME);
+}

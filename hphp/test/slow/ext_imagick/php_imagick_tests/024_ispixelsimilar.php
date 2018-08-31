@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_024_ispixelsimilar() {
 $root3 = 1.732050807568877;
 
 $tests = array(
@@ -42,4 +45,5 @@ try {
 } catch (\Exception $e) {
   echo "Exception caught in ImagickPixel::isPixelSimilar test: ".
     $e->getMessage().PHP_EOL;
+}
 }

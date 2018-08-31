@@ -5,4 +5,8 @@ class X {
     return $o instanceof $s;
   }
 }
+
+<<__EntryPoint>>
+function main_669() {
 var_dump(X::f(new X));
+}

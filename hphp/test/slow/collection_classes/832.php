@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_832() {
 $mapFn = function ($x) {
  return $x*3+1;
  }
@@ -22,4 +25,5 @@ $mp = Map {
 ;
 foreach ($mp->items()->map($mapFn) as $t) {
   var_dump($t[0], $t[1]);
+}
 }

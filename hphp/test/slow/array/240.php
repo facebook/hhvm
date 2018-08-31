@@ -25,5 +25,9 @@ class A {
      var_dump($args);
   }
 }
+
+<<__EntryPoint>>
+function main_240() {
 $obj = new A;
 $obj->foo(1, 2, 3);
+}

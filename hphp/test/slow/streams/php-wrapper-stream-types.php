@@ -24,4 +24,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_php_wrapper_stream_types() {
 main();
+}

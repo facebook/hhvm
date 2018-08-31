@@ -42,6 +42,9 @@ class ProxySessionHandler implements SessionHandlerInterface {
 
 }
 
+
+<<__EntryPoint>>
+function main_set_save_twice() {
 $handler = new ProxySessionHandler();
 session_set_save_handler($handler, false);
 session_set_save_handler($handler, false);
@@ -49,3 +52,4 @@ session_start();
 
 $_SESSION['a'] = 'a';
 var_dump($_SESSION['a']);
+}

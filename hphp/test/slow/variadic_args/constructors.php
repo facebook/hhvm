@@ -1,7 +1,5 @@
 <?hh
 
-error_reporting(-1);
-
 class CVarSome {
   public $x;
   public $v;
@@ -45,4 +43,10 @@ function test_reflection() {
 function main() {
   test_constructor();
   test_reflection();
+}
+
+
+<<__EntryPoint>>
+function main_constructors() {
+error_reporting(-1);
 }

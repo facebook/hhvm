@@ -1005,6 +1005,10 @@ function big_packed() {
   ];
 }
 
+
+<<__EntryPoint>>
+function main_giant_arrays() {
 var_dump(big_keyset());
 var_dump(big_vec());
 var_dump(big_packed());
+}

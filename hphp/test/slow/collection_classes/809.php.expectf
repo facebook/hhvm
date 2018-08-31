@@ -5,12 +5,12 @@ i:0;
 i:1;
 i:1;
 }
-]. stdClass is not a collection class. in %s/test/slow/collection_classes/809.php on line 10
+]. stdClass is not a collection class. in %s/test/slow/collection_classes/809.php on line 13
 bool(false)
 
 Notice: Unable to unserialize: [O:9:"HH\Vector":1:{
 s:3:"foo";
 i:7;
 }
-]. HH\Vector does not support the 'O' serialization format. in %s/test/slow/collection_classes/809.php on line 16
+]. HH\Vector does not support the 'O' serialization format. in %s/test/slow/collection_classes/809.php on line 19
 bool(false)

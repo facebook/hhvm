@@ -78,4 +78,8 @@ function main() {
   var_dump(idx());
 }
 
+
+<<__EntryPoint>>
+function main_idx_1() {
 main();
+}

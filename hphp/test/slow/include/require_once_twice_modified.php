@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_require_once_twice_modified() {
 $file = tempnam('/tmp', 'require_once_twice.inc');
 
 file_put_contents($file, "<?php\n echo 'Hello world!\n';\n"
@@ -17,3 +20,4 @@ require_once($file);
 var_dump(f());
 
 unlink($file);
+}

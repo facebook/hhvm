@@ -15,4 +15,8 @@ function main() {
   var_dump(test(new Y, "Y"));
 }
 
+
+<<__EntryPoint>>
+function main_has_tostring() {
 main();
+}

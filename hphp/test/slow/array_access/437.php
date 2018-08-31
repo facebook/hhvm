@@ -17,4 +17,8 @@ function test() {
   unset($x['a']);
   return isset($x['b']);
 }
+
+<<__EntryPoint>>
+function main_437() {
 var_dump(test());
+}

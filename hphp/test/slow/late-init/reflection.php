@@ -16,4 +16,8 @@ function test() {
   var_dump(hphp_get_property($a, '', 'p1'));
   var_dump(hphp_get_static_property('A', 'p2', false));
 }
+
+<<__EntryPoint>>
+function main_reflection() {
 test();
+}

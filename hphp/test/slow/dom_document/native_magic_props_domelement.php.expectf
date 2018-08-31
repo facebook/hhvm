@@ -5,5 +5,5 @@ __get nodeValue: string(15) "nodeValue-value"
 __get nonExisting: string(17) "nonExisting-value"
 int(10)
 
-Notice: Undefined property: MyElementDirect::$nonExisting in %s/test/slow/dom_document/native_magic_props_domelement.php on line 60
+Notice: Undefined property: MyElementDirect::$nonExisting in %s/test/slow/dom_document/native_magic_props_domelement.php on line 63
 NULL

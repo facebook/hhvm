@@ -6,4 +6,8 @@ function foo($feature1) {
   return $feats[0];
 }
 
+
+<<__EntryPoint>>
+function main_unbox_collection() {
 var_dump(foo('foo'));
+}

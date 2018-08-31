@@ -5,8 +5,7 @@ function block() {
     RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
     1,
   );
-};
-
+}
 async function num() {
   var_dump(func_num_args());
   await block();
@@ -23,5 +22,10 @@ async function arg() {
   }
 }
 
+<<__EntryPoint>>
+function main_func_get_arg() {
+;
+
 HH\Asio\join(num("a", "b", "c"));
 HH\Asio\join(arg("e", "f"));
+}

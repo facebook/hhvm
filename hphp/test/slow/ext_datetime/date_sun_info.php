@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_date_sun_info() {
 date_default_timezone_set("America/Los_Angeles");
 
 var_dump(date_sun_info(strtotime("2006-12-12"), 31.7667, 35.2333));
@@ -27,3 +30,4 @@ var_dump(
   date_sunset(strtotime("2004-12-20"), SUNFUNCS_RET_STRING,
               38.4, -9, 90, 1)
 );
+}

@@ -13,4 +13,8 @@ function bar() {
     var_dump($r);
   }
 }
+
+<<__EntryPoint>>
+function main_2181() {
 bar();
+}

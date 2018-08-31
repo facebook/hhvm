@@ -26,9 +26,13 @@ class Baz {
 
 }
 
+
+<<__EntryPoint>>
+function main_null_method_call() {
 Baz::$x = true;
 try {
   (new Baz())->run();
 } catch (Exception $e) {
   echo $e->getMessage()."\n";
+}
 }

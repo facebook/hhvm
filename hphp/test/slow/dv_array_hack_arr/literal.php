@@ -37,5 +37,9 @@ function test_darray() {
   var_dump(darray['abc' => varray[], 'def' => varray['a', 100, false]]);
 }
 
+
+<<__EntryPoint>>
+function main_literal() {
 test_varray();
 test_darray();
+}

@@ -18,6 +18,9 @@ function __toString() {
  return 'baz';
  }
 }
+
+<<__EntryPoint>>
+function main_758() {
 $a = new X;
 echo "sets\n";
 $a[true] = 5;
@@ -51,3 +54,4 @@ isset($a[array(3)]);
 isset($a[$a]);
 isset($a['57']);
 isset($a['6.5']);
+}

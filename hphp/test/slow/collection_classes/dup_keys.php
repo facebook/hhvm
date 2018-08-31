@@ -7,4 +7,8 @@ function test() {
   var_dump($s, $s->toArray());
 }
 
+
+<<__EntryPoint>>
+function main_dup_keys() {
 test();
+}

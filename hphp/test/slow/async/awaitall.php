@@ -3,8 +3,7 @@
 async function answer() {
   await reschedule();
   return 42;
-};
-function reschedule() {
+}function reschedule() {
   return RescheduleWaitHandle::create(
     RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
     1,
@@ -88,6 +87,20 @@ function get_handles() {
 
   return tuple($vectors, $maps, $arrays, $vecs, $dicts);
 }
+function get_wrapped_handles() {
+  list($vectors, $maps, $arrays, $vecs, $dicts) = $handles = get_handles();
+  return tuple(
+    $vectors->map($v ==> AwaitAllWaitHandle::fromVector($v)),
+    $maps->map($m ==> AwaitAllWaitHandle::fromMap($m)),
+    $arrays->map($a ==> AwaitAllWaitHandle::fromArray($a)),
+    $vecs->map($v ==> AwaitAllWaitHandle::fromVec($v)),
+    $dicts->map($d ==> AwaitAllWaitHandle::fromDict($d))
+  );
+}
+
+<<__EntryPoint>>
+function main_awaitall() {
+;
 
 echo "children only\n";
 list($vectors, $maps, $arrays, $vecs, $dicts) = get_handles();
@@ -114,16 +127,6 @@ foreach ($dicts as $d) {
 }
 
 echo "parents\n";
-function get_wrapped_handles() {
-  list($vectors, $maps, $arrays, $vecs, $dicts) = $handles = get_handles();
-  return tuple(
-    $vectors->map($v ==> AwaitAllWaitHandle::fromVector($v)),
-    $maps->map($m ==> AwaitAllWaitHandle::fromMap($m)),
-    $arrays->map($a ==> AwaitAllWaitHandle::fromArray($a)),
-    $vecs->map($v ==> AwaitAllWaitHandle::fromVec($v)),
-    $dicts->map($d ==> AwaitAllWaitHandle::fromDict($d))
-  );
-}
 
 list($vectors, $maps, $arrays, $vecs, $dicts) = $handles = get_wrapped_handles();
 $wh = AwaitAllWaitHandle::fromVector($vectors);
@@ -164,3 +167,4 @@ $finished();
 HH\Asio\join($wh);
 $finished();
 echo "done\n";
+}

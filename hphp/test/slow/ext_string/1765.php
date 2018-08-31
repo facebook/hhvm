@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1765() {
 var_dump(str_replace(array(65), array('a'), 'axAX'));
 var_dump(str_ireplace(array(65), array('a'), 'axAX'));
 echo "**************************\n";
@@ -66,3 +69,4 @@ var_dump(strripos('aAaXA', 'A', -3));
 var_dump(strripos('aAaXA', 'A', -4));
 var_dump(strripos('aAaXA', 'A', -5));
 var_dump(strripos('aAaXA', 'A', -6));
+}

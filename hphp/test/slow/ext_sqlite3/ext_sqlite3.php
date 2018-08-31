@@ -19,6 +19,9 @@ function sumlen_fini($a) {
  return (int)$a;
 }
 
+
+<<__EntryPoint>>
+function main_ext_sqlite3() {
 $db = new SQLite3(':memory:test');
 $db->exec("DROP TABLE IF EXISTS foo");
 $db->exec("CREATE TABLE foo (bar STRING)");
@@ -94,4 +97,5 @@ try {
   new SQLite3('/'.uniqid('random', true).'/db');
 } catch (Exception $e) {
   var_dump(true);
+}
 }

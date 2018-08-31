@@ -30,4 +30,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_maybe_has_this() {
 main();
+}

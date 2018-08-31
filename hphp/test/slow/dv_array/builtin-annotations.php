@@ -61,5 +61,9 @@ function parameters() {
   echo "====================================================\n";
 }
 
+
+<<__EntryPoint>>
+function main_builtin_annotations() {
 return_values();
 parameters();
+}

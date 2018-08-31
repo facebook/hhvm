@@ -12,5 +12,9 @@ function gen() {
   }
   yield null;
 }
+
+<<__EntryPoint>>
+function main_232() {
 foreach (gen() as $_) {
+}
 }

@@ -1,4 +1,5 @@
 <?php
+
 /* foreach by reference has an interesting interaction with array_pop.
  * array_pop will reset the internal array pointer, but it will not reset the
  * foreach by reference array pointer; instead it will rewind it if the array
@@ -10,6 +11,8 @@
  * case iteration restarts from the internal array pointer, which array_pop
  * has reset). PHP is awesome like that.
  */
+<<__EntryPoint>>
+function main_foreach_by_reference_array_pop() {
 echo "---- packed no copy case\n";
 $a = [1, 2, 3];
 foreach ($a as &$v) {
@@ -75,4 +78,5 @@ foreach ($a as &$v) {
     array_pop($a); array_pop($a); array_pop($a);
     $a[] = 9; $a[] = 10;
   }
+}
 }

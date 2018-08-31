@@ -62,4 +62,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_817() {
 main();
+}

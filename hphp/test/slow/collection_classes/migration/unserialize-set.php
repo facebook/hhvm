@@ -31,4 +31,8 @@ function main() {
   var_dump(unserialize($s4) == $set);
 }
 
+
+<<__EntryPoint>>
+function main_unserialize_set() {
 main();
+}

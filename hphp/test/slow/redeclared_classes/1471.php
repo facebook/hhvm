@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1471() {
 $ok = 1;
 if ($ok) {
 class A {
@@ -11,5 +14,6 @@ public $a = A::FOO;
 class A {
 const FOO = 'test';
 public $a = A::FOO;
+}
 }
 }

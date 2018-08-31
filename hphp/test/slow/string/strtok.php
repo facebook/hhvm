@@ -13,6 +13,9 @@ function tokenize($str, $token) {
     return $tokenizedStrArr;
 }
 
+
+<<__EntryPoint>>
+function main_strtok() {
 var_dump(tokenize('foobarbaz', 'foo'));
 var_dump(tokenize('foobarbaz', 'bar'));
 var_dump(tokenize('foobarbaz', 'baz'));
@@ -20,3 +23,4 @@ var_dump(tokenize('foobarbaz', 'baz'));
 var_dump(tokenize('foobarbaz', 'foobar'));
 var_dump(tokenize('foobarbaz', 'barbaz'));
 var_dump(tokenize('foobarbaz', 'foobaz'));
+}

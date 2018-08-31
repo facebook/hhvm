@@ -12,4 +12,8 @@ class C {
     echo get_called_class();
   }
 }
+
+<<__EntryPoint>>
+function main_1884() {
 C::d();
+}

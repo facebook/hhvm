@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_gmt_offsets() {
 $tzs = [
   'GMT+0',
   'GMT-1',
@@ -17,4 +20,5 @@ print("---Repeating to check caching---\n");
 
 foreach ($tzs as $tz) {
   var_dump(new DateTimeZone($tz));
+}
 }

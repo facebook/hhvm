@@ -10,7 +10,11 @@ function f(mixed $x) {
   echo "\n";
 }
 
+
+<<__EntryPoint>>
+function main_nullable_as() {
 f(1);
 f("hi");
 f(1.20);
 f(true);
+}

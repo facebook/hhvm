@@ -44,5 +44,9 @@ function main() {
     echo "\n";
   }
 }
-main();
 
+
+<<__EntryPoint>>
+function main_skip_skipwhile_lazy() {
+main();
+}

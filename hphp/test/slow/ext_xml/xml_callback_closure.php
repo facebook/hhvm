@@ -6,6 +6,9 @@ function elementOpen( $parser, $name, $attribs ) {
     print "<$name>";
 }
 
+
+<<__EntryPoint>>
+function main_xml_callback_closure() {
 var_dump( is_callable( 'elementOpen' ) );
 $closure = function ( $parser, $name ) {
             print "</$name>";
@@ -27,3 +30,4 @@ if ( 0 === xml_parse( $parser, "<root><a><b></b></a></root>" ) ) {
 }
 
 xml_parser_free( $parser );
+}

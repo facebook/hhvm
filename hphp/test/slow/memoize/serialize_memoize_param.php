@@ -185,4 +185,8 @@ function test() {
   test_exception("recursion depth", $wrapped);
 }
 
+
+<<__EntryPoint>>
+function main_serialize_memoize_param() {
 test();
+}

@@ -4,5 +4,9 @@ function main($s) {
   var_dump(wordwrap($s, 10));
 }
 
-main("hello goodbye");
 
+
+<<__EntryPoint>>
+function main_builtin_defaults() {
+main("hello goodbye");
+}

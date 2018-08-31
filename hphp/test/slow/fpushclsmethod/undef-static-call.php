@@ -24,4 +24,8 @@ function main() {
   Derived2::test();
 }
 
+
+<<__EntryPoint>>
+function main_undef_static_call() {
 main();
+}

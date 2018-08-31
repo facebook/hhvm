@@ -23,4 +23,8 @@ function test($a) {
   var_dump($a);
 }
 
+
+<<__EntryPoint>>
+function main_setop() {
 test([1 => 'foo', 'baz' => 123]);
+}

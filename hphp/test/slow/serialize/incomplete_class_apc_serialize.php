@@ -8,4 +8,8 @@ function main() {
   $o2 = apc_fetch('foo');
   var_dump($o2); // real X
 }
+
+<<__EntryPoint>>
+function main_incomplete_class_apc_serialize() {
 main();
+}

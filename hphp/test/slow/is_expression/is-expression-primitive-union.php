@@ -16,6 +16,9 @@ function is_num(mixed $x): void {
   }
 }
 
+
+<<__EntryPoint>>
+function main_is_expression_primitive_union() {
 is_arraykey(1);
 is_arraykey("one");
 is_arraykey(1.5);
@@ -27,3 +30,4 @@ is_num(1);
 is_num("one");
 is_num(1.5);
 is_num(true);
+}

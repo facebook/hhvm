@@ -10,5 +10,9 @@ function g11() {
   }
   var_dump(current(&$arr));
 }
+
+<<__EntryPoint>>
+function main_486() {
 foreach (g11() as $_) {
+}
 }

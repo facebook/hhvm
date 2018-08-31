@@ -1,16 +1,4 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
-
-set_error_handler(
-  (int $errno,
-   string $errstr,
-   string $errfile,
-   int $errline,
-   array $errcontext
-  ) ==> {
-    throw new Exception($errstr);
-  }
-);
 
 function takes_array(array $a) {}
 function takes_nullable_array(?array $a) {}
@@ -37,8 +25,7 @@ function returns_nullable_varray_or_darray($a): ?varray_or_darray { return $a; }
 function returns_vec_or_dict($a): vec_or_dict { return $a; }
 function returns_nullable_vec_or_dict($a): ?vec_or_dict { return $a; }
 
-class Foo {};
-function takes_bool(bool $v) {}
+class Foo {}function takes_bool(bool $v) {}
 function takes_int(int $v) {}
 function takes_str(string $v) {}
 function takes_vec(vec $v) {}
@@ -192,5 +179,22 @@ function test2() {
   }
 }
 
+// Copyright 2004-present Facebook. All Rights Reserved.
+
+<<__EntryPoint>>
+function main_type_hint() {
+set_error_handler(
+  (int $errno,
+   string $errstr,
+   string $errfile,
+   int $errline,
+   array $errcontext
+  ) ==> {
+    throw new Exception($errstr);
+  }
+);
+;
+
 test1();
 test2();
+}

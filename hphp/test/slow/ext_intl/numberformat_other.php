@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_numberformat_other() {
 $locales = array(
   'en_US',
   'en_GB',
@@ -32,3 +35,4 @@ foreach ($locales as $locale) {
 
 $formatter = new NumberFormatter('en_GB', NumberFormatter::PATTERN_DECIMAL);
 var_dump($formatter->format('123456'));
+}

@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_filter_input_array() {
 $result = filter_input_array(INPUT_SERVER, FILTER_UNSAFE_RAW);
 if ($result === false) {
   echo "ERROR: result is false\n";
@@ -13,3 +16,4 @@ if ($result['DOCUMENT_ROOT'] !== '') {
 echo $result['PHP_SELF'] . "\n";
 echo $result['SCRIPT_NAME'] . "\n";
 echo $result['SCRIPT_FILENAME'] . "\n";
+}

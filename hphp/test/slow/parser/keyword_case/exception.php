@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_exception() {
 TRY {
   ECHO "TRYING\n";
   Throw NEW Exception('LOL');
@@ -8,4 +11,5 @@ TRY {
   ECHO "CATCHING\n";
 } FINALLY {
   ECHO "WE'RE DONE HERE\n";
+}
 }

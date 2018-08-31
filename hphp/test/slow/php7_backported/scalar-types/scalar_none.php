@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_scalar_none() {
 require 'fix_exceptions.inc';
 
 $functions = [
@@ -22,3 +25,4 @@ foreach ($functions as $type => $function) {
     }
 }
 echo PHP_EOL . "Done";
+}

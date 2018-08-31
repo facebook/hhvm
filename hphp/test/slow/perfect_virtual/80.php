@@ -14,4 +14,8 @@ function test(X $x) {
   $y = $x->foo(5);
   return ++$y;
 }
+
+<<__EntryPoint>>
+function main_80() {
 test(new Y);
+}

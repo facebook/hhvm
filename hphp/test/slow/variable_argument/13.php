@@ -6,6 +6,10 @@ function test($a) {
   $args = func_get_args();
   var_dump($args);
 }
- test(1);
+
+ <<__EntryPoint>>
+function main_13() {
+test(1);
  test(1, 2);
  test(1, 2, 3);
+}

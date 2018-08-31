@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_socket_select_index() {
 $msg = "Hello";
 $len = strlen($msg);
 
@@ -11,3 +14,4 @@ $fdset = array( 1 => $sockets[1] );
 $write = $excep = array();
 socket_select($fdset, $write, $excep, 0, 100);
 print_r($fdset);
+}

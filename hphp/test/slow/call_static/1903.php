@@ -7,4 +7,8 @@ abstract class BaseClass {
 }
 class SubClass extends BaseClass {
 }
+
+<<__EntryPoint>>
+function main_1903() {
 SubClass::foo();
+}

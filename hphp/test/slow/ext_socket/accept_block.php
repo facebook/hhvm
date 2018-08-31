@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_accept_block() {
 $socket = null;
 while (!$socket) {
   $port = rand(50000, 65535);
@@ -15,4 +18,5 @@ if ($pid) {
   var_dump(stream_socket_accept($socket));
 } else {
   stream_socket_client("tcp://127.0.0.1:$port", $errno, $errstr, 2);
+}
 }

@@ -3,4 +3,8 @@
 function test() {
  print 'test';
 }
- test();
+
+ <<__EntryPoint>>
+function main_6() {
+test();
+}

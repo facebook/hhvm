@@ -74,4 +74,8 @@ function main() {
   var_dump(HerpDerp::orange($x));
 }
 
+
+<<__EntryPoint>>
+function main_trait_magic() {
 main();
+}

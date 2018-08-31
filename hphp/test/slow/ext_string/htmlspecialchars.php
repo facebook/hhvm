@@ -80,5 +80,9 @@ function test_htmlspecialchars() {
   VS(fb_htmlspecialchars($zfoo, ENT_COMPAT, "UTF-8"), u('\ufffd')."foo");
 }
 
+
+<<__EntryPoint>>
+function main_htmlspecialchars() {
 test_htmlspecialchars_decode();
 test_htmlspecialchars();
+}

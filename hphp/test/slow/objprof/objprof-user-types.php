@@ -35,6 +35,116 @@ function getStr(int $len): string {
 
 // TEST: tracking works when enabled and not when disabled
 class EmptyClass {}
+
+
+// TEST: nullifying variables removes their tracking
+class EmptyClass2 {}
+
+
+// TEST: sizes of classes (including private props)
+class SimpleProps { // 51:48
+  private string $prop1 = "one"; // 19:16
+  protected int $prop2 = 2; // 16:16
+  public bool $prop3 = true; // 16:16
+}
+
+
+// TEST: sizes of arrays
+class SimpleArrays {
+  public array $arrEmpty = array(); // 16 (tv) + 16 (ArrayData) = 32
+  public array $arrMixed = array( // 16 (tv) + 16 (ArrayData) + 46 + 32 = 110
+    "somekey" => "someval", // 2 * (23:16) = 46:32
+    321 => 3, // 2 * (16:16) = 32:32
+  );
+  public array<int> $arrNums = array(
+    2012, // 16:16
+    2013, // 16:16
+    2014 // 16:16
+  ); // 16 (tv) + 16 (ArrayData) + (16 * 3) = 80
+}
+
+
+// TEST: sizes of dynamic props
+class DynamicClass {}
+
+
+// TEST: async handle
+async function myAsyncFunc(): Awaitable<int> { return 42; }
+class SharedStringClass {
+  public string $val_ref = null;
+  public function __construct(string $str) {
+    $this->val_ref = $str; // inc 2 + inc 3
+  }
+}
+class SharedArrayClass {
+  public array $val_ref = null;
+  public function __construct(array $arr) {
+    $this->val_ref = $arr;
+  }
+}
+class NestedArrayClass {
+  public array $val_ref = null;
+  public function __construct(array $arr) {
+    $this->val_ref = $arr;
+  }
+}
+
+
+// TEST: ref counted Maps
+class SimpleMapClass { // size = 2*(24(SimpleMapClass)+122) = 292
+                   // sized = 2*(24(SimpleMapClass)+116) = 280
+  public Map<string,mixed> $map;
+  public function __construct() {
+    $this->map = Map{ // size = 16(tv)+$MapSize+39+43 = 122
+      'foo' => getStr(4), // size = 19+20 = 39
+                          // sized = 16+20 = 36
+      'bar' => getStr(8), // size = 19+24 = 43
+                          // sized = 16+24 = 40
+    };
+  }
+}
+class SharedMapClass { // size = 2*(24(SharedMapClass)+122) = 292
+                        // sized = 2*(24(SharedMapClass)+66) = 180
+  public Map<string,mixed> $map;
+  public function __construct(Map<string, mixed> $m) {
+    $this->map = $m;
+  }
+}
+
+
+// TEST: back edge
+class SimpleMapClassWithBackEdge { // size = 24(Objsize)+114 = 138
+                                   // sized = 24(Objsize)+108 = 132
+  public Map<string,mixed> $map;
+  public function __construct() {
+    $this->map = Map{ // size = 16(tv)+$MapSize+39+35 = 114
+                      // sized = 16(tv)+$MapSize+36+32 = 108
+      'bar' => getStr(4), // size = 19+20 = 39
+                          // sized = 16+20 = 36
+    };
+  }
+}
+
+
+// TEST: Validate that memory for an excluded class is correctly attributed
+// to the parent root node, both in DEFAULT and USER_TYPES_ONLY modes
+class ExlcudeClass {}
+class SimpleClassForExclude {
+  public Map<string,mixed> $map;
+  public ExlcudeClass $fooCls1;
+  public ExlcudeClass $fooCls2;
+  public function __construct() {
+    $this->map = Map{
+      'foo' => getStr(4),
+      'bar' => getStr(8),
+    };
+    $this->fooCls1 = new ExlcudeClass();
+    $this->fooCls2 = new ExlcudeClass();
+  }
+}
+
+<<__EntryPoint>>
+function main_objprof_user_types() {
 $myClass2 = new EmptyClass();
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 $emptyCount = get_instances("EmptyClass", $objs);
@@ -44,10 +154,6 @@ echo $emptyCount ?
 $ObjSize = get_bytes("EmptyClass", $objs) / $emptyCount;
 $objs = null;
 $myClass2 = null;
-
-
-// TEST: nullifying variables removes their tracking
-class EmptyClass2 {}
 $myClass = new EmptyClass2();
 $myClass2 = new EmptyClass2();
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
@@ -66,14 +172,6 @@ echo $instances_after ?
 $objs = null;
 $myClass = null;
 $myClass2 = null;
-
-
-// TEST: sizes of classes (including private props)
-class SimpleProps { // 51:48
-  private string $prop1 = "one"; // 19:16
-  protected int $prop2 = 2; // 16:16
-  public bool $prop3 = true; // 16:16
-}
 $myClass = new SimpleProps();
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 echo get_bytes('SimpleProps', $objs) == $ObjSize + 51 &&
@@ -82,21 +180,6 @@ echo get_bytes('SimpleProps', $objs) == $ObjSize + 51 &&
       "(BAD) Bytes (props) failed: " . var_export($objs, true) . "\n";
 $objs = null;
 $myClass = null;
-
-
-// TEST: sizes of arrays
-class SimpleArrays {
-  public array $arrEmpty = array(); // 16 (tv) + 16 (ArrayData) = 32
-  public array $arrMixed = array( // 16 (tv) + 16 (ArrayData) + 46 + 32 = 110
-    "somekey" => "someval", // 2 * (23:16) = 46:32
-    321 => 3, // 2 * (16:16) = 32:32
-  );
-  public array<int> $arrNums = array(
-    2012, // 16:16
-    2013, // 16:16
-    2014 // 16:16
-  ); // 16 (tv) + 16 (ArrayData) + (16 * 3) = 80
-}
 $myClass = new SimpleArrays();
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 echo get_bytes('SimpleArrays', $objs) == $ObjSize + 80 + 110 + 32 &&
@@ -105,10 +188,6 @@ echo get_bytes('SimpleArrays', $objs) == $ObjSize + 80 + 110 + 32 &&
       "(BAD) Bytes (arrays) failed: " . var_export($objs, true) . "\n";
 $objs = null;
 $myClass = null;
-
-
-// TEST: sizes of dynamic props
-class DynamicClass {}
 $myClass = new DynamicClass();
 $dynamic_field = 'abcd'; // 20:16
 $dynamic_field2 = 1234;  // 20:16 (dynamic properties - always string)
@@ -121,10 +200,6 @@ echo get_bytes('DynamicClass', $objs) == $ObjSize + 20 + 20 + 16 + 16 &&
       "(BAD) Bytes (dynamic) failed: " . var_export($objs, true) . "\n";
 $objs = null;
 $myClass = null;
-
-
-// TEST: async handle
-async function myAsyncFunc(): Awaitable<int> { return 42; }
 $myClass = myAsyncFunc();
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 echo get_bytes_eq(StaticWaitHandle::class, $objs) == 0 ? // not a user node
@@ -192,12 +267,6 @@ $myClass = null;
 
 // TEST: multiple ref counted strings
 $mystr = getStr(9); // inc 1, 25:16
-class SharedStringClass {
-  public string $val_ref = null;
-  public function __construct(string $str) {
-    $this->val_ref = $str; // inc 2 + inc 3
-  }
-}
 $myClass = new SharedStringClass($mystr);
 $myClass2 = new SharedStringClass($mystr);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
@@ -215,12 +284,6 @@ $my_arr = array(
   getStr(4) => getStr(8), // 20:20 + 24:24 = 44:44
   getStr(5) => getStr(7), // 21:21 + 23:23 = 44:44
 );
-class SharedArrayClass {
-  public array $val_ref = null;
-  public function __construct(array $arr) {
-    $this->val_ref = $arr;
-  }
-}
 $myClass = new SharedArrayClass($my_arr);
 $myClass2 = new SharedArrayClass($my_arr);
 $my_arr = null;
@@ -239,12 +302,6 @@ $myClass2 = null;
 $my_arr = array( // 16 /*(tv)*/ + 16 /*(ArrayData)*/ + 76 = 108
   array(getStr(4) => getStr(8)), // 20 + 24 + 16 /*(tv)*/ + 16 /*(ArrayData)*/
 );
-class NestedArrayClass {
-  public array $val_ref = null;
-  public function __construct(array $arr) {
-    $this->val_ref = $arr;
-  }
-}
 $myClass = new NestedArrayClass($my_arr);
 $my_arr = null;
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
@@ -253,21 +310,6 @@ echo get_bytes_eq('NestedArrayClass', $objs) == ($ObjSize + 108) ?
   "(BAD) Bytes (NestedArray) failed: " . var_export($objs, true) . "\n";
 $objs = null;
 $myClass = null;
-
-
-// TEST: ref counted Maps
-class SimpleMapClass { // size = 2*(24(SimpleMapClass)+122) = 292
-                   // sized = 2*(24(SimpleMapClass)+116) = 280
-  public Map<string,mixed> $map;
-  public function __construct() {
-    $this->map = Map{ // size = 16(tv)+$MapSize+39+43 = 122
-      'foo' => getStr(4), // size = 19+20 = 39
-                          // sized = 16+20 = 36
-      'bar' => getStr(8), // size = 19+24 = 43
-                          // sized = 16+24 = 40
-    };
-  }
-}
 $myClass = new SimpleMapClass();
 $myClass2 = new SimpleMapClass();
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
@@ -290,13 +332,6 @@ $shared_map = Map{ // size = 16(tv)+$MapSize+39+43 = 122
   'bar' => getStr(8), // size = 19+24 = 43
                       // sized = 16+24 = 40
 };
-class SharedMapClass { // size = 2*(24(SharedMapClass)+122) = 292
-                        // sized = 2*(24(SharedMapClass)+66) = 180
-  public Map<string,mixed> $map;
-  public function __construct(Map<string, mixed> $m) {
-    $this->map = $m;
-  }
-}
 $my_obj1 = new SharedMapClass($shared_map);
 $my_obj2 = new SharedMapClass($shared_map);
 $shared_map = null;
@@ -310,20 +345,6 @@ echo get_bytes('SharedMapClass', $objs) ==
 $objs = null;
 $my_obj1 = null;
 $my_obj2 = null;
-
-
-// TEST: back edge
-class SimpleMapClassWithBackEdge { // size = 24(Objsize)+114 = 138
-                                   // sized = 24(Objsize)+108 = 132
-  public Map<string,mixed> $map;
-  public function __construct() {
-    $this->map = Map{ // size = 16(tv)+$MapSize+39+35 = 114
-                      // sized = 16(tv)+$MapSize+36+32 = 108
-      'bar' => getStr(4), // size = 19+20 = 39
-                          // sized = 16+20 = 36
-    };
-  }
-}
 $my_obj = new SimpleMapClassWithBackEdge();
 $my_obj->map['foo'] = $my_obj; // size = 19+16(tv) = 35, sized = 16+16(tv) = 32
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
@@ -336,24 +357,6 @@ echo get_bytes('SimpleMapClassWithBackEdge', $objs) ==
         var_export($objs, true) . "\n";
 $objs = null;
 $my_obj = null;
-
-
-// TEST: Validate that memory for an excluded class is correctly attributed
-// to the parent root node, both in DEFAULT and USER_TYPES_ONLY modes
-class ExlcudeClass {}
-class SimpleClassForExclude {
-  public Map<string,mixed> $map;
-  public ExlcudeClass $fooCls1;
-  public ExlcudeClass $fooCls2;
-  public function __construct() {
-    $this->map = Map{
-      'foo' => getStr(4),
-      'bar' => getStr(8),
-    };
-    $this->fooCls1 = new ExlcudeClass();
-    $this->fooCls2 = new ExlcudeClass();
-  }
-}
 
 $my_obj = new SimpleClassForExclude();
 $objs = objprof_get_data(OBJPROF_FLAGS_DEFAULT);
@@ -412,3 +415,4 @@ $my_obj = null;
 //$xml = simplexml_load_string('<root><hello>world</hello></root>');
 //$objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 echo "(GOOD) Got here without crashing\n";
+}

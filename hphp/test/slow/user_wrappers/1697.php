@@ -8,6 +8,10 @@ class MagicStream {
     return true;
   }
 }
+
+<<__EntryPoint>>
+function main_1697() {
 stream_wrapper_register('magic', 'MagicStream');
 $fp = fopen('magic://stream-via-call', 'r');
 fclose($fp);
+}

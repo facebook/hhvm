@@ -7,6 +7,9 @@ function myfunction() {
 }
 const MYCONST = 123;
 
+
+<<__EntryPoint>>
+function main_2216() {
 $a = new MyClass;
  var_dump(get_class($a));
 $c = new \my\name\MyClass;
@@ -18,3 +21,4 @@ $d = namespace\MYCONST;
 $d = __NAMESPACE__ . '\MYCONST';
  var_dump(constant($d));
 var_dump(defined('MYCONST'));
+}

@@ -10,4 +10,8 @@ function test() {
   byVal($x?->y); // ok
 }
 
+
+<<__EntryPoint>>
+function main_nullsafe_prop_5() {
 test();
+}

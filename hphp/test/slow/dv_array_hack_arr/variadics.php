@@ -36,6 +36,9 @@ function test($x) {
   A::foobaz(1, 2, ...$x);
   if (count($x) > 0) call_user_func_array('A::foobaz', $x);
 }
+
+<<__EntryPoint>>
+function main_variadics() {
 test([]);
 test([3, 4, 5]);
 test(vec[]);
@@ -43,3 +46,4 @@ test(vec[3, 4, 5]);
 test(dict['a' => 3, 'b' => 4, 'c' => 5]);
 test(varray[3, 4, 5]);
 test(Vector{3, 4, 5});
+}

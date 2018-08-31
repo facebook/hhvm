@@ -443,14 +443,15 @@ module ServerInitCommon = struct
       if Relative_path.Set.mem s k then FileInfo.merge_names v acc
       else acc
     end ~init:FileInfo.empty_names in
+    (* TODO: do we need to add extend deps to master deps? *)
     let master_deps = names dirty_master_files |> names_to_deps in
     let local_deps = names dirty_local_files |> names_to_deps in
-    (* TODO: need to remember those and use when going from
-     * Initial_typechecking to Prechecked_files_ready *)
-    ignore master_deps;
 
     let env, to_recheck = if use_prechecked_files genv then begin
-      ServerPrecheckedFiles.set env (Initial_typechecking { dirty_local_deps = local_deps }),
+      ServerPrecheckedFiles.set env (Initial_typechecking {
+          dirty_local_deps = local_deps;
+          dirty_master_deps = master_deps;
+      }),
       (* Start with dirty files only *)
       Relative_path.Set.empty
     end else begin

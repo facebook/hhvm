@@ -449,6 +449,7 @@ module ServerInitCommon = struct
 
     let env, to_recheck = if use_prechecked_files genv then begin
       ServerPrecheckedFiles.set env (Initial_typechecking {
+          rechecked_files = Relative_path.Set.empty;
           dirty_local_deps = local_deps;
           dirty_master_deps = master_deps;
       }),

@@ -60,7 +60,7 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
 
   Test.assert_no_errors env;
 
-  Test.assert_needs_recheck env "A.php"; (* TODO: avoid double checking of A *)
+  Test.assert_needs_no_recheck env "A.php";
   Test.assert_needs_recheck env "test.php";
   (* Run second stage of rechecking *)
   let env, _ = Test.(run_loop_once env default_loop_input) in

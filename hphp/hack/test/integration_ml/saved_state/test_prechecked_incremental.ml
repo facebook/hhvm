@@ -75,9 +75,9 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
     ]
   }) in
 
-  Test.assert_needs_recheck env "foo.php"; (* unnecessary *)
+  Test.assert_needs_no_recheck env "foo.php";
   Test.assert_needs_no_recheck env "A.php";
-  Test.assert_needs_recheck env "B.php"; (* unnecessary *)
+  Test.assert_needs_no_recheck env "B.php";
   (* test depends (through foo) on B, which was a local dirty change, so needs
    * to be rechecked *)
   Test.assert_needs_recheck env "test.php";

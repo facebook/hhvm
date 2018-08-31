@@ -165,6 +165,8 @@ and dirty_deps = {
   dirty_local_deps : Typing_deps.DepSet.t;
   (* The fan-outs of those nodes were not expanded yet. *)
   dirty_master_deps : Typing_deps.DepSet.t;
+  (* Files that have been rechecked since server startup *)
+  rechecked_files : Relative_path.Set.t;
 }
 
 (* When using prechecked files we split initial typechecking in two phases

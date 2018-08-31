@@ -60,17 +60,13 @@ let keys p s =
   keys_aux p count names_numbers_sorted []
 
 let type_match p s =
-  let sft_0 =
-    { sft_optional = false; sft_ty = Reason.Rregex p, Tprim Tstring; } in
   let sft =
-    { sft_optional = true; sft_ty = Reason.Rregex p, Tprim Tstring; } in
+    { sft_optional = false; sft_ty = Reason.Rregex p, Tprim Tstring; } in
   let keys = keys p s in
   let shape_map = List.fold_left ~f:(fun acc key -> ShapeMap.add key sft acc)
     ~init:ShapeMap.empty keys in
-  (* Any Regex\Match will contain the entire matched substring at key 0.
-    For now, as the native impl omits non-matching captures,
-    all fields but the 0 field will be optional. *)
-  let shape_map = ShapeMap.add (SFlit_int (p, "0")) sft_0 shape_map in
+  (* Any Regex\Match will contain the entire matched substring at key 0 *)
+  let shape_map = ShapeMap.add (SFlit_int (p, "0")) sft shape_map in
   Reason.Rregex p, Tshape (FieldsFullyKnown, shape_map)
 
 let check_global_options s =

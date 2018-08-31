@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
- open Hh_core
+ open Core_kernel
  open Nast
  open Typing_defs
 

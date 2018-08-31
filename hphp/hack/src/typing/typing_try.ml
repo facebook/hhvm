@@ -7,7 +7,10 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-open Hh_core
+[@@@warning "-33"] (* in OCaml 4.06.0, this can be inlined *)
+open Core_kernel
+open Common
+[@@@warning "+33"]
 
 module C = Typing_continuations
 module CMap = C.Map

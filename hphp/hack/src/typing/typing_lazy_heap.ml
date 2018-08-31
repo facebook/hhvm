@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 open Typing_heap
 
 let check_cache_consistency x expected_kind expected_result =

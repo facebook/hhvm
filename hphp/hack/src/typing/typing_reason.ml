@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Utils
 
 (* The reason why something is expected to have a certain type *)
@@ -239,7 +239,7 @@ let rec to_string prefix r =
         else
           "  resulting from expanding a type constant as follows:\n    " in
       (to_string prefix r_orig) @
-      (to_string (expand_prefix^String.concat " -> " expansions) r_expanded)
+      (to_string (expand_prefix^String.concat ~sep:" -> " expansions) r_expanded)
   | Rexpr_dep_type (r, p, e) ->
       (to_string prefix r) @ [p, "  "^expr_dep_type_reason_string e]
   | Rtconst_no_cstr (_, n) ->

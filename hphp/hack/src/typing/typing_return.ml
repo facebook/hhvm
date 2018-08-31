@@ -8,10 +8,9 @@
  *)
 
 (* Typing code concerned with return types. *)
-
+open Core_kernel
 open Typing_defs
 open Typing_env_return_info
-open Hh_core
 
 module Env = Typing_env
 module TUtils = Typing_utils

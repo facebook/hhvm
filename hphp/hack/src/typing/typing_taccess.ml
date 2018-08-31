@@ -7,7 +7,8 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
+open Common
 open Typing_defs
 open Typing_dependent_type
 open Utils
@@ -260,7 +261,7 @@ and get_typeconst env class_pos class_name pos tconst =
     let cur_tconst = `cls class_name, List.map env.ids snd in
     let seen = ExprDepTy.to_string cur_tconst in
     let type_expansions = (pos, seen)::env.ety_env.type_expansions in
-    if List.mem (List.map env.ety_env.type_expansions snd) seen then
+    if List.mem ~equal:(=) (List.map env.ety_env.type_expansions snd) seen then
       begin
         let seen = List.rev_map type_expansions snd in
         Errors.cyclic_typeconst (fst typeconst.ttc_name) seen;

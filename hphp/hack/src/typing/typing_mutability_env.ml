@@ -6,6 +6,8 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
+open Core_kernel
 (* Tracks the different types of mutability of a given local variable.
   See typing_mutability.ml for a description of the fields.
 *)

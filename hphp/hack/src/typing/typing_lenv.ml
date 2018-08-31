@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 module Env = Typing_env
 open Env
 module TUtils = Typing_utils

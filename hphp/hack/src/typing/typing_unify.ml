@@ -6,7 +6,8 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Hh_core
+open Core_kernel
+open Common
 open Typing_defs
 open String_utils
 
@@ -24,7 +25,7 @@ let make_union_instead_of_unificaton = ref false
  * and ty1 <: ty and ty2 <: ty under env'
  *)
 let rec unify ?(opts=TUtils.default_unify_opt) env ty1 ty2 =
-  if ty1 == ty2 then env, ty1 else
+  if phys_equal ty1 ty2 then env, ty1 else
   let types =
     [Typing_log.Log_type ("ty1", ty1);
      Typing_log.Log_type ("ty2", ty2)]  in
@@ -89,7 +90,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
   match ty1, ty2 with
   | Tdynamic, Tdynamic -> env, Tdynamic
   | Tprim x, Tprim y ->
-    if x == y then env, Tprim x
+    if phys_equal x y then env, Tprim x
     else
       let () = TUtils.uerror r1 ty1 r2 ty2 in
       env, Terr

@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 open Typing_mutability_env
 module T = Tast
 module Env = Typing_env
@@ -15,7 +16,7 @@ open Typing_defs
 
 type borrowable_args = Arg_this | Arg_local of Local_id.S.t
 
-module Borrowable_args = Map.Make(struct
+module Borrowable_args = Caml.Map.Make(struct
   type t = borrowable_args
   let compare (a: t) (b: t) = compare a b
 end)

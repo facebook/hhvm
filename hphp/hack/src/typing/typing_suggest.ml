@@ -10,7 +10,7 @@
 
 (** Module used to suggest type annotations when they are missing
 *)
-open Hh_core
+open Core_kernel
 open Typing_defs
 open Utils
 
@@ -224,7 +224,7 @@ and normalize_ tcopt = function
   | Tprim _ as ty -> ty
   | Tvar _ -> raise Exit
   | Tfun _ -> raise Exit
-  | Tclass ((pos, name), tyl) when name.[0] = '\\' && String.rindex name '\\' = 0 ->
+  | Tclass ((pos, name), tyl) when name.[0] = '\\' && String.rindex_exn name '\\' = 0 ->
       (* TODO this transform isn't completely legit; can cause a reference into
        * the global namespace to suddenly refer to a different class in the
        * local one. Figure something else out that doesn't involve spamming '\'

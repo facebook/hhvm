@@ -8,7 +8,8 @@
  *)
 
 (* This module implements the typing for type_structure. *)
-open Hh_core
+open Core_kernel
+open Common
 open Nast
 open Typing_defs
 

@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Typing_defs
 
 module Env = Typing_env
@@ -39,7 +39,7 @@ let rec occurs env n rty =
   | Tvar n' ->
     let _, n'' = Env.get_var env n' in
     begin
-      n == n'' || (match IMap.get n'' env.Env.tenv with
+      phys_equal n n'' || (match IMap.get n'' env.Env.tenv with
       | Some ty -> occurs env n ty
       | None -> false)
     end
@@ -92,7 +92,7 @@ let rec occursUnderOptions level env n ty =
   | Tvar n' ->
     let _, n'' = Env.get_var env n' in
     begin
-      if n == n''
+      if phys_equal n n''
       then Some level
       else
       begin match IMap.get n'' env.Env.tenv with

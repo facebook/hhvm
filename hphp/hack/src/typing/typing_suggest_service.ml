@@ -13,13 +13,13 @@
  *)
 (*****************************************************************************)
 
-open Hh_core
+open Core_kernel
 
 module Env = Typing_env
 module SN = Naming_special_names
 
 let insert_resolved_result fn acc result =
-  let pl = try Relative_path.Map.find_unsafe acc fn with Not_found -> [] in
+  let pl = try Relative_path.Map.find_unsafe acc fn with Caml.Not_found -> [] in
   let pl = result :: pl in
   Relative_path.Map.add acc ~key:fn ~data:pl
 
@@ -88,7 +88,7 @@ let resolve_types tcopt acc collated_values =
          * a supertype of tyl, or raising Not_found if none are suitable.
          *)
         let rec guess_super env tyl = function
-          | [] -> raise Not_found
+          | [] -> raise Caml.Not_found
           | guess :: guesses ->
             (* Extra check on Windows to check to see if Timeout is reached. *)
             check_timeout t;
@@ -148,22 +148,22 @@ let resolve_types tcopt acc collated_values =
   !patches
 
 let hashtbl_keys tbl =
-  let tmp_tbl = Hashtbl.create (Hashtbl.length tbl) in
-  Hashtbl.iter begin fun k _ ->
-    if not (Hashtbl.mem tmp_tbl k) then Hashtbl.add tmp_tbl k ();
+  let tmp_tbl = Caml.Hashtbl.create (Caml.Hashtbl.length tbl) in
+  Caml.Hashtbl.iter begin fun k _ ->
+    if not (Caml.Hashtbl.mem tmp_tbl k) then Caml.Hashtbl.add tmp_tbl k ();
   end tbl;
-  Hashtbl.fold (fun k () acc -> k::acc) tmp_tbl []
+  Caml.Hashtbl.fold (fun k () acc -> k::acc) tmp_tbl []
 
 let hashtbl_all_values tbl =
   let keys = hashtbl_keys tbl in
   List.fold_left keys
-    ~f:(fun acc key -> (key, Hashtbl.find_all tbl key) :: acc) ~init:[]
+    ~f:(fun acc key -> (key, Caml.Hashtbl.find_all tbl key) :: acc) ~init:[]
 
 let parallel_resolve_types workers collated tcopt =
   (* TODO jwatzman #2910120 this scheme is still pretty dumb but at least kinda
    * sorta works on medium-sized examples. Should make it scale all the way. *)
   let values = hashtbl_all_values collated in
-  Hashtbl.clear collated;
+  Caml.Hashtbl.clear collated;
   let result =
     MultiWorker.call
       workers
@@ -179,7 +179,7 @@ let parallel_resolve_types workers collated tcopt =
  * at all the positions in the code where we have a suggestion and unify across
  * all the suggestions to see if we can find something that works. *)
 let collate_types fast all_types =
-  let tbl = Hashtbl.create (Relative_path.Map.cardinal fast) in
+  let tbl = Caml.Hashtbl.create (Relative_path.Map.cardinal fast) in
   List.iter all_types begin fun (env, pos, k, ty) ->
     let fn = Pos.filename pos in
     let line, _, _ = Pos.info_pos pos in
@@ -187,7 +187,7 @@ let collate_types fast all_types =
      * a file we do care about calls a function in a file we don't, causing us
      * to infer a parameter type in the target file. *)
     if Relative_path.Map.mem fast fn
-    then Hashtbl.add tbl (fn, line, k) (env, ty);
+    then Caml.Hashtbl.add tbl (fn, line, k) (env, ty);
   end;
   tbl
 

@@ -7,10 +7,10 @@
  *
  *)
 
+open Core_kernel
 module Env = Typing_env
 
 open Tty
-open Hh_core
 
 (*****************************************************************************)
 (* Logging type inference environment                                        *)

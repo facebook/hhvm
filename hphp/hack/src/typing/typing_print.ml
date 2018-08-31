@@ -12,7 +12,7 @@
 (* Pretty printing of types *)
 (*****************************************************************************)
 
-open Hh_core
+open Core_kernel
 open Typing_defs
 open Utils
 
@@ -297,9 +297,9 @@ module Full = struct
     fun ld x y rd -> delimited_list comma_sep ld x y rd
 
   let shape_map fdm f_field =
-    let cmp = (fun (k1, _) (k2, _) ->
+    let compare = (fun (k1, _) (k2, _) ->
        compare (Env.get_shape_field_name k1) (Env.get_shape_field_name k2)) in
-    let fields = List.sort ~cmp (Nast.ShapeMap.elements fdm) in
+    let fields = List.sort ~compare (Nast.ShapeMap.elements fdm) in
     List.map fields f_field
 
   let rec ty: type a. _ -> _ -> _ -> a ty -> Doc.t =
@@ -541,7 +541,7 @@ module Full = struct
   let to_string to_doc env x =
     ty to_doc ISet.empty env x
     |> Libhackfmt.format_doc_unbroken format_env
-    |> String.trim
+    |> String.strip
 
   let constraints_for_type to_doc env ty =
     let tparams = SSet.elements (Env.get_tparams env ty) in
@@ -562,7 +562,7 @@ module Full = struct
   let to_string_rec env n x =
     ty Doc.text (ISet.add n ISet.empty) env x
     |> Libhackfmt.format_doc_unbroken format_env
-    |> String.trim
+    |> String.strip
 
   let to_string_strip_ns env x =
     to_string text_strip_ns env x
@@ -620,7 +620,7 @@ module Full = struct
     in
     Concat [prefix; body; constraints]
     |> Libhackfmt.format_doc format_env
-    |> String.trim
+    |> String.strip
 
 end
 
@@ -1022,5 +1022,5 @@ let typedef tcopt td = PrintTypedef.typedef tcopt td
 let constraints_for_type env ty =
   Full.constraints_for_type Doc.text env ty
   |> Option.map ~f:(Libhackfmt.format_doc_unbroken Full.format_env)
-  |> Option.map ~f:String.trim
+  |> Option.map ~f:String.strip
 let class_kind c_kind final = ErrorString.class_kind c_kind final

@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 open Typing_defs
 
 module Reason  = Typing_reason
@@ -96,13 +97,13 @@ module LeastUpperBound = struct
     let (r1, ty_1), (_, ty_2) = (ty1, ty2) in
     match ty_1, ty_2 with
       | Ttuple tyl1, Ttuple tyl2 ->
-        begin try let tyl = List.map2 (type_visitor ~f ~default) tyl1 tyl2 in
+        begin try let tyl = List.map2_exn ~f:(type_visitor ~f ~default) tyl1 tyl2 in
           r1, Ttuple tyl
           with _ -> default
         end
       | Tclass ((p, id1), tyl1), Tclass((_, id2), tyl2) ->
         if id1 = id2 then
-          begin try let tyl = List.map2 (type_visitor ~f ~default) tyl1 tyl2 in
+          begin try let tyl = List.map2_exn ~f:(type_visitor ~f ~default) tyl1 tyl2 in
             r1, Tclass ((p, id1), tyl)
             with _ -> default
           end

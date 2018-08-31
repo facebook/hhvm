@@ -6,7 +6,8 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Hh_core
+open Core_kernel
+open Common
 
 include Typing_env_types
 
@@ -28,7 +29,7 @@ exception Continuation_not_found of string
 
 let get_cont cont m =
   try CMap.find cont m
-  with Not_found ->
+  with Caml.Not_found ->
     (* Programming error. This is not supposed to happen. *)
     raise (Continuation_not_found ("There is no continuation " ^
       (C.to_string cont) ^ " in the locals."))
@@ -38,7 +39,7 @@ let try_get_conts conts m =
   let rec aux contl m =
     match contl with
     | [] -> raise (Continuation_not_found ("None of the continuations " ^
-      (String.concat ", " (List.map ~f:C.to_string conts)) ^ " were found."))
+      (String.concat ~sep:", " (List.map ~f:C.to_string conts)) ^ " were found."))
     | cont :: contl ->
       begin match get_cont_option cont m with
       | None -> aux contl m

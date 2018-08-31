@@ -7,7 +7,8 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
+open Common
 open Nast
 open Typing_defs
 

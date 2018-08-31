@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Utils
 open Typing_defs
 
@@ -1899,7 +1899,7 @@ let decompose_subtype_add_bound
   let env, ty_sub = Env.expand_type env ty_sub in
   match ty_sub, ty_super with
   (* name_sub <: ty_super so add an upper bound on name_sub *)
-  | (_, Tabstract (AKgeneric name_sub, _)), _ when ty_sub != ty_super ->
+  | (_, Tabstract (AKgeneric name_sub, _)), _ when not (phys_equal ty_sub ty_super) ->
     Typing_log.log_types 2 p env
       [Typing_log.Log_sub ("Typing_subtype.decompose_subtype_add_bound",
        [Typing_log.Log_type ("ty_sub", ty_sub);
@@ -1910,7 +1910,7 @@ let decompose_subtype_add_bound
     else Env.add_upper_bound ~intersect:(try_intersect env) env name_sub ty_super
 
   (* ty_sub <: name_super so add a lower bound on name_super *)
-  | _, (_, Tabstract (AKgeneric name_super, _)) when ty_sub != ty_super ->
+  | _, (_, Tabstract (AKgeneric name_super, _)) when not (phys_equal ty_sub ty_super) ->
     Typing_log.log_types 2 p env
     [Typing_log.Log_sub ("Typing_subtype.decompose_subtype_add_bound",
      [Typing_log.Log_type ("ty_sub", ty_sub);

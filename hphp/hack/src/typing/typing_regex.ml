@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 open Typing_defs
 open Nast
 open Ast_defs
@@ -50,9 +51,9 @@ let keys p s =
     with Pcre.Error (Pcre.InternalError s) -> internal_error s in
   (*  For re"Hel(\D)(?'o'\D)", this is [2] *)
   let numbers =
-    try List.map (Pcre.get_stringnumber pattern) names
+    try List.map ~f:(Pcre.get_stringnumber pattern) names
     with Invalid_argument s -> internal_error s in
-  let names_numbers = List.combine names numbers in
+  let names_numbers = List.zip_exn names numbers in
   let names_numbers_sorted =
     List.sort (fun nn1 nn2 -> ~- (Pervasives.compare (snd nn1) (snd nn2)))
       names_numbers in
@@ -64,8 +65,8 @@ let type_match p s =
   let sft =
     { sft_optional = true; sft_ty = Reason.Rregex p, Tprim Tstring; } in
   let keys = keys p s in
-  let shape_map = List.fold_left (fun acc key -> ShapeMap.add key sft acc)
-    ShapeMap.empty keys in
+  let shape_map = List.fold_left ~f:(fun acc key -> ShapeMap.add key sft acc)
+    ~init:ShapeMap.empty keys in
   (* Any Regex\Match will contain the entire matched substring at key 0.
     For now, as the native impl omits non-matching captures,
     all fields but the 0 field will be optional. *)
@@ -73,13 +74,13 @@ let type_match p s =
   Reason.Rregex p, Tshape (FieldsFullyKnown, shape_map)
 
 let check_global_options s =
-  String.iter (fun c ->
+  String.iter ~f:(fun c ->
     match c with
     | 'i' | 'm' | 's' | 'x' | 'A' | 'D' | 'S' | 'U' | 'X' | 'u' -> ()
     | _ -> raise Invalid_global_option) s
 
 let rec find_delimiter s desired from_i =
-  match String.index_from_opt s from_i desired with
+  match String.index_from s from_i desired with
   | Some i ->
     if i <> 0 && s.[i - 1] = '\\'
     then find_delimiter s desired (i + 1)

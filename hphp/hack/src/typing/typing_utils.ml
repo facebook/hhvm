@@ -7,7 +7,8 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
+open Common
 open Typing_defs
 
 module N = Nast
@@ -253,7 +254,7 @@ let get_class_ids env ty =
     | _, Tclass ((_, cid), _) -> cid::acc
     | _, (Toption ty | Tabstract (_, Some ty)) -> aux seen acc ty
     | _, Tunresolved tys -> List.fold tys ~init:acc ~f:(aux seen)
-    | _, Tabstract (AKgeneric name, None) when not (List.mem seen name) ->
+    | _, Tabstract (AKgeneric name, None) when not (List.mem ~equal:(=) seen name) ->
       let seen = name :: seen in
       let upper_bounds = Env.get_upper_bounds env name in
       TySet.fold (fun ty acc -> aux seen acc ty) upper_bounds acc

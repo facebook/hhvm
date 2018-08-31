@@ -55,7 +55,7 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   let env, _ = Test.full_check env in
 
   (match env.ServerEnv.prechecked_files with
-  | ServerEnv.Prechecked_files_ready -> ()
+  | ServerEnv.Prechecked_files_ready _ -> ()
   | _ -> assert false);
 
   Test.assert_no_errors env;

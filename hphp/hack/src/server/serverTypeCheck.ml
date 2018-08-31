@@ -804,7 +804,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     in
     (* Add new things that need to be rechecked *)
     let needs_recheck =
-      Relative_path.Set.union old_env.needs_recheck lazy_check_later in
+      Relative_path.Set.union env.needs_recheck lazy_check_later in
     (* Remove things that were cancelled from things we started rechecking... *)
     let fast, needs_recheck = List.fold cancelled ~init:(fast, needs_recheck)
       ~f:begin fun (fast, needs_recheck) (path, _) ->

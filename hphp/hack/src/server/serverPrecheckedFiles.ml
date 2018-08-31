@@ -27,8 +27,6 @@ let update_after_recheck env =
      * and expand them too *)
     let more_deps, dirty_master_deps =
       intersect_with_master_deps ~deps ~dirty_master_deps in
-    (* TODO: need to remember those and use them in incremental mode too. *)
-    ignore dirty_master_deps;
     let deps = Typing_deps.DepSet.union deps more_deps in
     let needs_recheck = Typing_deps.get_files deps in
 
@@ -39,7 +37,8 @@ let update_after_recheck env =
       let init_env = { env.init_env with needs_full_init = true } in
       { env with needs_recheck; full_check; init_env }
     end in
-    set env Prechecked_files_ready
+    let dirty_local_deps = Typing_deps.DepSet.empty in
+    set env (Prechecked_files_ready { dirty_local_deps; dirty_master_deps} )
   | _ -> env
 
 let update_after_local_changes env changes =
@@ -48,6 +47,16 @@ let update_after_local_changes env changes =
   | Initial_typechecking { dirty_local_deps; dirty_master_deps } ->
     let dirty_local_deps = Typing_deps.DepSet.union changes dirty_local_deps in
     set env (Initial_typechecking { dirty_local_deps; dirty_master_deps })
-  | Prechecked_files_ready ->
-    (* TODO *)
-    env
+  | Prechecked_files_ready { dirty_local_deps; dirty_master_deps } ->
+    let changes = Typing_deps.add_all_deps changes in
+    let deps, dirty_master_deps =
+      intersect_with_master_deps ~deps:changes ~dirty_master_deps in
+    let needs_recheck = Typing_deps.get_files deps in
+    let env = if Relative_path.Set.is_empty needs_recheck then env else begin
+      Hh_logger.log "Adding %d files to recheck"
+        (Relative_path.Set.cardinal needs_recheck);
+      let needs_recheck =
+        Relative_path.Set.union env.needs_recheck needs_recheck in
+      { env with needs_recheck;}
+    end in
+    set env (Prechecked_files_ready { dirty_local_deps; dirty_master_deps })

@@ -173,7 +173,7 @@ and dirty_deps = {
 and prechecked_files_status =
   | Prechecked_files_disabled
   | Initial_typechecking of dirty_deps
-  | Prechecked_files_ready
+  | Prechecked_files_ready of dirty_deps
 
 and init_env = {
   init_start_t : float;

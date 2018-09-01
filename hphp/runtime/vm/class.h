@@ -1358,7 +1358,8 @@ private:
   void importTraitInstanceProp(Prop&       traitProp,
                                const TypedValue& traitPropVal,
                                const int idxOffset,
-                               PropMap::Builder& curPropMap);
+                               PropMap::Builder& curPropMap,
+                               SPropMap::Builder& curSPropMap);
   void importTraitStaticProp(SProp&   traitProp,
                              const int idxOffset,
                              PropMap::Builder& curPropMap,

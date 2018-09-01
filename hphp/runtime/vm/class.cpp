@@ -2763,7 +2763,14 @@ const constexpr Attr kRedeclarePropAttrMask =
 void Class::importTraitInstanceProp(Prop& traitProp,
                                     const TypedValue& traitPropVal,
                                     const int idxOffset,
-                                    PropMap::Builder& curPropMap) {
+                                    PropMap::Builder& curPropMap,
+                                    SPropMap::Builder& curSPropMap) {
+  // Check if prop already declared as static
+  if (curSPropMap.find(traitProp.name) != curSPropMap.end()) {
+    raise_error("trait declaration of property '%s' is incompatible with "
+                "previous declaration", traitProp.name->data());
+  }
+
   auto prevIt = curPropMap.find(traitProp.name);
 
   if (prevIt == curPropMap.end()) {
@@ -2916,7 +2923,8 @@ void Class::importTraitProps(int traitIdx,
         Prop prop;
         initProp(prop, preProp);
         prop.idx = 0;
-        importTraitInstanceProp(prop, preProp->val(), idxOffset, curPropMap);
+        importTraitInstanceProp(prop, preProp->val(), idxOffset,
+                                curPropMap, curSPropMap);
       } else {
         SProp prop;
         initProp(prop, preProp);
@@ -2937,7 +2945,8 @@ void Class::importTraitProps(int traitIdx,
     for (Slot p = 0; p < trait->m_declProperties.size(); p++) {
       auto& traitProp    = trait->m_declProperties[p];
       auto& traitPropVal = trait->m_declPropInit[p];
-      importTraitInstanceProp(traitProp, traitPropVal, idxOffset, curPropMap);
+      importTraitInstanceProp(traitProp, traitPropVal, idxOffset,
+                              curPropMap, curSPropMap);
     }
 
     // static properties

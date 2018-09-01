@@ -525,6 +525,7 @@ protected:
 
 public:
   explicit X64AssemblerBase(CodeBlock& cb) : codeBlock(cb) {}
+  virtual ~X64AssemblerBase() {}
 
   CodeBlock& code() const { return codeBlock; }
 

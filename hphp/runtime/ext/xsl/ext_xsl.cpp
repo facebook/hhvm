@@ -549,22 +549,13 @@ HHVM_METHOD(XSLTProcessor, setParameter, const Variant& /*namespaceURI*/,
 
   // namespaceURI argument is unused in PHP5 XSL extension.
   if (localName.isString() && value.isString()) {
-    if (data->m_params.exists(localName)) {
-      data->m_params.set(localName, value);
-    } else {
-      data->m_params.add(localName, value);
-    }
-
+    data->m_params.set(localName, value);
     return true;
   } else if (localName.isArray() && value.isNull()) {
     int ret = true;
     for (ArrayIter iter(localName); iter; ++iter) {
       if (iter.first().isString() && iter.second().isString()) {
-        if (data->m_params.exists(iter.first().toString())) {
-          data->m_params.set(iter.first().toString(), iter.second().toString());
-        } else {
-          data->m_params.add(iter.first().toString(), iter.second().toString());
-        }
+        data->m_params.set(iter.first().toString(), iter.second().toString());
       } else {
         ret = false;
       }

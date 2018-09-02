@@ -249,9 +249,9 @@ TEST_F(ProxygenTransportTest, push_empty_body) {
   Array responseHeaders;
   uint8_t pri = 1;
 
-  promiseHeaders.add(String("hello"),
+  promiseHeaders.set(String("hello"),
                      String("world"));  // dict serializtion path
-  responseHeaders.add(String("foo"), String("bar"));  // dict serializtion path
+  responseHeaders.set(String("foo"), String("bar"));  // dict serializtion path
   pushResource(promiseHeaders, responseHeaders, pri, true /* eom, no body */);
 
   // Creates a new transaction and sends headers and an empty body
@@ -274,9 +274,9 @@ TEST_F(ProxygenTransportTest, push_abort_incomplete) {
   Array responseHeaders;
   uint8_t pri = 1;
 
-  promiseHeaders.add(String("hello"),
+  promiseHeaders.set(String("hello"),
                      String("world"));  // dict serializtion path
-  responseHeaders.add(String("foo"), String("bar"));  // dict serializtion path
+  responseHeaders.set(String("foo"), String("bar"));  // dict serializtion path
   pushResource(promiseHeaders, responseHeaders, pri);
 
   // Creates a new transaction and sends headers, but not body
@@ -303,9 +303,9 @@ TEST_F(ProxygenTransportTest, push_abort) {
   Array responseHeaders;
   uint8_t pri = 1;
 
-  promiseHeaders.add(String("hello"),
+  promiseHeaders.set(String("hello"),
                      String("world"));  // dict serializtion path
-  responseHeaders.add(String("foo"), String("bar"));  // dict serializtion path
+  responseHeaders.set(String("foo"), String("bar"));  // dict serializtion path
   auto id = pushResource(promiseHeaders, responseHeaders, pri);
 
   // Creates a new transaction and sends headers, but not body

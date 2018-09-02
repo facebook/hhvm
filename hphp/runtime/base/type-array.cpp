@@ -721,16 +721,6 @@ void Array::setRefImpl(const T& key, tv_lval v) {
   }
 }
 
-template<typename T> ALWAYS_INLINE
-void Array::addImpl(const T& key, TypedValue v) {
-  if (!m_arr) {
-    m_arr = Ptr::attach(ArrayData::Create(key, v));
-  } else {
-    auto const escalated = m_arr->set(key, tvToCell(v), m_arr->cowCheck());
-    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace detail {
@@ -870,7 +860,6 @@ FOR_EACH_KEY_TYPE(void, remove, )
   }
 
 FOR_EACH_KEY_TYPE(set, TypedValue)
-FOR_EACH_KEY_TYPE(add, TypedValue)
 FOR_EACH_KEY_TYPE(setWithRef, TypedValue)
 FOR_EACH_KEY_TYPE(setRef, Variant&)
 FOR_EACH_KEY_TYPE(setRef, tv_lval)
@@ -891,7 +880,6 @@ FOR_EACH_KEY_TYPE(setRef, tv_lval)
 
 FOR_EACH_KEY_TYPE(set)
 FOR_EACH_KEY_TYPE(setWithRef)
-FOR_EACH_KEY_TYPE(add)
 
 #undef I
 #undef V

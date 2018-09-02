@@ -569,7 +569,7 @@ Array VarEnv::getDefinedVariables() const {
     if (tvAsCVarRef(tv).isReferenced()) {
       ret.setWithRef(StrNR(sd).asString(), tvAsCVarRef(tv));
     } else {
-      ret.add(StrNR(sd).asString(), tvAsCVarRef(tv));
+      ret.set(StrNR(sd).asString(), tvAsCVarRef(tv));
     }
   }
   {

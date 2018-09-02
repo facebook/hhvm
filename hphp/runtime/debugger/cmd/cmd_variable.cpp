@@ -264,7 +264,7 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
       tvThis.m_data.pobj = oThis;
 
       Variant thisName(s_this);
-      m_variables.add(thisName, tvAsVariant(&tvThis));
+      m_variables.set(thisName, tvAsVariant(&tvThis));
     }
   }
 

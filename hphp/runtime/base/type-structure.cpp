@@ -540,10 +540,10 @@ Array resolveShape(TSEnv& env,
     auto value = resolveTS(env, valueArr, typeCns, typeCnsCls, generics);
 
     if (wrapper.exists(s_optional_shape_field)) {
-      value.add(s_optional_shape_field, true_varNR.tv());
+      value.set(s_optional_shape_field, true_varNR.tv());
     }
 
-    newfields.add(key, Variant(value));
+    newfields.set(key, Variant(value));
   }
 
   return newfields;
@@ -572,8 +572,8 @@ bool resolveClass(TSEnv& env,
   }
 
   ret.set(s_kind, Variant(static_cast<uint8_t>(resolvedKind)));
-  ret.add(s_classname, Variant(makeStaticString(cls->name())));
-  if (clsName.same(s_this)) ret.add(s_exact, true_varNR.tv());
+  ret.set(s_classname, Variant(makeStaticString(cls->name())));
+  if (clsName.same(s_this)) ret.set(s_exact, true_varNR.tv());
 
   return true;
 }
@@ -597,11 +597,11 @@ Array resolveTS(TSEnv& env,
     arr[s_kind].toInt64Val());
 
   auto newarr = Array::CreateDArray();
-  if (arr.exists(s_nullable)) newarr.add(s_nullable, true_varNR.tv());
-  newarr.add(s_kind, Variant(static_cast<uint8_t>(kind)));
+  if (arr.exists(s_nullable)) newarr.set(s_nullable, true_varNR.tv());
+  newarr.set(s_kind, Variant(static_cast<uint8_t>(kind)));
 
   if (arr.exists(s_allows_unknown_fields)) {
-    newarr.add(s_allows_unknown_fields, true_varNR.tv());
+    newarr.set(s_allows_unknown_fields, true_varNR.tv());
   }
 
   switch (kind) {
@@ -610,7 +610,7 @@ Array resolveTS(TSEnv& env,
       auto const elemsArr = arr[s_elem_types].toCArrRef();
       auto const elemTypes =
         resolveList(env, elemsArr, typeCns, typeCnsCls, generics);
-      newarr.add(s_elem_types, Variant(elemTypes));
+      newarr.set(s_elem_types, Variant(elemTypes));
       break;
     }
     case TypeStructure::Kind::T_fun: {
@@ -619,13 +619,13 @@ Array resolveTS(TSEnv& env,
       auto const returnArr = arr[s_return_type].toCArrRef();
       auto const returnType =
         resolveTS(env, returnArr, typeCns, typeCnsCls, generics);
-      newarr.add(s_return_type, Variant(returnType));
+      newarr.set(s_return_type, Variant(returnType));
 
       assertx(arr.exists(s_param_types));
       auto const paramsArr = arr[s_param_types].toCArrRef();
       auto const paramTypes =
         resolveList(env, paramsArr, typeCns, typeCnsCls, generics);
-      newarr.add(s_param_types, Variant(paramTypes));
+      newarr.set(s_param_types, Variant(paramTypes));
       break;
     }
     case TypeStructure::Kind::T_array:
@@ -645,7 +645,7 @@ Array resolveTS(TSEnv& env,
         env.invalidType = true;
       }
       if (arr.exists(s_generic_types)) {
-        newarr.add(s_generic_types,
+        newarr.set(s_generic_types,
                    Variant(resolveGenerics(env, arr, typeCns, typeCnsCls,
                                            generics)));
       }
@@ -653,7 +653,7 @@ Array resolveTS(TSEnv& env,
     }
     case TypeStructure::Kind::T_shape: {
       auto const fields = resolveShape(env, arr, typeCns, typeCnsCls, generics);
-      newarr.add(s_fields, Variant(fields));
+      newarr.set(s_fields, Variant(fields));
       break;
     }
     case TypeStructure::Kind::T_unresolved: {
@@ -665,7 +665,7 @@ Array resolveTS(TSEnv& env,
         Class::Const typeCns;
         typeCns.name = clsName.get();
         auto resolved = resolveTS(env, ts, typeCns, nullptr, generics);
-        resolved.add(s_alias, Variant(clsName));
+        resolved.set(s_alias, Variant(clsName));
         return resolved;
       };
 
@@ -686,12 +686,12 @@ Array resolveTS(TSEnv& env,
           }
           auto generics = newarr.toArray();
           ts = resolve(generics);
-          ts.add(s_typevar_types, Variant(generics));
+          ts.set(s_typevar_types, Variant(generics));
         } else {
           ts = resolve();
         }
         if (arr.exists(s_nullable)) {
-          ts.add(s_nullable, true_varNR.tv());
+          ts.set(s_nullable, true_varNR.tv());
         }
 
         return ts;
@@ -702,22 +702,22 @@ Array resolveTS(TSEnv& env,
        * compatible with php. We simply return as a OF_CLASS with class name
        * set to 'callable'. */
       if (clsName.same(s_callable)) {
-        newarr.add(s_kind,
+        newarr.set(s_kind,
                    Variant(static_cast<uint8_t>(TypeStructure::Kind::T_class)));
-        newarr.add(s_classname, Variant(clsName));
+        newarr.set(s_classname, Variant(clsName));
         break;
       }
       if (!resolveClass(env, newarr, clsName, typeCns, typeCnsCls) &&
           env.allow_partial) {
         env.partial = true;
-        newarr.add(s_kind,
+        newarr.set(s_kind,
                    Variant(static_cast<uint8_t>(
                            TypeStructure::Kind::T_unresolved)));
-        newarr.add(s_classname, Variant(clsName));
+        newarr.set(s_classname, Variant(clsName));
         break;
       }
       if (arr.exists(s_generic_types)) {
-        newarr.add(s_generic_types,
+        newarr.set(s_generic_types,
                    Variant(resolveGenerics(env, arr, typeCns, typeCnsCls,
                                            generics)));
       }
@@ -771,7 +771,7 @@ Array resolveTS(TSEnv& env,
       }
 
       if (arr.exists(s_nullable)) {
-        typeCnsVal.add(s_nullable, true_varNR.tv());
+        typeCnsVal.set(s_nullable, true_varNR.tv());
       }
 
       return typeCnsVal;
@@ -794,7 +794,7 @@ Array resolveTS(TSEnv& env,
       return arr.toDArray();
   }
 
-  if(arr.exists(s_typevars)) newarr.add(s_typevars, arr[s_typevars]);
+  if (arr.exists(s_typevars)) newarr.set(s_typevars, arr[s_typevars]);
 
   return newarr;
 }
@@ -844,7 +844,7 @@ Array TypeStructure::resolve(const String& aliasName,
   typeCns.name = aliasName.get();
   TSEnv env;
   auto resolved = resolveTS(env, arr, typeCns, nullptr, generics);
-  resolved.add(s_alias, Variant(aliasName));
+  resolved.set(s_alias, Variant(aliasName));
   persistent = env.persistent;
   return resolved;
 }

@@ -1238,21 +1238,21 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
     }
     if (details) {
       Array item = Array::Create();
-      item.add(s_global_value, value);
-      item.add(s_local_value, value);
+      item.set(s_global_value, value);
+      item.set(s_local_value, value);
       if (iter.second.mode == PHP_INI_ALL) {
-        item.add(
+        item.set(
           s_access,
           Variant(PHP_INI_USER | PHP_INI_SYSTEM | PHP_INI_PERDIR)
         );
       } else if (iter.second.mode == PHP_INI_ONLY) {
-        item.add(s_access, Variant(PHP_INI_SYSTEM));
+        item.set(s_access, Variant(PHP_INI_SYSTEM));
       } else {
-        item.add(s_access, Variant(iter.second.mode));
+        item.set(s_access, Variant(iter.second.mode));
       }
-      r.add(String(iter.first), item);
+      r.set(String(iter.first), item);
     } else {
-      r.add(String(iter.first), value);
+      r.set(String(iter.first), value);
     }
   }
   return r;

@@ -114,7 +114,7 @@ static Variant preg_replace_callback_array_impl(
         total_replacement_count += count.toInt64();
       }
     }
-    ret.add(key++, subj);
+    ret.set(key++, subj);
   }
 
   // If count was passed in as an explicit reference, we will assign it to our
@@ -155,7 +155,7 @@ Variant HHVM_FUNCTION(preg_replace_callback_array,
 
   if (subject.isString()) {
     Array subject_arr = Array::Create();
-    subject_arr.add(0, subject.toString());
+    subject_arr.set(0, subject.toString());
     Variant ret = preg_replace_callback_array_impl(
       patterns_and_callbacks, subject_arr, limit, count
     );

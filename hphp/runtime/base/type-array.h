@@ -511,14 +511,6 @@ public:
   FOR_EACH_KEY_TYPE(setRef, Variant&)
   FOR_EACH_KEY_TYPE(setRef, tv_lval);
 
-  /*
-   * Add an element.
-   *
-   * Like set(), but with the precondition that the key does not already exist
-   * in the array.
-   */
-  FOR_EACH_KEY_TYPE(add, TypedValue)
-
 #undef D
 #undef I
 #undef V
@@ -535,7 +527,6 @@ public:
    */
   FOR_EACH_KEY_TYPE(set, const Variant&)
   FOR_EACH_KEY_TYPE(setWithRef, const Variant&)
-  FOR_EACH_KEY_TYPE(add, const Variant&)
 
 #undef D
 #undef I
@@ -587,7 +578,6 @@ private:
   template<typename T> void setWithRefImpl(const T& key, TypedValue v);
   template<typename T> void setRefImpl(const T& key, Variant& v);
   template<typename T> void setRefImpl(const T& key, tv_lval v);
-  template<typename T> void addImpl(const T& key, TypedValue v);
 
   static void compileTimeAssertions();
 

@@ -370,8 +370,8 @@ static bool filter_var(Variant& ret, const Variant& variable, int64_t filter,
   return true;
 }
 
-static bool filter_recursive(Variant& ret, const Variant& variable, int64_t filter,
-                             const Variant& options) {
+static bool filter_recursive(Variant& ret, const Variant& variable,
+                             int64_t filter, const Variant& options) {
   Array arr = Array::Create();
   for (ArrayIter iter(variable.toArray()); iter; ++iter) {
     Variant v;
@@ -380,7 +380,7 @@ static bool filter_recursive(Variant& ret, const Variant& variable, int64_t filt
     } else {
       FAIL_IF(!filter_var(v, iter.second(), filter, options));
     }
-    arr.add(iter.first(), v);
+    arr.set(iter.first(), v);
   }
   ret = arr;
   return true;

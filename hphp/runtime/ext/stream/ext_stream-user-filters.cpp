@@ -43,7 +43,7 @@ const StaticString s_default_filters_register_func(
 
 struct StreamFilterRepository {
   void add(const String& key, const Variant& v) {
-    m_filters.add(key, v);
+    m_filters.set(key, v);
   }
 
   void detach() {

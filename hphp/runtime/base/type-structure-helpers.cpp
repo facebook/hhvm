@@ -556,10 +556,10 @@ Array resolveAndVerifyTypeStructure(
     if (RuntimeOption::EvalIsExprEnableUnresolvedWarning) raise_warning(errMsg);
     // Lets just return an unresolved array instead
     resolved = Array::CreateDArray();
-    resolved.add(s_kind,
+    resolved.set(s_kind,
                  Variant(static_cast<uint8_t>(
                          TypeStructure::Kind::T_unresolved)));
-    resolved.add(s_classname, Variant(s_unresolved));
+    resolved.set(s_classname, Variant(s_unresolved));
   }
   assertx(!resolved.empty());
   assertx(resolved.isDictOrDArray());

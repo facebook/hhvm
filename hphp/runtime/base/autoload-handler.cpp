@@ -395,7 +395,7 @@ bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
   // in which case autoload is allowed to be reentrant.
   if (!forceSplStack) {
     if (m_loading.exists(className)) { return false; }
-    m_loading.add(className, className);
+    m_loading.set(className, className);
   } else {
     // We can still overflow the stack if there is a loop when using
     // spl_autoload_call directly, but this behavior matches PHP5.

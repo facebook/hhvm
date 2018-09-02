@@ -3736,7 +3736,7 @@ void Class::getMethodNames(const Class* cls,
       auto const methName = Variant(meth->name(), Variant::PersistentStrInit{});
       auto const lowerName = f_strtolower(methName.toString());
       if (!out.exists(lowerName)) {
-        out.add(lowerName, methName);
+        out.set(lowerName, methName);
       }
     };
 

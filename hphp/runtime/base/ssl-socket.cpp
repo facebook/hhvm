@@ -482,7 +482,7 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
   }
 
   if (!m_context.exists(s_verify_peer)) {
-    m_context.add(s_verify_peer, true);
+    m_context.set(s_verify_peer, true);
   }
 
   /* need to do slightly different things, based on client/server method,

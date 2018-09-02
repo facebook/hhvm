@@ -1503,7 +1503,7 @@ static Array HHVM_METHOD(ReflectionClass, getAttributesRecursive) {
     for (auto it = pcls->userAttributes().begin();
          it != pcls->userAttributes().end(); ++it) {
       if (!ret.exists(StrNR(it->first))) {
-        ret.add(StrNR(it->first), tvAsCVarRef(&it->second));
+        ret.set(StrNR(it->first), tvAsCVarRef(&it->second));
       }
     }
   } while ((currentCls = currentCls->parent()));
@@ -1972,7 +1972,7 @@ static Array HHVM_METHOD(ReflectionProperty, getAttributes) {
       auto const prop = data->getProp();
       auto const preProp = prop->cls->preClass()->lookupProp(prop->name);
       for (auto attr : preProp->userAttributes()) {
-        attrs.add(StrNR(attr.first), attr.second);
+        attrs.set(StrNR(attr.first), attr.second);
       }
       return attrs;
     }
@@ -1980,7 +1980,7 @@ static Array HHVM_METHOD(ReflectionProperty, getAttributes) {
       auto const prop = data->getSProp();
       auto const preProp = prop->cls->preClass()->lookupProp(prop->name);
       for (auto attr : preProp->userAttributes()) {
-        attrs.add(StrNR(attr.first), attr.second);
+        attrs.set(StrNR(attr.first), attr.second);
       }
       return attrs;
     }

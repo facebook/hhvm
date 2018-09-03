@@ -54,6 +54,7 @@ struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
    * Create a RefData, allocated in the request local heap.
    */
   static RefData* Make(Cell v) {
+    assertx(cellIsPlausible(v));
     return new (tl_heap->objMalloc(sizeof(RefData)))
       RefData(v.m_type, v.m_data.num);
   }
@@ -81,8 +82,15 @@ struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
    */
   const Cell* cell() const {
     assertx(kindIsValid());
+    assertx(cellIsPlausible(m_cell));
     return &m_cell;
   }
+
+  /*
+   * This can never return a pointer to non-Cell when valid, but can
+   * be used to obtain a pointer for writing, after initInRDS() when
+   * m_cell still is uninitialized.
+   */
   Cell* cell() {
     assertx(kindIsValid());
     return &m_cell;

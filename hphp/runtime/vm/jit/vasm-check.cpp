@@ -86,7 +86,7 @@ checkSSA(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
 
     auto const& block = unit.blocks[b];
     auto const lastOp = block.code.back().op;
-    if (lastOp == Vinstr::phijmp || lastOp == Vinstr::phijcc) {
+    if (lastOp == Vinstr::phijmp) {
       for (DEBUG_ONLY auto s : succs(block)) {
         assert_flog(
           !unit.blocks[s].code.empty() &&

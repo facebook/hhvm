@@ -491,39 +491,6 @@ void profile(Env& env, jcci& inst, Vlabel b) {
   from = jcc{inst.cc, inst.sf, {inst.target, header}};
 }
 
-void profile(Env& env, phijcc& inst, Vlabel b) {
-  auto& unit = env.unit;
-
-  auto const fresh_tuple = [&] {
-    auto copy = unit.tuples[inst.uses];
-    for (auto& r : copy) r = unit.makeReg();
-    return unit.makeTuple(copy);
-  };
-
-  auto branch = branch_id_for(env, inst, b);
-  auto const taken = inst.targets[1];
-
-  for (auto& s : inst.targets) {
-    DEBUG_ONLY auto const& to = unit.blocks[s].code.front();
-    assertx(to.op == Vinstr::phidef);
-    assertx(unit.tuples[inst.uses].size() ==
-            unit.tuples[to.phidef_.defs].size());
-
-    auto const middlemen = fresh_tuple();
-
-    create_profiling_header(
-      env, branch.take(s == taken), s,
-      [&] (Vout& v, Vlabel) {
-        v << phidef{middlemen};
-      },
-      [&] (Vout& v, Vlabel header) {
-        v << phijmp{s, middlemen};
-        s = header;
-      }
-    );
-  };
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 const Abi sf_abi {

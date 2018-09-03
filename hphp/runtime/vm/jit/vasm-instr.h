@@ -81,7 +81,6 @@ struct Vunit;
   O(store, Inone, U(s) UW(d), Dn)\
   O(mcprep, Inone, Un, D(d))\
   O(phidef, Inone, Un, D(defs))\
-  O(phijcc, I(cc), U(uses) U(sf), Dn)\
   O(phijmp, Inone, U(uses), Dn)\
   O(conjure, Inone, Un, D(c))\
   O(conjureuse, Inone, U(c), Dn)\
@@ -526,7 +525,6 @@ struct mcprep { Vreg64 d; };
  */
 struct phidef { Vtuple defs; };
 struct phijmp { Vlabel target; Vtuple uses; };
-struct phijcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; Vtuple uses; };
 
 /*
  * These marker instructions are used to model dataflow in pseudo-translations.

@@ -244,7 +244,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::orqim:
     case Vinstr::orwim:
     case Vinstr::phidef:
-    case Vinstr::phijcc:
     case Vinstr::phijmp:
     case Vinstr::phplogue:
     case Vinstr::phpret:

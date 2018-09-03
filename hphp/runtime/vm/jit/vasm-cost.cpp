@@ -32,8 +32,6 @@ Vcost instrSize(const Vunit& u, AreaIndex area, Vinstr inst) {
     return {tuple_size(inst.get<phidef>().defs), false};
   case Vinstr::phijmp:
     return {tuple_size(inst.get<phijmp>().uses) + 1, false};
-  case Vinstr::phijcc:
-    return {tuple_size(inst.get<phijcc>().uses) + 1, false};
   case Vinstr::copyargs:
     return {tuple_size(inst.get<copyargs>().s), false};
   case Vinstr::copy2:

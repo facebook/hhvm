@@ -324,8 +324,8 @@ void setupNullCtor(Class* cls) {
   clone->setNewFuncId();
   clone->setAttrs(static_cast<Attr>(
                     AttrPublic | AttrNoInjection | AttrSkipFrame |
-                    AttrRequiresThis | AttrHasForeignThis |
-                    AttrDynamicallyCallable));
+                    AttrRequiresThis | AttrDynamicallyCallable));
+  clone->setHasForeignThis(true);
   s_nullCtor = clone;
 }
 

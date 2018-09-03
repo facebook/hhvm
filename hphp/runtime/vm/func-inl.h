@@ -376,7 +376,11 @@ inline int Func::numSlotsInFrame() const {
 }
 
 inline bool Func::hasForeignThis() const {
-  return attrs() & AttrHasForeignThis;
+  return m_hasForeignThis;
+}
+
+inline void Func::setHasForeignThis(bool hasForeignThis) {
+  m_hasForeignThis = hasForeignThis;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

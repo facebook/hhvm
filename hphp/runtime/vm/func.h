@@ -641,6 +641,8 @@ struct Func final {
    */
   bool hasForeignThis() const;
 
+  void setHasForeignThis(bool);
+
   /////////////////////////////////////////////////////////////////////////////
   // Static locals.                                                     [const]
 
@@ -1435,6 +1437,7 @@ private:
   bool m_shouldSampleJit : 1;
   bool m_hot : 1;
   bool m_serialized : 1;
+  bool m_hasForeignThis : 1;
   int m_maxStackCells{0};
   uint64_t m_refBitVal{0};
   Unit* const m_unit;

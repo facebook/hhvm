@@ -290,11 +290,12 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
   }
 }
 
-Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
+Class* Class::rescope(Class* ctx, Class::CloneAttr attrs /* = None */) {
   assertx(parent() == c_Closure::classof());
   assertx(m_invoke);
 
-  bool const is_dynamic = (attrs != AttrNone);
+  bool const is_dynamic = (attrs != CloneAttr::None);
+  assertx(IMPLIES(is_dynamic, (attrs & CloneAttr::DynamicBind)));
 
   // Look up the generated template class for this particular subclass of
   // Closure.  This class maintains the table of scoped clones of itself, and
@@ -306,17 +307,26 @@ Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
   assertx(IMPLIES(is_dynamic, template_cls->m_scoped));
 
   auto const try_template = [&]() -> Class* {
-    bool const ctx_match = invoke->cls() == ctx;
-    bool const attrs_match = (attrs == AttrNone || attrs == invoke->attrs());
+    if (invoke->cls() != ctx) return nullptr;
+    if (attrs != CloneAttr::None) {
+      auto curattrs = CloneAttr::DynamicBind;
+      if (invoke->attrs() & AttrStatic) {
+        curattrs |= CloneAttr::Static;
+      }
+      if (invoke->hasForeignThis()) {
+        curattrs |= CloneAttr::HasForeignThis;
+      }
+      if (attrs != curattrs) return nullptr;
+    }
 
     // The first scoping will never be for `template_cls' (since it's
     // impossible to define a closure in the context of its own Closure
     // subclass), so if this happens, it means that `template_cls' is in a
     // "de-scoped" state and we shouldn't use it.  (See Class::releaseRefs().)
-    bool const ctx_override = template_cls->m_scoped &&
-                              invoke->cls() == template_cls;
-
-    return ctx_match && attrs_match && !ctx_override ? template_cls : nullptr;
+    if (template_cls->m_scoped && invoke->cls() == template_cls) {
+      return nullptr;
+    }
+    return template_cls;
   };
 
   // If the template class has already been scoped to `ctx', we're done.  This
@@ -373,7 +383,16 @@ Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
   if (auto cls = try_template()) return cls;
   if (auto cls = try_cache()) return cls;
 
-  fermeture->m_invoke->rescope(ctx, attrs);
+  auto const invokeAttrs = [&]() {
+    // passing AttrNone to Func::rescope means don't change attrs
+    if (!is_dynamic) return AttrNone;
+    if (attrs & CloneAttr::Static) {
+      return invoke->attrs() | AttrStatic;
+    }
+    return Attr(invoke->attrs() & ~AttrStatic);
+  }();
+  fermeture->m_invoke->rescope(ctx, invokeAttrs);
+  fermeture->m_invoke->setHasForeignThis(attrs & CloneAttr::HasForeignThis);
   fermeture->m_scoped = true;
 
   if (ctx != nullptr &&
@@ -567,11 +586,12 @@ void Class::releaseRefs() {
 
         auto const invoke = template_cls->m_invoke;
 
-        if (invoke->cls() == this && attrs == AttrNone) {
+        if (invoke->cls() == this && attrs == CloneAttr::None) {
           // We only hijack the `template_cls' as a clone for static rescopings
-          // (which are signified by AttrNone).  To undo this, we need to make
-          // sure that /no/ scoping will match with that of `template_cls'.  We
-          // can accomplish this by using `template_cls' itself as the context.
+          // (which are signified by CloneAttr::None).  To undo this, we need
+          // to make sure that /no/ scoping will match with that of
+          // `template_cls'.  We can accomplish this by using `template_cls'
+          // itself as the context.
           // Any instance of this closure will have its own scoped clone, and
           // we are de-scoping `template_cls' here, so the only way to obtain
           // it for dynamic binding is to reference it by name, which is

@@ -1,2 +1,1 @@
-
-Fatal error: %s
+Fatal error: Call to private method Bar::instanceDo() from context 'Foo' in %s/test/slow/closure/bind-private.php on line 8

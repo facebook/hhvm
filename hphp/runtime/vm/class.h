@@ -261,11 +261,26 @@ struct Class : AtomicCountable {
   using TraitAliasVec = std::vector<PreClass::TraitAliasRule::NamePair>;
 
   /*
+   * Attributes that determine how we cloned/want to clone a closure class.
+   * None indicates that the closure was created the normal CreateCl way.
+   * DynamicBind indicates that Closure::bindto was used. If it is set then
+   * Static and HasForeignThis will indicate whether the resulting clone is
+   * static (i.e. has no $this) or has a $this that has a class not matching
+   * the one it was compiled with, respectively.
+   */
+  enum class CloneAttr : uint32_t {
+    None           = 0,
+    DynamicBind    = (1u << 0),
+    Static         = (1u << 1),
+    HasForeignThis = (1u << 2),
+  };
+
+  /*
    * Scope context for a Closure subclass.
    */
   struct CloneScope {
     LowPtr<Class> ctx;
-    Attr attrs;
+    CloneAttr attrs;
 
     bool operator==(CloneScope o) const { return ctx == o.ctx &&
                                                  attrs == o.attrs; }
@@ -296,7 +311,7 @@ struct Class : AtomicCountable {
   struct ScopedCloneBackref {
     ClassPtr template_cls;
     /* LowPtr<Class> ctx_cls = this; */
-    Attr ctx_attrs;
+    CloneAttr ctx_attrs;
   };
 
   /*
@@ -322,12 +337,11 @@ struct Class : AtomicCountable {
   /*
    * Make a clone of this Closure subclass, with `ctx' as the closure scope.
    *
-   * Passing a value of `attrs' that is not AttrNone indicates that the scoping
-   * is dynamic---i.e., via Closure::bind(), as opposed to a CreateCl opcode.
-   * If the specified `attrs' do not match those of the __invoke method, we
-   * update them in the clone along with the scope.  All closure __invoke
-   * methods have AttrPublic, so using AttrNone as a sentinel here is
-   * unambiguous.
+   * Passing a value of `attrs' that is not CloneAttr::None indicates that the
+   * scoping is dynamic---i.e., via Closure::bind(), as opposed to a CreateCl
+   * opcode. In this case, they must contain CloneAttr::DynamicBind. If the
+   * Static and HasForeignThis `attrs' do not match the properties of the
+   * __invoke method, we update them in the clone along with the scope.
    *
    * If the scoping already exists in m_extra->m_scopedClones, or if this class
    * is already scoped correctly, just return it.  Otherwise, we scope our own
@@ -353,7 +367,7 @@ struct Class : AtomicCountable {
    *
    * @requires: parent() == SystemLib::s_ClosureClass
    */
-  Class* rescope(Class* ctx, Attr attrs = AttrNone);
+  Class* rescope(Class* ctx, CloneAttr attrs = CloneAttr::None);
 
   /*
    * Called when a Class becomes unreachable.
@@ -1558,6 +1572,15 @@ private:
    */
   LowPtr<Class> m_classVec[1]; // Dynamically sized; must come last.
 };
+
+constexpr bool operator&(Class::CloneAttr a, Class::CloneAttr b) {
+  return (uint32_t)a & (uint32_t)b;
+}
+
+inline Class::CloneAttr& operator|=(Class::CloneAttr& a,
+                                    const Class::CloneAttr& b) {
+  return (a = Class::CloneAttr((uint32_t)a | (uint32_t)b));
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

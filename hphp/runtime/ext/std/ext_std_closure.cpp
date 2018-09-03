@@ -220,8 +220,14 @@ static Variant HHVM_METHOD(Closure, bindto,
   auto cloneObj = this_->clone();
   auto clone = c_Closure::fromObject(cloneObj);
 
-  Attr curattrs = invoke->attrs();
-  Attr newattrs = static_cast<Attr>(curattrs & ~AttrHasForeignThis);
+  auto curattrs = Class::CloneAttr::DynamicBind;
+  if (invoke->attrs() & AttrStatic) {
+    curattrs |= Class::CloneAttr::Static;
+  }
+  auto newattrs = curattrs;
+  if (invoke->hasForeignThis()) {
+    curattrs |= Class::CloneAttr::HasForeignThis;
+  }
 
   if (od) {
     od->incRefCount();
@@ -230,12 +236,12 @@ static Variant HHVM_METHOD(Closure, bindto,
     if (thisNotOfCtx) {
       // If the bound $this is not a subclass of the context class, then we
       // have to pessimize translation.
-      newattrs |= AttrHasForeignThis;
+      newattrs |= Class::CloneAttr::HasForeignThis;
     }
   } else if (newscope) {
     // If we attach a scope to a function with no bound $this we need to make
     // the function static.
-    newattrs |= AttrStatic;
+    newattrs |= Class::CloneAttr::Static;
     clone->setClass(newscope);
   } else {
     clone->setThis(nullptr);
@@ -244,7 +250,7 @@ static Variant HHVM_METHOD(Closure, bindto,
   // If we are changing either the scope or the attributes of the closure, we
   // need to re-scope its Closure subclass.
   if (newscope != curscope || newattrs != curattrs) {
-    assertx(newattrs != AttrNone);
+    assertx(newattrs != Class::CloneAttr::None);
 
     auto newcls = cls->rescope(newscope, newattrs);
     cloneObj->setVMClass(newcls);

@@ -729,12 +729,12 @@ and stmt env = function
        * lenv *)
       let parent_lenv = env.Env.lenv in
 
-      let env   = condition env true e in
+      let env   = condition env true te in
       let env, tb1 = block env b1 in
       let lenv1 = env.Env.lenv in
 
       let env   = { env with Env.lenv = parent_lenv } in
-      let env   = condition env false e in
+      let env   = condition env false te in
       let env, tb2 = block env b2 in
       let lenv2 = env.Env.lenv in
 
@@ -827,15 +827,15 @@ and stmt env = function
             let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
             (* The following is necessary in case there is an assignment in the
              * expression *)
-            let env, _, _ = if_next_expr env e in
-            let env = if_next_condition env true e in
+            let env, te, _ = if_next_expr env e in
+            let env = if_next_condition env true te in
             let env = LEnv.update_next_from_conts env [C.Do; C.Next] in
             let env, tb = block env b in
             env, tb
           end end in
         let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
         let env, te, _ = if_next_expr env e in
-        let env = if_next_condition env false e in
+        let env = if_next_condition env false te in
         let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
         env, (tb, te)) in
     env, T.Do(tb, te)
@@ -849,8 +849,8 @@ and stmt env = function
           let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
           (* The following is necessary in case there is an assignment in the
            * expression *)
-          let env, _, _ = expr env e in
-          let env = if_next_condition env true e in
+          let env, te, _ = expr env e in
+          let env = if_next_condition env true te in
           (* TODO TAST: avoid repeated generation of block *)
           let env, tb = block env b in
           env, tb
@@ -858,7 +858,7 @@ and stmt env = function
       end in
       let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
       let env, te, _ = expr env e in
-      let env = if_next_condition env false e in
+      let env = if_next_condition env false te in
       let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
       env, (te, tb)) in
     env, T.While (te, tb)
@@ -883,8 +883,8 @@ and stmt env = function
           iter_n_acc alias_depth begin fun env ->
             (* The following is necessary in case there is an assignment in the
              * expression *)
-            let env, _, _ = expr env e2 in
-            let env = if_next_condition env true e2 in
+            let env, te2, _ = expr env e2 in
+            let env = if_next_condition env true te2 in
             let env, tb = block env b in
             let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
             let (env, te3, _) = if_next_expr env e3 in
@@ -893,7 +893,7 @@ and stmt env = function
         end in
         let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
         let (env, te2, _) = expr env e2 in
-        let env = if_next_condition env false e2 in
+        let env = if_next_condition env false te2 in
         let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
         env, (te1, te2, te3, tb)) in
     env, T.For(te1, te2, te3, tb)
@@ -1234,10 +1234,9 @@ and expr
        [Typing_log.Log_type ("expected_ty", ty)])] end;
   raw_expr ~accept_using_var ~is_using_clause ~is_expr_statement
     ~allow_non_awaited_awaitable_in_rx
-    ?is_func_arg ?forbid_uref ?expected ~in_cond:false env e
+    ?is_func_arg ?forbid_uref ?expected env e
 
 and raw_expr
-  ~in_cond
   ?(accept_using_var = false)
   ?(is_using_clause = false)
   ?(is_expr_statement = false)
@@ -1250,7 +1249,7 @@ and raw_expr
   env e =
   debug_last_pos := fst e;
   let env, te, ty =
-    expr_ ~in_cond ~accept_using_var ~is_using_clause ~is_expr_statement ?expected
+    expr_ ~accept_using_var ~is_using_clause ~is_expr_statement ?expected
       ?lhs_of_null_coalesce ?is_func_arg ?forbid_uref
       ~valkind env e in
   let () = match !expr_hook with
@@ -1268,7 +1267,7 @@ and raw_expr
 
 and lvalue env e =
   let valkind = `lvalue in
-  expr_ ~in_cond:false ~valkind env e
+  expr_ ~valkind env e
 
 and is_pseudo_function s =
   s = SN.PseudoFunctions.hh_show ||
@@ -1291,12 +1290,12 @@ and loop_forever env =
 (* $x ?? 0 is handled similarly to $x ?: 0, except that the latter will also
  * look for sketchy null checks in the condition. *)
 (* TODO TAST: type refinement should be made explicit in the typed AST *)
-and eif env ~expected ~coalesce ~in_cond p c e1 e2 =
+and eif env ~expected ~coalesce p c e1 e2 =
   let condition = condition ~lhs_of_null_coalesce:coalesce in
-  let env, tc, tyc = raw_expr ~in_cond ~lhs_of_null_coalesce:coalesce env c in
+  let env, tc, tyc = raw_expr ~lhs_of_null_coalesce:coalesce env c in
   let parent_lenv = env.Env.lenv in
-  let c = if coalesce then (p, Binop (Ast.Diff2, c, (p, Null))) else c in
-  let env = condition env true c in
+
+  let env = condition env true tc in
   let env, te1, ty1 = match e1 with
     | None ->
         let env, ty = TUtils.non_null env tyc in
@@ -1307,7 +1306,7 @@ and eif env ~expected ~coalesce ~in_cond p c e1 e2 =
     in
   let lenv1 = env.Env.lenv in
   let env = { env with Env.lenv = parent_lenv } in
-  let env = condition env false c in
+  let env = condition env false tc in
   let env, te2, ty2 = expr ?expected ~allow_non_awaited_awaitable_in_rx:true env e2 in
   let lenv2 = env.Env.lenv in
   let fake_members = LEnv.intersect_fake lenv1 lenv2 in
@@ -1366,7 +1365,6 @@ and exprs_expected (pos, ur, expected_tyl) env el =
 
 and expr_
   ?expected
-  ~in_cond
   ?(accept_using_var = false)
   ?(is_using_clause = false)
   ?(is_expr_statement = false)
@@ -1672,7 +1670,7 @@ and expr_
   | Assert (AE_assert e) ->
       let env, te, _ = expr env e in
       let env = LEnv.save_and_merge_next_in_cont env C.Exit in
-      let env = condition env true e in
+      let env = condition env true te in
       make_result env (T.Assert (T.AE_assert te))
         (Reason.Rwitness p, Tprim Tvoid)
   | True ->
@@ -2031,7 +2029,7 @@ and expr_
       Typing_mutability.enforce_mutable_call env te;
       env, te, ty
   | Binop (Ast.QuestionQuestion, e1, e2) ->
-      eif env ~expected ~coalesce:true ~in_cond p e1 None e2
+      eif env ~expected ~coalesce:true p e1 None e2
     (* For example, e1 += e2. This is typed and translated as if
      * written e1 = e1 + e2.
      * TODO TAST: is this right? e1 will get evaluated more than once
@@ -2043,7 +2041,7 @@ and expr_
         expr_error env p (Reason.Rnone)
       end else
       let e_fake = (p, Binop (Ast.Eq None, e1, (p, Binop (op, e1, e2)))) in
-      let env, te_fake, ty = raw_expr in_cond env e_fake in
+      let env, te_fake, ty = raw_expr env e_fake in
       begin match snd te_fake with
         | T.Binop (_, te1, (_, T.Binop (_, _, te2))) ->
           let te = T.Binop (Ast.Eq (Some op), te1, te2) in
@@ -2060,7 +2058,7 @@ and expr_
           Errors.let_var_immutability_violation p (Local_id.get_name x)
         | _ -> ()
       end;
-      let env, te2, ty2 = raw_expr ~in_cond ~forbid_uref env e2 in
+      let env, te2, ty2 = raw_expr ~forbid_uref env e2 in
       let env, te1, ty = assign p env e1 ty2 in
       let env =
         if Env.env_local_reactive env then
@@ -2086,8 +2084,8 @@ and expr_
       let c = bop = Ast.AMpamp in
       let env, te1, _ = expr env e1 in
       let lenv = env.Env.lenv in
-      let env = condition env c e1 in
-      let env, te2, _ = raw_expr in_cond env e2 in
+      let env = condition env c te1 in
+      let env, te2, _ = raw_expr env e2 in
       let env = { env with Env.lenv = lenv } in
       make_result env (T.Binop(bop, te1, te2))
         (Reason.Rlogic_ret p, Tprim Tbool)
@@ -2095,14 +2093,14 @@ and expr_
                         && (snd e1 = Nast.Null || snd e2 = Nast.Null)
                         && (bop = Ast.EQeqeq || bop = Ast.Diff2) ->
       let e, ne = if snd e2 = Nast.Null then e1, e2 else e2, e1 in
-      let _, te, ty = raw_expr in_cond env e in
+      let env, te, ty = raw_expr env e in
       let tne = T.make_typed_expr (fst ne) ty T.Null in
       let te1, te2 = if snd e2 = Nast.Null then te, tne else tne, te in
       make_result env (T.Binop(bop, te1, te2))
         (Reason.Rcomp p, Tprim Tbool)
   | Binop (bop, e1, e2) ->
-      let env, te1, ty1 = raw_expr in_cond env e1 in
-      let env, te2, ty2 = raw_expr in_cond env e2 in
+      let env, te1, ty1 = raw_expr env e1 in
+      let env, te2, ty2 = raw_expr env e2 in
       let env = save_and_merge_next_in_catch env in
       let env, te3, ty =
         binop p env bop (fst e1) te1 ty1 (fst e2) te2 ty2 in
@@ -2129,10 +2127,10 @@ and expr_
        *)
       make_result env (T.Pipe(e0, te1, te2)) ty2
   | Unop (uop, e) ->
-      let env, te, ty = raw_expr in_cond env e in
+      let env, te, ty = raw_expr env e in
       let env = save_and_merge_next_in_catch env in
       unop ~is_func_arg ~forbid_uref p env uop te ty
-  | Eif (c, e1, e2) -> eif env ~expected ~coalesce:false ~in_cond p c e1 e2
+  | Eif (c, e1, e2) -> eif env ~expected ~coalesce:false p c e1 e2
   | Typename sid ->
       begin match Env.get_typedef env (snd sid) with
         | Some {td_tparams = tparaml; _} ->
@@ -2387,7 +2385,7 @@ and expr_
           | _ -> Reason.Rwitness p, Toption (hint_ty) in
         env, hint_ty
       else if is_instance_var e then
-        let env, _, ivar_ty = raw_expr ~in_cond:false env e in
+        let env, _, ivar_ty = raw_expr env e in
         let env, ((ivar_pos, _) as ivar) = get_instance_var env e in
         let env, hint_ty = refine_type env ivar_pos ivar_ty hint_ty in
         let env = set_local env ivar hint_ty in
@@ -6082,6 +6080,19 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
   | Ast.Eq _ ->
       assert false
 
+and make_a_local_of env e =
+  match e with
+  | p, Class_get ((_, cname), (_, member_name)) ->
+   let env, local = Env.FakeMembers.make_static p env cname member_name in
+   env, Some (p, local)
+  | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
+   let env, local = Env.FakeMembers.make p env obj member_name in
+   env, Some (p, local)
+  | _, Lvar x
+  | _, ImmutableVar x
+  | _, Dollardollar x -> env, Some x
+  | _ -> env, None
+
 (* This function captures the common bits of logic behind refinement
  * of the type of a local variable or a class member variable as a
  * result of a dynamic check (e.g., nullity check, simple type check
@@ -6090,81 +6101,63 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
  * and returns a refined type (making necessary changes to the
  * environment, which is threaded through).
  *)
-and refine_lvalue_type env e ~refine =
-  match e with
-  | _, Lvar x
-  | _, ImmutableVar x
-  | _, Dollardollar x ->
-      let ty = Env.get_local env (snd x) in
-      let env, refined_ty = refine env ty in
-      set_local env x refined_ty
-  | p, Class_get ((_, cname), (_, member_name)) as e ->
-      let env, _te, ty = expr env e in
-      let env, refined_ty = refine env ty in
-      let env, local = Env.FakeMembers.make_static p env cname member_name in
-      let lvar = (p, local) in
-      set_local env lvar refined_ty
-    (* TODO TAST: generate an assignment to the fake local in the TAST *)
-  | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
-      let env, _te, ty = expr env e in
-      let env, refined_ty = refine env ty in
-      let env, local = Env.FakeMembers.make p env obj member_name in
-      let lvar = (p, local) in
-      set_local env lvar refined_ty
-  | _ -> env
+and refine_lvalue_type env ((_p, ty), _ as te) ~refine =
+  let env, ty = refine env ty in
+  let e = T.to_nast_expr te in
+  let env, localopt = make_a_local_of env e in
+  (* TODO TAST: generate an assignment to the fake local in the TAST *)
+  match localopt with
+  | Some local ->
+    set_local env local ty
+  | None -> env
 
-and condition_nullity ~nonnull env e =
-  match e with
+and condition_nullity ~nonnull (env: Env.env) te =
+  match te with
   (* assignment: both the rhs and lhs of the '=' must be made null/non-null *)
-  | _, Binop (Ast.Eq None, var, e) ->
-      let env = condition_nullity ~nonnull env e in
+  | _, T.Binop (Ast.Eq None, var, te) ->
+      let env = condition_nullity ~nonnull env te in
       condition_nullity ~nonnull env var
   | _ ->
     let refine env ty = if nonnull
       then TUtils.non_null env ty
       else env, ty in
-    refine_lvalue_type env e ~refine
+    refine_lvalue_type env te ~refine
 
 and condition_isset env = function
-  | _, Array_get (x, _) -> condition_isset env x
+  | _, T.Array_get (x, _) -> condition_isset env x
   | v -> condition_nullity ~nonnull:true env v
 
-and if_next_condition env tparamt e =
+and if_next_condition env tparamt (te: Tast.expr) =
   match LEnv.get_cont_option env C.Next with
   | None -> env
-  | Some _ -> condition env tparamt e
+  | Some _ -> condition env tparamt te
 
 (**
  * Build an environment for the true or false branch of
  * conditional statements.
  *)
-and condition ?lhs_of_null_coalesce env tparamet =
-  let expr env x =
-    let env, _te, ty = raw_expr ?lhs_of_null_coalesce ~in_cond:true env x in
-    Async.enforce_nullable_or_not_awaitable env (fst x) ty;
-    check_valid_rvalue (fst x) env ty
-  in let condition = condition ?lhs_of_null_coalesce
-  in function
-  | _, Expr_list [] -> env
-  | _, Expr_list [x] ->
-      let env, _ = expr env x in
+and condition ?lhs_of_null_coalesce env tparamet
+    ((p, ty as pty), e as te: Tast.expr) =
+  Async.enforce_nullable_or_not_awaitable env p ty;
+  let env, ty = check_valid_rvalue p env ty in
+  let condition = condition ?lhs_of_null_coalesce in
+  match e with
+  | T.Expr_list [] -> env
+  | T.Expr_list [x] ->
       condition env tparamet x
-  | r, Expr_list (x::xs) ->
-      let env, _ = expr env x in
-      condition env tparamet (r, Expr_list xs)
-  | _, Call (Cnormal, (_, Id (_, func)), _, [param], [])
+  | T.Expr_list (_::xs) ->
+      condition env tparamet (pty, T.Expr_list xs)
+  | T.Call (Cnormal, (_, T.Id (_, func)), _, [param], [])
     when SN.PseudoFunctions.isset = func && tparamet &&
     not (Env.is_strict env) ->
       condition_isset env param
-  | _, Call (Cnormal, (_, Id (_, func)), _, [e], [])
-    when not tparamet && SN.StdlibFunctions.is_null = func ->
-      condition_nullity ~nonnull:true env e
-  | _, Binop ((Ast.Eqeq | Ast.EQeqeq), (_, Null), e)
-  | _, Binop ((Ast.Eqeq | Ast.EQeqeq), e, (_, Null)) when not tparamet ->
-      let env, _ = expr env e in
-      condition_nullity ~nonnull:true env e
-  | (p, (Lvar _ | Obj_get _ | Class_get _ | Binop (Ast.Eq None, _, _)) as e) ->
-      let env, ty = expr env e in
+  | T.Call (Cnormal, (_, T.Id (_, func)), _, [te], [])
+    when SN.StdlibFunctions.is_null = func ->
+      condition_nullity ~nonnull:(not tparamet) env te
+  | T.Binop ((Ast.Eqeq | Ast.EQeqeq), (_, T.Null), e)
+  | T.Binop ((Ast.Eqeq | Ast.EQeqeq), e, (_, T.Null)) ->
+      condition_nullity ~nonnull:(not tparamet) env e
+  | (T.Lvar _ | T.Obj_get _ | T.Class_get _ | T.Binop (Ast.Eq None, _, _)) ->
       let env, ety = Env.expand_type env ty in
       (match ety with
       | _, Tarraykind (AKany | AKempty)
@@ -6173,59 +6166,65 @@ and condition ?lhs_of_null_coalesce env tparamet =
         | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _)
         | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
         ) ->
-          condition env (not tparamet) (p, Binop (Ast.Eqeq, e, (p, Null))))
-  | p, Binop ((Ast.Diff | Ast.Diff2 as op), e1, e2) ->
+          condition_nullity ~nonnull:tparamet env te)
+  | T.Binop ((Ast.Diff | Ast.Diff2 as op), e1, e2) ->
       let op = if op = Ast.Diff then Ast.Eqeq else Ast.EQeqeq in
-      condition env (not tparamet) (p, Binop (op, e1, e2))
-  | _, Id (_, s) when s = SN.Rx.is_enabled ->
+      condition env (not tparamet) (pty, T.Binop (op, e1, e2))
+  | T.Id (_, s) when s = SN.Rx.is_enabled ->
       (* when Rx\IS_ENABLED is false - switch env to non-reactive *)
       if not tparamet
       then Env.set_env_reactive env Nonreactive
       else env
-  | _, Binop (Ast.AMpamp, e1, e2) when tparamet ->
+  | T.Binop (Ast.AMpamp, e1, e2) when tparamet ->
       let env = condition env true e1 in
       let env = condition env true e2 in
       env
-  | _, Binop (Ast.BArbar, e1, e2) when not tparamet ->
+  | T.Binop (Ast.BArbar, e1, e2) when not tparamet ->
       let env = condition env false e1 in
       let env = condition env false e2 in
       env
-  | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
+  | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_array ->
       is_array env `PHPArray p f lv
-  | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
+  | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_vec ->
       is_array env `HackVec p f lv
-  | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
+  | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_dict ->
       is_array env `HackDict p f lv
-  | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
+  | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_keyset ->
       is_array env `HackKeyset p f lv
-  | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
+  | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_int ->
       is_type env lv Tint (Reason.Rpredicated (p, f))
-  | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
+  | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_bool ->
       is_type env lv Tbool (Reason.Rpredicated (p, f))
-  | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
+  | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_float ->
       is_type env lv Tfloat (Reason.Rpredicated (p, f))
-  | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
+  | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_string ->
       is_type env lv Tstring (Reason.Rpredicated (p, f))
-  | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
+  | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_resource ->
       is_type env lv Tresource (Reason.Rpredicated (p, f))
-  | _, Call (Cnormal,
-    (_, Class_const ((_, CI ((_, class_name), _)), (_, method_name))), _, [shape; field], [])
+  | T.Call (
+      Cnormal,
+      (_, T.Class_const ((_, T.CI ((_, class_name), _)), (_, method_name))),
+      _,
+      [shape; field],
+      [])
     when tparamet && class_name = SN.Shapes.cShapes && method_name = SN.Shapes.keyExists ->
       key_exists env shape field
-  | _, Unop (Ast.Unot, e) ->
+  | T.Unop (Ast.Unot, e) ->
       condition env (not tparamet) e
-  | p, InstanceOf (ivar, (_, cid)) when tparamet && is_instance_var ivar ->
+  | T.InstanceOf (ivar, (_, cid))
+    when tparamet && is_instance_var (T.to_nast_expr ivar) ->
+      let ivar = T.to_nast_expr ivar in
       (* Check the expession and determine its static type *)
-      let env, _te, x_ty = raw_expr ~in_cond:false env ivar in
+      let env, _te, x_ty = raw_expr env ivar in
 
       (* What is the local variable bound to the expression? *)
       let env, ((ivar_pos, _) as ivar) = get_instance_var env ivar in
@@ -6233,7 +6232,8 @@ and condition ?lhs_of_null_coalesce env tparamet =
       (* The position p here is not really correct... it's the position
        * of the instanceof expression, not the class id. But we don't store
        * position data for the latter. *)
-      let env, _te, obj_ty = static_class_id ~check_constraints:false p env cid in
+      let env, _te, obj_ty = static_class_id ~check_constraints:false p env
+        (T.to_nast_class_id_ cid) in
 
       if SubType.is_sub_type env obj_ty (
         Reason.none, Tclass ((Pos.none, SN.Classes.cAwaitable), [Reason.none, Typing_utils.tany env])
@@ -6267,7 +6267,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
              * subtype of static or provide a way of specifying exactly
              * the late bound type i.e. $x::class === static::class
              *)
-            if cid = CIstatic then
+            if cid = T.CIstatic then
               ExprDepTy.make env CIstatic obj_ty
             else
               env, obj_ty in
@@ -6315,9 +6315,10 @@ and condition ?lhs_of_null_coalesce env tparamet =
       in
       let env, x_ty = resolve_obj env obj_ty in
       set_local env ivar x_ty
-  | p, Is (ivar, h) when tparamet && is_instance_var ivar ->
+  | T.Is (ivar, h) when tparamet && is_instance_var (T.to_nast_expr ivar) ->
+    let ivar = T.to_nast_expr ivar in
     (* Check the expession and determine its static type *)
-    let env, _te, ivar_ty = raw_expr ~in_cond:false env ivar in
+    let env, _te, ivar_ty = raw_expr env ivar in
     (* What is the local variable bound to the expression? *)
     let env, ((ivar_pos, _) as ivar) = get_instance_var env ivar in
     (* Resolve the typehint to a type *)
@@ -6331,13 +6332,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
       then env, ivar_ty
       else safely_refine_type env p reason ivar_pos ivar_ty hint_ty in
     set_local env ivar hint_ty
-  | _, Binop ((Ast.Eqeq | Ast.EQeqeq), e, (_, Null))
-  | _, Binop ((Ast.Eqeq | Ast.EQeqeq), (_, Null), e) ->
-      let env, _ = expr env e in
-      condition_nullity ~nonnull:false env e
-  | e ->
-      let env, _ = expr env e in
-      env
+  | _ -> env
 
 and safely_refine_type env p reason ivar_pos ivar_ty hint_ty =
   match snd ivar_ty, snd hint_ty with
@@ -6502,8 +6497,8 @@ and get_instance_var env = function
   | p, This -> env, (p, this)
   | _ -> failwith "Should only be called when is_instance_var is true"
 
-and is_type env e tprim r =
-  refine_lvalue_type env e ~refine:(fun env _ -> env, (r, Tprim tprim))
+and is_type env te tprim r =
+  refine_lvalue_type env te ~refine:(fun env _ -> env, (r, Tprim tprim))
 
 (* Refine type for is_array, is_vec, is_keyset and is_dict tests
  * `pred_name` is the function name itself (e.g. 'is_vec')
@@ -6543,6 +6538,7 @@ and is_array env ty p pred_name arg_expr =
   end
 
 and key_exists env shape field =
+  let field = T.to_nast_expr field in
   refine_lvalue_type env shape ~refine:begin fun env shape_ty ->
     match TUtils.shape_field_name env field with
     | None -> env, shape_ty
@@ -7190,7 +7186,7 @@ and update_array_type ?lhs_of_null_coalesce p env e1 e2 valkind  =
   match valkind with
     | `lvalue | `lvalue_subexpr ->
       let env, te1, ty1 =
-        raw_expr ~valkind:`lvalue_subexpr ~in_cond:false env e1 in
+        raw_expr ~valkind:`lvalue_subexpr env e1 in
       let env, ty1 = type_mapper env ty1 in
       begin match e1 with
         | (_, Lvar (_, x)) ->
@@ -7201,7 +7197,7 @@ and update_array_type ?lhs_of_null_coalesce p env e1 e2 valkind  =
         | _ -> env, te1, ty1
       end
     | _ ->
-      raw_expr ~in_cond:false ?lhs_of_null_coalesce env e1
+      raw_expr ?lhs_of_null_coalesce env e1
 
 let nast_to_tast opts nast =
   let convert_def = function

@@ -16,18 +16,6 @@ Invalid argument (Typing[4110])
   This is an object of type D
   File "do_assign_in_invariant.php", line 48, characters 14-14:
   It is incompatible with an object of type B
-File "do_assign_in_invariant.php", line 59, characters 29-30:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 36, characters 37-37:
-  This is an object of type B
-  File "do_assign_in_invariant.php", line 56, characters 14-14:
-  It is incompatible with an object of type D
-File "do_assign_in_invariant.php", line 59, characters 33-34:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 36, characters 43-43:
-  This is an object of type D
-  File "do_assign_in_invariant.php", line 48, characters 14-14:
-  It is incompatible with an object of type B
 File "do_assign_in_invariant.php", line 45, characters 15-16:
 Invalid argument (Typing[4110])
   File "do_assign_in_invariant.php", line 25, characters 20-21:
@@ -58,18 +46,6 @@ Invalid argument (Typing[4110])
   This is an object of type D
   File "do_assign_in_invariant.php", line 48, characters 14-14:
   It is incompatible with an object of type B
-File "do_assign_in_invariant.php", line 59, characters 29-30:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 36, characters 37-37:
-  This is an object of type B
-  File "do_assign_in_invariant.php", line 56, characters 14-14:
-  It is incompatible with an object of type D
-File "do_assign_in_invariant.php", line 59, characters 33-34:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 36, characters 43-43:
-  This is an object of type D
-  File "do_assign_in_invariant.php", line 48, characters 14-14:
-  It is incompatible with an object of type B
 File "do_assign_in_invariant.php", line 45, characters 15-16:
 Invalid argument (Typing[4110])
   File "do_assign_in_invariant.php", line 25, characters 20-21:
@@ -88,18 +64,6 @@ Invalid argument (Typing[4110])
   This is an object of type BD
   File "do_assign_in_invariant.php", line 41, characters 12-12:
   It is incompatible with an object of type A
-File "do_assign_in_invariant.php", line 59, characters 29-30:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 36, characters 37-37:
-  This is an object of type B
-  File "do_assign_in_invariant.php", line 56, characters 14-14:
-  It is incompatible with an object of type D
-File "do_assign_in_invariant.php", line 59, characters 33-34:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 36, characters 43-43:
-  This is an object of type D
-  File "do_assign_in_invariant.php", line 48, characters 14-14:
-  It is incompatible with an object of type B
 File "do_assign_in_invariant.php", line 59, characters 29-30:
 Invalid argument (Typing[4110])
   File "do_assign_in_invariant.php", line 36, characters 37-37:
@@ -148,18 +112,6 @@ Invalid argument (Typing[4110])
   This is an object of type D
   File "do_assign_in_invariant.php", line 75, characters 14-14:
   It is incompatible with an object of type B
-File "do_assign_in_invariant.php", line 86, characters 39-40:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 33, characters 41-41:
-  This is an object of type B
-  File "do_assign_in_invariant.php", line 83, characters 14-14:
-  It is incompatible with an object of type D
-File "do_assign_in_invariant.php", line 86, characters 43-44:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 33, characters 47-47:
-  This is an object of type D
-  File "do_assign_in_invariant.php", line 75, characters 14-14:
-  It is incompatible with an object of type B
 File "do_assign_in_invariant.php", line 73, characters 14-15:
 Invalid argument (Typing[4110])
   File "do_assign_in_invariant.php", line 19, characters 19-19:
@@ -184,18 +136,6 @@ Invalid argument (Typing[4110])
   This is an object of type D
   File "do_assign_in_invariant.php", line 75, characters 14-14:
   It is incompatible with an object of type B
-File "do_assign_in_invariant.php", line 86, characters 39-40:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 33, characters 41-41:
-  This is an object of type B
-  File "do_assign_in_invariant.php", line 83, characters 14-14:
-  It is incompatible with an object of type D
-File "do_assign_in_invariant.php", line 86, characters 43-44:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 33, characters 47-47:
-  This is an object of type D
-  File "do_assign_in_invariant.php", line 75, characters 14-14:
-  It is incompatible with an object of type B
 File "do_assign_in_invariant.php", line 73, characters 14-15:
 Invalid argument (Typing[4110])
   File "do_assign_in_invariant.php", line 19, characters 19-19:
@@ -208,18 +148,6 @@ Invalid argument (Typing[4110])
   This is an object of type E
   File "do_assign_in_invariant.php", line 69, characters 12-12:
   It is incompatible with an object of type A
-File "do_assign_in_invariant.php", line 86, characters 39-40:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 33, characters 41-41:
-  This is an object of type B
-  File "do_assign_in_invariant.php", line 83, characters 14-14:
-  It is incompatible with an object of type D
-File "do_assign_in_invariant.php", line 86, characters 43-44:
-Invalid argument (Typing[4110])
-  File "do_assign_in_invariant.php", line 33, characters 47-47:
-  This is an object of type D
-  File "do_assign_in_invariant.php", line 75, characters 14-14:
-  It is incompatible with an object of type B
 File "do_assign_in_invariant.php", line 86, characters 39-40:
 Invalid argument (Typing[4110])
   File "do_assign_in_invariant.php", line 33, characters 41-41:

@@ -22,7 +22,7 @@ type saved_env = {
   tpenv : Type_parameter_env.t;
 }
 
-let empty_saved_env tcopt = {
+let empty_saved_env tcopt : saved_env = {
   tcopt;
   tenv = IMap.empty;
   subst = IMap.empty;
@@ -121,3 +121,9 @@ let to_nast program =
     ~map_env_annotation:(fun _ -> ())
     ~map_expr_annotation:fst
     program
+
+let to_nast_expr =
+  NastMapper.map_expr nast_mapping_env
+
+let to_nast_class_id_ =
+  NastMapper.map_class_id_ nast_mapping_env

@@ -22,6 +22,8 @@ type tparam_info = {
 type tpenv = tparam_info SMap.t
 type t = tpenv
 
+let empty: t = SMap.empty
+
 let pp_tparam_info fmt tpi =
   Format.fprintf fmt "@[<hv 2>{ ";
 

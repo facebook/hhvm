@@ -104,13 +104,14 @@ let print_json_version () =
 (*****************************************************************************)
 
 let parse_mini_state_json (json, _keytrace) =
+  let prechecked_changes = Option.value ~default:[]
+    (Hh_json.(get_field_opt (Access.get_array "prechecked_changes")) json) in
   let json = Hh_json.Access.return json in
   let open Hh_json.Access in
   json >>= get_string "state" >>= fun (state, _state_keytrace) ->
   json >>= get_string "corresponding_base_revision"
     >>= fun (for_base_rev, _for_base_rev_keytrace) ->
   json >>= get_string "deptable" >>= fun (deptable, _deptable_keytrace) ->
-  json >>= get_array "prechecked_changes" >>= fun (prechecked_changes, _) ->
   json >>= get_array "changes" >>= fun (changes, _) ->
     let array_to_path_list = List.map
       (fun file -> Hh_json.get_string_exn file |> Relative_path.from_root)

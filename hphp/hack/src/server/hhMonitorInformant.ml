@@ -17,7 +17,6 @@ module WEWConfig = WatchmanEventWatcherConfig
 module type State_loader_prefetcher_sig = sig
   val fetch :
     hhconfig_hash:string ->
-    is_tiny:bool ->
     cache_limit:int ->
     State_loader.mini_state_handle ->
       unit Future.t
@@ -26,13 +25,12 @@ end
 module State_loader_prefetcher_real = struct
 
   (** Main entry point for a new package fetcher process. Exits with 0 on success. *)
-  let main (hhconfig_hash, handle, is_tiny, cache_limit) =
+  let main (hhconfig_hash, handle, cache_limit) =
     EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0;
     let cached = State_loader.cached_state
       ~mini_state_handle:handle
       ~config_hash:hhconfig_hash
       ~rev:handle.State_loader.mini_state_for_rev
-      ~tiny:is_tiny
     in
     if cached <> None then
       (** No need to fetch if catched. *)
@@ -50,15 +48,15 @@ module State_loader_prefetcher_real = struct
 
   let prefetch_package_entry = Process.register_entry_point "State_loader_prefetcher_entry" main
 
-  let fetch ~hhconfig_hash ~is_tiny ~cache_limit handle =
+  let fetch ~hhconfig_hash ~cache_limit handle =
     Future.make (Process.run_entry prefetch_package_entry
-      (hhconfig_hash, handle, is_tiny, cache_limit)) ignore
+      (hhconfig_hash, handle, cache_limit)) ignore
 
 end;;
 
 
 module State_loader_prefetcher_fake = struct
-  let fetch ~hhconfig_hash:_ ~is_tiny:_ ~cache_limit:_ _ = Future.of_value ()
+  let fetch ~hhconfig_hash:_ ~cache_limit:_ _ = Future.of_value ()
 end
 
 
@@ -84,7 +82,6 @@ module Revision_map = struct
         svn_queries : (Hg.hg_rev, (Hg.svn_rev Future.t)) Hashtbl.t;
         xdb_queries : (int,
           (Xdb.sql_result list Future.t *
-          (** is tiny state *) bool *
           (** Prefetcher *) (unit Future.t) option ref)) Hashtbl.t;
         use_xdb : bool;
         ignore_hh_version : bool;
@@ -151,8 +148,6 @@ module Revision_map = struct
         | Not_found ->
           let hhconfig_hash, _config = Config_file.parse
             (Relative_path.to_absolute ServerConfig.filename) in
-          let local_config = ServerLocalConfig.load ~silent:true in
-          let tiny = local_config.ServerLocalConfig.load_tiny_state in
           (** Query doesn't exist yet, so we create one and consume it when
            * it's ready. *)
           let future = begin match hhconfig_hash with
@@ -170,9 +165,8 @@ module Revision_map = struct
                 ~svn_rev
                 ~hh_version
                 ~hhconfig_hash
-                ~tiny
           end in
-          let () = Hashtbl.add t.xdb_queries svn_rev (future, tiny, ref None) in
+          let () = Hashtbl.add t.xdb_queries svn_rev (future, ref None) in
           None
       in
       let query_to_result_list future =
@@ -181,7 +175,7 @@ module Revision_map = struct
         |> Core_result.map_error ~f:(HackEventLogger.find_xdb_match_failed (Future.start_t future))
         |> Core_result.ok
         |> Option.value ~default:[] in
-      let prefetch_package ~is_tiny xdb_result =
+      let prefetch_package xdb_result =
         let handle = {
           State_loader.mini_state_for_rev = Hg.Svn_rev (xdb_result.Xdb.svn_rev);
           mini_state_everstore_handle = xdb_result.Xdb.everstore_handle;
@@ -189,25 +183,25 @@ module Revision_map = struct
         } in
         State_loader_prefetcher.fetch
           ~hhconfig_hash:xdb_result.Xdb.hhconfig_hash
-          ~is_tiny ~cache_limit:t.saved_state_cache_limit
+          ~cache_limit:t.saved_state_cache_limit
           handle
       in
       let not_yet_ready =
         (** We use None to represent a not yet ready result. Check again later *)
         None
       in
-      let no_good_xdb_result ~is_tiny =
+      let no_good_xdb_result () =
         let () = clear_xdb_query ~svn_rev t in
-        Some ([], is_tiny)
+        Some ([])
       in
-      let good_xdb_result ~is_tiny result =
+      let good_xdb_result result =
         let () = clear_xdb_query ~svn_rev t in
-        Some ([result], is_tiny)
+        Some ([result])
       in
       let open Option in
       (** We run the prefetcher after the XDB lookup (because we need the XDB
        * result to run the prefetcher). *)
-      query >>= fun (query, is_tiny, prefetcher) ->
+      query >>= fun (query, prefetcher) ->
         match query, !prefetcher with
         | query, Some prefetcher -> begin
           match Future.check_status prefetcher with
@@ -216,7 +210,7 @@ module Revision_map = struct
              * this as having no saved states. *)
             let () = Hh_logger.log "Informant prefetcher timed out" in
             let () = HackEventLogger.informant_prefetcher_timed_out (Future.start_t prefetcher) in
-            no_good_xdb_result ~is_tiny
+            no_good_xdb_result ()
           | Future.In_progress _ ->
             (** Prefetcher is still running. "Not yet ready, check later." *)
             not_yet_ready
@@ -226,11 +220,11 @@ module Revision_map = struct
              * XDB lookup finishes and produces a non-empty result list,
              * so we know the XDB list is non-empty here. *)
             let () = HackEventLogger.informant_prefetcher_success (Future.start_t prefetcher) in
-            good_xdb_result ~is_tiny (List.hd (query_to_result_list query))
+            good_xdb_result (List.hd (query_to_result_list query))
           | Future.Complete_with_result (Error e) ->
             let () = HackEventLogger.informant_prefetcher_failed
               (Future.start_t prefetcher) (Future.error_to_string e) in
-            no_good_xdb_result ~is_tiny
+            no_good_xdb_result ()
           end
         | query, None ->
           begin match Future.check_status query with
@@ -238,7 +232,7 @@ module Revision_map = struct
             (** If lookup in XDB table has taken more than 15 seconds, we
              * we consider this as having no saved state. *)
             let () = HackEventLogger.find_xdb_match_timed_out (Future.start_t query) in
-            no_good_xdb_result ~is_tiny
+            no_good_xdb_result ()
           | Future.In_progress _ ->
             (** XDB lookup still in progress. "Not yet ready, check later." *)
             not_yet_ready
@@ -247,12 +241,12 @@ module Revision_map = struct
             if result = [] then
               let () = Hh_logger.log "Got no XDB results on merge base change to %d" svn_rev in
               let () = HackEventLogger.informant_no_xdb_result () in
-              no_good_xdb_result ~is_tiny
+              no_good_xdb_result ()
             else
               let () = HackEventLogger.find_xdb_match_success (Future.start_t query) in
               (** XDB looup is done, so we need to fire up the prefetcher.
                * The prefetcher's status will be checked on the next loop. *)
-              let () = prefetcher := Some (prefetch_package ~is_tiny (List.hd result)) in
+              let () = prefetcher := Some (prefetch_package  (List.hd result)) in
               not_yet_ready
           end
 
@@ -273,7 +267,7 @@ module Revision_map = struct
       svn_rev >>= fun svn_rev ->
         if t.use_xdb then
           find_xdb_match svn_rev t
-          >>= fun (xdb_results, is_tiny) -> begin
+          >>= fun (xdb_results) -> begin
             (** We log the mergebase after the XDB lookup and prefetch has
              * completed to avoid log spam, since the "find_svn_rev" result
              * is pinged once per second until completion. *)
@@ -292,10 +286,10 @@ module Revision_map = struct
                   distance in
                 HackEventLogger.informant_find_saved_state_success ~distance start_t
             in
-            Some(svn_rev, xdb_results, is_tiny)
+            Some(svn_rev, xdb_results)
           end
         else
-          Some(svn_rev, [], false)
+          Some(svn_rev, [])
 
 end
 
@@ -450,7 +444,7 @@ module Revision_tracker = struct
    * svn_rev: The corresponding SVN rev for this transition's hg rev.
    * xdb_results: The nearest saved states for this svn_rev provided by the XDB table.
    *)
-  let form_decision ~start_t ~is_tiny ~significant transition
+  let form_decision ~start_t ~significant transition
   server_state xdb_results svn_rev env =
     let use_xdb = env.inits.use_xdb in
     let open Informant_sig in
@@ -494,7 +488,6 @@ module Revision_tracker = struct
         let target_state = {
           ServerMonitorUtils.mini_state_everstore_handle = nearest_xdb_result.Xdb.everstore_handle;
           target_svn_rev = nearest_xdb_result.Xdb.svn_rev;
-          is_tiny;
           watchman_mergebase = Some watchman_mergebase;
         } in
         Restart_server (Some target_state)
@@ -520,13 +513,13 @@ module Revision_tracker = struct
     match Revision_map.find_and_prefetch ~start_t:timestamp hg_rev env.rev_map with
     | None ->
       None
-    | Some (svn_rev, xdb_results, is_tiny) ->
+    | Some (svn_rev, xdb_results) ->
       let jump_distance = get_jump_distance svn_rev env in
       let elapsed_t = (Unix.time () -. timestamp) in
       let significant = is_significant
         ~min_distance_restart:env.inits.min_distance_restart
         ~jump_distance elapsed_t in
-      Some (form_decision ~start_t:timestamp ~is_tiny ~significant
+      Some (form_decision ~start_t:timestamp ~significant
         transition server_state xdb_results svn_rev env, svn_rev)
 
   (**

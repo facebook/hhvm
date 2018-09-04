@@ -10,11 +10,10 @@ let hack_db_name = "";;
 let mini_saved_states_table = "";;
 let devinfra_saved_states_table = ""
 
-let find_nearest ~db ~db_table ~svn_rev ~hh_version ~hhconfig_hash ~tiny =
+let find_nearest ~db ~db_table ~svn_rev ~hh_version ~hhconfig_hash =
   ignore db;
   ignore db_table;
   ignore svn_rev;
   ignore hh_version;
   ignore hhconfig_hash;
-  ignore tiny;
   Future.of_value []

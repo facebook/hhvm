@@ -820,7 +820,6 @@ let setup_server ~informant_managed ~monitor_pid options handle =
     load_script_config;
     max_workers;
     max_bucket_size;
-    load_tiny_state;
     use_full_fidelity_parser;
     interrupt_on_watchman;
     interrupt_on_client;
@@ -847,7 +846,6 @@ let setup_server ~informant_managed ~monitor_pid options handle =
     ~search_chunk_size
     ~max_workers
     ~max_bucket_size
-    ~load_tiny_state
     ~use_full_fidelity_parser
     ~interrupt_on_watchman
     ~interrupt_on_client
@@ -870,16 +868,6 @@ let setup_server ~informant_managed ~monitor_pid options handle =
   Option.iter monitor_pid ~f:(fun monitor_pid -> PidLog.log ~reason:"monitor" monitor_pid);
   PidLog.log ~reason:"main" (Unix.getpid());
   ServerEnvBuild.make_genv options config local_config handle, init_id
-
-
-let save_state options handle =
-  let genv, _ = setup_server ~informant_managed:false ~monitor_pid:None options handle in
-  let env = ServerInit.init_to_save_state genv in
-  Option.iter (ServerArgs.save_filename genv.options)
-    (ServerInit.save_state genv env);
-  Hh_logger.log "Running to save saved state";
-  Program.run_once_and_exit genv env
-
 
 let run_once options handle =
   let genv, _ = setup_server ~informant_managed:false ~monitor_pid:None options handle in

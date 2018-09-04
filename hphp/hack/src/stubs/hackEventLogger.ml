@@ -8,7 +8,6 @@
  *)
 
 let set_use_watchman _ = ()
-let set_use_tiny_state _ = ()
 let set_use_full_fidelity_parser _ = ()
 let set_lazy_incremental _ = ()
 let set_search_chunk_size _ = ()
@@ -24,7 +23,6 @@ let init
   ~search_chunk_size:_
   ~max_workers:_
   ~max_bucket_size:_
-  ~load_tiny_state:_
   ~use_full_fidelity_parser:_
   ~interrupt_on_watchman:_
   ~interrupt_on_client:_

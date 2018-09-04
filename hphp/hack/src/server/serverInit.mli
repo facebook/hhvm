@@ -31,5 +31,3 @@ type init_result =
  *)
 val init: ?load_mini_approach:load_mini_approach -> ServerEnv.genv
   -> ServerEnv.env * init_result (* If the script failed, the error message *)
-
-val init_to_save_state : ServerEnv.genv -> ServerEnv.env

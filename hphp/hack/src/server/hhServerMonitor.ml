@@ -71,17 +71,9 @@ let monitor_daemon_main (options: ServerArgs.options) =
 
   if local_config.ServerLocalConfig.use_full_fidelity_parser then
     HackEventLogger.set_use_full_fidelity_parser true;
-  HackEventLogger.set_use_tiny_state
-    local_config.ServerLocalConfig.load_tiny_state;
 
   HackSearchService.fuzzy := local_config.ServerLocalConfig.enable_fuzzy_search;
-  if ServerArgs.save_filename options <> None
-    && ServerArgs.use_gen_deps options then
-    let shared_config = ServerConfig.(sharedmem_config config) in
-    let handle = SharedMem.init shared_config in
-    SharedMem.connect handle ~is_master:true;
-    ServerMain.save_state options handle
-  else if ServerArgs.check_mode options then
+  if ServerArgs.check_mode options then
     let shared_config = ServerConfig.(sharedmem_config config) in
     let handle = SharedMem.init shared_config in
     SharedMem.connect handle ~is_master:true;

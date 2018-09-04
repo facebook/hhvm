@@ -55,7 +55,7 @@ let set_next_watchman_state_transition move hg_rev =
  * for_svn_rev: The svn_rev lookup in "Xdb.find_nearest" that will locate
  *              this result.
  *)
-let set_xdb ~state_svn_rev ~for_svn_rev ~everstore_handle ~tiny  =
+let set_xdb ~state_svn_rev ~for_svn_rev ~everstore_handle  =
   let hh_version = Build_id.build_revision in
   let hg_hash = match state_svn_rev with
     | 1 -> hg_rev_1
@@ -82,4 +82,4 @@ let set_xdb ~state_svn_rev ~for_svn_rev ~everstore_handle ~tiny  =
     let result = Future.of_value [result] in
     Xdb.Mocking.find_nearest_returns ~db:Xdb.hack_db_name
       ~db_table:Xdb.saved_states_table
-      ~svn_rev:for_svn_rev ~hh_version:(Some hh_version) ~tiny result
+      ~svn_rev:for_svn_rev ~hh_version:(Some hh_version) result

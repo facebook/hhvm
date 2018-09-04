@@ -116,25 +116,23 @@ module ServerInitCommon = struct
     Timeout.with_timeout ~timeout ~do_:(fun _ -> f ())
       ~on_timeout:(fun _ -> raise @@ Loader_timeout stage)
 
-  let invoke_loading_state_natively ~tiny ?(use_canary=false) ?target genv root =
-    let mini_state_handle, tiny = begin match target with
-    | None -> None, tiny
-    | Some { ServerMonitorUtils.mini_state_everstore_handle; target_svn_rev; is_tiny; watchman_mergebase; } ->
-      let handle =
+  let invoke_loading_state_natively ?(use_canary=false) ?target genv root =
+    let mini_state_handle = begin match target with
+    | None -> None
+    | Some { ServerMonitorUtils.mini_state_everstore_handle; target_svn_rev; watchman_mergebase } ->
       Some
       {
         State_loader.mini_state_everstore_handle = mini_state_everstore_handle;
         mini_state_for_rev = (Hg.Svn_rev target_svn_rev);
         watchman_mergebase;
-      } in
-      handle, is_tiny
+      }
     end in
     let native_load_error e = raise (Native_loader_failure (State_loader.error_string e)) in
     let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
     let use_prechecked_files = ServerPrecheckedFiles.should_use genv.options genv.local_config in
     State_loader.mk_state_future ~config:genv.local_config.SLC.state_loader_timeouts
       ~use_canary ?mini_state_handle
-      ~config_hash:(ServerConfig.config_hash genv.config) root ~tiny
+      ~config_hash:(ServerConfig.config_hash genv.config) root
       ~ignore_hh_version
       ~use_prechecked_files
       |> Core_result.map_error ~f:native_load_error
@@ -167,7 +165,7 @@ module ServerInitCommon = struct
     ) in
     Ok get_loaded_info
 
-  let invoke_approach genv root approach ~tiny =
+  let invoke_approach genv root approach =
     let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
     match approach with
     | Precomputed { ServerArgs.saved_state_fn;
@@ -187,40 +185,13 @@ module ServerInitCommon = struct
       }) in
       Core_result.try_with (fun () -> fun () -> Ok get_loaded_info)
     | Load_state_natively use_canary ->
-      Ok (fun () ->
-        try
-          let result = invoke_loading_state_natively ~use_canary ~tiny genv root in
-          begin match result, tiny with
-          | Error _, true ->
-            (* If we can't find a saved state but don't throw an exception,
-              turn off tiny states and see if we have a regular one *)
-            HackEventLogger.set_use_tiny_state false;
-            invoke_loading_state_natively ~use_canary ~tiny:false genv root
-          | _ -> result
-          end
-        with
-        (** TODO: remove this after we migrate fully to tiny saved states.
-        This happens when the sql file doesn't exist because it's under a
-        different name, so Sql_assertion_failure 14 is thrown and we
-        should delete the saved state. We only need to do this for now because
-        we conflate tiny and non-tiny saved states and put them in the same
-        directory and misuse one as the other kind when the directory is filled
-         by some other process (or at an earlier time). *)
-        (* If it fails, we delete the corrupted saved state and try again *)
-        | SharedMem.Sql_assertion_failure 14 ->
-          invoke_loading_state_natively ~use_canary ~tiny genv root)
+      Core_result.try_with (fun () ->
+        (fun () -> invoke_loading_state_natively ~use_canary  genv root)
+      )
     | Load_state_natively_with_target target ->
-      Ok (fun () ->
-        let is_tiny = target.ServerMonitorUtils.is_tiny in
-        try
-          HackEventLogger.set_use_tiny_state is_tiny;
-
-          invoke_loading_state_natively ~tiny:is_tiny ~target genv root
-        with
-        | SharedMem.Sql_assertion_failure 14 ->
-          (* TODO: Remove this after we migrate fully to tiny saved states. See above docs. *)
-          (* If it fails, we delete the corrupted saved state and try again *)
-          invoke_loading_state_natively ~tiny:is_tiny ~target genv root)
+      Core_result.try_with (fun () ->
+        (fun () -> invoke_loading_state_natively ~target genv root)
+      )
 
   let is_check_mode options =
     ServerArgs.check_mode options &&
@@ -575,7 +546,7 @@ module ServerEagerInit : InitKind = struct
      * in the Result monad provides a convenient way to locate the error
      * handling code in one place. *)
     let state_future =
-     load_mini_approach >>= invoke_approach genv root ~tiny:false in
+     load_mini_approach >>= invoke_approach genv root in
     let get_next, t = indexing genv in
     let lazy_parse = lazy_level = Parse in
     (* Parsing entire repo, too many files to trace. TODO: why do we parse
@@ -661,10 +632,9 @@ module ServerLazyInit : InitKind = struct
   let init ~load_mini_approach genv lazy_level env root =
     assert(lazy_level = Init);
     Hh_logger.log "Begin loading mini-state";
-    let tiny = genv.local_config.SLC.load_tiny_state in
     let trace = genv.local_config.SLC.trace_parsing in
     let state_future =
-      load_mini_approach >>= invoke_approach genv root ~tiny in
+      load_mini_approach >>= invoke_approach genv root in
     let timeout = genv.local_config.SLC.load_mini_script_timeout in
     let state_future = state_future >>= fun f ->
       with_loader_timeout timeout "wait_for_state" f
@@ -849,15 +819,6 @@ let save_state genv env fn =
     ~file_info_on_disk env.ServerEnv.files_info fn in
   ()
 
-let gen_deps genv env t =
-  let files_list = Relative_path.Map.keys env.files_info in
-  let next = MultiWorker.next genv.workers files_list in
-  Dependency_service.go
-    genv.workers
-    ~get_next:next
-    env.popt;
-  Hh_logger.log_duration "Generating dependencies" t
-
 let get_lazy_level genv =
   let lazy_decl = Option.is_none (ServerArgs.ai_mode genv.options) in
   let lazy_parse = genv.local_config.SLC.lazy_parse in
@@ -867,19 +828,6 @@ let get_lazy_level genv =
   | true, true, false -> Parse
   | true, true, true -> Init
   | _ -> Off
-
-(* Initialize only to save a saved state *)
-let init_to_save_state genv =
-  let open ServerInitCommon in
-  let env = ServerEnvBuild.make_env genv.config in
-  let get_next, t = indexing genv in
-  (* We need full asts to generate dependencies *)
-  let env, t = parsing ~lazy_parse:false genv env ~get_next t ~trace:false in
-  let t = update_files genv env.files_info t in
-  let env, t = naming env t in
-  ignore(gen_deps genv env t);
-  env
-
 
 (* entry point *)
 let init ?load_mini_approach genv =

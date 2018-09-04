@@ -18,8 +18,7 @@ let error_string _ = ""
 let cached_state
   ?mini_state_handle:_
   ~config_hash:_
-  ~rev:_
-  ~tiny:_ = None
+  ~rev:_ = None
 
 exception Not_supported
 
@@ -34,6 +33,5 @@ let mk_state_future
   ~use_canary:_
   ?mini_state_handle:_
   ~config_hash:_
-  ~tiny:_ _
   ~use_prechecked_files:_
   = raise Not_supported

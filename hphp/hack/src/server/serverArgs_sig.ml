@@ -47,7 +47,6 @@ module type S = sig
   val load_state_canary   : options -> bool
   val with_mini_state     : options -> mini_state_target option
   val save_filename       : options -> string option
-  val use_gen_deps        : options -> bool
   val waiting_client      : options -> Unix.file_descr option
   val watchman_debug_logging : options -> bool
   val ignore_hh_version   : options -> bool

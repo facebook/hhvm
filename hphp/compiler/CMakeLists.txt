@@ -34,6 +34,7 @@ auto_source_group("hphp_analysis" "${CMAKE_CURRENT_SOURCE_DIR}"
   ${CXX_SOURCES} ${C_SOURCES} ${HEADER_SOURCES})
 target_link_libraries(hphp_analysis ${Boost_LIBRARIES})
 add_dependencies(hphp_analysis hphp_parser)
+add_dependencies(hphp_analysis hphp_util)
 if (ENABLE_COTIRE)
   cotire(hphp_analysis)
 endif()

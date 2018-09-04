@@ -217,7 +217,6 @@ let try_over_concrete_supertypes env ty f =
           (fun _ -> iter_over_types env resl tyl) in
   iter_over_types env [] tyl
 
-
 (*****************************************************************************)
 (* Handling function/method arguments *)
 (*****************************************************************************)
@@ -3441,6 +3440,11 @@ and assign_ p ur env e1 ty2 =
          Typing_suggest.save_member y env exp_real_type ty2;
        | _ -> ());
       env, te1, ty3
+  | pos, Array_get (e1, None) ->
+    let env, _, ty1 = update_array_type pos env e1 None `lvalue in
+    let env, (ty1', ty2') = assign_array_append p ur env ty1 ty2 in
+    let env, te1, _ = assign_ p ur env e1 ty1' in
+    env, ((pos, ty2'), T.Array_get (te1, None)), ty2
   | _, Array_get ((_, Lvar (_, lvar)) as shape, ((Some _) as e2)) ->
     let access_type = Typing_arrays.static_array_access env e2 in
     (* In the case of an assignment of the form $x['new_field'] = ...;
@@ -3474,6 +3478,77 @@ and assign_simple pos ur env e1 ty2 =
   let env, ty2 = TUtils.unresolved env ty2 in
   let env = Type.coerce_type pos ur env ty2 ty1 in
   env, te1, ty2
+
+and assign_array_append pos ur env ty1 ty2 =
+  let env, ety1 = Env.expand_type env ty1 in
+  match ety1 with
+  | r, (Tany | Tarraykind (AKany | AKempty)) ->
+    env, (ty1, (r, Typing_utils.tany env))
+  | r, Terr ->
+    env, (ty1, (r, Typing_utils.terr env))
+  | _, Tclass ((_, n), [tv])
+    when n = SN.Collections.cVector || n = SN.Collections.cSet ->
+    Env.error_if_reactive_context env begin fun () ->
+      Errors.nonreactive_append pos
+    end;
+    let env = Type.sub_type pos ur env ty2 tv in
+    env, (ty1, tv)
+  (* Handle the case where Vector or Set was used as a typehint
+     without type parameters *)
+  | r, Tclass ((_, n), [])
+    when n = SN.Collections.cVector || n = SN.Collections.cSet ->
+    Env.error_if_reactive_context env begin fun () ->
+      Errors.nonreactive_append pos
+    end;
+    env, (ty1, (r, Typing_utils.tany env))
+  | _, Tclass ((_, n), [tk; tv]) when n = SN.Collections.cMap ->
+    Env.error_if_reactive_context env begin fun () ->
+      Errors.nonreactive_append pos
+    end;
+    let tpair =
+      (Reason.Rmap_append pos, Tclass ((pos, SN.Collections.cPair), [tk; tv])) in
+    let env = Type.sub_type pos ur env ty2 tpair in
+    env, (ty1, tpair)
+  (* Handle the case where Map was used as a typehint without
+     type parameters *)
+  | _, Tclass ((_, n), []) when n = SN.Collections.cMap ->
+    Env.error_if_reactive_context env begin fun () ->
+      Errors.nonreactive_append pos
+    end;
+    let tpair =
+      (Reason.Rmap_append pos, Tclass ((pos, SN.Collections.cPair), [])) in
+    let env = Type.sub_type pos ur env ty2 tpair in
+    env, (ty1, tpair)
+  | r, Tclass ((_, n) as id, [tv])
+    when n = SN.Collections.cVec || n = SN.Collections.cKeyset ->
+    let env, tv' = LEnv.ty_union env tv ty2 in
+    env, ((r, Tclass (id, [tv'])), tv')
+  | r, Tarraykind (AKvec tv) ->
+    let  env, tv' = LEnv.ty_union env tv ty2 in
+    env, ((r, Tarraykind (AKvec tv')), tv')
+  | r, Tarraykind (AKvarray tv) ->
+    let  env, tv' = LEnv.ty_union env tv ty2 in
+    env, ((r, Tarraykind (AKvarray tv')), tv')
+  | r, Tdynamic -> env, (ty1, (r, Tdynamic))
+  | _, Tobject ->
+    if Env.is_strict env
+    then error_assign_array_append env pos ty1
+    else env, (ty1, (Reason.Rwitness pos, Typing_utils.tany env))
+  | r, Tunresolved ty1l ->
+    let env, resl = List.map_env env ty1l (fun env ty1 -> assign_array_append pos ur env ty1 ty2) in
+    let (ty1l', tyl') = List.unzip resl in
+    env, ((r, Tunresolved ty1l'), (r, Tunresolved tyl'))
+  | _, Tabstract _ ->
+    let resl = try_over_concrete_supertypes env ty1 begin fun env ty1 ->
+      assign_array_append pos ur env ty1 ty2
+    end in
+    begin match resl with
+    | [res] -> res
+    | _ -> error_assign_array_append env pos ty1
+    end
+  | _, (Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tvar _ |
+        Tfun _ | Tclass _ | Ttuple _ | Tanon _ | Tshape _) ->
+    error_assign_array_append env pos ty1
 
 and array_field env = function
   | Nast.AFvalue ve ->
@@ -4671,6 +4746,10 @@ and error_array env p (r, ty) =
 and error_array_append env p (r, ty) =
   Errors.array_append p (Reason.to_pos r) (Typing_print.error ty);
   env, err_witness env p
+
+and error_assign_array_append env p (r, ty) =
+  Errors.array_append p (Reason.to_pos r) (Typing_print.error ty);
+  env, ((r, ty), err_witness env p)
 
 and error_const_mutation env p (r, ty) =
   Errors.const_mutation p (Reason.to_pos r) (Typing_print.error ty);

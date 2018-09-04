@@ -66,7 +66,7 @@
                         [([10:13-19], $items)])))
                     ))));
              (Expr
-                (([13:3-16], (int | string)),
+                (([13:3-16], string),
                  (Binop ((Eq None),
                     (([13:3-11], (int | string)),
                      (Array_get (

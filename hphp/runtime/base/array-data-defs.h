@@ -310,9 +310,9 @@ inline ArrayData* ArrayData::dequeue(Variant& value) {
   return g_array_funcs.dequeue[kind()](this, value);
 }
 
-inline ArrayData* ArrayData::prepend(Cell v, bool copy) {
+inline ArrayData* ArrayData::prepend(Cell v) {
   assertx(v.m_type != KindOfUninit);
-  return g_array_funcs.prepend[kind()](this, v, copy);
+  return g_array_funcs.prepend[kind()](this, v);
 }
 
 inline void ArrayData::onSetEvalScalar() {

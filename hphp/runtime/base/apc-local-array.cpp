@@ -275,9 +275,9 @@ ArrayData* APCLocalArray::Merge(ArrayData* ad, const ArrayData *elems) {
   return escalated->merge(elems);
 }
 
-ArrayData* APCLocalArray::Prepend(ArrayData* ad, Cell v, bool /*copy*/) {
+ArrayData* APCLocalArray::Prepend(ArrayData* ad, Cell v) {
   EscalateHelper helper{ad};
-  return helper.release(helper.escalated->prepend(v, false));
+  return helper.release(helper.escalated->prepend(v));
 }
 
 ArrayData *APCLocalArray::Escalate(const ArrayData* ad) {

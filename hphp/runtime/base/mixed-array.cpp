@@ -1579,8 +1579,7 @@ ArrayData* MixedArray::Dequeue(ArrayData* adInput, Variant& value) {
   return a;
 }
 
-ArrayData* MixedArray::Prepend(ArrayData* adInput, Cell v, bool /*copy*/) {
-  // TODO: why is this ignoring the copy param and calling cowCheck?
+ArrayData* MixedArray::Prepend(ArrayData* adInput, Cell v) {
   auto a = asMixed(adInput)->prepareForInsert(adInput->cowCheck());
 
   auto elms = a->data();

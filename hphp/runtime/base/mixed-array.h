@@ -374,7 +374,7 @@ public:
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
-  static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
+  static ArrayData* Prepend(ArrayData*, Cell v);
   static ArrayData* ToPHPArray(ArrayData*, bool);
   static ArrayData* ToDict(ArrayData*, bool);
   static ArrayData* ToShape(ArrayData*, bool);

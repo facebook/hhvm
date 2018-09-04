@@ -442,7 +442,7 @@ public:
   static ArrayData* Merge(ArrayData*, const ArrayData*);
   static ArrayData* Pop(ArrayData*, Variant&);
   static ArrayData* Dequeue(ArrayData*, Variant&);
-  static ArrayData* Prepend(ArrayData*, Cell, bool);
+  static ArrayData* Prepend(ArrayData*, Cell);
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData*);

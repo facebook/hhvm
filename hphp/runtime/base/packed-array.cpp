@@ -1202,7 +1202,7 @@ ArrayData* PackedArray::Dequeue(ArrayData* adIn, Variant& value) {
   return ad;
 }
 
-ArrayData* PackedArray::Prepend(ArrayData* adIn, Cell v, bool /*copy*/) {
+ArrayData* PackedArray::Prepend(ArrayData* adIn, Cell v) {
   assertx(checkInvariants(adIn));
 
   auto const ad = PrepareForInsert(adIn, adIn->cowCheck());

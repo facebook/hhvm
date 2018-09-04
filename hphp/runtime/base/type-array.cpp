@@ -931,7 +931,7 @@ void Array::appendWithRef(TypedValue v) {
 void Array::prepend(TypedValue v) {
   if (!m_arr) operator=(Create());
   assertx(m_arr);
-  auto const escalated = m_arr->prepend(tvToInitCell(v), m_arr->cowCheck());
+  auto const escalated = m_arr->prepend(tvToInitCell(v));
   if (escalated != m_arr) m_arr = Ptr::attach(escalated);
 }
 

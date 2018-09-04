@@ -430,7 +430,7 @@ void BaseVector::addFront(TypedValue tv) {
   assertx(!isRefType(tv.m_type));
   dropImmCopy();
   auto oldAd = arrayData();
-  m_arr = PackedArray::PrependVec(oldAd, tv, oldAd->cowCheck());
+  m_arr = PackedArray::PrependVec(oldAd, tv);
   if (m_arr != oldAd) {
     decRefArr(oldAd);
   }

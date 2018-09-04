@@ -73,7 +73,7 @@ struct APCLocalArray final : ArrayData,
   static ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy);
   static ArrayData* PlusEq(ArrayData*, const ArrayData *elems);
   static ArrayData* Merge(ArrayData*, const ArrayData *elems);
-  static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
+  static ArrayData* Prepend(ArrayData*, Cell v);
   static tv_rval NvGetInt(const ArrayData*, int64_t k);
   static constexpr auto NvTryGetInt = &NvGetInt;
   static tv_rval NvGetStr(const ArrayData*, const StringData* k);

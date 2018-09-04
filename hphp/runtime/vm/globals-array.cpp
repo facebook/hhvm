@@ -215,7 +215,7 @@ ArrayData* GlobalsArray::Merge(ArrayData*, const ArrayData*) {
   throw_not_implemented("merge on $GLOBALS");
 }
 
-ArrayData* GlobalsArray::Prepend(ArrayData*, Cell, bool) {
+ArrayData* GlobalsArray::Prepend(ArrayData*, Cell) {
   throw_not_implemented("prepend on $GLOBALS");
 }
 

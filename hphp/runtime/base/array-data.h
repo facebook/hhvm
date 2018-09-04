@@ -680,14 +680,14 @@ public:
   ArrayData* pop(Variant& value);
 
   /*
-   * Prepend `v' to the array, making a copy first if `copy' is set.
+   * Prepend `v' to the array, making a copy first if cowCheck() returns true.
    *
    * This implements array_unshift().
    *
    * Return `this' if copy/escalation are not needed, or a copied/escalated
    * array data.
    */
-  ArrayData* prepend(Cell v, bool copy);
+  ArrayData* prepend(Cell v);
 
   /*
    * Comparisons.
@@ -973,7 +973,7 @@ struct ArrayFunctions {
   ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);
   ArrayData* (*dequeue[NK])(ArrayData*, Variant& value);
-  ArrayData* (*prepend[NK])(ArrayData*, Cell v, bool copy);
+  ArrayData* (*prepend[NK])(ArrayData*, Cell v);
   void (*renumber[NK])(ArrayData*);
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*escalate[NK])(const ArrayData*);

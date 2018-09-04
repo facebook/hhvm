@@ -141,7 +141,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
-  static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
+  static ArrayData* Prepend(ArrayData*, Cell v);
   static ArrayData* ToPHPArray(ArrayData*, bool);
   static ArrayData* ToVArray(ArrayData*, bool);
   static ArrayData* ToDArray(ArrayData*, bool);

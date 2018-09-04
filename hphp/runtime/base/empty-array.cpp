@@ -348,7 +348,7 @@ ArrayData* EmptyArray::PopOrDequeue(ArrayData* ad, Variant& value) {
   return ad;
 }
 
-ArrayData* EmptyArray::Prepend(ArrayData*, Cell v, bool) {
+ArrayData* EmptyArray::Prepend(ArrayData*, Cell v) {
   tvIncRefGen(v);
   return EmptyArray::MakePacked(v).arr;
 }

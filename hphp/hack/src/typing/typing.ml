@@ -1984,10 +1984,12 @@ and expr_
       let ty = Reason.Rwitness p, Ttuple tyl in
       make_result env (T.Expr_list tel) ty
   | Array_get (e, None) ->
-      let env, te1, ty1 = update_array_type p env e None valkind in
+      let env, te, _ = update_array_type p env e None valkind in
       let env = save_and_merge_next_in_catch env in
-      let env, ty = array_append p env ty1 in
-      make_result env (T.Array_get(te1, None)) ty
+      (* NAST check reports an error if [] is used for reading in an
+         lvalue context. *)
+      let ty = (Reason.Rwitness p, Typing_utils.terr env) in
+      make_result env (T.Array_get (te, None)) ty
   | Array_get (e1, Some e2) ->
       let env, te1, ty1 =
         update_array_type ?lhs_of_null_coalesce p env e1 (Some e2) valkind in
@@ -4676,73 +4678,8 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
   | Tclass (_, _) | Tanon (_, _) ->
       error_array env p ety1
 
-and array_append p env ty1 =
-  let env, ty1 = TUtils.fold_unresolved env ty1 in
-  let resl = try_over_concrete_supertypes env ty1
-    begin fun env ty ->
-      match ty with
-      | (r, ty_) ->
-        match ty_ with
-        | Tany | Tarraykind (AKany | AKempty) ->
-          env, (r, Typing_utils.tany env)
-
-        | Terr ->
-          env, (r, Typing_utils.terr env)
-        (* No reactive append on vector and set *)
-        | Tclass ((_, n), [ty])
-            when (n = SN.Collections.cVector
-            || n = SN.Collections.cSet) ->
-            Env.error_if_reactive_context env @@ begin fun () ->
-              Errors.nonreactive_append p;
-            end;
-            env, ty
-
-        | Tclass ((_, n), [ty])
-            when  n = SN.Collections.cVec || n = SN.Collections.cKeyset ->
-            env, ty
-        | Tclass ((_, n), [])
-            when n = SN.Collections.cVector || n = SN.Collections.cSet ->
-            (* Handle the case where "Vector" or "Set" was used as a typehint
-               without type parameters *)
-            env, (r, Typing_utils.tany env)
-        | Tclass ((_, n), [tkey; tvalue]) when n = SN.Collections.cMap ->
-            Env.error_if_reactive_context env @@ begin fun () ->
-              Errors.nonreactive_append p;
-            end;
-              (* You can append a pair to a map *)
-            env, (Reason.Rmap_append p, Tclass ((p, SN.Collections.cPair),
-                [tkey; tvalue]))
-        | Tclass ((_, n), []) when n = SN.Collections.cMap ->
-            Env.error_if_reactive_context env @@ begin fun () ->
-              Errors.nonreactive_append p;
-            end;
-            (* Handle the case where "Map" was used as a typehint without
-               type parameters *)
-            env, (Reason.Rmap_append p,
-              Tclass ((p, SN.Collections.cPair), []))
-        | Tarraykind (AKvec ty | AKvarray ty) ->
-            env, ty
-        | Tdynamic -> env, ty
-        | Tobject ->
-            if Env.is_strict env
-            then error_array_append env p ty1
-            else env, (Reason.Rwitness p, Typing_utils.tany env)
-        | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _
-        | Tvar _ | Tfun _ | Tclass (_, _) | Ttuple _
-        | Tanon (_, _) | Tunresolved _ | Tshape _ | Tabstract _ ->
-          error_array_append env p ty1
-    end in
-  match resl with
-  | [res] -> res
-  | _ -> error_array_append env p ty1
-
-
 and error_array env p (r, ty) =
   Errors.array_access p (Reason.to_pos r) (Typing_print.error ty);
-  env, err_witness env p
-
-and error_array_append env p (r, ty) =
-  Errors.array_append p (Reason.to_pos r) (Typing_print.error ty);
   env, err_witness env p
 
 and error_assign_array_append env p (r, ty) =

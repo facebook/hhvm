@@ -504,20 +504,22 @@ and emit_using env pos is_block_scoped has_await e b =
     let fn_name = Hhbc_id.Method.from_raw_string @@
       if has_await then "__disposeAsync" else "__dispose"
     in
-    let epilogue =
-      if has_await then
-        gather [
-          instr_unboxr;
-          instr_await;
-          instr_popc
-        ]
-      else
-        instr_popr
-    in
-    let finally = gather [
+    let emit_finally () =
+      let epilogue, async_eager_label =
+        if has_await then
+          let after_await = Label.next_regular() in
+          gather [
+            instr_unboxr;
+            instr_await;
+            instr_label after_await;
+            instr_popc
+          ], Some after_await
+        else
+          instr_popr, None
+      in gather [
         instr_cgetl local;
         instr_fpushobjmethodd 0 fn_name A.OG_nullthrows;
-        instr_fcall (make_fcall_args 0);
+        instr_fcall (make_fcall_args ?async_eager_label 0);
         epilogue;
         if is_block_scoped then instr_unsetl local else empty;
       ]
@@ -537,7 +539,7 @@ and emit_using env pos is_block_scoped has_await e b =
           instr_jmp after_catch;
         instr_try_catch_middle;
           emit_pos (fst b);
-          make_finally_catch exn_local finally;
+          make_finally_catch exn_local (emit_finally ());
           emit_pos pos;
         instr_try_catch_end;
         instr_label after_catch;
@@ -547,7 +549,7 @@ and emit_using env pos is_block_scoped has_await e b =
       preamble;
       middle;
       instr_label finally_start;
-      finally;
+      emit_finally ();
       finally_epilogue;
       instr_label finally_end;
     ]
@@ -1061,6 +1063,7 @@ and emit_foreach env pos collection await_pos iterator block =
 and emit_foreach_await env pos collection iterator block =
   let next_label = Label.next_regular () in
   let exit_label = Label.next_regular () in
+  let async_eager_label = Label.next_regular () in
   let iter_temp_local = Local.get_unnamed_local () in
   let collection_expr = emit_expr ~need_ref:false env collection in
   let result_temp_local = Local.get_unnamed_local () in
@@ -1078,9 +1081,10 @@ and emit_foreach_await env pos collection iterator block =
       instr_label next_label;
       instr_cgetl iter_temp_local;
       instr_fpushobjmethodd 0 next_meth A.OG_nullthrows;
-      instr_fcall (make_fcall_args 0);
+      instr_fcall (make_fcall_args ~async_eager_label 0);
       instr_unboxr;
       instr_await;
+      instr_label async_eager_label;
       instr_setl result_temp_local;
       instr_popc;
       instr_istypel result_temp_local OpNull;

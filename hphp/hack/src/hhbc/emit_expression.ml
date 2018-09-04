@@ -773,35 +773,35 @@ and emit_new env pos expr targs args uargs =
     gather [
       emit_pos pos;
       instr_fpushctord nargs fq_id;
-      emit_args_and_call env pos reified_targs args uargs;
+      emit_args_and_call env pos reified_targs args uargs None;
       instr_popr
       ]
   | Class_static ->
     gather [
       emit_pos pos;
       instr_fpushctors nargs SpecialClsRef.Static;
-      emit_args_and_call env pos reified_targs args uargs;
+      emit_args_and_call env pos reified_targs args uargs None;
       instr_popr
       ]
   | Class_self ->
     gather [
       emit_pos pos;
       instr_fpushctors nargs SpecialClsRef.Self;
-      emit_args_and_call env pos reified_targs args uargs;
+      emit_args_and_call env pos reified_targs args uargs None;
       instr_popr
       ]
   | Class_parent ->
     gather [
       emit_pos pos;
       instr_fpushctors nargs SpecialClsRef.Parent;
-      emit_args_and_call env pos reified_targs args uargs;
+      emit_args_and_call env pos reified_targs args uargs None;
       instr_popr
       ]
   | _ ->
     gather [
       emit_load_class_ref env pos cexpr;
       instr_fpushctor nargs 0;
-      emit_args_and_call env pos reified_targs args uargs;
+      emit_args_and_call env pos reified_targs args uargs None;
       instr_popr
     ]
 
@@ -810,7 +810,7 @@ and emit_new_anon env pos cls_idx args uargs =
   gather [
     instr_defcls cls_idx;
     instr_fpushctori nargs cls_idx;
-    emit_args_and_call env pos [] args uargs;
+    emit_args_and_call env pos [] args uargs None;
     instr_popr
     ]
 
@@ -829,7 +829,7 @@ and emit_shape env expr fl =
   in
   emit_expr ~need_ref:false env (p, A.Darray fl)
 
-and emit_call_expr env pos e targs args uargs =
+and emit_call_expr env pos e targs args uargs async_eager_label =
   match snd e, targs, args, uargs with
   | A.Id (_, "__hhas_adata"), _, [ (_, A.String data) ], [] ->
     let v = Typed_value.HhasAdata data in
@@ -873,7 +873,8 @@ and emit_call_expr env pos e targs args uargs =
     when enable_intrinsics_extension () ->
     emit_pos_then pos @@ emit_reified_type env s, Flavor.Cell
   | _, _, _, _ ->
-    let instrs, flavor = emit_call env pos e targs args uargs in
+    let instrs, flavor = emit_call env pos e targs args uargs async_eager_label
+    in
     emit_pos_then pos instrs, flavor
 
 and emit_known_class_id env id =
@@ -1364,7 +1365,7 @@ and emit_eval env pos e =
 and emit_xhp_obj_get_raw env pos e s nullflavor =
   let fn_name = pos, A.Obj_get (e, (pos, A.Id (pos, "getAttribute")), nullflavor) in
   let args = [pos, A.String (SU.Xhp.clean s)] in
-  fst (emit_call env pos fn_name [] args [])
+  fst (emit_call env pos fn_name [] args [] None)
 
 and emit_xhp_obj_get ~need_ref env pos e s nullflavor =
   gather [
@@ -1461,15 +1462,17 @@ and inline_gena_call env arg = Local.scope @@ fun () ->
     instr_popc;
     begin
       unset_in_fault [arr_local] @@ fun () ->
+        let async_eager_label = Label.next_regular() in
         gather [
           instr_fpushclsmethodd 1
             (Hhbc_id.Method.from_raw_string
                (if hack_arr_dv_arrs () then "fromDict" else "fromDArray"))
             (Hhbc_id.Class.from_raw_string "HH\\AwaitAllWaitHandle");
           instr_cgetl arr_local;
-          instr_fcall (make_fcall_args 1);
+          instr_fcall (make_fcall_args ~async_eager_label 1);
           instr_unboxr;
           instr_await;
+          instr_label async_eager_label;
           instr_popc;
           emit_iter ~collection:(instr_cgetl arr_local) @@
           begin fun value_local key_local ->
@@ -1606,13 +1609,19 @@ and try_inline_genva_call_ env pos args uargs inline_context =
   Some result
   end
 
-and emit_await env pos e =
-  begin match try_inline_gen_call env e with
+and emit_await env pos expr =
+  begin match try_inline_gen_call env expr with
   | Some r -> r
   | None ->
     let after_await = Label.next_regular () in
-    gather [
-      emit_expr ~need_ref:false env e;
+    let instrs = match snd expr with
+    | A.Call (e, targs, args, uargs) ->
+      emit_box_or_unbox_if_necessary (fst expr) false @@
+        emit_call_expr env pos e targs args uargs (Some after_await)
+    | _ ->
+      emit_expr ~need_ref:false env expr
+    in gather [
+      instrs;
       emit_pos pos;
       instr_dup;
       instr_istypec OpNull;
@@ -1739,7 +1748,7 @@ and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
     fst (emit_obj_get ~need_ref env pos query_op expr prop nullflavor)
   | A.Call (e, targs, args, uargs) ->
     emit_box_or_unbox_if_necessary pos need_ref @@
-      emit_call_expr env pos e targs args uargs
+      emit_call_expr env pos e targs args uargs None
   | A.Execution_operator es ->
     emit_box_if_necessary pos need_ref @@
       emit_execution_operator env pos es
@@ -3010,7 +3019,7 @@ and emit_reified_arg env hint =
     ]
 
 (* Emit code to construct the argument frame and then make the call *)
-and emit_args_and_call env call_pos reified_targs args uargs =
+and emit_args_and_call env call_pos reified_targs args uargs async_eager_label =
   let args_count = List.length args in
   let all_args = args @ uargs in
   let aliases =
@@ -3034,7 +3043,8 @@ and emit_args_and_call env call_pos reified_targs args uargs =
         else empty
       in
       let fcall_args = make_fcall_args
-        ~has_unpack:use_unpack ~num_rets:(num_inout + 1) nargs in
+        ~has_unpack:use_unpack ~num_rets:(num_inout + 1)
+        ?async_eager_label nargs in
       gather [
         (* emit call*)
         emit_pos call_pos;
@@ -3398,7 +3408,7 @@ and emit_special_function env pos id args uargs default =
            && String.lowercase @@ SU.strip_ns s = "func_get_args"->
     let p = Pos.none in
     Some (emit_call env pos (p,
-        A.Id (p, "\\__SystemLib\\func_slice_args")) [] [count] [])
+        A.Id (p, "\\__SystemLib\\func_slice_args")) [] [count] [] None)
 
   | "hh\\asm", [_, A.String s] ->
     Some (emit_inline_hhas s, Flavor.Cell)
@@ -3500,7 +3510,7 @@ and get_inout_arg_positions args =
           | _, A.Callconv (A.Pinout, _) -> Some i
           | _ -> None)
 
-and emit_call env pos (_, expr_ as expr) targs args uargs =
+and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
   (match expr_ with
     | A.Id (_, s) -> Emit_symbol_refs.add_function s
     | _ -> ());
@@ -3517,7 +3527,7 @@ and emit_call env pos (_, expr_ as expr) targs args uargs =
       gather @@ List.init num_uninit ~f:(fun _ -> instr_nulluninit);
       emit_call_lhs
         env pos expr nargs (not (List.is_empty uargs)) inout_arg_positions;
-      emit_args_and_call env pos reified_targs args uargs;
+      emit_args_and_call env pos reified_targs args uargs async_eager_label;
     ], flavor in
 
   match expr_, args with
@@ -3536,7 +3546,7 @@ and emit_call env pos (_, expr_ as expr) targs args uargs =
 and emit_flavored_expr env ?last_pos (pos, expr_ as expr) =
   match expr_ with
   | A.Call (e, targs, args, uargs) ->
-    emit_call_expr env pos e targs args uargs
+    emit_call_expr env pos e targs args uargs None
   | _ ->
     let need_ref = binary_assignment_rhs_starts_with_ref expr in
     let flavor = if need_ref then Flavor.Ref else Flavor.Cell in

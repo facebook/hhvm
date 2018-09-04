@@ -1316,7 +1316,6 @@ FCallArgs read_fcall_args(AsmState& as) {
   auto const hasUnpack = read_opcode_arg<uint32_t>(as);
   auto const numRets = read_opcode_arg<uint32_t>(as);
   UNUSED auto const asyncEagerLabel = read_opcode_arg<std::string>(as);
-  assertx(asyncEagerLabel == "-");
   return FCallArgs(numArgs, hasUnpack != 0, numRets);
 }
 

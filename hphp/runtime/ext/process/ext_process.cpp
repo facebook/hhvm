@@ -383,7 +383,7 @@ struct SignalHandlers final : RequestEventHandler {
   Array handlers;
   int signaled[_NSIG];
   sigset_t oldSet;
-  std::atomic<bool> inited;
+  std::atomic<bool> inited{};
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(SignalHandlers, s_signal_handlers);
 

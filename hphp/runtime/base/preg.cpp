@@ -230,7 +230,7 @@ private:
   std::atomic<StaticCache*> m_staticCache;
   std::unique_ptr<LRUCache> m_lruCache;
   std::unique_ptr<ScalableCache> m_scalableCache;
-  std::atomic<time_t> m_expire;
+  std::atomic<time_t> m_expire{};
   std::mutex m_clearMutex;
 };
 

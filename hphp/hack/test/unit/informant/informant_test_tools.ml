@@ -81,5 +81,5 @@ let set_xdb ~state_svn_rev ~for_svn_rev ~everstore_handle ~tiny  =
     } in
     let result = Future.of_value [result] in
     Xdb.Mocking.find_nearest_returns ~db:Xdb.hack_db_name
-      ~db_table:Xdb.mini_saved_states_table
+      ~db_table:Xdb.saved_states_table
       ~svn_rev:for_svn_rev ~hh_version:(Some hh_version) ~tiny result

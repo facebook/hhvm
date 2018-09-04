@@ -18,7 +18,6 @@ let init
   ~root:_
   ~init_id:_
   ~informant_managed:_
-  ~devinfra_saved_state_lookup:_
   ~time:_
   ~saved_state_load_type:_
   ~use_sql:_
@@ -34,7 +33,6 @@ let init
 let init_monitor
   ?exit_on_parent_exit:_
   ~search_chunk_size:_
-  ~devinfra_saved_state_lookup:_
   ~prechecked_files:_
   _ _ _ _ = ()
 let init_end ~state_distance:_ ~approach_name:_ ~init_error:_ _ _ = ()

@@ -49,7 +49,6 @@ let monitor_daemon_main (options: ServerArgs.options) =
     EventLogger.Event_logger_fake 0.0
   else HackEventLogger.init_monitor
     ~exit_on_parent_exit
-    ~devinfra_saved_state_lookup:local_config.ServerLocalConfig.devinfra_saved_state_lookup
     ~search_chunk_size:local_config.ServerLocalConfig.search_chunk_size
     ~prechecked_files:(ServerPrecheckedFiles.should_use options local_config)
     (ServerArgs.root options) init_id
@@ -100,7 +99,6 @@ let monitor_daemon_main (options: ServerArgs.options) =
       saved_state_cache_limit =
         local_config.ServerLocalConfig.saved_state_cache_limit;
       use_xdb = local_config.ServerLocalConfig.informant_use_xdb;
-      devinfra_saved_state_lookup = local_config.ServerLocalConfig.devinfra_saved_state_lookup;
       ignore_hh_version = ServerArgs.ignore_hh_version options;
     } in
     let max_purgatory_clients =

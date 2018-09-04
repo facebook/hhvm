@@ -88,17 +88,15 @@ module Revision_map = struct
           (** Prefetcher *) (unit Future.t) option ref)) Hashtbl.t;
         use_xdb : bool;
         ignore_hh_version : bool;
-        devinfra_saved_state_lookup: bool;
         saved_state_cache_limit : int;
       }
 
-    let create ~saved_state_cache_limit ~devinfra_saved_state_lookup use_xdb ignore_hh_version =
+    let create ~saved_state_cache_limit use_xdb ignore_hh_version =
       {
         svn_queries = Hashtbl.create 200;
         xdb_queries = Hashtbl.create 200;
         use_xdb;
         ignore_hh_version;
-        devinfra_saved_state_lookup;
         saved_state_cache_limit;
       }
 
@@ -166,14 +164,9 @@ module Revision_map = struct
               let hh_version = if t.ignore_hh_version
                 then None
                 else Some Build_id.build_revision in
-              let db_table = if t.devinfra_saved_state_lookup then
-                Xdb.devinfra_saved_states_table
-              else
-                Xdb.mini_saved_states_table
-              in
               Xdb.find_nearest
                 ~db:Xdb.hack_db_name
-                ~db_table
+                ~db_table:Xdb.saved_states_table
                 ~svn_rev
                 ~hh_version
                 ~hhconfig_hash
@@ -363,7 +356,6 @@ module Revision_tracker = struct
     min_distance_restart : int;
     saved_state_cache_limit : int;
     use_xdb : bool;
-    devinfra_saved_state_lookup : bool;
     ignore_hh_version : bool;
   }
 
@@ -411,7 +403,6 @@ module Revision_tracker = struct
   ~min_distance_restart
   ~use_xdb ~ignore_hh_version
   ~saved_state_cache_limit
-  ~devinfra_saved_state_lookup
   watchman root =
     let init_settings = {
       watchman = ref watchman;
@@ -420,7 +411,6 @@ module Revision_tracker = struct
       saved_state_cache_limit;
       use_xdb;
       ignore_hh_version;
-      devinfra_saved_state_lookup;
   } in
     ref @@ Initializing (init_settings,
       Hg.current_working_copy_base_rev (Path.to_string root))
@@ -438,7 +428,6 @@ module Revision_tracker = struct
       current_base_revision = ref base_svn_rev;
       rev_map = Revision_map.create
         ~saved_state_cache_limit:init_settings.saved_state_cache_limit
-        ~devinfra_saved_state_lookup:init_settings.devinfra_saved_state_lookup
         init_settings.use_xdb
         init_settings.ignore_hh_version;
       state_changes = Queue.create() ;
@@ -767,7 +756,6 @@ let init {
   min_distance_restart;
   saved_state_cache_limit;
   use_xdb;
-  devinfra_saved_state_lookup;
   watchman_debug_logging;
   ignore_hh_version;
 } =
@@ -799,7 +787,6 @@ let init {
           ~use_xdb
           ~ignore_hh_version
           ~saved_state_cache_limit
-          ~devinfra_saved_state_lookup
           (Watchman.Watchman_alive watchman_env)
           root;
         watchman_event_watcher = WEWClient.init root;

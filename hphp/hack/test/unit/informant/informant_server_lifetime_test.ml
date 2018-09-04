@@ -76,7 +76,6 @@ module Tools = struct
     min_distance_restart = 100;
     use_xdb = true;
     saved_state_cache_limit = 20;
-    devinfra_saved_state_lookup = false;
     ignore_hh_version = false;
   }
 end;;

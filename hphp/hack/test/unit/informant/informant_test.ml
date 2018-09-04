@@ -65,7 +65,6 @@ let basic_setup_rev_5_and_200_and_start_informant temp_dir =
     watchman_debug_logging = false;
     use_xdb = true;
     saved_state_cache_limit = 20;
-    devinfra_saved_state_lookup = false;
     ignore_hh_version = false;
   } in
   let report = HhMonitorInformant.report
@@ -233,7 +232,6 @@ let test_informant_restarts_significant_move_delayed temp_dir =
     watchman_debug_logging = false;
     use_xdb = false;
     saved_state_cache_limit = 20;
-    devinfra_saved_state_lookup = false;
     ignore_hh_version = false;
   } in
   let report = HhMonitorInformant.report
@@ -287,7 +285,6 @@ let test_informant_no_saved_state_no_restart temp_dir =
     watchman_debug_logging = false;
     use_xdb = true;
     saved_state_cache_limit = 20;
-    devinfra_saved_state_lookup = false;
     ignore_hh_version = false;
   } in
   let report = HhMonitorInformant.report
@@ -323,7 +320,6 @@ let test_informant_xdb_saved_state_too_far temp_dir =
     watchman_debug_logging = false;
     use_xdb = true;
     saved_state_cache_limit = 20;
-    devinfra_saved_state_lookup = false;
     ignore_hh_version = false;
   } in
   let report = HhMonitorInformant.report
@@ -358,7 +354,6 @@ let test_repo_starts_midupdate temp_dir =
     watchman_debug_logging = false;
     use_xdb = false;
     saved_state_cache_limit = 20;
-    devinfra_saved_state_lookup = false;
     ignore_hh_version = false;
   } in
   let should_start_first_server =
@@ -393,7 +388,6 @@ let test_watcher_in_unknown_state temp_dir =
     watchman_debug_logging = false;
     use_xdb = false;
     saved_state_cache_limit = 20;
-    devinfra_saved_state_lookup = false;
     ignore_hh_version = false;
   } in
   let should_start_first_server =

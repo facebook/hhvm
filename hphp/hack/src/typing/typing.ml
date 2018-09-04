@@ -6078,6 +6078,9 @@ and condition ?lhs_of_null_coalesce env tparamet
   Async.enforce_nullable_or_not_awaitable env p ty;
   let env, ty = check_valid_rvalue p env ty in
   let condition = condition ?lhs_of_null_coalesce in
+  let enable_primitive_refinement =
+    not (TypecheckerOptions.disable_primitive_refinement (Env.get_tcopt env))
+  in
   match e with
   | T.Expr_list [] -> env
   | T.Expr_list [x] ->
@@ -6124,28 +6127,28 @@ and condition ?lhs_of_null_coalesce env tparamet
     when tparamet && f = SN.StdlibFunctions.is_array ->
       is_array env `PHPArray p f lv
   | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
-    when tparamet && f = SN.StdlibFunctions.is_vec ->
+    when tparamet && f = SN.StdlibFunctions.is_vec && enable_primitive_refinement ->
       is_array env `HackVec p f lv
   | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
-    when tparamet && f = SN.StdlibFunctions.is_dict ->
+    when tparamet && f = SN.StdlibFunctions.is_dict && enable_primitive_refinement ->
       is_array env `HackDict p f lv
   | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
-    when tparamet && f = SN.StdlibFunctions.is_keyset ->
+    when tparamet && f = SN.StdlibFunctions.is_keyset && enable_primitive_refinement ->
       is_array env `HackKeyset p f lv
   | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
-    when tparamet && f = SN.StdlibFunctions.is_int ->
+    when tparamet && f = SN.StdlibFunctions.is_int && enable_primitive_refinement ->
       is_type env lv Tint (Reason.Rpredicated (p, f))
   | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
-    when tparamet && f = SN.StdlibFunctions.is_bool ->
+    when tparamet && f = SN.StdlibFunctions.is_bool && enable_primitive_refinement ->
       is_type env lv Tbool (Reason.Rpredicated (p, f))
   | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
-    when tparamet && f = SN.StdlibFunctions.is_float ->
+    when tparamet && f = SN.StdlibFunctions.is_float && enable_primitive_refinement ->
       is_type env lv Tfloat (Reason.Rpredicated (p, f))
   | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
-    when tparamet && f = SN.StdlibFunctions.is_string ->
+    when tparamet && f = SN.StdlibFunctions.is_string && enable_primitive_refinement ->
       is_type env lv Tstring (Reason.Rpredicated (p, f))
   | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
-    when tparamet && f = SN.StdlibFunctions.is_resource ->
+    when tparamet && f = SN.StdlibFunctions.is_resource && enable_primitive_refinement ->
       is_type env lv Tresource (Reason.Rpredicated (p, f))
   | T.Call (
       Cnormal,

@@ -39,6 +39,7 @@ let global_opts = GlobalOptions.make
   ~tco_untyped_nonstrict_lambda_parameters:false
   ~tco_language_feature_logging:false
   ~tco_unsafe_rx:false
+  ~tco_disable_primitive_refinement:false
   ~tco_disallow_implicit_returns_in_non_void_functions:true
   ~tco_disallow_unset_on_varray:false
   ~ignored_fixme_codes: ISet.empty

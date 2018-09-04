@@ -126,6 +126,11 @@ type t = {
  tco_unsafe_rx : bool;
 
  (*
+  * Flag to disable type refinement via is_{bool, float, int, string, etc.}.
+  *)
+ tco_disable_primitive_refinement : bool;
+
+ (*
   * Flag to disallow implicit and expressionless returns in non-void functions.
   *)
  tco_disallow_implicit_returns_in_non_void_functions: bool;
@@ -161,6 +166,7 @@ val make :
   tco_disallow_array_cell_pass_by_ref: bool ->
   tco_language_feature_logging: bool ->
   tco_unsafe_rx: bool ->
+  tco_disable_primitive_refinement: bool ->
   tco_disallow_implicit_returns_in_non_void_functions: bool ->
   tco_disallow_unset_on_varray: bool ->
   ignored_fixme_codes: ISet.t ->
@@ -187,6 +193,7 @@ val tco_disallow_return_by_ref : t -> bool
 val tco_disallow_array_cell_pass_by_ref : t -> bool
 val tco_language_feature_logging : t -> bool
 val tco_unsafe_rx : t -> bool
+val tco_disable_primitive_refinement : t -> bool
 val tco_disallow_implicit_returns_in_non_void_functions : t -> bool
 val tco_disallow_unset_on_varray : t -> bool
 val default : t

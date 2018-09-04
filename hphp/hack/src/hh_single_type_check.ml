@@ -156,6 +156,7 @@ let parse_options () =
   let auto_namespace_map = ref [] in
   let dont_assume_php = ref false in
   let unsafe_rx = ref false in
+  let disable_primitive_refinement = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -322,7 +323,10 @@ let parse_options () =
         " Disallow unsetting indices from varrays";
     "--unsafe-rx",
         Arg.Set unsafe_rx,
-        " Disables reactivity related errors"
+        " Disables reactivity related errors";
+    "--disable-primitive-refinement",
+      Arg.Set disable_primitive_refinement,
+      " Disable type refinement of is_{bool, float, int, string, etc.}.";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -333,6 +337,7 @@ let parse_options () =
     GlobalOptions.default with
       GlobalOptions.tco_assume_php = not !dont_assume_php;
       GlobalOptions.tco_unsafe_rx = !unsafe_rx;
+      GlobalOptions.tco_disable_primitive_refinement = !disable_primitive_refinement;
       GlobalOptions.tco_safe_array = !safe_array;
       GlobalOptions.tco_safe_vector_array = !safe_vector_array;
       GlobalOptions.po_deregister_php_stdlib = !deregister_attributes;

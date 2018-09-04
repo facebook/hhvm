@@ -18,6 +18,7 @@ let disallow_array_literal = GlobalOptions.tco_disallow_array_literal
 let untyped_nonstrict_lambda_parameters = GlobalOptions.tco_untyped_nonstrict_lambda_parameters
 let language_feature_logging = GlobalOptions.tco_language_feature_logging
 let unsafe_rx = GlobalOptions.tco_unsafe_rx
+let disable_primitive_refinement = GlobalOptions.tco_disable_primitive_refinement
 let experimental_feature_enabled =
   GlobalOptions.tco_experimental_feature_enabled
 let migration_flag_enabled =

@@ -33,8 +33,7 @@ bool branchesToItself(SrcKey sk) {
   auto const op = peek_op(pc);
   if (!instrIsControlFlow(op)) return false;
   if (isSwitch(op)) return false;
-  auto const branchOffsetPtr = instrJumpOffset(pc);
-  return branchOffsetPtr != nullptr && *branchOffsetPtr == 0;
+  return instrJumpOffset(pc) == 0;
 }
 
 /*

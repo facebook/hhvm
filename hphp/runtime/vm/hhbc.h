@@ -926,10 +926,9 @@ bool subopValid(Subop);
 template<class SubOpType>
 folly::Optional<SubOpType> nameToSubop(const char*);
 
-// returns a pointer to the location within the bytecode containing the jump
-//   Offset, or NULL if the instruction cannot jump. Note that this offset is
-//   relative to the current instruction.
-Offset* instrJumpOffset(PC instr);
+// Returns a jump offset relative to the instruction, or kInvalidOffset if
+// the instruction cannot jump.
+Offset instrJumpOffset(PC instr);
 
 // returns absolute address of target, or InvalidAbsoluteOffset if instruction
 //   cannot jump

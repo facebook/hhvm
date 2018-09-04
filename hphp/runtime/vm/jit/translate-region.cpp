@@ -819,7 +819,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
           SrcKey nextSk = inst.nextSk();
           Op nextOp = nextSk.op();
           if (needsSurpriseCheck(nextOp) &&
-              *instrJumpOffset(nextSk.pc()) < 0) {
+              instrJumpOffset(nextSk.pc()) < 0) {
             emitedSurpriseCheck = true;
             inst.forceSurpriseCheck = true;
           }
@@ -831,7 +831,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
           const bool firstInstr = isEntry && i == 0;
           if (lastInstr && !emitedSurpriseCheck &&
               needsSurpriseCheck(inst.op()) &&
-              *instrJumpOffset(inst.pc()) < 0) {
+              instrJumpOffset(inst.pc()) < 0) {
             emitedSurpriseCheck = true;
             inst.forceSurpriseCheck = true;
           }

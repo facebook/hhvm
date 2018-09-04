@@ -31,7 +31,7 @@ namespace {
  * which is the offset corresponding to the branch being taken.
  */
 Offset iterBranchTarget(const NormalizedInstruction& i) {
-  assertx(instrJumpOffset(i.pc()) != nullptr);
+  assertx(instrJumpOffset(i.pc()) != kInvalidOffset);
   switch (i.op()) {
     case OpIterInit:
     case OpIterInitK:

@@ -252,7 +252,7 @@ int instrLen(const PC origPC) {
   return pc - origPC;
 }
 
-Offset* instrJumpOffset(const PC origPC) {
+Offset instrJumpOffset(const PC origPC) {
   static const int8_t jumpMask[] = {
 #define IMM_NA 0
 #define IMM_IVA 0
@@ -317,32 +317,23 @@ Offset* instrJumpOffset(const PC origPC) {
   auto const op = decode_op(pc);
   assertx(!isSwitch(op));  // BLA doesn't work here
 
-  if (op == OpIterBreak) {
-    // offset is imm number 0
-    return const_cast<Offset*>(reinterpret_cast<const Offset*>(pc));
-  }
-
-  int mask = jumpMask[size_t(op)];
-  if (mask == 0) {
-    return nullptr;
-  }
   int immNum;
-  switch (mask) {
-  case 0: return nullptr;
+  switch (jumpMask[size_t(op)]) {
+  case 0: return kInvalidOffset;
   case 1: immNum = 0; break;
   case 2: immNum = 1; break;
   case 4: immNum = 2; break;
   case 8: immNum = 3; break;
   case 16: immNum = 4; break;
-  default: assertx(false); return nullptr;
+  default: assertx(false); return kInvalidOffset;
   }
 
-  return &getImmPtr(origPC, immNum)->u_BA;
+  return getImmPtr(origPC, immNum)->u_BA;
 }
 
 Offset instrJumpTarget(PC instrs, Offset pos) {
   auto offset = instrJumpOffset(instrs + pos);
-  return offset ? *offset + pos : InvalidAbsoluteOffset;
+  return offset != kInvalidOffset ? offset + pos : InvalidAbsoluteOffset;
 }
 
 OffsetSet instrSuccOffsets(PC opc, const Unit* unit) {
@@ -393,7 +384,7 @@ int numSuccs(const PC origPC) {
     return 0;
   }
   if (!instrIsControlFlow(op)) return 1;
-  if (instrJumpOffset(origPC)) return 2;
+  if (instrJumpOffset(origPC) != kInvalidOffset) return 2;
   return 1;
 }
 

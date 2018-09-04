@@ -149,6 +149,7 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
             # Must enable fsmonitor extension to see State enter/leave events
             f.write('[extensions]\n')
             f.write('fsmonitor =\n')
+            f.write('hgevents =\n')
         cmd = ['hg', 'add']
         self.check_call(cmd)
         self.hg_commit('starting')

@@ -450,7 +450,6 @@ and add_decl_errors = function
 and fun_def tcopt f =
   (* reset the expression dependent display ids for each function body *)
   Reason.expr_display_id_map := IMap.empty;
-  Typing_hooks.dispatch_enter_fun_def_hook f;
   let pos = fst f.f_name in
   let nb = TNBody.func_body tcopt f in
   let env = EnvFromDef.fun_env tcopt f in
@@ -537,7 +536,6 @@ and fun_def tcopt f =
       } in
       Typing_lambda_ambiguous.suggest_fun_def env fundef
   ) in
-  Typing_hooks.dispatch_exit_fun_def_hook f;
   tfun_def
 
 (*****************************************************************************)
@@ -1738,7 +1736,6 @@ and expr_
           Errors.re_prefixed_non_string p "Non-strings";
           expr_error env p (Reason.Rregex p))
   | Fun_id x ->
-      Typing_hooks.dispatch_id_hook x env;
       let env, fty = fun_type_of_id env x [] in
       begin match fty with
       | _, Tfun fty -> check_deprecated (fst x) fty;
@@ -1746,7 +1743,6 @@ and expr_
       end;
       make_result env (T.Fun_id x) fty
   | Id ((cst_pos, cst_name) as id) ->
-      Typing_hooks.dispatch_id_hook id env;
       (match Env.get_gconst env cst_name with
       | None when Env.is_strict env ->
           Errors.unbound_global cst_pos;
@@ -2334,7 +2330,6 @@ and expr_
 
   | Special_func func -> special_func env p func
   | New ((pos, c), el, uel) ->
-      Typing_hooks.dispatch_new_id_hook c env p;
       let env = save_and_merge_next_in_catch env in
       let env, tc, tel, tuel, ty, _ =
         new_object ~expected ~is_using_clause ~check_parent:false ~check_not_abstract:true
@@ -4207,10 +4202,9 @@ and is_abstract_ft fty = match fty with
     end
 
   (* Special function `parent::__construct` *)
-  | Class_const ((pos, CIparent), ((callee_pos, construct) as id))
+  | Class_const ((pos, CIparent), ((_, construct) as id))
     when construct = SN.Members.__construct ->
       check_class_function_in_suspend "parent" SN.Members.__construct;
-      Typing_hooks.dispatch_parent_construct_hook env callee_pos;
       let env, tel, tuel, ty, pty, ctor_fty =
         call_parent_construct p env el uel in
       make_call env (T.make_typed_expr fpos ctor_fty
@@ -4381,14 +4375,12 @@ and is_abstract_ft fty = match fty with
 
   (* Function invocation *)
   | Fun_id x ->
-      Typing_hooks.dispatch_id_hook x env;
       let env, fty = fun_type_of_id env x hl in
       check_coroutine_call env fty;
       let env, tel, tuel, ty =
         call ~expected ~is_expr_statement p env fty el uel in
       make_call env (T.make_typed_expr fpos fty (T.Fun_id x)) hl tel tuel ty
   | Id (_, id as x) ->
-      Typing_hooks.dispatch_id_hook x env;
       let env, fty = fun_type_of_id env x hl in
       check_coroutine_call env fty;
       let env, tel, tuel, ty =
@@ -4771,8 +4763,6 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
       (match class_ with
       | None -> env, (Reason.Rwitness p, Typing_utils.tany env), None
       | Some class_ ->
-        Typing_hooks.dispatch_smethod_hook class_ paraml ~pos_params (p, mid)
-          env ety_env.from_class ~is_method ~is_const;
         (* We need to instantiate generic parameters in the method signature *)
         let ety_env =
           { ety_env with
@@ -4924,8 +4914,8 @@ and obj_get_with_visibility ~is_method ~nullsafe ~valkind ~pos_params
 
 (* We know that the receiver is a concrete class: not a generic with
  * bounds, or a Tunresolved. *)
-and obj_get_concrete_ty ~is_method ~valkind ~pos_params ?(explicit_tparams=[])
-    env concrete_ty class_id (id_pos, id_str as id) k_lhs =
+and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
+    env concrete_ty class_id (id_pos, id_str) k_lhs =
   let default () = env, (Reason.Rwitness id_pos, Typing_utils.tany env), None in
   let mk_ety_env r class_info x paraml =
     let this_ty = k_lhs (r, (Tclass(x, paraml))) in
@@ -4970,8 +4960,6 @@ and obj_get_concrete_ty ~is_method ~valkind ~pos_params ?(explicit_tparams=[])
         end
       else old_member_info, false
       in
-      Typing_hooks.dispatch_cmethod_hook class_info paraml ~pos_params id
-        env (Some class_id) ~is_method;
 
       begin match member_info with
       | None when not is_method ->
@@ -5117,7 +5105,7 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~(pos_params : expr list option) ?(ex
          let k_lhs' ty = match ak with
          | AKnewtype (_, _) -> k_lhs ty
          | _ -> k_lhs (p', Tabstract (ak, Some ty)) in
-         obj_get_concrete_ty ~is_method ~valkind ~pos_params ~explicit_tparams env ty cid id k_lhs'
+         obj_get_concrete_ty ~is_method ~valkind ~explicit_tparams env ty cid id k_lhs'
       ) in
     begin match resl with
       | [] -> begin
@@ -5142,7 +5130,7 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~(pos_params : expr list option) ?(ex
   | r, Tprim Nast.Tvoid when TUtils.is_void_type_of_null env ->
     nullable_obj_get (r, Tany)
   | _, _ ->
-    k (obj_get_concrete_ty ~is_method ~valkind ~pos_params ~explicit_tparams env ety1 cid id k_lhs)
+    k (obj_get_concrete_ty ~is_method ~valkind ~explicit_tparams env ety1 cid id k_lhs)
 
 and class_id_for_new p env cid =
   let env, te, ty = static_class_id ~check_constraints:false p env cid in
@@ -5498,7 +5486,6 @@ and call_ ~expected ~method_call_info ~is_expr_statement pos env fty el uel =
       env, te
     end in
     let env = call_untyped_unpack env uel in
-    Typing_hooks.dispatch_fun_call_hooks [] (List.map (el @ uel) fst) env;
     let ty =
       if snd efty = Tdynamic then
         (Reason.Rdynamic_call pos, Tdynamic)
@@ -5623,8 +5610,6 @@ and call_ ~expected ~method_call_info ~is_expr_statement pos env fty el uel =
     let () = check_arity ~did_unpack pos pos_def arity ft.ft_arity in
     (* Variadic params cannot be inout so we can stop early *)
     let env = wfold_left2 inout_write_back env ft.ft_params el in
-    Typing_hooks.dispatch_fun_call_hooks
-      ft.ft_params (List.map (el @ uel) fst) env;
     let env, ret_ty =
       TR.get_adjusted_return_type env method_call_info ft.ft_ret in
     env, tel, tuel, ret_ty
@@ -6625,7 +6610,6 @@ and class_def tcopt c =
     Some (class_def_ env c tc)
 
 and class_def_ env c tc =
-  Typing_hooks.dispatch_enter_class_def_hook c tc;
   let env =
     let kind = match c.c_kind with
     | Ast.Cenum -> SN.AttributeKinds.enum
@@ -6685,7 +6669,6 @@ and class_def_ env c tc =
   let typed_static_vars =
     List.map c.c_static_vars (class_var_def env ~is_static:true c) in
   let typed_static_methods = List.map c.c_static_methods (method_def env) in
-  Typing_hooks.dispatch_exit_class_def_hook c tc;
   {
     T.c_annotation = Env.save env.Env.lenv.Env.tpenv env;
     T.c_mode = c.c_mode;
@@ -6908,7 +6891,6 @@ and user_attribute env ua =
 and method_def env m =
   (* reset the expression dependent display ids for each method body *)
   Reason.expr_display_id_map := IMap.empty;
-  Typing_hooks.dispatch_enter_method_def_hook m;
   let pos = fst m.m_name in
   let env = Env.reinitialize_locals env in
   let env = Env.set_env_function_pos env pos in
@@ -6996,7 +6978,6 @@ and method_def env m =
     | Some hint ->
       Typing_return.async_suggest_return (m.m_fun_kind) hint (fst m.m_name); m.m_ret in
   let m = { m with m_ret = m_ret; } in
-  Typing_hooks.dispatch_exit_method_def_hook m;
   let method_def = {
     T.m_annotation = Env.save local_tpenv env;
     T.m_final = m.m_final;

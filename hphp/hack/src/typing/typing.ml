@@ -825,15 +825,15 @@ and stmt env = function
             let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
             (* The following is necessary in case there is an assignment in the
              * expression *)
-            let env, te, _ = if_next_expr env e in
-            let env = if_next_condition env true te in
+            let env, te, _ = expr env e in
+            let env = condition env true te in
             let env = LEnv.update_next_from_conts env [C.Do; C.Next] in
             let env, tb = block env b in
             env, tb
           end end in
         let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
-        let env, te, _ = if_next_expr env e in
-        let env = if_next_condition env false te in
+        let env, te, _ = expr env e in
+        let env = condition env false te in
         let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
         env, (tb, te)) in
     env, T.Do(tb, te)
@@ -848,7 +848,7 @@ and stmt env = function
           (* The following is necessary in case there is an assignment in the
            * expression *)
           let env, te, _ = expr env e in
-          let env = if_next_condition env true te in
+          let env = condition env true te in
           (* TODO TAST: avoid repeated generation of block *)
           let env, tb = block env b in
           env, tb
@@ -856,7 +856,7 @@ and stmt env = function
       end in
       let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
       let env, te, _ = expr env e in
-      let env = if_next_condition env false te in
+      let env = condition env false te in
       let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
       env, (te, tb)) in
     env, T.While (te, tb)
@@ -882,16 +882,16 @@ and stmt env = function
             (* The following is necessary in case there is an assignment in the
              * expression *)
             let env, te2, _ = expr env e2 in
-            let env = if_next_condition env true te2 in
+            let env = condition env true te2 in
             let env, tb = block env b in
             let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
-            let (env, te3, _) = if_next_expr env e3 in
+            let (env, te3, _) = expr env e3 in
             env, (tb, te3)
           end
         end in
         let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
         let (env, te2, _) = expr env e2 in
-        let env = if_next_condition env false te2 in
+        let env = condition env false te2 in
         let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
         env, (te1, te2, te3, tb)) in
     env, T.For(te1, te2, te3, tb)
@@ -1210,11 +1210,6 @@ and bind_as_expr env loop_ty ty aexpr =
     | _ -> (* TODO Probably impossible, should check that *)
       assert false
 
-and if_next_expr env (p, _ as e) =
-  match LEnv.get_cont_option env C.Next with
-  | None -> expr_error env p (Reason.Rwitness p)
-  | Some _ -> expr env e
-
 and expr
     ?expected
     ?(accept_using_var = false)
@@ -1299,13 +1294,15 @@ and eif env ~expected ~coalesce p c e1 e2 =
         let env, ty = TUtils.non_null env tyc in
         env, None, ty
     | Some e1 ->
-        let env, te1, ty1 = expr ?expected ~allow_non_awaited_awaitable_in_rx:true env e1 in
+        let env, te1, ty1 = expr ?expected
+          ~allow_non_awaited_awaitable_in_rx:true env e1 in
         env, Some te1, ty1
     in
   let lenv1 = env.Env.lenv in
   let env = { env with Env.lenv = parent_lenv } in
   let env = condition env false tc in
-  let env, te2, ty2 = expr ?expected ~allow_non_awaited_awaitable_in_rx:true env e2 in
+  let env, te2, ty2 = expr ?expected
+    ~allow_non_awaited_awaitable_in_rx:true env e2 in
   let lenv2 = env.Env.lenv in
   let fake_members = LEnv.intersect_fake lenv1 lenv2 in
   (* we restore the locals to their parent state so as not to leak the
@@ -1432,6 +1429,7 @@ and expr_
     let env = Env.forget_members env p in
     env, te, result in
 
+  try
   match e with
   | Any -> expr_error env p (Reason.Rwitness p)
   | Array [] ->
@@ -2649,6 +2647,8 @@ and expr_
        * using shape keyword and we know exactly what fields are set. *)
       make_result env (T.Shape (ShapeMap.map (fun (te,_) -> te) tfdm))
         (Reason.Rwitness p, Tshape (FieldsFullyKnown, fdm))
+  with Typing_lenv_cont.Continuation_not_found _ ->
+    expr_error env p (Reason.Rwitness p)
 
 and class_const ?(incl_tc=false) env p ((cpos, cid), mid) =
   let env, ce, cty = static_class_id ~check_constraints:false cpos env cid in
@@ -6048,11 +6048,6 @@ and condition_nullity ~nonnull (env: Env.env) te =
 and condition_isset env = function
   | _, T.Array_get (x, _) -> condition_isset env x
   | v -> condition_nullity ~nonnull:true env v
-
-and if_next_condition env tparamt (te: Tast.expr) =
-  match LEnv.get_cont_option env C.Next with
-  | None -> env
-  | Some _ -> condition env tparamt te
 
 (**
  * Build an environment for the true or false branch of

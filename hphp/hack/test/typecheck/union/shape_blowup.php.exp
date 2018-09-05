@@ -1,0 +1,11 @@
+File "shape_blowup.php", line 50, characters 3-18:
+  ^(shape('original_restriction_class' => ^(string)) | shape())
+File "shape_blowup.php", line 55, characters 3-18:
+  ^(shape('aldrin_reason' => ^string, 'original_restriction_class' => ^(string)) | shape('aldrin_reason' => ^[unresolved]))
+File "shape_blowup.php", line 60, characters 3-18:
+  ^(shape('aldrin_reason' => ^string, 'feature' => ^string, 'original_restriction_class' => ^(string)) | shape('aldrin_reason' => ^[unresolved], 'feature' => ^[unresolved]))
+File "shape_blowup.php", line 65, characters 3-18:
+  ^(shape('aldrin_reason' => ^string, 'feature' => ^string, 'limited_fbid' => ^int, 'original_restriction_class' => ^(string)) | shape('aldrin_reason' => ^[unresolved], 'feature' => ^[unresolved], 'limited_fbid' => ^[unresolved]))
+File "shape_blowup.php", line 70, characters 3-18:
+  ^(shape('aldrin_reason' => ^string, 'feature' => ^string, 'limited_fbid' => ^int, 'original_restriction_class' => ^(string), 'policy' => ^string) | shape('aldrin_reason' => ^[unresolved], 'feature' => ^[unresolved], 'limited_fbid' => ^[unresolved], 'policy' => ^[unresolved]))
+No errors

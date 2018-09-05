@@ -1,0 +1,65 @@
+File "generics.php", line 54, characters 3-13:
+  A as A<int>
+File "generics.php", line 57, characters 3-13:
+  A as A<^[unresolved]>
+File "generics.php", line 60, characters 3-13:
+  A as A<^int>
+File "generics.php", line 63, characters 3-13:
+  B as B<int>
+File "generics.php", line 66, characters 3-13:
+  B as B<^(int)>
+File "generics.php", line 69, characters 3-13:
+  (A<int> | A as A<int>)
+File "generics.php", line 72, characters 3-13:
+  (A<int> | A as A<^[unresolved]>)
+File "generics.php", line 75, characters 3-13:
+  (A<T> | A as A<^[unresolved]>)
+File "generics.php", line 78, characters 3-13:
+  (A<T> | A as A<int>)
+File "generics.php", line 81, characters 3-13:
+  (A<T> | A<int>)
+File "generics.php", line 84, characters 3-13:
+  A<T>
+File "generics.php", line 87, characters 3-13:
+  (A as A<int> | A as A<string>)
+File "generics.php", line 88, characters 3-35:
+  ^(bool | bool)
+File "generics.php", line 91, characters 3-13:
+  (A as A<num> | A as A<arraykey>)
+File "generics.php", line 92, characters 3-34:
+  ^(bool | bool)
+File "generics.php", line 95, characters 3-13:
+  (A as A<int> | B as B<^(int)>)
+File "generics.php", line 96, characters 3-25:
+  ^(bool | bool)
+File "generics.php", line 99, characters 3-13:
+  (Tu | C)
+  where Tu super \C
+File "generics.php", line 102, characters 3-13:
+  (Tv | C)
+  where Tv as \C
+File "generics.php", line 105, characters 3-13:
+  (Tu | Tv)
+  where Tu super \C, Tv as \C
+File "generics.php", line 108, characters 3-13:
+  (Tu | Tw)
+  where Tu super \C, Tw super \C
+File "generics.php", line 111, characters 3-13:
+  (Tv | Ty)
+  where Tv as \C, Ty as \C
+File "generics.php", line 18, characters 5-15:
+  (int | Ta)
+File "generics.php", line 21, characters 5-15:
+  (Tabs | Ta)
+File "generics.php", line 24, characters 5-15:
+  (Tcstr | int)
+File "generics.php", line 27, characters 5-15:
+  (Tcstr | Ta)
+File "generics.php", line 88, characters 32-33:
+Invalid argument (Typing[4110])
+File "generics.php", line 86, characters 20-22:
+This is an int
+File "generics.php", line 12, characters 36-36:
+  via this generic T
+File "generics.php", line 88, characters 32-33:
+It is incompatible with a string

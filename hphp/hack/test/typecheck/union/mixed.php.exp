@@ -1,0 +1,32 @@
+File "mixed.php", line 17, characters 3-13:
+  ^(A as A)
+File "mixed.php", line 25, characters 3-13:
+  ^(nonnull | A as A)
+File "mixed.php", line 34, characters 3-13:
+  mixed
+File "mixed.php", line 43, characters 3-13:
+  ^(object | A as A)
+File "mixed.php", line 54, characters 3-13:
+  ^((function(string $s1, string $s2): int) | (function(string $s1, string $s2): string))
+File "mixed.php", line 63, characters 3-13:
+  ^([fun] | [fun])
+File "mixed.php", line 72, characters 3-13:
+  ^(A | A as A)
+File "mixed.php", line 76, characters 3-13:
+  (int | string)
+File "mixed.php", line 79, characters 3-13:
+  (int | float)
+File "mixed.php", line 82, characters 3-13:
+  (float | string)
+File "mixed.php", line 85, characters 3-13:
+  B
+File "mixed.php", line 88, characters 3-13:
+  (int | B)
+File "mixed.php", line 91, characters 3-13:
+  (A as A | B)
+File "mixed.php", line 27, characters 12-13:
+Invalid argument (Typing[4110])
+File "mixed.php", line 102, characters 19-19:
+This is an object of type A
+File "mixed.php", line 11, characters 48-54:
+It is incompatible with a nonnull value

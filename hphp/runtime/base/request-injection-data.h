@@ -378,6 +378,7 @@ private:
   std::string m_defaultMimeType;
   std::string m_brotliEnabled;
   std::string m_brotliChunkedEnabled;
+  std::string m_zstdEnabled;
   std::string m_gzipCompressionLevel = "-1";
   std::string m_gzipCompression;
   std::string m_errorLog;
@@ -398,6 +399,7 @@ private:
   int64_t m_zendAssertions;
   int64_t m_brotliLgWindowSize;
   int64_t m_brotliQuality;
+  int64_t m_zstdLevel;
 
   /*
    * Keep track of the open_basedir_separator that may be used so we can

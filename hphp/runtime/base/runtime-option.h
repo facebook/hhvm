@@ -224,6 +224,8 @@ struct RuntimeOption {
   // Base 2 logarithm of the sliding window size. Range is 10-24.
   static int BrotliCompressionLgWindowSize;
   static int BrotliCompressionQuality;
+  static int ZstdCompressionEnabled;
+  static int ZstdCompressionLevel;
   static int GzipCompressionLevel;
   static int GzipMaxCompressionLevel;
   static std::string ForceCompressionURL;

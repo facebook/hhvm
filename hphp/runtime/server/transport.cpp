@@ -43,6 +43,7 @@
 #include "hphp/util/struct-log.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/timer.h"
+#include "hphp/util/zstd.h"
 
 #include <folly/String.h>
 #include <enc/encode.h>
@@ -52,7 +53,7 @@ namespace HPHP {
 
 static const char HTTP_RESPONSE_STATS_PREFIX[] = "http_response_";
 const char* Transport::ENCODING_TYPE_TO_NAME[CompressionType::Max + 1] = {
-    "br", "br", "gzip", ""};
+    "br", "br", "zstd", "gzip", ""};
 
 Transport::Transport()
   : m_instructions(0), m_sleepTime(0), m_usleepTime(0),
@@ -527,6 +528,10 @@ bool Transport::decideCompression() {
     m_acceptedEncodings[CompressionType::BrotliChunked] = true;
     acceptsEncoding = true;
   }
+  if (acceptEncoding("zstd")) {
+    m_acceptedEncodings[CompressionType::Zstd] = true;
+    acceptsEncoding = true;
+  }
   if (acceptEncoding("gzip")) {
     m_acceptedEncodings[CompressionType::Gzip] = true;
     acceptsEncoding = true;
@@ -732,7 +737,8 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
      */
     if (compressed ? m_compressionDecision != CompressionDecision::HasTo
                    : (isCompressionEnabled() &&
-                      !(acceptEncoding("gzip") || acceptEncoding("br")))) {
+                      !(acceptEncoding("gzip") || acceptEncoding("br") ||
+                        acceptEncoding("zstd")))) {
       addHeaderImpl("Vary", "Accept-Encoding");
     }
   }
@@ -888,6 +894,8 @@ StringHolder Transport::prepareResponse(const void* data,
         m_compressionEnabled[CompressionType::BrotliChunked],
         "brotli.chunked_compression");
     finalizeCompressionOnOff(
+        m_compressionEnabled[CompressionType::Zstd], "zstd.compression");
+    finalizeCompressionOnOff(
         m_compressionEnabled[CompressionType::Gzip], "zlib.output_compression");
 
     // If PHP disables a particular compression, then it is the same as if
@@ -902,7 +910,10 @@ StringHolder Transport::prepareResponse(const void* data,
     // wouldn't benefit much from compression
     if (m_chunkedEncoding || size > 50 ||
         m_compressionDecision == CompressionDecision::HasTo) {
-      if (m_chunkedEncoding &&
+      if (m_acceptedEncodings[CompressionType::Zstd]) {
+        // for the moment, prefer zstd
+        m_encodingType = CompressionType::Zstd;
+      } else if (m_chunkedEncoding &&
           m_acceptedEncodings[CompressionType::BrotliChunked]) {
         m_encodingType = CompressionType::Brotli;
       } else if (!m_chunkedEncoding &&
@@ -916,6 +927,8 @@ StringHolder Transport::prepareResponse(const void* data,
 
   if (m_encodingType == CompressionType::Brotli) {
     response = compressBrotli(data, size, compressed, last);
+  } else if (m_encodingType == CompressionType::Zstd) {
+    response = compressZstd(data, size, compressed, last);
   } else if (m_encodingType == CompressionType::Gzip) {
     response = compressGzip(data, size, compressed, last);
   }
@@ -995,11 +1008,34 @@ StringHolder Transport::compressBrotli(const void *data, int size,
   return StringHolder(compressedData, len, true);
 }
 
+StringHolder Transport::compressZstd(const void *data, int size,
+                                       bool &compressed, bool last) {
+  if (m_zstdCompressor == nullptr) {
+    Variant quality;
+    IniSetting::Get("zstd.compression_level", quality);
+    auto compression_level = quality.asInt64Val();
+
+    m_zstdCompressor = std::make_unique<ZstdCompressor>(compression_level);
+  }
+
+  size_t len = size;
+  auto compressedData = m_zstdCompressor->compress(data, len, last);
+  if (!compressedData) {
+    Logger::Error("Unable to compress response to zstd: size=%d", size);
+    return StringHolder((const char*)data, size);
+  }
+
+  compressed = true;
+  return StringHolder(compressedData, len, true);
+}
+
 void Transport::enableCompression() {
   m_compressionEnabled[CompressionType::Brotli] =
       RuntimeOption::BrotliCompressionEnabled;
   m_compressionEnabled[CompressionType::BrotliChunked] =
       RuntimeOption::BrotliChunkedCompressionEnabled;
+  m_compressionEnabled[CompressionType::Zstd] =
+      RuntimeOption::ZstdCompressionEnabled;
   m_compressionEnabled[CompressionType::Gzip] =
       RuntimeOption::GzipCompressionLevel ? 1 : 0;
 }
@@ -1013,6 +1049,7 @@ void Transport::disableCompression() {
 bool Transport::isCompressionEnabled() const {
   return m_compressionEnabled[CompressionType::Brotli] ||
          m_compressionEnabled[CompressionType::BrotliChunked] ||
+         m_compressionEnabled[CompressionType::Zstd] ||
          m_compressionEnabled[CompressionType::Gzip];
 }
 

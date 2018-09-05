@@ -511,6 +511,15 @@ void RequestInjectionData::threadInit() {
       std::to_string(RuntimeOption::BrotliCompressionLgWindowSize).c_str(),
       &m_brotliLgWindowSize);
 
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "zstd.compression", &m_zstdEnabled);
+  IniSetting::Bind(
+      IniSetting::CORE,
+      IniSetting::PHP_INI_ALL,
+      "zstd.compression_level",
+      std::to_string(RuntimeOption::ZstdCompressionLevel).c_str(),
+      &m_zstdLevel);
+
   // Assertions
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
     "zend.assertions", "1",

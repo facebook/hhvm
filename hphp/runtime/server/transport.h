@@ -40,6 +40,8 @@ struct Array;
 struct Variant;
 struct StructuredLogEntry;
 
+struct ZstdCompressor;
+
 /**
  * For storing headers and cookies.
  */
@@ -494,6 +496,7 @@ protected:
   enum CompressionType {
     Brotli,
     BrotliChunked,
+    Zstd,
     Gzip,
     Max,
   };
@@ -512,6 +515,7 @@ protected:
   CompressionType m_encodingType;
   std::unique_ptr<StreamCompressor> m_compressor;
   std::unique_ptr<brotli::BrotliCompressor> m_brotliCompressor;
+  std::unique_ptr<ZstdCompressor> m_zstdCompressor;
 
   bool m_isSSL;
 
@@ -539,6 +543,8 @@ protected:
                             bool last);
   StringHolder compressBrotli(const void *data, int size, bool &compressed,
                               bool last);
+  StringHolder compressZstd(const void *data, int size, bool &compressed,
+                            bool last);
 
 private:
   void prepareHeaders(bool compressed, bool chunked,

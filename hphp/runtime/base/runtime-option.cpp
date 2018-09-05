@@ -232,6 +232,8 @@ int RuntimeOption::BrotliChunkedCompressionEnabled = -1;
 int RuntimeOption::BrotliCompressionMode = 0;
 int RuntimeOption::BrotliCompressionQuality = 6;
 int RuntimeOption::BrotliCompressionLgWindowSize = 20;
+int RuntimeOption::ZstdCompressionEnabled = -1;
+int RuntimeOption::ZstdCompressionLevel = 3;
 int RuntimeOption::GzipCompressionLevel = 3;
 int RuntimeOption::GzipMaxCompressionLevel = 9;
 std::string RuntimeOption::ForceCompressionURL;
@@ -1655,6 +1657,10 @@ void RuntimeOption::Load(
                  "Server.BrotliCompressionMode", 0);
     Config::Bind(BrotliCompressionQuality, ini, config,
                  "Server.BrotliCompressionQuality", 6);
+    Config::Bind(ZstdCompressionEnabled, ini, config,
+                 "Server.ZstdCompressionEnabled", -1);
+    Config::Bind(ZstdCompressionLevel, ini, config,
+                 "Server.ZstdCompressionLevel", 3);
     Config::Bind(GzipCompressionLevel, ini, config,
                  "Server.GzipCompressionLevel", 3);
     Config::Bind(GzipMaxCompressionLevel, ini, config,

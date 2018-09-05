@@ -259,7 +259,7 @@ let with_server_hung_up f =
   try f () with
   | Server_hung_up ->
     (Printf.eprintf ("Hack server disconnected suddenly. Most likely a new one" ^^
-    " is being initialized with a better saved state after a large rebase/update.");
+    " is being initialized with a better saved state after a large rebase/update.\n");
     raise Exit_status.(Exit_with No_server_running))
 
 let rec connect ?(first_attempt=false) env retries start_time tail_env =

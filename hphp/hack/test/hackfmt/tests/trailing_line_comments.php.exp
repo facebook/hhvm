@@ -214,7 +214,7 @@ function swap<
   Vector<U>, // U
   Vector<T>, // T
 > {
-  return Pair { $b, $a };
+  return Pair {$b, $a};
 }
 
 function swap<
@@ -230,5 +230,5 @@ function swap<
   ,
   Vector<T>, // T
 > {
-  return Pair { $b, $a };
+  return Pair {$b, $a};
 }

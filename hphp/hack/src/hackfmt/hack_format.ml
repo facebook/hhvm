@@ -1603,8 +1603,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       collection_literal_left_brace = left_b;
       collection_literal_initializers = initializers;
       collection_literal_right_brace = right_b; } ->
-    transform_container_literal
-      env ~spaces:true name left_b initializers right_b
+    transform_container_literal env ~space:true name left_b initializers right_b
   | Syntax.ObjectCreationExpression {
       object_creation_new_keyword = newkw;
       object_creation_object = what; } ->
@@ -2248,7 +2247,6 @@ and coloned_block_nest env open_colon close_token close_semi nodes =
   ]
 
 and delimited_nest env
-    ?(spaces=false)
     ?(split_when_children_split=true)
     ?(force_newlines=false)
     left_delim
@@ -2264,7 +2262,7 @@ and delimited_nest env
   Span [
     t env left_delim;
     WithRule (rule,
-      nest env ~spaces right_delim nodes
+      nest env right_delim nodes
     );
   ]
 
@@ -2772,7 +2770,6 @@ and transform_argish env
     | _ -> true
   in
   delimited_nest env
-    ~spaces
     ~split_when_children_split
     ~force_newlines
     left_p
@@ -2892,14 +2889,13 @@ and transform_arg_list env ?(allow_trailing=true) items =
     ~handle_last:(transform_last_arg env ~allow_trailing)
     ~handle_element:(transform_argish_item env)
 
-and transform_possible_comma_list env ?(allow_trailing=true) ?(spaces=false)
-    items right_p =
-  nest env ~spaces right_p [
+and transform_possible_comma_list env ?(allow_trailing=true) items right_p =
+  nest env right_p [
     transform_arg_list env ~allow_trailing items
   ]
 
 and transform_container_literal env
-    ?(spaces=false) ?allow_trailing ?explicit_type kw left_p members right_p =
+    ?(space=false) ?allow_trailing ?explicit_type kw left_p members right_p =
   let force_newlines = node_has_trailing_newline left_p in
   let ty = match explicit_type with
   | Some ex_ty -> t env ex_ty
@@ -2907,9 +2903,8 @@ and transform_container_literal env
   Concat [
     t env kw;
     ty;
-    if spaces then Space else Nothing;
-    transform_argish env
-      ~spaces ~force_newlines ?allow_trailing left_p members right_p;
+    if space then Space else Nothing;
+    transform_argish env ~force_newlines ?allow_trailing left_p members right_p;
   ]
 
 and replace_leading_trivia node new_leading_trivia =
@@ -3361,7 +3356,7 @@ and node_has_trailing_newline node =
   let trivia = Syntax.trailing_trivia node in
   List.exists trivia ~f:(fun x -> Trivia.kind x = TriviaKind.EndOfLine)
 
-and transform_consequence t (env: Env.t) (node_body: Syntax.t) (node_newline: Syntax.t) = 
+and transform_consequence t (env: Env.t) (node_body: Syntax.t) (node_newline: Syntax.t) =
   match Syntax.syntax node_body with
   | Syntax.CompoundStatement _ -> handle_possible_compound_statement env node_body
   | _ -> Concat [

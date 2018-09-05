@@ -17,15 +17,15 @@ $foo = darray[
   'should_remain' => 'on_new_line',
 ];
 
-$foo = Set { 'should_stay_on_same_line' };
+$foo = Set {'should_stay_on_same_line'};
 $foo = Set {
   'should_remain_on_new_line',
 };
-$foo = Vector { 'should_stay_on_same_line' };
+$foo = Vector {'should_stay_on_same_line'};
 $foo = Vector {
   'should_remain_on_new_line',
 };
-$foo = Map { 'should_stay' => 'on_same_line' };
+$foo = Map {'should_stay' => 'on_same_line'};
 $foo = Map {
   'should_remain' => 'on_new_line',
 };

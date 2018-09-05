@@ -429,6 +429,584 @@ array(2) {
   string(1) "u"
 }
 ---- running with_keyset with
+keyset(4) {
+  int(5)
+  int(7)
+  int(8)
+  int(10)
+}
+array_diff_assoc: array(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_diff: array(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_diff_key: array(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_diff_uassoc: array(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_diff_ukey: array(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_udiff: array(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_udiff_assoc: array(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_udiff_uassoc: array(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_combine 1: 
+Warning: array_combine(): Both parameters should have an equal number of elements in %s/builtins.php on line %d
+bool(false)
+array_combine 2: 
+Warning: array_combine(): Both parameters should have an equal number of elements in %s/builtins.php on line %d
+bool(false)
+array_uintersect_assoc: array(0) {
+}
+array_uintersect_uassoc: array(0) {
+}
+array_intersect_assoc: array(0) {
+}
+array_intersect_key: array(0) {
+}
+array_intersect_uassoc: array(0) {
+}
+array_intersect_ukey: array(0) {
+}
+array_intersect: array(0) {
+}
+array_uintersect: array(0) {
+}
+array_filter: array(0) {
+}
+array_flip: array(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_map: array(3) {
+  ["H"]=>
+  string(1) "I"
+  ["A"]=>
+  string(1) "B"
+  ["L"]=>
+  string(1) "M"
+}
+array_merge: array(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  ["a"]=>
+  string(1) "a"
+  ["b"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "c"
+}
+array_reverse: array(4) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(8)
+  [2]=>
+  int(7)
+  [3]=>
+  int(5)
+}
+array_slice: array(2) {
+  [0]=>
+  int(8)
+  [1]=>
+  int(10)
+}
+array_key_exists: array(2) {
+  [0]=>
+  bool(false)
+  [1]=>
+  bool(false)
+}
+array_keys: array(4) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(7)
+  [2]=>
+  int(8)
+  [3]=>
+  int(10)
+}
+array_pop: int(10)
+keyset(3) {
+  int(5)
+  int(7)
+  int(8)
+}
+array_product: int(2800)
+array_rand: int(10)
+array_reduce: string(5) "57810"
+array_search 1: bool(false)
+array_search 2: bool(false)
+array_shift: int(5)
+keyset(2) {
+  int(7)
+  int(8)
+}
+array_sum: int(30)
+current 1: int(7)
+each: array(4) {
+  [1]=>
+  int(7)
+  ["value"]=>
+  int(7)
+  [0]=>
+  int(7)
+  ["key"]=>
+  int(7)
+}
+current 2: int(8)
+end: int(8)
+extract: int(1)
+string(14) "php_is_awesome"
+in_array: array(2) {
+  [0]=>
+  bool(false)
+  [1]=>
+  bool(false)
+}
+key: int(8)
+next: bool(false)
+prev 1: bool(false)
+prev 2: int(7)
+reset: int(7)
+count: int(4)
+array_pad 1: array(7) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+  [11]=>
+  string(1) "n"
+  [12]=>
+  string(1) "n"
+  [13]=>
+  string(1) "n"
+}
+array_pad 2: array(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_replace: array(5) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+  ["q"]=>
+  string(1) "r"
+}
+array_unique 1: array(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_unique 2: array(0) {
+}
+int(3)
+int(4)
+keyset(4) {
+  string(1) "q"
+  int(7)
+  int(8)
+  string(1) "i"
+}
+array_splice: array(2) {
+  [0]=>
+  int(8)
+  ["i"]=>
+  string(1) "i"
+}
+array(2) {
+  ["q"]=>
+  string(1) "q"
+  [0]=>
+  int(7)
+}
+---- running with_keyset with
+keyset(4) {
+  string(1) "5"
+  string(1) "7"
+  string(1) "8"
+  string(2) "10"
+}
+array_diff_assoc: array(4) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+}
+array_diff: array(4) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+}
+array_diff_key: array(4) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+}
+array_diff_uassoc: array(4) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+}
+array_diff_ukey: array(4) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+}
+array_udiff: array(4) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+}
+array_udiff_assoc: array(4) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+}
+array_udiff_uassoc: array(4) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+}
+array_combine 1: 
+Warning: array_combine(): Both parameters should have an equal number of elements in %s/builtins.php on line %d
+bool(false)
+array_combine 2: 
+Warning: array_combine(): Both parameters should have an equal number of elements in %s/builtins.php on line %d
+bool(false)
+array_uintersect_assoc: array(0) {
+}
+array_uintersect_uassoc: array(0) {
+}
+array_intersect_assoc: array(0) {
+}
+array_intersect_key: array(0) {
+}
+array_intersect_uassoc: array(0) {
+}
+array_intersect_ukey: array(0) {
+}
+array_intersect: array(0) {
+}
+array_uintersect: array(0) {
+}
+array_filter: array(0) {
+}
+array_flip: array(4) {
+  [5]=>
+  string(1) "5"
+  [7]=>
+  string(1) "7"
+  [8]=>
+  string(1) "8"
+  [10]=>
+  string(2) "10"
+}
+array_map: array(3) {
+  ["H"]=>
+  string(1) "I"
+  ["A"]=>
+  string(1) "B"
+  ["L"]=>
+  string(1) "M"
+}
+array_merge: array(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  ["a"]=>
+  string(1) "a"
+  ["b"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "c"
+}
+array_reverse: array(4) {
+  [0]=>
+  int(10)
+  [1]=>
+  int(8)
+  [2]=>
+  int(7)
+  [3]=>
+  int(5)
+}
+array_slice: array(2) {
+  [0]=>
+  string(1) "8"
+  [1]=>
+  string(2) "10"
+}
+array_key_exists: array(2) {
+  [0]=>
+  bool(false)
+  [1]=>
+  bool(false)
+}
+array_keys: array(4) {
+  [0]=>
+  string(1) "5"
+  [1]=>
+  string(1) "7"
+  [2]=>
+  string(1) "8"
+  [3]=>
+  string(2) "10"
+}
+array_pop: string(2) "10"
+keyset(3) {
+  string(1) "5"
+  string(1) "7"
+  string(1) "8"
+}
+array_product: int(2800)
+array_rand: string(2) "10"
+array_reduce: string(5) "57810"
+array_search 1: bool(false)
+array_search 2: bool(false)
+array_shift: string(1) "5"
+keyset(2) {
+  string(1) "7"
+  string(1) "8"
+}
+array_sum: int(30)
+current 1: string(1) "7"
+each: array(4) {
+  [1]=>
+  string(1) "7"
+  ["value"]=>
+  string(1) "7"
+  [0]=>
+  string(1) "7"
+  ["key"]=>
+  string(1) "7"
+}
+current 2: string(1) "8"
+end: string(1) "8"
+extract: int(1)
+string(14) "php_is_awesome"
+in_array: array(2) {
+  [0]=>
+  bool(false)
+  [1]=>
+  bool(false)
+}
+key: string(1) "8"
+next: bool(false)
+prev 1: bool(false)
+prev 2: string(1) "7"
+reset: string(1) "7"
+count: int(4)
+array_pad 1: array(7) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+  [11]=>
+  string(1) "n"
+  [12]=>
+  string(1) "n"
+  [13]=>
+  string(1) "n"
+}
+array_pad 2: array(4) {
+  [5]=>
+  int(5)
+  [7]=>
+  int(7)
+  [8]=>
+  int(8)
+  [10]=>
+  int(10)
+}
+array_replace: array(5) {
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+  ["q"]=>
+  string(1) "r"
+}
+array_unique 1: array(4) {
+  [5]=>
+  string(1) "5"
+  [7]=>
+  string(1) "7"
+  [8]=>
+  string(1) "8"
+  [10]=>
+  string(2) "10"
+}
+array_unique 2: array(0) {
+}
+int(3)
+int(4)
+keyset(4) {
+  string(1) "q"
+  string(1) "7"
+  string(1) "8"
+  string(1) "i"
+}
+array_splice: array(2) {
+  ["8"]=>
+  string(1) "8"
+  ["i"]=>
+  string(1) "i"
+}
+array(2) {
+  ["q"]=>
+  string(1) "q"
+  ["7"]=>
+  string(1) "7"
+}
+---- running with_keyset with
 keyset(0) {
 }
 array_diff_assoc: array(0) {

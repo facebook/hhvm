@@ -34,6 +34,12 @@ function main() {
 
   var_dump(array_slice(Map{12 => 1, 6 => 2}, 0, 2, true));
   var_dump(array_slice(Map{12 => 1, 6 => 2}, 0, 2, false));
+
+  var_dump(array_slice(Map{"12" => 1, "6" => 2, "4" => 3}, 0, 2, true));
+  var_dump(array_slice(Map{"12" => 1, "6" => 2, "4" => 3}, 0, 2, false));
+
+  var_dump(array_slice(Map{6 => 1, "6" => 2, "4" => 3}, 0, 2, true));
+  var_dump(array_slice(Map{6 => 1, "6" => 2, "4" => 3}, 0, 2, false));
 }
 
 <<__EntryPoint>>

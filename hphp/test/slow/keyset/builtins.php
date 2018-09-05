@@ -180,6 +180,8 @@ function with_keyset($k1) {
 }
 
 with_keyset(keyset['q', 'u', 'e', 'n', 't', 'i', 'n']);
+with_keyset(keyset[5, 7, 8, 10]);
+with_keyset(keyset["5", "7", "8", "10"]);
 with_keyset(keyset[]);
 
 // Recursive functions will convert the keysets they process in a "lazy"

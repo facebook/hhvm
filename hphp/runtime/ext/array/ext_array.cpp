@@ -1001,11 +1001,15 @@ TypedValue HHVM_FUNCTION(array_slice,
 
   // Otherwise PackedArrayInit can't be used because non-numeric keys are
   // preserved even when preserve_keys is false
+  bool is_php_array = isArrayType(cell_input.m_type);
   Array ret = Array::attach(PackedArray::MakeReserve(len));
   for (; pos < (offset + len) && iter; ++pos, ++iter) {
     Variant key(iter.first());
-    bool doAppend = !preserve_keys && key.isNumeric();
-    if (doAppend) {
+    if (!is_php_array && key.isString()) {
+      int64_t n;
+      if (key.asCStrRef().get()->isStrictlyInteger(n)) key = n;
+    }
+    if (!preserve_keys && key.isInteger()) {
       ret.appendWithRef(iter.secondValPlus());
     } else {
       ret.setWithRef(key, iter.secondValPlus(), true);

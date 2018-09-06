@@ -243,11 +243,11 @@ static __thread bool s_sessionInitialized{false};
 
 static void process_cmd_arguments(int argc, char **argv) {
   php_global_set(s_argc, Variant(argc));
-  Array argvArray(staticEmptyArray());
+  VArrayInit argvArray(argc);
   for (int i = 0; i < argc; i++) {
     argvArray.append(String(argv[i]));
   }
-  php_global_set(s_argv, argvArray);
+  php_global_set(s_argv, argvArray.toArray());
 }
 
 static void process_env_variables(Array& variables, char** envp,

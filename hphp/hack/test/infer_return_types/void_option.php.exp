@@ -1,3 +1,3 @@
-\f : ?_ try ?_
+\f : void, ?_ try ?void
 \g : \Awaitable<void>, \Awaitable<?_> try \Awaitable<?void>
 No errors

@@ -13,34 +13,34 @@ class :xhp {}
 class :div extends :xhp {}
 class :span extends :xhp {}
 
-function f() {
-  if (true) {
+function f(bool $b) {
+  if ($b) {
     return <span />;
   } else {
     return <div />;
   }
 }
 
-async function g() {
-  if (true) {
+async function g(bool $b) {
+  if ($b) {
     return <span />;
   } else {
     return <div />;
   }
 }
 
-function h() {
-  if (true) {
+function h(bool $b) {
+  if ($b) {
     return <div />;
   } else {
     return null;
   }
 }
 
-function i() {
-  if (true) {
+function i(bool $b) {
+  if ($b) {
     return <div />;
-  } else if (true) {
+  } else if ($b) {
     return <span />;
   } else {
     return null;

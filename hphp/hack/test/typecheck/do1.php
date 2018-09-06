@@ -9,13 +9,13 @@
  *
  */
 
-function test(): int {
+function test(bool $b): int {
   $x = null;
   do {
-    if (true) {
+    if ($b) {
       continue;
     }
     $x = 0;
-  } while (true);
+  } while ($b);
   return $x;
 }

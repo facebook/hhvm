@@ -60,15 +60,7 @@
              (If (
                 (([22:13-17], bool),
                  (Unop (Unot, (([22:13-17], bool), True)))),
-                [(Expr
-                    (([22:3-25], noreturn),
-                     (Call (Cnormal,
-                        (([22:3-12], (function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)),
-                         (Id ([22:3-12], "\\invariant_violation"))),
-                        [], [(([22:19-24], string), (String "foo"))], 
-                        []))))
-                  ],
-                [Noop]));
+                [], [Noop]));
              (Expr
                 (([23:3-29], noreturn),
                  (Call (Cnormal,

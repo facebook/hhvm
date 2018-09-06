@@ -9,11 +9,11 @@
  *
  */
 
-function f(): int {
+function f(bool $b): int {
   $x = 1;
   switch (1) {
     default:
-      if (true) {
+      if ($b) {
         hh_show($x);
         $x = "derp";
         hh_show($x);

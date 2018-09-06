@@ -99,12 +99,6 @@
     {
       "name":"invariant_violation",
       "type":"Function",
-      "pos":{"filename":"pseudofunctions.php","line":30,"char_start":3,"char_end":11},
-      "caller":"test"
-    },
-    {
-      "name":"invariant_violation",
-      "type":"Function",
       "pos":{"filename":"pseudofunctions.php","line":31,"char_start":3,"char_end":21},
       "caller":"test"
     }

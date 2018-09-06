@@ -10,7 +10,7 @@
  */
 
 function f1(): ?string {
-  if (true) {
+  if (cond()) {
     return 'x';
   } else {
     return null;
@@ -18,7 +18,7 @@ function f1(): ?string {
 }
 
 function f2(): ?int {
-  if (true) {
+  if (cond()) {
     return 42;
   } else {
     return null;
@@ -26,5 +26,9 @@ function f2(): ?int {
 }
 
 function t(): ?string {
-  return true ? f1() : f2();
+  return cond() ? f1() : f2();
+}
+
+function cond(): bool {
+  return true;
 }

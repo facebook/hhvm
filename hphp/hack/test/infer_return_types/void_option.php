@@ -11,14 +11,14 @@
 
 function v(): void {}
 
-function f() {
-  if (true) {
+function f(bool $b) {
+  if ($b) {
     return null;
   }
 }
 
-async function g() {
-  if (true) {
+async function g(bool $b) {
+  if ($b) {
     return null;
   }
 

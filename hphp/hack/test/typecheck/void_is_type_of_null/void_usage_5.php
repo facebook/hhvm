@@ -1,9 +1,9 @@
 <?hh // strict
 
-function test(): void {
+function test(bool $b): void {
   $arr = array_map(
     $x ==> {
-      if (false) {
+      if ($b) {
         return $x;
       }
     },

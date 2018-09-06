@@ -39,10 +39,10 @@ class A {
   }
 
   <<__Rx, __MutableReturn>>
-  public function f5(): C {
+  public function f5(bool $b): C {
     // OK - returns conditional that returns mutably owned value
     $a = \HH\Rx\mutable(make());
-    return true ? $a : make();
+    return $b ? $a : make();
   }
 
   <<__Rx, __MutableReturn>>

@@ -101,7 +101,7 @@ function cond(): bool { return true; }
 function loop_assignment(): void {
   $x = 1;
 // ^5:4
-  while (true) {
+  while (cond()) {
     douse($x);
 //        ^8:11
     if (cond())

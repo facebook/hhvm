@@ -1,9 +1,9 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function test(): void {
+function test(bool $b): void {
   $f = $x ==> {
-    if (false) {
+    if ($b) {
       return $x;
     } else {
       return;

@@ -16,7 +16,7 @@ class A implements I {
 class B implements I {}
 class Z {}
 
-function bar(): void {
-  $x = true ? new A() : new B();
+function bar(bool $b): void {
+  $x = $b ? new A() : new B();
   $x->get();
 }

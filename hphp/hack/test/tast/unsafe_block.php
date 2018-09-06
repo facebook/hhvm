@@ -9,8 +9,8 @@
  *
  */
 
-function foo() {
-  if (true) {
+function foo(bool $b) {
+  if ($b) {
     {
       bar();
       // UNSAFE

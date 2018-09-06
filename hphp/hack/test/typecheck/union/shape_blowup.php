@@ -41,123 +41,127 @@ type SentryRestrictionReasonThrown = shape(
 );
 
 // The infered type for $reason used to grow exponentially
-function f(dict<string, mixed> $reason_arr): SentryRestrictionReasonThrown {
+function f(
+  bool $b,
+  dict<string, mixed> $reason_arr
+): SentryRestrictionReasonThrown {
+
   $reason = shape();
 
-  if (true) {
+  if ($b) {
     $reason['original_restriction_class'] = "";
   }
   hh_show($reason);
 
-  if (true) {
+  if ($b) {
     $reason['aldrin_reason'] = "";
   }
   hh_show($reason);
 
-  if (true) {
+  if ($b) {
     $reason['feature'] = "";
   }
   hh_show($reason);
 
-  if (true) {
+  if ($b) {
     $reason['limited_fbid'] = 0;
   }
   hh_show($reason);
 
-  if (true) {
+  if ($b) {
     $reason['policy'] = (string)$reason_arr['policy'];
   }
   hh_show($reason);
 
-  if (true) {
+  if ($b) {
     $reason['admin'] = (int)$reason_arr['admin'];
   }
 
-  if (true) {
+  if ($b) {
     $reason['admin_id'] = (int)$reason_arr['admin_id'];
   }
 
-  if (true) {
+  if ($b) {
     $reason['flow'] = (int)$reason_arr['flow'];
   }
 
-  if (true) {
+  if ($b) {
     $reason['system'] = (int)$reason_arr['system'];
   }
 
-  if (true) {
+  if ($b) {
     $reason['reason'] = (string)$reason_arr['reason'];
   }
 
-  if (true) {
+  if ($b) {
     $reason['si_url_id'] = (int)$reason_arr['si_url_id'];
   }
 
-  if (true) {
+  if ($b) {
     $reason['karma_key'] = (string)$reason_arr['karma_key'];
   }
 
-  if (true) {
+  if ($b) {
     $reason['karma_key_that_hit'] = (string)$reason_arr['karma_key_that_hit'];
   }
 
-  if (true) {
+  if ($b) {
     $reason['allowance_spent_until'] = 1;
   }
 
-  if (true) {
+  if ($b) {
     $reason['filter'] = (string)$reason_arr['filter'];
   }
 
-  if (true) {
+  if ($b) {
     $reason['responsible_policies'] = "";
   }
 
-  if (true) {
+  if ($b) {
     $reason['urls'] = "";
   }
 
-  if (true) {
+  if ($b) {
     $reason['holdout_gks'] = "";
   }
 
-  if (true) {
+  if ($b) {
     $reason['expiration_time'] = (int)$reason_arr['expiration_time'];
   }
 
-  if (true) {
+  if ($b) {
     $reason['karma'] = (int)$reason_arr['karma'];
   }
 
-  if (true) {
+  if ($b) {
     $reason['bad_phrase'] = (string)$reason_arr['bad_phrase'];
   }
 
-  if (true) {
+  if ($b) {
     $reason['text_cluster_fbid'] = (int)$reason_arr['text_cluster_fbid'];
   }
 
-  if (true) {
+  if ($b) {
     $reason['manual_actor'] = (string)$reason_arr['manual_actor'];
   }
 
-  if (true) {
+  if ($b) {
     $reason['classifier'] = (string)$reason_arr['classifier'];
   }
 
-  if (true) {
+  if ($b) {
     $reason['corpus'] = (string)$reason_arr['corpus'];
   }
 
-  if (true) {
+  if ($b) {
     $reason['sample_id'] = (int)$reason_arr['sample_id'];
   }
 
-  if (true) {
+  if ($b) {
     $reason['target_feature'] = (int)$reason_arr['target_feature'];
   }
 
-  if (true) {
+  if ($b) {
     $reason['nonce'] = (int)$reason_arr['nonce'];
   }
 

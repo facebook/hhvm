@@ -1,22 +1,22 @@
 <?hh
 
-  function f () {
-    if (true) {
+  function f (bool $b) {
+    if ($b) {
       return 1;
     }
     return 1.0;
   }
 
-  function g () {
-    if (true) {
+  function g (bool $b) {
+    if ($b) {
       return 'str';
     }
     return 1;
     }
 
   class C  {
-    public function meth1 () {
-      if (true) {
+    public function meth1 (bool $b) {
+      if ($b) {
         return 'one';
       }
       return 'two';

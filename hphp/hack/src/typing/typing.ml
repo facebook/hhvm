@@ -6062,6 +6062,11 @@ and condition ?lhs_of_null_coalesce env tparamet
     not (TypecheckerOptions.disable_primitive_refinement (Env.get_tcopt env))
   in
   match e with
+  | T.True
+  | T.Expr_list [] when not tparamet ->
+    LEnv.drop_cont env C.Next
+  | T.False when tparamet ->
+    LEnv.drop_cont env C.Next
   | T.Expr_list [] -> env
   | T.Expr_list [x] ->
       condition env tparamet x

@@ -9,10 +9,10 @@
  *
  */
 
-function foo(): int {
+function foo(bool $b): int {
   $x = 10;
   do {
     $x = null;
-  } while (true);
+  } while ($b);
   return $x;
 }

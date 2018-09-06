@@ -9,3 +9,4 @@
 
 let log_typing_time _ _ = ()
 let flush_buffer _ = ()
+let log_lambda_counts _ = ()

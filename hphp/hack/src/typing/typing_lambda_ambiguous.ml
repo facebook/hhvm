@@ -12,6 +12,7 @@ open Typing_defs
 module T = Tast
 module Env = Typing_env
 module Reason = Typing_reason
+module FL = FeatureLogging
 
 let log_anonymous env =
   let found = ref false in
@@ -19,7 +20,7 @@ let log_anonymous env =
     let n = List.length ftys in
     if n > 0 then found := true;
     if GlobalOptions.tco_language_feature_logging (Env.get_options env)
-    then Measure.sample (Printf.sprintf "Lambda [unknown params] %3d" n) 1.0;
+    then Measure.sample (FL.Lambda.unknown_params_with_uses n) 1.0;
     if TypecheckerOptions.disallow_ambiguous_lambda (Env.get_options env) && n > 0
     then Errors.ambiguous_lambda pos
       (List.map ftys (fun fty ->

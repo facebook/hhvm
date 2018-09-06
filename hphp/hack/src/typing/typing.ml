@@ -48,6 +48,7 @@ module C            = Typing_continuations
 module CMap         = C.Map
 module Try          = Typing_try
 module TR           = Typing_reactivity
+module FL           = FeatureLogging
 
 (* Maps a Nast to a Tast where every type is Tany.
    Used to produce a Tast for unsafe code without inferring types for it. *)
@@ -2477,7 +2478,7 @@ and expr_
           match expected_ft.ft_ret with
           | _, Tprim Tvoid when not is_explicit_ret -> None
           | _ -> Some expected_ft.ft_ret in
-        Typing_log.increment_feature_count env "Lambda [contextual params]";
+        Typing_log.increment_feature_count env FL.Lambda.contextual_params;
         check_body_under_known_params ?ret_ty expected_ft
       | _ ->
         let explicit_variadic_param_or_non_variadic =
@@ -2494,7 +2495,7 @@ and expr_
         if all_explicit_params && explicit_variadic_param_or_non_variadic
         then begin
           Typing_log.increment_feature_count env
-            (if List.is_empty f.f_params then "Lambda [no params]" else "Lambda [explicit params]");
+            (if List.is_empty f.f_params then FL.Lambda.no_params else FL.Lambda.explicit_params);
           check_body_under_known_params declared_ft
         end
         else begin
@@ -2502,14 +2503,14 @@ and expr_
           | Some (_, _, (_, Tany)) ->
             (* If the expected type is Tany env then we're passing a lambda to an untyped
              * function and we just assume every parameter has type Tany env *)
-            Typing_log.increment_feature_count env "Lambda [untyped context]";
+            Typing_log.increment_feature_count env FL.Lambda.untyped_context;
             check_body_under_known_params declared_ft
           | Some _ ->
             (* If the expected type is something concrete but not a function
              * then we should reject in strict mode. Check body anyway *)
             if Env.is_strict env
             then Errors.untyped_lambda_strict_mode p;
-            Typing_log.increment_feature_count env "Lambda [non-function typed context]";
+            Typing_log.increment_feature_count env FL.Lambda.non_function_typed_context;
             check_body_under_known_params declared_ft
           | _ ->
             (* If we're in partial mode then type-check definition anyway,
@@ -2518,11 +2519,11 @@ and expr_
             if not (Env.is_strict env) && TypecheckerOptions.untyped_nonstrict_lambda_parameters
               (Env.get_options env)
             then begin
-              Typing_log.increment_feature_count env "Lambda [non-strict unknown params]";
+              Typing_log.increment_feature_count env FL.Lambda.non_strict_unknown_params;
               check_body_under_known_params declared_ft
             end
             else begin
-              Typing_log.increment_feature_count env "Lambda [unknown params]";
+              Typing_log.increment_feature_count env FL.Lambda.unknown_params;
               Typing_log.log_types 1 p env
                 [Typing_log.Log_sub
                   ("Typing.expr Efun unknown params",

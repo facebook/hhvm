@@ -839,7 +839,9 @@ end = functor(CheckKind:CheckKindType) -> struct
       GlobalOptions.tco_language_feature_logging env.tcopt
     then begin
       Measure.print_stats ();
-      Measure.print_distributions ()
+      Measure.print_distributions ();
+      (* For full checks, we'd like to log lambda counts to a Scuba table *)
+      if full_check_done then TypingLogger.log_lambda_counts ();
     end;
     ServerDebug.info genv "incremental_done";
 

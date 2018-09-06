@@ -118,10 +118,12 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
 
 ALWAYS_INLINE
 MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
-                                       size_t neededSize) {
+                                       size_t neededSize,
+                                       bool promotion) {
   assertx(checkInvariants(old));
 
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatPromoteNotices) &&
+  if (promotion &&
+      UNLIKELY(RuntimeOption::EvalHackArrCompatPromoteNotices) &&
       old->isVArray()) {
     raise_hackarr_compat_notice("varray promoting to darray");
   }
@@ -158,9 +160,9 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
  * The returned array is mixed, and is guaranteed not to be isFull().
  * (Note: only unset can call ToMixed when we aren't about to insert.)
  */
-MixedArray* PackedArray::ToMixed(ArrayData* old) {
+MixedArray* PackedArray::ToMixed(ArrayData* old, bool promotion) {
   auto const oldSize = old->m_size;
-  auto const ad      = ToMixedHeader(old, oldSize + 1);
+  auto const ad      = ToMixedHeader(old, oldSize + 1, promotion);
   auto const mask    = ad->mask();
   auto dstData       = ad->data();
   auto const srcData = packedData(old);
@@ -193,11 +195,11 @@ MixedArray* PackedArray::ToMixed(ArrayData* old) {
  * time as converting to mixed.  The returned mixed array is
  * guaranteed not to be full.
  */
-MixedArray* PackedArray::ToMixedCopy(const ArrayData* old) {
+MixedArray* PackedArray::ToMixedCopy(const ArrayData* old, bool promotion) {
   assertx(checkInvariants(old));
 
   auto const oldSize = old->m_size;
-  auto const ad      = ToMixedHeader(old, oldSize + 1);
+  auto const ad      = ToMixedHeader(old, oldSize + 1, promotion);
   auto const mask    = ad->mask();
   auto dstData       = ad->data();
   auto const srcData = packedData(old);
@@ -223,9 +225,10 @@ MixedArray* PackedArray::ToMixedCopy(const ArrayData* old) {
  * it.
  */
 MixedArray* PackedArray::ToMixedCopyReserve(const ArrayData* old,
-                                           size_t neededSize) {
+                                            size_t neededSize,
+                                            bool promotion) {
   assertx(neededSize >= old->m_size);
-  auto const ad      = ToMixedHeader(old, neededSize);
+  auto const ad      = ToMixedHeader(old, neededSize, promotion);
   auto const oldSize = old->m_size;
   auto const mask    = ad->mask();
   auto dstData       = ad->data();
@@ -1300,10 +1303,10 @@ ArrayData* PackedArray::ToDict(ArrayData* ad, bool copy) {
   auto mixed = [&] {
     switch (ArrayCommon::CheckForRefs(ad)) {
       case ArrayCommon::RefCheckResult::Pass:
-        return copy ? ToMixedCopy(ad) : ToMixed(ad);
+        return copy ? ToMixedCopy(ad, false) : ToMixed(ad, false);
       case ArrayCommon::RefCheckResult::Collapse:
         // Unconditionally copy to remove unreferenced refs
-        return ToMixedCopy(ad);
+        return ToMixedCopy(ad, false);
       case ArrayCommon::RefCheckResult::Fail:
         throwRefInvalidArrayValueException(staticEmptyDictArray());
         break;

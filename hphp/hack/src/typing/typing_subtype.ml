@@ -142,19 +142,19 @@ let check_mutability
   | _ ->
     valid env
 
-let rec process_simplify_subtype_result ~this_ty ~unwrappedToption_super env prop =
+let rec process_simplify_subtype_result ~this_ty env prop =
   Typing_logic.log_prop 2 env.Env.pos "process_simplify_subtype_result" env prop;
   match prop with
   | TL.Unsat f ->
     f ();
     env
-  | TL.Sub (ty1, ty2) -> sub_type_unwrapped_helper env ~this_ty ~unwrappedToption_super ty1 ty2
+  | TL.Sub (ty1, ty2) -> sub_type_inner_helper env ~this_ty ty1 ty2
   | TL.Eq (ty1, ty2) -> fst (Unify.unify env ty2 ty1)
   | TL.Conj props ->
     (* Evaluates list from left-to-right so preserves order of conjuncts *)
     List.fold_left
       ~init:env
-      ~f:(process_simplify_subtype_result ~this_ty ~unwrappedToption_super)
+      ~f:(process_simplify_subtype_result ~this_ty)
       props
   | TL.Disj props ->
     let rec try_disj props =
@@ -164,7 +164,7 @@ let rec process_simplify_subtype_result ~this_ty ~unwrappedToption_super env pro
         env
       | prop :: props ->
         Errors.try_ begin fun () ->
-          process_simplify_subtype_result ~this_ty ~unwrappedToption_super env prop end
+          process_simplify_subtype_result ~this_ty env prop end
           (fun _ -> try_disj props)
     in
     try_disj props
@@ -1118,13 +1118,11 @@ and check_subtype_funs_attributes
   then simplify_subtype ~deep ft_sub.ft_ret ft_super.ft_ret
   else valid
 
-(* unwrappedToption_super is true if we have already stripped off a Toption
- * from the supertype. *)
 and sub_type
   (env : Env.env)
   (ty_sub : locl ty)
   (ty_super : locl ty) : Env.env =
-    sub_type_unwrapped env ~this_ty:None ~unwrappedToption_super:false ty_sub ty_super
+    sub_type_inner env ~this_ty:None ty_sub ty_super
 
 (**
  * Checks that ty_sub is a subtype of ty_super, and returns an env.
@@ -1134,10 +1132,9 @@ and sub_type
  *      sub_type env ?int alpha => env where alpha==?int
  *      sub_type env int string => error
 *)
-and sub_type_unwrapped
+and sub_type_inner
   (env : Env.env)
   ~(this_ty : locl ty option)
-  ~(unwrappedToption_super: bool)
   (ty_sub: locl ty)
   (ty_super: locl ty) : Env.env =
   let types =
@@ -1146,19 +1143,16 @@ and sub_type_unwrapped
   let types = Option.value_map this_ty ~default:types
     ~f:(fun ty -> Typing_log.Log_type ("this_ty", ty) :: types) in
   Typing_log.log_types 2 (Reason.to_pos (fst ty_sub)) env
-    [Typing_log.Log_sub (Printf.sprintf
-      "Typing_subtype.sub_type_unwrapped unwrappedToption_super=%b"
-        unwrappedToption_super,
-      types)];
+    [Typing_log.Log_sub ("Typing_subtype.sub_type_inner", types)];
   let env, prop =
     simplify_subtype ~deep:false ~this_ty ty_sub ty_super env in
   let res = TL.disj prop (TL.Unsat (fun () ->
     TUtils.uerror (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub))) in
-  process_simplify_subtype_result ~this_ty ~unwrappedToption_super env res
+  process_simplify_subtype_result ~this_ty env res
 
 (* Deal with the cases not dealt with by simplify_subtype *)
-and sub_type_unwrapped_helper env ~this_ty
-  ~unwrappedToption_super ty_sub ty_super =
+and sub_type_inner_helper env ~this_ty
+  ty_sub ty_super =
   let env, ety_super =
     Env.expand_type env ty_super in
   let env, ety_sub =
@@ -1201,8 +1195,8 @@ and sub_type_unwrapped_helper env ~this_ty
 (****************************************************************************)
   | (r_sub, _), (_, Tunresolved _) ->
       let ty_sub = (r_sub, Tunresolved [ty_sub]) in
-      sub_type_unwrapped_helper env ~this_ty
-        ~unwrappedToption_super ty_sub ty_super
+      sub_type_inner_helper env ~this_ty
+        ty_sub ty_super
    (* This case is for when Tany comes from expanding an empty Tvar - it will
     * result in binding the type variable to the other type. *)
   | _, (_, Tany) -> fst (Unify.unify env ty_super ty_sub)
@@ -1243,8 +1237,8 @@ and sub_type_unwrapped_helper env ~this_ty
   | (_, Tunresolved tyl), _ ->
     let env =
       List.fold_left tyl ~f:begin fun env x ->
-        sub_type_unwrapped env ~this_ty
-          ~unwrappedToption_super x ty_super
+        sub_type_inner env ~this_ty
+          x ty_super
       end ~init:env in
     env
 
@@ -1260,7 +1254,7 @@ and sub_type_unwrapped_helper env ~this_ty
    *)
   | (_, Tabstract (AKdependent (`expr _, []), Some ty_sub)), _ ->
       let this_ty = Option.first_some this_ty (Some ety_sub) in
-      sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty_sub ty_super
+      sub_type_inner env ~this_ty ty_sub ty_super
 
   | (_, Tabstract (AKdependent d_sub, Some sub)),
     (_, Tabstract (AKdependent d_super, _)) when d_sub <> d_super ->
@@ -1271,8 +1265,8 @@ and sub_type_unwrapped_helper env ~this_ty
        *)
       Errors.try_when
         (fun () ->
-          sub_type_unwrapped env ~this_ty
-            ~unwrappedToption_super sub ty_super)
+          sub_type_inner env ~this_ty
+            sub ty_super)
         ~when_: begin fun () ->
           match sub, TUtils.get_base_type env ty_super with
           | (_, Tclass ((_, y), _)), (_, Tclass ((_, x), _)) when x = y -> false
@@ -1290,7 +1284,7 @@ and sub_type_unwrapped_helper env ~this_ty
     begin match class_ with
     | Some class_ty
       when TUtils.class_is_final_and_not_contravariant class_ty ->
-      sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty_sub ty_bound
+      sub_type_inner env ~this_ty ty_sub ty_bound
     | _ ->
       (Errors.try_when
          (fun () -> TUtils.simplified_uerror env ty_super ty_sub)
@@ -1373,30 +1367,26 @@ and sub_type_unwrapped_helper env ~this_ty
           else fail ()
     end
 
-  | _, (_, Toption ty)
-    when unwrappedToption_super ->
-    sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty_sub ty
-
   (* If the nonnull type is not enabled, mixed <: ?t is equivalent
    * to mixed <: t.  Otherwise, we should not encounter mixed
    * because by this time it should have been desugared into ?nonnull.
    *)
   | (_, (Tmixed | Tdynamic)), (_, Toption ty_super) ->
-    sub_type_unwrapped env ~this_ty ~unwrappedToption_super:true ty_sub ty_super
+    sub_type_inner env ~this_ty ty_sub ty_super
 
   (* If t1 <: ?t2, where t1 is guaranteed not to contain null, then
    * t1 <: t2, and the converse is obviously true as well.
    *)
   | (_, (Tprim Nast.Tvoid | Tabstract (AKdependent _, None))),
     (_, Toption ty_super) ->
-    sub_type_unwrapped env ~this_ty ~unwrappedToption_super:true ty_sub ty_super
+    sub_type_inner env ~this_ty ty_sub ty_super
 
   | (r_sub, Tabstract (AKnewtype _ as ak, None)),
     (_, Toption _) ->
     let r = Reason.Rimplicit_upper_bound (Reason.to_pos r_sub, "?nonnull") in
     let ty = (r, Toption (r, Tnonnull)) in
     let ty_sub' = (r_sub, Tabstract (ak, Some ty)) in
-    sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty_sub' ty_super
+    sub_type_inner env ~this_ty ty_sub' ty_super
 
   (* If t1 <: ?t2 and t1 is an abstract type constrained as t1',
    * then t1 <: t2 or t1' <: ?t2.  The converse is obviously
@@ -1407,30 +1397,28 @@ and sub_type_unwrapped_helper env ~this_ty
     (_, Toption arg_ty_super) ->
     Errors.try_
       (fun () ->
-        sub_type_unwrapped env ~this_ty
-          ~unwrappedToption_super:true ty_sub arg_ty_super)
+        sub_type_inner env ~this_ty ty_sub arg_ty_super)
       (fun _ ->
-        sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty ty_super)
+        sub_type_inner env ~this_ty ty ty_super)
 
   | (_, Tabstract (AKdependent _, Some ty)), (_, Toption arg_ty_super) ->
     Errors.try_
       (fun () ->
-        sub_type_unwrapped env ~this_ty
-          ~unwrappedToption_super:true ty_sub arg_ty_super)
+        sub_type_inner env ~this_ty ty_sub arg_ty_super)
       (fun _ ->
         let this_ty = Option.first_some this_ty (Some ety_sub) in
-         sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty ty_super)
+         sub_type_inner env ~this_ty ty ty_super)
 
   | (_, Tabstract (AKgeneric _, _)), (_, Toption arg_ty_super) ->
     Errors.try_
       (fun () ->
-        sub_type_unwrapped env ~this_ty ~unwrappedToption_super:true ty_sub arg_ty_super)
+        sub_type_inner env ~this_ty ty_sub arg_ty_super)
       (fun _ ->
-        sub_generic_params SSet.empty env ~this_ty ~unwrappedToption_super ty_sub ty_super)
+        sub_generic_params SSet.empty env ~this_ty ty_sub ty_super)
 
   | (r_sub, Tvar v), (_, Toption _) ->
     let env, ty_sub = Env.get_type env r_sub v in
-    sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty_sub ty_super
+    sub_type_inner env ~this_ty ty_sub ty_super
 
   | (r_sub, Tanon (anon_arity, id)), (r_super, Tfun ft)  ->
       (match Env.get_anonymous env id with
@@ -1465,9 +1453,9 @@ and sub_type_unwrapped_helper env ~this_ty
     (_, Tabstract (AKgeneric _, _)) ->
     Errors.try_
       (fun () ->
-        sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty ty_super)
+        sub_type_inner env ~this_ty ty ty_super)
       (fun _ ->
-        sub_generic_params SSet.empty env ~this_ty ~unwrappedToption_super ty_sub ty_super)
+        sub_generic_params SSet.empty env ~this_ty ty_sub ty_super)
 
   (* Supertype is generic parameter *and* subtype is dependent.
    * We need to make this a special case because there is a *choice*
@@ -1497,13 +1485,13 @@ and sub_type_unwrapped_helper env ~this_ty
     Errors.try_
       (fun () ->
         let this_ty = Option.first_some this_ty (Some ety_sub) in
-        sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty ty_super)
+        sub_type_inner env ~this_ty ty ty_super)
       (fun _ ->
-        sub_generic_params SSet.empty env ~this_ty ~unwrappedToption_super ty_sub ty_super)
+        sub_generic_params SSet.empty env ~this_ty ty_sub ty_super)
 
   | (_, Tabstract (AKdependent _, Some ty)), _ ->
     let this_ty = Option.first_some this_ty (Some ety_sub) in
-    sub_type_unwrapped env ~this_ty ~unwrappedToption_super ty ty_super
+    sub_type_inner env ~this_ty ty ty_super
 
   (* Subtype or supertype is generic parameter
    * We delegate these cases to a separate function in order to catch cycles
@@ -1512,7 +1500,7 @@ and sub_type_unwrapped_helper env ~this_ty
   | (_, Tabstract (AKgeneric _, _)), _
   | _, (_, Tabstract (AKgeneric _, _)) ->
     sub_generic_params SSet.empty env ~this_ty
-      ~unwrappedToption_super ty_sub ty_super
+      ty_sub ty_super
 
   | _, _ ->
     (* TODO: replace this by fail() once we support all subtyping rules that
@@ -1523,7 +1511,6 @@ and sub_generic_params
   (seen : SSet.t)
   (env : Env.env)
   ~(this_ty : locl ty option)
-  ~(unwrappedToption_super : bool)
   (ty_sub: locl ty)
   (ty_super: locl ty) : Env.env =
   let env, ety_super = Env.expand_type env ty_super in
@@ -1569,13 +1556,13 @@ and sub_generic_params
           let tmixed = (r, Toption (r, Tnonnull)) in
           Errors.try_
             (fun () ->
-              sub_generic_params seen env ~this_ty ~unwrappedToption_super tmixed ty_super)
+              sub_generic_params seen env ~this_ty tmixed ty_super)
             fail
 
         | ty::tyl ->
           Errors.try_
             (fun () ->
-              sub_generic_params seen env ~this_ty ~unwrappedToption_super ty ty_super)
+              sub_generic_params seen env ~this_ty ty ty_super)
             (fun l ->
               (* Right now we report constraint failure based on the last
                * error. This should change when we start supporting
@@ -1608,7 +1595,7 @@ and sub_generic_params
 
         | ty::tyl ->
           Errors.try_
-            (fun () -> sub_generic_params seen ~this_ty env ~unwrappedToption_super ty_sub ty)
+            (fun () -> sub_generic_params seen ~this_ty env ty_sub ty)
           (fun l ->
            (* Right now we report constraint failure based on the last
             * error. This should change when we start supporting
@@ -1620,8 +1607,8 @@ and sub_generic_params
       in try_bounds (Typing_set.elements (Env.get_lower_bounds env name_super))
 
   | _, _ ->
-    sub_type_unwrapped env ~this_ty
-      ~unwrappedToption_super ty_sub ty_super
+    sub_type_inner env ~this_ty
+      ty_sub ty_super
 
 (* BEWARE: hack upon hack here.
  * To implement a predicate that tests whether `ty_sub` is a subtype of
@@ -1866,7 +1853,7 @@ let subtype_method
     r_super ft_super_no_tvars
     env in
   let env =
-    process_simplify_subtype_result ~this_ty:None ~unwrappedToption_super:false env res in
+    process_simplify_subtype_result ~this_ty:None env res in
 
   (* This is (3) above *)
   let check_tparams_constraints env tparams =
@@ -1938,8 +1925,8 @@ let decompose_subtype_add_bound
  * Then it must be the case that T <: D so we add an upper bound D to the
  * bounds for T.
  *
- * Although some of this code is similar to that for sub_type_unwrapped, its
- * purpose is different. sub_type_unwrapped takes two types t and u and makes
+ * Although some of this code is similar to that for sub_type_inner, its
+ * purpose is different. sub_type_inner takes two types t and u and makes
  * updates to the substitution of type variables (through unification) to
  * make t <: u true.
  *

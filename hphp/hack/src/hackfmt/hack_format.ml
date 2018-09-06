@@ -1862,91 +1862,89 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       xhp_close = close; } ->
     let handle_xhp_body body =
       match Syntax.syntax body with
-      | Syntax.Missing -> Nothing, true
+      | Syntax.Missing -> when_present close split
       | Syntax.SyntaxList xs ->
-        (* XHP breaks the normal rules of trivia. All trailing trivia (except
-         * on XHPBody tokens) is lexed as leading trivia for the next token.
-         *
-         * To deal with this, we keep track of whether the last token we added
-         * was one that trailing trivia is scanned for. If it wasn't, we
-         * handle the next token's leading trivia with
-         * transform_xhp_leading_trivia, which treats all trivia up to the
-         * first newline as trailing trivia. *)
+        (* Trivia is lexed differently within an XHP body because whitespace is
+           semantically significant in an XHP body when it is adjacent to an
+           XHPBody token. Any number of whitespaces or newlines adjacent to an
+           XHPBody token will be rendered as a single space. In order to make it
+           easier to determine whether a space character should be rendered next
+           to an XHPBody token, all trailing trivia in an XHP body is lexed as
+           leading trivia for the next token (except on XHPBody tokens, where
+           trailing trivia is lexed normally). This ensures that any time
+           semantically-significant whitespace is present, at least some of it
+           occurs in the leading or trailing trivia list of an adjacent XHPBody
+           token.
+
+           To deal with this, we keep track of whether the last token we
+           transformed was one that trailing trivia is scanned for. If it
+           wasn't, we handle the next token's leading trivia list using
+           transform_xhp_leading_trivia, which treats all trivia up to the first
+           newline as trailing trivia. *)
         let prev_token_was_xhpbody = ref false in
         let transformed_body = Concat (List.map xs ~f:begin fun node ->
-          let leading, node = remove_leading_trivia node in
-          let transformed_node = Concat [
-            (* Whitespace in an XHPBody is only significant when adjacent to
-             * an XHPBody token, so we are free to add splits between other
-             * nodes (like XHPExpressions and BracedExpressions). We can also
-             * safely add splits before XHPBody tokens, but only if they
-             * already have whitespace in their leading trivia.
-             *
-             * Splits *after* XHPBody tokens are handled below by
-             * trailing_whitespace, so if the previous token was an XHPBody
-             * token, we don't need to do anything. *)
-            if !prev_token_was_xhpbody
-              then transform_leading_trivia leading
-              else begin
-                let v =
-                  match Syntax.syntax node with
-                  | Syntax.Token _ ->
-                    if has_newline leading then Newline
-                    else if has_whitespace leading then Space
-                    else Nothing
-                  | _ -> Split in
-                Concat [v; transform_xhp_leading_trivia leading]
-              end;
-            t env node;
-          ] in
-          prev_token_was_xhpbody := begin
+          let node_is_xhpbody =
             match Syntax.syntax node with
             | Syntax.Token t -> Token.kind t = TokenKind.XHPBody
             | _ -> false
-          end;
-          (* Here, we preserve newlines after XHPBody tokens and don't add
-           * splits between them. This means that we don't reflow paragraphs
-           * in XHP to fit in the column limit.
-           *
-           * If we were to split between XHPBody tokens, we'd need a new Rule
-           * type to govern word-wrap style splitting, since using independent
-           * splits (e.g. SplitWith Cost.Base) between every token would make
-           * solving too expensive. *)
-          let trailing = Syntax.trailing_trivia node in
-          let trailing_whitespace =
-            match Syntax.syntax node with
-            | Syntax.Token _ when has_newline trailing -> Newline
-            | _ when has_whitespace trailing -> Space
-            | _ -> Nothing
           in
-          Concat [transformed_node; trailing_whitespace]
+          (* Here, we preserve newlines after XHPBody tokens and don't otherwise
+             add splits between them. This means that we don't reflow paragraphs
+             in XHP to fit in the desired line length. It would be nice to do
+             so, but this is not possible with the current set of Rule types.
+
+             If we were to add a split between each XHPBody token instead of
+             splitting only where newlines were already present, we'd need a new
+             Rule type to govern word-wrap style splitting, since using
+             independent splits (e.g. SplitWith Cost.Base) between every token
+             would make solving too expensive. *)
+          let preserve_xhpbody_whitespace trivia =
+            if node_is_xhpbody
+            then begin
+              if has_newline trivia then Newline
+              else if has_whitespace trivia then Space
+              else Nothing
+            end
+            else Nothing
+          in
+          let leading, node = remove_leading_trivia node in
+          let trailing = Syntax.trailing_trivia node in
+          let leading_whitespace = Concat [
+            (* Whitespace in an XHP body is *only* significant when adjacent to
+               an XHPBody token, so we are free to add splits between other
+               nodes (like XHPExpressions and BracedExpressions). *)
+            if not !prev_token_was_xhpbody && not node_is_xhpbody
+            then Split
+            else Nothing;
+            (* If the previous token was an XHPBody token, the lexer will have
+               scanned trailing trivia for it, so we can handle the leading
+               trivia for this node normally. Otherwise, handle the trivia up to
+               the first newline as trailing trivia. *)
+            if !prev_token_was_xhpbody
+            then transform_leading_trivia leading
+            else transform_xhp_leading_trivia leading;
+          ] in
+          prev_token_was_xhpbody := node_is_xhpbody;
+          Concat [
+            leading_whitespace;
+            preserve_xhpbody_whitespace leading;
+            t env node;
+            preserve_xhpbody_whitespace trailing;
+          ]
         end) in
-        let leading_token =
-          match Syntax.leading_token (List.hd_exn xs) with
-          | None -> failwith "Expected token"
-          | Some token -> token
-        in
-        let can_split_before_first_token =
-          Token.kind leading_token <> TokenKind.XHPBody ||
-          has_invisibles (Token.leading leading_token)
-        in
-        let transformed_body = Concat [
-          if can_split_before_first_token then Split else Nothing;
+        Concat [
           transformed_body;
-        ] in
-        let can_split_before_close = not !prev_token_was_xhpbody in
-        transformed_body, can_split_before_close
+          if not !prev_token_was_xhpbody then Split else Nothing;
+        ]
       | _ -> failwith "Expected SyntaxList"
     in
     WithPossibleLazyRule (Rule.Parental, t env xhp_open,
-      let transformed_body, can_split_before_close = handle_xhp_body body in
       Concat [
-        Nest [transformed_body];
+        Nest [handle_xhp_body body];
         when_present close begin fun () ->
           let leading, close = remove_leading_trivia close in Concat [
             (* Ignore extra newlines by treating this as trailing trivia *)
             ignore_trailing_invisibles leading;
-            if can_split_before_close then Split else Nothing;
             t env close;
           ]
         end;
@@ -3170,11 +3168,6 @@ and is_invisible trivia =
   match Trivia.kind trivia with
   | TriviaKind.WhiteSpace | TriviaKind.EndOfLine -> true
   | _ -> false
-
-(* True if the trivia list contains any "invisible" trivia, meaning spaces,
- * tabs, or newlines. *)
-and has_invisibles trivia_list =
-  List.exists trivia_list ~f:is_invisible
 
 and transform_leading_trivia t = transform_trivia ~is_leading:true t
 and transform_trailing_trivia t = transform_trivia ~is_leading:false t

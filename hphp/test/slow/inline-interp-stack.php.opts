@@ -1,0 +1,1 @@
+-vEval.HackArrCompatNotices=1 -vEval.HackArrCompatCheckMisc=1 -vEval.JitEnableRenameFunction=0 -vHack.Lang.DisallowDynamicVarEnvFuncs=1 -vEval.HackArrCompatCheckIntishCast=1

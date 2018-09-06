@@ -140,6 +140,7 @@ inline void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
   vmfp() = ar;
   vmsp() = sp;
   vmpc() = ar->unit()->at(pcOff);
+  vmJitReturnAddr() = nullptr; // We never elide frames around an interpOne
 }
 
 /*

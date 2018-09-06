@@ -591,4 +591,5 @@ module type S = sig
   val rx_of_scope_and_explicit_rx: Pos.t -> unit
   val lateinit_with_default: Pos.t -> unit
   val interface_use_trait: Pos.t -> unit
+  val nonstatic_method_in_abstract_final_class: Pos.t -> unit
 end

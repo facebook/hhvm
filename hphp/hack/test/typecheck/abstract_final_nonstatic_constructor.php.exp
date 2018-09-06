@@ -1,0 +1,2 @@
+File "abstract_final_nonstatic_constructor.php", line 3, characters 19-29:
+Abstract final classes cannot have nonstatic methods or constructors. (NastCheck[3074])

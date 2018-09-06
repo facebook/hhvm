@@ -1,5 +1,5 @@
 <?hh // strict
-abstract final class A {
+class A {
   protected darray<string, varray<int>> $events = darray[];
 
   <<__RxShallow, __Mutable>>

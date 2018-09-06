@@ -1171,6 +1171,11 @@ let no_construct_parent pos =
    ]
  )
 
+ let nonstatic_method_in_abstract_final_class pos =
+  add (NastCheck.err_code NastCheck.NonstaticMethodInAbstractFinalClass) pos (
+    "Abstract final classes cannot have nonstatic methods or constructors."
+  )
+
 let constructor_required (pos, name) prop_names =
   let name = Utils.strip_ns name in
   let props_str = SSet.fold ~f:(fun x acc -> x^" "^acc) prop_names ~init:"" in

@@ -601,9 +601,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env kw;
       when_present const_type space;
       t env const_type;
-      WithRule (Rule.Parental, Nest [
-        handle_possible_list env ~before_each:space_split declarators;
-      ]);
+      handle_declarator_list env declarators;
       t env semi;
       Newline;
     ]

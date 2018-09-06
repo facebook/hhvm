@@ -249,7 +249,8 @@ and darray_to_typed_value ns fields =
         | A.String s ->
            begin match Int64.of_string s with
            | index when (SU.Integer.is_decimal_int s) && not (hack_arr_dv_arrs ()) ->
-              (TV.Int index, expr_to_typed_value ns v2)
+              if (hack_arr_compat_notices ()) then raise NotLiteral
+              else (TV.Int index, expr_to_typed_value ns v2)
            | _ ->
               (expr_to_typed_value ns v1, expr_to_typed_value ns v2)
            | exception Failure _ ->

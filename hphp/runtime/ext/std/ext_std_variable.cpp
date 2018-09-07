@@ -196,6 +196,12 @@ bool HHVM_FUNCTION(HH_is_any_array, const Variant& val) {
   return tvIsArrayLike(val.asTypedValue());
 }
 
+bool HHVM_FUNCTION(HH_is_list_like, const Variant& val) {
+  if (!val.isArray()) return false;
+  auto const& arr = val.toCArrRef();
+  return arr->isVectorData();
+}
+
 bool HHVM_FUNCTION(is_object, const Variant& v) {
   return is_object(v.asTypedValue());
 }
@@ -666,6 +672,7 @@ void StandardExtension::initVariable() {
   HHVM_FALIAS(HH\\is_varray, HH_is_varray);
   HHVM_FALIAS(HH\\is_darray, HH_is_darray);
   HHVM_FALIAS(HH\\is_any_array, HH_is_any_array);
+  HHVM_FALIAS(HH\\is_list_like, HH_is_list_like);
   HHVM_FE(is_object);
   HHVM_FE(is_resource);
   HHVM_FE(boolval);

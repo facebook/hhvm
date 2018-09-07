@@ -236,6 +236,13 @@ namespace HH {
   <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
   function is_any_array(<<__MaybeMutable>> mixed $var): bool;
 
+  /*
+   * Check if the input is an array-like containing only integer keys running
+   * from 0 to N-1, in that order.
+   */
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  function is_list_like(<<__MaybeMutable>> arraylike $var): bool;
+
  /*
   * Behaves like serialize() but takes an optional set of options.
   *

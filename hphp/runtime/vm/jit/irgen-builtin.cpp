@@ -106,6 +106,7 @@ const StaticString
   s_func_num_args("func_num_args"),
   s_array_key_cast("hh\\array_key_cast"),
   s_type_structure("hh\\type_structure"),
+  s_is_list_like("hh\\is_list_like"),
   s_one("1"),
   s_empty("");
 
@@ -632,6 +633,21 @@ SSATmp* opt_type_structure(IRGS& env, const ParamPrep& params) {
   );
 }
 
+SSATmp* opt_is_list_like(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const type = params[0].value->type();
+  // Type might be a Ptr here, so the maybe() below will go wrong if we don't
+  // bail out here.
+  if (!(type <= TInitCell)) return nullptr;
+
+  if (!type.maybe(TArrLike)) return cns(env, false);
+  if (type <= TVec || type <= Type::Array(ArrayData::kPackedKind)) {
+    return cns(env, true);
+  }
+
+  return nullptr;
+}
+
 SSATmp* opt_foldable(IRGS& env,
                      const Func* func,
                      const ParamPrep& params,
@@ -804,6 +820,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
     X(set_frame_metadata)
     X(array_key_cast)
     X(type_structure)
+    X(is_list_like)
 
 #undef X
 

@@ -47,6 +47,8 @@ function is_vec(<<__MaybeMutable>> mixed $arg): bool;
 function is_dict(<<__MaybeMutable>> mixed $arg): bool;
 <<__Rx>>
 function is_keyset(<<__MaybeMutable>> mixed $arg): bool;
+<<__Rx>>
+function is_list_like(<<__MaybeMutable>> mixed $arg): bool;
 <<__PHPStdLib, __Rx>>
 function ord(string $string): int;
 <<__PHPStdLib>>

@@ -286,6 +286,42 @@ bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
   return true;
 }
 
+bool builtin_is_list_like(ISS& env, const bc::FCallBuiltin& op) {
+  if (op.arg1 != 1) return false;
+  auto const ty = topC(env);
+
+  constprop(env);
+  nothrow(env);
+
+  if (!ty.couldBeAny(TArr, TVec, TDict, TKeyset)) {
+    popC(env);
+    push(env, TFalse);
+    return true;
+  }
+
+  if (ty.subtypeOfAny(TVec, TVArr)) {
+    popC(env);
+    push(env, TTrue);
+    return true;
+  }
+
+  switch (categorize_array(ty).cat) {
+    case Type::ArrayCat::Empty:
+    case Type::ArrayCat::Packed:
+      popC(env);
+      push(env, TTrue);
+      return true;
+    case Type::ArrayCat::Mixed:
+    case Type::ArrayCat::Struct:
+      popC(env);
+      push(env, TFalse);
+      return true;
+    case Type::ArrayCat::None:
+      return false;
+  }
+  always_assert(false);
+}
+
 #define SPECIAL_BUILTINS                                                \
   X(abs, abs)                                                           \
   X(ceil, ceil)                                                         \
@@ -302,6 +338,7 @@ bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
   X(trait_exists, trait_exists)                                         \
   X(class_alias, class_alias)                                           \
   X(array_key_cast, HH\\array_key_cast)                                 \
+  X(is_list_like, HH\\is_list_like)                                     \
 
 #define X(x, y)    const StaticString s_##x(#y);
   SPECIAL_BUILTINS

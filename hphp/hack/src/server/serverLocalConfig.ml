@@ -40,7 +40,6 @@ type t = {
   use_dummy_informant : bool;
   informant_min_distance_restart: int;
   informant_use_xdb: bool;
-  load_script_config: LoadScriptConfig.t;
   use_full_fidelity_parser : bool;
   interrupt_on_watchman : bool;
   interrupt_on_client : bool;
@@ -75,7 +74,6 @@ let default = {
   use_dummy_informant = true;
   informant_min_distance_restart = 100;
   informant_use_xdb = false;
-  load_script_config = LoadScriptConfig.default;
   use_full_fidelity_parser = true;
   interrupt_on_watchman = false;
   interrupt_on_client = false;
@@ -178,7 +176,6 @@ let load_ fn ~silent =
     ~default:default.interrupt_on_watchman config in
   let interrupt_on_client = bool_if_version "interrupt_on_client"
     ~default:default.interrupt_on_client config in
-  let load_script_config = LoadScriptConfig.default in
   let use_full_fidelity_parser = bool_if_version "use_full_fidelity_parser"
     ~default:default.use_full_fidelity_parser config in
   let trace_parsing = bool_if_version "trace_parsing"
@@ -212,7 +209,6 @@ let load_ fn ~silent =
     use_dummy_informant;
     informant_min_distance_restart;
     informant_use_xdb;
-    load_script_config;
     use_full_fidelity_parser;
     interrupt_on_watchman;
     interrupt_on_client;

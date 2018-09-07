@@ -817,7 +817,6 @@ let setup_server ~informant_managed ~monitor_pid options handle =
     io_priority;
     enable_on_nfs;
     search_chunk_size;
-    load_script_config;
     max_workers;
     max_bucket_size;
     use_full_fidelity_parser;
@@ -829,10 +828,6 @@ let setup_server ~informant_managed ~monitor_pid options handle =
   List.iter (ServerConfig.ignored_paths config) ~f:FilesToIgnore.ignore_path;
   List.iter (ServerConfig.coroutine_whitelist_paths config)
     ~f:Coroutine_check.whitelist_path;
-  let saved_state_load_type =
-    LoadScriptConfig.saved_state_load_type_to_string load_script_config in
-  let use_sql =
-    LoadScriptConfig.use_sql load_script_config in
   let prechecked_files = ServerPrecheckedFiles.should_use options local_config in
   if Sys_utils.is_test_mode ()
   then EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0
@@ -842,8 +837,6 @@ let setup_server ~informant_managed ~monitor_pid options handle =
     ~init_id
     ~informant_managed
     ~time:(Unix.gettimeofday ())
-    ~saved_state_load_type
-    ~use_sql
     ~search_chunk_size
     ~max_workers
     ~max_bucket_size

@@ -18,8 +18,6 @@ let init
   ~init_id:_
   ~informant_managed:_
   ~time:_
-  ~saved_state_load_type:_
-  ~use_sql:_
   ~search_chunk_size:_
   ~max_workers:_
   ~max_bucket_size:_

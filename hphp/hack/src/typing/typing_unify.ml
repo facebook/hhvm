@@ -60,6 +60,8 @@ let rec unify ?(opts=TUtils.default_unify_opt) env ty1 ty2 =
       let r = unify_reason r1 r2 in
       let env, tyl = TUtils.normalize_inter env tyl1 tyl2 in
       env, (r, Tunresolved tyl)
+  | (Reason.Rnone, Tunresolved []), ty
+  | ty, (Reason.Rnone, Tunresolved []) -> env, ty
   | (r, Tunresolved tyl), (_, ty_ as ty)
   | (_, ty_ as ty), (r, Tunresolved tyl) ->
       let p1 = TUtils.find_pos (Reason.to_pos r) tyl in

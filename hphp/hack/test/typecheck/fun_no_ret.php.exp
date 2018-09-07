@@ -2,7 +2,5 @@ File "fun_no_ret.php", line 14, characters 10-13:
 Invalid return type (Typing[4110])
 File "fun_no_ret.php", line 12, characters 17-19:
 This is an int
-File "", line 0, characters 0-0:
-It is incompatible with void
 File "fun_no_ret.php", line 13, characters 8-21:
-It was implicitly typed as void during this operation
+It is incompatible with void because this function implicitly returns void

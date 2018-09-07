@@ -9,6 +9,14 @@
  *
  */
 
+class Foo implements HH\TypeAliasAttribute { public function __construct(int... $x) {} }
+class Bar implements HH\TypeAliasAttribute {}
+class SingleAttribute implements HH\TypeAliasAttribute {}
+class SingleAttributeWithOneParam implements HH\TypeAliasAttribute { public function __construct(public int $x) {} }
+class SingleAttributeWithTwoParams implements HH\TypeAliasAttribute { public function __construct(public int $x, public int $y) {} }
+class Multiple implements HH\TypeAliasAttribute { public function __construct(public int $x) {} }
+class Attributes implements HH\TypeAliasAttribute { public function __construct(public int $x, public int $y) {} }
+
 <<Foo(1,2,3), Bar>>
 type T1 = int;
 

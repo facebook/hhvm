@@ -802,18 +802,24 @@ let save_state genv env fn =
   let ignore_errors =
     ServerArgs.gen_saved_ignore_type_errors genv.ServerEnv.options in
   let has_errors = not (Errors.is_empty env.errorl) in
-  if ignore_errors then begin
-    if has_errors then
-      Printf.eprintf "WARNING: BROKEN SAVED STATE! Generating saved state. Ignoring type errors.\n%!"
-    else
-      Printf.eprintf "Generating saved state and ignoring type errors, but there were none.\n%!"
-  end else begin
-    if has_errors then begin
-      Printf.eprintf "Refusing to generate saved state. There are type errors\n%!";
-      Printf.eprintf "and --gen-saved-ignore-type-errors was not provided. "
-    end else
-      ()
-  end;
+  let do_save_state =
+    if ignore_errors then begin
+      if has_errors then
+        Printf.eprintf
+          "WARNING: BROKEN SAVED STATE! Generating saved state. Ignoring type errors.\n%!"
+      else
+        Printf.eprintf "Generating saved state and ignoring type errors, but there were none.\n%!";
+      true
+    end else begin
+      if has_errors then begin
+        Printf.eprintf "Refusing to generate saved state. There are type errors\n%!";
+        Printf.eprintf "and --gen-saved-ignore-type-errors was not provided.\n%!";
+        false
+      end else
+        true
+    end in
+
+  if do_save_state then
   let file_info_on_disk = ServerArgs.file_info_on_disk genv.ServerEnv.options in
   let _ : int = SaveStateService.save_state
     ~file_info_on_disk env.ServerEnv.files_info fn in

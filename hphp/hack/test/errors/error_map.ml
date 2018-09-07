@@ -220,6 +220,7 @@ MaybeMutableMethodsMustBeReactive = 3071
 RequiresFinalClass = 3072
 InterfaceUsesTrait = 3073
 NonstaticMethodInAbstractFinalClass = 3074
+MutableOnStatic = 3075
 
 Typing Errors:
 AbstractClassFinalDEPRECATED = 4001

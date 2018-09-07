@@ -593,4 +593,5 @@ module type S = sig
   val lateinit_with_default: Pos.t -> unit
   val interface_use_trait: Pos.t -> unit
   val nonstatic_method_in_abstract_final_class: Pos.t -> unit
+  val mutable_on_static: Pos.t -> unit
 end

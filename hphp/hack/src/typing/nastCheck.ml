@@ -974,8 +974,12 @@ and method_ (env, is_static) m =
     && not (Attributes.mem SN.UserAttributes.uaOptionalDestruct m.m_user_attributes)
   then Errors.illegal_destructor p;
 
-  let is_mutable =
-    Attributes.mem SN.UserAttributes.uaMutable m.m_user_attributes in
+  let is_mutable, is_mutable_pos =
+    Attributes.find SN.UserAttributes.uaMutable m.m_user_attributes
+    |> Option.value_map
+        ~default:(false, Pos.none)
+        ~f:(fun { ua_name = (p, _); _ } -> true, p) in
+
 
   let is_maybe_mutable =
     Attributes.mem SN.UserAttributes.uaMaybeMutable m.m_user_attributes in
@@ -989,8 +993,13 @@ and method_ (env, is_static) m =
     if is_maybe_mutable
     then Errors.maybe_mutable_methods_must_be_reactive p name;
   end;
-  if is_mutable && is_maybe_mutable
-  then Errors.conflicting_mutable_and_maybe_mutable_attributes p;
+  if is_mutable
+  then begin
+    if is_maybe_mutable
+    then Errors.conflicting_mutable_and_maybe_mutable_attributes p;
+    if is_static && name <> SN.Members.__construct
+    then Errors.mutable_on_static is_mutable_pos;
+  end;
 
   (*Methods annotated with MutableReturn attribute must be reactive *)
   if Attributes.mem SN.UserAttributes.uaMutableReturn m.m_user_attributes

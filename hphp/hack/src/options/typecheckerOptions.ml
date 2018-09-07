@@ -66,6 +66,7 @@ let disallow_return_by_ref = GlobalOptions.tco_disallow_return_by_ref
 let disallow_array_cell_pass_by_ref = GlobalOptions.tco_disallow_array_cell_pass_by_ref
 let disallow_implicit_returns_in_non_void_functions =
   GlobalOptions.tco_disallow_implicit_returns_in_non_void_functions
-
 let disallow_unset_on_varray = GlobalOptions.tco_disallow_unset_on_varray
+let disallow_scrutinee_case_value_type_mismatch =
+  GlobalOptions.tco_disallow_scrutinee_case_value_type_mismatch
 let forward_compatibility_level = GlobalOptions.forward_compatibility_level

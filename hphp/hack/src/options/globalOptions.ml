@@ -31,6 +31,7 @@ type t = {
   tco_disable_primitive_refinement : bool;
   tco_disallow_implicit_returns_in_non_void_functions : bool;
   tco_disallow_unset_on_varray: bool;
+  tco_disallow_scrutinee_case_value_type_mismatch : bool;
   ignored_fixme_codes : ISet.t;
   forward_compatibility_level : ForwardCompatibilityLevel.t;
 } [@@deriving show]
@@ -190,6 +191,7 @@ let default = {
  tco_disable_primitive_refinement = false;
  tco_disallow_implicit_returns_in_non_void_functions = true;
  tco_disallow_unset_on_varray = false;
+ tco_disallow_scrutinee_case_value_type_mismatch = false;
  ignored_fixme_codes = Errors.default_ignored_fixme_codes;
  forward_compatibility_level = ForwardCompatibilityLevel.default;
 }
@@ -230,6 +232,7 @@ let make ~tco_assume_php
          ~tco_disable_primitive_refinement
          ~tco_disallow_implicit_returns_in_non_void_functions
          ~tco_disallow_unset_on_varray
+         ~tco_disallow_scrutinee_case_value_type_mismatch
          ~ignored_fixme_codes
          ~forward_compatibility_level = {
                    tco_assume_php;
@@ -256,6 +259,7 @@ let make ~tco_assume_php
                    tco_disable_primitive_refinement;
                    tco_disallow_implicit_returns_in_non_void_functions;
                    tco_disallow_unset_on_varray;
+                   tco_disallow_scrutinee_case_value_type_mismatch;
                    forward_compatibility_level;
         }
 let tco_assume_php t = t.tco_assume_php
@@ -289,5 +293,7 @@ let tco_disable_primitive_refinement t = t.tco_disable_primitive_refinement
 let tco_disallow_implicit_returns_in_non_void_functions t =
   t.tco_disallow_implicit_returns_in_non_void_functions
 let tco_disallow_unset_on_varray t = t.tco_disallow_unset_on_varray
+let tco_disallow_scrutinee_case_value_type_mismatch t =
+  t.tco_disallow_scrutinee_case_value_type_mismatch
 let ignored_fixme_codes t = t.ignored_fixme_codes
 let forward_compatibility_level t = t.forward_compatibility_level

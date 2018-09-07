@@ -1128,21 +1128,8 @@ and case_list parent_locals ty env switch_pos cl =
     check_fallthrough env switch_pos Pos.none b rl ~is_default:true;
     env, [T.Default tb]
   | (Case ((pos, _) as e, b)) :: rl ->
-    (* TODO - we should consider handling the comparisons the same
-     * way as Binop Ast.EqEq, since case statements work using ==
-     * comparison rules *)
-
     let env = initialize_next_cont env in
-    let ty_num = (Reason.Rnone, Tprim Nast.Tnum) in
-    let ty_arraykey = (Reason.Rnone, Tprim Nast.Tarraykey) in
-    let both_are_sub_types env tprim ty1 ty2 =
-      (SubType.is_sub_type env ty1 tprim) &&
-      (SubType.is_sub_type env ty2 tprim) in
-    let env, te, ty2 = expr env e in
-    let env, _ = if (both_are_sub_types env ty_num ty ty2) ||
-                    (both_are_sub_types env ty_arraykey ty ty2)
-                 then env, ty
-                 else Type.unify (fst e) Reason.URnone env ty ty2 in
+    let env, te, _ = expr env e in
     let env, tb = block env b in
     check_fallthrough env switch_pos pos b rl ~is_default:false;
     let env, tcl = case_list parent_locals ty env switch_pos rl in

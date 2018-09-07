@@ -3343,6 +3343,13 @@ let forward_compatibility_below_minimum pos value =
       (ForwardCompatibilityLevel.as_int current)
     )
 
+let invalid_switch_case_value_type case_value_p case_value_ty scrutinee_ty =
+  add (Typing.err_code Typing.InvalidSwitchCaseValueType) case_value_p @@
+    Printf.sprintf
+      "This case value has type %s, which is incompatible with type %s."
+      case_value_ty
+      scrutinee_ty
+
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)
 (*****************************************************************************)

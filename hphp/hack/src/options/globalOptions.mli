@@ -140,6 +140,12 @@ type t = {
   *)
  tco_disallow_unset_on_varray : bool;
 
+ (*
+  * When enabled, mismatches between the types of the scrutinee and case value
+  * of a switch expression are reported as type errors.
+  *)
+ tco_disallow_scrutinee_case_value_type_mismatch: bool;
+
  (* Error codes for which we do not allow HH_FIXMEs *)
  ignored_fixme_codes : ISet.t;
 
@@ -169,6 +175,7 @@ val make :
   tco_disable_primitive_refinement: bool ->
   tco_disallow_implicit_returns_in_non_void_functions: bool ->
   tco_disallow_unset_on_varray: bool ->
+  tco_disallow_scrutinee_case_value_type_mismatch: bool ->
   ignored_fixme_codes: ISet.t ->
   forward_compatibility_level: ForwardCompatibilityLevel.t ->
   t
@@ -196,6 +203,7 @@ val tco_unsafe_rx : t -> bool
 val tco_disable_primitive_refinement : t -> bool
 val tco_disallow_implicit_returns_in_non_void_functions : t -> bool
 val tco_disallow_unset_on_varray : t -> bool
+val tco_disallow_scrutinee_case_value_type_mismatch : t -> bool
 val default : t
 val make_permissive : t -> t
 val tco_experimental_instanceof : string

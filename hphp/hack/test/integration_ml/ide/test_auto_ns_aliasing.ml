@@ -116,6 +116,7 @@ let () =
     ~tco_disable_primitive_refinement:false
     ~tco_disallow_implicit_returns_in_non_void_functions:true
     ~tco_disallow_unset_on_varray:false
+    ~tco_disallow_scrutinee_case_value_type_mismatch:false
     ~ignored_fixme_codes: ISet.empty
     ~forward_compatibility_level: ForwardCompatibilityLevel.default
   in

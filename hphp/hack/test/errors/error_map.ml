@@ -501,4 +501,5 @@ SketchyTruthinessTest = 4276
 LateInitWithDefault = 4277
 OverrideMemoizeLSB = 4278
 ClassVarTypeGenericParam = 4279
+InvalidSwitchCaseValueType = 4280
   |}]

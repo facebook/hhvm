@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function fb_cs_test($v) {
   echo "====\n";
@@ -11,10 +11,10 @@ function fb_cs_test($v) {
   var_dump(!empty($ss_));
   /* check high bit of first character always set */
   var_dump(preg_match("/^[\x80-\xff]/", $ss_));
-  var_dump(fb_compact_unserialize($s_, $ret) === $v_);
+  var_dump(fb_compact_unserialize($s_, &$ret) === $v_);
   var_dump($ret === true);
   $ret = null;
-  var_dump(fb_unserialize($s_, $ret) === $v_);
+  var_dump(fb_unserialize($s_, &$ret) === $v_);
   var_dump($ret === true);
 }
 
@@ -74,7 +74,7 @@ function main() {
   // C++ code in serialized strings)
   $s = "\xfe\x01\x02\x03\xfc";  // VECTOR, 1, 2, 3, STOP
   $ret = null;
-  var_dump(fb_compact_unserialize($s, $ret));
+  var_dump(fb_compact_unserialize($s, &$ret));
 }
 
 

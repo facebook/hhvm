@@ -155,17 +155,20 @@ let test_incremental_update () =
 
   let foo_error_a, () =
   Errors.do_with_context a_path Errors.Parsing begin fun () ->
-    error_in "foo";
+    error_in "foo1";
+    error_in "foo2";
     ()
   end in
   let bar_error_a, () =
     Errors.do_with_context a_path Errors.Parsing begin fun () ->
-    error_in "bar";
+    error_in "bar1";
+    error_in "bar2";
     ()
   end in
   let baz_error_b, () =
     Errors.do_with_context b_path Errors.Parsing begin fun () ->
-    error_in "baz";
+    error_in "baz1";
+    error_in "baz2";
     ()
   end in
 
@@ -176,7 +179,9 @@ let test_incremental_update () =
     Errors.Parsing
   in
   let expected =
-    "File \"/bar\", line 0, characters 0-0:\n (Parsing[1002])\n\n" in
+    "File \"/bar2\", line 0, characters 0-0:\n (Parsing[1002])\n\n" ^
+    "File \"/bar1\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
+  in
   Asserter.String_asserter.assert_equals expected
     (Errors.get_error_list errors |> error_list_to_string )
     "Incremental update should overwrite foo error with bar.";
@@ -188,8 +193,10 @@ let test_incremental_update () =
     Errors.Parsing
   in
   let expected =
-    "File \"/foo\", line 0, characters 0-0:\n (Parsing[1002])\n\n" ^
-    "File \"/baz\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
+    "File \"/foo1\", line 0, characters 0-0:\n (Parsing[1002])\n\n" ^
+    "File \"/foo2\", line 0, characters 0-0:\n (Parsing[1002])\n\n" ^
+    "File \"/baz2\", line 0, characters 0-0:\n (Parsing[1002])\n\n" ^
+    "File \"/baz1\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
   in
   Asserter.String_asserter.assert_equals expected
     (Errors.get_error_list errors |> error_list_to_string )

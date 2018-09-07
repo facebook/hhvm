@@ -14,6 +14,7 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
+<<__Sealed(Error::class, Exception::class)>>
 interface Throwable {
   public function getMessage(): string;
   // Documented as 'int' in PHP docs, but not actually guaranteed;

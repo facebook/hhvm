@@ -1,0 +1,1 @@
+Fatal error: Class foo may not inherit from sealed interface (Throwable) without being in the whitelist in %s/test/slow/exceptions/seal_throwable.php on line 3

@@ -1,4 +1,5 @@
 <?php
+<<__Sealed(Error::class, Exception::class)>>
 interface Throwable {
   public function getMessage(): string;
   public function getCode(): int;

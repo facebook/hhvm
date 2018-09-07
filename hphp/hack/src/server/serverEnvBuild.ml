@@ -82,7 +82,9 @@ let make_genv options config local_config handle =
         then Some Watchman.Defer_changes
         else None;
       expression_terms = watchman_expression_terms;
-      debug_logging = ServerArgs.watchman_debug_logging options;
+      debug_logging =
+        ServerArgs.watchman_debug_logging options ||
+        local_config.SLC.watchman_debug_logging;
       subscription_prefix = "hh_type_check_watcher";
       roots = [root];
     } ()

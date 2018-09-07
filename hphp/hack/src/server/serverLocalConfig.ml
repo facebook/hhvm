@@ -46,6 +46,7 @@ type t = {
   trace_parsing : bool;
   prechecked_files : bool;
   predeclare_ide : bool;
+  watchman_debug_logging : bool;
 }
 
 let default = {
@@ -80,6 +81,7 @@ let default = {
   trace_parsing = false;
   prechecked_files = false;
   predeclare_ide = false;
+  watchman_debug_logging = false;
 }
 
 let path =
@@ -184,6 +186,8 @@ let load_ fn ~silent =
     ~default:default.prechecked_files config in
   let predeclare_ide = bool_if_version "predeclare_ide"
     ~default:default.predeclare_ide config in
+  let watchman_debug_logging = bool_if_version "watchman_debug_logging"
+    ~default:default.watchman_debug_logging config in
   {
     use_watchman;
     watchman_init_timeout;
@@ -215,6 +219,7 @@ let load_ fn ~silent =
     trace_parsing;
     prechecked_files;
     predeclare_ide;
+    watchman_debug_logging;
   }
 
 let load ~silent =

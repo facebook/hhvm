@@ -86,7 +86,9 @@ let monitor_daemon_main (options: ServerArgs.options) =
       HhMonitorInformant.root = ServerArgs.root options;
       allow_subscriptions = local_config.ServerLocalConfig.watchman_subscribe;
       use_dummy = local_config.ServerLocalConfig.use_dummy_informant;
-      watchman_debug_logging = ServerArgs.watchman_debug_logging options;
+      watchman_debug_logging =
+        ServerArgs.watchman_debug_logging options ||
+        local_config.ServerLocalConfig.watchman_debug_logging;
       min_distance_restart =
         local_config.ServerLocalConfig.informant_min_distance_restart;
       saved_state_cache_limit =

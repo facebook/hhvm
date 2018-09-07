@@ -16,9 +16,9 @@
 #include "hphp/util/light-process.h"
 
 #include <string>
+#include <memory>
 #include <vector>
 
-#include <boost/scoped_array.hpp>
 #include <boost/thread/barrier.hpp>
 
 #include <folly/portability/SysMman.h>
@@ -413,7 +413,7 @@ void do_change_user(int afdt_fd) {
 ///////////////////////////////////////////////////////////////////////////////
 // light-weight process
 
-boost::scoped_array<LightProcess> g_procs;
+std::unique_ptr<LightProcess[]> g_procs;
 int g_procsCount = 0;
 bool s_handlerInited = false;
 LightProcess::LostChildHandler s_lostChildHandler;
@@ -644,7 +644,7 @@ R runLight(const char* call, F1 body, R failureResult) {
 }
 
 void LightProcess::Close() {
-  boost::scoped_array<LightProcess> procs;
+  std::unique_ptr<LightProcess[]> procs;
   procs.swap(g_procs);
   int count = g_procsCount;
   g_procs.reset();

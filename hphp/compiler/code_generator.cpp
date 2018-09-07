@@ -26,8 +26,9 @@
 #include "hphp/util/hash.h"
 #include <folly/Conv.h>
 #include <boost/format.hpp>
-#include <boost/scoped_array.hpp>
+
 #include <algorithm>
+#include <memory>
 #include <vector>
 
 using namespace HPHP;
@@ -129,7 +130,7 @@ void CodeGenerator::namespaceEnd() {
 
 void CodeGenerator::print(const char *fmt, va_list ap) {
   if (!m_out) return;
-  boost::scoped_array<char> buf;
+  std::unique_ptr<char[]> buf;
   bool done = false;
   for (int len = 1024; !done; len <<= 1) {
     va_list v;

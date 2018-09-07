@@ -173,7 +173,6 @@ LINKER_FLAGS=$(NATIVE_OBJECT_FILES) $(NATIVE_LIB_OPTS) $(EXTRA_LINK) \
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 
 all: build-hack copy-hack-files
-all-ocp: build-hack-with-ocp copy-hack-files-ocp
 
 clean:
 	$(OCAMLBUILD) -clean
@@ -181,11 +180,6 @@ clean:
 	rm -f utils/get_build_id.gen.c
 
 build-hack: $(TARGETS)
-
-build-hack-with-ocp:
-	$(MAKE) $(BUILD_ID_OBJECTS)
-	[ -d ${ROOT}/../_obuild ] || ( cd ${ROOT}/.. && ocp-build init )
-	ocp-build build
 
 # These are needed so we can turn OCAMLBUILD from 'a,b,c' into 'a b c' below
 comma := ,
@@ -270,20 +264,8 @@ $(COPIED_HHIS): _build/%.hhi: ../%.hhi
 
 copy-hhis: $(COPIED_HHIS)
 
-copy-hack-files-ocp: build-hack-with-ocp
-	mkdir -p ../bin
-	cp ../_obuild/hh_server/hh_server.asm ../bin/hh_server
-	cp ../_obuild/hh_client/hh_client.asm ../bin/hh_client
-	cp ../_obuild/hh_single_type_check/hh_single_type_check.asm ../bin/hh_single_type_check
-	cp ../_obuild/hh_format/hackfmt.asm ../bin/hackfmt
-	cp ../_obuild/full_fidelity_parse.asm ../bin/hh_parse
-	cp ../_obuild/hh_single_compile.asm ../bin/hh_single_compile
-
-.PHONY: test test-ocp do-test
+.PHONY: test do-test
 test: build-hack copy-hack-files
-	${MAKE} do-test
-
-test-ocp: build-hack-with-ocp copy-hack-files-ocp
 	${MAKE} do-test
 
 do-test:

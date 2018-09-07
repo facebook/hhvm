@@ -51,6 +51,7 @@ let monitor_daemon_main (options: ServerArgs.options) =
     ~exit_on_parent_exit
     ~search_chunk_size:local_config.ServerLocalConfig.search_chunk_size
     ~prechecked_files:(ServerPrecheckedFiles.should_use options local_config)
+    ~predeclare_ide:local_config.ServerLocalConfig.predeclare_ide
     (ServerArgs.root options) init_id
     (Unix.gettimeofday ()) false;
   Utils.profile := ServerArgs.profile_log options;

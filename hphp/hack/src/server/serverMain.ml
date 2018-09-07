@@ -823,6 +823,7 @@ let setup_server ~informant_managed ~monitor_pid options handle =
     use_full_fidelity_parser;
     interrupt_on_watchman;
     interrupt_on_client;
+    predeclare_ide;
     _
   } as local_config = local_config in
   List.iter (ServerConfig.ignored_paths config) ~f:FilesToIgnore.ignore_path;
@@ -849,7 +850,8 @@ let setup_server ~informant_managed ~monitor_pid options handle =
     ~use_full_fidelity_parser
     ~interrupt_on_watchman
     ~interrupt_on_client
-    ~prechecked_files;
+    ~prechecked_files
+    ~predeclare_ide;
   let root_s = Path.to_string root in
   let check_mode = ServerArgs.check_mode options in
   if not check_mode && Sys_utils.is_nfs root_s && not enable_on_nfs then begin

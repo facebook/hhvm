@@ -127,7 +127,7 @@ let apply_changes env changes =
   Relative_path.Map.fold changes
     ~init:env
     ~f:begin fun path content env ->
-      ServerFileSync.open_file env (Relative_path.to_absolute path) content
+      ServerFileSync.open_file ~predeclare:false env (Relative_path.to_absolute path) content
     end
 
 let get_unsaved_changes env  =

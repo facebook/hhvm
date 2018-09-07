@@ -132,12 +132,14 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | DUMP_FULL_FIDELITY_PARSE file ->
         env, FullFidelityParseService.go file
     | OPEN_FILE (path, contents) ->
-        ServerFileSync.open_file env path contents, ()
+        let predeclare = genv.local_config.ServerLocalConfig.predeclare_ide in
+        ServerFileSync.open_file ~predeclare env path contents, ()
     | CLOSE_FILE path ->
         ServerFileSync.close_file env path, ()
     | EDIT_FILE (path, edits) ->
+        let predeclare = genv.local_config.ServerLocalConfig.predeclare_ide in
         let edits = List.map edits ~f:Ide_api_types.ide_text_edit_to_fc in
-        ServerFileSync.edit_file env path edits, ()
+        ServerFileSync.edit_file ~predeclare env path edits, ()
     | IDE_AUTOCOMPLETE (path, pos, delimit_on_namespaces, is_manually_invoked) ->
         let open With_complete_flag in
         let pos = pos |> Ide_api_types.ide_pos_to_fc in

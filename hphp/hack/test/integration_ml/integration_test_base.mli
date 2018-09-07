@@ -45,6 +45,7 @@ val edit_file :
   ServerEnv.env * ('a, unit) loop_outputs
 
 val close_file :
+  ?ignore_response:bool ->
   ServerEnv.env ->
   string ->
   ServerEnv.env * ('a, unit) loop_outputs

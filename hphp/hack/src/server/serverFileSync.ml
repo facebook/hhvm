@@ -47,9 +47,14 @@ let update_diagnostics diag_subscribe editor_open_files errorl  =
       ~full_check_done:true
   end
 
-let open_file env path content =
+let open_file ~predeclare env path content =
   let prev_content = get_file_content (ServerCommandTypes.FileName path) in
   let new_env = try_relativize_path path >>= fun path ->
+    (* Before making any changes, pre-load (into Decl_heap) currently existing
+     * declarations so there is always a previous version to compare against,
+     * which makes incremental mode perform better. *)
+    if predeclare && (not (Relative_path.Set.mem env.editor_open_files path)) then
+      Decl.make_env env.tcopt path;
     let editor_open_files = Relative_path.Set.add env.editor_open_files path in
     FileHeap.remove_batch (Relative_path.Set.singleton path);
     FileHeap.add path (Ide content);
@@ -97,8 +102,11 @@ let close_file env path =
   let new_env = try_relativize_path path >>| close_relative_path env in
   Option.value new_env ~default:env
 
-let edit_file env path (edits: File_content.text_edit list) =
+let edit_file ~predeclare env path (edits: File_content.text_edit list) =
   let new_env = try_relativize_path path >>= fun path ->
+    (* See similar predeclare in open_file function *)
+    if predeclare && (not (Relative_path.Set.mem env.editor_open_files path)) then
+      Decl.make_env env.tcopt path;
     ServerBusyStatus.send env ServerCommandTypes.Needs_local_typecheck;
     let fc = match FileHeap.get path with
     | Some Ide f -> f

@@ -7,9 +7,15 @@
  *
  *)
 
-val open_file : ServerEnv.env -> string -> string -> ServerEnv.env
+val open_file :
+  predeclare:bool ->
+  ServerEnv.env ->
+  string ->
+  string ->
+  ServerEnv.env
 
 val edit_file :
+  predeclare:bool ->
   ServerEnv.env ->
   string ->
   File_content.text_edit list ->

@@ -139,6 +139,8 @@ let run_loop_once : type a b. ServerEnv.env -> (a, b) loop_inputs ->
     did_read_disk_changes = !did_read_disk_changes_ref;
     rechecked_count =
       env.ServerEnv.recent_recheck_loop_stats.ServerEnv.rechecked_count;
+    total_rechecked_count =
+      env.ServerEnv.recent_recheck_loop_stats.ServerEnv.total_rechecked_count;
     new_client_response =
       TestClientProvider.get_client_response Non_persistent;
     persistent_client_response =
@@ -245,11 +247,12 @@ let edit_file env name contents =
   assert_responded "Expected EDIT_FILE to be processed" loop_output;
   env, loop_output
 
-let close_file env name =
+let close_file ?(ignore_response=false) env name =
   let env, loop_output = run_loop_once env { default_loop_input with
     persistent_client_request = Some (Request (CLOSE_FILE (root ^ name)))
   } in
-  assert_responded "Expected CLOSE_FILE to be processeded" loop_output;
+  if not ignore_response then
+    assert_responded "Expected CLOSE_FILE to be processed" loop_output;
   env, loop_output
 
 let wait env =
@@ -377,6 +380,7 @@ let load_state
       ServerLocalConfig.lazy_parse = true;
       lazy_init = true;
       prechecked_files = use_precheked_files;
+      predeclare_ide = true;
     }
   };
   test_init_common ();

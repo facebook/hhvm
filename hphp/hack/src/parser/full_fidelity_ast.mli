@@ -90,6 +90,7 @@ val defensive_program :
   ?hacksperimental:bool ->
   ?quick:bool ->
   ?fail_open:bool ->
+  ?keep_errors:bool ->
   ?elaborate_namespaces:bool ->
   ParserOptions.t ->
   Relative_path.t ->

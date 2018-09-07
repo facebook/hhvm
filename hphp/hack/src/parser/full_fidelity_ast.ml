@@ -3411,6 +3411,7 @@ let defensive_program
   ?(hacksperimental=false)
   ?(quick=false)
   ?(fail_open=false)
+  ?(keep_errors=false)
   ?(elaborate_namespaces=true)
   parser_options fn content =
   try begin
@@ -3420,7 +3421,7 @@ let defensive_program
       ~fail_open
       ~quick_mode:quick
       ~elaborate_namespaces
-      ~keep_errors:(not fail_open)
+      ~keep_errors:(keep_errors || (not fail_open))
       ~parser_options
       ~hacksperimental
       fn

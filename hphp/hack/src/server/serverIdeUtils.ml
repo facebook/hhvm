@@ -134,6 +134,7 @@ let declare_and_check ?(path=path) content ~f tcopt =
        malformed files. *)
     (Full_fidelity_ast.defensive_program
       ~fail_open:true
+      ~keep_errors:true
       ~quick:false
       tcopt
       path

@@ -75,6 +75,13 @@ function main() {
   $s = "\xfe\x01\x02\x03\xfc";  // VECTOR, 1, 2, 3, STOP
   $ret = null;
   var_dump(fb_compact_unserialize($s, &$ret));
+
+  // Demonstrate vector deserialize issue.
+  // This should be illegal and result in an error.
+  $s = "\xfe\x01\xfd\x03\xfc";  // VECTOR, 1, SKIP, 2, STOP
+  $ret = null;
+  var_dump(fb_compact_unserialize($s, &$ret));
+  var_dump($ret);
 }
 
 

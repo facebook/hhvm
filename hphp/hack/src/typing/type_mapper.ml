@@ -172,6 +172,9 @@ class deep_type_mapper = object(this)
     let on_type env _key = this#on_type env in
     let env, fields = IMap.map_env on_type env fields in
     env, (r, Tarraykind (AKtuple fields))
+  method! on_tvarray_or_darray env r tv =
+    let env, tv = this#on_type env tv in
+    env, (r, Tarraykind (AKvarray_or_darray tv))
   method! on_ttuple env r tyl =
     let env, tyl = List.map_env env tyl this#on_type in
     env, (r, Ttuple tyl)

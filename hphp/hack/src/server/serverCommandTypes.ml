@@ -59,6 +59,11 @@ module Find_refs = struct
     type ide_result = (string * Pos.absolute list) option
 end
 
+module Refactor = struct
+  type ide_result = ((ServerRefactorTypes.patch list), string) result
+  type result = ServerRefactorTypes.patch list
+end
+
 module Symbol_type = struct
   type t = {
     pos: string Pos.pos;
@@ -150,9 +155,8 @@ type _ t =
       Find_refs.ide_result t
   | IDE_HIGHLIGHT_REFS : file_input * int * int ->
       ServerHighlightRefsTypes.result t
-  | REFACTOR : ServerRefactorTypes.action -> ServerRefactorTypes.patch list t
-  | IDE_REFACTOR : Ide_refactor_type.t ->
-      ((ServerRefactorTypes.patch list, string) result) t
+  | REFACTOR : ServerRefactorTypes.action -> Refactor.result t
+  | IDE_REFACTOR : Ide_refactor_type.t -> Refactor.ide_result t
   | DUMP_SYMBOL_INFO : string list -> Symbol_info_service.result t
   | DUMP_AI_INFO : string list -> Ai.InfoService.result t
   | REMOVE_DEAD_FIXMES : int list -> [`Ok of ServerRefactorTypes.patch list | `Error of string] t

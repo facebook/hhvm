@@ -17,6 +17,8 @@ open Coverage_level
 
 let root = "/"
 let hhi = "/hhi"
+let tmp = "/tmp"
+
 let () = Hh_logger.Level.set_min_level Hh_logger.Level.Off
 let server_config = ServerEnvBuild.default_genv.ServerEnv.config
 let global_opts = GlobalOptions.make
@@ -60,6 +62,8 @@ let test_init_common () =
   EventLogger.init EventLogger.Event_logger_fake 0.0;
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   Relative_path.set_path_prefix Relative_path.Hhi (Path.make hhi);
+  Relative_path.set_path_prefix Relative_path.Tmp (Path.make tmp);
+
   let _ = SharedMem.init GlobalConfig.default_sharedmem_config in
   ()
 
@@ -530,6 +534,44 @@ let assert_status loop_output expected =
     | _ -> fail "Expected status response"
   in
   let results_as_string = errors_to_string error_list in
+  assertEqual expected results_as_string
+
+let assert_response loop_output =
+  match loop_output.persistent_client_response with
+  | Some res -> res
+  | None -> fail "Expected response"
+
+let assert_find_refs loop_output expected =
+  let results = assert_response loop_output in
+  let results = List.map results ~f:begin fun (name, pos) ->
+    name ^ ": " ^ (Pos.string pos);
+  end in
+  let results_as_string = list_to_string results in
+  let expected_as_string = list_to_string expected in
+  assertEqual expected_as_string results_as_string
+
+let assert_ide_find_refs loop_output expected_name expected =
+  let results = assert_response loop_output in
+  let results_as_string = match results with
+  | None -> "None"
+  | Some (name, results) ->
+    assertEqual expected_name name;
+    List.map results ~f:Pos.string |> list_to_string
+  in
+  let expected_as_string = list_to_string expected in
+  assertEqual expected_as_string results_as_string
+
+let assert_refactor loop_output expected =
+  let results = assert_response loop_output in
+  (* We don't have any (better than JSON) human-readable format for refactor results,
+   * and I'm too lazy to write it. Tests will have to compare JSON outputs for now. *)
+  let results_as_string = ClientRefactor.patches_to_json_string results in
+  assertEqual expected results_as_string
+
+let assert_ide_refactor loop_output expected =
+  let results = assert_response loop_output in
+  let results = Core_result.ok_or_failwith results in
+  let results_as_string = ClientRefactor.patches_to_json_string results in
   assertEqual expected results_as_string
 
 let assert_needs_recheck env x =

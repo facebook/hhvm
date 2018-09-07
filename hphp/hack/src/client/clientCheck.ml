@@ -418,11 +418,9 @@ let main args =
       | `Error msg ->
         (Printf.eprintf "%s\n" msg; Exit_status.Type_error)
       | `Ok patches -> begin
-        let file_map = List.fold_left patches
-          ~f:map_patches_to_filename ~init:SMap.empty in
         if args.output_json
-        then print_patches_json file_map
-        else apply_patches file_map;
+        then print_patches_json patches
+        else apply_patches patches;
         Exit_status.No_error
       end end
     | MODE_FORMAT (from, to_) ->

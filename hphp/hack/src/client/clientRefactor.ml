@@ -74,7 +74,13 @@ let apply_patches_to_file fn patch_list =
   let new_file_contents = Buffer.contents buf in
   write_string_to_file fn new_file_contents
 
-let apply_patches file_map =
+let list_to_file_map =
+  List.fold_left
+    ~f:map_patches_to_filename
+    ~init:SMap.empty
+
+let apply_patches patches =
+  let file_map = list_to_file_map patches in
   SMap.iter apply_patches_to_file file_map;
   print_endline
       ("Rewrote "^(string_of_int (SMap.cardinal file_map))^" files.")
@@ -101,14 +107,18 @@ let patch_to_json res =
       "replacement", Hh_json.JSON_String replacement;
   ]
 
-let print_patches_json file_map =
+let patches_to_json_string patches =
+  let file_map = list_to_file_map patches in
   let entries = SMap.fold begin fun fn patch_list acc ->
     Hh_json.JSON_Object [
         "filename", Hh_json.JSON_String fn;
         "patches",  Hh_json.JSON_Array (List.map patch_list patch_to_json);
     ] :: acc
   end file_map [] in
-  print_endline (Hh_json.json_to_string (Hh_json.JSON_Array entries))
+  Hh_json.json_to_string (Hh_json.JSON_Array entries)
+
+let print_patches_json patches =
+  print_endline (patches_to_json_string patches)
 
 let go_ide conn args filename line char new_name =
   let patches = ClientConnect.rpc conn @@
@@ -123,11 +133,9 @@ let go_ide conn args filename line char new_name =
   | Ok patches -> patches
   | Error message -> failwith message
   in
-  let file_map = List.fold_left patches
-    ~f:map_patches_to_filename ~init:SMap.empty in
   if args.output_json
-  then print_patches_json file_map
-  else apply_patches file_map
+  then print_patches_json patches
+  else apply_patches patches
 
 let go conn args mode before after =
     let command = match mode with
@@ -178,8 +186,6 @@ let go conn args mode before after =
 
     let patches =
       ClientConnect.rpc conn @@ ServerCommandTypes.REFACTOR command in
-    let file_map = List.fold_left patches
-      ~f:map_patches_to_filename ~init:SMap.empty in
     if args.output_json
-    then print_patches_json file_map
-    else apply_patches file_map
+    then print_patches_json patches
+    else apply_patches patches

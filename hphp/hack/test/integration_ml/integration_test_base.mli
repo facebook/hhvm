@@ -127,6 +127,27 @@ val assert_ide_autocomplete :
 val assert_status :
   (ServerCommandTypes.Server_status.t, 'a) loop_outputs -> string -> unit
 
+val assert_find_refs :
+  ('a, ServerCommandTypes.Find_refs.result) loop_outputs ->
+  string list ->
+  unit
+
+val assert_ide_find_refs :
+  ('a, ServerCommandTypes.Find_refs.ide_result) loop_outputs ->
+  string ->
+  string list ->
+  unit
+
+val assert_refactor :
+  ('a, ServerCommandTypes.Refactor.result) loop_outputs ->
+  string ->
+  unit
+
+val assert_ide_refactor :
+  ('a, ServerCommandTypes.Refactor.ide_result) loop_outputs ->
+  string ->
+  unit
+
 val assert_needs_recheck: ServerEnv.env -> string -> unit
 
 val assert_needs_no_recheck: ServerEnv.env -> string -> unit

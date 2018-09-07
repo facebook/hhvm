@@ -421,6 +421,9 @@ int64_t RuntimeOption::HeapResetCountMultiple = 2;
 int64_t RuntimeOption::HeapLowWaterMark = 16;
 int64_t RuntimeOption::HeapHighWaterMark = 1024;
 
+uint64_t RuntimeOption::DisableCompact = 0;
+uint64_t RuntimeOption::DisableExtract = 0;
+
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
 std::string RuntimeOption::ExtensionDir = HHVM_DYNAMIC_EXTENSION_DIR;
 #else
@@ -1176,6 +1179,12 @@ void RuntimeOption::Load(
                  "ResourceLimit.HeapLowWaterMark", HeapLowWaterMark);
     Config::Bind(HeapHighWaterMark , ini, config,
                  "ResourceLimit.HeapHighWaterMark",HeapHighWaterMark);
+  }
+  {
+    Config::Bind(DisableCompact, ini, config,
+                 "Hack.Lang.Phpism.DisableCompact", DisableCompact);
+    Config::Bind(DisableExtract, ini, config,
+                 "Hack.Lang.Phpism.DisableExtract", DisableExtract);
   }
   {
     // Repo

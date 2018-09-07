@@ -1341,6 +1341,13 @@ static void compact(PointerSet& seen, VarEnv* v, Array& ret,
 Array HHVM_FUNCTION(compact,
                     const Variant& varname,
                     const Array& args /* = null array */) {
+  auto const warning =
+    "compact() is deprecated and subject to removal from the Hack language";
+  switch (RuntimeOption::DisableCompact) {
+    case 0:  break;
+    case 1:  raise_warning(warning); break;
+    default: raise_error(warning);
+  }
   Array ret = Array::CreateDArray();
   VarEnv* v = g_context->getOrCreateVarEnv();
   if (v) {

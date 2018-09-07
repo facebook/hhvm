@@ -570,6 +570,13 @@ int64_t HHVM_FUNCTION(extract,
                       VRefParam vref_array,
                       int64_t extract_type = EXTR_OVERWRITE,
                       const String& prefix = "") {
+  auto const warning =
+    "extract() is deprecated and subject to removal from the Hack language";
+  switch (RuntimeOption::DisableExtract) {
+    case 0:  break;
+    case 1:  raise_warning(warning); break;
+    default: raise_error(warning);
+  }
   auto arrByRef = false;
   auto arr_tv = vref_array.wrapped().asTypedValue();
   if (isRefType(arr_tv->m_type)) {

@@ -476,6 +476,13 @@ struct RuntimeOption {
   static int64_t HeapLowWaterMark;
   static int64_t HeapHighWaterMark;
 
+  // Disables PHP's compact() function. Valid values are 0 => enabled (default),
+  // 1 => warning, 2 => error.
+  static uint64_t DisableCompact;
+  // Disables PHP's extract() function. Valid values are 0 => enabled (default),
+  // 1 => warning, 2 => error.
+  static uint64_t DisableExtract;
+
   static int GetScannerType();
 
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;

@@ -26,9 +26,9 @@ namespace {
 template<typename T> T bad_value() { not_reached(); }
 
 Opcode canonicalOp(Opcode op) {
-  if (op == ElemUX || op == UnsetElem) return UnsetElem;
-  if (op == SetWithRefElem)            return SetWithRefElem;
-  if (op == SetRangeRev)               return SetRange;
+  if (op == ElemUX || op == UnsetElem)     return UnsetElem;
+  if (op == SetWithRefElem)                return SetWithRefElem;
+  if (op == SetRange || op == SetRangeRev) return SetRange;
 
   return opcodeHasFlags(op, MInstrProp) ? SetProp
        : opcodeHasFlags(op, MInstrElem) ? SetElem

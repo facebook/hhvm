@@ -2317,10 +2317,11 @@ and expr_
   | Special_func func -> special_func env p func
   | New ((pos, c), el, uel) ->
       let env = save_and_merge_next_in_catch env in
-      let env, tc, tel, tuel, ty, _ =
+      let env, tc, tel, tuel, ty, ctor_fty =
         new_object ~expected ~is_using_clause ~check_parent:false ~check_not_abstract:true
           pos env c el uel in
       let env = Env.forget_members env p in
+      Typing_mutability.enforce_mutable_constructor_call env ctor_fty tel;
       make_result env (T.New(tc, tel, tuel)) ty
   | Cast ((_, Harray (None, None)), _)
     when Env.is_strict env

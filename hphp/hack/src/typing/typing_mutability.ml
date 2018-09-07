@@ -304,6 +304,11 @@ let check_mutability_fun_params env mut_args fty el =
     end
   end
 
+let enforce_mutable_constructor_call env ctor_fty el =
+  match ctor_fty with
+  | _, Tfun fty ->
+    check_mutability_fun_params env Borrowable_args.empty fty el
+  | _ -> ()
 
 let enforce_mutable_call (env : Typing_env.env) (te : T.expr) =
   match snd te with

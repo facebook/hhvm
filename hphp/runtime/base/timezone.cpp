@@ -213,7 +213,7 @@ Array TimeZone::GetAbbreviations() {
   Array ret;
   for (const timelib_tz_lookup_table *entry =
          timelib_timezone_abbreviations_list(); entry->name; entry++) {
-    ArrayInit element(3, ArrayInit::Map{});
+    DArrayInit element(3);
     element.set(s_dst, (bool)entry->type);
     element.set(s_offset, entry->gmtoffset);
     if (entry->full_tz_name) {
@@ -221,7 +221,14 @@ Array TimeZone::GetAbbreviations() {
     } else {
       element.set(s_timezone_id, uninit_null());
     }
-    auto const lval = ret.lvalAt(String(entry->name));
+    if (ret.isNull()) {
+      ret = Array::CreateDArray();
+    }
+    String key{entry->name};
+    if (!ret.exists(key)) {
+      ret.set(key, Array::CreateVArray());
+    }
+    auto const lval = ret.lvalAt(key);
     forceToArray(lval).append(element.toArray());
   }
   return ret;

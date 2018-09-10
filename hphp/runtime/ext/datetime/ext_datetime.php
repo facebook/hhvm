@@ -268,7 +268,7 @@ class DateTimeZone {
    *
    */
   <<__Native>>
-  static function listAbbreviations(): array;
+  static function listAbbreviations(): darray;
 
   /**
    * @param int $what - One of DateTimeZone class constants.
@@ -831,7 +831,7 @@ function strtotime(string $input, int $timestamp = -1): mixed;
 <<__Native>>
 function time(): int;
 
-function timezone_abbreviations_list(): array {
+function timezone_abbreviations_list(): darray {
   return DateTimeZone::listAbbreviations();
 }
 

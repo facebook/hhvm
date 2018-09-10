@@ -1,2 +1,4 @@
 -vEval.HackArrCompatTypeHintNotices=1
+-vEval.HackArrCompatNotices=true
+-vEval.HackArrCompatCheckFalseyPromote=true
 -vEval.EnableHipHopSyntax=1

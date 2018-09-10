@@ -135,7 +135,7 @@ module type S = sig
   val parsing_error : Pos.t * string -> unit
   val format_string :
     Pos.t -> string -> string -> Pos.t -> string -> string -> unit
-  val expected_literal_string : Pos.t -> unit
+  val expected_literal_format_string : Pos.t -> unit
   val re_prefixed_non_string : Pos.t -> string -> unit
   val bad_regex_pattern : Pos.t -> string -> unit
   val generic_array_strict : Pos.t -> unit

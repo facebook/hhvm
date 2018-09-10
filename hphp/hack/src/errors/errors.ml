@@ -1785,9 +1785,9 @@ let format_string pos snippet s class_pos fname class_suggest =
    "You can add a new format specifier by adding "
    ^fname^"() to "^class_suggest)]
 
-let expected_literal_string pos =
-  add (Typing.err_code Typing.ExpectedLiteralString) pos
-    "This argument must be a literal string"
+let expected_literal_format_string pos =
+  add (Typing.err_code Typing.ExpectedLiteralFormatString) pos
+    "This argument must be a literal format string"
 
 let re_prefixed_non_string pos non_strings =
   add (Typing.err_code Typing.RePrefixedNonString) pos

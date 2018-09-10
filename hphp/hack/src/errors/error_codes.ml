@@ -255,7 +255,7 @@ module Typing                               = struct
   | EnumTypeBad
   | EnumTypeTypedefMixed
   | ExpectedClass
-  | ExpectedLiteralString
+  | ExpectedLiteralFormatString
   | ExpectedStaticIntDEPRECATED
   | ExpectedTparam
   | ExpectingReturnTypeHint

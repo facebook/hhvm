@@ -1381,12 +1381,11 @@ and sub_type_inner_helper env ~this_ty
     (_, Toption ty_super) ->
     sub_type_inner env ~this_ty ty_sub ty_super
 
-  | (r_sub, Tabstract (AKnewtype _ as ak, None)),
-    (_, Toption _) ->
-    let r = Reason.Rimplicit_upper_bound (Reason.to_pos r_sub, "?nonnull") in
-    let ty = (r, Toption (r, Tnonnull)) in
-    let ty_sub' = (r_sub, Tabstract (ak, Some ty)) in
-    sub_type_inner env ~this_ty ty_sub' ty_super
+  (* Internally, newtypes are always equipped with an upper bound.
+   * In the case when no upper bound is specified in source code,
+   * an implicit upper bound mixed = ?nonnull is added.
+   *)
+  | (_, Tabstract (AKnewtype _, None)), (_, Toption _) -> assert false
 
   (* If t1 <: ?t2 and t1 is an abstract type constrained as t1',
    * then t1 <: t2 or t1' <: ?t2.  The converse is obviously

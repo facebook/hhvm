@@ -56,7 +56,10 @@ let expand_typedef_ ?force_expand:(force_expand=false) ety_env env r x argl =
       else begin
         let env, td_constraint =
           match td_constraint with
-          | None -> env, None
+          | None ->
+            let r_cstr  = Reason.Rimplicit_upper_bound (Reason.to_pos r, "?nonnull") in
+            let cstr = (r_cstr, Toption (r_cstr, Tnonnull)) in
+            env, Some cstr
           | Some cstr ->
             let env, cstr = Phase.localize ~ety_env env cstr in
             env, Some cstr

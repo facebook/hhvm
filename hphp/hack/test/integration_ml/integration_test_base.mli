@@ -25,6 +25,8 @@ val load_state:
   use_precheked_files:bool ->
   ServerEnv.env
 
+val in_daemon : (unit -> unit) -> unit
+
 val connect_persistent_client: ServerEnv.env -> ServerEnv.env
 
 val default_loop_input: ('a, 'b) loop_inputs

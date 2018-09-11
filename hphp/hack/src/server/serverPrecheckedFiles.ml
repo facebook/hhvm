@@ -107,7 +107,11 @@ let update_after_local_changes env changes =
       Hh_logger.log "Adding %d files to recheck" size;
       let needs_recheck =
         Relative_path.Set.union env.needs_recheck needs_recheck in
-      { env with needs_recheck;}
+      let full_check = match env.full_check with
+        | Full_check_done -> Full_check_needed
+        | x -> x
+      in
+      { env with needs_recheck; full_check; }
     end in
     HackEventLogger.prechecked_evaluate_incremental t size;
     set env (Prechecked_files_ready { dirty_deps with

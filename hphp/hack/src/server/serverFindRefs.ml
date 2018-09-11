@@ -41,8 +41,20 @@ let search target include_defs files genv env =
     target include_defs env.files_info files in
   strip_ns res
 
+let handle_prechecked_files env dep f =
+  (* We need to handle prechecked files here to get accurate results. *)
+  let dep = Typing_deps.DepSet.singleton dep in
+  (* All the callers of this should be listed in ServerCommand.rpc_command_needs_full_check,
+   * and server should never call this before completing full check *)
+  assert (env.full_check = Full_check_done);
+  let env = ServerPrecheckedFiles.update_after_local_changes env dep in
+  (* If we added more things to recheck, we can't handle this command now, and
+   * tell the client to retry instead. *)
+  env, if (env.full_check <> Full_check_done) then Retry else Done (f ())
+
 let search_function function_name include_defs genv env =
   let function_name = add_ns function_name in
+  handle_prechecked_files env Typing_deps.Dep.(make (Fun function_name)) @@ fun () ->
   let files = FindRefsService.get_dependent_files_function
     genv.ServerEnv.workers function_name in
   search (FindRefsService.IFunction function_name) include_defs files genv env
@@ -50,6 +62,7 @@ let search_function function_name include_defs genv env =
 let search_member class_name member include_defs genv env =
   let class_name = add_ns class_name in
   let class_name = FindRefsService.get_origin_class_name env.tcopt class_name member in
+  handle_prechecked_files env Typing_deps.Dep.(make (Class class_name)) @@ fun () ->
   (* Find all the classes that extend this one *)
   let files = FindRefsService.get_child_classes_files class_name in
   let all_classes = FindRefsService.find_child_classes env.tcopt
@@ -65,12 +78,14 @@ let search_member class_name member include_defs genv env =
 
 let search_gconst cst_name include_defs genv env =
   let cst_name = add_ns cst_name in
+  handle_prechecked_files env Typing_deps.Dep.(make (GConst cst_name)) @@ fun () ->
   let files = FindRefsService.get_dependent_files_gconst
     genv.ServerEnv.workers cst_name in
   search (FindRefsService.IGConst cst_name) include_defs files genv env
 
 let search_class class_name include_defs genv env =
   let class_name = add_ns class_name in
+  handle_prechecked_files env Typing_deps.Dep.(make (Class class_name)) @@ fun () ->
   let files = FindRefsService.get_dependent_files
       genv.ServerEnv.workers (SSet.singleton class_name) in
   search (FindRefsService.IClass class_name) include_defs files genv env
@@ -87,13 +102,13 @@ let search_localvar path content line char env =
 let go action include_defs genv env =
   match action with
   | Member (class_name, member) ->
-      env, Done (search_member class_name member include_defs genv env)
+      search_member class_name member include_defs genv env
   | Function function_name ->
-      env, Done (search_function function_name include_defs genv env)
+      search_function function_name include_defs genv env
   | Class class_name ->
-      env, Done (search_class class_name include_defs genv env)
+      search_class class_name include_defs genv env
   | GConst cst_name ->
-      env, Done (search_gconst cst_name include_defs genv env)
+      search_gconst cst_name include_defs genv env
   | LocalVar { filename; file_content; line; char } ->
       env, Done (search_localvar filename file_content line char env)
 

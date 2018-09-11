@@ -121,7 +121,7 @@ let print_patches_json patches =
   print_endline (patches_to_json_string patches)
 
 let go_ide conn args filename line char new_name =
-  let patches = ClientConnect.rpc conn @@
+  let patches = ClientConnect.rpc (conn ()) @@
     ServerCommandTypes.IDE_REFACTOR {
       ServerCommandTypes.Ide_refactor_type.
       filename;
@@ -185,7 +185,7 @@ let go conn args mode before after =
         failwith "Unexpected Mode" in
 
     let patches =
-      ClientConnect.rpc conn @@ ServerCommandTypes.REFACTOR command in
+      ClientConnect.rpc (conn ()) @@ ServerCommandTypes.REFACTOR command in
     if args.output_json
     then print_patches_json patches
     else apply_patches patches

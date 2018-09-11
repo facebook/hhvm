@@ -90,13 +90,33 @@ let connect ?(use_priority_pipe=false) args =
     prechecked = args.prechecked;
   }
 
-let rpc args command =
+(* This is a function, because server closes the connection after each command,
+ * so we need to be able to reconnect to retry. *)
+type connect_fun = unit -> ClientConnect.conn
+
+let rpc
+  (args : ClientEnv.client_check_env)
+  (command : 'a ServerCommandTypes.t)
+  (call : connect_fun -> 'a ServerCommandTypes.t -> 'b)
+: 'b =
   let use_priority_pipe =
     (not @@ ServerCommand.rpc_command_needs_full_check command) &&
     (not @@ ServerCommand.rpc_command_needs_writes command)
   in
-  let conn = connect args ~use_priority_pipe in
-  ClientConnect.rpc conn @@ command
+  let conn = fun () -> connect args ~use_priority_pipe in
+  call conn @@ command
+
+let rpc_with_retry
+  (args : ClientEnv.client_check_env)
+  (command : 'a ServerCommandTypes.Done_or_retry.t ServerCommandTypes.t)
+: 'a =
+  rpc args command ClientConnect.rpc_with_retry
+
+let rpc
+  (args : ClientEnv.client_check_env)
+  (command : 'a ServerCommandTypes.t)
+: 'a =
+  rpc args command (fun conn -> ClientConnect.rpc (conn ()))
 
 let main args =
   let mode_s = ClientEnv.mode_to_string args.mode in
@@ -185,11 +205,11 @@ let main args =
       ClientFindDependentFiles.go conn files expand_path;
       Exit_status.No_error
     | MODE_REFACTOR (ref_mode, before, after) ->
-      let conn = connect args in
+      let conn = fun () -> connect args in
       ClientRefactor.go conn args ref_mode before after;
       Exit_status.No_error
     | MODE_IDE_REFACTOR arg ->
-      let conn = connect args in
+      let conn = fun () -> connect args in
       let tpos = Str.split (Str.regexp ":") arg in
       let filename, line, char, new_name =
         try

@@ -325,6 +325,9 @@ let rpc
     let message = Printexc.to_string e in
     raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
 
+let rpc_with_retry server_conn ref_unblocked_time command =
+  ServerCommandTypes.Done_or_retry.call
+    ~f:(fun () -> rpc server_conn ref_unblocked_time command)
 
 (* Determine whether to read a message from the client (the editor) or the
    server (hh_server), or whether neither is ready within 1s. *)

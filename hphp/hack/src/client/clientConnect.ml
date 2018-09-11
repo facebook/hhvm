@@ -439,3 +439,6 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> a
     in
     Option.iter tail_env ~f:Tail.close_env;
     res
+
+let rpc_with_retry conn cmd =
+  ServerCommandTypes.Done_or_retry.call ~f:(fun () -> rpc (conn ()) cmd)

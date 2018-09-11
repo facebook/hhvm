@@ -41,6 +41,54 @@ module Method_jumps = struct
     | Trait
 end
 
+module Done_or_retry = struct
+  (* This is an ugly hack to support following case:
+   * - client issues a command that requires full recheck. Server knows not to
+   *   accept it until full check is completed .
+   * - while processing the command, it turns out that we need to recheck even
+   *   more files for full check to be "good enough" for this command
+   * This can happen when combining prechecked files and find references.
+   * We could store the client with its command somwhere, and come back to it
+   * after this additional rechecking is done, but in practice this is ugly to
+   * implement in current atchitecture. What is easier to do instead, is to
+   * return a special "Retry" response to the client, which will cause it to
+   * re-issue the same request (which will once again not be accepted until full
+   * check is completed. Since command is the same, its second execution should
+   * not add even more files to recheck, hence a limit of only two attempts.
+   *
+   * In other words: the goal of this is to avoid implementing even more
+   * server-side client queing mechanisms, but re-use an existing "clients waiting
+   * for full check" queue. *)
+  exception Two_retries_in_a_row
+
+  type 'a t =
+    | Done of 'a
+    | Retry
+
+  (* Note: this is designed to work with calls that always will succeed on second try
+   * (the reason for retrying is a one time event that is resolved during first call).
+   * If this ends up throwing, it's a bug in hh_server. *)
+  let rec call ~(f:unit -> 'a t) ~(depth:int) : 'a =
+    if depth = 2 then raise Two_retries_in_a_row;
+    match f () with
+    | Done x -> x
+    | Retry -> call ~f ~depth:(depth+1)
+
+  (* Call the function returning Done_or_retry.t with at most one retry, expecting
+   * that this is enough to yield a non-Retry value, which is returned *)
+  let call ~(f:unit -> 'a t) : 'a = call ~f ~depth:0
+
+  (* Helper function useful when mapping over results from functions that (in addition
+   * to Done_or_retry.t result) thread through some kind of environment. *)
+  let map_env
+    ~(f:'a -> 'b)
+    ((env, x) : 'env * 'a t)
+  : 'env * 'b t =
+    match x with
+    | Done x -> env, Done (f x)
+    | Retry -> env, Retry
+end
+
 module Find_refs = struct
   type member = Ai.ServerFindRefs.member =
     | Method of string

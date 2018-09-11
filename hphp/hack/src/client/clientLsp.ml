@@ -1150,7 +1150,7 @@ let do_findReferences
   let include_defs = params.context.includeDeclaration in
   let labelled_file = ServerCommandTypes.LabelledFileName filename in
   let command = ServerCommandTypes.IDE_FIND_REFS (labelled_file, line, column, include_defs) in
-  let results = rpc conn ref_unblocked_time command in
+  let results = rpc_with_retry conn ref_unblocked_time command in
   (* TODO: respect params.context.include_declaration *)
   match results with
   | None -> []
@@ -1318,7 +1318,7 @@ let do_documentRename
     ServerCommandTypes.IDE_REFACTOR
       { ServerCommandTypes.Ide_refactor_type.filename; line; char; new_name } in
   let patches =
-    rpc conn ref_unblocked_time command in
+    rpc_with_retry conn ref_unblocked_time command in
   let patches = match patches with
   | Ok patches -> patches
   | Error message -> raise (Error.InvalidRequest message)

@@ -13,6 +13,7 @@ open ServerEnv
 open Reordered_argument_collections
 
 open ServerCommandTypes.Find_refs
+open ServerCommandTypes.Done_or_retry
 
 let to_json input =
   let entries = List.map input begin fun (name, pos) ->
@@ -83,23 +84,24 @@ let search_localvar path content line char env =
     List.map results (fun x -> (var_text, x))
   | [] -> []
 
-let get_refs action include_defs genv env =
+let go action include_defs genv env =
   match action with
   | Member (class_name, member) ->
-      search_member class_name member include_defs genv env
+      env, Done (search_member class_name member include_defs genv env)
   | Function function_name ->
-      search_function function_name include_defs genv env
+      env, Done (search_function function_name include_defs genv env)
   | Class class_name ->
-      search_class class_name include_defs genv env
+      env, Done (search_class class_name include_defs genv env)
   | GConst cst_name ->
-      search_gconst cst_name include_defs genv env
+      env, Done (search_gconst cst_name include_defs genv env)
   | LocalVar { filename; file_content; line; char } ->
-      search_localvar filename file_content line char env
+      env, Done (search_localvar filename file_content line char env)
 
-let go action include_defs genv env =
-  let res = get_refs action include_defs genv env in
-  let res = List.map res (fun (r, pos) -> (r, Pos.to_absolute pos)) in
-  res
+let to_absolute res =
+  List.map res (fun (r, pos) -> (r, Pos.to_absolute pos))
+
+let to_ide symbol_name res  =
+  Some (symbol_name, List.map ~f:snd (to_absolute res))
 
 let get_action symbol (filename, file_content, line, char) =
   let name = symbol.SymbolOccurrence.name in
@@ -123,7 +125,7 @@ let get_action symbol (filename, file_content, line, char) =
         Some (LocalVar { filename; file_content; line; char })
   end
 
-let go_from_file (labelled_file, line, char, include_defs) genv env =
+let go_from_file (labelled_file, line, char) env =
   let (filename, content) =
     let open ServerCommandTypes in
     match labelled_file with
@@ -140,5 +142,4 @@ let go_from_file (labelled_file, line, char, include_defs) genv env =
   (* Ignore symbols that lack definitions *)
   definition >>= fun definition ->
   get_action occurrence (filename, content, line, char) >>= fun action ->
-  let results = go action include_defs genv env |> List.map ~f:snd in
-  Some (definition.SymbolDefinition.full_name, results)
+  Some (definition.SymbolDefinition.full_name, action)

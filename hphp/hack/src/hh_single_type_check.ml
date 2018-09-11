@@ -934,8 +934,17 @@ let handle_mode
     let content = cat filename in
     let include_defs = true in
     let labelled_file = ServerCommandTypes.LabelledFileContent { filename; content; } in
-    let results = ServerFindRefs.go_from_file
-      (labelled_file, line, column, include_defs) genv env in
+    let open Option.Monad_infix in
+    let open ServerCommandTypes.Done_or_retry in
+    let results = ServerFindRefs.(
+      go_from_file (labelled_file, line, column) env >>= fun (name, action) ->
+      go action include_defs genv env |>
+      map_env ~f:(to_ide name) |>
+      snd |> function
+        | Done r -> r
+        | Retry -> failwith @@ "should only happen with prechecked files " ^
+                               "which are not a thing in hh_single_type_check"
+    ) in
     ClientFindRefs.print_ide_readable results;
   | Highlight_refs (line, column) ->
     let file = cat (Relative_path.to_absolute filename) in

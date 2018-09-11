@@ -253,7 +253,8 @@ let go action genv env =
     | LocalVarRename { filename; file_content; line; char; new_name } ->
         Types.LocalVar { filename; file_content; line; char }, new_name in
   let include_defs = true in
-  let refs = ServerFindRefs.get_refs find_refs_action include_defs genv env in
+  ServerFindRefs.go find_refs_action include_defs genv env |>
+  ServerCommandTypes.Done_or_retry.map_env ~f:begin fun refs ->
   let changes = List.fold_left refs ~f:begin fun acc x ->
     let replacement = {
       pos  = Pos.to_absolute (snd x);
@@ -272,6 +273,7 @@ let go action genv env =
   in
   Option.value_map deprecated_wrapper_patch ~default:changes
     ~f:begin fun patch -> patch :: changes end
+  end
 
 let go_ide (filename, line, char) new_name genv env =
   let open SymbolDefinition in

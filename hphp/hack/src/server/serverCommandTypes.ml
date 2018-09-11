@@ -103,13 +103,21 @@ module Find_refs = struct
     | GConst of string
     | LocalVar of { filename: Relative_path.t; file_content: string; line: int; char: int }
 
+    type server_result = (string * Pos.t) list
     type result = (string * Pos.absolute) list
     type ide_result = (string * Pos.absolute list) option
+
+    type server_result_or_retry = server_result Done_or_retry.t
+    type result_or_retry = result Done_or_retry.t
+    type ide_result_or_retry = ide_result Done_or_retry.t
 end
 
 module Refactor = struct
   type ide_result = ((ServerRefactorTypes.patch list), string) result
   type result = ServerRefactorTypes.patch list
+
+  type ide_result_or_retry = ide_result Done_or_retry.t
+  type result_or_retry = result Done_or_retry.t
 end
 
 module Symbol_type = struct
@@ -198,13 +206,13 @@ type _ t =
   | METHOD_JUMP_BATCH : (string list * Method_jumps.filter) ->
       Method_jumps.result list t
   | FIND_DEPENDENT_FILES: string list -> string list t
-  | FIND_REFS : Find_refs.action -> Find_refs.result t
+  | FIND_REFS : Find_refs.action -> Find_refs.result_or_retry t
   | IDE_FIND_REFS : labelled_file * int * int * bool ->
-      Find_refs.ide_result t
+      Find_refs.ide_result_or_retry t
   | IDE_HIGHLIGHT_REFS : file_input * int * int ->
       ServerHighlightRefsTypes.result t
-  | REFACTOR : ServerRefactorTypes.action -> Refactor.result t
-  | IDE_REFACTOR : Ide_refactor_type.t -> Refactor.ide_result t
+  | REFACTOR : ServerRefactorTypes.action -> Refactor.result_or_retry t
+  | IDE_REFACTOR : Ide_refactor_type.t -> Refactor.ide_result_or_retry t
   | DUMP_SYMBOL_INFO : string list -> Symbol_info_service.result t
   | DUMP_AI_INFO : string list -> Ai.InfoService.result t
   | REMOVE_DEAD_FIXMES : int list -> [`Ok of ServerRefactorTypes.patch list | `Error of string] t

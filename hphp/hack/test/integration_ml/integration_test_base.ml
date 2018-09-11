@@ -536,9 +536,18 @@ let assert_status loop_output expected =
   let results_as_string = errors_to_string error_list in
   assertEqual expected results_as_string
 
-let assert_response loop_output =
+let assert_needs_retry loop_output =
+  let open Done_or_retry in
   match loop_output.persistent_client_response with
-  | Some res -> res
+  | Some Retry -> ()
+  | Some Done _ -> fail "Expected needing to retry"
+  | None -> fail "Expected response"
+
+let assert_response loop_output =
+  let open Done_or_retry in
+  match loop_output.persistent_client_response with
+  | Some Done res -> res
+  | Some Retry -> fail "Expecteded not needing to retry"
   | None -> fail "Expected response"
 
 let assert_find_refs loop_output expected =

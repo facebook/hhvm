@@ -158,7 +158,7 @@ let main args =
       Exit_status.No_error
     | MODE_FIND_CLASS_REFS name ->
       let results =
-        rpc args @@ Rpc.FIND_REFS (ServerCommandTypes.Find_refs.Class name) in
+        rpc_with_retry args @@ Rpc.FIND_REFS (ServerCommandTypes.Find_refs.Class name) in
       ClientFindRefs.go results args.output_json;
       Exit_status.No_error
     | MODE_FIND_REFS name ->
@@ -171,7 +171,7 @@ let main args =
           ~func_action:(fun fun_name -> Function fun_name)
           name
       in
-      let results = rpc args @@ Rpc.FIND_REFS action in
+      let results = rpc_with_retry args @@ Rpc.FIND_REFS action in
       ClientFindRefs.go results args.output_json;
       Exit_status.No_error
     | MODE_IDE_FIND_REFS arg ->
@@ -181,7 +181,7 @@ let main args =
       let labelled_file =
         ServerCommandTypes.LabelledFileContent { filename = ""; content; } in
       let results =
-        rpc args @@ Rpc.IDE_FIND_REFS (labelled_file, line, char, include_defs) in
+        rpc_with_retry args @@ Rpc.IDE_FIND_REFS (labelled_file, line, char, include_defs) in
       ClientFindRefs.go_ide results args.output_json;
       Exit_status.No_error
     | MODE_IDE_HIGHLIGHT_REFS arg ->

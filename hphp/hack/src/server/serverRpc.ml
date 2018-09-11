@@ -69,22 +69,33 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, Ai.ServerFindDepFiles.go genv.workers file_list
           (ServerArgs.ai_mode genv.options)
     | FIND_REFS find_refs_action ->
+        let open Done_or_retry in
         if ServerArgs.ai_mode genv.options = None then
           let include_defs = false in
-          env, ServerFindRefs.go find_refs_action include_defs genv env
+          ServerFindRefs.(
+            go find_refs_action include_defs genv env |>
+            map_env ~f:to_absolute
+          )
         else
-          env, Ai.ServerFindRefs.go find_refs_action genv env
+          env, Done (Ai.ServerFindRefs.go find_refs_action genv env)
     | IDE_FIND_REFS (labelled_file, line, char, include_defs) ->
-        let results = ServerFindRefs.go_from_file
-          (labelled_file, line, char, include_defs) genv env in
-        env, results
+        let open Done_or_retry in
+        ServerFindRefs.(
+          match go_from_file (labelled_file, line, char) env with
+          | None -> env, Done None
+          | Some (name, action) -> map_env ~f:(to_ide name) (go action include_defs genv env)
+        )
     | IDE_HIGHLIGHT_REFS (input, line, char) ->
         let content = ServerFileSync.get_file_content input in
         env, ServerHighlightRefs.go (content, line, char) env.tcopt
     | REFACTOR refactor_action ->
-        env, ServerRefactor.go refactor_action genv env
+        ServerRefactor.go refactor_action genv env
     | IDE_REFACTOR { ServerCommandTypes.Ide_refactor_type.filename; line; char; new_name } ->
-        env, ServerRefactor.go_ide (filename, line, char) new_name genv env
+        let open Done_or_retry in
+        begin match ServerRefactor.go_ide (filename, line, char) new_name genv env with
+          | Error e -> env, Done (Error e)
+          | Ok r -> map_env r ~f:(fun x -> Ok x)
+        end
     | REMOVE_DEAD_FIXMES codes ->
       if genv.ServerEnv.options |> ServerArgs.no_load then begin
         HackEventLogger.check_response (Errors.get_error_list env.errorl);

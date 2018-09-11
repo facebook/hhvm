@@ -127,24 +127,27 @@ val assert_ide_autocomplete :
 val assert_status :
   (ServerCommandTypes.Server_status.t, 'a) loop_outputs -> string -> unit
 
+val assert_needs_retry :
+  ('a, 'b ServerCommandTypes.Done_or_retry.t) loop_outputs -> unit
+
 val assert_find_refs :
-  ('a, ServerCommandTypes.Find_refs.result) loop_outputs ->
+  ('a, ServerCommandTypes.Find_refs.result_or_retry) loop_outputs ->
   string list ->
   unit
 
 val assert_ide_find_refs :
-  ('a, ServerCommandTypes.Find_refs.ide_result) loop_outputs ->
+  ('a, ServerCommandTypes.Find_refs.ide_result_or_retry) loop_outputs ->
   string ->
   string list ->
   unit
 
 val assert_refactor :
-  ('a, ServerCommandTypes.Refactor.result) loop_outputs ->
+  ('a, ServerCommandTypes.Refactor.result_or_retry) loop_outputs ->
   string ->
   unit
 
 val assert_ide_refactor :
-  ('a, ServerCommandTypes.Refactor.ide_result) loop_outputs ->
+  ('a, ServerCommandTypes.Refactor.ide_result_or_retry) loop_outputs ->
   string ->
   unit
 

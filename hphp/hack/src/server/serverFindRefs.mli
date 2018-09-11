@@ -11,11 +11,13 @@ open ServerCommandTypes.Find_refs
 
 val to_json: result -> Hh_json.json
 
-val get_refs :
-  action -> bool -> ServerEnv.genv -> ServerEnv.env -> (string * Pos.t) list
+val go : action -> bool -> ServerEnv.genv -> ServerEnv.env -> ServerEnv.env * server_result_or_retry
 
-val go : action -> bool -> ServerEnv.genv -> ServerEnv.env -> result
+val go_from_file:
+  ServerCommandTypes.labelled_file * int * int ->
+  ServerEnv.env ->
+  (string * action) option
 
-val go_from_file :
-  (ServerCommandTypes.labelled_file * int * int * bool) -> ServerEnv.genv -> ServerEnv.env ->
-    ide_result
+val to_absolute: server_result -> result
+
+val to_ide: string -> server_result -> ide_result

@@ -1,7 +1,7 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-class __Attribute__FAttr implements HH\FunctionAttribute, HH\MethodAttribute {
+class FAttr implements HH\FunctionAttribute, HH\MethodAttribute {
   public function __construct(public string $s) {}
 }
 

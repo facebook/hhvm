@@ -1,2 +1,2 @@
 File "enum_attribute.php", line 4, characters 3-14:
-Unrecognized user attribute: DoesNotExist does not have a class and is not listed in .hhconfig (Naming[2049])
+Unbound name: DoesNotExist (an object type) (Naming[2049])

@@ -1,13 +1,13 @@
 <?hh // strict
 
-class __Attribute__C implements HH\ClassAttribute {}
-class __Attribute__E implements HH\EnumAttribute {}
-class __Attribute__F implements HH\FunctionAttribute {}
-class __Attribute__Met implements HH\MethodAttribute {}
-class __Attribute__IProp implements HH\InstancePropertyAttribute {}
-class __Attribute__SProp implements HH\StaticPropertyAttribute {}
-class __Attribute__P implements HH\ParameterAttribute {}
-class __Attribute__T implements HH\TypeAliasAttribute {}
+class C implements HH\ClassAttribute {}
+class E implements HH\EnumAttribute {}
+class F implements HH\FunctionAttribute {}
+class Met implements HH\MethodAttribute {}
+class IProp implements HH\InstancePropertyAttribute {}
+class SProp implements HH\StaticPropertyAttribute {}
+class P implements HH\ParameterAttribute {}
+class T implements HH\TypeAliasAttribute {}
 
 <<F>>
 function ff(<<P>>int $i): void {}
@@ -26,4 +26,4 @@ class CC {
 enum EE: int {}
 
 <<T>>
-type t = int;
+type tt = int;

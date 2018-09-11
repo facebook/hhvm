@@ -57,8 +57,8 @@
        t_tparams = []; t_constraint = None;
        t_kind = ([8:11-14], (Hprim Tint));
        t_user_attributes =
-       [{ Aast.AnnotatedAST.ua_name = ([7:15-18], "Bar"); ua_params = [] };
-         { Aast.AnnotatedAST.ua_name = ([7:3-6], "Foo");
+       [{ Aast.AnnotatedAST.ua_name = ([7:15-18], "\\Bar"); ua_params = [] };
+         { Aast.AnnotatedAST.ua_name = ([7:3-6], "\\Foo");
            ua_params =
            [(([7:7-8], int), (Int "1")); (([7:9-10], int), (Int "2"));
              (([7:11-12], int), (Int "3"))]
@@ -70,7 +70,7 @@
        t_tparams = []; t_constraint = None;
        t_kind = ([11:11-18], (Hoption ([11:12-18], (Hprim Tstring))));
        t_user_attributes =
-       [{ Aast.AnnotatedAST.ua_name = ([10:3-18], "SingleAttribute");
+       [{ Aast.AnnotatedAST.ua_name = ([10:3-18], "\\SingleAttribute");
           ua_params = [] }
          ];
        t_mode = <opaque>; t_vis = Transparent });

@@ -1,6 +1,6 @@
 <?hh // strict
 
-class __Attribute__A implements HH\FunctionAttribute {
+class A implements HH\FunctionAttribute {
   public function __construct(public int $i) {}
 }
 

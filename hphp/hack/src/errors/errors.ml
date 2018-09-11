@@ -887,7 +887,7 @@ let unbound_attribute_name pos name =
     then "starts with __ but is not a standard attribute"
     else "does not have a class and is not listed in .hhconfig"
   in add (Naming.err_code Naming.UnboundName) pos
-    ("Unrecognized user attribute: "^name^" "^reason)
+    ("Unrecognized user attribute: "^(Utils.strip_ns name)^" "^reason)
 
 let this_no_argument pos =
   add (Naming.err_code Naming.ThisNoArgument) pos "\"this\" expects no arguments"
@@ -3186,7 +3186,7 @@ let ambiguous_lambda pos uses =
 
 let wrong_expression_kind_attribute expr_kind pos attr attr_class_pos attr_class_name intf_name =
   let msg1 =
-    Printf.sprintf "The %s attribute cannot be used on %s." attr expr_kind in
+    Printf.sprintf "The %s attribute cannot be used on %s." (Utils.strip_ns attr) expr_kind in
   let msg2 =
     Printf.sprintf "The attribute's class is defined here. To be available for use on \
                     %s, the %s class must implement %s." expr_kind

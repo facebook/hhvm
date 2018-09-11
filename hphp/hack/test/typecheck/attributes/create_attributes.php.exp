@@ -1,4 +1,1 @@
-File "create_attributes.php", line 29, characters 6-6:
-A class and an attribute class cannot share the same name. Conflicting class: t (Naming[2085])
-File "create_attributes.php", line 10, characters 7-20:
-Previous definition: __Attribute__T
+No errors

@@ -72,7 +72,6 @@ struct XenonRequestLocalData final {
   XenonRequestLocalData();
   ~XenonRequestLocalData();
   void log(Xenon::SampleType t,
-           const char* info = nullptr,
            c_WaitableWaitHandle* wh = nullptr);
   Array createResponse();
 
@@ -99,9 +98,7 @@ const StaticString
   s_time("time"),
   s_isWait("ioWaitSample"),
   s_stack("stack"),
-  s_phpStack("phpStack"),
-  s_type("type"),
-  s_info("info");
+  s_phpStack("phpStack");
 
 namespace {
 
@@ -235,15 +232,9 @@ void Xenon::log(SampleType t, c_WaitableWaitHandle* wh) const {
     if (!RuntimeOption::XenonForceAlwaysOn) {
       clearSurpriseFlag(XenonSignalFlag);
     }
-    logNoSurprise(t, nullptr, wh);
+    TRACE(1, "Xenon::log %s\n", show(t));
+    s_xenonData->log(t, wh);
   }
-}
-
-void Xenon::logNoSurprise(SampleType t,
-                          const char* info,
-                          c_WaitableWaitHandle* wh) const {
-  TRACE(1, "Xenon::log %s %s\n", show(t), info ? info : "(null)");
-  s_xenonData->log(t, info, wh);
 }
 
 // Called from timer handler, Lets non-signal code know the timer was fired.
@@ -290,7 +281,6 @@ Array XenonRequestLocalData::createResponse() {
 }
 
 void XenonRequestLocalData::log(Xenon::SampleType t,
-                                const char* info,
                                 c_WaitableWaitHandle* wh) {
   if (!m_inRequest) return;
 
@@ -302,24 +292,11 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
                              .fromWaitHandle(wh)
                              .withMetadata()
                              .ignoreArgs());
-  auto logDest = RuntimeOption::XenonStructLogDest;
-  if (!logDest.empty()) {
-    StructuredLogEntry cols;
-    cols.setStr("type", Xenon::show(t));
-    if (info) {
-      cols.setStr("info", info);
-    }
-    addBacktraceToStructLog(bt, cols);
-    StructuredLog::log(logDest, cols);
-  } else {
-    m_stackSnapshots.append(make_darray(
-      s_time, now,
-      s_stack, bt,
-      s_isWait, !Xenon::isCPUTime(t),
-      s_type, Xenon::show(t),
-      s_info, info ? info : ""
-    ));
-  }
+  m_stackSnapshots.append(make_darray(
+    s_time, now,
+    s_stack, bt,
+    s_isWait, !Xenon::isCPUTime(t)
+  ));
 }
 
 void XenonRequestLocalData::requestInit() {

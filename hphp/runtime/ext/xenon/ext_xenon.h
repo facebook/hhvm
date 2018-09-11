@@ -69,9 +69,6 @@ struct Xenon final {
     // Sample was taken during I/O wait and thus does not represent CPU time.
     IOWaitSample,
 
-    // Sample was taken to trace loading of new units.
-    UnitLoadEvent,
-
     // Sample was taken before an async function was resumed at await opcode.
     // The CPU time is attributed to the resumed async function, because the
     // CPU time was spent by the scheduler on the behalf of the resumed
@@ -95,7 +92,6 @@ struct Xenon final {
   static bool isCPUTime(SampleType t) {
     switch (t) {
       case IOWaitSample:
-      case UnitLoadEvent:
         return false;
       case ResumeAwaitSample:
       case EnterSample:
@@ -108,7 +104,6 @@ struct Xenon final {
   static const char* show(SampleType t) {
     switch (t) {
       case IOWaitSample: return "IOWait";
-      case UnitLoadEvent: return "UnitLoad";
       case ResumeAwaitSample: return "ResumeAwait";
       case EnterSample: return "Enter";
       case ExitSample: return "Exit";
@@ -130,11 +125,6 @@ struct Xenon final {
   // Log a sample if XenonSignalFlag is set. Also clear it, unless
   // in always-on mode.
   void log(SampleType t, c_WaitableWaitHandle* wh = nullptr) const;
-  // Like `log' but does not check or reset XenonSignalFlag. `info' may be
-  // brief description of why sample was logged, or nullptr.
-  void logNoSurprise(SampleType t,
-                     const char* info,
-                     c_WaitableWaitHandle* wh = nullptr) const;
   void surpriseAll();
   void onTimer();
 

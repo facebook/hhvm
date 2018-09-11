@@ -30,7 +30,6 @@
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/ext/std/ext_std_variable.h"
-#include "hphp/runtime/ext/xenon/ext_xenon.h"
 
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/disas.h"
@@ -911,10 +910,6 @@ UnitRepoProxy::load(const std::string& name, const MD5& md5,
                     const Native::FuncTable& nativeFuncs) {
   UnitEmitter ue(md5, nativeFuncs);
   if (loadHelper(ue, name, md5) == RepoStatus::error) return nullptr;
-
-  if (RuntimeOption::XenonTraceUnitLoad) {
-    Xenon::getInstance().logNoSurprise(Xenon::UnitLoadEvent, name.c_str());
-  }
 
 #ifdef USE_JEMALLOC
   if (RuntimeOption::TrackPerUnitMemory) {

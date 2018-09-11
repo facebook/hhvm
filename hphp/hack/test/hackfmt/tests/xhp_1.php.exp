@@ -19,8 +19,12 @@ final class :MyFancyXHPClass extends :OtherXHPThing {
             'key1' => 'value1',
           })
         }>
-        <x:div padding="large"><x:link href="#">Click Here!</x:link></x:div>
-        <x:div padding="large">{$link}</x:div>
+        <x:div padding="large">
+          <x:link href="#">Click Here!</x:link>
+        </x:div>
+        <x:div padding="large">
+          {$link}
+        </x:div>
         <x:div padding="large">
           <!--
             Here is a multiline comment that is very unhelpful. In fact, it is

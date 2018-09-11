@@ -12,8 +12,7 @@ class A {
 
 function test(): void {
   <foo />;
-  <foo>
-  </foo>;
+  <foo></foo>;
   <foo>
     <bar />
   </foo>;

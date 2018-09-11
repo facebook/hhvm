@@ -54,6 +54,8 @@ let builder = object (this)
 
   val mutable last_string_type = Other;
 
+  val mutable after_next_string = None;
+
   (* TODO: Make builder into an instantiable class instead of
    * having this reset method
    *)
@@ -143,6 +145,9 @@ let builder = object (this)
     end;
 
     last_string_type <- Other;
+
+    Option.call ~f:after_next_string ();
+    after_next_string <- None;
 
   method private set_pending_comma present_in_original_source =
     if last_string_type <> DocStringClose then
@@ -409,29 +414,35 @@ let builder = object (this)
       this#start_block_nest ();
       List.iter nodes this#consume_doc;
       this#end_block_nest ();
-    | WithRule (rule_kind, action) ->
+    | WithRule (rule_kind, body) ->
       this#start_rule_kind ~rule_kind ();
-      this#consume_doc action;
+      this#consume_doc body;
       this#end_rule ();
-    | WithLazyRule (rule_kind, before, action) ->
+    | WithLazyRule (rule_kind, before, body) ->
       let rule = this#create_lazy_rule ~rule_kind () in
       this#consume_doc before;
       this#start_lazy_rule rule;
-      this#consume_doc action;
+      this#consume_doc body;
       this#end_rule ();
-    | WithPossibleLazyRule (rule_kind, before, action) ->
-      if this#has_rule_kind rule_kind then begin
-        let rule = this#create_lazy_rule ~rule_kind () in
-        this#consume_doc before;
-        this#start_lazy_rule rule;
-        this#consume_doc action;
-        this#end_rule ();
-      end else begin
-        this#start_rule_kind ~rule_kind ();
-        this#consume_doc before;
-        this#consume_doc action;
-        this#end_rule ();
-      end
+    | WithOverridingParentalRule body ->
+      let start_parental_rule = this#start_rule_kind ~rule_kind:Rule.Parental in
+      (* If we have a pending split which is not a hard split, replace it with a
+         Parental rule, which will break if the body breaks. *)
+      let override_independent_split =
+        match next_split_rule with
+        | RuleKind Rule.Always -> false
+        | RuleKind _ -> true
+        | _ -> false
+      in
+      (* Starting a new rule will override the independent split, controlling
+         that split with the new Parental rule instead. *)
+      if override_independent_split then start_parental_rule ();
+      (* Regardless of whether we intend to override the preceding split, start
+         a new Parental rule to govern the contents of the body. *)
+      after_next_string <- Some start_parental_rule;
+      this#consume_doc body;
+      this#end_rule ();
+      if override_independent_split then this#end_rule ();
     | TrailingComma present_in_original_source ->
       if last_string_type <> LineComment
       then this#set_pending_comma present_in_original_source

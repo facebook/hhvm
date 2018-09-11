@@ -58,24 +58,61 @@ type t =
    * split on newlines and passed as a MultilineString. These strings are not
    * indented (since indenting would insert whitespace into the literal). *)
   | MultilineString of string list * int
+
   (* Heredoc and Nowdoc literals end with a closing identifier, which must be
    * the only characters on their line (other than a semicolon). Chunk_builder
    * needs to know if the last string was a docstring close in order to ensure a
    * newline after it (except if the next token is a semicolon). *)
   | DocLiteral of t
+
   (* Chunk_builder needs to know if the last literal was numeric in order to
    * avoid adding a concat operator directly next to it (since it would then be
    * parsed as a decimal point). *)
   | NumericLiteral of t
+
   (* Chunk_builder needs to know if the last token was a concat operator in
    * order to avoid adding a numeric literal directly next to it (since it would
    * then be parsed as a decimal point). *)
   | ConcatOperator of t
+
   (* Set Nesting.skip_parent_if_nested on this nesting *)
   | ConditionalNest of t list
-  (* Enable this lazy rule only if we are within another region with the same
-   * rule kind. Otherwise, enable the rule as a non-lazy rule. *)
-  | WithPossibleLazyRule of Rule.kind * t * t
+
+  (* Splits in a WithOverridingParentalRule region are controlled by a Parental
+     rule. If an independent split (i.e., SplitWith) precedes the region,
+     override that split to be governed by the Parental rule instead.
+
+     This is useful for XHP, where we would never like to join multiline XHP
+     expressions onto a previous line:
+
+     $x = <p>
+       foo
+     </p>;
+
+     Instead, it is conventional to start a multiline XHP expression on a new
+     line:
+
+     $x =
+       <p>
+         foo
+       </p>;
+
+     Using WithOverridingParentalRule overrides the independent split following
+     the assignment operator, causing it to be governed by the Parental rule
+     governing the rest of the splits in this region instead of the Simple rule
+     originally created for the independent split.
+
+     Note that this "overriding" behavior is actually the *default* behavior of
+     WithRule--if a split is pending when a WithRule region begins, that split
+     will be considered to be part of the WithRule region, even if it was
+     already associated with another rule. What is special about the
+     WithOverridingParentalRule construct is that it *doesn't* trample the rule
+     association of a preceding Split which is not independent.
+
+     Yes, this is confusing. Diffs which make this more sensible and consistent
+     would be more than welcome! *)
+  | WithOverridingParentalRule of t
+
   (* Add a comma only if the next split is broken on. The bool indicates whether
    * a trailing comma was present in the original source. *)
   | TrailingComma of bool
@@ -103,12 +140,12 @@ let rec has_printable_content node =
   | BlockNest nodes ->
     List.exists nodes has_printable_content
 
-  | WithRule (_, action) ->
-    has_printable_content action
+  | WithRule (_, body)
+  | WithOverridingParentalRule body ->
+    has_printable_content body
 
-  | WithLazyRule (_, before, action)
-  | WithPossibleLazyRule (_, before, action) ->
-    has_printable_content before || has_printable_content action
+  | WithLazyRule (_, before, body) ->
+    has_printable_content before || has_printable_content body
 
   | Nothing
   | Ignore _
@@ -135,12 +172,12 @@ let rec has_split node =
   | BlockNest nodes ->
     List.exists nodes has_split
 
-  | WithRule (_, action) ->
-    has_split action
+  | WithRule (_, body)
+  | WithOverridingParentalRule body ->
+    has_split body
 
-  | WithLazyRule (_, before, action)
-  | WithPossibleLazyRule (_, before, action) ->
-    has_split before || has_split action
+  | WithLazyRule (_, before, body) ->
+    has_split before || has_split body
 
   | Text _
   | Comment _
@@ -204,19 +241,17 @@ let dump ?(ignored=false) node =
       dump_list "ConditionalNest" nodes
     | BlockNest nodes ->
       dump_list "BlockNest" nodes
-    | WithRule (_, action) ->
-      dump_list "WithRule" [action]
-    | WithLazyRule (_, before, action) ->
+    | WithRule (_, body) ->
+      dump_list "WithRule" [body]
+    | WithLazyRule (_, before, body) ->
       print "WithLazyRule ([";
       dump_list_items [before];
       print "], [";
-      dump_list_items [action];
+      dump_list_items [body];
       print "])";
-    | WithPossibleLazyRule (_, before, action) ->
-      print "WithPossibleLazyRule ([";
-      dump_list_items [before];
-      print "], [";
-      dump_list_items [action];
+    | WithOverridingParentalRule body ->
+      print "WithOverridingParentalRule ([";
+      dump_list_items [body];
       print "])";
     | TrailingComma present_in_original_source ->
       print (sprintf "TrailingComma %b" present_in_original_source)

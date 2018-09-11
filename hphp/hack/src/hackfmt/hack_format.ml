@@ -1932,21 +1932,31 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         end) in
         Concat [
           transformed_body;
-          if not !prev_token_was_xhpbody then Split else Nothing;
+          if !prev_token_was_xhpbody
+          then Nothing
+          else
+            (* Don't collapse XHPExpressions onto a single line if they were
+               intentionally split across multiple lines in the original source.
+               If there is a newline in the body's leading trivia, we consider
+               that a signal that this expression was intended to be split
+               across multiple lines. *)
+            if has_newline (Syntax.leading_trivia body)
+            then Newline
+            else Split
         ]
       | _ -> failwith "Expected SyntaxList"
     in
-    WithPossibleLazyRule (Rule.Parental, t env xhp_open,
-      Concat [
-        Nest [handle_xhp_body body];
-        when_present close begin fun () ->
-          let leading, close = remove_leading_trivia close in Concat [
-            (* Ignore extra newlines by treating this as trailing trivia *)
-            ignore_trailing_invisibles leading;
-            t env close;
-          ]
-        end;
-      ])
+    WithOverridingParentalRule (Concat [
+      t env xhp_open;
+      Nest [handle_xhp_body body];
+      when_present close begin fun () ->
+        let leading, close = remove_leading_trivia close in Concat [
+          (* Ignore extra newlines by treating this as trailing trivia *)
+          ignore_trailing_invisibles leading;
+          t env close;
+        ]
+      end;
+    ])
   | Syntax.VarrayTypeSpecifier {
       varray_keyword = kw;
       varray_left_angle = left_a;

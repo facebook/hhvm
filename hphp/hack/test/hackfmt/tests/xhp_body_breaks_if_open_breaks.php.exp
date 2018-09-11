@@ -24,8 +24,10 @@ f(
   </ui:selector:option>,
 );
 
-f(<ui:selector:option
-  value={$value________}
-  selected={$label === $selected_value}>
-  {$label}
-</ui:selector:option>);
+f(
+  <ui:selector:option
+    value={$value________}
+    selected={$label === $selected_value}>
+    {$label}
+  </ui:selector:option>,
+);

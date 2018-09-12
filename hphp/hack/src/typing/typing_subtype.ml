@@ -116,6 +116,11 @@ let valid env = env, TL.valid
 let (&&&) (env,p1) f =
   let env, p2 = f env in
   env, TL.conj p1 p2
+
+let (|||) (env,p1) f =
+  let env, p2 = f env in
+  env, TL.disj p1 p2
+
 let check_mutability
   ~(is_receiver: bool)
   (p_sub : Pos.t)
@@ -142,7 +147,7 @@ let check_mutability
   | _ ->
     valid env
 
-let rec process_simplify_subtype_result ~this_ty env prop =
+let rec process_simplify_subtype_result ~this_ty ~fail env prop =
   Typing_logic.log_prop 2 env.Env.pos "process_simplify_subtype_result" env prop;
   match prop with
   | TL.Unsat f ->
@@ -154,20 +159,23 @@ let rec process_simplify_subtype_result ~this_ty env prop =
     (* Evaluates list from left-to-right so preserves order of conjuncts *)
     List.fold_left
       ~init:env
-      ~f:(process_simplify_subtype_result ~this_ty)
+      ~f:(process_simplify_subtype_result ~this_ty ~fail)
       props
+  | TL.Disj [prop] ->
+    process_simplify_subtype_result ~this_ty ~fail env prop
+
   | TL.Disj props ->
     let rec try_disj props =
       match props with
       | [] ->
-        (* Need to fail here *)
+        fail ();
         env
       | prop :: props ->
         Errors.try_ begin fun () ->
-          process_simplify_subtype_result ~this_ty env prop end
+          process_simplify_subtype_result ~this_ty ~fail env prop end
           (fun _ -> try_disj props)
     in
-    try_disj props
+      try_disj props
 
 and simplify_subtype
   ?(deep : bool = true)
@@ -422,6 +430,16 @@ and simplify_subtype
   | (_, Tabstract ((AKenum _), _)), (_, (Tnonnull | Tprim Nast.Tarraykey)) ->
     valid ()
 
+  (* If t1 <: ?t2 and t1 is an abstract type constrained as t1',
+   * then t1 <: t2 or t1' <: ?t2.  The converse is obviously
+   * true as well.  We can fold the case where t1 is unconstrained
+   * into the case analysis below.
+   *)
+  | (_, Tabstract ((AKnewtype _), Some ty)), (_, Toption arg_ty_super) ->
+    env |>
+    simplify_subtype ~deep ~this_ty ty_sub arg_ty_super |||
+    simplify_subtype ~deep ~this_ty ty ty_super
+
   (* Similar to newtype above *)
   | (_, Tabstract (AKenum _, None)),
     (_, (Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject |
@@ -599,6 +617,7 @@ and simplify_subtype
     (_, (Tfun _ | Ttuple _ | Tshape _ | Tanon _  | Tobject | Tclass _ |
          Tarraykind _ | Tabstract ((AKnewtype _ | AKenum _), _))) ->
     invalid ()
+
   | _, _ ->
     default ()
 
@@ -1146,9 +1165,10 @@ and sub_type_inner
     [Typing_log.Log_sub ("Typing_subtype.sub_type_inner", types)];
   let env, prop =
     simplify_subtype ~deep:false ~this_ty ty_sub ty_super env in
-  let res = TL.disj prop (TL.Unsat (fun () ->
-    TUtils.uerror (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub))) in
-  process_simplify_subtype_result ~this_ty env res
+  process_simplify_subtype_result ~this_ty
+    ~fail:(fun () -> TUtils.uerror (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub))
+    env
+    prop
 
 (* Deal with the cases not dealt with by simplify_subtype *)
 and sub_type_inner_helper env ~this_ty
@@ -1386,19 +1406,6 @@ and sub_type_inner_helper env ~this_ty
    * an implicit upper bound mixed = ?nonnull is added.
    *)
   | (_, Tabstract (AKnewtype _, None)), (_, Toption _) -> assert false
-
-  (* If t1 <: ?t2 and t1 is an abstract type constrained as t1',
-   * then t1 <: t2 or t1' <: ?t2.  The converse is obviously
-   * true as well.  We can fold the case where t1 is unconstrained
-   * into the case analysis below.
-   *)
-  | (_, Tabstract ((AKnewtype _ | AKenum _), Some ty)),
-    (_, Toption arg_ty_super) ->
-    Errors.try_
-      (fun () ->
-        sub_type_inner env ~this_ty ty_sub arg_ty_super)
-      (fun _ ->
-        sub_type_inner env ~this_ty ty ty_super)
 
   | (_, Tabstract (AKdependent _, Some ty)), (_, Toption arg_ty_super) ->
     Errors.try_
@@ -1852,7 +1859,8 @@ let subtype_method
     r_super ft_super_no_tvars
     env in
   let env =
-    process_simplify_subtype_result ~this_ty:None env res in
+    process_simplify_subtype_result ~this_ty:None
+    ~fail:(fun () -> ()) env res in
 
   (* This is (3) above *)
   let check_tparams_constraints env tparams =

@@ -30,6 +30,8 @@ let valid = Conj []
 let rec conj p1 p2 =
   match p1, p2 with
   | Conj ps1, Conj ps2 -> conj_list (ps1 @ ps2)
+  | Conj [], _ -> p2
+  | _, Conj [] -> p1
   (* Preserve the order to maintain legacy behaviour. If two errors share the
    * same position then the first one to be emitted wins.
    * TODO: consider relaxing this behaviour *)
@@ -45,8 +47,10 @@ and conj_list ps =
 (* Smart constructor for binary disjunction *)
 let disj p1 p2 =
   match p1, p2 with
-  | _, Unsat _ -> p1
-  | Unsat _, _ -> p2
+  | _, (Unsat _ | Disj []) -> p1
+  | (Unsat _ | Disj []), _ -> p2
+  | Conj [], _
+  | _, Conj [] -> Conj []
   | Disj ps1, Disj ps2 -> Disj (ps1 @ ps2)
   | _, Disj ps -> Disj (p1::ps)
   | Disj ps, _ -> Disj (p2::ps)

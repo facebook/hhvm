@@ -27,12 +27,6 @@ trait ReflectionTypedAttribute {
   final public function getAttributeClass(classname $c) {
     $attrs = $this->getAttributes();
     $args = hphp_array_idx($attrs, $c, null);
-    $prefix = '__Attribute__';
-    $length = strlen($prefix);
-    if ($args === null && strncmp($c, $prefix, $length) === 0) {
-      $double_under_attr = substr($c, $length);
-      $args = hphp_array_idx($attrs, $double_under_attr, null);
-    }
 
     if ($args === null) {
       return null;

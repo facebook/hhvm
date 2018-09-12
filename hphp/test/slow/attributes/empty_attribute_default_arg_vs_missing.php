@@ -1,15 +1,15 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-class __Attribute__FA implements HH\FunctionAttribute {
+class FA implements HH\FunctionAttribute {
   public function __construct(public int $i = 4) {}
 }
 
-class __Attribute__FAmissing implements HH\FunctionAttribute {
+class FAmissing implements HH\FunctionAttribute {
   public function __construct() {}
 }
 
-class __Attribute__PA implements HH\ParameterAttribute {
+class PA implements HH\ParameterAttribute {
   public function __construct() {}
 }
 
@@ -21,12 +21,12 @@ function g() {}
 
 function reflect () {
   $rf = new ReflectionFunction("f");
-  var_dump($rf->getAttributeClass(__Attribute__FA::class)->i); // 4
+  var_dump($rf->getAttributeClass(FA::class)->i); // 4
   $rg = new ReflectionFunction("g");
-  var_dump($rg->getAttributeClass(__Attribute__FA::class)->i); // 42
-  var_dump(is_null($rf->getAttributeClass(__Attribute__FAmissing::class))); // true
+  var_dump($rg->getAttributeClass(FA::class)->i); // 42
+  var_dump(is_null($rf->getAttributeClass(FAmissing::class))); // true
   $rp = $rf->getParameters()[0];
-  var_dump(is_null($rp->getAttributeClass(__Attribute__PA::class))); // false
+  var_dump(is_null($rp->getAttributeClass(PA::class))); // false
 }
 
 

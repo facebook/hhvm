@@ -24,16 +24,9 @@ namespace X\Y {
 namespace {
   use X\Y\C;
 
-  class __Attribute__A implements HH\FunctionAttribute {
-    public function __construct(public int $i) {}
-  }
-
   class B implements HH\FunctionAttribute {
     public function __construct(public int $i) {}
   }
-
-  <<A(3)>>
-  function f() {}
 
   <<B(4)>>
   function g() {}
@@ -42,8 +35,6 @@ namespace {
   function h() {}
 
   function reflect () {
-    $rf = new ReflectionFunction("f");
-    var_dump($rf->getAttributeClass(__Attribute__A::class)->i); // 3
     $rg = new ReflectionFunction("g");
     var_dump($rg->getAttributeClass(B::class)->i); // 4
     $rh = new ReflectionFunction("h");

@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/curl/ext_curl.h"
+#include "hphp/runtime/ext/curl/curl-multi-await.h"
 #include "hphp/runtime/ext/curl/curl-multi-resource.h"
 #include "hphp/runtime/ext/curl/curl-pool.h"
 #include "hphp/runtime/ext/curl/curl-resource.h"
@@ -608,6 +609,19 @@ Variant HHVM_FUNCTION(curl_multi_select, const Resource& mh,
   IOStatusHelper io("curl_multi_select");
   curl_multi_select_func(curlm->get(), timeout_ms, &ret);
   return ret;
+}
+
+Object HHVM_FUNCTION(curl_multi_await, const Resource& mh,
+                                       double timeout /*=1.0*/) {
+  CHECK_MULTI_RESOURCE_THROW(curlm);
+  auto ev = new CurlMultiAwait(curlm, timeout);
+  try {
+    return Object{ev->getWaitHandle()};
+  } catch (...) {
+    assert(false);
+    ev->abandon();
+    throw;
+  }
 }
 
 Variant HHVM_FUNCTION(curl_multi_getcontent, const Resource& ch) {
@@ -1483,6 +1497,7 @@ struct CurlExtension final : Extension {
     HHVM_FE(curl_multi_remove_handle);
     HHVM_FE(curl_multi_exec);
     HHVM_FE(curl_multi_select);
+    HHVM_FE(curl_multi_await);
     HHVM_FE(curl_multi_getcontent);
     HHVM_FE(curl_multi_setopt);
     HHVM_FE(fb_curl_multi_fdset);

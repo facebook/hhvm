@@ -268,6 +268,7 @@ val instanceof_missing_subscript_index: string
 val instanceof_new_unknown_node: string -> string
 val instanceof_reference: string
 val invalid_await_use: string
+val toplevel_await_use: string
 val invalid_constructor_method_call: string
 val invalid_default_argument: string -> string
 val do_not_use_xor : string

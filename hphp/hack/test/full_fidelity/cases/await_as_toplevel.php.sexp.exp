@@ -1,0 +1,12 @@
+((script 14
+  ((list 14
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
+       (missing 0 ())))
+     (expression_statement 8
+      ((prefix_unary_expression 7
+        ((((end_of_line 1)) await 5 ((whitespace 1)))
+         (literal 1 ((() decimal_literal 1 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

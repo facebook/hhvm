@@ -1549,12 +1549,14 @@ let is_in_unyieldable_magic_method parents =
     | _ -> SSet.mem s SN.Members.as_lowercase_set
     end
 
-let is_in_function parents =
+let is_in_function ?(await=false) parents =
   List.exists parents ~f:begin fun node ->
     match syntax node with
     | FunctionDeclaration _
     | MethodishDeclaration _
-    | AnonymousFunction _ -> true
+    | AnonymousFunction _
+    | LambdaExpression _  -> true
+    | AwaitableCreationExpression _ -> await
     | _ -> false
     end
 
@@ -2083,6 +2085,9 @@ let expression_errors env namespace_name node parents errors =
   | DecoratedExpression { decorated_expression_decorator = op; _ }
   | PrefixUnaryExpression { prefix_unary_operator = op; _ }
     when token_kind op = Some TokenKind.Await ->
+    let errors = if not (is_in_function ~await:true parents) then
+      make_error_from_node node SyntaxError.toplevel_await_use :: errors
+    else errors in
     begin match parents with
       | si :: le :: _ when is_simple_initializer si && is_let_statement le ->
         errors

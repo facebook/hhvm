@@ -1081,7 +1081,7 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   };
 
 #define ADD(name, stub) name = add(#name, (stub), code, dbg)
-  ADD(enterTCExit,   emitEnterTCExit(main, data, *this));
+  ADD(enterTCExit,   emitEnterTCExit(hot(), data, *this));
   enterTCHelper =
     decltype(enterTCHelper)(add("enterTCHelper",
                                 emitEnterTCHelper(main, data, *this),

@@ -206,16 +206,10 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TCA emitCallToExit(CodeBlock& cb, DataBlock& /*data*/, const UniqueStubs& us) {
-  vixl::MacroAssembler a { cb };
-  auto const begin = cb.frontier();
-
-  // Jump to enterTCExit
-  a.Mov(rAsm, us.enterTCExit);
-  a.Br(rAsm);
-
-  cb.sync(begin);
-  return begin;
+TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us) {
+  return vwrap(cb, data, [&] (Vout& v) {
+    v << jmpi{us.enterTCExit};
+  });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

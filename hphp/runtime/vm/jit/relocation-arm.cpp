@@ -758,10 +758,11 @@ bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
    */
   if (next->Mask(LoadStoreUnsignedOffsetMask) == LDR_x_unsigned &&
       next->Rn() == rd && !next->ImmShiftLS()) {
-    // Only transform if the MOV/MOVK sequence def'd a vixl scratch,
-    // otherwise we run the risk of not def'ing a live register.
+    // Only transform if the MOV/MOVK sequence def'd a vixl scratch or Vasm
+    // scratch register. Otherwise we run the risk of not def'ing a live
+    // register.
     auto const tmp = vixl::Register(rd, 64);
-    if (tmp.Is(rVixlScratch0) || tmp.Is(rVixlScratch1)) {
+    if (tmp.Is(rVixlScratch0) || tmp.Is(rVixlScratch1) || tmp.Is(rAsm)) {
       env.destBlock.setFrontier(destAddr);
       destCount--;
 
@@ -789,10 +790,11 @@ bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
     }
   } else if (next->IsUncondBranchReg() && next->Rn() == rd) {
     imm >>= kInstructionSizeLog2;
-    // Only transform if the MOV/MOVK sequence def'd a vixl scratch,
-    // otherwise we run the risk of not def'ing a live register.
+    // Only transform if the MOV/MOVK sequence def'd a vixl scratch or Vasm
+    // scratch register. Otherwise we run the risk of not def'ing a live
+    // register.
     auto const dst = vixl::Register(rd, 64);
-    if (dst.Is(rVixlScratch0) || dst.Is(rVixlScratch1)) {
+    if (dst.Is(rVixlScratch0) || dst.Is(rVixlScratch1) || dst.Is(rAsm)) {
       if (is_int26(imm)) {
         env.destBlock.setFrontier(destAddr);
         destCount--;

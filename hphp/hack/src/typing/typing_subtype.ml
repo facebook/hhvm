@@ -389,6 +389,28 @@ and simplify_subtype
   | (r_sub, Tfun ft_sub), (r_super, Tfun ft_super) ->
     simplify_subtype_funs ~deep ~check_return:true r_sub ft_sub r_super ft_super env
 
+  | (r_sub, Tanon (anon_arity, id)), (r_super, Tfun ft) ->
+    begin match Env.get_anonymous env id with
+      | None ->
+        invalid_with (fun () -> Errors.anonymous_recursive_call (Reason.to_pos r_sub))
+      | Some (reactivity, is_coroutine, ftys, _, anon) ->
+        let p_super = Reason.to_pos r_super in
+        let p_sub = Reason.to_pos r_sub in
+        if not (subtype_reactivity env reactivity ft.ft_reactive)
+        then Errors.fun_reactivity_mismatch
+          p_super (TUtils.reactivity_to_string env reactivity)
+          p_sub (TUtils.reactivity_to_string env ft.ft_reactive);
+        if is_coroutine <> ft.ft_is_coroutine
+        then Errors.coroutinness_mismatch ft.ft_is_coroutine p_super p_sub;
+        if not (Unify.unify_arities
+                  ~ellipsis_is_variadic:true anon_arity ft.ft_arity)
+        then Errors.fun_arity_mismatch p_super p_sub;
+        (* Add function type to set of types seen so far *)
+        ftys := TUtils.add_function_type env ety_super !ftys;
+        let env, _, ret = anon env ft.ft_params ft.ft_arity in
+        simplify_subtype ~deep ~this_ty ret ft.ft_ret env
+    end
+
   | (_, Tabstract (AKnewtype (name_sub, tyl_sub), _)),
     (_, Tabstract (AKnewtype (name_super, tyl_super), _))
     when name_super = name_sub ->
@@ -573,9 +595,25 @@ and simplify_subtype
                 default ()
       end
 
+  (* everything subtypes mixed *)
+  | _, (_, Tmixed) -> valid ()
+  | _, (_, Toption (_, Tnonnull)) -> valid ()
+
   (* void is the type of null and is a subtype of any option type. *)
   | (_, Tprim Nast.Tvoid), (_, Toption _)
     when TUtils.is_void_type_of_null env -> valid ()
+
+  (* If t1 <: ?t2, where t1 is guaranteed not to contain null, then
+   * t1 <: t2, and the converse is obviously true as well.
+   *)
+  | (_, (Tprim Nast.Tvoid | Tabstract (AKdependent _, None))), (_, Toption ty_super) ->
+    simplify_subtype ~deep ~this_ty ty_sub ty_super env
+
+  (* Internally, newtypes are always equipped with an upper bound.
+   * In the case when no upper bound is specified in source code,
+   * an implicit upper bound mixed = ?nonnull is added.
+   *)
+  | (_, Tabstract (AKnewtype _, None)), (_, Toption _) -> assert false
 
   | (_, Toption ty_sub'), (_, Tprim Nast.Tvoid)
     when TUtils.is_void_type_of_null env ->
@@ -585,10 +623,6 @@ and simplify_subtype
   | (_, (Tprim Nast.Tvoid | Tmixed | Tdynamic | Toption _
     | Tabstract (AKdependent _, None))), (_, Tnonnull) ->
     invalid ()
-
-  (* everything subtypes mixed *)
-  | _, (_, Tmixed) -> valid ()
-  | _, (_, Toption (_, Tnonnull)) -> valid ()
 
   | (_, Tprim (Nast.Tint | Nast.Tfloat)), (_, Tprim Nast.Tnum) -> valid ()
   | (_, Tprim (Nast.Tint | Nast.Tstring)), (_, Tprim Nast.Tarraykey) -> valid ()
@@ -1394,19 +1428,6 @@ and sub_type_inner_helper env ~this_ty
   | (_, (Tmixed | Tdynamic)), (_, Toption ty_super) ->
     sub_type_inner env ~this_ty ty_sub ty_super
 
-  (* If t1 <: ?t2, where t1 is guaranteed not to contain null, then
-   * t1 <: t2, and the converse is obviously true as well.
-   *)
-  | (_, (Tprim Nast.Tvoid | Tabstract (AKdependent _, None))),
-    (_, Toption ty_super) ->
-    sub_type_inner env ~this_ty ty_sub ty_super
-
-  (* Internally, newtypes are always equipped with an upper bound.
-   * In the case when no upper bound is specified in source code,
-   * an implicit upper bound mixed = ?nonnull is added.
-   *)
-  | (_, Tabstract (AKnewtype _, None)), (_, Toption _) -> assert false
-
   | (_, Tabstract (AKdependent _, Some ty)), (_, Toption arg_ty_super) ->
     Errors.try_
       (fun () ->
@@ -1421,34 +1442,6 @@ and sub_type_inner_helper env ~this_ty
         sub_type_inner env ~this_ty ty_sub arg_ty_super)
       (fun _ ->
         sub_generic_params SSet.empty env ~this_ty ty_sub ty_super)
-
-  | (r_sub, Tvar v), (_, Toption _) ->
-    let env, ty_sub = Env.get_type env r_sub v in
-    sub_type_inner env ~this_ty ty_sub ty_super
-
-  | (r_sub, Tanon (anon_arity, id)), (r_super, Tfun ft)  ->
-      (match Env.get_anonymous env id with
-      | None ->
-          Errors.anonymous_recursive_call (Reason.to_pos r_sub);
-          env
-      | Some (reactivity, is_coroutine, ftys, _, anon) ->
-          let p_super = Reason.to_pos r_super in
-          let p_sub = Reason.to_pos r_sub in
-          if not (subtype_reactivity env reactivity ft.ft_reactive)
-          then Errors.fun_reactivity_mismatch
-            p_super (TUtils.reactivity_to_string env reactivity)
-            p_sub (TUtils.reactivity_to_string env ft.ft_reactive);
-          if is_coroutine <> ft.ft_is_coroutine
-          then Errors.coroutinness_mismatch ft.ft_is_coroutine p_super p_sub;
-          if not (Unify.unify_arities
-                    ~ellipsis_is_variadic:true anon_arity ft.ft_arity)
-          then Errors.fun_arity_mismatch p_super p_sub;
-          (* Add function type to set of types seen so far *)
-          ftys := TUtils.add_function_type env ety_super !ftys;
-          let env, _, ret = anon env ft.ft_params ft.ft_arity in
-          let env = sub_type env ret ft.ft_ret in
-          env
-      )
 
   (* Supertype is generic parameter *and* subtype is a newtype with bound.
    * We need to make this a special case because there is a *choice*

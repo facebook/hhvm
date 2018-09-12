@@ -127,6 +127,7 @@ struct Xenon final {
   void log(SampleType t, c_WaitableWaitHandle* wh = nullptr) const;
   void surpriseAll();
   void onTimer();
+  bool getIsProfiledRequest();
 
   bool      m_stopping;
  private:

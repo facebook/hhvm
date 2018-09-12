@@ -1043,6 +1043,7 @@ public:
 
   // Xenon options
   static double XenonPeriodSeconds;
+  static uint32_t XenonRequestFreq;
   static bool XenonForceAlwaysOn;
 };
 static_assert(sizeof(RuntimeOption) == 1, "no instance variables");

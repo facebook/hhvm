@@ -741,6 +741,7 @@ int RuntimeOption::Fb303ServerPoolThreads = 1;
 #endif
 
 double RuntimeOption::XenonPeriodSeconds = 0.0;
+uint32_t RuntimeOption::XenonRequestFreq = 1;
 bool RuntimeOption::XenonForceAlwaysOn = false;
 bool RuntimeOption::TrackPerUnitMemory = false;
 
@@ -2077,6 +2078,7 @@ void RuntimeOption::Load(
   {
     // Xenon
     Config::Bind(XenonPeriodSeconds, ini, config, "Xenon.Period", 0.0);
+    Config::Bind(XenonRequestFreq, ini, config, "Xenon.RequestFreq", 1);
     Config::Bind(XenonForceAlwaysOn, ini, config, "Xenon.ForceAlwaysOn", false);
   }
   {

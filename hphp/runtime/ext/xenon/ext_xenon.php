@@ -36,4 +36,10 @@ function xenon_get_and_clear_samples(): varray<XenonSample>;
  */
 <<__Native>>
 function xenon_get_and_clear_missed_sample_count(): int;
+
+/**
+ * Return true whether this request can potentially log Xenon stacks
+ */
+<<__Native>>
+function xenon_get_is_profiled_request(): bool;
 }

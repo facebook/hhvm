@@ -43,4 +43,8 @@ namespace HH {
    * Returns the number of xenon samples lost so far.
    */
   function xenon_get_and_clear_missed_sample_count(): int;
+  /**
+   * Return true whether this request can potentially log Xenon stacks
+   */
+  function xenon_get_is_profiled_request(): bool;
 }

@@ -77,12 +77,13 @@ struct XenonRequestLocalData final {
 
   void requestInit();
   void requestShutdown();
+  bool getIsProfiledRequest();
 
   // an array of php stacks
   Array m_stackSnapshots;
 
-  // Set to true while a request is active and it's safe to record samples.
-  bool m_inRequest{false};
+  // Set to true if this request is going to handle the log calls
+  bool m_isProfiledRequest{false};
 };
 static THREAD_LOCAL(XenonRequestLocalData, s_xenonData);
 
@@ -251,6 +252,10 @@ void Xenon::surpriseAll() {
   );
 }
 
+bool Xenon::getIsProfiledRequest() {
+  return s_xenonData->getIsProfiledRequest();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // There is one XenonRequestLocalData per thread, stored in thread local area
 
@@ -266,7 +271,6 @@ XenonRequestLocalData::~XenonRequestLocalData() {
 // Creates an array to respond to the Xenon PHP extension;
 // builds the data into the format neeeded.
 Array XenonRequestLocalData::createResponse() {
-  assertx(m_inRequest);
   VArrayInit stacks(m_stackSnapshots.size());
   for (ArrayIter it(m_stackSnapshots); it; ++it) {
     const auto& frame = it.second().toArray();
@@ -282,7 +286,7 @@ Array XenonRequestLocalData::createResponse() {
 
 void XenonRequestLocalData::log(Xenon::SampleType t,
                                 c_WaitableWaitHandle* wh) {
-  if (!m_inRequest) return;
+  if (!m_isProfiledRequest) return;
 
   TRACE(1, "XenonRequestLocalData::log\n");
   time_t now = time(nullptr);
@@ -302,7 +306,7 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
 void XenonRequestLocalData::requestInit() {
   TRACE(1, "XenonRequestLocalData::requestInit\n");
 
-  assertx(!m_inRequest);
+  assertx(!m_isProfiledRequest);
   assertx(m_stackSnapshots.get() == nullptr);
   if (RuntimeOption::XenonForceAlwaysOn) {
     setSurpriseFlag(XenonSignalFlag);
@@ -311,16 +315,22 @@ void XenonRequestLocalData::requestInit() {
     // not have a bias towards the first function.
     clearSurpriseFlag(XenonSignalFlag);
   }
-  m_inRequest = true;
+
+  uint32_t freq = RuntimeOption::XenonRequestFreq;
+  m_isProfiledRequest = (freq > 0 && folly::Random::rand32(freq) == 0);
 }
 
 void XenonRequestLocalData::requestShutdown() {
   TRACE(1, "XenonRequestLocalData::requestShutdown\n");
 
-  m_inRequest = false;
+  m_isProfiledRequest = false;
   clearSurpriseFlag(XenonSignalFlag);
   Xenon::getInstance().incrementMissedSampleCount(m_stackSnapshots.size());
   m_stackSnapshots.reset();
+}
+
+bool XenonRequestLocalData::getIsProfiledRequest() {
+  return m_isProfiledRequest;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -352,6 +362,10 @@ int64_t HHVM_FUNCTION(xenon_get_and_clear_missed_sample_count, void) {
     return Xenon::getInstance().getAndClearMissedSampleCount();
 }
 
+bool HHVM_FUNCTION(xenon_get_is_profiled_request, void) {
+  return Xenon::getInstance().getIsProfiledRequest();
+}
+
 struct xenonExtension final : Extension {
   xenonExtension() : Extension("xenon", "1.0") { }
 
@@ -360,6 +374,8 @@ struct xenonExtension final : Extension {
     HHVM_FALIAS(HH\\xenon_get_and_clear_samples, xenon_get_and_clear_samples);
     HHVM_FALIAS(HH\\xenon_get_and_clear_missed_sample_count,
                 xenon_get_and_clear_missed_sample_count);
+    HHVM_FALIAS(HH\\xenon_get_is_profiled_request,
+                xenon_get_is_profiled_request);
     loadSystemlib();
   }
 

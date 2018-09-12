@@ -184,7 +184,7 @@ namespace detail {
   TCA vwrap_impl(CodeBlock& main, CodeBlock& cold, DataBlock& data,
                  CGMeta* meta, GenFunc gen,
                  CodeKind kind = CodeKind::CrossTrace,
-                 bool relocate = false);
+                 bool relocate = true);
 }
 
 /*
@@ -197,12 +197,12 @@ namespace detail {
  */
 template<class GenFunc>
 TCA vwrap(CodeBlock& cb, DataBlock& data, CGMeta& meta, GenFunc gen,
-          CodeKind kind = CodeKind::CrossTrace, bool relocate = false) {
+          CodeKind kind = CodeKind::CrossTrace, bool relocate = true) {
   return detail::vwrap_impl(cb, cb, data, &meta,
                             [&] (Vout& v, Vout&) { gen(v); }, kind, relocate);
 }
 template<class GenFunc>
-TCA vwrap(CodeBlock& cb, DataBlock& data, GenFunc gen, bool relocate = false) {
+TCA vwrap(CodeBlock& cb, DataBlock& data, GenFunc gen, bool relocate = true) {
   return detail::vwrap_impl(cb, cb, data, nullptr,
                             [&] (Vout& v, Vout&) { gen(v); },
                             CodeKind::CrossTrace, relocate);

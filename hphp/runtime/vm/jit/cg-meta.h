@@ -132,6 +132,14 @@ struct CGMeta {
   std::set<TCA> addressImmediates;
 
   /*
+   * Certain addresses are fallthrough to the next vunit.
+   * We tag such an address so we can patch a jump over any inserted literal
+   * pools/veneers.  This metadata is kept around so the relocator can properly
+   * adjust or remove the jump to keep it pointing directly after the Vunit.
+   */
+  folly::Optional<TCA> fallthru;
+
+  /*
    * Code addresses of interest to other code.
    *
    * These are like `watchpoints', except that the pointers point into the TC

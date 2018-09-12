@@ -88,6 +88,7 @@ TCA vwrap_impl(CodeBlock& main, CodeBlock& cold, DataBlock& data,
   dummy_meta.process_literals();
   if (!meta) {
     dummy_meta.addressImmediates.clear();
+    dummy_meta.fallthru.clear();
   }
   assertx(dummy_meta.empty());
 

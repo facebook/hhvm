@@ -100,8 +100,14 @@ Vauto::~Vauto() {
         if (m_relocate) {
           auto& cold = m_text.cold().code;
           if (cold.canEmit(0x10000)) {
-            mainTmp.init(cold.frontier() + 0x8000, 0x4000, "vauto main tmp");
-            coldTmp.init(cold.frontier() + 0xc000, 0x4000, "vauto cold tmp");
+            mainTmp.init(cold.frontier() + 0x8000,
+                         cold.toDestAddress(cold.frontier() + 0x8000),
+                         0x4000,
+                         "vauto main tmp");
+            coldTmp.init(cold.frontier() + 0xc000,
+                         cold.toDestAddress(cold.frontier() + 0xc000),
+                         0x4000,
+                         "vauto cold tmp");
             return Vtext(mainTmp, coldTmp, m_text.data());
           }
           m_relocate = false;

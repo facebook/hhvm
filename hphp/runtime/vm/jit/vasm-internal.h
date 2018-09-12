@@ -71,13 +71,6 @@ struct Venv {
   jit::vector<std::pair<TCA,IStack>> stacks;
 
   /*
-   * fallThrus allow Vgen::patch to know if a Vunit falls through to the next
-   * translation.  This is important on ARM because Vgen::patch needs to know
-   * if it should insert a jump over the literal pool it inserts.
-   */
-  jit::fast_set<CodeAddress> fallThrus;
-
-  /*
    * Stubs that need to be emitted and patched into service request callsites.
    *
    * In vasm_emit(), we lower service request instructions (e.g., bindjmp) to

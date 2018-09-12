@@ -75,7 +75,7 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& cb, DataBlock& data,
 
     v = done;
     v << debugguardjmp{realCode, &dbgBranchGuardSrc};
-  }, CodeKind::Helper);
+  }, CodeKind::Helper, false);
 
   assertx(dbgBranchGuardSrc);
 

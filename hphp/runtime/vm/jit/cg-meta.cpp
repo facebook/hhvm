@@ -254,6 +254,7 @@ void CGMeta::clear() {
   alignments.clear();
   reusedStubs.clear();
   addressImmediates.clear();
+  fallthru.clear();
   codePointers.clear();
   inProgressTailJumps.clear();
   bcMap.clear();
@@ -275,6 +276,7 @@ bool CGMeta::empty() const {
     alignments.empty() &&
     reusedStubs.empty() &&
     addressImmediates.empty() &&
+    !fallthru.hasValue() &&
     codePointers.empty() &&
     inProgressTailJumps.empty() &&
     bcMap.empty() &&

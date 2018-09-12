@@ -411,6 +411,9 @@ struct Vgen {
 
 private:
   CodeBlock& frozen() { return env.text.frozen().code; }
+  static void recordAddressImmediate(Venv& env, TCA addr) {
+    env.meta.addressImmediates.insert(addr);
+  }
   void recordAddressImmediate() {
     env.meta.addressImmediates.insert(env.cb->frontier());
   }
@@ -543,7 +546,6 @@ void Vgen::emitVeneers(Venv& env) {
 
 void Vgen::handleLiterals(Venv& env) {
   decltype(env.meta.literalsToPool) notEmitted;
-  jit::fast_map<CodeBlock*, CodeAddress> headers;
   for (auto const& pl : env.meta.literalsToPool) {
     auto const cb = getBlock(env, pl.patchAddress);
     if (!cb) {
@@ -551,13 +553,6 @@ void Vgen::handleLiterals(Venv& env) {
       // wrapping this one.  (retransopt emits a Vunit within a Vunit)
       notEmitted.push_back(pl);
       continue;
-    }
-    if (!headers.count(cb)) {
-      if (env.fallThrus.count(cb->frontier())) {
-        headers.emplace(cb, cb->frontier());
-        // leave room for a jmp.
-        cb->dword(0);
-      }
     }
 
     // Emit the literal.
@@ -585,16 +580,23 @@ void Vgen::handleLiterals(Venv& env) {
       Instruction::Cast(pl.patchAddress));
   }
 
-  for (auto const& h : headers) {
-    CodeBlock cb;
-    auto const startAddr = h.first->toDestAddress(h.second);
-    cb.init(startAddr, startAddr, 4, 4, "Tmp");
-    auto const poolSize = h.first->frontier() - h.second;
-    assertx(env.fallThrus.count(h.second));
+  if (env.meta.fallthru) {
+    auto const fallthru = *env.meta.fallthru;
+    auto const cb = getBlock(env, fallthru);
+    if (!cb) {
+      always_assert_flog(false,
+                         "Fallthrus shouldn't be used in nested Vunits.");
+    }
+    auto const blockEndAddr = cb->frontier();
+    auto const startAddr = cb->toDestAddress(fallthru);
+    CodeBlock tmp;
+    tmp.init(startAddr, kInstructionSize, "Tmp");
     // Write the jmp.
-    Assembler a { cb };
-    a.b(poolSize >> kInstructionSizeLog2);
+    Assembler a { tmp };
+    recordAddressImmediate(env, fallthru);
+    a.b((blockEndAddr - fallthru) >> kInstructionSizeLog2);
   }
+
   env.meta.literalsToPool.swap(notEmitted);
 }
 
@@ -696,7 +698,9 @@ void emitSimdImmInt(vixl::MacroAssembler* a, uint64_t val, Vreg d) {
   }
 }
 void Vgen::emit(const fallthru& /*i*/) {
-  env.fallThrus.insert(a->frontier());
+  always_assert(!env.meta.fallthru);
+  env.meta.fallthru = a->frontier();
+  a->nop();
 }
 
 #define Y(vasm_opc, simd_w, vr_w, gpr_w, imm) \

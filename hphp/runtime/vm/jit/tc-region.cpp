@@ -909,7 +909,7 @@ folly::Optional<TransMetaInfo> emitTranslation(TransEnv env, OptView optDst) {
            "translation (spOff = {})\n", env.initSpOffset.offset);
     vwrap(codeView.main(), codeView.data(), fixups,
           [&] (Vout& v) { emitInterpReq(v, sk, env.initSpOffset); },
-          CodeKind::Helper);
+          CodeKind::Helper, false);
   }
 
   Timer metaTimer(Timer::mcg_finishTranslation_metadata);

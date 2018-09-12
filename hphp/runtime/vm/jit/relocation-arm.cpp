@@ -101,7 +101,7 @@ struct Env {
   CodeBlock& srcBlock;
   CodeBlock& destBlock;
   const TCA start, end;
-  const CGMeta& meta;
+  CGMeta& meta;
   TCA* exitAddr;
   bool updateInternalRefs;
 
@@ -549,7 +549,8 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
 
   // If the target is outside of the range of this relocation,
   // then update it.
-  if ((target < env.start) || (target >= env.end)) {
+  if (((target < env.start) || (target >= env.end)) &&
+      env.meta.fallthru != srcAddr) {
     /*
      * Calculate the new offset and determine if it can be encoded
      * in a PC relative instruciton or if it needs to be converted
@@ -1020,6 +1021,36 @@ size_t relocateImpl(Env& env) {
 
       asmCount += destCount;
     } // while (src != env.end)
+
+    // Remap fallthru.
+    if (env.meta.fallthru) {
+      auto const srcAddr = *env.meta.fallthru;
+      if (env.srcBlock.contains(srcAddr)) {
+        auto const src = Instruction::Cast(env.srcBlock.toDestAddress(srcAddr));
+        env.rewrites.insert(src);  // We are handling adjustment here.
+        auto const destAddrBefore = env.rel.adjustedAddressBefore(srcAddr);
+        auto const destAddr = env.rel.adjustedAddressAfter(srcAddr);
+        auto const destFrom = Instruction::Cast(destAddr);
+        auto const dest =
+          Instruction::Cast(env.destBlock.toDestAddress(destAddr));
+        assertx(dest->IsUncondBranchImm());
+        if (Instruction::Cast(destAddr)->NextInstruction() ==
+            Instruction::Cast(env.destBlock.frontier())) {
+          // Remove the fallthru jmp and update mapping.  There are no literals
+          // or veneers, so we do not need a jump to fallthru properly.
+          env.destBlock.setFrontier(destAddrBefore);
+          env.rel.recordAddress(srcAddr, destAddrBefore - kInstructionSize, 0);
+          env.meta.fallthru.clear();
+        } else {
+          // Adjust the fallthru jmp.
+          auto const success =
+            writePCRelative(dest,
+                            Instruction::Cast(env.destBlock.frontier()),
+                            destFrom);
+          always_assert(success);
+        }
+      }
+    }
 
     env.rel.recordRange(env.start, env.end, destStart,
                         env.destBlock.frontier());

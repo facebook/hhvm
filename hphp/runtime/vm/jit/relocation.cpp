@@ -237,6 +237,12 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
   }
   updatedAI.swap(meta.addressImmediates);
 
+  if (meta.fallthru) {
+    if (TCA adjusted = rel.adjustedAddressAfter(*meta.fallthru)) {
+      meta.fallthru = adjusted;
+    }
+  }
+
   decltype(meta.alignments) updatedAF;
   for (auto af : meta.alignments) {
     if (TCA adjusted = rel.adjustedAddressAfter(af.first)) {

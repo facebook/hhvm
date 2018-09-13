@@ -78,6 +78,43 @@ let rec shrink_shape pos field_name env shape =
   | x ->
       env, x
 
+(* Refine the type of a shape knowing that a call to Shapes::idx is not null.
+ * This means that the shape now has the field, and that the type for this
+ * field is not nullable.
+ * We stay quite liberal here: we add the field to the shape type regardless
+ * of whether this field can be here at all. Errors will anyway be raised
+ * elsewhere when typechecking the call to Shapes::idx. This allows for more
+ * useful typechecking of incomplete code (code in the process of being
+ * written). *)
+let shapes_idx_not_null env shape_ty (p, field) =
+  let env, (r, shape_ty) = Env.expand_type env shape_ty in
+  match TUtils.shape_field_name env (p, field) with
+  | None -> env, (r, shape_ty)
+  | Some field ->
+    begin match shape_ty with
+    | Tshape (fieldsknown, ftm) ->
+      let env, field_type =
+        begin match ShapeMap.find_opt field ftm with
+        | Some { sft_ty; _ } ->
+          let env, sft_ty = TUtils.non_null env sft_ty in
+          env, { sft_optional = false; sft_ty }
+        | None ->
+          env,
+          { sft_optional = false
+          ; sft_ty = (Reason.Rwitness p, Tnonnull)
+          }
+        end in
+      let ftm = ShapeMap.add field field_type ftm in
+      let fieldsknown = match fieldsknown with
+        | FieldsFullyKnown -> FieldsFullyKnown
+        | FieldsPartiallyKnown unsetfields ->
+          FieldsPartiallyKnown (ShapeMap.remove field unsetfields) in
+      env, (r, Tshape (fieldsknown, ftm))
+    | _ -> (* This should be an error, but it is already raised when
+      typechecking the call to Shapes::idx *)
+      env, (r, shape_ty)
+    end
+
 let experiment_enabled env experiment =
   TypecheckerOptions.experimental_feature_enabled
     (Env.get_options env)

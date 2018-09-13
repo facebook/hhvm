@@ -1,0 +1,6 @@
+File "null.php", line 7, characters 27-28:
+Invalid argument (Typing[4110])
+  File "null.php", line 15, characters 31-33:
+  This is an int
+  File "null.php", line 5, characters 16-16:
+  It is incompatible with an object of type A

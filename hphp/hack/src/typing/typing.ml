@@ -5988,11 +5988,11 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
 and make_a_local_of env e =
   match e with
   | p, Class_get ((_, cname), (_, member_name)) ->
-   let env, local = Env.FakeMembers.make_static p env cname member_name in
-   env, Some (p, local)
+    let env, local = Env.FakeMembers.make_static p env cname member_name in
+    env, Some (p, local)
   | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
-   let env, local = Env.FakeMembers.make p env obj member_name in
-   env, Some (p, local)
+    let env, local = Env.FakeMembers.make p env obj member_name in
+    env, Some (p, local)
   | _, Lvar x
   | _, ImmutableVar x
   | _, Dollardollar x -> env, Some x
@@ -6022,6 +6022,19 @@ and condition_nullity ~nonnull (env: Env.env) te =
   | _, T.Binop (Ast.Eq None, var, te) ->
       let env = condition_nullity ~nonnull env te in
       condition_nullity ~nonnull env var
+  (* case where `Shapes::idx(...)` must be made null/non-null *)
+  | _, T.Call (
+      _,
+      (_, T.Class_const ((_, T.CI((_, shapes), _)), (_, idx))),
+      _,
+      [shape; field],
+      _)
+    when shapes = SN.Shapes.cShapes && idx = SN.Shapes.idx ->
+    let field = T.to_nast_expr field in
+    let refine env shape_ty = if nonnull
+      then Typing_shapes.shapes_idx_not_null env shape_ty field
+      else env, shape_ty in
+    refine_lvalue_type env shape ~refine
   | _ ->
     let refine env ty = if nonnull
       then TUtils.non_null env ty

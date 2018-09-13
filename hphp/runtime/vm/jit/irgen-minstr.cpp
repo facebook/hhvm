@@ -949,31 +949,6 @@ SSATmp* emitKeysetEmptyElem(IRGS& env, SSATmp* base, SSATmp* key) {
   return gen(env, KeysetEmptyElem, base, key);
 }
 
-void emitVectorSet(IRGS& env, SSATmp* base, SSATmp* key, SSATmp* value) {
-  auto const size = gen(env, LdVectorSize, base);
-  checkCollectionBounds(env, base, key, size);
-
-  ifThen(
-    env,
-    [&] (Block* taken) {
-      gen(env, VectorHasImmCopy, taken, base);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      gen(env, VectorDoCow, base);
-    }
-  );
-
-  gen(env, IncRef, value);
-  auto const vecBase = gen(env, LdVectorBase, base);
-  static_assert(sizeof(TypedValue) == 16,
-                "TypedValue size expected to be 16 bytes");
-  auto const idx = gen(env, Shl, key, cns(env, 4));
-  auto const oldVal = gen(env, LdElem, vecBase, idx);
-  gen(env, StElem, vecBase, idx, value);
-  decRef(env, oldVal);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
@@ -1991,7 +1966,7 @@ SSATmp* setElemImpl(IRGS& env, SSATmp* key) {
       break;
 
     case SimpleOp::Vector:
-      emitVectorSet(env, extractBase(env), key, value);
+      gen(env, VectorSet, extractBase(env), key, value);
       break;
 
     case SimpleOp::Map:

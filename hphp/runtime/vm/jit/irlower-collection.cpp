@@ -195,25 +195,6 @@ void cgLdVectorBase(IRLS& env, const IRInstruction* inst) {
   v << lea{arr[PackedArray::entriesOffset()], dst};
 }
 
-void cgVectorHasImmCopy(IRLS& env, const IRInstruction* inst) {
-  assertHasVectorSrc(inst, false);
-
-  auto const src = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  auto const arr = v.makeReg();
-  v << load{src[BaseVector::arrOffset()], arr};
-  auto const sf = emitCmpRefCount(v, OneReference, arr);
-  v << jcc{CC_NE, sf, {label(env, inst->next()), label(env, inst->taken())}};
-}
-
-void cgVectorDoCow(IRLS& env, const IRInstruction* inst) {
-  assertHasVectorSrc(inst, false);
-
-  cgCallHelper(vmain(env), env, CallSpec::direct(triggerCow),
-               kVoidDest, SyncOptions::Sync, argGroup(env, inst).ssa(0));
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Pair
 

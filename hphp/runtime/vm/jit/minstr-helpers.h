@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 
 namespace HPHP { namespace jit { namespace MInstrHelpers {
 
@@ -1225,6 +1226,16 @@ template<KeyType keyType>
 void mapSetImpl(c_Map* map, key_type<keyType> key, Cell value) {
   // XXX: we should call this directly from the TC.
   map->set(key, value);
+}
+
+inline
+void vectorSetImplI(c_Vector* vector, int64_t key, Cell value) {
+  vector->set(key, value);
+}
+
+[[noreturn]] inline
+void vectorSetImplS(c_Vector* vector, StringData* key, Cell value) {
+  BaseVector::throwBadKeyType();
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -3202,6 +3202,10 @@ fields of that struct for holding intermediate values.
 
   Set element with key S1 in S0 to S2.
 
+| VectorSet, ND, S(Obj) S(Int,Str) S(Cell), NF
+
+  Set element with key S1 in S0 to S2.
+
 | SetElem, DSetElem, S(LvalToGen) S(Cell) S(Cell) S(MIPropSPtr,Nullptr), MElem|PRc
 
   Set element with key S1 in S0 to S2. SetElem returns a Nullptr in the common
@@ -3383,16 +3387,6 @@ fields of that struct for holding intermediate values.
 | LdVectorSize, D(Int), S(Obj), NF
 
   Returns the size of the given Vector collection in S0.
-
-| VectorDoCow, ND, S(Obj), NF
-
-  Triggers a copy on write for a Vector that has a live ImmVector sharing
-  the same copy of the elements.
-
-| VectorHasImmCopy, ND, S(Obj), B
-
-  Given a vector, check if it has a immutable copy and jump to the taken branch
-  if so.
 
 | ColIsEmpty, D(Bool), S(Obj), NF
 

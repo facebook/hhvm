@@ -249,9 +249,12 @@ public:
   /*
    * Add `k' => `v' to the Vector, increffing `v' if it's refcounted.
    */
-  void set(int64_t key, const TypedValue* val) {
+  void set(int64_t key, TypedValue val) {
     mutate();
     setRaw(key, val);
+  }
+  void set(int64_t key, const TypedValue* val) {
+    set(key, *val);
   }
   void set(int64_t key, const Variant& val) {
     set(key, val.toCell());
@@ -354,8 +357,8 @@ protected:
   // setRaw() assigns a value to the specified key in this Vector but doesn't
   // check for an immutable buffer, so it's only safe to use in some cases.
   // If you're not sure, use set() instead.
-  void setRaw(int64_t key, const TypedValue* val) {
-    assertx(!isRefType(val->m_type));
+  void setRaw(int64_t key, TypedValue val) {
+    assertx(!isRefType(val.m_type));
     assertx(canMutateBuffer());
     if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
       collections::throwOOB(key);
@@ -363,8 +366,11 @@ protected:
     }
     TypedValue* tv = &data()[key];
     auto const oldTV = *tv;
-    cellDup(*val, *tv);
+    cellDup(val, *tv);
     tvDecRefGen(oldTV);
+  }
+  void setRaw(int64_t key, const TypedValue* val) {
+    setRaw(key, *val);
   }
   void setRaw(int64_t key, const Variant& val) {
     setRaw(key, val.toCell());
@@ -561,7 +567,6 @@ private:
   // Friends
   friend struct collections::CollectionsExtension;
   friend void collections::append(ObjectData* obj, TypedValue* val);
-  friend void triggerCow(c_Vector* vec);
 
   friend struct BaseMap;
   friend struct c_Pair;

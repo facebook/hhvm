@@ -8,8 +8,6 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-struct c_Vector;
-void triggerCow(c_Vector* vec);
 ArrayIter getArrayIterHelper(const Variant& v, size_t& sz);
 
 namespace collections {

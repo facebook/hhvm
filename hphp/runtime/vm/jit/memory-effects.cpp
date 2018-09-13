@@ -1510,11 +1510,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    */
   case MapIsset:
   case PairIsset:
-  case VectorDoCow:
   case VectorIsset:
     return may_load_store(AHeapAny, AEmpty /* Note */);
   case MapGet:
   case MapSet:
+  case VectorSet:
     return may_reenter(inst, may_load_store(AHeapAny, AEmpty /* Note */));
 
   case LdInitPropAddr:
@@ -1940,7 +1940,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvObjToBool:
   case CountCollection:
   case LdVectorSize:
-  case VectorHasImmCopy:
   case CheckPackedArrayDataBounds:
   case LdColVec:
   case LdColDict:

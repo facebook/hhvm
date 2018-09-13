@@ -1270,6 +1270,20 @@ void cgKeysetIdx(IRLS& env, const IRInstruction* inst) {
 IMPL_OPCODE_CALL(PairIsset);
 IMPL_OPCODE_CALL(VectorIsset);
 
+void cgVectorSet(IRLS& env, const IRInstruction* inst) {
+  auto const target = inst->src(1)->isA(TInt)
+    ? CallSpec::direct(MInstrHelpers::vectorSetImplI)
+    : CallSpec::direct(MInstrHelpers::vectorSetImplS);
+
+  auto const args = argGroup(env, inst)
+    .ssa(0)
+    .ssa(1)
+    .typedValue(2);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
+}
+
 void cgMapGet(IRLS& env, const IRInstruction* inst) {
   auto const target = inst->src(1)->isA(TInt)
     ? CallSpec::direct(MInstrHelpers::mapGetImpl<KeyType::Int>)

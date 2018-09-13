@@ -663,6 +663,7 @@ bool canDCE(IRInstruction* inst) {
   case DictSet:
   case DictSetRef:
   case MapSet:
+  case VectorSet:
   case SetElem:
   case SetWithRefElem:
   case SetRange:
@@ -688,8 +689,6 @@ bool canDCE(IRInstruction* inst) {
   case ProfileSubClsCns:
   case CheckPackedArrayDataBounds:
   case LdVectorSize:
-  case VectorDoCow:
-  case VectorHasImmCopy:
   case BeginCatch:
   case EndCatch:
   case UnwindCheckSideExit:

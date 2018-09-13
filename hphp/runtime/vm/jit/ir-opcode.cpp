@@ -517,6 +517,7 @@ bool opcodeMayRaise(Opcode opc) {
   case UnsetProp:
   case VecSet:
   case VecSetRef:
+  case VectorSet:
   case VerifyParamCallable:
   case VerifyParamCls:
   case VerifyParamFail:
@@ -986,8 +987,6 @@ bool opcodeMayRaise(Opcode opc) {
   case UnboxPtr:
   case Unreachable:
   case UnwindCheckSideExit:
-  case VectorDoCow:
-  case VectorHasImmCopy:
   case VectorIsset:
   case XorBool:
   case XorInt:

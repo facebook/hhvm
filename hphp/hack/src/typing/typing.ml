@@ -552,7 +552,7 @@ and fun_ ?(abstract=false) env return pos named_body f_kind =
     Typing_sequencing.sequence_check_block named_body.fnb_nast;
     let { Typing_env_return_info.return_type = ret; _} = Env.get_return env in
     let env =
-      if Nast_terminality.Terminal.block env named_body.fnb_nast ||
+      if not @@ LEnv.has_next env ||
         abstract ||
         named_body.fnb_unsafe ||
         !auto_complete
@@ -705,9 +705,8 @@ and stmt env = function
   | Noop ->
       env, T.Noop
   | Expr e ->
-
       let env, te, ty = expr ~is_expr_statement:true env e in
-      let env = if TFTerm.expression_exits te ty
+      let env = if TFTerm.expression_exits env e
         then LEnv.move_and_merge_next_in_cont env C.Exit
         else env in
       (* NB: this check does belong here and not in expr, even though it only
@@ -2815,8 +2814,12 @@ and anon_check_param env param =
 and anon_block env b =
   let is_not_next = function C.Next -> false | _ -> true in
   let all_but_next = List.filter C.all ~f:is_not_next in
-  let env, tb = LEnv.stash_and_do env all_but_next (fun env -> block env b) in
-  env, tb
+  let env, (tb, implicit_return) = LEnv.stash_and_do env all_but_next (
+    fun env ->
+      let env, tb = block env b in
+      let implicit_return = LEnv.has_next env in
+      env, (tb, implicit_return)) in
+  env, tb, implicit_return
 
 (* Make a type-checking function for an anonymous function. *)
 and anon_make tenv p f ft idl =
@@ -2927,10 +2930,9 @@ and anon_make tenv p f ft idl =
             ~is_by_ref:f.f_ret_by_ref
             hret) in
         let local_tpenv = env.Env.lenv.Env.tpenv in
-        let env, tb = anon_block env nb.fnb_nast in
+        let env, tb, implicit_return = anon_block env nb.fnb_nast in
         let env =
-          if Nast_terminality.Terminal.block tenv nb.fnb_nast
-            || nb.fnb_unsafe || !auto_complete
+          if not implicit_return || nb.fnb_unsafe || !auto_complete
           then env
           else fun_implicit_return env p hret f.f_fun_kind
         in

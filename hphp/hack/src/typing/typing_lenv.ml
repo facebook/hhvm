@@ -1,4 +1,4 @@
-  (**
+(**
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -189,3 +189,8 @@ let env_with_empty_fakes env =
       env.Env.lenv with Env.fake_members = Env.empty_fake_members;
     }
   }
+
+let has_next env =
+  match get_cont_option env C.Next with
+  | None -> false
+  | Some _ -> true

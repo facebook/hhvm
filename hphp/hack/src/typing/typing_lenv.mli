@@ -85,3 +85,5 @@ val stash_and_do :
   Typing_env.env * 'a) -> Typing_env.env * 'a
 val env_with_empty_fakes :
   Typing_env.env -> Typing_env.env
+val has_next :
+  Typing_env.env -> bool

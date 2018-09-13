@@ -8,13 +8,49 @@
  *)
 
 
-(* module checking that all the class members are properly initialized *)
+(* Module checking that all the class members are properly initialized.
+ * To be more precise, this checks that if the constructor does not throw,
+ * it initializes all members. *)
 open Core_kernel
 open Nast
-open Utils
 
 module DICheck = Decl_init_check
 module SN = Naming_special_names
+
+module SSetWTop = struct
+  type t =
+    | Top
+    | Set of SSet.t
+
+  let union s1 s2 =
+    match s1, s2 with
+    | Top, _
+    | _, Top -> Top
+    | Set s1, Set s2 -> Set (SSet.union s1 s2)
+
+  let inter s1 s2 =
+    match s1, s2 with
+    | Top, s
+    | s, Top -> s
+    | Set s1, Set s2 -> Set (SSet.inter s1 s2)
+
+  let inter_list (sl: t list) =
+    List.fold_left ~f:inter ~init:Top sl
+
+  let add x s =
+    match s with
+    | Top -> Top
+    | Set s -> Set (SSet.add x s)
+
+  let mem x s =
+    match s with
+    | Top -> true
+    | Set s -> SSet.mem x s
+
+  let empty = Set SSet.empty
+end
+
+module S = SSetWTop
 
 (* Exception raised when we hit a return statement and the initialization
  * is not over.
@@ -32,7 +68,7 @@ module SN = Naming_special_names
  *
  *  What is effectively initialized: { x }
  *)
-exception InitReturn of SSet.t
+exception InitReturn of S.t
 
 (* Module initializing the environment
    Originally, every class member has 2 possible states,
@@ -105,6 +141,13 @@ let is_whitelisted = function
   | x when x = SN.StdlibFunctions.get_class -> true
   | _ -> false
 
+let save_initialized_members_for_suggest cname initialized_props =
+  let props_to_save = match initialized_props with
+  | S.Top -> SSet.empty (* Constructor always throws *)
+  | S.Set s -> s in
+  Typing_suggest.save_initialized_members cname props_to_save
+
+
 let rec class_ tenv c =
   if c.c_mode = FileInfo.Mdecl then () else
   match c.c_constructor with
@@ -118,7 +161,7 @@ let rec class_ tenv c =
     let env = Env.make tenv c in
     let inits = constructor env c.c_constructor in
 
-    let check_inits = begin fun () ->
+    let check_inits inits =
       let uninit_props = SMap.filter (fun prop elt ->
         if SSet.mem prop inits then false
         else Option.value_map elt
@@ -130,34 +173,73 @@ let rec class_ tenv c =
           Errors.no_construct_parent p
         else
           Errors.not_initialized (p, snd c.c_name) (SMap.keys uninit_props)
-      end
-    end in
+      end in
 
-    Typing_suggest.save_initialized_members (snd c.c_name) inits;
+    let check_throws_or_init_all inits =
+      match inits with
+      | S.Top ->
+        (* Constructor always throw, so checking that all properties are
+         * initialized is irrelevant. *)
+        ()
+      | S.Set inits ->
+        check_inits inits in
+
+    save_initialized_members_for_suggest (snd c.c_name) inits;
     if c.c_kind = Ast.Ctrait || c.c_kind = Ast.Cabstract
     then begin
       let has_constructor = match c.c_constructor with
         | None -> false
         | Some m when m.m_abstract -> false
         | Some _ -> true in
-      if has_constructor then check_inits () else ()
+      if has_constructor then check_throws_or_init_all inits else ()
     end
-    else check_inits ()
+    else check_throws_or_init_all inits
   )
 
+(**
+ * Returns the set of properties initialized by the constructor.
+ * More exactly, returns a SSetWTop.t, i.e. either a set, or Top, which is
+ * the top element of the set of sets of properties, i.e. a set containing
+ * all the possible properties.
+ * Top is returned for a block of statements if
+ * this block always throws. It is an abstract construct used to deal
+ * gracefully with control flow.
+ *
+ * For example, if we have an `if` statement like:
+ *
+ * ```
+ * if (...) {
+ *   // This branch initialize a set of properties S1
+ *   ...
+ * } else {
+ *   // This branch initialize another set of properties S2
+ *   ...
+ * }
+ * ```
+ *
+ * then the set `S` of properties initialized by this `if` statement is the
+ * intersection `S1 /\ S2`.
+ * If one of the branches throws, say the first branch, then the set `S`
+ * of properties initialized by the `if` statement is equal to the set of
+ * properties initialized by the branch that does not throw, i.e. `S = S2`.
+ * This amounts to saying that `S1` is some top element of the set of sets
+ * of variables, which we call `Top`, which has the property that for all
+ * set S of properties, S is included in `Top`, such that `S = S1 /\ S2`
+ * still holds.
+ *)
 and constructor env cstr =
   match cstr with
-    | None -> SSet.empty
+    | None -> S.empty
     | Some cstr ->
-      let check_param_initializer = fun e -> ignore(expr env SSet.empty e) in
+      let check_param_initializer = fun e -> ignore (expr env S.empty e) in
       List.iter cstr.m_params (fun p ->
         Option.iter p.param_expr check_param_initializer
       );
       let b = Nast.assert_named_body cstr.m_body in
-      toplevel env SSet.empty b.fnb_nast
+      toplevel env S.empty b.fnb_nast
 
 and assign _env acc x =
-  SSet.add x acc
+  S.add x acc
 
 and assign_expr env acc e1 =
   match e1 with
@@ -177,12 +259,15 @@ and stmt env acc st =
         when m = SN.Members.__construct ->
       let acc = List.fold_left ~f:expr ~init:acc el in
       assign env acc DICheck.parent_init_prop
-    | Expr e -> expr acc e
+    | Expr e ->
+      if (Typing_func_terminality.expression_exits env.tenv e)
+        then S.Top
+        else expr acc e
     | GotoLabel _
     | Goto _
     | Break _ -> acc
     | Continue _ -> acc
-    | Throw (_, e) -> expr acc e
+    | Throw _ -> S.Top
     | Return (_, None) ->
       if are_all_init env acc
       then acc
@@ -197,15 +282,9 @@ and stmt env acc st =
        -> List.fold_left ~f:expr ~init:acc el
     | If (e1, b1, b2) ->
       let acc = expr acc e1 in
-      let is_term1 = Nast_terminality.Terminal.block env.tenv b1 in
-      let is_term2 = Nast_terminality.Terminal.block env.tenv b2 in
       let b1 = block acc b1 in
       let b2 = block acc b2 in
-      if is_term1
-      then SSet.union acc b2
-      else if is_term2
-      then SSet.union acc b1
-      else SSet.union acc (SSet.inter b1 b2)
+      S.union acc (S.inter b1 b2)
     | Do (b, e) ->
       let acc = block acc b in
       expr acc e
@@ -218,28 +297,22 @@ and stmt env acc st =
       expr acc e1
     | Switch (e, cl) ->
       let acc = expr acc e in
-      let _ = List.map cl (case acc) in
-      let cl = List.filter cl (function c ->
-        not (Nast_terminality.Terminal.case env.tenv c)) in
       let cl = List.map cl (case acc) in
-      let c = inter_list cl in
-      SSet.union acc c
+      let c = S.inter_list cl in
+      S.union acc c
     | Foreach (e, _, _) ->
       let acc = expr acc e in
       acc
     | Try (b, cl, fb) ->
       let c = block acc b in
       let f = block acc fb in
-      let _ = List.map cl (catch acc) in
-      let cl = List.filter cl (fun (_, _, b) ->
-        not (Nast_terminality.Terminal.block env.tenv b)) in
       let cl = List.map cl (catch acc) in
-      let c = inter_list (c :: cl) in
+      let c = S.inter_list (c :: cl) in
       (* the finally block executes even if *none* of try and catch do *)
-      let acc = SSet.union acc f in
-      SSet.union acc c
+      let acc = S.union acc f in
+      S.union acc c
+    | Fallthrough -> S.empty
     | Unsafe_block _
-    | Fallthrough
     | Noop -> acc
     | Let (_, _, e) ->
       (* Scoped local variable cannot escape the block *)
@@ -258,11 +331,11 @@ and block env acc l =
     raise (InitReturn acc_before_block)
 
 and are_all_init env set =
-  SMap.fold (fun cv _ acc -> acc && SSet.mem cv set) env.props true
+  SMap.fold (fun cv _ acc -> acc && S.mem cv set) env.props true
 
 and check_all_init p env acc =
   SMap.iter begin fun cv _ ->
-    if not (SSet.mem cv acc)
+    if not (S.mem cv acc)
     then Errors.call_before_init p cv
   end env.props
 
@@ -292,7 +365,7 @@ and expr_ env acc p e =
   | ImmutableVar _
   | Lplaceholder _ | Dollardollar _ -> acc
   | Obj_get ((_, This), (_, Id (_, vx as v)), _) ->
-      if SMap.mem vx env.props && not (SSet.mem vx acc)
+      if SMap.mem vx env.props && not (S.mem vx acc)
       then (Errors.read_before_write v; acc)
       else acc
   | Clone e -> expr acc e
@@ -404,8 +477,8 @@ and expr_ env acc p e =
       end fdm acc
 
 and case env acc = function
-  | Default b -> block env acc b
-  | Case (_, e) -> block env acc e
+  | Default b
+  | Case (_, b) -> block env acc b
 
 and catch env acc (_, _, b) = block env acc b
 

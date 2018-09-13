@@ -30,17 +30,36 @@ let get_static_meth tcopt (cls_name:string) (meth_name:string) =
       | Some _ -> None
     end
 
-let raise_exit_if_terminal = function
-  | None -> ()
+let funopt_is_noreturn = function
   | Some ({ Typing_defs.ft_ret = (_r, Typing_defs.Tprim Nast.Tnoreturn); _})
-    -> raise Exit
-  | Some _ -> ()
+    -> true
+  | _ -> false
 
-let expression_exits (_, te) (_, ty) =
-  match te, ty with
-  | T.Assert(T.AE_assert (_, T.False)), _ -> true
-  | _, Tprim Tnoreturn -> true
-  | T.Yield_break, _ -> true
+let raise_exit_if_terminal f =
+  begin if funopt_is_noreturn f then raise Exit; end
+
+let static_meth_is_noreturn env ci meth_id =
+  let class_name = match ci with
+    | CI (cls_id, _) -> Some (snd cls_id)
+    | CIself | CIstatic -> Some (Typing_env.get_self_id env)
+    | CIparent -> Some (Typing_env.get_parent_id env)
+    | CIexpr _ -> None (* we declared the types, but didn't check the bodies yet
+                       so can't tell anything here *)
+  in
+  match class_name with
+  | Some class_name ->
+    funopt_is_noreturn
+      (get_static_meth (Env.get_options env) class_name (snd meth_id))
+  | None -> false
+
+let expression_exits env (_, e) =
+  match e with
+  | Assert(AE_assert (_, False))
+  | Yield_break -> true
+  | Call (Cnormal, (_, Id (_, fun_name)), _, _, _) ->
+    funopt_is_noreturn @@ get_fun (Env.get_options env) fun_name
+  | Call (Cnormal, (_, Class_const ((_, ci), meth_id)), _, _, _) ->
+    static_meth_is_noreturn env ci meth_id
   | _ -> false
 
 let is_noreturn env =

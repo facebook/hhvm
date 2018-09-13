@@ -103,6 +103,7 @@ let rec reason = function
   | Rsum_dynamic p -> Rsum_dynamic (pos p)
   | Rbitwise_dynamic p -> Rbitwise_dynamic (pos p)
   | Rincdec_dynamic p -> Rincdec_dynamic (pos p)
+  | Rnull p           -> Rnull (pos p)
 
 let string_id (p, x) = pos p, x
 

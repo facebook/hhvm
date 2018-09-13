@@ -600,13 +600,12 @@ and simplify_subtype
   | _, (_, Toption (_, Tnonnull)) -> valid ()
 
   (* void is the type of null and is a subtype of any option type. *)
-  | (_, Tprim Nast.Tvoid), (_, Toption _)
-    when TUtils.is_void_type_of_null env -> valid ()
+  | (_, Tprim Nast.Tvoid), (_, Toption _) -> valid ()
 
   (* If t1 <: ?t2, where t1 is guaranteed not to contain null, then
    * t1 <: t2, and the converse is obviously true as well.
    *)
-  | (_, (Tprim Nast.Tvoid | Tabstract (AKdependent _, None))), (_, Toption ty_super) ->
+  | (_, Tabstract (AKdependent _, None)), (_, Toption ty_super) ->
     simplify_subtype ~deep ~this_ty ty_sub ty_super env
 
   (* Internally, newtypes are always equipped with an upper bound.
@@ -615,8 +614,7 @@ and simplify_subtype
    *)
   | (_, Tabstract (AKnewtype _, None)), (_, Toption _) -> assert false
 
-  | (_, Toption ty_sub'), (_, Tprim Nast.Tvoid)
-    when TUtils.is_void_type_of_null env ->
+  | (_, Toption ty_sub'), (_, Tprim Nast.Tvoid) ->
     simplify_subtype ~deep ~this_ty ty_sub' ty_super env
 
   (* Subtype is known to be nullable, so never a subtype of nonnull *)

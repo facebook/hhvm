@@ -66,10 +66,6 @@ val union_lenv_list :
   Typing_env.env ->
   Typing_env.local_env ->
   Typing_env.local_env list -> Typing_env.env
-val ty_union :
-  Typing_env.env ->
-  Typing_defs.locl Typing_defs.ty ->
-  Typing_defs.locl Typing_defs.ty -> Typing_env.env * Typing_defs.locl Typing_defs.ty
 
 (* When entering control flow structures, some
  * preexisting continuations must be stashed away and then restored

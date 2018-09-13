@@ -254,11 +254,17 @@ and array_kind =
   | AKany
   (* An array declared as a varray. *)
   | AKvarray of locl ty
-  | AKvec of locl ty
   (* An array declared as a darray. *)
   | AKdarray of locl ty * locl ty
   (* An array annotated as a varray_or_darray. *)
   | AKvarray_or_darray of locl ty
+  (* An array "used like a vec".
+   * /!\ An actual `vec` is represented as a `Tclass ("\\vec", [...])`
+   *)
+  | AKvec of locl ty
+  (* An array "used like a map or dict".
+   * /!\ An actual `dict` is represented as a `Tclass ("\\dict", [...])`
+   *)
   | AKmap of locl ty * locl ty
   (* This is a type created when we see array() literal *)
   | AKempty

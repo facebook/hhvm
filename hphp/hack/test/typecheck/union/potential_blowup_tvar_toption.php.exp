@@ -1,2 +1,4 @@
 File "potential_blowup_tvar_toption.php", line 12, characters 10-11:
 Undefined variable: $c (Naming[2050])
+File "potential_blowup_tvar_toption.php", line 13, characters 10-11:
+Undefined variable: $d (Naming[2050])

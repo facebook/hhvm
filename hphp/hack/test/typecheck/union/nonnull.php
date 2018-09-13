@@ -15,15 +15,15 @@ class A {}
 newtype E as ?int = int;
 
 function f(
-    bool $cond,
-    nonnull $nonnull,
-    ?int $nullableInt,
-    ?A $nullableA,
-    B $b,
-    C $c,
-    D $d,
-    E $e,
-  ): void {
+  bool $cond,
+  nonnull $nonnull,
+  ?int $nullableInt,
+  ?A $nullableA,
+  B $b,
+  C $c,
+  D $d,
+  E $e,
+): void {
 
   $x = ($cond ? 1 : $nonnull);
   hh_show($x);

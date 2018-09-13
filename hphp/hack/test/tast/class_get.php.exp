@@ -10,7 +10,8 @@
          cv_visibility = Private;
          cv_type = (Some ([13:18-22], (Hoption ([13:19-22], (Hprim Tint)))));
          cv_id = ([13:23-25], "x");
-         cv_expr = (Some (([13:28-32], ?_), Null)); cv_user_attributes = [] }
+         cv_expr = (Some (([13:28-32], void), Null)); cv_user_attributes = []
+         }
         ];
       c_vars = []; c_constructor = None;
       c_static_methods =

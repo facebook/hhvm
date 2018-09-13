@@ -1,5 +1,5 @@
 File "terminal_try_with_finally.php", line 16, characters 5-15:
-  ^(bool | string | int)
+  (string | bool | int)
 File "terminal_try_with_finally.php", line 16, characters 5-15:[2]
   int
 File "terminal_try_with_finally.php", line 16, characters 5-15:[3]

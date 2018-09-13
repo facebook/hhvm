@@ -1,5 +1,5 @@
 File "for_assign_in_invariant.php", line 55, characters 3-13:
-  ^(C as C | B as B | D as D | A as A)
+  (C as C | B as B | D as D | A as A)
 File "for_assign_in_invariant.php", line 38, characters 54-55:
 Invalid argument (Typing[4110])
   File "for_assign_in_invariant.php", line 31, characters 58-59:

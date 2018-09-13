@@ -1,1 +1,4 @@
-No errors
+File "shape_key_exists5.php", line 15, characters 3-29:
+This Shapes::keyExists() check is always false (Typing[4250])
+File "shape_key_exists5.php", line 7, characters 8-22:
+The field 'z' is not defined in this shape

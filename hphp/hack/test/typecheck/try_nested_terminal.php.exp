@@ -1,9 +1,9 @@
 File "try_nested_terminal.php", line 26, characters 7-17:
-  ^(F | D | E)
+  (F | D | E)
 File "try_nested_terminal.php", line 31, characters 7-17:
-  ^(D | H | F | E | G)
+  (H | F | D | E | G)
 File "try_nested_terminal.php", line 31, characters 7-17:[2]
-  ^(G | E | D | F)
+  (G | E | D | F)
 File "try_nested_terminal.php", line 31, characters 7-17:[3]
   H
 File "try_nested_terminal.php", line 31, characters 7-17:[4]
@@ -11,15 +11,15 @@ File "try_nested_terminal.php", line 31, characters 7-17:[4]
 File "try_nested_terminal.php", line 33, characters 5-15:
   F
 File "try_nested_terminal.php", line 36, characters 5-15:
-  ^(B | G | E | D | F | C)
+  (F | E | C | B | G | D)
 File "try_nested_terminal.php", line 38, characters 5-15:
-  ^(H | C | F | D | E | G | B)
+  (G | C | E | B | D | H | F)
 File "try_nested_terminal.php", line 38, characters 5-15:[2]
-  ^(B | G | E | D | F | C)
+  (F | E | C | B | G | D)
 File "try_nested_terminal.php", line 38, characters 5-15:[3]
-  ^(F | H)
+  (F | H)
 File "try_nested_terminal.php", line 38, characters 5-15:[4]
-  ^(B | G | E | D | F | C)
+  (F | E | C | B | G | D)
 File "try_nested_terminal.php", line 40, characters 3-13:
-  ^(B | G | E | D | F | C)
+  (F | E | C | B | G | D)
 No errors

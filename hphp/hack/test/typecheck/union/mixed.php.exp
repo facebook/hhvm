@@ -1,17 +1,17 @@
 File "mixed.php", line 17, characters 3-13:
-  ^(A as A)
+  (A as A)
 File "mixed.php", line 25, characters 3-13:
-  ^(nonnull | A as A)
+  (nonnull | A as A)
 File "mixed.php", line 34, characters 3-13:
   mixed
 File "mixed.php", line 43, characters 3-13:
-  ^(object | A as A)
+  (object | A as A)
 File "mixed.php", line 54, characters 3-13:
-  ^((function(string $s1, string $s2): int) | (function(string $s1, string $s2): string))
+  (function(string $s1, string $s2): (int | string))
 File "mixed.php", line 63, characters 3-13:
-  ^([fun] | [fun])
+  ([fun] | [fun])
 File "mixed.php", line 72, characters 3-13:
-  ^(A | A as A)
+  A
 File "mixed.php", line 76, characters 3-13:
   (int | string)
 File "mixed.php", line 79, characters 3-13:
@@ -26,7 +26,31 @@ File "mixed.php", line 91, characters 3-13:
   (A as A | B)
 File "mixed.php", line 27, characters 12-13:
 Invalid argument (Typing[4110])
-File "mixed.php", line 102, characters 19-19:
-This is an object of type A
-File "mixed.php", line 11, characters 48-54:
-It is incompatible with a nonnull value
+  File "mixed.php", line 102, characters 19-19:
+  This is an object of type A
+  File "mixed.php", line 11, characters 48-54:
+  It is incompatible with a nonnull value
+File "mixed.php", line 36, characters 12-13:
+Invalid argument (Typing[4110])
+  File "mixed.php", line 102, characters 19-19:
+  This is an object of type A
+  File "mixed.php", line 11, characters 34-38:
+  It is incompatible with a mixed value
+File "mixed.php", line 44, characters 17-18:
+Invalid argument (Typing[4110])
+  File "mixed.php", line 101, characters 24-29:
+  This is an object of type Object
+  File "mixed.php", line 41, characters 14-14:
+  It is incompatible with an object of type A
+File "mixed.php", line 56, characters 18-19:
+Invalid argument (Typing[4110])
+  File "mixed.php", line 96, characters 52-54:
+  This is an int
+  File "mixed.php", line 52, characters 36-41:
+  It is incompatible with a string
+File "mixed.php", line 65, characters 28-29:
+Invalid argument (Typing[4039])
+  File "mixed.php", line 94, characters 35-60:
+  Number of arguments doesn't match
+  File "mixed.php", line 59, characters 10-31:
+  Because of this definition

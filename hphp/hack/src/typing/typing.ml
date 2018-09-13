@@ -31,6 +31,7 @@ module Dep          = Typing_deps.Dep
 module Async        = Typing_async
 module SubType      = Typing_subtype
 module Unify        = Typing_unify
+module Union        = Typing_union
 module TGen         = Typing_generic
 module SN           = Naming_special_names
 module TI           = Typing_instantiability
@@ -49,6 +50,7 @@ module CMap         = C.Map
 module Try          = Typing_try
 module TR           = Typing_reactivity
 module FL           = FeatureLogging
+module U            = Typing_union
 
 (* Maps a Nast to a Tast where every type is Tany.
    Used to produce a Tast for unsafe code without inferring types for it. *)
@@ -783,7 +785,7 @@ and stmt env = function
       let return_type = TR.strip_condition_type_in_return env return_type in
       let rty = Typing_return.wrap_awaitable env p rty in
       let env, rty = (match snd (Env.expand_type env return_type) with
-        | r, Tprim Tvoid when not (TUtils.is_void_type_of_null env) ->
+        | r, Tprim Tvoid ->
             (* Yell about returning a value from a void function. This catches
              * more issues than just unifying with void would do -- in particular
              * just unifying allows you to return a Typing_utils.tany env from a void function,
@@ -1300,13 +1302,7 @@ and eif env ~expected ~coalesce p c e1 e2 =
    * latter takes local environments as arguments, but our types here
    * aren't assigned to local variables in an environment *)
   (* TODO: Omit if expected type is present and checked in calls to expr *)
-  let env, ty =
-    if Typing_defs.ty_equal ty1 ty2
-    then env, ty1
-    else
-      let env, ty1 = TUtils.unresolved env ty1 in
-      let env, ty2 = TUtils.unresolved env ty2 in
-      Type.union env.Env.pos Reason.URnone env ty1 ty2 in
+  let env, ty = Union.union env ty1 ty2 in
   let te = if coalesce then T.Binop(Ast.QuestionQuestion, tc, te2) else T.Eif(tc, te1, te2) in
   env, T.make_typed_expr p ty te, ty
 
@@ -1671,11 +1667,7 @@ and expr_
      * be null | t
      *)
   | Null ->
-      let ty =
-        if TUtils.is_void_type_of_null env
-        then Tprim Tvoid
-        else Toption (Env.fresh_type ()) in
-      make_result env T.Null (Reason.Rwitness p, ty)
+      make_result env T.Null (Reason.Rnull p, Tprim Tvoid)
   | String s ->
       make_result env (T.String s) (Reason.Rwitness p, Tprim Tstring)
   | String2 idl ->
@@ -3225,7 +3217,7 @@ and check_valid_rvalue p env ty =
             (Reason.to_string "A noreturn function always throws or exits" r);
           env, (r, Typing_utils.terr env)
 
-        | r, Tprim Tvoid when not (TUtils.is_void_type_of_null env) ->
+        | r, Tprim Tvoid when not @@ Reason.is_rnull r ->
           Errors.void_usage p
             (Reason.to_string "A void function doesn't return a value" r);
           env, (r, Typing_utils.terr env)
@@ -3507,13 +3499,13 @@ and assign_array_append pos ur env ty1 ty2 =
     env, (ty1, tpair)
   | r, Tclass ((_, n) as id, [tv])
     when n = SN.Collections.cVec || n = SN.Collections.cKeyset ->
-    let env, tv' = LEnv.ty_union env tv ty2 in
+    let env, tv' = U.union env tv ty2 in
     env, ((r, Tclass (id, [tv'])), tv')
   | r, Tarraykind (AKvec tv) ->
-    let  env, tv' = LEnv.ty_union env tv ty2 in
+    let  env, tv' = U.union env tv ty2 in
     env, ((r, Tarraykind (AKvec tv')), tv')
   | r, Tarraykind (AKvarray tv) ->
-    let  env, tv' = LEnv.ty_union env tv ty2 in
+    let  env, tv' = U.union env tv ty2 in
     env, ((r, Tarraykind (AKvarray tv')), tv')
   | r, Tdynamic -> env, (ty1, (r, Tdynamic))
   | _, Tobject ->
@@ -4634,7 +4626,7 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
         | Some { sft_optional = _; sft_ty } -> env, sft_ty)
     )
   | Toption ty -> nullable_container_get ty
-  | Tprim Nast.Tvoid when TUtils.is_void_type_of_null env ->
+  | Tprim Nast.Tvoid ->
       nullable_container_get (Reason.Rnone, Tany)
   | Tobject ->
       if Env.is_strict env
@@ -5118,7 +5110,7 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~(pos_params : expr list option) ?(ex
     end
 
   | _, Toption ty -> nullable_obj_get ty
-  | r, Tprim Nast.Tvoid when TUtils.is_void_type_of_null env ->
+  | r, Tprim Nast.Tvoid ->
     nullable_obj_get (r, Tany)
   | _, _ ->
     k (obj_get_concrete_ty ~is_method ~valkind ~explicit_tparams env ety1 cid id k_lhs)

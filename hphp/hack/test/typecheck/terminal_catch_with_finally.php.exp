@@ -1,7 +1,7 @@
 File "terminal_catch_with_finally.php", line 17, characters 5-15:
-  ^(bool | int | string)
+  (string | int | bool)
 File "terminal_catch_with_finally.php", line 17, characters 5-15:[2]
-  ^(bool | int)
+  (bool | int)
 File "terminal_catch_with_finally.php", line 17, characters 5-15:[3]
   string
 File "terminal_catch_with_finally.php", line 17, characters 5-15:[4]

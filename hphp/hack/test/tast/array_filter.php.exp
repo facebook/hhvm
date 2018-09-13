@@ -57,11 +57,11 @@
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
-               (([11:3-51], (Container<?string> | KeyedContainer<int, ?string>)),
+               (([11:3-51], Container<?string>),
                 (Binop ((Eq None),
-                   (([11:3-14], (Container<?string> | KeyedContainer<int, ?string>)),
+                   (([11:3-14], Container<?string>),
                     (Lvar ([11:3-14], $unresolved))),
-                   (([11:17-51], (Container<?string> | KeyedContainer<int, ?string>)),
+                   (([11:17-51], Container<?string>),
                     (Eif ((([11:17-19], bool), (Lvar ([11:17-19], $b))),
                        (Some (([11:22-32], Container<?string>),
                               (Lvar ([11:22-32], $container)))),
@@ -113,12 +113,12 @@
                     [], [(([17:16-24], _), (Lvar ([17:16-24], $untyped)))],
                     []))));
              (Expr
-                (([18:3-28], (array<arraykey, string> | array<int, string>)),
+                (([18:3-28], array<arraykey, string>),
                  (Call (Cnormal,
-                    (([18:3-15], (function(Container<?string> $input, ?(function(?string): bool) $callback): (array<arraykey, string> | array<int, string>))),
+                    (([18:3-15], (function(Container<?string> $input, ?(function(?string): bool) $callback): array<arraykey, string>)),
                      (Id ([18:3-15], "\\array_filter"))),
                     [],
-                    [(([18:16-27], (Container<?string> | KeyedContainer<int, ?string>)),
+                    [(([18:16-27], Container<?string>),
                       (Lvar ([18:16-27], $unresolved)))],
                     []))));
              (Expr
@@ -217,12 +217,12 @@
                       ],
                     []))));
              (Expr
-                (([27:3-32], (array<arraykey, ?string> | array<int, ?string>)),
+                (([27:3-32], array<arraykey, ?string>),
                  (Call (Cnormal,
-                    (([27:3-15], (function(Container<?string> $input, ?(function(?string): bool) $callback): (array<arraykey, ?string> | array<int, ?string>))),
+                    (([27:3-15], (function(Container<?string> $input, ?(function(?string): bool) $callback): array<arraykey, ?string>)),
                      (Id ([27:3-15], "\\array_filter"))),
                     [],
-                    [(([27:16-27], (Container<?string> | KeyedContainer<int, ?string>)),
+                    [(([27:16-27], Container<?string>),
                       (Lvar ([27:16-27], $unresolved)));
                       (([27:29-31], (function(?string $x): bool)),
                        (Lvar ([27:29-31], $f)))

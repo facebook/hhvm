@@ -310,7 +310,7 @@ module Full = struct
     let k: type b. b ty -> _ = fun x -> ty to_doc st env x in
     match x with
     | Tany -> text "_"
-    | Terr -> text "_"
+    | Terr -> text (if !debug_mode then "err" else "_")
     | Tthis -> text SN.Typehints.this
     | Tmixed -> text "mixed"
     | Tdynamic -> text "dynamic"

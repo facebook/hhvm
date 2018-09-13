@@ -1,3 +1,13 @@
+//// file1.php
+<?hh // strict
+
+newtype E<T> = mixed;
+
+newtype F<+T> = mixed;
+
+
+
+//// file2.php
 <?hh // strict
 
 class A<T> {
@@ -38,12 +48,22 @@ class B<T> {
 
 class C {}
 
+class D<+T> {}
+
 function f<T, Tu super C, Tv as C, Tw super C, Ty as C>(
   bool $b,
   A<int> $aint,
   A<int> $aint2,
   A<T> $at,
   A<T> $at2,
+  D<int> $dint,
+  D<string> $dstring,
+  E<int> $eint,
+  E<int> $eint2,
+  E<string> $estring,
+  F<int> $fint,
+  F<string> $fstring,
+  classname<C> $cl,
   Tu $u,
   Tv $v,
   Tw $w,
@@ -94,6 +114,27 @@ function f<T, Tu super C, Tv as C, Tw super C, Ty as C>(
   $x = ($b ? new A<int>() : new B(0));
   hh_show($x);
   hh_show($x->isAClass());
+
+  $x = ($b ? $dint : $dstring);
+  hh_show($x);
+
+  $x = ($b ? new D<int> () : new D<string>());
+  hh_show($x);
+
+  $x = ($b ? $dint : new D<string>());
+  hh_show($x);
+
+  $x = ($b ? $eint : $eint2);
+  hh_show($x);
+
+  $x = ($b ? $eint : $estring);
+  hh_show($x);
+
+  $x = ($b ? $fint : $fstring);
+  hh_show($x);
+
+  $x = ($b ? $cl : C::class);
+  hh_show($x);
 
   $x = ($b ? $u : $c);
   hh_show($x);

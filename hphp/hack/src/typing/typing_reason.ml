@@ -14,7 +14,7 @@ open Utils
 type t =
   | Rnone
   | Rwitness         of Pos.t
-  | Ridx             of Pos.t * t (* Used as an index into into a vector-like
+  | Ridx             of Pos.t * t (* Used as an index into a vector-like
                                      array or string. Position of indexing,
                                      reason for the indexed type *)
   | Ridx_vector      of Pos.t (* Used as an index, in the Vector case *)
@@ -90,6 +90,7 @@ type t =
   | Rregex           of Pos.t
   | Rlambda_use      of Pos.t
   | Rimplicit_upper_bound of Pos.t * string
+  | Rnull            of Pos.t
 
 and arg_position =
   | Aonly
@@ -282,9 +283,11 @@ let rec to_string prefix r =
   | Rregex _ ->
     [(p, prefix ^ " resulting from this regex pattern")]
   | Rlambda_use p ->
-      [(p, prefix ^ " because the lambda function was used here")]
+    [(p, prefix ^ " because the lambda function was used here")]
   | Rimplicit_upper_bound (_, cstr) ->
     [(p, prefix ^ " arising from an implicit 'as " ^ cstr ^ "' constraint on this type")]
+  | Rnull p ->
+    [(p, Printf.sprintf "%s (null has type void)" prefix)]
 
 and to_pos = function
   | Rnone     -> Pos.none
@@ -363,6 +366,7 @@ and to_pos = function
   | Rarith_ret_int p -> p
   | Rbitwise_dynamic p -> p
   | Rincdec_dynamic p -> p
+  | Rnull p -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -470,6 +474,11 @@ match r with
   | Rsum_dynamic _ -> "Rsum_dynamic"
   | Rbitwise_dynamic _ -> "Rbitwise_dynamic"
   | Rincdec_dynamic _ -> "Rincdec_dynamic"
+  | Rnull _ -> "Rnull"
+
+let is_rnull = function
+  | Rnull _ -> true
+  | _ -> false
 
 let pp fmt r =
   Format.pp_print_string fmt @@ to_constructor_string r

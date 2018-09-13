@@ -23,18 +23,20 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/req-root.h"
+#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
-#include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/systemlib.h"
+
+#include <folly/tracing/StaticTracepoint.h>
 
 namespace HPHP {
 
@@ -1461,7 +1463,7 @@ inline int64_t castKeyToInt<KeyType::Int>(int64_t key) {
 template <bool setResult, KeyType keyType>
 inline StringData* SetElemString(tv_lval base, key_type<keyType> key,
                                  Cell* value, const MInstrPropState* pState) {
-  int baseLen = val(base).pstr->size();
+  auto const baseLen = val(base).pstr->size();
   if (baseLen == 0) {
     SetElemEmptyish<keyType>(base, key, value, pState);
     if (!setResult) {
@@ -1510,26 +1512,30 @@ inline StringData* SetElemString(tv_lval base, key_type<keyType> key,
 
   // Create and save the result.
   assert(x >= 0); // x < 0 is handled above.
-  if (x < baseLen && !val(base).pstr->cowCheck()) {
+  auto const oldp = val(base).pstr;
+  if (x < baseLen && !oldp->cowCheck()) {
     // Modify base in place.  This is safe because the LHS owns the
     // only reference.
-    auto const oldp = val(base).pstr;
+    FOLLY_SDT(hhvm, hhvm_mut_modifychar, baseLen, x);
     auto const newp = oldp->modifyChar(x, y);
     if (UNLIKELY(newp != oldp)) {
+      // only way we can get here is due to a private (count==1) apc string.
       decRefStr(oldp);
       val(base).pstr = newp;
       type(base) = KindOfString;
     }
+    // NB: if x < capacity, we could have appended in-place here.
   } else {
+    FOLLY_SDT(hhvm, hhvm_cow_modifychar, baseLen, x);
     StringData* sd = StringData::Make(slen);
     char* s = sd->mutableData();
-    memcpy(s, val(base).pstr->data(), baseLen);
+    memcpy(s, oldp->data(), baseLen);
     if (x > baseLen) {
       memset(&s[baseLen], ' ', slen - baseLen - 1);
     }
     s[x] = y;
     sd->setSize(slen);
-    decRefStr(val(base).pstr);
+    decRefStr(oldp);
     val(base).pstr = sd;
     type(base) = KindOfString;
   }

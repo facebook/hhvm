@@ -22,8 +22,9 @@
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
-
 #include "hphp/util/conv-10.h"
+
+#include <folly/tracing/StaticTracepoint.h>
 
 #include <algorithm>
 
@@ -208,60 +209,45 @@ String& String::operator=(const std::string& s) {
 // concatenation and increments
 
 String& String::operator+=(const char* s) {
-  if (s && *s) {
-    if (empty()) {
-      m_str = req::ptr<StringData>::attach(StringData::Make(s, CopyString));
-    } else if (!m_str->cowCheck()) {
-      auto const tmp = m_str->append(folly::StringPiece{s});
-      if (UNLIKELY(tmp != m_str)) {
-        m_str = req::ptr<StringData>::attach(tmp);
-      }
-    } else {
-      m_str =
-        req::ptr<StringData>::attach(StringData::Make(m_str.get(), s));
-    }
-  }
-  return *this;
-}
-
-String& String::operator+=(const String& str) {
-  if (!str.empty()) {
-    if (empty()) {
-      m_str = str.m_str;
-    } else if (!m_str->cowCheck()) {
-      auto tmp = m_str->append(str.slice());
-      if (UNLIKELY(tmp != m_str)) {
-        m_str = req::ptr<StringData>::attach(tmp);
-      }
-    } else {
-      m_str = req::ptr<StringData>::attach(
-        StringData::Make(m_str.get(), str.slice())
-      );
-    }
-  }
-  return *this;
+  if (!s) return *this;
+  return operator+=(folly::StringPiece{s, strlen(s)});
 }
 
 String& String::operator+=(const std::string& str) {
-  return (*this += folly::StringPiece{str});
+  return operator+=(folly::StringPiece{str});
+}
+
+String& String::operator+=(const String& str) {
+  if (str.empty()) return *this;
+  if (empty()) {
+    // lhs is empty, just return str. No attempt to append in place even
+    // if lhs is private & reserved.
+    m_str = str.m_str;
+    return *this;
+  }
+  return operator+=(str.slice());
 }
 
 String& String::operator+=(folly::StringPiece slice) {
-  if (slice.size() == 0) {
+  if (slice.empty()) {
     return *this;
   }
-  if (m_str && !m_str->cowCheck()) {
-    auto const tmp = m_str->append(slice);
-    if (UNLIKELY(tmp != m_str)) {
-      m_str = req::ptr<StringData>::attach(tmp);
-    }
-    return *this;
-  }
-  if (empty()) {
+  if (!m_str) {
     m_str = req::ptr<StringData>::attach(
       StringData::Make(slice.begin(), slice.size(), CopyString));
     return *this;
   }
+  if (!m_str->cowCheck()) {
+    UNUSED auto const lsize = m_str->size();
+    FOLLY_SDT(hhvm, hhvm_mut_concat, lsize, slice.size());
+    auto const tmp = m_str->append(slice);
+    if (UNLIKELY(tmp != m_str)) {
+      // had to realloc even though count==1
+      m_str = req::ptr<StringData>::attach(tmp);
+    }
+    return *this;
+  }
+  FOLLY_SDT(hhvm, hhvm_cow_concat, m_str->size(), slice.size());
   m_str = req::ptr<StringData>::attach(
     StringData::Make(m_str.get(), slice)
   );
@@ -269,7 +255,7 @@ String& String::operator+=(folly::StringPiece slice) {
 }
 
 String& String::operator+=(folly::MutableStringPiece slice) {
-  return (*this += folly::StringPiece{slice.begin(), slice.size()});
+  return operator+=(folly::StringPiece{slice.begin(), slice.size()});
 }
 
 String&& operator+(String&& lhs, const char* rhs) {

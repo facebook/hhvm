@@ -368,6 +368,7 @@ and def =
   | Class of class_
   | Typedef of typedef
   | Constant of gconst
+  | Stmt of stmt
 
 let expr_to_string expr =
   match expr with

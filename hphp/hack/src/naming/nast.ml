@@ -687,6 +687,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | Class c -> this#on_class_ acc c
     | Typedef t -> this#on_typedef acc t
     | Constant g -> this#on_gconst acc g
+    | Stmt s -> this#on_stmt acc s
 
   method on_program acc p =
     let acc = List.fold_left p ~init:acc ~f:this#on_def in

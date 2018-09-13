@@ -7116,11 +7116,19 @@ let nast_to_tast opts nast =
     | Nast.Fun f       -> T.Fun (fun_def opts f)
     | Nast.Constant gc -> T.Constant (gconst_def opts gc)
     | Nast.Typedef td  -> T.Typedef (typedef_def opts td)
-    | Nast.Class c ->
+    | Nast.Class c -> begin
       match class_def opts c with
-      | Some c -> T.Class c
+      | Some c -> (T.Class c)
       | None -> failwith @@ Printf.sprintf
           "Error in declaration of class: %s" (snd c.c_name)
+    end
+    (* We don't typecheck top level statements:
+     * https://docs.hhvm.com/hack/unsupported/top-level
+     * so just create the minimal env for us to construct a Stmt.
+     *)
+    | Nast.Stmt s ->
+    let env = Env.empty opts Relative_path.default None in
+      T.Stmt (snd (stmt env s))
   in
   let tast = List.map nast convert_def in
   Tast_check.program tast;

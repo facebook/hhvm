@@ -318,6 +318,7 @@ struct
     | S.Class c -> T.Class (map_class menv c)
     | S.Typedef td -> T.Typedef (map_typedef menv td)
     | S.Constant gc -> T.Constant (map_gconst menv gc)
+    | S.Stmt s -> T.Stmt (map_stmt menv s)
 
   let map_program
     ~map_expr_annotation

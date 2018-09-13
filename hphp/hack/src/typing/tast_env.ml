@@ -138,6 +138,10 @@ let def_env d =
   | Class x -> class_env x
   | Typedef x -> typedef_env x
   | Constant x -> gconst_env x
+  (* We don't typecheck top level statements, so we rely on callers
+     dropping them before starting the typecheck.
+   *)
+  | Stmt _ -> assert false
 
 let set_ppl_lambda env =
   { env with Typing_env.inside_ppl_class = false }

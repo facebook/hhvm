@@ -84,7 +84,7 @@ module Annotations = struct
   end
 end
 
-module TypeAndPosAnnotatedAST = Nast.AnnotatedAST(Annotations)
+module TypeAndPosAnnotatedAST = Aast.AnnotatedAST(Annotations)
 
 include TypeAndPosAnnotatedAST
 

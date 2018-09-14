@@ -1,0 +1,10 @@
+Linearization for class \Foo:
+[\Foo]
+Linearization for class \Bar:
+[\Bar, \Foo]
+Linearization for class \I:
+[\I]
+Linearization for class \I2:
+[\I2, \I]
+Linearization for class \I3:
+[\I3, \I, \I2]

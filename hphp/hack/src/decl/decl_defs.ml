@@ -41,6 +41,8 @@ type subst_context = {
   sc_from_req_extends : bool;
 }
 
+type linearization = string list
+
 type decl_class_type = {
   dc_need_init           : bool;
   dc_members_fully_known : bool;
@@ -75,6 +77,7 @@ type decl_class_type = {
   (* this field is used to prevent condition types being filtered
        in Decl_redecl_service.is_dependent_class_of_any *)
   dc_condition_types     : SSet.t;
+  dc_linearization       : linearization;
 }
 
 (* name of condition type for conditional reactivity of methods.

@@ -224,6 +224,7 @@ val tco_experimental_void_is_type_of_null : string
 val tco_experimental_null_coalesce_assignment : string
 val tco_experimental_reified_generics : string
 val tco_experimental_re_prefixed_strings : string
+val tco_experimental_decl_linearization : string
 val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t

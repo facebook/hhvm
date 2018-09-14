@@ -71,6 +71,7 @@ type mode =
   | Decl_compare
   | Infer_return_types
   | Least_upper_bound
+  | Linearization
 
 type options = {
   filename : string;
@@ -327,6 +328,9 @@ let parse_options () =
     "--disable-primitive-refinement",
       Arg.Set disable_primitive_refinement,
       " Disable type refinement of is_{bool, float, int, string, etc.}.";
+    "--mro",
+        Arg.Unit (set_mode Linearization),
+        " Grabs the linearization of all classes in a file.";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -976,6 +980,27 @@ let handle_mode
   | Decl_compare ->
     test_decl_compare filename popt files_contents tcopt files_info
   | Least_upper_bound-> compute_least_type tcopt popt filename
+  | Linearization ->
+    if errors <> [] then  (error (List.hd_exn errors); exit 2);
+    let files_info = Relative_path.Map.fold builtins
+      ~f:begin fun k _ acc -> Relative_path.Map.remove acc k end
+      ~init:files_info
+    in
+    Relative_path.Map.iter files_info ~f:(fun _ info ->
+      let { FileInfo.classes; _} = info in
+      (* For each class, grab the declaration from the decl_heap*)
+      let linearizations = List.map classes
+        begin fun (_, c) ->
+            let class_decl = Decl_heap.Classes.find_unsafe c in
+            c, class_decl.Decl_defs.dc_linearization
+        end in
+      List.iter linearizations ~f:(fun (classname, linearization) ->
+        Printf.printf "Linearization for class %s:\n" classname;
+        Printf.printf "[%s]\n" (String.concat ", " linearization)
+      )
+    )
+
+
 
 (*****************************************************************************)
 (* Main entry point *)

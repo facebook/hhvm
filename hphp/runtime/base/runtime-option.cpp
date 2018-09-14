@@ -423,6 +423,8 @@ int64_t RuntimeOption::HeapHighWaterMark = 1024;
 
 uint64_t RuntimeOption::DisableCompact = 0;
 uint64_t RuntimeOption::DisableExtract = 0;
+uint64_t RuntimeOption::DisableForwardStaticCall = 0;
+uint64_t RuntimeOption::DisableForwardStaticCallArray = 0;
 
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
 std::string RuntimeOption::ExtensionDir = HHVM_DYNAMIC_EXTENSION_DIR;
@@ -1184,6 +1186,12 @@ void RuntimeOption::Load(
                  "Hack.Lang.Phpism.DisableCompact", DisableCompact);
     Config::Bind(DisableExtract, ini, config,
                  "Hack.Lang.Phpism.DisableExtract", DisableExtract);
+    Config::Bind(DisableForwardStaticCall, ini, config,
+                 "Hack.Lang.Phpism.DisableForwardStaticCall",
+                 DisableForwardStaticCall);
+    Config::Bind(DisableForwardStaticCallArray, ini, config,
+                 "Hack.Lang.Phpism.DisableForwardStaticCallArray",
+                 DisableForwardStaticCallArray);
   }
   {
     // Repo

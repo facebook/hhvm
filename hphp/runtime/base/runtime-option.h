@@ -482,6 +482,15 @@ struct RuntimeOption {
   // Disables PHP's extract() function. Valid values are 0 => enabled (default),
   // 1 => warning, 2 => error.
   static uint64_t DisableExtract;
+  // Disables PHP's forward_static_call function.
+  // Valid values are 0 => enabled (default),
+  // 1 => warning, 2 => error.
+  static uint64_t DisableForwardStaticCall;
+  // Disables PHP's forward_static_call_array function.
+  // Valid values are 0 => enabled (default),
+  // 1 => warning, 2 => error.
+  static uint64_t DisableForwardStaticCallArray;
+
 
   static int GetScannerType();
 

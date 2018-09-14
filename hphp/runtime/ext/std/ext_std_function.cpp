@@ -93,11 +93,25 @@ Variant HHVM_FUNCTION(end_user_func_async, const Object& /*handle*/,
 
 Variant HHVM_FUNCTION(forward_static_call_array, const Variant& function,
                       const Array& params) {
+  auto const warning = "forward_static_call_array() is deprecated and subject"
+  " to removal from the Hack language";
+  switch (RuntimeOption::DisableForwardStaticCallArray) {
+    case 0:  break;
+    case 1:  raise_warning(warning); break;
+    default: raise_error(warning);
+  }
   return HHVM_FN(forward_static_call)(function, params);
 }
 
 Variant HHVM_FUNCTION(forward_static_call, const Variant& function,
                               const Array& params /* = null_array */) {
+  auto const warning = "forward_static_call() is deprecated and subject"
+  " to removal from the Hack language";
+  switch (RuntimeOption::DisableForwardStaticCall) {
+    case 0:  break;
+    case 1:  raise_warning(warning); break;
+    default: raise_error(warning);
+  }
   // Setting the bound parameter to true tells vm_call_user_func()
   // propogate the current late bound class
   return vm_call_user_func(function, params, true, /* check ref */ true);

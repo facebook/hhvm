@@ -10,7 +10,9 @@
 open Core_kernel
 open Decl_defs
 open Nast
-open Typing_defs
+
+module Attrs = Attributes
+module SN = Naming_special_names
 
 let parent_init_prop = "parent::" ^ SN.Members.__construct
 
@@ -42,8 +44,12 @@ let parent decl_env c add_prop acc =
     | [] -> acc
     | parent_hint :: _ -> add_parent_construct decl_env c add_prop acc parent_hint
 
+let is_lateinit cv =
+  Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes
+
 let prop_needs_init cv =
   if cv.cv_is_xhp then false
+  else if is_lateinit cv then false
   else match cv.cv_type with
     | None
     | Some (_, Hoption _)

@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/unit-emitter.h"
 
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/option.h"
 #include "hphp/parser/location.h"
 #include "hphp/system/systemlib.h"
@@ -908,8 +910,8 @@ UnitRepoProxy::loadEmitter(const std::string& name, const MD5& md5,
 std::unique_ptr<Unit>
 UnitRepoProxy::load(const std::string& name, const MD5& md5,
                     const Native::FuncTable& nativeFuncs) {
-  UnitEmitter ue(md5, nativeFuncs);
-  if (loadHelper(ue, name, md5) == RepoStatus::error) return nullptr;
+  auto ue = std::make_unique<UnitEmitter>(md5, nativeFuncs);
+  if (loadHelper(*ue, name, md5) == RepoStatus::error) return nullptr;
 
 #ifdef USE_JEMALLOC
   if (RuntimeOption::TrackPerUnitMemory) {
@@ -920,7 +922,7 @@ UnitRepoProxy::load(const std::string& name, const MD5& md5,
     mallctl("thread.deallocatedp", static_cast<void*>(&del), &len, nullptr, 0);
     auto before = *alloc;
     auto debefore = *del;
-    std::unique_ptr<Unit> result = ue.create();
+    std::unique_ptr<Unit> result = ue->create();
     auto after = *alloc;
     auto deafter = *del;
 
@@ -937,7 +939,12 @@ UnitRepoProxy::load(const std::string& name, const MD5& md5,
   }
 #endif
 
-  auto unit = ue.create();
+  auto unit = ue->create();
+  if (BuiltinSymbols::s_systemAr) {
+    assertx(ue->m_filepath->data()[0] == '/' &&
+            ue->m_filepath->data()[1] == ':');
+    BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
+  }
   FTRACE(1, "Creating unit {} for `{}`\n", unit.get(), name);
   return unit;
 }

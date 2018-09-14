@@ -1069,6 +1069,7 @@ function hphp_cmd($options, $test, $program) {
     '-vParserThreadCount=' . ($options['repo-threads'] ?? 1),
     '--nofork=1 -thhbc -l1 -k1',
     "-o \"$test.repo\" --program $program.hhbc \"$test\"",
+    "-vRuntime.Repo.Local.Mode=rw -vRuntime.Repo.Local.Path=".verify_hhbc(),
     $extra_args,
     $compiler_args,
     read_opts_file("$test.hphp_opts"),

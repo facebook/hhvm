@@ -70,6 +70,7 @@ struct UnitEmitter {
   // Initialization and execution.
 
   explicit UnitEmitter(const MD5& md5, const Native::FuncTable&);
+  UnitEmitter(UnitEmitter&&) = delete;
   ~UnitEmitter();
 
   /*

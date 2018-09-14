@@ -372,14 +372,16 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
     } else {
       ue.reset();
-    }
 
-    if (unit->sn() == -1) {
-      // the unit was not committed to the Repo, probably because
-      // another thread did it first. Try to use the winner.
-      auto u = Repo::get().loadUnit(filename ? filename : "", md5, nativeFuncs);
-      if (u != nullptr) {
-        return u.release();
+      if (unit->sn() == -1 && RuntimeOption::RepoCommit) {
+        // the unit was not committed to the Repo, probably because
+        // another thread did it first. Try to use the winner.
+        auto u = Repo::get().loadUnit(filename ? filename : "",
+                                      md5,
+                                      nativeFuncs);
+        if (u != nullptr) {
+          return u.release();
+        }
       }
     }
 

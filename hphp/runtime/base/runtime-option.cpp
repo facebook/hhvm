@@ -1196,7 +1196,7 @@ void RuntimeOption::Load(
   {
     // Repo
     // Local Repo
-    Config::Bind(RepoLocalMode, ini, config, "Repo.Local.Mode");
+    Config::Bind(RepoLocalMode, ini, config, "Repo.Local.Mode", RepoLocalMode);
     if (RepoLocalMode.empty()) {
       const char* HHVM_REPO_LOCAL_MODE = getenv("HHVM_REPO_LOCAL_MODE");
       if (HHVM_REPO_LOCAL_MODE != nullptr) {

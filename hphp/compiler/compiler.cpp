@@ -437,6 +437,10 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   // info to be true so that it's present in sandboxes. Override that default
   // here, since we only get here when building for repo authoritatibe mode.
   RuntimeOption::RepoDebugInfo = false;
+  // Default RepoLocalMode to off so we build systemlib from source.
+  // This can be overridden when running lots of repo builds (eg
+  // test/run) for better performance.
+  RuntimeOption::RepoLocalMode = "--";
   RuntimeOption::Load(ini, runtime);
   Option::Load(ini, config);
   RuntimeOption::RepoAuthoritative = false;
@@ -712,11 +716,12 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
     RuntimeOption::RepoCentralPath += ".hhbc";
   }
   unlink(RuntimeOption::RepoCentralPath.c_str());
-  RuntimeOption::RepoLocalMode = "--";
-  RuntimeOption::RepoJournal = "memory";
 
-  // Turn off commits, because we don't want systemlib to get included
-  RuntimeOption::RepoCommit = false;
+  if (RuntimeOption::RepoLocalMode != "rw") {
+    // No point writing to the central repo, because we're going to
+    // remove it before writing the final repo.
+    RuntimeOption::RepoCommit = false;
+  }
 }
 
 int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
@@ -750,11 +755,15 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
     return 1;
   }
 
+  Repo::shutdown();
+  RuntimeOption::RepoJournal = "memory";
+  RuntimeOption::RepoLocalMode = "--";
+  unlink(RuntimeOption::RepoCentralPath.c_str());
   /* without this, emitClass allows classes with interfaces to be
      hoistable */
   SystemLib::s_inited = true;
   RuntimeOption::RepoCommit = true;
-
+  Repo::get();
 
   // the function is only invoked in hhvm --hphp, which is supposed to be in
   // repo mode only. we are not setting it earlier in `compiler_main` since we

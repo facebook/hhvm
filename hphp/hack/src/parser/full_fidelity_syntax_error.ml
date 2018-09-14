@@ -458,6 +458,9 @@ let memoize_lsb_on_non_static =
 let memoize_lsb_on_non_method =
   "<<__MemoizeLSB>> can only be applied to methods"
 
+let constants_as_attribute_arguments =
+  "User-defined constants are not allowed in user attribute expressions"
+
 let instanceof_paren x =
   Printf.sprintf "`instanceof (%s)` is not allowed because it is ambiguous. Is `%s` a class or a constant?"
     x x

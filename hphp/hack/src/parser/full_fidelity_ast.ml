@@ -951,7 +951,16 @@ and pUserAttribute : user_attribute list parser = fun node env ->
       | { syntax = ConstructorCall { constructor_call_argument_list; constructor_call_type; _ }; _ } ->
         fun env ->
           { ua_name   = pos_name constructor_call_type env
-          ; ua_params = couldMap ~f:pExpr constructor_call_argument_list env
+          ; ua_params = couldMap ~f:(fun p ->
+            begin match syntax p with
+            | ScopeResolutionExpression {
+                scope_resolution_name = { syntax = Token t; _ }; _
+              } when Token.kind t = TK.Name ->
+              raise_parsing_error env (`Node p) SyntaxError.constants_as_attribute_arguments
+            | Token t when Token.kind t = TK.Name ->
+              raise_parsing_error env (`Node p) SyntaxError.constants_as_attribute_arguments
+            | _ -> () end;
+            pExpr p) constructor_call_argument_list env
           }
       | node -> missing_syntax "attribute" node
     end

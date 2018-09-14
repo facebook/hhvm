@@ -1451,7 +1451,20 @@ module Make (GetLocals : GetLocals) = struct
     | Method ({ m_name = (p, name); _ } as m)
         when name = SN.Members.__construct ->
       (match acc with
-      | None -> Some (method_ (fst env) m)
+      | None ->
+        let curr_class_kind =
+          match (fst env).current_cls with
+          | Some (_, kind) -> kind
+          | None -> failwith "current class must be set for methods" in
+        let params_have_visibility = List.exists m.m_params
+        ~f:(fun p -> p.param_modifier <> None) in
+        begin match curr_class_kind with
+        | Cinterface
+        | Ctrait when params_have_visibility ->
+          Errors.trait_interface_constructor_promo p
+        | _ -> ()
+        end;
+        Some (method_ (fst env) m)
       | Some _ -> Errors.method_name_already_bound p name; acc)
     | Method _ -> acc
     | TypeConst _ -> acc

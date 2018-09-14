@@ -144,6 +144,7 @@ DeclareStatement = 2089
 MisplacedRxOfScope = 2090
 RxOfScopeAndExplicitRx = 2091
 UnsupportedFeature = 2092
+TraitInterfaceConstructorPromo = 2093
 
 NastCheck Errors:
 AbstractBody = 3001

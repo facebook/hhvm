@@ -729,6 +729,11 @@ let parsing_error (p, msg) =
 (* Naming errors *)
 (*****************************************************************************)
 
+
+let trait_interface_constructor_promo pos =
+  add (Naming.err_code Naming.TraitInterfaceConstructorPromo) pos
+  "Constructor parameter promotion not allowed on traits or interfaces"
+
 let typeparam_alok (pos, x) =
   add (Naming.err_code Naming.TypeparamAlok) pos (
   "You probably forgot to bind this type parameter right?\nAdd <"^x^

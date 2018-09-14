@@ -256,6 +256,7 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   BIND_HAC_OPTION_SELF(TypeHintNotices)
   BIND_HAC_OPTION_SELF(DVCmpNotices)
   BIND_HAC_OPTION_SELF(SerializeNotices)
+  BIND_HAC_OPTION_SELF(CompactSerializeNotices)
 
 #undef BIND_HAC_OPTION_SELF
 #undef BIND_HAC_OPTION

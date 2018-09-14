@@ -876,6 +876,8 @@ struct RuntimeOption {
   F(bool, HackArrCompatTypeHintNotices, false)                          \
   F(bool, HackArrCompatDVCmpNotices, false)                             \
   F(bool, HackArrCompatSerializeNotices, false)                         \
+  /* Raise notices when fb_compact_*() would change behavior */         \
+  F(bool, HackArrCompatCompactSerializeNotices, false)                  \
   /* Raises notice when a function that returns a PHP array, not */     \
   /* a v/darray, is called */                                           \
   F(bool, HackArrCompatArrayProducingFuncNotices, false)                \

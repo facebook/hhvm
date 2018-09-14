@@ -6369,10 +6369,11 @@ array(3) {
   [2]=>
   int(3)
 }
+Hack Array Compat: fb_compact_unserialize(): vector cannot contain skip
 array(2) {
   [0]=>
   int(1)
-  [2]=>
+  [3]=>
   int(3)
 }
 bool(true)

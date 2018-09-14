@@ -205,6 +205,10 @@ bool VSCommand::parseCommand(
 
     *command = new TerminateThreadsCommand(debugger, clientMessage);
 
+  } else if (cmdString == "info") {
+
+    *command = new InfoCommand(debugger, clientMessage);
+
   } else if (cmdString == "initialize") {
 
     *command = new InitializeCommand(debugger, clientMessage);
@@ -236,15 +240,15 @@ bool VSCommand::parseCommand(
 
     *command = new SetVariableCommand(debugger, clientMessage);
 
-  } else if (cmdString.compare("stackTrace") == 0) {
+  } else if (cmdString == "stackTrace") {
 
     *command = new StackTraceCommand(debugger, clientMessage);
 
-  } else if (cmdString.compare("threads") == 0) {
+  } else if (cmdString == "threads") {
 
     *command = new ThreadsCommand(debugger, clientMessage);
 
-  } else if (cmdString.compare("variables") == 0) {
+  } else if (cmdString == "variables") {
 
     *command = new VariablesCommand(debugger, clientMessage);
 
@@ -306,6 +310,9 @@ const folly::dynamic VSCommand::getDebuggerCapabilities() {
   // the startup doc for the console REPL is complete, so that a client
   // can wait for this event before offering the console.
   capabilities["supportsReadyForEvaluationsEvent"] = true;
+
+  // Non-standard capability to indicate we support the "info" command.
+  capabilities["supportsInfo"] = true;
 
   folly::dynamic exceptionBreakpointFilters = folly::dynamic::array;
 

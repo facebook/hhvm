@@ -681,6 +681,11 @@ private:
   FrameObject* m_frameObj {nullptr};
 };
 
+////// Represents an InitializeRequest command from the debugger client. //////
+struct InfoCommand : public VSCommand {
+  VS_COMMAND_COMMON_IMPL(InfoCommand, CommandTarget::Request, false);
+};
+
 #undef VS_COMMAND_COMMON_IMPL
 
 }

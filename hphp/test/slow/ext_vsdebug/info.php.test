@@ -1,0 +1,17 @@
+<?hh
+
+class A {
+  public $y = 5;
+  const CONSTANT = 'constant value';
+  function foo() {
+    $x = 1;
+  }
+}
+
+function bar($x, $y, $z) {
+  $x = 1;
+}
+
+$a = new A();
+$a->foo();
+bar(1, 2, 3);

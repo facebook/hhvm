@@ -27,7 +27,7 @@ namespace HPHP {
 namespace VSDEBUG {
 
 #define VSDEBUG_NAME "vsdebug"
-#define VSDEBUG_VERSION "1.0"
+#define VSDEBUG_VERSION "1.1"
 
 struct VSDebugExtension final : Extension {
   VSDebugExtension() : Extension(VSDEBUG_NAME, VSDEBUG_VERSION) { }

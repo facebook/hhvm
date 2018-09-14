@@ -726,8 +726,10 @@ bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
                        size_t& srcCount, size_t& destCount) {
 
   auto const srcAddrActual = env.srcBlock.toDestAddress(srcAddr);
+  auto const endAddrActual = env.srcBlock.toDestAddress(env.end);
   auto const destAddrActual = env.destBlock.toDestAddress(destAddr);
   auto const src = Instruction::Cast(srcAddrActual);
+  auto const end = Instruction::Cast(endAddrActual);
   auto const dest = Instruction::Cast(destAddrActual);
 
   // Don't turn non address immediates into PC relative instructions.  PC
@@ -737,8 +739,7 @@ bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
 
   uint64_t target;
   uint32_t rd;
-  auto const length = decodePossibleMovSequence(src, Instruction::Cast(env.end),
-                                                target, rd);
+  auto const length = decodePossibleMovSequence(src, end, target, rd);
   if (!length) return false;
   auto next = src + length * kInstructionSize;
 

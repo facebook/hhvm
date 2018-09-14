@@ -238,10 +238,10 @@ public:
   int parseNativeAttributes(Attr& attrs_) const;
 
   /*
-   * Set some fields for builtin functions.
+   * Fix some attributes based on the current runtime options that may
+   * have been stored incorrectly in the repo.
    */
-  void setBuiltinFunc(Attr attrs_, Offset base_);
-
+  Attr fix_attrs(Attr a) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.

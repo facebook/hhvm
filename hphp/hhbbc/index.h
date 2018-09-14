@@ -331,8 +331,10 @@ struct Func {
 private:
   friend struct ::HPHP::HHBBC::Index;
   struct FuncName {
+    FuncName(SString n, bool r) : name{n}, renamable{r} {}
     bool operator==(FuncName o) const { return name == o.name; }
     SString name;
+    bool renamable;
   };
   struct MethodName {
     bool operator==(MethodName o) const { return name == o.name; }

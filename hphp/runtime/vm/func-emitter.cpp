@@ -104,7 +104,7 @@ void FuncEmitter::init(int l1, int l2, Offset base_, Attr attrs_, bool top_,
   line1 = l1;
   line2 = l2;
   top = top_;
-  attrs = attrs_;
+  attrs = fix_attrs(attrs_);
   docComment = docComment_;
 
   if (!isPseudoMain()) {
@@ -136,16 +136,9 @@ void FuncEmitter::commit(RepoTxn& txn) const {
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(name->data()[0]) || needsStripInOut(name);
 
-  Attr attrs = this->attrs;
+  auto attrs = fix_attrs(this->attrs);
   if (preClass && preClass->attrs() & AttrInterface) {
     attrs |= AttrAbstract;
-  }
-  if (!RuntimeOption::RepoAuthoritative) {
-    if (RuntimeOption::EvalJitEnableRenameFunction) {
-      attrs |= AttrInterceptable;
-    } else {
-      attrs = Attr(attrs & ~AttrInterceptable);
-    }
   }
   if (attrs & AttrPersistent && !preClass) {
     if ((RuntimeOption::EvalJitEnableRenameFunction ||
@@ -522,15 +515,78 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
   return ret;
 }
 
-void FuncEmitter::setBuiltinFunc(Attr attrs_, Offset base_) {
-  isNative = true;
-  base = base_;
-  top = true;
-  // TODO: Task #1137917: See if we can avoid marking most builtins with
-  // "MayUseVV" and still make things work
-  attrs = attrs_ | AttrBuiltin | AttrSkipFrame | AttrMayUseVV;
+Attr FuncEmitter::fix_attrs(Attr a) const {
+  if (RuntimeOption::RepoAuthoritative) return a;
+
+  a = Attr(a & ~AttrInterceptable);
+
+  if (a & (AttrReadsCallerFrame | AttrWritesCallerFrame)) {
+    return a;
+  }
+
+  if (RuntimeOption::EvalJitEnableRenameFunction) {
+    return a | AttrInterceptable;
+  }
+
+  if (!RuntimeOption::DynamicInvokeFunctions.empty()) {
+    auto const fullName = [&] {
+      if (m_pce) return folly::sformat("{}::{}", m_pce->name(), name);
+      return name->toCppString();
+    }();
+    if (RuntimeOption::DynamicInvokeFunctions.count(fullName)) {
+      return a | AttrInterceptable;
+    }
+  }
+  return a;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Serialization/Deserialization
+
+template<class SerDe>
+void FuncEmitter::serdeMetaData(SerDe& sd) {
+  // NOTE: name, top, and a few other fields currently handled outside of this.
+  Offset past_delta;
+  Attr a = attrs;
+
+  if (!SerDe::deserializing) {
+    past_delta = past - base;
+    a = fix_attrs(attrs);
+  }
+
+  sd(line1)
+    (line2)
+    (base)
+    (past_delta)
+    (a)
+    (hniReturnType)
+    (repoReturnType)
+    (repoAwaitedReturnType)
+    (docComment)
+    (m_numLocals)
+    (m_numIterators)
+    (m_numClsRefSlots)
+    (maxStackCells)
+    (m_repoBoolBitset)
+
+    (params)
+    (m_localNames)
+    (staticVars)
+    (ehtab)
+    (fpitab)
+    (userAttributes)
+    (retTypeConstraint)
+    (retUserType)
+    (originalFilename)
+    ;
+
+  if (SerDe::deserializing) {
+    repoReturnType.resolveArray(ue());
+    repoAwaitedReturnType.resolveArray(ue());
+    past = base + past_delta;
+    attrs = fix_attrs(a);
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // FuncRepoProxy.

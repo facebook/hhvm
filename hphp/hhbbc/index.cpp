@@ -744,7 +744,7 @@ bool Func::same(const Func& o) const {
 SString Func::name() const {
   return match<SString>(
     val,
-    [&] (FuncName s) { return s.name; },
+    [&] (FuncName s)   { return s.name; },
     [&] (MethodName s) { return s.name; },
     [&] (FuncInfo* fi) { return fi->func->name; },
     [&] (const MethTabEntryPair* mte) { return mte->first; },
@@ -765,8 +765,8 @@ const php::Func* Func::exactFunc() const {
   using Ret = const php::Func*;
   return match<Ret>(
     val,
-    [&](FuncName /*s*/)                           { return Ret{}; },
-    [&](MethodName /*s*/)                         { return Ret{}; },
+    [&](FuncName)                    { return Ret{}; },
+    [&](MethodName)                  { return Ret{}; },
     [&](FuncInfo* fi)                { return fi->func; },
     [&](const MethTabEntryPair* mte) { return mte->second.func; },
     [&](FuncFamily* /*fa*/)          { return Ret{}; }
@@ -776,8 +776,8 @@ const php::Func* Func::exactFunc() const {
 bool Func::cantBeMagicCall() const {
   return match<bool>(
     val,
-    [&](FuncName)                             { return true; },
-    [&](MethodName)                           { return false; },
+    [&](FuncName)                { return true; },
+    [&](MethodName)              { return false; },
     [&](FuncInfo*)               { return true; },
     [&](const MethTabEntryPair*) { return true; },
     [&](FuncFamily*)             { return true; }
@@ -787,12 +787,11 @@ bool Func::cantBeMagicCall() const {
 bool Func::mightReadCallerFrame() const {
   return match<bool>(
     val,
-    // Only non-method builtins can read the caller's frame and builtins are
-    // always uniquely resolvable in repo mode.
-    [&](FuncName /*s*/) {
-      return !RuntimeOption::RepoAuthoritative;
-    },
-    [&](MethodName /*s*/) { return false; },
+    // Only non-method builtins can read the caller's frame and
+    // builtins are always uniquely resolvable (renaming is not
+    // allowed for functions that can access the caller's frame).
+    [&](FuncName)   { return false; },
+    [&](MethodName) { return false; },
     [&](FuncInfo* fi) {
       return fi->func->attrs & AttrReadsCallerFrame;
     },
@@ -808,12 +807,11 @@ bool Func::mightReadCallerFrame() const {
 bool Func::mightWriteCallerFrame() const {
   return match<bool>(
     val,
-    // Only non-method builtins can write to the caller's frame and builtins are
-    // always uniquely resolvable in repo mode.
-    [&](FuncName /*s*/) {
-      return !RuntimeOption::RepoAuthoritative;
-    },
-    [&](MethodName /*s*/) { return false; },
+    // Only non-method builtins can write the caller's frame and
+    // builtins are always uniquely resolvable (renaming is not
+    // allowed for functions that can access the caller's frame).
+    [&](FuncName)     { return false; },
+    [&](MethodName)   { return false; },
     [&](FuncInfo* fi) {
       return fi->func->attrs & AttrWritesCallerFrame;
     },
@@ -827,8 +825,9 @@ bool Func::mightWriteCallerFrame() const {
 }
 
 bool Func::isFoldable() const {
-  return match<bool>(val, [&](FuncName /*s*/) { return false; },
-                     [&](MethodName /*s*/) { return false; },
+  return match<bool>(val,
+                     [&](FuncName)   { return false; },
+                     [&](MethodName) { return false; },
                      [&](FuncInfo* fi) {
                        return fi->func->attrs & AttrIsFoldable;
                      },
@@ -844,9 +843,9 @@ bool Func::mightBeSkipFrame() const {
   return match<bool>(
     val,
     // Only builtins can be skip frame and non-method builtins are always
-    // uniquely resolvable. Methods are more complicated though.
-    [&](FuncName /*s*/) { return false; },
-    [&](MethodName /*s*/) { return true; },
+    // uniquely resolvable unless renaming is involved.
+    [&](FuncName s) { return s.renamable; },
+    [&](MethodName) { return true; },
     [&](FuncInfo* fi) { return fi->func->attrs & AttrSkipFrame; },
     [&](const MethTabEntryPair* mte) {
       return mte->second.func->attrs & AttrSkipFrame;
@@ -890,8 +889,9 @@ bool Func::mightCareAboutDynCalls() const {
 bool Func::mightBeBuiltin() const {
   return match<bool>(
     val,
-    // Builtins are always uniquely resolvable in repo mode.
-    [&](FuncName) { return !RuntimeOption::RepoAuthoritative; },
+    // Builtins are always uniquely resolvable unless renaming is
+    // involved.
+    [&](FuncName s) { return s.renamable; },
     [&](MethodName) { return true; },
     [&](FuncInfo* fi) { return fi->func->attrs & AttrBuiltin; },
     [&](const MethTabEntryPair* mte) {
@@ -907,9 +907,10 @@ bool Func::mightBeBuiltin() const {
 }
 
 std::string show(const Func& f) {
-  std::string ret = f.name()->data();
+  auto ret = f.name()->toCppString();
   match<void>(f.val,
-              [&](Func::FuncName) {}, [&](Func::MethodName) {},
+              [&](Func::FuncName s) { if (s.renamable) ret += '?'; },
+              [&](Func::MethodName) {},
               [&](FuncInfo* /*fi*/) { ret += "*"; },
               [&](const MethTabEntryPair* /*mte*/) { ret += "*"; },
               [&](FuncFamily* /*fa*/) { ret += "+"; });
@@ -4235,25 +4236,28 @@ Index::resolve_ctor(Context /*ctx*/, res::Class rcls, bool exact) const {
 template<class FuncRange>
 res::Func
 Index::resolve_func_helper(const FuncRange& funcs, SString name) const {
-  auto name_only = [&] {
-    return res::Func { this, res::Func::FuncName { name } };
+  auto name_only = [&] (bool renamable) {
+    return res::Func { this, res::Func::FuncName { name, renamable } };
   };
 
   // no resolution
-  if (begin(funcs) == end(funcs)) return name_only();
+  if (begin(funcs) == end(funcs)) return name_only(false);
 
   auto const func = begin(funcs)->second;
+  if (func->attrs & AttrInterceptable) return name_only(true);
 
   // multiple resolutions
   if (std::next(begin(funcs)) != end(funcs)) {
     assert(!(func->attrs & AttrUnique));
-    return name_only();
+    if (debug && any_interceptable_functions()) {
+      for (auto const DEBUG_ONLY f : funcs) {
+        assertx(!(f.second->attrs & AttrInterceptable));
+      }
+    }
+    return name_only(false);
   }
 
-  // single resolution
-  if (func->attrs & AttrInterceptable) return name_only();
-
-  // whole-program mode, that's it
+  // single resolution, in whole-program mode, that's it
   if (RuntimeOption::RepoAuthoritative) {
     assert(func->attrs & AttrUnique);
     return do_resolve(func);
@@ -4265,8 +4269,8 @@ Index::resolve_func_helper(const FuncRange& funcs, SString name) const {
     return do_resolve(func);
   }
 
-  // single-unit, non-builtin
-  return name_only();
+  // single-unit, non-builtin, not renamable
+  return name_only(false);
 }
 
 res::Func Index::resolve_func(Context /*ctx*/, SString name) const {
@@ -4466,8 +4470,9 @@ bool Index::satisfies_constraint(Context ctx, const Type& t,
 
 bool Index::is_async_func(res::Func rfunc) const {
   return match<bool>(
-    rfunc.val, [&](res::Func::FuncName /*s*/) { return false; },
-    [&](res::Func::MethodName /*s*/) { return false; },
+    rfunc.val,
+    [&](res::Func::FuncName)   { return false; },
+    [&](res::Func::MethodName) { return false; },
     [&](FuncInfo* finfo) {
       return finfo->func->isAsync && !finfo->func->isGenerator;
     },
@@ -4492,8 +4497,8 @@ bool Index::is_async_func(res::Func rfunc) const {
 bool Index::is_effect_free(res::Func rfunc) const {
   return match<bool>(
     rfunc.val,
-    [&](res::Func::FuncName /*s*/) { return false; },
-    [&](res::Func::MethodName /*s*/) { return false; },
+    [&](res::Func::FuncName)   { return false; },
+    [&](res::Func::MethodName) { return false; },
     [&](FuncInfo* finfo) {
       return finfo->effectFree;
     },
@@ -4659,8 +4664,9 @@ Type Index::lookup_foldable_return_type(Context ctx,
 
 Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
   return match<Type>(
-    rfunc.val, [&](res::Func::FuncName /*s*/) { return TInitGen; },
-    [&](res::Func::MethodName /*s*/) { return TInitGen; },
+    rfunc.val,
+    [&](res::Func::FuncName)   { return TInitGen; },
+    [&](res::Func::MethodName) { return TInitGen; },
     [&](FuncInfo* finfo) {
       add_dependency(*m_data, finfo->func, ctx, Dep::ReturnTy);
       return unctx(finfo->returnTy);
@@ -4768,7 +4774,7 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
   return match<PrepKind>(
     rfunc.val,
     [&] (res::Func::FuncName s) {
-      if (!RuntimeOption::RepoAuthoritative) return PrepKind::Unknown;
+      if (!RuntimeOption::RepoAuthoritative || s.renamable) return PrepKind::Unknown;
       return prep_kind_from_set(find_range(m_data->funcs, s.name), paramId);
     },
     [&] (res::Func::MethodName s) {

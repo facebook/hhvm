@@ -121,7 +121,9 @@ struct c_Pair : ObjectData {
     throwBadKeyType();
   }
 
-  Array toArrayImpl() const;
+  Array toPHPArrayImpl() const;
+  Array toPHPArray() const;
+
   Array toVArrayImpl() const;
   Array toDArrayImpl() const;
 

@@ -2379,7 +2379,6 @@ and expr_
       let ety_env =
         { (Phase.env_with_self env) with from_class = Some CIstatic } in
       let env, declared_ft = Phase.localize_ft ~use_pos:p ~ety_env env declared_ft in
-      let env = { env with Typing_env.inside_ppl_class = false } in
       List.iter idl (check_escaping_var env);
       (* Ensure lambda arity is not Fellipsis in strict mode *)
       begin match declared_ft.ft_arity with
@@ -2398,10 +2397,13 @@ and expr_
       let check_body_under_known_params ?ret_ty ft =
         let old_reactivity = Env.env_reactivity env in
         let env = Env.set_env_reactive env reactivity in
+        let old_inside_ppl_class = env.Typing_env.inside_ppl_class in
+        let env = { env with Typing_env.inside_ppl_class = false } in
         let (is_coroutine, _counter, _, anon) = anon_make env p f ft idl in
         let ft = { ft with ft_is_coroutine = is_coroutine; ft_reactive = reactivity } in
         let (env, tefun, ty) = anon ?ret_ty env ft.ft_params ft.ft_arity in
         let env = Env.set_env_reactive env old_reactivity in
+        let env = { env with Typing_env.inside_ppl_class = old_inside_ppl_class } in
         let inferred_ty =
           if is_explicit_ret
           then (Reason.Rwitness p, Tfun { ft with ft_ret = declared_ft.ft_ret })

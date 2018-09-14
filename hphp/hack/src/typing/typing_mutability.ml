@@ -132,6 +132,10 @@ let check_function_return_value
       CONSIDER: We might consider to report special error message for scenarios when
       return value is known to be literal\primitive\value with immutable semantics.
       *)
+    (* ignore nulls - it is ok to return then from functions
+       that return nullable types and for non-nullable return types it will
+       be an error anyways *)
+    | T.Null -> ()
     | _ ->
       if function_returns_mutable && not (expr_returns_owned_mutable env e)
       then error_mutable e None in

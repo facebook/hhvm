@@ -76,8 +76,7 @@ const RegSet kSIMDRegs =
   vixl::d16 | vixl::d17 | vixl::d18 | vixl::d19 |
   vixl::d20 | vixl::d21 | vixl::d22 | vixl::d23 |
   vixl::d24 | vixl::d25 | vixl::d26 | vixl::d27 |
-  vixl::d28 | vixl::d29;
-  // we don't use d30 and d31 because BitSet can't represent them
+  vixl::d28 | vixl::d29 | vixl::d30 | vixl::d31;
 
 const RegSet kSIMDCallerSaved = kSIMDRegs;
 const RegSet kSIMDCalleeSaved{};

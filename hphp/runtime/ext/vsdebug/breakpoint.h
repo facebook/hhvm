@@ -150,7 +150,7 @@ struct BreakpointManager {
 
   void onFuncBreakpointResolved(
     Breakpoint& bp,
-    Func* func
+    const Func* func
   );
 
   int addSourceLineBreakpoint(

@@ -316,7 +316,8 @@ struct Debugger final {
   // Called when the request defines a new function.
   void onFunctionDefined(
     RequestInfo* ri,
-    const HPHP::Func* func
+    const Func* func,
+    const std::string& funcName
   );
 
   // Called when a request thinks it has hit a source breakpoint.

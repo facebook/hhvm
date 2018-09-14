@@ -1621,7 +1621,8 @@ std::pair<int, int> Debugger::calibrateBreakpointLineInUnit(
 
 void Debugger::onFunctionDefined(
   RequestInfo* ri,
-  const HPHP::Func* func
+  const Func* func,
+  const std::string& funcName
 ) {
   Lock lock(m_lock);
 
@@ -1635,11 +1636,13 @@ void Debugger::onFunctionDefined(
   for (auto it = unresolvedBps.begin(); it != unresolvedBps.end(); ) {
     const int bpId = *it;
     const Breakpoint* bp = bpMgr->getBreakpointById(bpId);
-    if (bp->m_type == BreakpointType::Function &&
-        tryResolveBreakpoint(ri, bpId, bp)) {
+    if (bp->m_type == BreakpointType::Function && funcName == bp->m_function) {
+        // Found a matching function!
+        phpAddBreakPointFuncEntry(func);
+        bpMgr->onFuncBreakpointResolved(*const_cast<Breakpoint*>(bp), func);
 
-      // Breakpoint is no longer unresolved!
-      it = unresolvedBps.erase(it);
+        // Breakpoint is no longer unresolved!
+        it = unresolvedBps.erase(it);
     } else {
       // Still no match, move on to the next unresolved function breakpoint.
       it++;

@@ -218,7 +218,7 @@ int BreakpointManager::addSourceLineBreakpoint(
 
 void BreakpointManager::onFuncBreakpointResolved(
   Breakpoint& bp,
-  Func* func
+  const Func* func
 ) {
   if (func == nullptr ||
       func->unit() == nullptr ||

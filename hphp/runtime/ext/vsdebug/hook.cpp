@@ -205,7 +205,36 @@ void VSDebugHook::onFileLoad(Unit* efile) {
   }
 }
 
-void VSDebugHook::onDefClass(const Class* /*cls*/) {}
+void VSDebugHook::onDefClass(const Class* cls) {
+  BreakContext breakContext(true);
+
+  // Resolve any breakpoints that are set on functions in this class.
+  if (breakContext.m_debugger != nullptr &&
+      breakContext.m_requestInfo != nullptr) {
+
+    // Acquire semantics around reading requestInfo->m_flags lock-free.
+    std::atomic_thread_fence(std::memory_order_acquire);
+
+    if (breakContext.m_requestInfo->m_flags.unresolvedBps) {
+      size_t methodCount = cls->numMethods();
+      for (unsigned int i = 0; i < methodCount; i++) {
+        auto func = cls->getMethod(i);
+        const std::string functionName(func->fullName()->data());
+        breakContext.m_debugger->onFunctionDefined(
+          breakContext.m_requestInfo,
+          func,
+          functionName
+        );
+      }
+
+      tryEnterDebugger(
+        breakContext.m_debugger,
+        breakContext.m_requestInfo,
+        true
+      );
+    }
+  }
+}
 
 void VSDebugHook::onRegisterFuncIntercept(const String& name) {
   BreakContext breakContext(true);
@@ -234,9 +263,11 @@ void VSDebugHook::onDefFunc(const Func* func) {
     std::atomic_thread_fence(std::memory_order_acquire);
 
     if (breakContext.m_requestInfo->m_flags.unresolvedBps) {
+      std::string funcName(func->fullName()->data());
       breakContext.m_debugger->onFunctionDefined(
         breakContext.m_requestInfo,
-        func
+        func,
+        funcName
       );
 
       tryEnterDebugger(

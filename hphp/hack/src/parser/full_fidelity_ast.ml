@@ -2798,11 +2798,6 @@ and pDef : def list parser = fun node env ->
       ; c_kind
       ; c_doc_comment
       }]
-  | ConstDeclaration { const_keyword = kw; _ }
-    when env.fi_mode = FileInfo.Mdecl
-      && "const" <>
-        Option.value_map ~default:"" ~f:Token.text (Syntax.get_token kw)
-      -> [] (* Legacy parity; case-sensitive global const declarations *)
   | ConstDeclaration
     { const_type_specifier = ty
     ; const_declarators    = decls
@@ -3002,7 +2997,7 @@ let pProgram : program parser = fun node env  ->
           { define_keyword; define_argument_list = args; _ }
         ; _ }
       ; _ }
-    ; _ } as cur_node :: nodel when not env.quick_mode ->
+    ; _ } as cur_node :: nodel ->
       let def =
         match List.map ~f:(fun x -> pExpr x env) (as_list args) with
         | [ pos, String name; e ] -> Constant

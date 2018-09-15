@@ -111,6 +111,7 @@ NATIVE_C_FILES=\
   third-party/libancillary/fd_recv.c\
   third-party/libancillary/fd_send.c\
   utils/sys/files.c\
+  utils/sys/gc_profiling.c\
   utils/sys/getrusage.c\
   utils/sys/handle_stubs.c\
   utils/sys/nproc.c\
